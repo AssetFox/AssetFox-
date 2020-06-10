@@ -72,6 +72,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
             CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
             NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
+            SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(Static.Identity, rule => rule.DistributionRules.ToSortedDictionary(distributionRule => distributionRule.CostCeiling ?? decimal.MaxValue));
 
             SectionContexts = Simulation.Network.Sections
                 .AsParallel()
@@ -184,6 +185,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private IReadOnlyCollection<ConditionActual> DeficientConditionActuals;
 
         private IReadOnlyCollection<SectionContext> SectionContexts;
+
+        private IReadOnlyDictionary<CashFlowRule, SortedDictionary<decimal, CashFlowDistributionRule>> SortedDistributionRulesPerCashFlowRule;
 
         private int StatusCode;
 
@@ -506,7 +509,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 cashFlowRule = Simulation.InvestmentPlan.CashFlowRules.SingleOrDefault(rule => rule.Criterion.EvaluateOrDefault(sectionContext));
                 if (cashFlowRule != null)
                 {
-                    var distributionRule = cashFlowRule.DistributionRules.First(rule => remainingCost <= (rule.CostCeiling ?? decimal.MaxValue));
+                    var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].First(kv => remainingCost <= kv.Key).Value;
                     var costPerYear = distributionRule.YearlyPercentages.Select(percentage => percentage / 100 * remainingCost).ToArray();
                     remainingCost = costPerYear[0];
 

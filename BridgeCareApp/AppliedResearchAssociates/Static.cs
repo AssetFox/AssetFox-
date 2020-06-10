@@ -147,6 +147,10 @@ namespace AppliedResearchAssociates
         [Obsolete(NET_STANDARD_2_1_AVAILABILITY)]
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source, IEqualityComparer<T> equalityComparer = null) => new HashSet<T>(source, equalityComparer);
 
+        public static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> source, Func<TValue, TKey> keySelector, IComparer<TKey> comparer = null) => new SortedDictionary<TKey, TValue>(source.ToDictionary(keySelector), comparer);
+
+        public static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue, T>(this IEnumerable<T> source, Func<T, TKey> keySelector, Func<T, TValue> valueSelector, IComparer<TKey> comparer = null) => new SortedDictionary<TKey, TValue>(source.ToDictionary(keySelector, valueSelector), comparer);
+
         public static FinalActor<T> WithFinalAction<T>(this T value, Action<FinalActor<T>> finalAction) => new FinalActor<T>(value, finalAction ?? throw new ArgumentNullException(nameof(finalAction)));
 
         private const string NET_STANDARD_2_1_AVAILABILITY = "Already present in netstandard2.1. Remove after upgrading.";

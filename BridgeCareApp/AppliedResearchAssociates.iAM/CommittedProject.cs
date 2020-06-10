@@ -45,9 +45,9 @@ namespace AppliedResearchAssociates.iAM
 
         public override bool CanUseBudget(Budget budget) => budget == Budget;
 
-        public override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateArgument argument) => Consequences.Select(consequence => consequence.GetRecalculator(argument)).ToArray();
+        public override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope) => Consequences.Select(consequence => consequence.GetRecalculator(scope)).ToArray();
 
-        public override double GetCost(CalculateEvaluateArgument argument, bool shouldApplyMultipleFeasibleCosts) => Cost;
+        public override double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts) => Cost;
 
         public override ValidationResultBag GetDirectValidationResults()
         {

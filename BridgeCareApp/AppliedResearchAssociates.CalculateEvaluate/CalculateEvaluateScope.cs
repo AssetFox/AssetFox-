@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.CalculateEvaluate
 {
-    public class CalculateEvaluateArgument
+    public class CalculateEvaluateScope
     {
-        public CalculateEvaluateArgument()
+        public CalculateEvaluateScope()
         {
         }
 
-        public CalculateEvaluateArgument(CalculateEvaluateArgument original)
+        public CalculateEvaluateScope(CalculateEvaluateScope original)
         {
             Number.CopyFrom(original.Number);
             Text.CopyFrom(original.Text);

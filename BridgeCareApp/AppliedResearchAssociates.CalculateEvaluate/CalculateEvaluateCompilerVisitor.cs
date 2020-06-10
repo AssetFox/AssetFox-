@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
         public override Expression VisitCalculationRoot(CalculateEvaluateParser.CalculationRootContext context)
         {
             var body = Visit(context.calculation());
-            var lambda = Expression.Lambda<Calculator>(body, ArgumentParameter);
+            var lambda = Expression.Lambda<Calculator>(body, ScopeParameter);
             return lambda;
         }
 
@@ -164,7 +164,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
             }
 
             var identifierString = Expression.Constant(identifierText);
-            result = Expression.Call(ArgumentParameter, Number.GetterInfo, identifierString);
+            result = Expression.Call(ScopeParameter, Number.GetterInfo, identifierString);
             return true;
         }
 
@@ -187,7 +187,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
         public override Expression VisitEvaluationRoot(CalculateEvaluateParser.EvaluationRootContext context)
         {
             var body = Visit(context.evaluation());
-            var lambda = Expression.Lambda<Evaluator>(body, ArgumentParameter);
+            var lambda = Expression.Lambda<Evaluator>(body, ScopeParameter);
             return lambda;
         }
 
@@ -246,7 +246,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
                 throw UnknownReference;
             }
 
-            ArgumentInfo argumentInfo;
+            ScopeInfo argumentInfo;
             switch (parameterType)
             {
             case CalculateEvaluateParameterType.Number:
@@ -270,7 +270,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
             }
 
             var identifier = Expression.Constant(identifierText);
-            var reference = Expression.Call(ArgumentParameter, argumentInfo.GetterInfo, identifier);
+            var reference = Expression.Call(ScopeParameter, argumentInfo.GetterInfo, identifier);
 
             var referenceOperand = comparisonOperand.parameterReference();
             var literalOperand = comparisonOperand.literal();
@@ -292,7 +292,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
                 }
 
                 var operandIdentifier = Expression.Constant(operandIdentifierText);
-                operand = Expression.Call(ArgumentParameter, argumentInfo.GetterInfo, operandIdentifier);
+                operand = Expression.Call(ScopeParameter, argumentInfo.GetterInfo, operandIdentifier);
             }
             else if (referenceOperand == null && literalOperand != null && numberOperand == null)
             {
@@ -320,22 +320,22 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
         #endregion "Evaluate"
 
-        private static readonly ParameterExpression ArgumentParameter = Expression.Parameter(typeof(CalculateEvaluateArgument), "arg");
+        private static readonly ScopeInfo Number = GetScopeInfo(nameof(CalculateEvaluateScope.GetNumber), double.Parse);
 
-        private static readonly ArgumentInfo Number = GetArgumentInfo(nameof(CalculateEvaluateArgument.GetNumber), double.Parse);
+        private static readonly ParameterExpression ScopeParameter = Expression.Parameter(typeof(CalculateEvaluateScope), "scope");
 
-        private static readonly ArgumentInfo Text = GetArgumentInfo(nameof(CalculateEvaluateArgument.GetText), Static.Identity);
+        private static readonly ScopeInfo Text = GetScopeInfo(nameof(CalculateEvaluateScope.GetText), Static.Identity);
 
-        private static readonly ArgumentInfo Timestamp = GetArgumentInfo(nameof(CalculateEvaluateArgument.GetTimestamp), Convert.ToDateTime);
+        private static readonly ScopeInfo Timestamp = GetScopeInfo(nameof(CalculateEvaluateScope.GetTimestamp), Convert.ToDateTime);
 
         private readonly IReadOnlyDictionary<string, CalculateEvaluateParameterType> ParameterTypes;
 
         private static CalculateEvaluateCompilationException UnknownReference => new CalculateEvaluateCompilationException("Unknown reference.");
 
-        private static ArgumentInfo GetArgumentInfo<T>(string argumentGetterName, Func<string, T> parse)
+        private static ScopeInfo GetScopeInfo<T>(string getterName, Func<string, T> parse)
         {
-            var getterInfo = typeof(CalculateEvaluateArgument).GetMethod(argumentGetterName);
-            return new ArgumentInfo(getterInfo, literal =>
+            var getterInfo = typeof(CalculateEvaluateScope).GetMethod(getterName);
+            return new ScopeInfo(getterInfo, literal =>
             {
                 T value;
 
@@ -352,9 +352,9 @@ namespace AppliedResearchAssociates.CalculateEvaluate
             });
         }
 
-        private sealed class ArgumentInfo
+        private sealed class ScopeInfo
         {
-            public ArgumentInfo(MethodInfo getterInfo, Func<string, ConstantExpression> parseLiteral)
+            public ScopeInfo(MethodInfo getterInfo, Func<string, ConstantExpression> parseLiteral)
             {
                 GetterInfo = getterInfo ?? throw new ArgumentNullException(nameof(getterInfo));
                 ParseLiteral = parseLiteral ?? throw new ArgumentNullException(nameof(parseLiteral));

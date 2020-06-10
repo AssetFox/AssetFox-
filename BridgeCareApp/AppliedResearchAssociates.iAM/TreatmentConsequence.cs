@@ -24,6 +24,6 @@ namespace AppliedResearchAssociates.iAM
             return results;
         }
 
-        public virtual Action GetRecalculator(CalculateEvaluateArgument argument) => Change.GetApplicator(Attribute, argument);
+        public virtual Action GetRecalculator(CalculateEvaluateScope scope) => Change.GetApplicator(Attribute, scope);
     }
 }

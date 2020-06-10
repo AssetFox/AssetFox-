@@ -19,10 +19,10 @@ namespace AppliedResearchAssociates.iAM
 
         public CalculatedFieldValueSource AddValueSource() => _ValueSources.GetAdd(new CalculatedFieldValueSource(Explorer));
 
-        public double Calculate(CalculateEvaluateArgument argument)
+        public double Calculate(CalculateEvaluateScope scope)
         {
             ValueSources.Channel(
-                source => source.Criterion.Evaluate(argument),
+                source => source.Criterion.Evaluate(scope),
                 result => result ?? false,
                 result => !result.HasValue,
                 out var applicableSources,
@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM
                 throw new SimulationException(MessageStrings.CalculatedFieldHasMultipleOperativeEquations);
             }
 
-            return operativeSources[0].Equation.Compute(argument);
+            return operativeSources[0].Equation.Compute(scope);
         }
 
         public ValidationResultBag GetDirectValidationResults()

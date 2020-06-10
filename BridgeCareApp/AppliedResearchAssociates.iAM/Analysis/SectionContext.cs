@@ -5,7 +5,7 @@ using AppliedResearchAssociates.CalculateEvaluate;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    internal sealed class SectionContext : CalculateEvaluateArgument
+    internal sealed class SectionContext : CalculateEvaluateScope
     {
         public SectionContext(Section section, SimulationRunner simulationRunner)
         {

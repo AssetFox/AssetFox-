@@ -7,13 +7,13 @@ namespace AppliedResearchAssociates.iAM
     {
         public Criterion(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
-        public bool? Evaluate(CalculateEvaluateArgument argument)
+        public bool? Evaluate(CalculateEvaluateScope scope)
         {
             EnsureCompiled();
-            return Evaluator?.Invoke(argument);
+            return Evaluator?.Invoke(scope);
         }
 
-        public bool EvaluateOrDefault(CalculateEvaluateArgument argument) => Evaluate(argument) ?? true;
+        public bool EvaluateOrDefault(CalculateEvaluateScope scope) => Evaluate(scope) ?? true;
 
         protected override void Compile()
         {

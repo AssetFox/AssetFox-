@@ -10,12 +10,12 @@ namespace AppliedResearchAssociates.iAM
     {
         public Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
-        public double Compute(CalculateEvaluateArgument argument)
+        public double Compute(CalculateEvaluateScope scope)
         {
             EnsureCompiled();
             return Computer.Reduce(
-                calculator => calculator(argument),
-                interpolator => interpolator(argument.GetNumber(Explorer.AgeAttribute.Name)));
+                calculator => calculator(scope),
+                interpolator => interpolator(scope.GetNumber(Explorer.AgeAttribute.Name)));
         }
 
         protected override void Compile()

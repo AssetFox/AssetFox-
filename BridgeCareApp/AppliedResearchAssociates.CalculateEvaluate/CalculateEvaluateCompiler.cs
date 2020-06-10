@@ -10,9 +10,9 @@ using Antlr4.Runtime.Tree;
 
 namespace AppliedResearchAssociates.CalculateEvaluate
 {
-    public delegate double Calculator(CalculateEvaluateArgument argument);
+    public delegate double Calculator(CalculateEvaluateScope scope);
 
-    public delegate bool Evaluator(CalculateEvaluateArgument argument);
+    public delegate bool Evaluator(CalculateEvaluateScope scope);
 
     public sealed class CalculateEvaluateCompiler
     {

@@ -58,9 +58,9 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             compiler.ParameterTypes["PARAM"] = CalculateEvaluateParameterType.Number;
             var expression = "[param] * param";
             var calculator = compiler.GetCalculator(expression);
-            var argument = new CalculateEvaluateArgument();
-            argument.SetNumber("PaRaM", n0);
-            var result = calculator(argument);
+            var scope = new CalculateEvaluateScope();
+            scope.SetNumber("PaRaM", n0);
+            var result = calculator(scope);
             Assert.That(result, Is.EqualTo(n0 * n0));
         }
 
@@ -173,12 +173,12 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
                 compiler.ParameterTypes["PARAM" + i] = CalculateEvaluateParameterType.Number;
             }
             var evaluator = compiler.GetEvaluator(inputExpression);
-            var argument = new CalculateEvaluateArgument();
+            var scope = new CalculateEvaluateScope();
             foreach (var (n, i) in parameters)
             {
-                argument.SetNumber("PaRaM" + i, n);
+                scope.SetNumber("PaRaM" + i, n);
             }
-            var result = evaluator(argument);
+            var result = evaluator(scope);
             assert(result);
         }
 
@@ -191,12 +191,12 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
                 compiler.ParameterTypes["PARAM" + i] = CalculateEvaluateParameterType.Number;
             }
             var calculator = compiler.GetCalculator(inputExpression);
-            var argument = new CalculateEvaluateArgument();
+            var scope = new CalculateEvaluateScope();
             foreach (var (n, i) in parameters)
             {
-                argument.SetNumber("PaRaM" + i, n);
+                scope.SetNumber("PaRaM" + i, n);
             }
-            var result = calculator(argument);
+            var result = calculator(scope);
             Assert.That(result, Is.EqualTo(expectedOutput));
         }
 
@@ -213,9 +213,9 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             var compiler = new CalculateEvaluateCompiler();
             compiler.ParameterTypes["PARAM"] = CalculateEvaluateParameterType.Number;
             var calculator = compiler.GetEvaluator(inputExpression);
-            var argument = new CalculateEvaluateArgument();
-            argument.SetNumber("PaRaM", n0);
-            var result = calculator(argument);
+            var scope = new CalculateEvaluateScope();
+            scope.SetNumber("PaRaM", n0);
+            var result = calculator(scope);
             assert(result);
         }
 
@@ -224,9 +224,9 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             var compiler = new CalculateEvaluateCompiler();
             compiler.ParameterTypes["PARAM"] = CalculateEvaluateParameterType.Text;
             var calculator = compiler.GetEvaluator(inputExpression);
-            var argument = new CalculateEvaluateArgument();
-            argument.SetText("PaRaM", s0);
-            var result = calculator(argument);
+            var scope = new CalculateEvaluateScope();
+            scope.SetText("PaRaM", s0);
+            var result = calculator(scope);
             assert(result);
         }
 
@@ -235,9 +235,9 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             var compiler = new CalculateEvaluateCompiler();
             compiler.ParameterTypes["PARAM"] = CalculateEvaluateParameterType.Timestamp;
             var calculator = compiler.GetEvaluator(inputExpression);
-            var argument = new CalculateEvaluateArgument();
-            argument.SetTimestamp("PaRaM", d0);
-            var result = calculator(argument);
+            var scope = new CalculateEvaluateScope();
+            scope.SetTimestamp("PaRaM", d0);
+            var result = calculator(scope);
             assert(result);
         }
     }

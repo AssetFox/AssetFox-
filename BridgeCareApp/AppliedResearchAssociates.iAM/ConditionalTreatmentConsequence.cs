@@ -35,15 +35,15 @@ namespace AppliedResearchAssociates.iAM
             }
         }
 
-        public override Action GetRecalculator(CalculateEvaluateArgument argument)
+        public override Action GetRecalculator(CalculateEvaluateScope scope)
         {
             if (!Equation.ExpressionIsBlank)
             {
-                var newValue = Equation.Compute(argument);
-                return () => argument.SetNumber(Attribute.Name, newValue);
+                var newValue = Equation.Compute(scope);
+                return () => scope.SetNumber(Attribute.Name, newValue);
             }
 
-            return base.GetRecalculator(argument);
+            return base.GetRecalculator(scope);
         }
     }
 }

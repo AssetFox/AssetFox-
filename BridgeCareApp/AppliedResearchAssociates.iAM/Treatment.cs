@@ -17,9 +17,9 @@ namespace AppliedResearchAssociates.iAM
 
         public abstract bool CanUseBudget(Budget budget);
 
-        public abstract IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateArgument argument);
+        public abstract IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope);
 
-        public abstract double GetCost(CalculateEvaluateArgument argument, bool shouldApplyMultipleFeasibleCosts);
+        public abstract double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts);
 
         public virtual ValidationResultBag GetDirectValidationResults()
         {

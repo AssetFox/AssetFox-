@@ -45,10 +45,10 @@ namespace AppliedResearchAssociates.iAM
             Simulation.DesignatedPassiveTreatment = this;
         }
 
-        public override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateArgument argument)
+        public override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope)
         {
             Consequences.Channel(
-                consequence => consequence.Criterion.Evaluate(argument),
+                consequence => consequence.Criterion.Evaluate(scope),
                 result => result ?? false,
                 result => !result.HasValue,
                 out var applicableConsequences,
@@ -62,21 +62,21 @@ namespace AppliedResearchAssociates.iAM
                 .ToArray();
 
             var consequenceActions = operativeConsequences
-                .Select(consequence => consequence.GetRecalculator(argument))
+                .Select(consequence => consequence.GetRecalculator(scope))
                 .ToArray();
 
             return consequenceActions;
         }
 
-        public override double GetCost(CalculateEvaluateArgument argument, bool shouldApplyMultipleFeasibleCosts)
+        public override double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts)
         {
-            var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(argument)).ToArray();
+            var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
             if (feasibleCosts.Length == 0)
             {
                 return 0;
             }
 
-            double getCost(TreatmentCost cost) => cost.Equation.Compute(argument);
+            double getCost(TreatmentCost cost) => cost.Equation.Compute(scope);
             return shouldApplyMultipleFeasibleCosts ? feasibleCosts.Sum(getCost) : feasibleCosts.Max(getCost);
         }
 
@@ -106,7 +106,7 @@ namespace AppliedResearchAssociates.iAM
 
         public override IEnumerable<TreatmentScheduling> GetSchedulings() => Schedulings;
 
-        public bool IsFeasible(CalculateEvaluateArgument argument) => FeasibilityCriteria.Any(feasibility => feasibility.EvaluateOrDefault(argument));
+        public bool IsFeasible(CalculateEvaluateScope scope) => FeasibilityCriteria.Any(feasibility => feasibility.EvaluateOrDefault(scope));
 
         public void Remove(TreatmentSupersession supersession) => _Supersessions.Remove(supersession);
 

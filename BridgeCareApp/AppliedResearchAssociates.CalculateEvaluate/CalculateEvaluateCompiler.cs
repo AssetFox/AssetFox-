@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
     {
         public static IEnumerable<string> NumberConstantNames => CalculateEvaluateCompilerVisitor.NumberConstants.Keys;
 
-        public static IEnumerable<NumberFunctionDescription> NumberFunctionDescriptors => CalculateEvaluateCompilerVisitor.NumberFunctions;
+        public static IEnumerable<NumberFunctionDescription> NumberFunctionDescriptions => CalculateEvaluateCompilerVisitor.NumberFunctionDescriptions;
 
         public Dictionary<string, CalculateEvaluateParameterType> ParameterTypes { get; } = new Dictionary<string, CalculateEvaluateParameterType>(StringComparer.OrdinalIgnoreCase);
 

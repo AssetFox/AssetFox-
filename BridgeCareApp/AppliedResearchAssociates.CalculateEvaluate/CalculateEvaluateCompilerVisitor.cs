@@ -16,13 +16,13 @@ namespace AppliedResearchAssociates.CalculateEvaluate
         {
             var mathMethods = typeof(Math).GetMethods(BindingFlags.Public | BindingFlags.Static);
             var numberMethods = mathMethods.Where(method => method.ReturnType == typeof(double) && method.GetParameters().All(parameter => parameter.ParameterType == typeof(double))).ToArray();
-            NumberFunctions = numberMethods.Select(method => new NumberFunctionDescription(method.Name, method.GetParameters().Select(parameter => parameter.Name))).ToArray();
+            NumberFunctionDescriptions = numberMethods.Select(method => new NumberFunctionDescription(method.Name, method.GetParameters().Select(parameter => parameter.Name))).ToArray();
             MethodPerSignature = numberMethods.ToDictionary(method => (method.Name, method.GetParameters().Length), ValueTupleEqualityComparer.Create<string, int>(StringComparer.OrdinalIgnoreCase));
         }
 
         public static IReadOnlyDictionary<string, double> NumberConstants { get; } = GetNumberConstants();
 
-        public static IReadOnlyCollection<NumberFunctionDescription> NumberFunctions { get; }
+        public static IReadOnlyCollection<NumberFunctionDescription> NumberFunctionDescriptions { get; }
 
         public override Expression VisitAdditionOrSubtraction(CalculateEvaluateParser.AdditionOrSubtractionContext context)
         {

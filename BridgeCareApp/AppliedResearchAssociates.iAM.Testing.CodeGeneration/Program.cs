@@ -14,104 +14,40 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
 {
     internal static class Program
     {
-        private static int NetworkId = 13;
-
-        private static int SimulationId = 91;
-
-        private static string FormattedCommandText => $@"
-select type_, attribute_, calculated, ascending, default_value, minimum_, maximum
-from attributes_
-
-select attribute_, equation, criteria
-from attributes_calculated
-
-select network_name
-from networks
-where networkid = {NetworkId}
-
-select facility, section, area, units, sectionid
-from section_{NetworkId}
-
-select *
-from segment_{NetworkId}_ns0
-
-select simulation, jurisdiction, analysis, budget_constraint, weighting, benefit_variable, benefit_limit, use_cumulative_cost, use_across_budget
-from simulations
-where simulationid = {SimulationId}
-
-select firstyear, numberyears, inflationrate, discountrate, budgetorder
-from investments
-where simulationid = {SimulationId}
-
-select attribute_, equationname, criteria, equation, shift
-from performance
-where simulationid = {SimulationId}
-
-select c.commitid, sectionid, years, treatmentname, yearsame, yearany, budget, cost_, attribute_, change_
-from committed_ c join commit_consequences cc on c.commitid = cc.commitid
-where simulationid = {SimulationId}
-
-select t.treatmentid, treatment, beforeany, beforesame, budget, description, attribute_, change_, equation, criteria
-from treatments t join consequences c on t.treatmentid = c.treatmentid
-where simulationid = {SimulationId}
-
-select t.treatmentid, cost_, criteria
-from treatments t join costs c on t.treatmentid = c.treatmentid
-where simulationid = {SimulationId}
-
-select t.treatmentid, criteria
-from treatments t join feasibility f on t.treatmentid = f.treatmentid
-where simulationid = {SimulationId}
-
-select t.treatmentid, scheduledyear, scheduledtreatmentid
-from treatments t join scheduled s on t.treatmentid = s.treatmentid
-where simulationid = {SimulationId}
-
-select t.treatmentid, supersede_treatment_id, criteria
-from treatments t join supersedes s on t.treatmentid = s.treatment_id
-where simulationid = {SimulationId}
-
-select p.priorityid, prioritylevel, criteria, years, budget, funding
-from priority p join priorityfund pf on p.priorityid = pf.priorityid
-where simulationid = {SimulationId}
-
-select attribute_, years, targetmean, targetname, criteria
-from targets
-where simulationid = {SimulationId}
-
-select attribute_, deficientname, deficient, percentdeficient, criteria
-from deficients
-where simulationid = {SimulationId}
-
-select attribute_, remaining_life_limit, criteria
-from remaining_life_limits
-where simulation_id = {SimulationId}
-
-select budgetname, year_, amount
-from yearlyinvestment
-where simulationid = {SimulationId}
-
-select budget_name, criteria
-from budget_criteria
-where simulationid = {SimulationId}
-
-select st.split_treatment_id, description, criteria, amount, percentage
-from split_treatment st join split_treatment_limit stl on st.split_treatment_id = stl.split_treatment_id
-where simulationid = {SimulationId}
-";
-
-        private const string CONNECTION_STRING = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=iAMBridgeCare;Integrated Security=True";
-
         private const string PASSIVE_TREATMENT_NAME = "No Treatment";
+
+        private static readonly SimulationConnectionInfo LocalZero = new SimulationConnectionInfo
+        {
+            ConnectionFormat = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=iAMBridgeCare;Integrated Security=True",
+            NetworkId = 13,
+            SimulationId = 91,
+        };
+
+        private static readonly SimulationConnectionInfo SmallSectionBased = new SimulationConnectionInfo
+        {
+            ConnectionFormat = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=PennDot_Light;User Id={0};Password={1}",
+            NetworkId = 13,
+            SimulationId = 1181, // "District 2 Initial Run"
+        };
 
         private static void Main()
         {
+            var simulationConnectionInfo = SmallSectionBased;
+
+            Console.WriteLine("User Id:");
+            var userId = Console.ReadLine();
+            Console.WriteLine("Password:");
+            var password = Console.ReadLine();
+            Console.Clear();
+
+            var connectionString = string.Format(simulationConnectionInfo.ConnectionFormat, userId, password);
+
             var simulation = new Explorer().AddNetwork().AddSimulation();
             var sectionById = new Dictionary<int, Section>();
             var treatmentById = new Dictionary<int, SelectableTreatment>();
 
-            using var connection = new SqlConnection(CONNECTION_STRING);
-            using var command = new SqlCommand(FormattedCommandText, connection);
+            using var connection = new SqlConnection(connectionString);
+            using var command = new SqlCommand(simulationConnectionInfo.FormattedCommandText, connection);
             connection.Open();
             using var reader = command.ExecuteReader(CommandBehavior.CloseConnection);
 
@@ -157,9 +93,17 @@ where simulationid = {SimulationId}
 
             simulation.Treatments.Single(treatment => string.Equals(treatment.Name.Trim(), PASSIVE_TREATMENT_NAME, StringComparison.OrdinalIgnoreCase)).DesignateAsPassiveForSimulation();
 
+            var errorIsPresent = false;
             foreach (var result in simulation.Network.Explorer.GetAllValidationResults())
             {
+                errorIsPresent |= result.Status == ValidationStatus.Error;
                 Console.WriteLine($"[{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");
+            }
+
+            if (errorIsPresent)
+            {
+                Console.WriteLine("Analysis should not run when validation errors are present. Terminating execution...");
+                Environment.Exit(1);
             }
 
             var runner = new SimulationRunner(simulation);
@@ -167,7 +111,7 @@ where simulationid = {SimulationId}
             runner.Warning += (sender, eventArgs) => Console.WriteLine(eventArgs.Message);
             time(runner.Run, "simulation run");
 
-            var outputPath = Path.GetFullPath($"Network {NetworkId} - Simulation {SimulationId}.json");
+            var outputPath = Path.GetFullPath($"Network {simulationConnectionInfo.NetworkId} - Simulation {simulationConnectionInfo.SimulationId}.json");
             using var outputStream = File.OpenWrite(outputPath);
             using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });
             JsonSerializer.Serialize(outputWriter, simulation.Results, new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });
@@ -400,6 +344,9 @@ where simulationid = {SimulationId}
 
             void createCommittedProjects()
             {
+                // per Jake 2020-07-30, ignore committed projects for now.
+                return;
+
                 var attributeByName = simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name);
                 var budgetByName = simulation.InvestmentPlan.Budgets.ToDictionary(budget => budget.Name);
                 var projectById = new Dictionary<int, CommittedProject>();
@@ -412,7 +359,7 @@ where simulationid = {SimulationId}
                         var sectionId = reader.GetInt32(1);
                         var section = sectionById[sectionId];
                         var year = reader.GetInt32(2);
-                        project = simulation.CommittedProjects.GetAdd(new CommittedProject(section, year));
+                        project = simulation.CommittedProjects.GetAdd(new CommittedProject(section, year)); // maybe modify this so that the project is ignored if the budget name is not found.
                         project.Name = reader.GetNullableString(3);
                         project.ShadowForSameTreatment = reader.GetInt32(4);
                         project.ShadowForAnyTreatment = reader.GetInt32(5);
@@ -646,6 +593,97 @@ where simulationid = {SimulationId}
                     distributionRule.Expression = reader.GetNullableString(4);
                 }
             }
+        }
+
+        private sealed class SimulationConnectionInfo
+        {
+            public string ConnectionFormat;
+
+            public int NetworkId;
+
+            public int SimulationId;
+
+            public string FormattedCommandText => $@"
+select type_, attribute_, calculated, ascending, default_value, minimum_, maximum
+from attributes_
+
+select attribute_, equation, criteria
+from attributes_calculated
+
+select network_name
+from networks
+where networkid = {NetworkId}
+
+select facility, section, area, units, sectionid
+from section_{NetworkId}
+
+select *
+from segment_{NetworkId}_ns0
+
+select simulation, jurisdiction, analysis, budget_constraint, weighting, benefit_variable, benefit_limit, use_cumulative_cost, use_across_budget
+from simulations
+where simulationid = {SimulationId}
+
+select firstyear, numberyears, inflationrate, discountrate, budgetorder
+from investments
+where simulationid = {SimulationId}
+
+select attribute_, equationname, criteria, equation, shift
+from performance
+where simulationid = {SimulationId}
+
+select c.commitid, sectionid, years, treatmentname, yearsame, yearany, budget, cost_, attribute_, change_
+from committed_ c join commit_consequences cc on c.commitid = cc.commitid
+where simulationid = {SimulationId}
+
+select t.treatmentid, treatment, beforeany, beforesame, budget, description, attribute_, change_, equation, criteria
+from treatments t join consequences c on t.treatmentid = c.treatmentid
+where simulationid = {SimulationId}
+
+select t.treatmentid, cost_, criteria
+from treatments t join costs c on t.treatmentid = c.treatmentid
+where simulationid = {SimulationId}
+
+select t.treatmentid, criteria
+from treatments t join feasibility f on t.treatmentid = f.treatmentid
+where simulationid = {SimulationId}
+
+select t.treatmentid, scheduledyear, scheduledtreatmentid
+from treatments t join scheduled s on t.treatmentid = s.treatmentid
+where simulationid = {SimulationId}
+
+select t.treatmentid, supersede_treatment_id, criteria
+from treatments t join supersedes s on t.treatmentid = s.treatment_id
+where simulationid = {SimulationId}
+
+select p.priorityid, prioritylevel, criteria, years, budget, funding
+from priority p join priorityfund pf on p.priorityid = pf.priorityid
+where simulationid = {SimulationId}
+
+select attribute_, years, targetmean, targetname, criteria
+from targets
+where simulationid = {SimulationId}
+
+select attribute_, deficientname, deficient, percentdeficient, criteria
+from deficients
+where simulationid = {SimulationId}
+
+select attribute_, remaining_life_limit, criteria
+from remaining_life_limits
+where simulation_id = {SimulationId}
+
+select budgetname, year_, amount
+from yearlyinvestment
+where simulationid = {SimulationId}
+
+select budget_name, criteria
+from budget_criteria
+where simulationid = {SimulationId}
+
+select st.split_treatment_id, description, criteria, amount, percentage
+from split_treatment st join split_treatment_limit stl on st.split_treatment_id = stl.split_treatment_id
+where simulationid = {SimulationId}
+";
         }
     }
 }

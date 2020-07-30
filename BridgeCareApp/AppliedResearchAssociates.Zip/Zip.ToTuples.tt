@@ -2,7 +2,7 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
-<#@ output extension=".cs" #>
+<#@ output extension=".tt.cs" #>
 // WARNING: This file was automatically generated from a T4 text template at the
 // following moment in time: <#= DateTimeOffset.Now #>. Any changes you make to
 // this file will be lost when this file is regenerated from the template
@@ -78,7 +78,7 @@ foreach (var arity in Enumerable.Range(2, 7))
     }
 #>
             {
-                while (Static.Distinct(<#= moveNextExprsStrict #>).Single())
+                while (Distinct(<#= moveNextExprsStrict #>).Single())
                 {
                     yield return (<#= currentExprs #>);
                 }

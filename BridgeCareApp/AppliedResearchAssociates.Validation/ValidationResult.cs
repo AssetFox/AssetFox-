@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.Validation
         public ValidationResult(ValidationTarget target, ValidationStatus status, string message)
         {
             Target = target ?? throw new ArgumentNullException(nameof(target));
-            Status = status.Defined();
+            Status = status;
 
             if (string.IsNullOrWhiteSpace(message))
             {

@@ -1,5 +1,5 @@
 ﻿// WARNING: This file was automatically generated from a T4 text template at the
-// following moment in time: 04/06/2020 10:20:09 -05:00. Any changes you make to
+// following moment in time: 07/07/2020 09:50:12 -05:00. Any changes you make to
 // this file will be lost when this file is regenerated from the template
 // source.
 
@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates
             using (var enumerator1 = sequence1.GetEnumerator())
             using (var enumerator2 = sequence2.GetEnumerator())
             {
-                while (Static.Distinct(enumerator1.MoveNext(), enumerator2.MoveNext()).Single())
+                while (Distinct(enumerator1.MoveNext(), enumerator2.MoveNext()).Single())
                 {
                     yield return (enumerator1.Current, enumerator2.Current);
                 }
@@ -80,7 +80,7 @@ namespace AppliedResearchAssociates
             using (var enumerator2 = sequence2.GetEnumerator())
             using (var enumerator3 = sequence3.GetEnumerator())
             {
-                while (Static.Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext()).Single())
+                while (Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext()).Single())
                 {
                     yield return (enumerator1.Current, enumerator2.Current, enumerator3.Current);
                 }
@@ -123,7 +123,7 @@ namespace AppliedResearchAssociates
             using (var enumerator3 = sequence3.GetEnumerator())
             using (var enumerator4 = sequence4.GetEnumerator())
             {
-                while (Static.Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext(), enumerator4.MoveNext()).Single())
+                while (Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext(), enumerator4.MoveNext()).Single())
                 {
                     yield return (enumerator1.Current, enumerator2.Current, enumerator3.Current, enumerator4.Current);
                 }
@@ -169,7 +169,7 @@ namespace AppliedResearchAssociates
             using (var enumerator4 = sequence4.GetEnumerator())
             using (var enumerator5 = sequence5.GetEnumerator())
             {
-                while (Static.Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext(), enumerator4.MoveNext(), enumerator5.MoveNext()).Single())
+                while (Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext(), enumerator4.MoveNext(), enumerator5.MoveNext()).Single())
                 {
                     yield return (enumerator1.Current, enumerator2.Current, enumerator3.Current, enumerator4.Current, enumerator5.Current);
                 }
@@ -218,7 +218,7 @@ namespace AppliedResearchAssociates
             using (var enumerator5 = sequence5.GetEnumerator())
             using (var enumerator6 = sequence6.GetEnumerator())
             {
-                while (Static.Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext(), enumerator4.MoveNext(), enumerator5.MoveNext(), enumerator6.MoveNext()).Single())
+                while (Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext(), enumerator4.MoveNext(), enumerator5.MoveNext(), enumerator6.MoveNext()).Single())
                 {
                     yield return (enumerator1.Current, enumerator2.Current, enumerator3.Current, enumerator4.Current, enumerator5.Current, enumerator6.Current);
                 }
@@ -270,7 +270,7 @@ namespace AppliedResearchAssociates
             using (var enumerator6 = sequence6.GetEnumerator())
             using (var enumerator7 = sequence7.GetEnumerator())
             {
-                while (Static.Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext(), enumerator4.MoveNext(), enumerator5.MoveNext(), enumerator6.MoveNext(), enumerator7.MoveNext()).Single())
+                while (Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext(), enumerator4.MoveNext(), enumerator5.MoveNext(), enumerator6.MoveNext(), enumerator7.MoveNext()).Single())
                 {
                     yield return (enumerator1.Current, enumerator2.Current, enumerator3.Current, enumerator4.Current, enumerator5.Current, enumerator6.Current, enumerator7.Current);
                 }
@@ -325,7 +325,7 @@ namespace AppliedResearchAssociates
             using (var enumerator7 = sequence7.GetEnumerator())
             using (var enumerator8 = sequence8.GetEnumerator())
             {
-                while (Static.Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext(), enumerator4.MoveNext(), enumerator5.MoveNext(), enumerator6.MoveNext(), enumerator7.MoveNext(), enumerator8.MoveNext()).Single())
+                while (Distinct(enumerator1.MoveNext(), enumerator2.MoveNext(), enumerator3.MoveNext(), enumerator4.MoveNext(), enumerator5.MoveNext(), enumerator6.MoveNext(), enumerator7.MoveNext(), enumerator8.MoveNext()).Single())
                 {
                     yield return (enumerator1.Current, enumerator2.Current, enumerator3.Current, enumerator4.Current, enumerator5.Current, enumerator6.Current, enumerator7.Current, enumerator8.Current);
                 }

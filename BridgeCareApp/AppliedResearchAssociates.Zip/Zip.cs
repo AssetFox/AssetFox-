@@ -19,6 +19,25 @@ namespace AppliedResearchAssociates
 
         public static IEnumerable<object[]> Strict(IEnumerable<IEnumerable> sequences) => Strict(sequences.SequenceCast<object>());
 
+        private static IEnumerable<T> Distinct<T>(params T[] values) => values.Distinct();
+
+        private static IEnumerable<IEnumerable<T>> SequenceCast<T>(this IEnumerable<IEnumerable> sequences) => sequences.Select(sequence => sequence.Cast<T>());
+
+        private sealed class AggregateDisposable : IDisposable
+        {
+            private readonly List<IDisposable> Disposables;
+
+            public AggregateDisposable(IEnumerable<IDisposable> disposables) => Disposables = disposables?.ToList() ?? new List<IDisposable>();
+
+            public void Dispose()
+            {
+                foreach (var disposable in Disposables)
+                {
+                    disposable?.Dispose();
+                }
+            }
+        }
+
         private abstract class AggregateEnumerator<T>
         {
             public IEnumerable<T[]> GetEnumerable(IEnumerable<IEnumerable<T>> sequences)
@@ -33,7 +52,7 @@ namespace AppliedResearchAssociates
                 IEnumerable<T[]> _()
                 {
                     var enumerators = sequences.Select(sequence => sequence.GetEnumerator()).ToList();
-                    using (enumerators.AsDisposable())
+                    using (new AggregateDisposable(enumerators))
                     {
                         while (MoveNext(enumerators))
                         {
@@ -50,6 +69,10 @@ namespace AppliedResearchAssociates
 
         private sealed class LongZipper<T> : AggregateEnumerator<T>
         {
+            private readonly T DefaultValue;
+
+            private readonly List<bool> HasCurrent = new List<bool>();
+
             public LongZipper(T defaultValue) => DefaultValue = defaultValue;
 
             protected override T[] Current(IEnumerable<IEnumerator<T>> enumerators)
@@ -70,17 +93,17 @@ namespace AppliedResearchAssociates
                 HasCurrent.Clear();
                 HasCurrent.AddRange(enumerators.Select(enumerator => enumerator.MoveNext()));
 
-                return HasCurrent.Any(Static.Identity);
+                return HasCurrent.Any(_ => _);
             }
-
-            private readonly T DefaultValue;
-
-            private readonly List<bool> HasCurrent = new List<bool>();
         }
 
         private sealed class ShortZipper<T> : AggregateEnumerator<T>
         {
             public static readonly ShortZipper<T> Instance = new ShortZipper<T>();
+
+            private ShortZipper()
+            {
+            }
 
             protected override bool MoveNext(IEnumerable<IEnumerator<T>> enumerators)
             {
@@ -95,21 +118,17 @@ namespace AppliedResearchAssociates
 
                 return any && moveNext;
             }
-
-            private ShortZipper()
-            {
-            }
         }
 
         private sealed class StrictZipper<T> : AggregateEnumerator<T>
         {
             public static readonly StrictZipper<T> Instance = new StrictZipper<T>();
 
-            protected override bool MoveNext(IEnumerable<IEnumerator<T>> enumerators) => enumerators.Select(enumerator => enumerator.MoveNext()).Distinct().SingleOrDefault();
-
             private StrictZipper()
             {
             }
+
+            protected override bool MoveNext(IEnumerable<IEnumerator<T>> enumerators) => enumerators.Select(enumerator => enumerator.MoveNext()).Distinct().SingleOrDefault();
         }
     }
 }

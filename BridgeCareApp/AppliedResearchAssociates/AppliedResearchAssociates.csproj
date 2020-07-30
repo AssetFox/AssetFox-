@@ -9,6 +9,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AppliedResearchAssociates.Zip\AppliedResearchAssociates.Zip.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Choice.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Choice.cs</LastGenOutput>
@@ -28,10 +32,6 @@
     <None Update="ValueTupleEqualityComparer.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ValueTupleEqualityComparer.cs</LastGenOutput>
-    </None>
-    <None Update="Zip.ToTuples.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Zip.ToTuples.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
@@ -59,11 +59,6 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ValueGetter.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Zip.ToTuples.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Zip.ToTuples.tt</DependentUpon>
     </Compile>
     <Compile Update="ValueTupleEqualityComparer.cs">
       <DesignTime>True</DesignTime>

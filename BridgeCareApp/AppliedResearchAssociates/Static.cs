@@ -99,8 +99,6 @@ namespace AppliedResearchAssociates
             value = keyValue.Value;
         }
 
-        public static T Defined<T>(this T enumValue) where T : Enum => enumValue.IsDefined() ? enumValue : throw new ArgumentException("Undefined enum value.", nameof(enumValue));
-
         public static IEnumerable<T> Distinct<T>(params T[] values) => values.Distinct();
 
         public static IEnumerable<T> Distinct<T>(IEqualityComparer<T> equalityComparer, params T[] values) => values.Distinct(equalityComparer);
@@ -228,7 +226,7 @@ namespace AppliedResearchAssociates
 
         private sealed class AggregateDisposable : IDisposable
         {
-            public AggregateDisposable(IEnumerable<IDisposable> disposables) => Disposables = disposables.ToList() ?? new List<IDisposable>();
+            public AggregateDisposable(IEnumerable<IDisposable> disposables) => Disposables = disposables?.ToList() ?? new List<IDisposable>();
 
             public void Dispose()
             {

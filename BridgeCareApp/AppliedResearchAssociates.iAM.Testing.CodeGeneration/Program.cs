@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 using Microsoft.Data.SqlClient;
@@ -162,12 +164,13 @@ where simulationid = {SimulationId}
 
             var runner = new SimulationRunner(simulation);
             runner.Information += (sender, eventArgs) => Console.WriteLine(eventArgs.Message);
+            runner.Warning += (sender, eventArgs) => Console.WriteLine(eventArgs.Message);
             time(runner.Run, "simulation run");
 
-            foreach (var yearDetail in simulation.Results)
-            {
-                Console.WriteLine(yearDetail.Year);
-            }
+            var outputPath = Path.GetFullPath($"Network {NetworkId} - Simulation {SimulationId}.json");
+            using var outputStream = File.OpenWrite(outputPath);
+            using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });
+            JsonSerializer.Serialize(outputWriter, simulation.Results, new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });
 
             //---
 

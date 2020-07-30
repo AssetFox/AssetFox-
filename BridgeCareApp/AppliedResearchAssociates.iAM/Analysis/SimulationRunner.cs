@@ -496,7 +496,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }));
 
             decimal remainingCost;
-            CashFlowRule cashFlowRule = null;
+            Action scheduleCashFlowEvents = null;
 
             if (indivisibleCost.HasValue)
             {
@@ -506,11 +506,17 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 remainingCost = (decimal)sectionContext.GetCostOfTreatment(treatment);
 
-                cashFlowRule = Simulation.InvestmentPlan.CashFlowRules.SingleOrDefault(rule => rule.Criterion.EvaluateOrDefault(sectionContext));
+                var cashFlowRule = Simulation.InvestmentPlan.CashFlowRules.SingleOrDefault(rule => rule.Criterion.EvaluateOrDefault(sectionContext));
                 if (cashFlowRule != null)
                 {
                     var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].First(kv => remainingCost <= kv.Key).Value;
                     var costPerYear = distributionRule.YearlyPercentages.Select(percentage => percentage / 100 * remainingCost).ToArray();
+
+                    if (costPerYear.Sum() != remainingCost)
+                    {
+                        throw new InvalidOperationException("Sum of yearly costs from cash flow split does not equal original total cost.");
+                    }
+
                     remainingCost = costPerYear[0];
 
                     var progression = costPerYear.Skip(1).Select(cost => new TreatmentProgress(treatment, cost)).ToArray();
@@ -523,13 +529,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
                         progression[progression.Length - 1].IsComplete = true;
                     }
 
-                    foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count(1)))
+                    scheduleCashFlowEvents = () =>
                     {
-                        // [FIXME] As of 2020-06-08, when using the current testing program, there's
-                        // a crash here when, for a certain section, the year is already scheduled
-                        // (i.e. the key is already present).
-                        sectionContext.EventSchedule.Add(year + yearOffset, yearProgress);
-                    }
+                        foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count(1)))
+                        {
+                            sectionContext.EventSchedule.Add(year + yearOffset, yearProgress);
+                        }
+                    };
                 }
             }
 
@@ -596,7 +602,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 costAllocator();
             }
 
-            return cashFlowRule == null ? CostCoverage.Full : CostCoverage.CashFlow;
+            if (scheduleCashFlowEvents != null)
+            {
+                scheduleCashFlowEvents();
+                return CostCoverage.CashFlow;
+            }
+
+            return CostCoverage.Full;
         }
 
         private void UpdateConditionActuals(int year)

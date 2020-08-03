@@ -628,6 +628,7 @@ where networkid = {NetworkId}
 
 select facility, section, area, units, sectionid
 from section_{NetworkId}
+order by sectionid
 
 select *
 from segment_{NetworkId}_ns0

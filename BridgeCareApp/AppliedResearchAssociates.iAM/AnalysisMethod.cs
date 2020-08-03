@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM
         {
             Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
-            JurisdictionCriterion = new Criterion(Simulation.Network.Explorer);
+            Filter = new Criterion(Simulation.Network.Explorer);
         }
 
         public Benefit Benefit { get; } = new Benefit();
@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM
 
         public string Description { get; set; }
 
-        public Criterion JurisdictionCriterion { get; }
+        public Criterion Filter { get; }
 
         public OptimizationStrategy OptimizationStrategy { get; set; }
 
@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM
 
         public SpendingStrategy SpendingStrategy { get; set; }
 
-        public ValidatorBag Subvalidators => new ValidatorBag { Benefit, BudgetPriorities, DeficientConditionGoals, JurisdictionCriterion, RemainingLifeLimits, TargetConditionGoals };
+        public ValidatorBag Subvalidators => new ValidatorBag { Benefit, BudgetPriorities, DeficientConditionGoals, Filter, RemainingLifeLimits, TargetConditionGoals };
 
         public IReadOnlyCollection<TargetConditionGoal> TargetConditionGoals => _TargetConditionGoals;
 

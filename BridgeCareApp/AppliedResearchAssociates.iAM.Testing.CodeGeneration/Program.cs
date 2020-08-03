@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
         {
             ConnectionFormat = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=iAMBridgeCare;Integrated Security=True",
             NetworkId = 13,
-            SimulationId = 91,
+            SimulationId = 91, // "MASTER - no commitments"
         };
 
         private static readonly SimulationConnectionInfo SmallSectionBased = new SimulationConnectionInfo
@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
 
         private static void Main()
         {
-            var simulationConnectionInfo = SmallSectionBased;
+            var simulationConnectionInfo = LocalZero;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();
@@ -280,7 +280,7 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
                 var attributeByName = simulation.Network.Explorer.NumericAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
 
                 simulation.Name = reader.GetNullableString(0);
-                simulation.AnalysisMethod.JurisdictionCriterion.Expression = reader.GetNullableString(1);
+                simulation.AnalysisMethod.Filter.Expression = reader.GetNullableString(1);
 
                 var optimizationStrategyLabel = reader.GetNullableString(2);
                 simulation.AnalysisMethod.OptimizationStrategy = OptimizationStrategyLookup.Instance[optimizationStrategyLabel];

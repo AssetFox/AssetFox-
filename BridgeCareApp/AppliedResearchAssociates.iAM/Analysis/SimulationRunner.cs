@@ -77,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             SectionContexts = Simulation.Network.Sections
                 .AsParallel()
                 .Select(section => new SectionContext(section, this))
-                .Where(context => Simulation.AnalysisMethod.JurisdictionCriterion.EvaluateOrDefault(context))
+                .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))
                 .ToArray();
 
             if (SectionContexts.Count == 0)

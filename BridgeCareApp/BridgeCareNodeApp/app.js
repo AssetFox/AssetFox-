@@ -7,6 +7,7 @@ require('./config/express')(app, winston);
 const passport = require("passport");
 
 const env = process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+const securityType = process.env.npm_package_security;
 
 const config = require('./config/config')[env];
 require('./config/mongoose')(config);
@@ -98,6 +99,7 @@ async function run() {
 
     Scenario.watch([], options).on('change', data => {
         emitEvent('scenarioStatus', data);
+        
     });
 
     TargetLibrary.watch([], options).on('change', data => {
@@ -127,5 +129,5 @@ async function run() {
     app.use(function (err, req, res, next) {
         winston.error(err.stack);
       });
-
+      module.exports.securityType = securityType;
 }

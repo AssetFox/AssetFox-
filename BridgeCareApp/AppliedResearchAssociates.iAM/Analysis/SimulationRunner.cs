@@ -82,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (SectionContexts.Count == 0)
             {
-                throw new SimulationException("There are no sections in the specified jurisdiction.");
+                throw new SimulationException("There are no sections.");
             }
 
             if (SectionContexts.Select(context => context.Section.AreaUnit).Distinct().Count() > 1)

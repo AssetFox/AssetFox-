@@ -16,23 +16,30 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
     {
         private const string PASSIVE_TREATMENT_NAME = "No Treatment";
 
-        private static readonly SimulationConnectionInfo LocalZero = new SimulationConnectionInfo
+        private static readonly SimulationConnectionInfo LocalZerothDataset = new SimulationConnectionInfo
         {
             ConnectionFormat = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=iAMBridgeCare;Integrated Security=True",
             NetworkId = 13,
             SimulationId = 91, // "MASTER - no commitments"
         };
 
-        private static readonly SimulationConnectionInfo SmallSectionBased = new SimulationConnectionInfo
+        private static readonly SimulationConnectionInfo SmallBridgeDataset = new SimulationConnectionInfo
         {
             ConnectionFormat = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=PennDot_Light;User Id={0};Password={1}",
             NetworkId = 13,
             SimulationId = 1181, // "District 2 Initial Run"
         };
 
+        private static readonly SimulationConnectionInfo MainDataset = new SimulationConnectionInfo
+        {
+            ConnectionFormat = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=DbBackup;User Id={0};Password={1}",
+            //NetworkId = 13,
+            //SimulationId = 1181,
+        };
+
         private static void Main()
         {
-            var simulationConnectionInfo = LocalZero;
+            var simulationConnectionInfo = SmallBridgeDataset;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();
@@ -217,13 +224,17 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
                         facilityByName.Add(facilityName, facility);
                     }
 
-                    var section = facility.AddSection();
-                    section.Name = reader.GetNullableString(1);
-                    section.Area = reader.GetDouble(2);
-                    section.AreaUnit = reader.GetNullableString(3);
+                    var sectionName = reader.GetNullableString(1);
+                    if (facility.Sections.All(section => section.Name != sectionName))
+                    {
+                        var section = facility.AddSection();
+                        section.Name = sectionName;
+                        section.Area = reader.GetDouble(2);
+                        section.AreaUnit = reader.GetNullableString(3);
 
-                    var sectionId = reader.GetInt32(4);
-                    sectionById.Add(sectionId, section);
+                        var sectionId = reader.GetInt32(4);
+                        sectionById.Add(sectionId, section);
+                    }
                 }
             }
 
@@ -248,21 +259,22 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
                 while (reader.Read())
                 {
                     var sectionId = reader.GetInt32(SECTIONID);
-                    var section = sectionById[sectionId];
-
-                    fillHistories(simulation.Network.Explorer.NumberAttributes, reader.GetDouble);
-                    fillHistories(simulation.Network.Explorer.TextAttributes, reader.GetNullableString);
-
-                    void fillHistories<T>(IEnumerable<Attribute<T>> attributes, Func<int, T> getValue)
+                    if (sectionById.TryGetValue(sectionId, out var section))
                     {
-                        foreach (var attribute in attributes)
+                        fillHistories(simulation.Network.Explorer.NumberAttributes, reader.GetDouble);
+                        fillHistories(simulation.Network.Explorer.TextAttributes, reader.GetNullableString);
+
+                        void fillHistories<T>(IEnumerable<Attribute<T>> attributes, Func<int, T> getValue)
                         {
-                            foreach (var (columnOrdinal, year, _) in columnData[attribute.Name])
+                            foreach (var attribute in attributes)
                             {
-                                if (!reader.IsDBNull(columnOrdinal))
+                                foreach (var (columnOrdinal, year, _) in columnData[attribute.Name])
                                 {
-                                    var value = getValue(columnOrdinal);
-                                    section.GetHistory(attribute).Add(year, value);
+                                    if (!reader.IsDBNull(columnOrdinal))
+                                    {
+                                        var value = getValue(columnOrdinal);
+                                        section.GetHistory(attribute).Add(year, value);
+                                    }
                                 }
                             }
                         }

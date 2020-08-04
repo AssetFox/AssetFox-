@@ -30,16 +30,23 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
             SimulationId = 1181, // "District 2 Initial Run"
         };
 
+        private static readonly SimulationConnectionInfo SmallBridgeDatasetLocal = new SimulationConnectionInfo
+        {
+            ConnectionFormat = @"Server=localhost;Database=PennDot_Light;Integrated Security=true",
+            NetworkId = 13,
+            SimulationId = 1181, // "District 2 Initial Run"
+        };
+
         private static readonly SimulationConnectionInfo MainDataset = new SimulationConnectionInfo
         {
             ConnectionFormat = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=DbBackup;User Id={0};Password={1}",
-            //NetworkId = 13,
-            //SimulationId = 1181,
+            NetworkId = 13,
+            SimulationId = 1171, // "JML Run District 8"
         };
 
         private static void Main()
         {
-            var simulationConnectionInfo = SmallBridgeDataset;
+            var simulationConnectionInfo = SmallBridgeDatasetLocal;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();

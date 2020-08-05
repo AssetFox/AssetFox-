@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace AppliedResearchAssociates
+namespace AppliedResearchAssociates.iAM
 {
-    public sealed class SetWithoutNulls<T> : ISet<T>, IReadOnlyCollection<T> where T : class
+    internal sealed class SetWithoutNulls<T> : ISet<T>, IReadOnlyCollection<T> where T : class
     {
         public SetWithoutNulls(IEqualityComparer<T> equalityComparer = null) => Items = new HashSet<T>(equalityComparer);
 

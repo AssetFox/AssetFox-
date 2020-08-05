@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates
 
         public static SequenceComparer<T> Create<T>(IComparer<T> comparer) => new SequenceComparer<T>(comparer ?? throw new ArgumentNullException(nameof(comparer)));
 
-        public override int Compare(IEnumerable x, IEnumerable y) => Static.SequenceCompare(x, y, Comparer);
+        public override int Compare(IEnumerable x, IEnumerable y) => Comparison.SequenceCompare(x, y, Comparer);
 
         private readonly IComparer Comparer;
 
@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates
     {
         new public static SequenceComparer<T> Default { get; } = new SequenceComparer<T>(Comparer<T>.Default);
 
-        public override int Compare(IEnumerable<T> x, IEnumerable<T> y) => Static.SequenceCompare(x, y, Comparer);
+        public override int Compare(IEnumerable<T> x, IEnumerable<T> y) => Comparison.SequenceCompare(x, y, Comparer);
 
         internal SequenceComparer(IComparer<T> comparer) => Comparer = comparer;
 

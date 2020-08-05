@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace AppliedResearchAssociates
+namespace AppliedResearchAssociates.CalculateEvaluate
 {
-    public sealed class FinalActor<T>
+    internal sealed class FinalActor<T>
     {
-        internal FinalActor(T value, Action<FinalActor<T>> finalAction)
+        public FinalActor(T value, Action<FinalActor<T>> finalAction)
         {
             Value = value;
             FinalAction = finalAction;

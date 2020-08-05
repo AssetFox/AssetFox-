@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates
 
         public static SequenceEqualityComparer<T> Create<T>(IEqualityComparer<T> equalityComparer) => new SequenceEqualityComparer<T>(equalityComparer ?? throw new ArgumentNullException(nameof(equalityComparer)));
 
-        public override bool Equals(IEnumerable x, IEnumerable y) => Static.SequenceEquals(x, y, EqualityComparer);
+        public override bool Equals(IEnumerable x, IEnumerable y) => Comparison.SequenceEquals(x, y, EqualityComparer);
 
         public override int GetHashCode(IEnumerable obj) => obj.CombineHashCodes(EqualityComparer);
 
@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates
     {
         new public static SequenceEqualityComparer<T> Default { get; } = new SequenceEqualityComparer<T>(EqualityComparer<T>.Default);
 
-        public override bool Equals(IEnumerable<T> x, IEnumerable<T> y) => Static.SequenceEquals(x, y, EqualityComparer);
+        public override bool Equals(IEnumerable<T> x, IEnumerable<T> y) => Comparison.SequenceEquals(x, y, EqualityComparer);
 
         public override int GetHashCode(IEnumerable<T> obj) => obj.CombineHashCodes(EqualityComparer);
 

@@ -174,17 +174,20 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (earliestYearOfMostRecentValue.HasValue)
             {
-                SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-                SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
-
-                var startYear = earliestYearOfMostRecentValue.Value + 1;
-                foreach (var year in Enumerable.Range(startYear, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - startYear))
+                var earliestYear = earliestYearOfMostRecentValue.Value;
+                if (earliestYear < SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
                 {
-                    ApplyPerformanceCurves();
-                    ApplyPassiveTreatment(year);
+                    SetHistoricalValues(earliestYear, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+                    SetHistoricalValues(earliestYear, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-                    SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-                    SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+                    foreach (var year in Enumerable.Range(earliestYear + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - earliestYear))
+                    {
+                        ApplyPerformanceCurves();
+                        ApplyPassiveTreatment(year);
+
+                        SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+                        SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+                    }
                 }
             }
         }
@@ -221,10 +224,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             SetNumber(Section.AreaIdentifier, Section.Area);
 
-            var yearBeforeAnalysisPeriod = SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1;
+            var initialReferenceYear = SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
 
-            SetHistoricalValues(yearBeforeAnalysisPeriod, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-            SetHistoricalValues(yearBeforeAnalysisPeriod, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+            SetHistoricalValues(initialReferenceYear, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+            SetHistoricalValues(initialReferenceYear, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
             foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
             {
@@ -238,7 +241,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private void SetHistoricalValues<T>(int referenceYear, bool useMostRecent, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
+        private void SetHistoricalValues<T>(int referenceYear, bool useMostRecentAsFallback, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
         {
             foreach (var attribute in attributes)
             {
@@ -247,7 +250,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     setValue(attribute.Name, value);
                 }
-                else if (useMostRecent)
+                else if (useMostRecentAsFallback)
                 {
                     var mostRecentYear = attributeHistory.Keys.Where(year => year < referenceYear).AsNullables().Max();
                     if (mostRecentYear.HasValue)

@@ -128,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
             var outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             var outputFile = $"Network {simulationConnectionInfo.NetworkId} - Simulation {simulationConnectionInfo.SimulationId}.json";
             var outputPath = Path.Combine(outputFolder, outputFile);
-            using var outputStream = File.OpenWrite(outputPath);
+            using var outputStream = File.Create(outputPath);
             using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });
             JsonSerializer.Serialize(outputWriter, simulation.Results, new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });
 
@@ -595,6 +595,8 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
 
             void createCashFlowRules()
             {
+                return;
+
                 var ruleById = new Dictionary<int, CashFlowRule>();
 
                 while (reader.Read())

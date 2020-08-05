@@ -111,6 +111,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     ApplyTreatment(treatment, year);
                 }
+                else
+                {
+                    AccumulationContext.ApplyPassiveTreatment(year);
+                }
 
                 AccumulateBenefit();
                 updateRemainingLife?.Invoke();

@@ -5,10 +5,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class SectionDetail
     {
-        public SectionDetail(string sectionName, string facilityName)
+        public SectionDetail(Section section)
         {
-            SectionName = sectionName ?? throw new ArgumentNullException(nameof(sectionName));
-            FacilityName = facilityName ?? throw new ArgumentNullException(nameof(facilityName));
+            if (section is null)
+            {
+                throw new ArgumentNullException(nameof(section));
+            }
+
+            FacilityName = section.Facility.Name;
+            SectionName = section.Name;
         }
 
         public string FacilityName { get; }
@@ -25,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public List<TreatmentSchedulingCollisionDetail> TreatmentSchedulingCollisions { get; } = new List<TreatmentSchedulingCollisionDetail>();
 
-        public TreatmentSource TreatmentSource { get; set; }
+        public TreatmentCause TreatmentCause { get; set; }
 
         public TreatmentStatus TreatmentStatus { get; set; }
 

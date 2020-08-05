@@ -174,7 +174,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Detail.TreatmentStatus = TreatmentStatus.Progressed;
         }
 
-        public void ResetDetail() => Detail = new SectionDetail(Section.Name, Section.Facility.Name);
+        public void ResetDetail() => Detail = new SectionDetail(Section);
 
         public void RollForward()
         {

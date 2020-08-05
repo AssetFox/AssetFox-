@@ -1,8 +1,9 @@
 ﻿namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public enum TreatmentSource
+    public enum TreatmentCause
     {
         Undefined,
+        NoSelection,
         SelectedTreatment,
         ScheduledTreatment,
         CommittedProject,

@@ -151,6 +151,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     context.EventSchedule.Add(year, Simulation.DesignatedPassiveTreatment);
                     context.ApplyPassiveTreatment(year);
+                    context.Detail.TreatmentCause = TreatmentCause.NoSelection;
                 });
 
                 UpdateConditionActuals(year);
@@ -268,7 +269,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                         context.LogTreatmentProgression(progress.Treatment);
                     }
 
-                    context.Detail.TreatmentSource = TreatmentSource.CashFlowProject;
+                    context.Detail.TreatmentCause = TreatmentCause.CashFlowProject;
                 }
                 else
                 {
@@ -308,9 +309,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 context.LogTreatmentProgression(treatment);
                             }
 
-                            context.Detail.TreatmentSource = treatment is CommittedProject
-                                ? TreatmentSource.CommittedProject
-                                : TreatmentSource.ScheduledTreatment;
+                            context.Detail.TreatmentCause = treatment is CommittedProject
+                                ? TreatmentCause.CommittedProject
+                                : TreatmentCause.ScheduledTreatment;
                         }
                     }
                     else
@@ -325,7 +326,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void ConsiderSelectableTreatments(ICollection<SectionContext> unhandledContexts, int year)
         {
-            var treatmentOptions = GetTreatmentOptionsInOptimalOrder(unhandledContexts, year);
+            var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
 
             UpdateConditionActuals(year);
 
@@ -378,7 +379,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                     option.Context.LogTreatmentProgression(option.CandidateTreatment);
                                 }
 
-                                option.Context.Detail.TreatmentSource = TreatmentSource.SelectedTreatment;
+                                option.Context.Detail.TreatmentCause = TreatmentCause.SelectedTreatment;
                                 _ = unhandledContexts.Remove(option.Context);
                             }
                         }
@@ -440,7 +441,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return results;
         }
 
-        private IReadOnlyCollection<TreatmentOption> GetTreatmentOptionsInOptimalOrder(IEnumerable<SectionContext> contexts, int year)
+        private IReadOnlyCollection<TreatmentOption> GetBeneficialTreatmentOptionsInOptimalOrder(IEnumerable<SectionContext> contexts, int year)
         {
             Func<TreatmentOption, double> objectiveFunction;
             switch (Simulation.AnalysisMethod.OptimizationStrategy)
@@ -510,7 +511,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
 
             InParallel(contexts, addTreatmentOptions);
-            var treatmentOptions = treatmentOptionsBag.OrderByDescending(objectiveFunction).ToArray();
+
+            var treatmentOptions = treatmentOptionsBag
+                .Where(option => objectiveFunction(option) > 0)
+                .OrderByDescending(objectiveFunction)
+                .ToArray();
 
             return treatmentOptions;
         }
@@ -594,8 +599,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 var progression = costPerYear.Select(cost => new TreatmentProgress(treatment, cost)).ToArray();
                                 progression.Last().IsComplete = true;
 
+                                // check whether future budget amounts can be set aside to guarantee funding.
+
+                                // if they can, then assign this delegate:
                                 scheduleCashFlowEvents = () =>
                                 {
+                                    // apply future set-asides in here.
+
                                     foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count(0)))
                                     {
                                         sectionContext.EventSchedule.Add(year + yearOffset, yearProgress);

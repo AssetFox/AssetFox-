@@ -273,7 +273,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
                 else
                 {
-                    context.ApplyPerformanceCurves();
+                    context.ApplyPerformanceCurves(); // move this to "end of year", and apply it to ALL contexts. likewise in outlook logic.
 
                     if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                     {

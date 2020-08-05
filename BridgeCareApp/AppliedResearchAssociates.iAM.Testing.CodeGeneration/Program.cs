@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
 
         private static void Main()
         {
-            var simulationConnectionInfo = SmallBridgeDatasetLocal;
+            var simulationConnectionInfo = SmallBridgeDataset;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();
@@ -125,7 +125,9 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
             runner.Warning += (sender, eventArgs) => Console.WriteLine(eventArgs.Message);
             time(runner.Run, "simulation run");
 
-            var outputPath = Path.GetFullPath($"Network {simulationConnectionInfo.NetworkId} - Simulation {simulationConnectionInfo.SimulationId}.json");
+            var outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var outputFile = $"Network {simulationConnectionInfo.NetworkId} - Simulation {simulationConnectionInfo.SimulationId}.json";
+            var outputPath = Path.Combine(outputFolder, outputFile);
             using var outputStream = File.OpenWrite(outputPath);
             using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });
             JsonSerializer.Serialize(outputWriter, simulation.Results, new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });

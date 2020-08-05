@@ -26,6 +26,8 @@ namespace AppliedResearchAssociates.iAM
 
         public double InflationRatePercentage { get; set; }
 
+        public int LastYearOfAnalysisPeriod => FirstYearOfAnalysisPeriod + NumberOfYearsInAnalysisPeriod - 1;
+
         public int NumberOfYearsInAnalysisPeriod
         {
             get => _NumberOfYearsInAnalysisPeriod;

@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
@@ -33,7 +32,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         // [REVIEW] What should happen when there are multiple applicable cash flow rules?
 
-        // [REVIEW] What should happen when a cash flow extends across or into another scheduled event?
+        // [REVIEW] Is this an intended cash flow behavior? "Try to deduct cash flow amounts ahead
+        // of time. If they can't be deducted, cancel the cash flow." If it is intended, how is the
+        // budget from which the amount is deducted determined? It seems impossible to do ahead of
+        // time, at the moment the cash flow is being considered, because the budget selection
+        // process is dependent on the evolving state of the section. Maybe by doing a little
+        // bookkeeping during cost allocation and then checking against the allocated budgets'
+        // future amounts just before scheduling the cash flow events.
 
         // [REVIEW] What happens when one calculated field has multiple equations whose criteria are met?
 
@@ -78,6 +83,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 .AsParallel()
                 .Select(section => new SectionContext(section, this))
                 .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))
+                .OrderBy(context => (context.Section.Facility.Name, context.Section.Name))
                 .ToArray();
 
             if (SectionContexts.Count == 0)
@@ -90,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 throw new SimulationException("Sections have multiple distinct area units.");
             }
 
-            _ = Parallel.ForEach(SectionContexts, context => context.RollForward());
+            InParallel(SectionContexts, context => context.RollForward());
 
             switch (Simulation.AnalysisMethod.SpendingStrategy)
             {
@@ -137,16 +143,22 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var detail = new SimulationYearDetail(year);
                 Simulation.Results.Add(detail);
 
-                _ = Parallel.ForEach(SectionContexts, context => context.ResetDetail());
+                InParallel(SectionContexts, context => context.ResetDetail());
 
                 MoveBudgetsToNextYear();
                 var unhandledContexts = ApplyRequiredEvents(year);
                 ConsiderSelectableTreatments(unhandledContexts, year);
-                ApplyPassiveTreatment(unhandledContexts, year);
+
+                InParallel(unhandledContexts, context =>
+                {
+                    context.EventSchedule.Add(year, Simulation.DesignatedPassiveTreatment);
+                    context.ApplyPassiveTreatment(year);
+                });
+
                 UpdateConditionActuals(year);
                 RecordStatusOfConditionGoals(detail);
 
-                _ = Parallel.ForEach(SectionContexts, context => context.CopyAttributeValuesToDetail());
+                InParallel(SectionContexts, context => context.CopyAttributeValuesToDetail());
 
                 detail.SectionDetails.AddRange(SectionContexts.Select(context => context.Detail));
             }
@@ -208,22 +220,23 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private static bool GoalsAreMet(IEnumerable<ConditionActual> conditionActuals) => conditionActuals.All(actual => actual.GoalIsMet);
 
-        private void ApplyPassiveTreatment(IEnumerable<SectionContext> contexts, int year)
+        private static void InParallel<T>(IEnumerable<T> items, Action<T> action)
         {
-            _ = Parallel.ForEach(contexts, context =>
+#if DEBUG
+            foreach (var item in items)
             {
-                context.ApplyPassiveTreatment(year);
-                context.EventSchedule.Add(year, Simulation.DesignatedPassiveTreatment);
-            });
+                action(item);
+            }
+#else
+            _ = System.Threading.Tasks.Parallel.ForEach(items, action);
+#endif
         }
 
         private ICollection<SectionContext> ApplyRequiredEvents(int year)
         {
-            var unhandledContexts = new ConcurrentBag<SectionContext>();
-            _ = Parallel.ForEach(SectionContexts, applyRequiredEvents);
-            return unhandledContexts.ToHashSet();
+            var unhandledContexts = new List<SectionContext>();
 
-            void applyRequiredEvents(SectionContext context)
+            foreach (var context in SectionContexts)
             {
                 var yearIsScheduled = context.EventSchedule.TryGetValue(year, out var scheduledEvent);
 
@@ -244,6 +257,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     if (progress.IsComplete)
                     {
                         context.ApplyTreatment(progress.Treatment, year);
+                    }
+                    else
+                    {
+                        context.Detail.NameOfProgressedTreatment = progress.Treatment.Name;
                     }
                 }
                 else
@@ -274,6 +291,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
                 }
             }
+
+            return unhandledContexts;
         }
 
         private void ConsiderSelectableTreatments(ICollection<SectionContext> unhandledContexts, int year)
@@ -317,6 +336,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                             {
                                 if (costCoverage == CostCoverage.Full)
                                 {
+                                    option.Context.EventSchedule.Add(year, option.CandidateTreatment);
                                     option.Context.ApplyTreatment(option.CandidateTreatment, year);
                                     UpdateConditionActuals(year);
 
@@ -325,8 +345,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                         return;
                                     }
                                 }
+                                else
+                                {
+                                    option.Context.Detail.NameOfProgressedTreatment = option.CandidateTreatment.Name;
+                                }
 
-                                option.Context.EventSchedule.Add(year, option.CandidateTreatment);
                                 _ = unhandledContexts.Remove(option.Context);
                             }
                         }
@@ -445,7 +468,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
             }
 
-            _ = Parallel.ForEach(contexts, addTreatmentOptions);
+            InParallel(contexts, addTreatmentOptions);
             var treatmentOptions = treatmentOptionsBag.OrderByDescending(objectiveFunction).ToArray();
 
             return treatmentOptions;
@@ -510,32 +533,36 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 if (cashFlowRule != null)
                 {
                     var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].First(kv => remainingCost <= kv.Key).Value;
-                    var costPerYear = distributionRule.YearlyPercentages.Select(percentage => percentage / 100 * remainingCost).ToArray();
-
-                    if (costPerYear.Sum() != remainingCost)
+                    if (distributionRule.YearlyPercentages.Count > 1)
                     {
-                        throw new InvalidOperationException("Sum of yearly costs from cash flow split does not equal original total cost.");
-                    }
-
-                    remainingCost = costPerYear[0];
-
-                    var progression = costPerYear.Skip(1).Select(cost => new TreatmentProgress(treatment, cost)).ToArray();
-                    if (progression.Length == 0)
-                    {
-                        cashFlowRule = null;
-                    }
-                    else
-                    {
-                        progression[progression.Length - 1].IsComplete = true;
-                    }
-
-                    scheduleCashFlowEvents = () =>
-                    {
-                        foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count(1)))
+                        var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
+                        if (lastYearOfCashFlow <= Simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
                         {
-                            sectionContext.EventSchedule.Add(year + yearOffset, yearProgress);
+                            var scheduleIsClear = !Enumerable.Range(year, distributionRule.YearlyPercentages.Count).Any(sectionContext.EventSchedule.ContainsKey);
+                            if (scheduleIsClear)
+                            {
+                                var costPerYear = distributionRule.YearlyPercentages.Select(percentage => percentage / 100 * remainingCost).ToArray();
+
+                                if (costPerYear.Sum() != remainingCost)
+                                {
+                                    throw new InvalidOperationException("Sum of yearly costs from cash flow split does not equal original total cost.");
+                                }
+
+                                remainingCost = costPerYear[0];
+
+                                var progression = costPerYear.Select(cost => new TreatmentProgress(treatment, cost)).ToArray();
+                                progression.Last().IsComplete = true;
+
+                                scheduleCashFlowEvents = () =>
+                                {
+                                    foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count(0)))
+                                    {
+                                        sectionContext.EventSchedule.Add(year + yearOffset, yearProgress);
+                                    }
+                                };
+                            }
                         }
-                    };
+                    }
                 }
             }
 
@@ -569,17 +596,17 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var availableAmount = getAvailableAmount(budgetContext);
                 if (AllowedSpending == Spending.Unlimited || remainingCost <= availableAmount)
                 {
-                    addCostAllocator(remainingCost, budgetContext);
                     budgetDetail.BudgetReason = BudgetReason.CostCoveredInFull;
                     budgetDetail.CoveredCost = remainingCost;
+                    addCostAllocator(remainingCost, budgetContext);
                     break;
                 }
 
                 if (Simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets)
                 {
-                    addCostAllocator(availableAmount, budgetContext);
                     budgetDetail.BudgetReason = BudgetReason.CostCoveredInPart;
                     budgetDetail.CoveredCost = availableAmount;
+                    addCostAllocator(availableAmount, budgetContext);
                 }
                 else
                 {

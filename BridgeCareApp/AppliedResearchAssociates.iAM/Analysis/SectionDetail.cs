@@ -19,6 +19,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public string NameOfAppliedTreatment { get; set; }
 
+        public string NameOfProgressedTreatment { get; set; }
+
         public string SectionName { get; }
 
         public Dictionary<string, double> ValuePerNumberAttribute { get; } = new Dictionary<string, double>();

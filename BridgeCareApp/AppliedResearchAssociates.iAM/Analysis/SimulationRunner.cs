@@ -273,8 +273,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
                 else
                 {
-                    context.ApplyPerformanceCurves(); // move this to "end of year", and apply it to ALL contexts. likewise in outlook logic.
-
                     if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                     {
                         var costCoverage = TryToPayForTreatment(
@@ -575,42 +573,52 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 remainingCost = (decimal)sectionContext.GetCostOfTreatment(treatment);
 
-                var cashFlowRule = Simulation.InvestmentPlan.CashFlowRules.SingleOrDefault(rule => rule.Criterion.EvaluateOrDefault(sectionContext));
-                if (cashFlowRule != null)
+                if (!(treatment is CommittedProject))
                 {
-                    var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].First(kv => remainingCost <= kv.Key).Value;
-                    if (distributionRule.YearlyPercentages.Count > 1)
+                    var cashFlowRule = Simulation.InvestmentPlan.CashFlowRules.SingleOrDefault(rule => rule.Criterion.EvaluateOrDefault(sectionContext));
+                    if (cashFlowRule != null)
                     {
-                        var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
-                        if (lastYearOfCashFlow <= Simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
+                        var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].First(kv => remainingCost <= kv.Key).Value;
+                        if (distributionRule.YearlyPercentages.Count > 1)
                         {
-                            var scheduleIsClear = !Enumerable.Range(year, distributionRule.YearlyPercentages.Count).Any(sectionContext.EventSchedule.ContainsKey);
-                            if (scheduleIsClear)
+                            var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
+                            if (lastYearOfCashFlow <= Simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
                             {
-                                var costPerYear = distributionRule.YearlyPercentages.Select(percentage => percentage / 100 * remainingCost).ToArray();
-
-                                if (costPerYear.Sum() != remainingCost)
+                                var scheduleIsClear = !Enumerable.Range(year, distributionRule.YearlyPercentages.Count).Any(sectionContext.EventSchedule.ContainsKey);
+                                if (scheduleIsClear)
                                 {
-                                    throw new InvalidOperationException("Sum of yearly costs from cash flow split does not equal original total cost.");
-                                }
+                                    var costPerYear = distributionRule.YearlyPercentages.Select(percentage => percentage / 100 * remainingCost).ToArray();
 
-                                remainingCost = costPerYear[0];
-
-                                var progression = costPerYear.Select(cost => new TreatmentProgress(treatment, cost)).ToArray();
-                                progression.Last().IsComplete = true;
-
-                                // check whether future budget amounts can be set aside to guarantee funding.
-
-                                // if they can, then assign this delegate:
-                                scheduleCashFlowEvents = () =>
-                                {
-                                    // apply future set-asides in here.
-
-                                    foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count(0)))
+                                    if (costPerYear.Sum() != remainingCost)
                                     {
-                                        sectionContext.EventSchedule.Add(year + yearOffset, yearProgress);
+                                        throw new InvalidOperationException("Sum of yearly costs from cash flow split does not equal original total cost.");
                                     }
-                                };
+
+                                    remainingCost = costPerYear[0];
+
+                                    var progression = costPerYear.Select(cost => new TreatmentProgress(treatment, cost)).ToArray();
+                                    progression.Last().IsComplete = true;
+
+                                    // "check whether future budget amounts can be set aside to
+                                    // guarantee funding." can't really do this here. instead,
+                                    // define CashFlowEventScheduler with setter (invoked when
+                                    // checking logic later in this method "passes") for budget info
+                                    // that is then used by scheduling method. in this method, use
+                                    // guard like:
+
+                                    //if (scheduler?.Budgets != null) ...
+
+                                    scheduleCashFlowEvents = () =>
+                                    {
+                                        // move this to scheduler object and add logic that uses
+                                        // budget info to deduct future budget amounts.
+
+                                        foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count(0)))
+                                        {
+                                            sectionContext.EventSchedule.Add(year + yearOffset, yearProgress);
+                                        }
+                                    };
+                                }
                             }
                         }
                     }

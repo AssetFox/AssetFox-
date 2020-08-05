@@ -83,6 +83,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 consequenceAction();
             }
 
+            ApplyPerformanceCurves();
+
             foreach (var scheduling in treatment.GetSchedulings())
             {
                 var schedulingYear = year + scheduling.OffsetToFutureYear;
@@ -196,7 +198,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     foreach (var year in Enumerable.Range(earliestYear + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - earliestYear))
                     {
-                        ApplyPerformanceCurves();
                         ApplyPassiveTreatment(year);
 
                         SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);

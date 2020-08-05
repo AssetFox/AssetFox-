@@ -105,8 +105,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     throw new SimulationException(MessageStrings.TreatmentOutlookIsConsumingAProgressEvent);
                 }
 
-                AccumulationContext.ApplyPerformanceCurves();
-
                 if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                 {
                     ApplyTreatment(treatment, year);

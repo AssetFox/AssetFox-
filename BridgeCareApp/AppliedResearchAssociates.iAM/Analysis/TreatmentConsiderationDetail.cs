@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             TreatmentName = treatmentName;
         }
 
-        public List<BudgetDetail> BudgetDetails { get; } = new List<BudgetDetail>();
+        public List<BudgetDetail> Budgets { get; } = new List<BudgetDetail>();
 
         public string TreatmentName { get; }
     }

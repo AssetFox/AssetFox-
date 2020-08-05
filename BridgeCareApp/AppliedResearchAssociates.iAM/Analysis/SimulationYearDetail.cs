@@ -9,11 +9,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public SimulationYearDetail(int year) => Year = year;
 
-        public List<DeficientConditionGoalDetail> DetailsOfDeficientConditionGoals { get; } = new List<DeficientConditionGoalDetail>();
+        public List<DeficientConditionGoalDetail> DeficientConditionGoals { get; } = new List<DeficientConditionGoalDetail>();
 
-        public List<TargetConditionGoalDetail> DetailsOfTargetConditionGoals { get; } = new List<TargetConditionGoalDetail>();
+        public List<SectionDetail> Sections { get; } = new List<SectionDetail>();
 
-        public List<SectionDetail> SectionDetails { get; } = new List<SectionDetail>();
+        public List<TargetConditionGoalDetail> TargetConditionGoals { get; } = new List<TargetConditionGoalDetail>();
 
         public int Year { get; }
     }

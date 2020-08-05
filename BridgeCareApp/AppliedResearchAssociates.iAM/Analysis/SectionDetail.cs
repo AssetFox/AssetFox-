@@ -11,17 +11,23 @@ namespace AppliedResearchAssociates.iAM.Analysis
             FacilityName = facilityName ?? throw new ArgumentNullException(nameof(facilityName));
         }
 
-        public List<TreatmentOptionDetail> DetailsOfTreatmentOptions { get; } = new List<TreatmentOptionDetail>();
-
-        public List<TreatmentConsiderationDetail> DetailsOfTreatmentConsiderations { get; } = new List<TreatmentConsiderationDetail>();
-
         public string FacilityName { get; }
 
-        public string NameOfAppliedTreatment { get; set; }
-
-        public string NameOfProgressedTreatment { get; set; }
+        public string NameOfUnfundedScheduledTreatment { get; set; }
 
         public string SectionName { get; }
+
+        public List<TreatmentConsiderationDetail> TreatmentConsiderations { get; } = new List<TreatmentConsiderationDetail>();
+
+        public string TreatmentName { get; set; }
+
+        public List<TreatmentOptionDetail> TreatmentOptions { get; } = new List<TreatmentOptionDetail>();
+
+        public List<TreatmentSchedulingCollisionDetail> TreatmentSchedulingCollisions { get; } = new List<TreatmentSchedulingCollisionDetail>();
+
+        public TreatmentSource TreatmentSource { get; set; }
+
+        public TreatmentStatus TreatmentStatus { get; set; }
 
         public Dictionary<string, double> ValuePerNumberAttribute { get; } = new Dictionary<string, double>();
 

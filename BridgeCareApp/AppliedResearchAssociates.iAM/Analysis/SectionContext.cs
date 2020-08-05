@@ -89,10 +89,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 if (EventSchedule.ContainsKey(schedulingYear))
                 {
-                    throw new SimulationException(MessageStrings.YearIsAlreadyScheduled);
+                    Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.Treatment.Name));
                 }
-
-                EventSchedule.Add(schedulingYear, scheduling.Treatment);
+                else
+                {
+                    EventSchedule.Add(schedulingYear, scheduling.Treatment);
+                }
             }
 
             FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
@@ -100,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (Detail != null)
             {
-                Detail.NameOfAppliedTreatment = treatment.Name;
+                LogTreatmentApplication(treatment);
             }
         }
 
@@ -158,6 +160,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
 
             return number;
+        }
+
+        public void LogTreatmentApplication(Treatment treatment)
+        {
+            Detail.TreatmentName = treatment.Name;
+            Detail.TreatmentStatus = TreatmentStatus.Applied;
+        }
+
+        public void LogTreatmentProgression(Treatment treatment)
+        {
+            Detail.TreatmentName = treatment.Name;
+            Detail.TreatmentStatus = TreatmentStatus.Progressed;
         }
 
         public void ResetDetail() => Detail = new SectionDetail(Section.Name, Section.Facility.Name);

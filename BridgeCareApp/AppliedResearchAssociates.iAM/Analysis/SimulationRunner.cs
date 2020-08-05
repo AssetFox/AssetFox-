@@ -31,19 +31,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
         // [REVIEW] What happens when one attribute has multiple consequences whose criteria are met?
 
         // [REVIEW] What should happen when there are multiple applicable cash flow rules?
-
-        // [REVIEW] Is this an intended cash flow behavior? "Try to deduct cash flow amounts ahead
-        // of time. If they can't be deducted, cancel the cash flow." If it is intended, how is the
-        // budget from which the amount is deducted determined? It seems impossible to do ahead of
-        // time, at the moment the cash flow is being considered, because the budget selection
-        // process is dependent on the evolving state of the section. Maybe by doing a little
-        // bookkeeping during cost allocation and then checking against the allocated budgets'
-        // future amounts just before scheduling the cash flow events.
+        // Currently, it throws.
 
         // [REVIEW] What happens when one calculated field has multiple equations whose criteria are met?
 
         // [REVIEW] When a single budget has multiple conditions, do all of them have to be
-        // satisfied? or just one?
+        // satisfied? or just one? Currently, it's "met" when there are either no conditions or at
+        // least one condition is met.
 
         // [REVIEW] When a given budget has no condition rows entered, is there effectively an
         // implicit blank condition, i.e. the condition is always met? or does it mean the budget
@@ -51,6 +45,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         // [REVIEW] What is the relationship between the two "Route/Section Definition" sub-nodes
         // and the set of all networks?
+
+        // [REVIEW] Budget conditions DO NOT have to be met for committed projects, right?
 
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
@@ -80,7 +76,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
             SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(Static.Identity, rule => rule.DistributionRules.ToSortedDictionary(distributionRule => distributionRule.CostCeiling ?? decimal.MaxValue));
 
             SectionContexts = Simulation.Network.Sections
+#if !DEBUG
                 .AsParallel()
+#endif
                 .Select(section => new SectionContext(section, this))
                 .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))
                 .OrderBy(context => (context.Section.Facility.Name, context.Section.Name))
@@ -160,7 +158,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 InParallel(SectionContexts, context => context.CopyAttributeValuesToDetail());
 
-                detail.SectionDetails.AddRange(SectionContexts.Select(context => context.Detail));
+                detail.Sections.AddRange(SectionContexts.Select(context => context.Detail));
             }
 
             Inform("Simulation complete.");
@@ -251,7 +249,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     if (costCoverage == CostCoverage.None)
                     {
-                        throw new SimulationException(MessageStrings.CostOfScheduledEventCannotBeCovered);
+                        // [TODO] Add code so that this "should" never happen. In other words, if it
+                        // was going to happen, then cash flow would not be used. The code will
+                        // basically track what budgets are used for the first year, then try to use
+                        // those budgets (same order) in subsequent years, unconditionally. The
+                        // trick to ensuring funding will be to immediately deduct the future cost
+                        // from the future amounts in the budgets' contexts. If those future amounts
+                        // can't cover the cost, then the cash flow doesn't happen at all.
+                        throw new SimulationException("Cash flow project progress is unfunded.");
                     }
 
                     if (progress.IsComplete)
@@ -260,8 +265,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
                     else
                     {
-                        context.Detail.NameOfProgressedTreatment = progress.Treatment.Name;
+                        context.LogTreatmentProgression(progress.Treatment);
                     }
+
+                    context.Detail.TreatmentSource = TreatmentSource.CashFlowProject;
                 }
                 else
                 {
@@ -277,12 +284,33 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                         if (costCoverage == CostCoverage.None)
                         {
-                            throw new SimulationException(MessageStrings.CostOfScheduledEventCannotBeCovered);
-                        }
+                            if (treatment is CommittedProject)
+                            {
+                                // [TODO] Add code so that this "should" never happen. In other
+                                // words, if it was going to happen, an error would be thrown
+                                // up-front when committed projects were loading. Similar "future
+                                // deduction" logic as described above for cash flow should be used.
+                                throw new SimulationException("Committed project is unfunded.");
+                            }
 
-                        if (costCoverage == CostCoverage.Full)
+                            context.Detail.NameOfUnfundedScheduledTreatment = treatment.Name;
+                            _ = context.EventSchedule.Remove(year);
+                            unhandledContexts.Add(context);
+                        }
+                        else
                         {
-                            context.ApplyTreatment(treatment, year);
+                            if (costCoverage == CostCoverage.Full)
+                            {
+                                context.ApplyTreatment(treatment, year);
+                            }
+                            else
+                            {
+                                context.LogTreatmentProgression(treatment);
+                            }
+
+                            context.Detail.TreatmentSource = treatment is CommittedProject
+                                ? TreatmentSource.CommittedProject
+                                : TreatmentSource.ScheduledTreatment;
                         }
                     }
                     else
@@ -347,9 +375,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 }
                                 else
                                 {
-                                    option.Context.Detail.NameOfProgressedTreatment = option.CandidateTreatment.Name;
+                                    option.Context.LogTreatmentProgression(option.CandidateTreatment);
                                 }
 
+                                option.Context.Detail.TreatmentSource = TreatmentSource.SelectedTreatment;
                                 _ = unhandledContexts.Remove(option.Context);
                             }
                         }
@@ -364,7 +393,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             foreach (var goal in Simulation.AnalysisMethod.DeficientConditionGoals)
             {
-                var goalContexts = SectionContexts.AsParallel().Where(context => goal.Criterion.EvaluateOrDefault(context)).ToArray();
+                var goalContexts = SectionContexts
+#if !DEBUG
+                    .AsParallel()
+#endif
+                    .Where(context => goal.Criterion.EvaluateOrDefault(context))
+                    .ToArray();
+
                 var goalArea = goalContexts.Sum(context => context.GetAreaOfSection());
                 var deficientContexts = goalContexts.Where(context => goal.LevelIsDeficient(context.GetNumber(goal.Attribute.Name)));
                 var deficientArea = deficientContexts.Sum(context => context.GetAreaOfSection());
@@ -387,7 +422,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     continue;
                 }
 
-                var goalContexts = SectionContexts.AsParallel().Where(context => goal.Criterion.EvaluateOrDefault(context)).ToArray();
+                var goalContexts = SectionContexts
+#if !DEBUG
+                    .AsParallel()
+#endif
+                    .Where(context => goal.Criterion.EvaluateOrDefault(context))
+                    .ToArray();
+
                 var goalAreaValues = goalContexts.Select(context => context.GetAreaOfSection()).ToArray();
                 var averageArea = goalAreaValues.Average();
                 var goalAreaWeights = goalAreaValues.Select(area => area / averageArea);
@@ -463,7 +504,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                         var option = outlook.GetOptionRelativeToBaseline(baselineOutlook);
                         treatmentOptionsBag.Add(option);
 
-                        context.Detail.DetailsOfTreatmentOptions.Add(option.Detail);
+                        context.Detail.TreatmentOptions.Add(option.Detail);
                     }
                 }
             }
@@ -488,7 +529,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void RecordStatusOfConditionGoals(SimulationYearDetail detail)
         {
-            detail.DetailsOfTargetConditionGoals.AddRange(TargetConditionActuals.Select(actual => new TargetConditionGoalDetail
+            detail.TargetConditionGoals.AddRange(TargetConditionActuals.Select(actual => new TargetConditionGoalDetail
             {
                 GoalName = actual.Goal.Name,
                 AttributeName = actual.Goal.Attribute.Name,
@@ -497,7 +538,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 ActualValue = actual.Value,
             }));
 
-            detail.DetailsOfDeficientConditionGoals.AddRange(DeficientConditionActuals.Select(actual => new DeficientConditionGoalDetail
+            detail.DeficientConditionGoals.AddRange(DeficientConditionActuals.Select(actual => new DeficientConditionGoalDetail
             {
                 GoalName = actual.Goal.Name,
                 AttributeName = actual.Goal.Attribute.Name,
@@ -511,9 +552,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private CostCoverage TryToPayForTreatment(SectionContext sectionContext, Treatment treatment, int year, Func<BudgetContext, decimal> getAvailableAmount, decimal? indivisibleCost = null)
         {
             var treatmentConsideration = new TreatmentConsiderationDetail(treatment.Name);
-            sectionContext.Detail.DetailsOfTreatmentConsiderations.Add(treatmentConsideration);
+            sectionContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
 
-            treatmentConsideration.BudgetDetails.AddRange(BudgetContexts.Select(budgetContext => new BudgetDetail(budgetContext.Budget.Name)
+            treatmentConsideration.Budgets.AddRange(BudgetContexts.Select(budgetContext => new BudgetDetail(budgetContext.Budget.Name)
             {
                 BudgetReason = treatment.CanUseBudget(budgetContext.Budget) ? BudgetReason.NotNeeded : BudgetReason.NotUsable
             }));
@@ -573,7 +614,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 costAllocators.Add(() => budgetContext.AllocateCost(cost));
             }
 
-            foreach (var (budgetContext, budgetDetail) in Zip.Strict(BudgetContexts, treatmentConsideration.BudgetDetails))
+            foreach (var (budgetContext, budgetDetail) in Zip.Strict(BudgetContexts, treatmentConsideration.Budgets))
             {
                 if (remainingCost <= 0)
                 {
@@ -586,7 +627,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
 
                 var budgetConditions = ConditionsPerBudget[budgetContext.Budget];
-                var budgetConditionIsMet = budgetConditions.Count() == 0 || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(sectionContext));
+                var budgetConditionIsMet = treatment is CommittedProject || budgetConditions.Count() == 0 || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(sectionContext));
                 if (!budgetConditionIsMet)
                 {
                     budgetDetail.BudgetReason = BudgetReason.ConditionNotMet;

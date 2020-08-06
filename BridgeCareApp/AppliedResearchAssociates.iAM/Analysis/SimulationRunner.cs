@@ -278,7 +278,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
                     else
                     {
-                        context.MarkTreatmentProgression(progress.Treatment);
+                        context.MarkTreatmentProgress(progress.Treatment);
                     }
 
                     context.Detail.TreatmentCause = TreatmentCause.CashFlowProject;
@@ -316,7 +316,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                             }
                             else
                             {
-                                context.MarkTreatmentProgression(treatment);
+                                context.MarkTreatmentProgress(treatment);
                             }
 
                             context.Detail.TreatmentCause = treatment is CommittedProject
@@ -386,7 +386,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 }
                                 else
                                 {
-                                    option.Context.MarkTreatmentProgression(option.CandidateTreatment);
+                                    option.Context.MarkTreatmentProgress(option.CandidateTreatment);
                                 }
 
                                 option.Context.Detail.TreatmentCause = TreatmentCause.SelectedTreatment;

@@ -13,6 +13,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
 
             Initialize();
+            InitializeCalculatedFields();
         }
 
         public SectionContext(SectionContext original) : base(original)
@@ -23,6 +24,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             FirstUnshadowedYearForSameTreatment.CopyFrom(original.FirstUnshadowedYearForSameTreatment);
             EventSchedule.CopyFrom(original.EventSchedule);
             NumberCache.CopyFrom(original.NumberCache);
+
+            InitializeCalculatedFields();
         }
 
         public SectionDetail Detail { get; private set; }
@@ -136,7 +139,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return number;
         }
 
-        public void MarkTreatmentProgression(Treatment treatment)
+        public void MarkTreatmentProgress(Treatment treatment)
         {
             Detail.TreatmentName = treatment.Name;
             Detail.TreatmentStatus = TreatmentStatus.Progressed;
@@ -244,15 +247,22 @@ namespace AppliedResearchAssociates.iAM.Analysis
             SetHistoricalValues(initialReferenceYear, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
             SetHistoricalValues(initialReferenceYear, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
+            foreach (var committedProject in SimulationRunner.CommittedProjectsPerSection[Section])
+            {
+                EventSchedule.Add(committedProject.Year, committedProject);
+            }
+        }
+
+        private void InitializeCalculatedFields()
+        {
+            // This initialization is separate from the rest because it needs to be called again in
+            // the copy constructor. Otherwise, the copy's calculated fields will use the original's
+            // scope values. (Note that "this" is captured in the local function's closure object.)
+
             foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
             {
                 double calculate() => calculatedField.Calculate(this);
                 SetNumber(calculatedField.Name, calculate);
-            }
-
-            foreach (var committedProject in SimulationRunner.CommittedProjectsPerSection[Section])
-            {
-                EventSchedule.Add(committedProject.Year, committedProject);
             }
         }
 

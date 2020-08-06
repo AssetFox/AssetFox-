@@ -9,46 +9,49 @@ namespace AppliedResearchAssociates.iAM.Analysis
     public sealed class SimulationRunner
     {
         // [REVIEW] Are cash flow rules only considered when the non-cash-flow payment logic isn't
-        // sufficient to cover the treatment cost? Or are they always used if their criteria are met?
+        // sufficient to cover the treatment cost? Or are they always used if their criteria are
+        // met? In other words, which is it: try to pay for treatment outright, then try to
+        // cash-flow if needed; or always try to cash-flow if eligible? ANSWERED BY JAKE: Always
+        // cash-flow if eligible.
 
         // [REVIEW] A treatment's "any" shadow applies to *all* treatments, including that same
-        // treatment, right?
+        // treatment, right? Currently "any" does apply to all including same.
 
         // [REVIEW] What is the "Actual_Spent" budget? It is not present in the budget order, yet it
-        // appears in the treatment table.
+        // appears in the treatment table. (of the first test db, iAMBridgeCare)
 
         // [REVIEW] What is the "No_Funds" budget?
 
         // [REVIEW] Is a treatment feasible only when *all* of its feasibility criteria are met? or
-        // when *any* are met?
+        // when *any* are met? Currently the latter.
 
-        // [REVIEW] How are inflation rate and discount rate used in the analysis logic?
+        // [REVIEW] How are inflation rate and discount rate used in the analysis logic? Currently unused.
 
-        // [REVIEW] What is the "PerformanceCurve.Shift" bool supposed to do?
+        // [REVIEW] What is the "PerformanceCurve.Shift" bool supposed to do? Currently unused.
 
-        // [REVIEW] How should the change/equation pair on a consequence be handled?
+        // [REVIEW] How should the change/equation pair on a consequence be handled? Currently, the
+        // presence of an equation expression will override the change expression.
 
-        // [REVIEW] What happens when one attribute has multiple consequences whose criteria are met?
+        // [REVIEW] What happens when one attribute has multiple consequences whose criteria are
+        // met? Currently, it throws.
 
         // [REVIEW] What should happen when there are multiple applicable cash flow rules?
         // Currently, it throws.
 
-        // [REVIEW] What happens when one calculated field has multiple equations whose criteria are met?
+        // [REVIEW] What happens when one calculated field has multiple equations whose criteria are
+        // met? Currently, it throws.
 
         // [REVIEW] When a single budget has multiple conditions, do all of them have to be
-        // satisfied? or just one? Currently, it's "met" when there are either no conditions or at
-        // least one condition is met.
-
-        // [REVIEW] When a given budget has no condition rows entered, is there effectively an
-        // implicit blank condition, i.e. the condition is always met? or does it mean the budget
-        // can never be used?
+        // satisfied? or just one? Also, when a given budget has no condition rows entered, is there
+        // effectively an implicit blank condition, i.e. the condition is always met? or does it
+        // mean the budget can never be used? Currently, it's "met" when there are either no
+        // conditions or at least one condition is met.
 
         // [REVIEW] What is the relationship between the two "Route/Section Definition" sub-nodes
         // and the set of all networks?
 
-        // [REVIEW] Budget conditions DO NOT have to be met for committed projects, right?
-
-        // [TODO] Try to pay for treatments w/o cash flow before seeing if they can be cash-flowed.
+        // [REVIEW] Budget conditions DO NOT have to be met for committed projects, right? If so,
+        // current CanUseBudget should always return true. (or be removed?)
 
         // [REVIEW] Ensure the pre-computed data structures are as exhaustive as possible.
 

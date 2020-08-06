@@ -15,12 +15,6 @@ namespace AppliedResearchAssociates.iAM
 
         public virtual ValidatorBag Subvalidators => new ValidatorBag();
 
-        public abstract bool CanUseBudget(Budget budget);
-
-        public abstract IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope);
-
-        public abstract double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts);
-
         public virtual ValidationResultBag GetDirectValidationResults()
         {
             var results = new ValidationResultBag();
@@ -49,5 +43,11 @@ namespace AppliedResearchAssociates.iAM
         }
 
         public abstract IEnumerable<TreatmentScheduling> GetSchedulings();
+
+        internal abstract bool CanUseBudget(Budget budget);
+
+        internal abstract IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope);
+
+        internal abstract double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts);
     }
 }

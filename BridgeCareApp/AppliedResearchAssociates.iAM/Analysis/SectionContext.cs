@@ -214,9 +214,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
 
+                if (operativeCurves.Count == 0)
+                {
+                    throw new SimulationException("No performances curves are operative for a deteriorating attribute.");
+                }
+
                 if (operativeCurves.Count > 1)
                 {
-                    SimulationRunner.Warn("Two or more performance curves are simultaneously operative.");
+                    SimulationRunner.Warn("Two or more performance curves are simultaneously operative for a single deteriorating attribute.");
                 }
 
                 double calculate(PerformanceCurve curve) => curve.Equation.Compute(this);

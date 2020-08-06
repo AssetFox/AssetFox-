@@ -50,6 +50,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         // [TODO] Try to pay for treatments w/o cash flow before seeing if they can be cash-flowed.
 
+        // [REVIEW] Ensure the pre-computed data structures are as exhaustive as possible.
+
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
         public event EventHandler<InformationEventArgs> Information;
@@ -67,8 +69,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             Inform("Simulation initializing ...");
 
-            // [REVIEW] Ensure these pre-computed data structures are as exhaustive as possible.
-
             ActiveTreatments = Simulation.GetActiveTreatments();
             BudgetContexts = Simulation.InvestmentPlan.Budgets.Select(budget => new BudgetContext(budget)).ToArray();
             CommittedProjectsPerSection = Simulation.CommittedProjects.ToLookup(committedProject => committedProject.Section);
@@ -76,6 +76,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
             CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
             NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
             SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(Static.Identity, rule => rule.DistributionRules.ToSortedDictionary(distributionRule => distributionRule.CostCeiling ?? decimal.MaxValue));
+
+            foreach (var treatment in Simulation.Treatments)
+            {
+                treatment.SetConsequencesPerAttribute();
+            }
 
             SectionContexts = Simulation.Network.Sections
 #if !DEBUG
@@ -165,6 +170,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
 
             Inform("Simulation complete.");
+
+            foreach (var treatment in Simulation.Treatments)
+            {
+                treatment.UnsetConsequencesPerAttribute();
+            }
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
         }

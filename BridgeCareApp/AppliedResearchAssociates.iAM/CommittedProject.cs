@@ -43,12 +43,6 @@ namespace AppliedResearchAssociates.iAM
 
         public int Year { get; }
 
-        public override bool CanUseBudget(Budget budget) => budget == Budget;
-
-        public override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope) => Consequences.Select(consequence => consequence.GetRecalculator(scope)).ToArray();
-
-        public override double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts) => Cost;
-
         public override ValidationResultBag GetDirectValidationResults()
         {
             var results = base.GetDirectValidationResults();
@@ -76,6 +70,12 @@ namespace AppliedResearchAssociates.iAM
         }
 
         public override IEnumerable<TreatmentScheduling> GetSchedulings() => Enumerable.Empty<TreatmentScheduling>();
+
+        internal override bool CanUseBudget(Budget budget) => budget == Budget;
+
+        internal override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope) => Consequences.Select(consequence => consequence.GetRecalculator(scope)).ToArray();
+
+        internal override double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts) => Cost;
 
         private SelectableTreatment _TemplateTreatment;
     }

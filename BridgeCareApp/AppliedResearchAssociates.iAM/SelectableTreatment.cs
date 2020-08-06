@@ -33,8 +33,6 @@ namespace AppliedResearchAssociates.iAM
 
         public TreatmentSupersession AddSupersession() => _Supersessions.GetAdd(new TreatmentSupersession(Simulation.Network.Explorer));
 
-        public override bool CanUseBudget(Budget budget) => Budgets.Contains(budget);
-
         public void DesignateAsPassiveForSimulation()
         {
             if (!Simulation.Treatments.Contains(this))
@@ -43,41 +41,6 @@ namespace AppliedResearchAssociates.iAM
             }
 
             Simulation.DesignatedPassiveTreatment = this;
-        }
-
-        public override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope)
-        {
-            Consequences.Channel(
-                consequence => consequence.Criterion.Evaluate(scope),
-                result => result ?? false,
-                result => !result.HasValue,
-                out var applicableConsequences,
-                out var defaultConsequences);
-
-            var operativeConsequences = applicableConsequences.Count > 0 ? applicableConsequences : defaultConsequences;
-
-            operativeConsequences = operativeConsequences
-                .GroupBy(consequence => consequence.Attribute)
-                .Select(GetSingleConsequence)
-                .ToArray();
-
-            var consequenceActions = operativeConsequences
-                .Select(consequence => consequence.GetRecalculator(scope))
-                .ToArray();
-
-            return consequenceActions;
-        }
-
-        public override double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts)
-        {
-            var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
-            if (feasibleCosts.Length == 0)
-            {
-                return 0;
-            }
-
-            double getCost(TreatmentCost cost) => cost.Equation.Compute(scope);
-            return shouldApplyMultipleFeasibleCosts ? feasibleCosts.Sum(getCost) : feasibleCosts.Max(getCost);
         }
 
         public override ValidationResultBag GetDirectValidationResults()
@@ -118,6 +81,48 @@ namespace AppliedResearchAssociates.iAM
 
         internal SelectableTreatment(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
+        internal override bool CanUseBudget(Budget budget) => Budgets.Contains(budget);
+
+        internal override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope)
+        {
+            return ConsequencesPerAttribute.SelectMany(getConsequenceAction).ToArray();
+
+            IEnumerable<Action> getConsequenceAction(IEnumerable<ConditionalTreatmentConsequence> consequences)
+            {
+                consequences.Channel(
+                    consequence => consequence.Criterion.Evaluate(scope),
+                    result => result ?? false,
+                    result => !result.HasValue,
+                    out var applicableConsequences,
+                    out var defaultConsequences);
+
+                var operativeConsequences = applicableConsequences.Count > 0 ? applicableConsequences : defaultConsequences;
+
+                if (operativeConsequences.Count > 1)
+                {
+                    throw new SimulationException(MessageStrings.AttributeIsBeingActedOnByMultipleConsequences);
+                }
+
+                return operativeConsequences.Select(consequence => consequence.GetRecalculator(scope));
+            }
+        }
+
+        internal override double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts)
+        {
+            var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
+            if (feasibleCosts.Length == 0)
+            {
+                return 0;
+            }
+
+            double getCost(TreatmentCost cost) => cost.Equation.Compute(scope);
+            return shouldApplyMultipleFeasibleCosts ? feasibleCosts.Sum(getCost) : feasibleCosts.Max(getCost);
+        }
+
+        internal void SetConsequencesPerAttribute() => ConsequencesPerAttribute = Consequences.ToLookup(c => c.Attribute);
+
+        internal void UnsetConsequencesPerAttribute() => ConsequencesPerAttribute = null;
+
         private readonly List<ConditionalTreatmentConsequence> _Consequences = new List<ConditionalTreatmentConsequence>();
 
         private readonly List<TreatmentCost> _Costs = new List<TreatmentCost>();
@@ -128,15 +133,6 @@ namespace AppliedResearchAssociates.iAM
 
         private readonly Simulation Simulation;
 
-        private static ConditionalTreatmentConsequence GetSingleConsequence(IEnumerable<ConditionalTreatmentConsequence> group)
-        {
-            var consequences = group.ToArray();
-            if (consequences.Length > 1)
-            {
-                throw new SimulationException(MessageStrings.AttributeIsBeingActedOnByMultipleConsequences);
-            }
-
-            return consequences[0];
-        }
+        private ILookup<Attribute, ConditionalTreatmentConsequence> ConsequencesPerAttribute;
     }
 }

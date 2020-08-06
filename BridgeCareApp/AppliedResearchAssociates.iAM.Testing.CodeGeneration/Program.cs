@@ -595,8 +595,6 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
 
             void createCashFlowRules()
             {
-                return;
-
                 var ruleById = new Dictionary<int, CashFlowRule>();
 
                 while (reader.Read())

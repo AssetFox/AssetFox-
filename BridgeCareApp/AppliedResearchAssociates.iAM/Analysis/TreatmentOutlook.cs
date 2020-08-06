@@ -12,9 +12,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
             InitialTreatment = initialTreatment ?? throw new ArgumentNullException(nameof(initialTreatment));
             InitialYear = initialYear;
 
+            if (remainingLifeCalculatorFactories is null)
+            {
+                throw new ArgumentNullException(nameof(remainingLifeCalculatorFactories));
+            }
+
             RemainingLifeCalculators = remainingLifeCalculatorFactories.Select(factory => factory.Create(AccumulationContext)).ToArray();
 
             AccumulationContext = new SectionContext(TemplateContext);
+            MostRecentBenefit = AccumulationContext.GetBenefit();
 
             Run();
         }
@@ -42,12 +48,20 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private double CumulativeBenefit;
         private double CumulativeCostPerUnitArea;
+        private double MostRecentBenefit;
         private double? RemainingLife;
 
         private void AccumulateBenefit()
         {
-            var benefit = AccumulationContext.GetBenefit();
-            CumulativeBenefit += benefit;
+            // The "cumulative benefit" is the "area under the curve" (a key phrase from the
+            // original system). To accumulate, we want to add the trapezoidal area between the
+            // previous data point and the current data point.
+
+            var additionalBenefit = MostRecentBenefit; // Start with the rectangle area of (benefit_0) * 1 year.
+            MostRecentBenefit = AccumulationContext.GetBenefit(); // Update benefit_1.
+            additionalBenefit += (MostRecentBenefit - additionalBenefit) / 2; // Add the right triangle area of ((b_1 - b_0) * 1 year) / 2.
+
+            CumulativeBenefit += additionalBenefit;
         }
 
         private void ApplyTreatment(Treatment treatment, int year)

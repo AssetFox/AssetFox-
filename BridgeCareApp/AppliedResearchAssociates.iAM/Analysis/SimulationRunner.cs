@@ -48,6 +48,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         // [REVIEW] Budget conditions DO NOT have to be met for committed projects, right?
 
+        // [TODO] Try to pay for treatments w/o cash flow before seeing if they can be cash-flowed.
+
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
         public event EventHandler<InformationEventArgs> Information;
@@ -266,7 +268,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
                     else
                     {
-                        context.LogTreatmentProgression(progress.Treatment);
+                        context.MarkTreatmentProgression(progress.Treatment);
                     }
 
                     context.Detail.TreatmentCause = TreatmentCause.CashFlowProject;
@@ -304,7 +306,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                             }
                             else
                             {
-                                context.LogTreatmentProgression(treatment);
+                                context.MarkTreatmentProgression(treatment);
                             }
 
                             context.Detail.TreatmentCause = treatment is CommittedProject
@@ -374,7 +376,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 }
                                 else
                                 {
-                                    option.Context.LogTreatmentProgression(option.CandidateTreatment);
+                                    option.Context.MarkTreatmentProgression(option.CandidateTreatment);
                                 }
 
                                 option.Context.Detail.TreatmentCause = TreatmentCause.SelectedTreatment;

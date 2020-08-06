@@ -46,35 +46,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
         }
 
-        public void ApplyPerformanceCurves()
-        {
-            var dataUpdates = SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, curves =>
-            {
-                curves.Channel(
-                    curve => curve.Criterion.Evaluate(this),
-                    result => result ?? false,
-                    result => !result.HasValue,
-                    out var applicableCurves,
-                    out var defaultCurves);
-
-                var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
-
-                if (operativeCurves.Count > 1)
-                {
-                    SimulationRunner.Warn("Two or more performance curves are simultaneously operative.");
-                }
-
-                double calculate(PerformanceCurve curve) => curve.Equation.Compute(this);
-
-                return curves.Key.IsDecreasingWithDeterioration ? operativeCurves.Min(calculate) : operativeCurves.Max(calculate);
-            });
-
-            foreach (var (key, value) in dataUpdates)
-            {
-                SetNumber(key, value);
-            }
-        }
-
         public void ApplyTreatment(Treatment treatment, int year)
         {
             var consequenceActions = treatment.GetConsequenceActions(this);
@@ -104,7 +75,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (Detail != null)
             {
-                LogTreatmentApplication(treatment);
+                Detail.TreatmentName = treatment.Name;
+                Detail.TreatmentStatus = TreatmentStatus.Applied;
             }
         }
 
@@ -164,13 +136,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return number;
         }
 
-        public void LogTreatmentApplication(Treatment treatment)
-        {
-            Detail.TreatmentName = treatment.Name;
-            Detail.TreatmentStatus = TreatmentStatus.Applied;
-        }
-
-        public void LogTreatmentProgression(Treatment treatment)
+        public void MarkTreatmentProgression(Treatment treatment)
         {
             Detail.TreatmentName = treatment.Name;
             Detail.TreatmentStatus = TreatmentStatus.Progressed;
@@ -234,6 +200,35 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
 
         private int? FirstUnshadowedYearForAnyTreatment;
+
+        private void ApplyPerformanceCurves()
+        {
+            var dataUpdates = SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, curves =>
+            {
+                curves.Channel(
+                    curve => curve.Criterion.Evaluate(this),
+                    result => result ?? false,
+                    result => !result.HasValue,
+                    out var applicableCurves,
+                    out var defaultCurves);
+
+                var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
+
+                if (operativeCurves.Count > 1)
+                {
+                    SimulationRunner.Warn("Two or more performance curves are simultaneously operative.");
+                }
+
+                double calculate(PerformanceCurve curve) => curve.Equation.Compute(this);
+
+                return curves.Key.IsDecreasingWithDeterioration ? operativeCurves.Min(calculate) : operativeCurves.Max(calculate);
+            });
+
+            foreach (var (key, value) in dataUpdates)
+            {
+                SetNumber(key, value);
+            }
+        }
 
         private void Initialize()
         {

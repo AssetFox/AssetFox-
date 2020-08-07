@@ -13,6 +13,10 @@ using System.Collections.Generic;
 
 namespace AppliedResearchAssociates
 {
+    /// <summary>
+    ///     Built-in equality comparison for value tuples works fine until you need to customize the
+    ///     equality comparison of the constituent types. This fills that gap.
+    /// </summary>
     public static class ValueTupleEqualityComparer
     {
 <#

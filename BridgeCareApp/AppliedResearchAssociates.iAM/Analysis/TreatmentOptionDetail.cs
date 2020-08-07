@@ -24,5 +24,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public double? RemainingLife { get; }
 
         public string TreatmentName { get; }
+
+        internal TreatmentOptionDetail(TreatmentOptionDetail original)
+        {
+            TreatmentName = original.TreatmentName;
+            CostPerUnitArea = original.CostPerUnitArea;
+            Benefit = original.Benefit;
+            RemainingLife = original.RemainingLife;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
@@ -22,6 +23,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public string SectionName { get; }
 
+        public TreatmentCause TreatmentCause { get; set; }
+
         public List<TreatmentConsiderationDetail> TreatmentConsiderations { get; } = new List<TreatmentConsiderationDetail>();
 
         public string TreatmentName { get; set; }
@@ -30,12 +33,27 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public List<TreatmentSchedulingCollisionDetail> TreatmentSchedulingCollisions { get; } = new List<TreatmentSchedulingCollisionDetail>();
 
-        public TreatmentCause TreatmentCause { get; set; }
-
         public TreatmentStatus TreatmentStatus { get; set; }
 
-        public Dictionary<string, double> ValuePerNumberAttribute { get; } = new Dictionary<string, double>();
+        public Dictionary<string, double> ValuePerNumericAttribute { get; } = new Dictionary<string, double>();
 
         public Dictionary<string, string> ValuePerTextAttribute { get; } = new Dictionary<string, string>();
+
+        internal SectionDetail(SectionDetail original)
+        {
+            FacilityName = original.FacilityName;
+            SectionName = original.SectionName;
+            TreatmentName = original.TreatmentName;
+            TreatmentCause = original.TreatmentCause;
+            TreatmentStatus = original.TreatmentStatus;
+            NameOfUnfundedScheduledTreatment = original.NameOfUnfundedScheduledTreatment;
+
+            ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute);
+            ValuePerTextAttribute.CopyFrom(original.ValuePerTextAttribute);
+
+            TreatmentOptions.AddRange(original.TreatmentOptions.Select(_ => new TreatmentOptionDetail(_)));
+            TreatmentConsiderations.AddRange(original.TreatmentConsiderations.Select(_ => new TreatmentConsiderationDetail(_)));
+            TreatmentSchedulingCollisions.AddRange(original.TreatmentSchedulingCollisions.Select(_ => new TreatmentSchedulingCollisionDetail(_)));
+        }
     }
 }

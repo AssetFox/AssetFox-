@@ -12,6 +12,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Section = section ?? throw new ArgumentNullException(nameof(section));
             SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
 
+            ResetDetail();
+
             Initialize();
             InitializeCalculatedFields();
         }
@@ -24,6 +26,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             FirstUnshadowedYearForSameTreatment.CopyFrom(original.FirstUnshadowedYearForSameTreatment);
             EventSchedule.CopyFrom(original.EventSchedule);
             NumberCache.CopyFrom(original.NumberCache);
+
+            ResetDetail();
 
             InitializeCalculatedFields();
         }
@@ -76,18 +80,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
             FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
             FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
 
-            if (Detail != null)
-            {
-                Detail.TreatmentName = treatment.Name;
-                Detail.TreatmentStatus = TreatmentStatus.Applied;
-            }
+            Detail.TreatmentName = treatment.Name;
+            Detail.TreatmentStatus = TreatmentStatus.Applied;
         }
 
         public void CopyAttributeValuesToDetail()
         {
-            foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.NumberAttributes)
+            foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.NumericAttributes)
             {
-                Detail.ValuePerNumberAttribute.Add(attribute.Name, GetNumber(attribute.Name));
+                Detail.ValuePerNumericAttribute.Add(attribute.Name, GetNumber(attribute.Name));
             }
 
             foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.TextAttributes)
@@ -95,6 +96,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 Detail.ValuePerTextAttribute.Add(attribute.Name, GetText(attribute.Name));
             }
         }
+
+        public void CopyDetailFrom(SectionContext other) => Detail = new SectionDetail(other.Detail);
 
         public double GetAreaOfSection() => GetNumber(Section.AreaIdentifier);
 

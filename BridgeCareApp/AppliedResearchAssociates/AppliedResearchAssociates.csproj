@@ -15,11 +15,11 @@
   <ItemGroup>
     <None Update="Static.Channel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Static.Channel.cs</LastGenOutput>
+      <LastGenOutput>Static.Channel.tt.cs</LastGenOutput>
     </None>
     <None Update="Inaction.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Inaction.cs</LastGenOutput>
+      <LastGenOutput>Inaction.tt.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
@@ -28,12 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Static.Channel.cs">
+    <Compile Update="Static.Channel.tt.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Static.Channel.tt</DependentUpon>
     </Compile>
-    <Compile Update="Inaction.cs">
+    <Compile Update="Inaction.tt.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Inaction.tt</DependentUpon>

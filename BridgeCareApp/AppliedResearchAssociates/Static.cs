@@ -36,8 +36,6 @@ namespace AppliedResearchAssociates
             return value;
         }
 
-        public static T Identity<T>(T value) => value;
-
         public static bool IsDefined<T>(this T enumValue) where T : Enum => Enum.IsDefined(typeof(T), enumValue);
 
         public static void Swap<T>(this IList<T> list, int index1, int index2)
@@ -51,6 +49,8 @@ namespace AppliedResearchAssociates
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source, IEqualityComparer<T> equalityComparer = null) => new HashSet<T>(source, equalityComparer);
 
         public static SortedDictionary<TKey, TValue> ToSortedDictionary<TKey, TValue>(this IEnumerable<TValue> source, Func<TValue, TKey> keySelector, IComparer<TKey> comparer = null) => new SortedDictionary<TKey, TValue>(source.ToDictionary(keySelector), comparer);
+
+        public static SortedSet<T> ToSortedSet<T>(this IEnumerable<T> source, IComparer<T> comparer = null) => new SortedSet<T>(source, comparer);
 
         private const string NET_STANDARD_2_1_AVAILABILITY = "Already present in netstandard2.1. Remove after upgrading.";
     }

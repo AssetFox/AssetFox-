@@ -19,5 +19,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public BudgetReason BudgetReason { get; set; }
 
         public decimal CoveredCost { get; set; }
+
+        internal BudgetDetail(BudgetDetail original)
+        {
+            BudgetName = original.BudgetName;
+            BudgetReason = original.BudgetReason;
+            CoveredCost = original.CoveredCost;
+        }
     }
 }

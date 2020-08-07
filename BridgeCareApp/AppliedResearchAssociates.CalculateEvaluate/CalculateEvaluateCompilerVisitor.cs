@@ -324,7 +324,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
         private static readonly ParameterExpression ScopeParameter = Expression.Parameter(typeof(CalculateEvaluateScope), "scope");
 
-        private static readonly ScopeInfo Text = GetScopeInfo(nameof(CalculateEvaluateScope.GetText), Static.Identity);
+        private static readonly ScopeInfo Text = GetScopeInfo(nameof(CalculateEvaluateScope.GetText), _ => _);
 
         private static readonly ScopeInfo Timestamp = GetScopeInfo(nameof(CalculateEvaluateScope.GetTimestamp), Convert.ToDateTime);
 

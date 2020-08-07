@@ -78,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
             CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
             NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
-            SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(Static.Identity, rule => rule.DistributionRules.ToSortedDictionary(distributionRule => distributionRule.CostCeiling ?? decimal.MaxValue));
+            SortedDistributionRulesPerCashFlowRule = Simulation.InvestmentPlan.CashFlowRules.ToDictionary(_ => _, rule => rule.DistributionRules.ToSortedDictionary(distributionRule => distributionRule.CostCeiling ?? decimal.MaxValue));
 
             foreach (var treatment in Simulation.Treatments)
             {
@@ -91,8 +91,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 #endif
                 .Select(section => new SectionContext(section, this))
                 .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))
-                .OrderBy(context => (context.Section.Facility.Name, context.Section.Name))
-                .ToArray();
+                .ToSortedSet(SelectionComparer<SectionContext>.Create(context => (context.Section.Facility.Name, context.Section.Name)));
 
             if (SectionContexts.Count == 0)
             {
@@ -110,32 +109,32 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
             case SpendingStrategy.NoSpending:
                 AllowedSpending = Spending.None;
-                ConditionGoalsAreMet = () => false;
+                _ConditionGoalsAreMet = () => false;
                 break;
 
             case SpendingStrategy.UnlimitedSpending:
                 AllowedSpending = Spending.Unlimited;
-                ConditionGoalsAreMet = () => false;
+                _ConditionGoalsAreMet = () => false;
                 break;
 
             case SpendingStrategy.UntilTargetAndDeficientConditionGoalsMet:
                 AllowedSpending = Spending.Unlimited;
-                ConditionGoalsAreMet = () => GoalsAreMet(TargetConditionActuals) && GoalsAreMet(DeficientConditionActuals);
+                _ConditionGoalsAreMet = () => GoalsAreMet(TargetConditionActuals) && GoalsAreMet(DeficientConditionActuals);
                 break;
 
             case SpendingStrategy.UntilTargetConditionGoalsMet:
                 AllowedSpending = Spending.Unlimited;
-                ConditionGoalsAreMet = () => GoalsAreMet(TargetConditionActuals);
+                _ConditionGoalsAreMet = () => GoalsAreMet(TargetConditionActuals);
                 break;
 
             case SpendingStrategy.UntilDeficientConditionGoalsMet:
                 AllowedSpending = Spending.Unlimited;
-                ConditionGoalsAreMet = () => GoalsAreMet(DeficientConditionActuals);
+                _ConditionGoalsAreMet = () => GoalsAreMet(DeficientConditionActuals);
                 break;
 
             case SpendingStrategy.AsBudgetPermits:
                 AllowedSpending = Spending.Budgeted;
-                ConditionGoalsAreMet = () => false;
+                _ConditionGoalsAreMet = () => false;
                 break;
 
             default:
@@ -151,25 +150,33 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var detail = new SimulationYearDetail(year);
                 Simulation.Results.Add(detail);
 
-                InParallel(SectionContexts, context => context.ResetDetail());
-
                 MoveBudgetsToNextYear();
-                var unhandledContexts = ApplyRequiredEvents(year);
-                ConsiderSelectableTreatments(unhandledContexts, year);
 
-                InParallel(unhandledContexts, context =>
+                var baselineContexts = ApplyRequiredEvents(year);
+                var baselineContextPerWorkingContext = baselineContexts.ToDictionary(context => new SectionContext(context), _ => _);
+
+                InParallel(baselineContextPerWorkingContext, kv =>
                 {
-                    context.EventSchedule.Add(year, Simulation.DesignatedPassiveTreatment);
-                    context.ApplyPassiveTreatment(year);
-                    context.Detail.TreatmentCause = TreatmentCause.NoSelection;
+                    var (working, baseline) = kv;
+                    working.CopyDetailFrom(baseline);
                 });
 
-                UpdateConditionActuals(year);
+                InParallel(baselineContexts, context =>
+                {
+                    context.Detail.TreatmentCause = TreatmentCause.NoSelection;
+                    context.EventSchedule.Add(year, Simulation.DesignatedPassiveTreatment);
+                    context.ApplyPassiveTreatment(year);
+                });
+
+                ConsiderSelectableTreatments(baselineContextPerWorkingContext, year);
+
                 RecordStatusOfConditionGoals(detail);
 
                 InParallel(SectionContexts, context => context.CopyAttributeValuesToDetail());
 
                 detail.Sections.AddRange(SectionContexts.Select(context => context.Detail));
+
+                InParallel(SectionContexts, context => context.ResetDetail());
             }
 
             Inform("Simulation complete.");
@@ -198,19 +205,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private static readonly IComparer<BudgetPriority> BudgetPriorityComparer = SelectionComparer<BudgetPriority>.Create(priority => priority.PriorityLevel);
 
+        private Func<bool> _ConditionGoalsAreMet;
+
         private IReadOnlyCollection<SelectableTreatment> ActiveTreatments;
 
         private Spending AllowedSpending;
 
         private IReadOnlyCollection<BudgetContext> BudgetContexts;
 
-        private Func<bool> ConditionGoalsAreMet;
-
         private ILookup<Budget, BudgetCondition> ConditionsPerBudget;
 
         private IReadOnlyCollection<ConditionActual> DeficientConditionActuals;
 
-        private IReadOnlyCollection<SectionContext> SectionContexts;
+        private ICollection<SectionContext> SectionContexts;
 
         private IReadOnlyDictionary<CashFlowRule, SortedDictionary<decimal, CashFlowDistributionRule>> SortedDistributionRulesPerCashFlowRule;
 
@@ -337,13 +344,17 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return unhandledContexts;
         }
 
-        private void ConsiderSelectableTreatments(ICollection<SectionContext> unhandledContexts, int year)
+        private bool ConditionGoalsAreMet(int year)
         {
-            var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
-
             UpdateConditionActuals(year);
+            return _ConditionGoalsAreMet();
+        }
 
-            if (AllowedSpending != Spending.None && !ConditionGoalsAreMet())
+        private void ConsiderSelectableTreatments(IDictionary<SectionContext, SectionContext> baselineContextPerWorkingContext, int year)
+        {
+            var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(baselineContextPerWorkingContext.Keys, year);
+
+            if (AllowedSpending != Spending.None && !ConditionGoalsAreMet(year))
             {
                 var applicablePriorities = new List<BudgetPriority>();
                 foreach (var levelPriorities in Simulation.AnalysisMethod.BudgetPriorities.GroupBy(priority => priority.PriorityLevel))
@@ -366,7 +377,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     foreach (var option in treatmentOptions)
                     {
-                        if (unhandledContexts.Contains(option.Context) && priority.Criterion.EvaluateOrDefault(option.Context))
+                        if (baselineContextPerWorkingContext.ContainsKey(option.Context) && priority.Criterion.EvaluateOrDefault(option.Context))
                         {
                             var costCoverage = TryToPayForTreatment(
                                 option.Context,
@@ -376,13 +387,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                             if (costCoverage != CostCoverage.None)
                             {
+                                _ = SectionContexts.Remove(baselineContextPerWorkingContext[option.Context]);
+                                SectionContexts.Add(option.Context);
+                                _ = baselineContextPerWorkingContext.Remove(option.Context);
+
+                                option.Context.Detail.TreatmentCause = TreatmentCause.SelectedTreatment;
+                                option.Context.EventSchedule.Add(year, option.CandidateTreatment);
+
                                 if (costCoverage == CostCoverage.Full)
                                 {
-                                    option.Context.EventSchedule.Add(year, option.CandidateTreatment);
                                     option.Context.ApplyTreatment(option.CandidateTreatment, year);
-                                    UpdateConditionActuals(year);
 
-                                    if (ConditionGoalsAreMet())
+                                    if (ConditionGoalsAreMet(year))
                                     {
                                         return;
                                     }
@@ -391,67 +407,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 {
                                     option.Context.MarkTreatmentProgress(option.CandidateTreatment);
                                 }
-
-                                option.Context.Detail.TreatmentCause = TreatmentCause.SelectedTreatment;
-                                _ = unhandledContexts.Remove(option.Context);
                             }
                         }
                     }
                 }
             }
-        }
-
-        private IReadOnlyCollection<ConditionActual> GetDeficientConditionActuals()
-        {
-            var results = new List<ConditionActual>();
-
-            foreach (var goal in Simulation.AnalysisMethod.DeficientConditionGoals)
-            {
-                var goalContexts = SectionContexts
-#if !DEBUG
-                    .AsParallel()
-#endif
-                    .Where(context => goal.Criterion.EvaluateOrDefault(context))
-                    .ToArray();
-
-                var goalArea = goalContexts.Sum(context => context.GetAreaOfSection());
-                var deficientContexts = goalContexts.Where(context => goal.LevelIsDeficient(context.GetNumber(goal.Attribute.Name)));
-                var deficientArea = deficientContexts.Sum(context => context.GetAreaOfSection());
-                var deficientPercentageActual = deficientArea / goalArea * 100;
-
-                results.Add(new ConditionActual(goal, deficientPercentageActual));
-            }
-
-            return results;
-        }
-
-        private IReadOnlyCollection<ConditionActual> GetTargetConditionActuals(int year)
-        {
-            var results = new List<ConditionActual>();
-
-            foreach (var goal in Simulation.AnalysisMethod.TargetConditionGoals)
-            {
-                if (goal.Year.HasValue && goal.Year.Value != year)
-                {
-                    continue;
-                }
-
-                var goalContexts = SectionContexts
-#if !DEBUG
-                    .AsParallel()
-#endif
-                    .Where(context => goal.Criterion.EvaluateOrDefault(context))
-                    .ToArray();
-
-                var goalAreaValues = goalContexts.Select(context => context.GetAreaOfSection()).ToArray();
-                var averageArea = goalAreaValues.Average();
-                var goalAreaWeights = goalAreaValues.Select(area => area / averageArea);
-                var averageActual = goalContexts.Zip(goalAreaWeights, (context, weight) => context.GetNumber(goal.Attribute.Name) * weight).Average();
-
-                results.Add(new ConditionActual(goal, averageActual));
-            }
-
-            return results;
         }
 
         private IReadOnlyCollection<TreatmentOption> GetBeneficialTreatmentOptionsInOptimalOrder(IEnumerable<SectionContext> contexts, int year)
@@ -531,6 +491,59 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 .ToArray();
 
             return treatmentOptions;
+        }
+
+        private IReadOnlyCollection<ConditionActual> GetDeficientConditionActuals()
+        {
+            var results = new List<ConditionActual>();
+
+            foreach (var goal in Simulation.AnalysisMethod.DeficientConditionGoals)
+            {
+                var goalContexts = SectionContexts
+#if !DEBUG
+                    .AsParallel()
+#endif
+                    .Where(context => goal.Criterion.EvaluateOrDefault(context))
+                    .ToArray();
+
+                var goalArea = goalContexts.Sum(context => context.GetAreaOfSection());
+                var deficientContexts = goalContexts.Where(context => goal.LevelIsDeficient(context.GetNumber(goal.Attribute.Name)));
+                var deficientArea = deficientContexts.Sum(context => context.GetAreaOfSection());
+                var deficientPercentageActual = deficientArea / goalArea * 100;
+
+                results.Add(new ConditionActual(goal, deficientPercentageActual));
+            }
+
+            return results;
+        }
+
+        private IReadOnlyCollection<ConditionActual> GetTargetConditionActuals(int year)
+        {
+            var results = new List<ConditionActual>();
+
+            foreach (var goal in Simulation.AnalysisMethod.TargetConditionGoals)
+            {
+                if (goal.Year.HasValue && goal.Year.Value != year)
+                {
+                    continue;
+                }
+
+                var goalContexts = SectionContexts
+#if !DEBUG
+                    .AsParallel()
+#endif
+                    .Where(context => goal.Criterion.EvaluateOrDefault(context))
+                    .ToArray();
+
+                var goalAreaValues = goalContexts.Select(context => context.GetAreaOfSection()).ToArray();
+                var averageArea = goalAreaValues.Average();
+                var goalAreaWeights = goalAreaValues.Select(area => area / averageArea);
+                var averageActual = goalContexts.Zip(goalAreaWeights, (context, weight) => context.GetNumber(goal.Attribute.Name) * weight).Average();
+
+                results.Add(new ConditionActual(goal, averageActual));
+            }
+
+            return results;
         }
 
         private void MoveBudgetsToNextYear()
@@ -623,6 +636,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                                     //if (scheduler?.Budgets != null) ...
 
+                                    //scheduler = new CashFlowEventScheduler(sectionContext, year, progression);
                                     scheduleCashFlowEvents = () =>
                                     {
                                         // move this to scheduler object and add logic that uses

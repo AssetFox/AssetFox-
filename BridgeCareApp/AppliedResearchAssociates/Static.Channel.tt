@@ -2,7 +2,7 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
-<#@ output extension=".cs" #>
+<#@ output extension=".tt.cs" #>
 // WARNING: This file was automatically generated from a T4 text template at the
 // following moment in time: <#= DateTimeOffset.Now #>. Any changes you make to
 // this file will be lost when this file is regenerated from the template
@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates
 {
     partial class Static
     {
-        public static IList<TElement>[] Channel<TElement>(this IEnumerable<TElement> elements, params Predicate<TElement>[] predicates) => elements.Channel(Identity, predicates);
+        public static IList<TElement>[] Channel<TElement>(this IEnumerable<TElement> elements, params Predicate<TElement>[] predicates) => elements.Channel(_ => _, predicates);
 
         public static IList<TElement>[] Channel<TElement, TSelection>(this IEnumerable<TElement> elements, Func<TElement, TSelection> selector, params Predicate<TSelection>[] predicates)
         {
@@ -48,7 +48,7 @@ foreach (var arity in Enumerable.Range(2, 7))
     var outArgs = string.Join(", ", labelNumbers.Select(n => $"out channel{n}"));
 #>
 
-        public static void Channel<TElement>(this IEnumerable<TElement> elements, <#= elementPredicateParams #>, <#= outParams #>) => elements.Channel(Identity, <#= predicateArgs #>, <#= outArgs #>);
+        public static void Channel<TElement>(this IEnumerable<TElement> elements, <#= elementPredicateParams #>, <#= outParams #>) => elements.Channel(_ => _, <#= predicateArgs #>, <#= outArgs #>);
 
         public static void Channel<TElement, TSelection>(this IEnumerable<TElement> elements, Func<TElement, TSelection> selector, <#= selectionPredicateParams #>, <#= outParams #>)
         {

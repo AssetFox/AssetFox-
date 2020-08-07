@@ -13,5 +13,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public string NameOfUnscheduledTreatment { get; set; }
 
         public int Year { get; set; }
+
+        internal TreatmentSchedulingCollisionDetail(TreatmentSchedulingCollisionDetail original)
+        {
+            Year = original.Year;
+            NameOfUnscheduledTreatment = original.NameOfUnscheduledTreatment;
+        }
     }
 }

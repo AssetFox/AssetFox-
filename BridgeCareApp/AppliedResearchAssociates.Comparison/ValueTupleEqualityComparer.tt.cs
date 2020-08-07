@@ -1,5 +1,5 @@
 ﻿// WARNING: This file was automatically generated from a T4 text template at the
-// following moment in time: 08/05/2020 14:24:46 -05:00. Any changes you make to
+// following moment in time: 08/07/2020 10:33:39 -05:00. Any changes you make to
 // this file will be lost when this file is regenerated from the template
 // source.
 
@@ -8,6 +8,10 @@ using System.Collections.Generic;
 
 namespace AppliedResearchAssociates
 {
+    /// <summary>
+    ///     Built-in equality comparison for value tuples works fine until you need to customize the
+    ///     equality comparison of the constituent types. This fills that gap.
+    /// </summary>
     public static class ValueTupleEqualityComparer
     {
         public static IEqualityComparer<(T1, T2)> Create<T1, T2>(IEqualityComparer<T1> comparer1 = null, IEqualityComparer<T2> comparer2 = null) => new _ValueTupleEqualityComparer<T1, T2>(comparer1, comparer2);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
@@ -18,5 +19,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public List<BudgetDetail> Budgets { get; } = new List<BudgetDetail>();
 
         public string TreatmentName { get; }
+
+        internal TreatmentConsiderationDetail(TreatmentConsiderationDetail original)
+        {
+            TreatmentName = original.TreatmentName;
+            Budgets.AddRange(original.Budgets.Select(_ => new BudgetDetail(_)));
+        }
     }
 }

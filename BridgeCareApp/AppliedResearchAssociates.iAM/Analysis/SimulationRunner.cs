@@ -14,6 +14,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
         // cash-flow if needed; or always try to cash-flow if eligible? ANSWERED BY JAKE: Always
         // cash-flow if eligible.
 
+        // [REVIEW] Can committed projects be cash-flowed? Seems like they "shouldn't", from my
+        // limited dev perspective.
+
+        // [REVIEW] Are priority level settings respected when "required events" (like scheduled
+        // treatments, committed projects, and cash flow project activities) are being handled?
+
         // [REVIEW] A treatment's "any" shadow applies to *all* treatments, including that same
         // treatment, right? Currently "any" does apply to all including same.
 
@@ -37,6 +43,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         // [REVIEW] What should happen when there are multiple applicable cash flow rules?
         // Currently, it throws.
+
+        // [REVIEW] Supposing multiple applicable cash flow rules are allowed (say, by using their
+        // order to determine precedence), if one rule is found to not work for whatever reason,
+        // should another rule be attempted, and so on, until we run out of applicable rules?
 
         // [REVIEW] What happens when one calculated field has multiple equations whose criteria are
         // met? Currently, it throws.
@@ -74,6 +84,23 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             ActiveTreatments = Simulation.GetActiveTreatments();
             BudgetContexts = Simulation.InvestmentPlan.Budgets.Select(budget => new BudgetContext(budget)).ToArray();
+
+            BudgetPrioritiesPerYear = Simulation.InvestmentPlan.YearsOfAnalysis.ToDictionary(_ => _, year =>
+            {
+                var applicablePriorities = new List<BudgetPriority>();
+                foreach (var levelPriorities in Simulation.AnalysisMethod.BudgetPriorities.GroupBy(priority => priority.PriorityLevel))
+                {
+                    var priority = Option
+                        .Of(levelPriorities.SingleOrDefault(p => p.Year == year))
+                        .Coalesce(() => levelPriorities.SingleOrDefault(p => p.Year == null));
+
+                    priority.Handle(applicablePriorities.Add, Inaction.Delegate);
+                }
+
+                applicablePriorities.Sort(BudgetPriorityComparer);
+                return applicablePriorities.AsEnumerable();
+            });
+
             CommittedProjectsPerSection = Simulation.CommittedProjects.ToLookup(committedProject => committedProject.Section);
             ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
             CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
@@ -212,6 +239,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private Spending AllowedSpending;
 
         private IReadOnlyCollection<BudgetContext> BudgetContexts;
+
+        private IReadOnlyDictionary<int, IEnumerable<BudgetPriority>> BudgetPrioritiesPerYear;
 
         private ILookup<Budget, BudgetCondition> ConditionsPerBudget;
 
@@ -356,19 +385,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (AllowedSpending != Spending.None && !ConditionGoalsAreMet(year))
             {
-                var applicablePriorities = new List<BudgetPriority>();
-                foreach (var levelPriorities in Simulation.AnalysisMethod.BudgetPriorities.GroupBy(priority => priority.PriorityLevel))
-                {
-                    var priority = Option
-                        .Of(levelPriorities.SingleOrDefault(p => p.Year == year))
-                        .Coalesce(() => levelPriorities.SingleOrDefault(p => p.Year == null));
-
-                    priority.Handle(applicablePriorities.Add, Inaction.Delegate);
-                }
-
-                applicablePriorities.Sort(BudgetPriorityComparer);
-
-                foreach (var priority in applicablePriorities)
+                foreach (var priority in BudgetPrioritiesPerYear[year])
                 {
                     foreach (var context in BudgetContexts)
                     {
@@ -590,67 +607,124 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 BudgetReason = treatment.CanUseBudget(budgetContext.Budget) ? BudgetReason.NotNeeded : BudgetReason.NotUsable
             }));
 
+            var applicableBudgets = Zip.Strict(BudgetContexts, treatmentConsideration.Budgets).Where(tuple2 =>
+            {
+                var (budgetContext, budgetDetail) = tuple2;
+
+                if (budgetDetail.BudgetReason == BudgetReason.NotUsable)
+                {
+                    return false;
+                }
+
+                var budgetConditions = ConditionsPerBudget[budgetContext.Budget];
+                var budgetConditionIsMet = treatment is CommittedProject || budgetConditions.Count() == 0 || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(sectionContext));
+                if (!budgetConditionIsMet)
+                {
+                    budgetDetail.BudgetReason = BudgetReason.ConditionNotMet;
+                    return false;
+                }
+
+                return true;
+            });
+
             decimal remainingCost;
             Action scheduleCashFlowEvents = null;
 
             if (indivisibleCost.HasValue)
             {
                 remainingCost = indivisibleCost.Value;
+                treatmentConsideration.ReasonAgainstCashFlow = ReasonAgainstCashFlow.TreatmentIsPartOfActiveCashFlowProject;
             }
             else
             {
                 remainingCost = (decimal)sectionContext.GetCostOfTreatment(treatment);
+                treatmentConsideration.ReasonAgainstCashFlow = decideCashFlow();
 
-                if (!(treatment is CommittedProject))
+                ReasonAgainstCashFlow decideCashFlow()
                 {
-                    var cashFlowRule = Simulation.InvestmentPlan.CashFlowRules.SingleOrDefault(rule => rule.Criterion.EvaluateOrDefault(sectionContext));
-                    if (cashFlowRule != null)
+                    if (treatment is CommittedProject)
                     {
-                        var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].First(kv => remainingCost <= kv.Key).Value;
-                        if (distributionRule.YearlyPercentages.Count > 1)
+                        return ReasonAgainstCashFlow.TreatmentIsDueToCommittedProject;
+                    }
+
+                    var cashFlowRule = Simulation.InvestmentPlan.CashFlowRules.SingleOrDefault(rule => rule.Criterion.EvaluateOrDefault(sectionContext));
+                    if (cashFlowRule == null)
+                    {
+                        return ReasonAgainstCashFlow.NoConditionMetForAnyCashFlowRule;
+                    }
+
+                    treatmentConsideration.CashFlowRuleName = cashFlowRule.Name;
+
+                    var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].First(kv => remainingCost <= kv.Key).Value;
+                    if (distributionRule.YearlyPercentages.Count == 1)
+                    {
+                        return ReasonAgainstCashFlow.ApplicableDistributionRuleIsNotMultiyear;
+                    }
+
+                    var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
+                    if (lastYearOfCashFlow > Simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
+                    {
+                        return ReasonAgainstCashFlow.LastYearOfCashFlowIsOutsideOfAnalysisPeriod;
+                    }
+
+                    var scheduleIsClear = !Enumerable.Range(year, distributionRule.YearlyPercentages.Count).Any(sectionContext.EventSchedule.ContainsKey);
+                    if (!scheduleIsClear)
+                    {
+                        return ReasonAgainstCashFlow.TreatmentEventScheduleIsNotClear;
+                    }
+
+                    var costPerYear = distributionRule.YearlyPercentages.Select(percentage => percentage / 100 * remainingCost).ToArray();
+
+                    if (costPerYear.Sum() != remainingCost)
+                    {
+                        throw new InvalidOperationException("Sum of yearly costs from cash flow split does not equal original total cost.");
+                    }
+
+                    var futureFundingIsGuaranteed = true;
+                    foreach (var (yearlyCost, yearOffset) in Zip.Short(costPerYear, Static.Count(0)).Skip(1))
+                    {
+                        foreach (var (budgetContext, _) in applicableBudgets)
                         {
-                            var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
-                            if (lastYearOfCashFlow <= Simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
-                            {
-                                var scheduleIsClear = !Enumerable.Range(year, distributionRule.YearlyPercentages.Count).Any(sectionContext.EventSchedule.ContainsKey);
-                                if (scheduleIsClear)
-                                {
-                                    var costPerYear = distributionRule.YearlyPercentages.Select(percentage => percentage / 100 * remainingCost).ToArray();
+                            // todo
 
-                                    if (costPerYear.Sum() != remainingCost)
-                                    {
-                                        throw new InvalidOperationException("Sum of yearly costs from cash flow split does not equal original total cost.");
-                                    }
+                            // QUESTION: do we need to be able to set aside extra in leading years
+                            // to cover down years, e.g. 30/30/40 where year 1 has lots of money and
+                            // year 2 has no money.
 
-                                    remainingCost = costPerYear[0];
+                            // also, we need to actually pay for the future years (execute cost
+                            // allocation delegates) within the scheduler delegate, and then
+                            // progress events need to happen for free.
 
-                                    var progression = costPerYear.Select(cost => new TreatmentProgress(treatment, cost)).ToArray();
-                                    progression.Last().IsComplete = true;
+                            // likewise for committed projects.
 
-                                    // "check whether future budget amounts can be set aside to
-                                    // guarantee funding." can't really do this here. instead,
-                                    // define CashFlowEventScheduler with setter (invoked when
-                                    // checking logic later in this method "passes") for budget info
-                                    // that is then used by scheduling method. in this method, use
-                                    // guard like:
-
-                                    //if (scheduler?.Budgets != null) ...
-
-                                    //scheduler = new CashFlowEventScheduler(sectionContext, year, progression);
-                                    scheduleCashFlowEvents = () =>
-                                    {
-                                        // move this to scheduler object and add logic that uses
-                                        // budget info to deduct future budget amounts.
-
-                                        foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count(0)))
-                                        {
-                                            sectionContext.EventSchedule.Add(year + yearOffset, yearProgress);
-                                        }
-                                    };
-                                }
-                            }
+                            // should probably look at total future cost and split it first by year
+                            // (with respect to the total amount across the budgets in each year).
+                            // start at last year and go backward. if a year cannot be covered, put
+                            // the balance into the previous year. or is this "too clever"?
                         }
                     }
+
+                    if (!futureFundingIsGuaranteed)
+                    {
+                        return ReasonAgainstCashFlow.FutureFundingIsNotGuaranteed;
+                    }
+
+                    remainingCost = costPerYear[0];
+
+                    var progression = costPerYear.Select(cost => new TreatmentProgress(treatment, cost)).ToArray();
+                    progression.Last().IsComplete = true;
+
+                    scheduleCashFlowEvents = () =>
+                    {
+                        // add logic that uses budget info to deduct future budget amounts.
+
+                        foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count(0)))
+                        {
+                            sectionContext.EventSchedule.Add(year + yearOffset, yearProgress);
+                        }
+                    };
+
+                    return ReasonAgainstCashFlow.None;
                 }
             }
 
@@ -661,24 +735,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 costAllocators.Add(() => budgetContext.AllocateCost(cost));
             }
 
-            foreach (var (budgetContext, budgetDetail) in Zip.Strict(BudgetContexts, treatmentConsideration.Budgets))
+            foreach (var (budgetContext, budgetDetail) in applicableBudgets)
             {
                 if (remainingCost <= 0)
                 {
                     break;
-                }
-
-                if (budgetDetail.BudgetReason == BudgetReason.NotUsable)
-                {
-                    continue;
-                }
-
-                var budgetConditions = ConditionsPerBudget[budgetContext.Budget];
-                var budgetConditionIsMet = treatment is CommittedProject || budgetConditions.Count() == 0 || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(sectionContext));
-                if (!budgetConditionIsMet)
-                {
-                    budgetDetail.BudgetReason = BudgetReason.ConditionNotMet;
-                    continue;
                 }
 
                 var availableAmount = getAvailableAmount(budgetContext);

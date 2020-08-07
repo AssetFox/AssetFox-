@@ -18,12 +18,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public List<BudgetDetail> Budgets { get; } = new List<BudgetDetail>();
 
+        public string CashFlowRuleName { get; set; }
+
+        public ReasonAgainstCashFlow ReasonAgainstCashFlow { get; set; }
+
         public string TreatmentName { get; }
 
         internal TreatmentConsiderationDetail(TreatmentConsiderationDetail original)
         {
             TreatmentName = original.TreatmentName;
             Budgets.AddRange(original.Budgets.Select(_ => new BudgetDetail(_)));
+
+            CashFlowRuleName = original.CashFlowRuleName;
+            ReasonAgainstCashFlow = original.ReasonAgainstCashFlow;
         }
     }
 }

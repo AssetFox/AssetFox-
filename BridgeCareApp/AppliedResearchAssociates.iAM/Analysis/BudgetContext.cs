@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
@@ -29,9 +30,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void MoveToNextYear()
         {
-            CurrentAmount += Budget.YearlyAmounts[++CurrentYearIndex].Value;
+            ++CurrentYearIndex;
+
+            if (!OverriddenYearlyAmounts.TryGetValue(CurrentYearIndex, out var yearlyAmount))
+            {
+                yearlyAmount = Budget.YearlyAmounts[CurrentYearIndex].Value;
+            }
+
+            CurrentAmount += yearlyAmount;
             CurrentPrioritizedAmount = null;
         }
+
+        private readonly Dictionary<int, decimal> OverriddenYearlyAmounts = new Dictionary<int, decimal>();
 
         private int CurrentYearIndex = -1;
     }

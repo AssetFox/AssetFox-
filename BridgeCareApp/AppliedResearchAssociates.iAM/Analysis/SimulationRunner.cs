@@ -701,6 +701,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
                             // (with respect to the total amount across the budgets in each year).
                             // start at last year and go backward. if a year cannot be covered, put
                             // the balance into the previous year. or is this "too clever"?
+
+                            // MAJOR SIMPLIFICATION potentially: instead of incorporating each
+                            // yearly amount each year, do it all up-front, e.g. budget object would
+                            // have an array of cumulative amounts, not a single periodically
+                            // incremented amount. spending out of year N means deducting from years
+                            // N+ as well.
                         }
                     }
 

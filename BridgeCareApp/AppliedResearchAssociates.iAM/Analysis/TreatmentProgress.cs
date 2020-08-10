@@ -4,16 +4,16 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     internal sealed class TreatmentProgress
     {
-        public TreatmentProgress(Treatment treatment, decimal cost)
+        public TreatmentProgress(Treatment treatment, TreatmentConsiderationDetail treatmentConsideration)
         {
             Treatment = treatment ?? throw new ArgumentNullException(nameof(treatment));
-            Cost = cost;
+            TreatmentConsideration = treatmentConsideration ?? throw new ArgumentNullException(nameof(treatmentConsideration));
         }
-
-        public decimal Cost { get; }
 
         public bool IsComplete { get; set; }
 
         public Treatment Treatment { get; }
+
+        public TreatmentConsiderationDetail TreatmentConsideration { get; }
     }
 }

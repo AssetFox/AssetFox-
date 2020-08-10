@@ -9,7 +9,7 @@
         ApplicableDistributionRuleIsNotMultiyear,
         LastYearOfCashFlowIsOutsideOfAnalysisPeriod,
         TreatmentEventScheduleIsNotClear,
-        FutureFundingIsNotGuaranteed,
+        FutureFundingIsNotAvailable,
         None,
     }
 }

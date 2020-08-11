@@ -60,7 +60,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
         internal BudgetContext(BudgetContext original)
         {
             Budget = original.Budget;
-            CumulativeAmountPerYear = (decimal[])CumulativeAmountPerYear.Clone();
+            FirstYearOfAnalysisPeriod = original.FirstYearOfAnalysisPeriod;
+
+            CumulativeAmountPerYear = original.CumulativeAmountPerYear.ToArray();
 
             CurrentYearIndex = original.CurrentYearIndex;
             CurrentPrioritizedAmount = original.CurrentPrioritizedAmount;

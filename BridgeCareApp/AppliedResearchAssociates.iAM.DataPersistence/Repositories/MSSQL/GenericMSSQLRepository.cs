@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace AppliedResearchAssociates.iAM.DataPersistence.Repositories
+namespace AppliedResearchAssociates.iAM.DataPersistence.Repositories.MSSQL
 {
     public abstract class GenericMSSQLRepository<T>
         : IRepository<T> where T : class

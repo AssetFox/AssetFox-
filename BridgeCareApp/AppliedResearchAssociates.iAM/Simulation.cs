@@ -81,6 +81,17 @@ namespace AppliedResearchAssociates.iAM
             {
                 results.Add(ValidationStatus.Error, "Multiple projects are committed to the same section in the same year.", this, nameof(CommittedProjects));
             }
+            else if (InvestmentPlan.GetAllValidationResults().All(result => result.Status != ValidationStatus.Error))
+            {
+                try
+                {
+                    _ = GetBudgetContextsWithCostAllocationsForCommittedProjects();
+                }
+                catch (SimulationException)
+                {
+                    results.Add(ValidationStatus.Error, "At least one committed project cannot be funded.", this, nameof(CommittedProjects));
+                }
+            }
 
             return results;
         }
@@ -88,6 +99,44 @@ namespace AppliedResearchAssociates.iAM
         public void Remove(SelectableTreatment treatment) => _Treatments.Remove(treatment);
 
         public void Remove(PerformanceCurve performanceCurve) => _PerformanceCurves.Remove(performanceCurve);
+
+        internal BudgetContext[] GetBudgetContextsWithCostAllocationsForCommittedProjects()
+        {
+            var budgetContexts = InvestmentPlan.Budgets
+                .Select(budget => new BudgetContext(budget, InvestmentPlan.FirstYearOfAnalysisPeriod))
+                .ToArray();
+
+            var committedProjectsPerBudget = CommittedProjects.ToLookup(committedProject => committedProject.Budget);
+
+            foreach (var budgetContext in budgetContexts)
+            {
+                var committedProjectPerYear = committedProjectsPerBudget[budgetContext.Budget].ToSortedDictionary(committedProject => committedProject.Year);
+
+                if (committedProjectPerYear.Any())
+                {
+                    foreach (var year in Static.BoundRange(committedProjectPerYear.Last().Value.Year, InvestmentPlan.FirstYearOfAnalysisPeriod, -1))
+                    {
+                        budgetContext.SetYear(year);
+
+                        if (committedProjectPerYear.TryGetValue(year, out var committedProject))
+                        {
+                            var cost = (decimal)committedProject.Cost;
+
+                            if (cost > budgetContext.CurrentAmount)
+                            {
+                                throw new SimulationException("Committed project cannot be funded.");
+                            }
+
+                            budgetContext.AllocateCost(cost);
+                        }
+
+                        budgetContext.LimitPreviousAmountToCurrentAmount();
+                    }
+                }
+            }
+
+            return budgetContexts;
+        }
 
         private readonly List<PerformanceCurve> _PerformanceCurves = new List<PerformanceCurve>();
 

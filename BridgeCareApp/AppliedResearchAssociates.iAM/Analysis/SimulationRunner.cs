@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -83,9 +84,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Inform("Simulation initializing ...");
 
             ActiveTreatments = Simulation.GetActiveTreatments();
-            BudgetContexts = Simulation.InvestmentPlan.Budgets
-                .Select(budget => new BudgetContext(budget, Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod))
-                .ToArray();
+            BudgetContexts = Simulation.GetBudgetContextsWithCostAllocationsForCommittedProjects();
 
             BudgetPrioritiesPerYear = Simulation.InvestmentPlan.YearsOfAnalysis.ToDictionary(_ => _, year =>
             {
@@ -179,8 +178,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var detail = new SimulationYearDetail(year);
                 Simulation.Results.Add(detail);
 
-                MoveBudgetsToNextYear();
-
                 var baselineContexts = ApplyRequiredEvents(year);
                 var baselineContextPerWorkingContext = baselineContexts.ToDictionary(context => new SectionContext(context), _ => _);
 
@@ -206,6 +203,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 detail.Sections.AddRange(SectionContexts.Select(context => context.Detail));
 
                 InParallel(SectionContexts, context => context.ResetDetail());
+
+                MoveBudgetsToNextYear();
             }
 
             Inform("Simulation complete.");
@@ -321,14 +320,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                         if (costCoverage == CostCoverage.None)
                         {
-                            if (treatment is CommittedProject)
-                            {
-                                // [TODO] Add code so that this "should" never happen. In other
-                                // words, if it was going to happen, an error would be thrown
-                                // up-front when committed projects were loading. Similar "future
-                                // deduction" logic as described above for cash flow should be used.
-                                throw new SimulationException("Committed project is unfunded.");
-                            }
+                            Warn($"Treatment \"{treatment.Name}\" scheduled for year {year} cannot be funded.");
 
                             context.Detail.NameOfUnfundedScheduledTreatment = treatment.Name;
                             _ = context.EventSchedule.Remove(year);
@@ -587,10 +579,17 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private CostCoverage TryToPayForTreatment(SectionContext sectionContext, Treatment treatment, int year, Func<BudgetContext, decimal> getAvailableAmount)
         {
             var treatmentConsideration = sectionContext.Detail.TreatmentConsiderations.GetAdd(new TreatmentConsiderationDetail(treatment.Name));
+
             treatmentConsideration.Budgets.AddRange(BudgetContexts.Select(budgetContext => new BudgetDetail(budgetContext.Budget.Name)
             {
                 BudgetReason = treatment.CanUseBudget(budgetContext.Budget) ? BudgetReason.NotNeeded : BudgetReason.NotUsable
             }));
+
+            if (treatment is CommittedProject)
+            {
+                treatmentConsideration.Budgets.Single(budget => budget.BudgetReason == BudgetReason.NotNeeded).BudgetReason = BudgetReason.CostCoveredInFull;
+                return CostCoverage.Full;
+            }
 
             var applicableBudgets = Zip.Strict(BudgetContexts, treatmentConsideration.Budgets).Where(budgetIsApplicable).ToArray();
 

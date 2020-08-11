@@ -10,6 +10,21 @@ namespace AppliedResearchAssociates
 
         public static IEnumerable<T?> AsNullables<T>(this IEnumerable<T> values) where T : struct => values.Select(AsNullable);
 
+        public static IEnumerable<int> BoundRange(int start, int end, int stride = 1)
+        {
+            switch (Math.Sign(stride))
+            {
+            case 1:
+                return TowardPositiveInfinity(start, end, stride);
+
+            case -1:
+                return TowardNegativeInfinity(start, end, stride);
+
+            default:
+                throw new ArgumentException("Stride must be non-zero.", nameof(stride));
+            };
+        }
+
         public static void CopyFrom<TKey, TValue>(this IDictionary<TKey, TValue> target, IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
             foreach (var (key, value) in source)
@@ -53,5 +68,23 @@ namespace AppliedResearchAssociates
         public static SortedSet<T> ToSortedSet<T>(this IEnumerable<T> source, IComparer<T> comparer = null) => new SortedSet<T>(source, comparer);
 
         private const string NET_STANDARD_2_1_AVAILABILITY = "Already present in netstandard2.1. Remove after upgrading.";
+
+        private static IEnumerable<int> TowardNegativeInfinity(int start, int end, int stride)
+        {
+            while (start >= end)
+            {
+                yield return start;
+                start += stride;
+            }
+        }
+
+        private static IEnumerable<int> TowardPositiveInfinity(int start, int end, int stride)
+        {
+            while (start <= end)
+            {
+                yield return start;
+                start += stride;
+            }
+        }
     }
 }

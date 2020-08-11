@@ -41,21 +41,16 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void LimitPreviousAmountToCurrentAmount()
         {
-            var previousYearIndex = CurrentYearIndex - 1;
-            CumulativeAmountPerYear[previousYearIndex] = Math.Min(CumulativeAmountPerYear[previousYearIndex], CumulativeAmountPerYear[CurrentYearIndex]);
+            if (CurrentYearIndex > 0)
+            {
+                var previousYearIndex = CurrentYearIndex - 1;
+                CumulativeAmountPerYear[previousYearIndex] = Math.Min(CumulativeAmountPerYear[previousYearIndex], CumulativeAmountPerYear[CurrentYearIndex]);
+            }
         }
 
-        public void MoveToNextYear()
-        {
-            ++CurrentYearIndex;
-            CurrentPrioritizedAmount = null;
-        }
+        public void MoveToNextYear() => SetYearIndex(CurrentYearIndex + 1);
 
-        public void SetYear(int year)
-        {
-            CurrentYearIndex = year - FirstYearOfAnalysisPeriod;
-            CurrentPrioritizedAmount = null;
-        }
+        public void SetYear(int year) => SetYearIndex(year - FirstYearOfAnalysisPeriod);
 
         internal BudgetContext(BudgetContext original)
         {
@@ -72,6 +67,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private readonly int FirstYearOfAnalysisPeriod;
 
-        private int CurrentYearIndex = -1;
+        private int CurrentYearIndex = 0;
+
+        private void SetYearIndex(int yearIndex)
+        {
+            CurrentYearIndex = yearIndex;
+            CurrentPrioritizedAmount = null;
+        }
     }
 }

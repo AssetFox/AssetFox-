@@ -385,7 +385,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 option.Context,
                                 option.CandidateTreatment,
                                 year,
-                                context => context.CurrentPrioritizedAmount.Value);
+                                context => context.CurrentPrioritizedAmount ?? context.CurrentAmount);
 
                             if (costCoverage != CostCoverage.None)
                             {
@@ -690,8 +690,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     {
                         remainingYearCost -= cost;
                         workingBudgetContext.AllocateCost(cost);
-
-                        // TODO: update previous years in working context re Min(currentAmountThisYear, currentAmountPreviousYear)
+                        workingBudgetContext.LimitPreviousAmountToCurrentAmount();
 
                         var originalBudgetContext = originalBudgetContextPerWorkingBudgetContext[workingBudgetContext];
                         futureCostAllocators.Add(() => originalBudgetContext.AllocateCost(cost));

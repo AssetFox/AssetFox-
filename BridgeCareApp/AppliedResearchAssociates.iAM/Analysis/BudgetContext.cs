@@ -39,6 +39,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
             CurrentPrioritizedAmount -= cost;
         }
 
+        public void LimitPreviousAmountToCurrentAmount()
+        {
+            var previousYearIndex = CurrentYearIndex - 1;
+            CumulativeAmountPerYear[previousYearIndex] = Math.Min(CumulativeAmountPerYear[previousYearIndex], CumulativeAmountPerYear[CurrentYearIndex]);
+        }
+
         public void MoveToNextYear()
         {
             ++CurrentYearIndex;

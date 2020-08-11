@@ -396,10 +396,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 _ = baselineContextPerWorkingContext.Remove(option.Context);
 
                                 option.Context.Detail.TreatmentCause = TreatmentCause.SelectedTreatment;
-                                option.Context.EventSchedule.Add(year, option.CandidateTreatment);
 
                                 if (costCoverage == CostCoverage.Full)
                                 {
+                                    option.Context.EventSchedule.Add(year, option.CandidateTreatment);
                                     option.Context.ApplyTreatment(option.CandidateTreatment, year);
 
                                     if (ConditionGoalsAreMet(year))

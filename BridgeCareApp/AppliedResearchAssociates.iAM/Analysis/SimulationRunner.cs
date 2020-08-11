@@ -309,6 +309,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
                 else
                 {
+                    context.ApplyPerformanceCurves();
+
                     if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                     {
                         var costCoverage = TryToPayForTreatment(

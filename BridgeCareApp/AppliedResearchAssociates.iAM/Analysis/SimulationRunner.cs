@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -38,6 +37,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         // [REVIEW] How should the change/equation pair on a consequence be handled? Currently, the
         // presence of an equation expression will override the change expression.
+
+        // [REVIEW] Are schedulings supposed to be used in outlook logic?
 
         // [REVIEW] What happens when one attribute has multiple consequences whose criteria are
         // met? Currently, it throws.

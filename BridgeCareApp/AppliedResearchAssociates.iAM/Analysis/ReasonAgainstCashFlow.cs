@@ -6,9 +6,9 @@
         TreatmentIsPartOfActiveCashFlowProject,
         TreatmentIsDueToCommittedProject,
         NoConditionMetForAnyCashFlowRule,
-        ApplicableDistributionRuleIsNotMultiyear,
+        ApplicableDistributionRuleIsForOnlyOneYear,
         LastYearOfCashFlowIsOutsideOfAnalysisPeriod,
-        TreatmentEventScheduleIsNotClear,
+        FutureEventScheduleIsBlocked,
         FutureFundingIsNotAvailable,
         None,
     }

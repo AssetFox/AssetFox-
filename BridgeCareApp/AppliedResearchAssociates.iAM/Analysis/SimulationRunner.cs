@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         // [REVIEW] How should the change/equation pair on a consequence be handled? Currently, the
         // presence of an equation expression will override the change expression.
 
-        // [REVIEW] Are schedulings supposed to be used in outlook logic?
+        // [REVIEW] Are schedulings supposed to be used in outlook logic? Currently, they are.
 
         // [REVIEW] What happens when one attribute has multiple consequences whose criteria are
         // met? Currently, it throws.
@@ -61,11 +61,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         // [REVIEW] What is the relationship between the two "Route/Section Definition" sub-nodes
         // and the set of all networks?
-
-        // [REVIEW] Budget conditions DO NOT have to be met for committed projects, right? If so,
-        // current CanUseBudget should always return true. (or be removed?)
-
-        // [REVIEW] Ensure the pre-computed data structures are as exhaustive as possible.
 
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
@@ -134,40 +129,60 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             InParallel(SectionContexts, context => context.RollForward());
 
+            SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;
+
             switch (Simulation.AnalysisMethod.SpendingStrategy)
             {
             case SpendingStrategy.NoSpending:
-                AllowedSpending = Spending.None;
                 _ConditionGoalsAreMet = () => false;
                 break;
 
             case SpendingStrategy.UnlimitedSpending:
-                AllowedSpending = Spending.Unlimited;
                 _ConditionGoalsAreMet = () => false;
                 break;
 
             case SpendingStrategy.UntilTargetAndDeficientConditionGoalsMet:
-                AllowedSpending = Spending.Unlimited;
                 _ConditionGoalsAreMet = () => GoalsAreMet(TargetConditionActuals) && GoalsAreMet(DeficientConditionActuals);
                 break;
 
             case SpendingStrategy.UntilTargetConditionGoalsMet:
-                AllowedSpending = Spending.Unlimited;
                 _ConditionGoalsAreMet = () => GoalsAreMet(TargetConditionActuals);
                 break;
 
             case SpendingStrategy.UntilDeficientConditionGoalsMet:
-                AllowedSpending = Spending.Unlimited;
                 _ConditionGoalsAreMet = () => GoalsAreMet(DeficientConditionActuals);
                 break;
 
             case SpendingStrategy.AsBudgetPermits:
-                AllowedSpending = Spending.Budgeted;
                 _ConditionGoalsAreMet = () => false;
                 break;
 
             default:
                 throw new SimulationException(MessageStrings.InvalidSpendingStrategy);
+            }
+
+            switch (Simulation.AnalysisMethod.OptimizationStrategy)
+            {
+            case OptimizationStrategy.Benefit:
+                ObjectiveFunction = option => option.Benefit;
+                break;
+
+            case OptimizationStrategy.BenefitToCostRatio:
+                ObjectiveFunction = option => option.Benefit / option.CostPerUnitArea;
+                break;
+
+            case OptimizationStrategy.RemainingLife:
+                ValidateRemainingLifeOptimization();
+                ObjectiveFunction = option => option.RemainingLife.Value;
+                break;
+
+            case OptimizationStrategy.RemainingLifeToCostRatio:
+                ValidateRemainingLifeOptimization();
+                ObjectiveFunction = option => option.RemainingLife.Value / option.CostPerUnitArea;
+                break;
+
+            default:
+                throw new SimulationException(MessageStrings.InvalidOptimizationStrategy);
             }
 
             Simulation.Results.Clear();
@@ -176,15 +191,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 Inform($"Simulating {year} ...");
 
-                var detail = new SimulationYearDetail(year);
-                Simulation.Results.Add(detail);
+                var yearDetail = Simulation.Results.GetAdd(new SimulationYearDetail(year));
 
                 var baselineContexts = ApplyRequiredEvents(year);
-                var baselineContextPerWorkingContext = baselineContexts.ToDictionary(context => new SectionContext(context), _ => _);
+                var baselineContextPerWorkingContext = baselineContexts.ToDictionary(_ => new SectionContext(_), _ => _);
 
-                InParallel(baselineContextPerWorkingContext, kv =>
+                InParallel(baselineContextPerWorkingContext, _ =>
                 {
-                    var (working, baseline) = kv;
+                    var (working, baseline) = _;
                     working.CopyDetailFrom(baseline);
                 });
 
@@ -197,11 +211,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 ConsiderSelectableTreatments(baselineContextPerWorkingContext, year);
 
-                RecordStatusOfConditionGoals(detail);
+                RecordStatusOfConditionGoals(yearDetail);
 
                 InParallel(SectionContexts, context => context.CopyAttributeValuesToDetail());
 
-                detail.Sections.AddRange(SectionContexts.Select(context => context.Detail));
+                yearDetail.Sections.AddRange(SectionContexts.Select(context => context.Detail));
 
                 InParallel(SectionContexts, context => context.ResetDetail());
 
@@ -238,8 +252,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private IReadOnlyCollection<SelectableTreatment> ActiveTreatments;
 
-        private Spending AllowedSpending;
-
         private IReadOnlyCollection<BudgetContext> BudgetContexts;
 
         private IReadOnlyDictionary<int, IEnumerable<BudgetPriority>> BudgetPrioritiesPerYear;
@@ -248,9 +260,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private IReadOnlyCollection<ConditionActual> DeficientConditionActuals;
 
+        private Func<TreatmentOption, double> ObjectiveFunction;
+
         private ICollection<SectionContext> SectionContexts;
 
         private IReadOnlyDictionary<CashFlowRule, SortedDictionary<decimal, CashFlowDistributionRule>> SortedDistributionRulesPerCashFlowRule;
+
+        private SpendingLimit SpendingLimit;
 
         private int StatusCode;
 
@@ -261,13 +277,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             None,
             Full,
             CashFlow,
-        }
-
-        private enum Spending
-        {
-            None,
-            Budgeted,
-            Unlimited,
         }
 
         private static bool GoalsAreMet(IEnumerable<ConditionActual> conditionActuals) => conditionActuals.All(actual => actual.GoalIsMet);
@@ -363,7 +372,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(baselineContextPerWorkingContext.Keys, year);
 
-            if (AllowedSpending != Spending.None && !ConditionGoalsAreMet(year))
+            if (SpendingLimit != SpendingLimit.Zero && !ConditionGoalsAreMet(year))
             {
                 foreach (var priority in BudgetPrioritiesPerYear[year])
                 {
@@ -413,31 +422,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private IReadOnlyCollection<TreatmentOption> GetBeneficialTreatmentOptionsInOptimalOrder(IEnumerable<SectionContext> contexts, int year)
         {
-            Func<TreatmentOption, double> objectiveFunction;
-            switch (Simulation.AnalysisMethod.OptimizationStrategy)
-            {
-            case OptimizationStrategy.Benefit:
-                objectiveFunction = option => option.Benefit;
-                break;
-
-            case OptimizationStrategy.BenefitToCostRatio:
-                objectiveFunction = option => option.Benefit / option.CostPerUnitArea;
-                break;
-
-            case OptimizationStrategy.RemainingLife:
-                ValidateRemainingLifeOptimization();
-                objectiveFunction = option => option.RemainingLife.Value;
-                break;
-
-            case OptimizationStrategy.RemainingLifeToCostRatio:
-                ValidateRemainingLifeOptimization();
-                objectiveFunction = option => option.RemainingLife.Value / option.CostPerUnitArea;
-                break;
-
-            default:
-                throw new SimulationException(MessageStrings.InvalidOptimizationStrategy);
-            }
-
             var treatmentOptionsBag = new ConcurrentBag<TreatmentOption>();
             void addTreatmentOptions(SectionContext context)
             {
@@ -483,8 +467,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             InParallel(contexts, addTreatmentOptions);
 
             var treatmentOptions = treatmentOptionsBag
-                .Where(option => objectiveFunction(option) > 0)
-                .OrderByDescending(objectiveFunction)
+                .Where(option => ObjectiveFunction(option) > 0)
+                .OrderByDescending(ObjectiveFunction)
                 .ToArray();
 
             return treatmentOptions;
@@ -617,6 +601,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Action scheduleCashFlowEvents = null;
 
             var remainingCost = (decimal)sectionContext.GetCostOfTreatment(treatment);
+
+            treatmentConsideration.NominalCost = remainingCost;
             treatmentConsideration.ReasonAgainstCashFlow = decideCashFlow();
 
             ReasonAgainstCashFlow decideCashFlow()
@@ -632,12 +618,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     return ReasonAgainstCashFlow.NoConditionMetForAnyCashFlowRule;
                 }
 
-                treatmentConsideration.CashFlowRuleName = cashFlowRule.Name;
+                treatmentConsideration.NameOfApplicableCashFlowRule = cashFlowRule.Name;
 
                 var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].First(kv => remainingCost <= kv.Key).Value;
+
+                treatmentConsideration.ApplicableDistributionRule = distributionRule.Expression;
+
                 if (distributionRule.YearlyPercentages.Count == 1)
                 {
-                    return ReasonAgainstCashFlow.ApplicableDistributionRuleIsNotMultiyear;
+                    return ReasonAgainstCashFlow.ApplicableDistributionRuleIsForOnlyOneYear;
                 }
 
                 var lastYearOfCashFlow = year + distributionRule.YearlyPercentages.Count - 1;
@@ -646,10 +635,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     return ReasonAgainstCashFlow.LastYearOfCashFlowIsOutsideOfAnalysisPeriod;
                 }
 
-                var scheduleIsClear = !Enumerable.Range(year, distributionRule.YearlyPercentages.Count).Any(sectionContext.EventSchedule.ContainsKey);
-                if (!scheduleIsClear)
+                var scheduleIsBlocked = Static.BoundRange(year + 1, lastYearOfCashFlow).Any(sectionContext.EventSchedule.ContainsKey);
+                if (scheduleIsBlocked)
                 {
-                    return ReasonAgainstCashFlow.TreatmentEventScheduleIsNotClear;
+                    return ReasonAgainstCashFlow.FutureEventScheduleIsBlocked;
                 }
 
                 var costPerYear = distributionRule.YearlyPercentages.Select(percentage => percentage / 100 * remainingCost).ToArray();
@@ -767,7 +756,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
 
                     var availableAmount = getAvailableAmount(budgetContext);
-                    if (AllowedSpending == Spending.Unlimited || cost <= availableAmount)
+                    if (SpendingLimit == SpendingLimit.NoLimit || cost <= availableAmount)
                     {
                         budgetDetail.BudgetReason = BudgetReason.CostCoveredInFull;
                         budgetDetail.CoveredCost = cost;

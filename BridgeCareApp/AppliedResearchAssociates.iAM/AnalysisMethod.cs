@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM
@@ -102,6 +103,36 @@ namespace AppliedResearchAssociates.iAM
         public void Remove(BudgetPriority budgetPriority) => _BudgetPriorities.Remove(budgetPriority);
 
         public void Remove(RemainingLifeLimit remainingLifeLimit) => _RemainingLifeLimits.Remove(remainingLifeLimit);
+
+        internal SpendingLimit SpendingLimit
+        {
+            get
+            {
+                switch (SpendingStrategy)
+                {
+                case SpendingStrategy.NoSpending:
+                    return SpendingLimit.Zero;
+
+                case SpendingStrategy.UnlimitedSpending:
+                    return SpendingLimit.NoLimit;
+
+                case SpendingStrategy.UntilTargetAndDeficientConditionGoalsMet:
+                    return SpendingLimit.NoLimit;
+
+                case SpendingStrategy.UntilTargetConditionGoalsMet:
+                    return SpendingLimit.NoLimit;
+
+                case SpendingStrategy.UntilDeficientConditionGoalsMet:
+                    return SpendingLimit.NoLimit;
+
+                case SpendingStrategy.AsBudgetPermits:
+                    return SpendingLimit.Budget;
+
+                default:
+                    throw new SimulationException(MessageStrings.InvalidSpendingStrategy);
+                }
+            }
+        }
 
         private readonly List<BudgetPriority> _BudgetPriorities = new List<BudgetPriority>();
 

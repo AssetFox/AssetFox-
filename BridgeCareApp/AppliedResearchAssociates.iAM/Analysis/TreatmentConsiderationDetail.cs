@@ -16,9 +16,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
             TreatmentName = treatmentName;
         }
 
+        public string ApplicableDistributionRule { get; set; }
+
         public List<BudgetDetail> Budgets { get; } = new List<BudgetDetail>();
 
-        public string CashFlowRuleName { get; set; }
+        public string NameOfApplicableCashFlowRule { get; set; }
+
+        public decimal NominalCost { get; set; }
 
         public ReasonAgainstCashFlow ReasonAgainstCashFlow { get; set; }
 
@@ -29,7 +33,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
             TreatmentName = original.TreatmentName;
             Budgets.AddRange(original.Budgets.Select(_ => new BudgetDetail(_)));
 
-            CashFlowRuleName = original.CashFlowRuleName;
+            NominalCost = original.NominalCost;
+            NameOfApplicableCashFlowRule = original.NameOfApplicableCashFlowRule;
+            ApplicableDistributionRule = original.ApplicableDistributionRule;
             ReasonAgainstCashFlow = original.ReasonAgainstCashFlow;
         }
     }

@@ -87,9 +87,9 @@ namespace AppliedResearchAssociates.iAM
                 {
                     _ = GetBudgetContextsWithCostAllocationsForCommittedProjects();
                 }
-                catch (SimulationException)
+                catch (SimulationException e)
                 {
-                    results.Add(ValidationStatus.Error, "At least one committed project cannot be funded.", this, nameof(CommittedProjects));
+                    results.Add(ValidationStatus.Error, "At least one committed project cannot be funded: " + e.Message, this, nameof(CommittedProjects));
                 }
             }
 
@@ -108,29 +108,45 @@ namespace AppliedResearchAssociates.iAM
 
             var committedProjectsPerBudget = CommittedProjects.ToLookup(committedProject => committedProject.Budget);
 
-            foreach (var budgetContext in budgetContexts)
+            Func<decimal, BudgetContext, bool> costCanBeAllocated;
+            switch (AnalysisMethod.SpendingLimit)
             {
-                var committedProjectPerYear = committedProjectsPerBudget[budgetContext.Budget].ToSortedDictionary(committedProject => committedProject.Year);
+            case SpendingLimit.Zero:
+                costCanBeAllocated = (cost, context) => cost == 0;
+                break;
+            case SpendingLimit.Budget:
+                costCanBeAllocated = (cost, context) => cost <= context.CurrentAmount;
+                break;
+            case SpendingLimit.NoLimit:
+                costCanBeAllocated = (cost, context) => true;
+                break;
+            default:
+                throw new InvalidOperationException("Invalid spending limit.");
+            }
+
+            foreach (var context in budgetContexts)
+            {
+                var committedProjectPerYear = committedProjectsPerBudget[context.Budget].ToSortedDictionary(committedProject => committedProject.Year);
 
                 if (committedProjectPerYear.Any())
                 {
                     foreach (var year in Static.BoundRange(committedProjectPerYear.Last().Value.Year, InvestmentPlan.FirstYearOfAnalysisPeriod, -1))
                     {
-                        budgetContext.SetYear(year);
+                        context.SetYear(year);
 
                         if (committedProjectPerYear.TryGetValue(year, out var committedProject))
                         {
                             var cost = (decimal)committedProject.Cost;
 
-                            if (cost > budgetContext.CurrentAmount)
+                            if (!costCanBeAllocated(cost, context))
                             {
-                                throw new SimulationException("Committed project cannot be funded.");
+                                throw new SimulationException($"Committed project \"{committedProject.Name}\" cannot be funded.");
                             }
 
-                            budgetContext.AllocateCost(cost);
+                            context.AllocateCost(cost);
                         }
 
-                        budgetContext.LimitPreviousAmountToCurrentAmount();
+                        context.LimitPreviousAmountToCurrentAmount();
                     }
                 }
             }

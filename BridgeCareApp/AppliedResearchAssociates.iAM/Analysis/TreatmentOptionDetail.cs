@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public sealed class TreatmentOptionDetail
+    public sealed class TreatmentOptionDetail : ITreatmentStatistics
     {
         public TreatmentOptionDetail(string treatmentName, double costPerUnitArea, double benefit, double? remainingLife)
         {

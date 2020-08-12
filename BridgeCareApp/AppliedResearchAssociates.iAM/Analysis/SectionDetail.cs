@@ -17,6 +17,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             SectionName = section.Name;
         }
 
+        public double Area { get; set; }
+
         public string FacilityName { get; }
 
         public string NameOfUnfundedScheduledTreatment { get; set; }
@@ -43,6 +45,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             FacilityName = original.FacilityName;
             SectionName = original.SectionName;
+            Area = original.Area;
+
             TreatmentName = original.TreatmentName;
             TreatmentCause = original.TreatmentCause;
             TreatmentStatus = original.TreatmentStatus;

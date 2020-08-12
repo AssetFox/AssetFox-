@@ -118,6 +118,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void CopyAttributeValuesToDetail()
         {
+            Detail.Area = GetAreaOfSection();
+
             foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.NumericAttributes)
             {
                 Detail.ValuePerNumericAttribute.Add(attribute.Name, GetNumber(attribute.Name));

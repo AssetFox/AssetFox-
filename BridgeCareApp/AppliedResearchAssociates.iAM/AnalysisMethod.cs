@@ -104,6 +104,32 @@ namespace AppliedResearchAssociates.iAM
 
         public void Remove(RemainingLifeLimit remainingLifeLimit) => _RemainingLifeLimits.Remove(remainingLifeLimit);
 
+        internal Func<ITreatmentStatistics, double> ObjectiveFunction
+        {
+            get
+            {
+                switch (OptimizationStrategy)
+                {
+                case OptimizationStrategy.Benefit:
+                    return option => option.Benefit;
+
+                case OptimizationStrategy.BenefitToCostRatio:
+                    return option => option.Benefit / option.CostPerUnitArea;
+
+                case OptimizationStrategy.RemainingLife:
+                    ValidateRemainingLifeOptimization();
+                    return option => option.RemainingLife.Value;
+
+                case OptimizationStrategy.RemainingLifeToCostRatio:
+                    ValidateRemainingLifeOptimization();
+                    return option => option.RemainingLife.Value / option.CostPerUnitArea;
+
+                default:
+                    throw new SimulationException(MessageStrings.InvalidOptimizationStrategy);
+                }
+            }
+        }
+
         internal SpendingLimit SpendingLimit
         {
             get
@@ -145,5 +171,13 @@ namespace AppliedResearchAssociates.iAM
         private readonly Simulation Simulation;
 
         private static IReadOnlyCollection<string> GetNames(IEnumerable<ConditionGoal> conditionGoals) => conditionGoals.Select(conditionGoal => conditionGoal.Name).Where(name => !string.IsNullOrWhiteSpace(name)).ToArray();
+
+        private void ValidateRemainingLifeOptimization()
+        {
+            if (RemainingLifeLimits.Count == 0)
+            {
+                throw new SimulationException(MessageStrings.RemainingLifeOptimizationHasNoLimits);
+            }
+        }
     }
 }

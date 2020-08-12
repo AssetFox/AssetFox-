@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    internal sealed class TreatmentOption
+    internal sealed class TreatmentOption : ITreatmentStatistics
     {
         public TreatmentOption(SectionContext context, SelectableTreatment candidateTreatment, double costPerUnitArea, double benefit, double? remainingLife)
         {

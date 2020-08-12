@@ -134,56 +134,34 @@ namespace AppliedResearchAssociates.iAM.Analysis
             switch (Simulation.AnalysisMethod.SpendingStrategy)
             {
             case SpendingStrategy.NoSpending:
-                _ConditionGoalsAreMet = () => false;
+                ConditionGoalsEvaluator = () => false;
                 break;
 
             case SpendingStrategy.UnlimitedSpending:
-                _ConditionGoalsAreMet = () => false;
+                ConditionGoalsEvaluator = () => false;
                 break;
 
             case SpendingStrategy.UntilTargetAndDeficientConditionGoalsMet:
-                _ConditionGoalsAreMet = () => GoalsAreMet(TargetConditionActuals) && GoalsAreMet(DeficientConditionActuals);
+                ConditionGoalsEvaluator = () => GoalsAreMet(TargetConditionActuals) && GoalsAreMet(DeficientConditionActuals);
                 break;
 
             case SpendingStrategy.UntilTargetConditionGoalsMet:
-                _ConditionGoalsAreMet = () => GoalsAreMet(TargetConditionActuals);
+                ConditionGoalsEvaluator = () => GoalsAreMet(TargetConditionActuals);
                 break;
 
             case SpendingStrategy.UntilDeficientConditionGoalsMet:
-                _ConditionGoalsAreMet = () => GoalsAreMet(DeficientConditionActuals);
+                ConditionGoalsEvaluator = () => GoalsAreMet(DeficientConditionActuals);
                 break;
 
             case SpendingStrategy.AsBudgetPermits:
-                _ConditionGoalsAreMet = () => false;
+                ConditionGoalsEvaluator = () => false;
                 break;
 
             default:
                 throw new SimulationException(MessageStrings.InvalidSpendingStrategy);
             }
 
-            switch (Simulation.AnalysisMethod.OptimizationStrategy)
-            {
-            case OptimizationStrategy.Benefit:
-                ObjectiveFunction = option => option.Benefit;
-                break;
-
-            case OptimizationStrategy.BenefitToCostRatio:
-                ObjectiveFunction = option => option.Benefit / option.CostPerUnitArea;
-                break;
-
-            case OptimizationStrategy.RemainingLife:
-                ValidateRemainingLifeOptimization();
-                ObjectiveFunction = option => option.RemainingLife.Value;
-                break;
-
-            case OptimizationStrategy.RemainingLifeToCostRatio:
-                ValidateRemainingLifeOptimization();
-                ObjectiveFunction = option => option.RemainingLife.Value / option.CostPerUnitArea;
-                break;
-
-            default:
-                throw new SimulationException(MessageStrings.InvalidOptimizationStrategy);
-            }
+            ObjectiveFunction = Simulation.AnalysisMethod.ObjectiveFunction;
 
             Simulation.Results.Clear();
 
@@ -248,7 +226,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private static readonly IComparer<BudgetPriority> BudgetPriorityComparer = SelectionComparer<BudgetPriority>.Create(priority => priority.PriorityLevel);
 
-        private Func<bool> _ConditionGoalsAreMet;
+        private Func<bool> ConditionGoalsEvaluator;
 
         private IReadOnlyCollection<SelectableTreatment> ActiveTreatments;
 
@@ -365,7 +343,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private bool ConditionGoalsAreMet(int year)
         {
             UpdateConditionActuals(year);
-            return _ConditionGoalsAreMet();
+            return ConditionGoalsEvaluator();
         }
 
         private void ConsiderSelectableTreatments(IDictionary<SectionContext, SectionContext> baselineContextPerWorkingContext, int year)
@@ -390,6 +368,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 option.CandidateTreatment,
                                 year,
                                 context => context.CurrentPrioritizedAmount ?? context.CurrentAmount);
+
+                            option.Context.Detail.TreatmentConsiderations.Last().BudgetPriorityLevel = priority.PriorityLevel;
 
                             if (costCoverage != CostCoverage.None)
                             {
@@ -602,7 +582,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             var remainingCost = (decimal)sectionContext.GetCostOfTreatment(treatment);
 
-            treatmentConsideration.NominalCost = remainingCost;
+            treatmentConsideration.NominalCostOfTreatment = remainingCost;
             treatmentConsideration.ReasonAgainstCashFlow = decideCashFlow();
 
             ReasonAgainstCashFlow decideCashFlow()
@@ -621,9 +601,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 treatmentConsideration.NameOfApplicableCashFlowRule = cashFlowRule.Name;
 
                 var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].First(kv => remainingCost <= kv.Key).Value;
-
-                treatmentConsideration.ApplicableDistributionRule = distributionRule.Expression;
-
                 if (distributionRule.YearlyPercentages.Count == 1)
                 {
                     return ReasonAgainstCashFlow.ApplicableDistributionRuleIsForOnlyOneYear;
@@ -787,14 +764,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             TargetConditionActuals = GetTargetConditionActuals(year);
             DeficientConditionActuals = GetDeficientConditionActuals();
-        }
-
-        private void ValidateRemainingLifeOptimization()
-        {
-            if (Simulation.AnalysisMethod.RemainingLifeLimits.Count == 0)
-            {
-                throw new SimulationException(MessageStrings.RemainingLifeOptimizationHasNoLimits);
-            }
         }
     }
 }

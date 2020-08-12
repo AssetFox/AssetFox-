@@ -3,7 +3,7 @@
 namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     // TODO: Add timestamp to the attribute datum class.
-    public class AttributeDatum<T>
+    public class AttributeDatum<T> : IAttributeDatum
     {
         public Location Location { get; }
 

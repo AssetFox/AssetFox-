@@ -3,9 +3,9 @@ using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
 namespace AppliedResearchAssociates.iAM.Segmentation
 {
-    public class Segment<T>
+    public class Segment
     {
-        public Segment(Location segmentLocation, AttributeDatum<T> segmentationAttributeDatum)
+        public Segment(Location segmentLocation, IAttributeDatum segmentationAttributeDatum)
         {
             Location = segmentLocation;
             SegmentationAttributeDatum = segmentationAttributeDatum;
@@ -13,6 +13,6 @@ namespace AppliedResearchAssociates.iAM.Segmentation
 
         public Location Location { get; }
 
-        public AttributeDatum<T> SegmentationAttributeDatum { get; }
+        public IAttributeDatum SegmentationAttributeDatum { get; }
     }
 }

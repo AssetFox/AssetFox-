@@ -28,6 +28,14 @@ namespace AppliedResearchAssociates.iAM.Aggregation
                 if (matchingLocationSegment != null)
                 {
                     // Add the datum to the aggregation data segment
+                    if(datum is AttributeDatum<double>)
+                    {
+                        // What is the performance cost of type checking here?
+                    }
+                    else if(datum is AttributeDatum<string>)
+                    {
+
+                    }
                     matchingLocationSegment.AddDatum(datum);
                 }
                 else

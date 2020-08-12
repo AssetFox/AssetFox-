@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.Aggregation
 
         public void AddDatum(IAttributeDatum datum) => AttributeData.Add(datum);
 
-        public IEnumerable<(int year, T value)> GetAggregatedValueByYear<T>(Attribute attribute, AggregationRule<T> aggregationRule)
+        public IEnumerable<(int year, T value)> GetAggregatedValuesByYear<T>(Attribute attribute, AggregationRule<T> aggregationRule)
         {
             var specifiedData = AttributeData.Where(_ => _.Attribute.Guid == attribute.Guid);
             return aggregationRule.Apply(specifiedData);

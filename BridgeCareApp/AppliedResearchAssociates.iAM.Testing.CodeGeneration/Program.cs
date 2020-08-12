@@ -125,12 +125,8 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
             runner.Warning += (sender, eventArgs) => Console.WriteLine(eventArgs.Message);
             time(runner.Run, "simulation run");
 
-            var benefit = simulation.AnalysisMethod.Benefit;
-            var network = simulation.Results.Last().Sections;
-            var networkArea = network.Sum(section => section.Area);
-            var networkCondition = network.Sum(section => benefit.LimitValue(section.ValuePerNumericAttribute[benefit.Attribute.Name]) * section.Area / networkArea);
             Console.WriteLine();
-            Console.WriteLine("Network condition: " + networkCondition);
+            Console.WriteLine("Network condition: " + simulation.NetworkCondition);
 
             var outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             var outputFile = $"Network {simulationConnectionInfo.NetworkId} - Simulation {simulationConnectionInfo.SimulationId}.json";

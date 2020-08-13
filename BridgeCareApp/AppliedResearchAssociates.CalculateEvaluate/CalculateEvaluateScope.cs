@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
         public virtual DateTime GetTimestamp(string key) => Timestamp[key];
 
-        public virtual void SetNumber(string key, double value) => SetNumber(key, () => value);
+        public virtual void SetNumber(string key, double value) => Number[key] = () => value;
 
         public virtual void SetNumber(string key, Func<double> getValue) => Number[key] = getValue;
 

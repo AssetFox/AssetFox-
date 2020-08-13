@@ -28,17 +28,6 @@ namespace AppliedResearchAssociates.iAM
 
         public Network Network { get; }
 
-        public double NetworkCondition
-        {
-            get
-            {
-                var network = Results.Last().Sections;
-                var networkArea = network.Sum(section => section.Area);
-                var networkCondition = network.Sum(section => AnalysisMethod.Benefit.LimitValue(section.ValuePerNumericAttribute[AnalysisMethod.Benefit.Attribute.Name]) * section.Area / networkArea);
-                return networkCondition;
-            }
-        }
-
         public int NumberOfYearsOfTreatmentOutlook { get; set; } = 100;
 
         public IReadOnlyCollection<PerformanceCurve> PerformanceCurves => _PerformanceCurves;

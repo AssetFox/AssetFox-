@@ -126,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
             time(runner.Run, "simulation run");
 
             Console.WriteLine();
-            Console.WriteLine("Network condition: " + simulation.NetworkCondition);
+            Console.WriteLine("Network condition: " + simulation.AnalysisMethod.Benefit.GetNetworkCondition(simulation.Results.Last().Sections));
 
             var outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             var outputFile = $"Network {simulationConnectionInfo.NetworkId} - Simulation {simulationConnectionInfo.SimulationId}.json";

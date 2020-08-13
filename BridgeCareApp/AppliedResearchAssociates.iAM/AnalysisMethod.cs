@@ -104,7 +104,7 @@ namespace AppliedResearchAssociates.iAM
 
         public void Remove(RemainingLifeLimit remainingLifeLimit) => _RemainingLifeLimits.Remove(remainingLifeLimit);
 
-        internal Func<ITreatmentStatistics, double> ObjectiveFunction
+        internal Func<TreatmentOption, double> ObjectiveFunction
         {
             get
             {
@@ -114,7 +114,7 @@ namespace AppliedResearchAssociates.iAM
                     return option => option.Benefit;
 
                 case OptimizationStrategy.BenefitToCostRatio:
-                    return option => option.Benefit / option.CostPerUnitArea;
+                    return option => option.Benefit / option.Cost;
 
                 case OptimizationStrategy.RemainingLife:
                     ValidateRemainingLifeOptimization();
@@ -122,7 +122,7 @@ namespace AppliedResearchAssociates.iAM
 
                 case OptimizationStrategy.RemainingLifeToCostRatio:
                     ValidateRemainingLifeOptimization();
-                    return option => option.RemainingLife.Value / option.CostPerUnitArea;
+                    return option => option.RemainingLife.Value / option.Cost;
 
                 default:
                     throw new SimulationException(MessageStrings.InvalidOptimizationStrategy);

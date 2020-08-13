@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public List<DeficientConditionGoalDetail> DeficientConditionGoals { get; } = new List<DeficientConditionGoalDetail>();
 
+        public double InitialConditionOfNetwork { get; set; }
+
         public List<SectionDetail> Sections { get; } = new List<SectionDetail>();
 
         public List<TargetConditionGoalDetail> TargetConditionGoals { get; } = new List<TargetConditionGoalDetail>();

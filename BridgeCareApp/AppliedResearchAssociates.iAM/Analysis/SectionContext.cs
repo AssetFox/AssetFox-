@@ -5,7 +5,7 @@ using AppliedResearchAssociates.CalculateEvaluate;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    internal sealed class SectionContext : CalculateEvaluateScope
+    internal sealed class SectionContext : CalculateEvaluateScope, ISection
     {
         public SectionContext(Section section, SimulationRunner simulationRunner)
         {
@@ -22,12 +22,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             Section = original.Section;
             SimulationRunner = original.SimulationRunner;
-            FirstUnshadowedYearForAnyTreatment = original.FirstUnshadowedYearForAnyTreatment;
-            FirstUnshadowedYearForSameTreatment.CopyFrom(original.FirstUnshadowedYearForSameTreatment);
-            EventSchedule.CopyFrom(original.EventSchedule);
-            NumberCache.CopyFrom(original.NumberCache);
 
             ResetDetail();
+
+            EventSchedule.CopyFrom(original.EventSchedule);
+            FirstUnshadowedYearForAnyTreatment = original.FirstUnshadowedYearForAnyTreatment;
+            FirstUnshadowedYearForSameTreatment.CopyFrom(original.FirstUnshadowedYearForSameTreatment);
+            NumberCache.CopyFrom(original.NumberCache);
 
             InitializeCalculatedFields();
         }
@@ -41,6 +42,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public SimulationRunner SimulationRunner { get; }
 
         private AnalysisMethod AnalysisMethod => SimulationRunner.Simulation.AnalysisMethod;
+
+        double ISection.Area => Section.Area;
 
         public void ApplyPassiveTreatment(int year)
         {
@@ -68,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 if (operativeCurves.Count == 0)
                 {
-                    throw new SimulationException("No performances curves are operative for a deteriorating attribute.");
+                    throw new SimulationException("No performance curves are operative for a deteriorating attribute.");
                 }
 
                 if (operativeCurves.Count > 1)
@@ -118,7 +121,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void CopyAttributeValuesToDetail()
         {
-            Detail.Area = GetAreaOfSection();
+            Detail.Area = Section.Area;
 
             foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.NumericAttributes)
             {
@@ -132,8 +135,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         }
 
         public void CopyDetailFrom(SectionContext other) => Detail = new SectionDetail(other.Detail);
-
-        public double GetAreaOfSection() => GetNumber(Section.AreaIdentifier);
 
         public double GetBenefit()
         {
@@ -216,18 +217,21 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override void SetNumber(string key, double value)
         {
+            BlockUsageOfAreaIdentifier(key);
             NumberCache.Clear();
             base.SetNumber(key, value);
         }
 
         public override void SetNumber(string key, Func<double> getValue)
         {
+            BlockUsageOfAreaIdentifier(key);
             NumberCache.Clear();
             base.SetNumber(key, getValue);
         }
 
         public override void SetText(string key, string value)
         {
+            BlockUsageOfAreaIdentifier(key);
             NumberCache.Clear();
             base.SetText(key, value);
         }
@@ -236,15 +240,27 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public bool YearIsWithinShadowForSameTreatment(int year, Treatment treatment) => FirstUnshadowedYearForSameTreatment.TryGetValue(treatment.Name, out var firstUnshadowedYear) && year < firstUnshadowedYear;
 
+        double ISection.GetAttributeValue(string attributeName) => GetNumber(attributeName);
+
+        private static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
+
         private readonly IDictionary<string, int> FirstUnshadowedYearForSameTreatment = new Dictionary<string, int>();
 
-        private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(KeyComparer);
 
         private int? FirstUnshadowedYearForAnyTreatment;
 
+        private static void BlockUsageOfAreaIdentifier(string key)
+        {
+            if (KeyComparer.Equals(key, Section.AreaIdentifier))
+            {
+                throw new SimulationException("Section area is being mutated. The analysis does not support this.");
+            }
+        }
+
         private void Initialize()
         {
-            SetNumber(Section.AreaIdentifier, Section.Area);
+            base.SetNumber(Section.AreaIdentifier, Section.Area);
 
             var initialReferenceYear = SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
 

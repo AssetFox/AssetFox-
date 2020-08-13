@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public sealed class SectionDetail
+    public sealed class SectionDetail : ISection
     {
         public SectionDetail(Section section)
         {
@@ -40,6 +40,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public Dictionary<string, double> ValuePerNumericAttribute { get; } = new Dictionary<string, double>();
 
         public Dictionary<string, string> ValuePerTextAttribute { get; } = new Dictionary<string, string>();
+
+        double ISection.GetAttributeValue(string attributeName) => ValuePerNumericAttribute[attributeName];
 
         internal SectionDetail(SectionDetail original)
         {

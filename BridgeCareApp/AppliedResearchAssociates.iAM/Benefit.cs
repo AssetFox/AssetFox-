@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM
@@ -41,6 +43,13 @@ namespace AppliedResearchAssociates.iAM
             }
 
             return results;
+        }
+
+        public double GetNetworkCondition(IEnumerable<ISection> network)
+        {
+            var networkArea = network.Sum(section => section.Area);
+            var networkCondition = network.Sum(section => LimitValue(section.GetAttributeValue(Attribute.Name)) * section.Area) / networkArea;
+            return networkCondition;
         }
 
         public double LimitValue(double benefit) => Math.Max(0, _LimitValue(benefit));

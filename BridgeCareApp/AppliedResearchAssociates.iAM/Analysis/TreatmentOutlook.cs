@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return new TreatmentOption(
                 TemplateContext,
                 InitialTreatment,
-                CumulativeCostPerUnitArea - baseline.CumulativeCostPerUnitArea,
+                CumulativeCost - baseline.CumulativeCost,
                 CumulativeBenefit - baseline.CumulativeBenefit,
                 RemainingLife - baseline.RemainingLife);
         }
@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private readonly IReadOnlyCollection<RemainingLifeCalculator> RemainingLifeCalculators;
 
         private double CumulativeBenefit;
-        private double CumulativeCostPerUnitArea;
+        private double CumulativeCost;
         private double MostRecentBenefit;
         private double? RemainingLife;
 
@@ -67,9 +67,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private void ApplyTreatment(Treatment treatment, int year)
         {
             var cost = AccumulationContext.GetCostOfTreatment(treatment);
-            var area = AccumulationContext.GetAreaOfSection();
-            var costPerUnitArea = cost / area;
-            CumulativeCostPerUnitArea += costPerUnitArea;
+            CumulativeCost += cost;
+
             AccumulationContext.ApplyTreatment(treatment, year);
         }
 

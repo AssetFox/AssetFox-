@@ -2,9 +2,9 @@
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public sealed class TreatmentOptionDetail : ITreatmentStatistics
+    public sealed class TreatmentOptionDetail
     {
-        public TreatmentOptionDetail(string treatmentName, double costPerUnitArea, double benefit, double? remainingLife)
+        public TreatmentOptionDetail(string treatmentName, double cost, double benefit, double? remainingLife)
         {
             if (string.IsNullOrWhiteSpace(treatmentName))
             {
@@ -12,14 +12,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
 
             TreatmentName = treatmentName;
-            CostPerUnitArea = costPerUnitArea;
+            Cost = cost;
             Benefit = benefit;
             RemainingLife = remainingLife;
         }
 
         public double Benefit { get; }
 
-        public double CostPerUnitArea { get; }
+        public double Cost { get; }
 
         public double? RemainingLife { get; }
 
@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         internal TreatmentOptionDetail(TreatmentOptionDetail original)
         {
             TreatmentName = original.TreatmentName;
-            CostPerUnitArea = original.CostPerUnitArea;
+            Cost = original.Cost;
             Benefit = original.Benefit;
             RemainingLife = original.RemainingLife;
         }

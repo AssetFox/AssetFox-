@@ -38,7 +38,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
         // [REVIEW] How should the change/equation pair on a consequence be handled? Currently, the
         // presence of an equation expression will override the change expression.
 
-        // [REVIEW] Are schedulings supposed to be used in outlook logic? Currently, they are.
+        // [REVIEW] Are schedulings supposed to be used in outlook logic? Currently, they are. If
+        // so, are their costs supposed to be considered as additional to the original treatment's
+        // cost? Currently, those costs are considered so.
 
         // [REVIEW] What happens when one attribute has multiple consequences whose criteria are
         // met? Currently, it throws.
@@ -170,6 +172,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 Inform($"Simulating {year} ...");
 
                 var yearDetail = Simulation.Results.GetAdd(new SimulationYearDetail(year));
+                yearDetail.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
 
                 var baselineContexts = ApplyRequiredEvents(year);
                 var baselineContextPerWorkingContext = baselineContexts.ToDictionary(_ => new SectionContext(_), _ => _);
@@ -226,13 +229,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private static readonly IComparer<BudgetPriority> BudgetPriorityComparer = SelectionComparer<BudgetPriority>.Create(priority => priority.PriorityLevel);
 
-        private Func<bool> ConditionGoalsEvaluator;
-
         private IReadOnlyCollection<SelectableTreatment> ActiveTreatments;
 
         private IReadOnlyCollection<BudgetContext> BudgetContexts;
 
         private IReadOnlyDictionary<int, IEnumerable<BudgetPriority>> BudgetPrioritiesPerYear;
+
+        private Func<bool> ConditionGoalsEvaluator;
 
         private ILookup<Budget, BudgetCondition> ConditionsPerBudget;
 
@@ -448,7 +451,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             var treatmentOptions = treatmentOptionsBag
                 .Where(option => ObjectiveFunction(option) > 0)
-                .OrderByDescending(ObjectiveFunction)
+                .OrderByDescending(option => ObjectiveFunction(option) * option.Context.Section.Area)
                 .ToArray();
 
             return treatmentOptions;
@@ -467,9 +470,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
 
-                var goalArea = goalContexts.Sum(context => context.GetAreaOfSection());
+                var goalArea = goalContexts.Sum(context => context.Section.Area);
                 var deficientContexts = goalContexts.Where(context => goal.LevelIsDeficient(context.GetNumber(goal.Attribute.Name)));
-                var deficientArea = deficientContexts.Sum(context => context.GetAreaOfSection());
+                var deficientArea = deficientContexts.Sum(context => context.Section.Area);
                 var deficientPercentageActual = deficientArea / goalArea * 100;
 
                 results.Add(new ConditionActual(goal, deficientPercentageActual));
@@ -496,7 +499,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
 
-                var goalAreaValues = goalContexts.Select(context => context.GetAreaOfSection()).ToArray();
+                var goalAreaValues = goalContexts.Select(context => context.Section.Area).ToArray();
                 var averageArea = goalAreaValues.Average();
                 var goalAreaWeights = goalAreaValues.Select(area => area / averageArea);
                 var averageActual = goalContexts.Zip(goalAreaWeights, (context, weight) => context.GetNumber(goal.Attribute.Name) * weight).Average();

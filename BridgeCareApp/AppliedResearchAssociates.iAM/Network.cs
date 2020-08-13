@@ -15,11 +15,11 @@ namespace AppliedResearchAssociates.iAM
 
         public string Name { get; set; }
 
-        public IEnumerable<Section> Sections => Facilities.SelectMany(facility => facility.Sections);
-
         public IReadOnlyCollection<Simulation> Simulations => _Simulations;
 
         public ValidatorBag Subvalidators => new ValidatorBag { Facilities, Simulations };
+
+        public IEnumerable<Section> Sections => Facilities.SelectMany(facility => facility.Sections);
 
         public Facility AddFacility() => _Facilities.GetAdd(new Facility(this));
 

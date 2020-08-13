@@ -22,8 +22,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public string NameOfApplicableCashFlowRule { get; set; }
 
-        public decimal NominalCostOfTreatment { get; set; }
-
         public ReasonAgainstCashFlow ReasonAgainstCashFlow { get; set; }
 
         public string TreatmentName { get; }
@@ -34,7 +32,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Budgets.AddRange(original.Budgets.Select(_ => new BudgetDetail(_)));
 
             BudgetPriorityLevel = original.BudgetPriorityLevel;
-            NominalCostOfTreatment = original.NominalCostOfTreatment;
             NameOfApplicableCashFlowRule = original.NameOfApplicableCashFlowRule;
             ReasonAgainstCashFlow = original.ReasonAgainstCashFlow;
         }

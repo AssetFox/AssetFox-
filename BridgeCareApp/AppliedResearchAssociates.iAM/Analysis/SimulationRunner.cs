@@ -450,8 +450,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
             InParallel(contexts, addTreatmentOptions);
 
             var treatmentOptions = treatmentOptionsBag
-                .Where(option => ObjectiveFunction(option) > 0)
-                .OrderByDescending(option => ObjectiveFunction(option) * option.Context.Section.Area)
+                .Select(option => (option, value: ObjectiveFunction(option)))
+                .Where(_ => _.value > 0)
+                .OrderByDescending(_ => _.value * _.option.Context.Section.Area)
+                .Select(_ => _.option)
                 .ToArray();
 
             return treatmentOptions;
@@ -581,11 +583,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 return true;
             }
 
-            Action scheduleCashFlowEvents = null;
-
             var remainingCost = (decimal)sectionContext.GetCostOfTreatment(treatment);
 
-            treatmentConsideration.NominalCostOfTreatment = remainingCost;
+            Action scheduleCashFlowEvents = null;
             treatmentConsideration.ReasonAgainstCashFlow = decideCashFlow();
 
             ReasonAgainstCashFlow decideCashFlow()

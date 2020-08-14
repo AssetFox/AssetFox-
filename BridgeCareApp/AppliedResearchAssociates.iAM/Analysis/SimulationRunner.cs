@@ -501,10 +501,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
 
-                var goalAreaValues = goalContexts.Select(context => context.Section.Area).ToArray();
-                var averageArea = goalAreaValues.Average();
-                var goalAreaWeights = goalAreaValues.Select(area => area / averageArea);
-                var averageActual = goalContexts.Zip(goalAreaWeights, (context, weight) => context.GetNumber(goal.Attribute.Name) * weight).Average();
+                var goalArea = goalContexts.Sum(context => context.Section.Area);
+                var averageActual = goalContexts.Sum(context => context.GetNumber(goal.Attribute.Name) * context.Section.Area) / goalArea;
 
                 results.Add(new ConditionActual(goal, averageActual));
             }

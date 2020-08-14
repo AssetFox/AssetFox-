@@ -24,14 +24,14 @@ namespace AppliedResearchAssociates.iAM
                 results.Add(ValidationStatus.Error, "Name is blank.", this, nameof(Name));
             }
 
-            if (ShadowForAnyTreatment < 0)
+            if (ShadowForAnyTreatment < 1)
             {
-                results.Add(ValidationStatus.Error, "\"Any\" shadow is less than zero.", this, nameof(ShadowForAnyTreatment));
+                results.Add(ValidationStatus.Error, "Shadow for any treatment is less than one.", this, nameof(ShadowForAnyTreatment));
             }
 
-            if (ShadowForSameTreatment < 0)
+            if (ShadowForSameTreatment < 1)
             {
-                results.Add(ValidationStatus.Error, "\"Same\" shadow is less than zero.", this, nameof(ShadowForSameTreatment));
+                results.Add(ValidationStatus.Error, "Shadow for same treatment is less than one.", this, nameof(ShadowForSameTreatment));
             }
 
             if (ShadowForSameTreatment < ShadowForAnyTreatment)

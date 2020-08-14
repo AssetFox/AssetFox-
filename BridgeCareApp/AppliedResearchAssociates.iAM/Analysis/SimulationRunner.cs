@@ -8,6 +8,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class SimulationRunner
     {
+        // [REVIEW] In the segment_N_ns0 table, what is the use of the attribute columns whose names
+        // are not suffixed with a year? Are those the values used for the "jurisdiction" filter
+        // prior to roll-forward?
+
+        // [REVIEW] The year-suffixed columns in the segment table, in the context of roll-forward,
+        // are those values considered "start-of-year" or "end-of-year"? (In other words, to
+        // "process" the roll-forward year 20XX, do you set the 20XX values and then apply curves
+        // and no-treatment? Or apply then set?)
+
         // [REVIEW] Are cash flow rules only considered when the non-cash-flow payment logic isn't
         // sufficient to cover the treatment cost? Or are they always used if their criteria are
         // met? In other words, which is it: try to pay for treatment outright, then try to
@@ -408,6 +417,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var treatmentOptionsBag = new ConcurrentBag<TreatmentOption>();
             void addTreatmentOptions(SectionContext context)
             {
+                if (context.Section.Name == "22008106500000")
+                {
+                    // For the district 2 simulation in penndot_light (id 1181), this section is
+                    // getting ZERO feasible treatments in 2020 (the first analysis year), but the
+                    // legacy analysis output shows that this section is assigned the "Painting
+                    // (Joint/Spot/Zone)" treatment in year 2020.
+                    ;
+                }
+
                 if (context.YearIsWithinShadowForAnyTreatment(year))
                 {
                     return;
@@ -613,7 +631,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     return ReasonAgainstCashFlow.LastYearOfCashFlowIsOutsideOfAnalysisPeriod;
                 }
 
-                var scheduleIsBlocked = Static.BoundRange(year + 1, lastYearOfCashFlow).Any(sectionContext.EventSchedule.ContainsKey);
+                var scheduleIsBlocked = Static.RangeFromBounds(year + 1, lastYearOfCashFlow).Any(sectionContext.EventSchedule.ContainsKey);
                 if (scheduleIsBlocked)
                 {
                     return ReasonAgainstCashFlow.FutureEventScheduleIsBlocked;

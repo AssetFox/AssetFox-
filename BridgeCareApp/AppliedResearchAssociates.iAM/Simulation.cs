@@ -133,7 +133,7 @@ namespace AppliedResearchAssociates.iAM
 
                 if (committedProjectPerYear.Any())
                 {
-                    foreach (var year in Static.BoundRange(committedProjectPerYear.Last().Value.Year, InvestmentPlan.FirstYearOfAnalysisPeriod, -1))
+                    foreach (var year in Static.RangeFromBounds(committedProjectPerYear.Last().Value.Year, InvestmentPlan.FirstYearOfAnalysisPeriod, -1))
                     {
                         context.SetYear(year);
 

@@ -10,21 +10,6 @@ namespace AppliedResearchAssociates
 
         public static IEnumerable<T?> AsNullables<T>(this IEnumerable<T> values) where T : struct => values.Select(AsNullable);
 
-        public static IEnumerable<int> BoundRange(int start, int end, int stride = 1)
-        {
-            switch (Math.Sign(stride))
-            {
-            case 1:
-                return TowardPositiveInfinity(start, end, stride);
-
-            case -1:
-                return TowardNegativeInfinity(start, end, stride);
-
-            default:
-                throw new ArgumentException("Stride must be non-zero.", nameof(stride));
-            };
-        }
-
         public static void CopyFrom<TKey, TValue>(this IDictionary<TKey, TValue> target, IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
             foreach (var (key, value) in source)
@@ -52,6 +37,21 @@ namespace AppliedResearchAssociates
         }
 
         public static bool IsDefined<T>(this T enumValue) where T : Enum => Enum.IsDefined(typeof(T), enumValue);
+
+        public static IEnumerable<int> RangeFromBounds(int start, int end, int stride = 1)
+        {
+            switch (Math.Sign(stride))
+            {
+            case 1:
+                return TowardPositiveInfinity(start, end, stride);
+
+            case -1:
+                return TowardNegativeInfinity(start, end, stride);
+
+            default:
+                throw new ArgumentException("Stride must be non-zero.", nameof(stride));
+            };
+        }
 
         public static void Swap<T>(this IList<T> list, int index1, int index2)
         {

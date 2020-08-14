@@ -195,23 +195,25 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 getMostRecentYearPerAttribute(SimulationRunner.Simulation.Network.Explorer.TextAttributes)
                 ).Min();
 
-            if (earliestYearOfMostRecentValue.HasValue)
+            if (earliestYearOfMostRecentValue < SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
             {
-                var earliestYear = earliestYearOfMostRecentValue.Value;
-                if (earliestYear < SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod)
+                SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+                SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+
+                ApplyPerformanceCurves();
+                ApplyPassiveTreatment(earliestYearOfMostRecentValue.Value);
+
+                foreach (var year in Static.RangeFromBounds(earliestYearOfMostRecentValue.Value + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1))
                 {
-                    SetHistoricalValues(earliestYear, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-                    SetHistoricalValues(earliestYear, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+                    SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+                    SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-                    foreach (var year in Enumerable.Range(earliestYear + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - earliestYear))
-                    {
-                        ApplyPerformanceCurves();
-                        ApplyPassiveTreatment(year);
-
-                        SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-                        SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
-                    }
+                    ApplyPerformanceCurves();
+                    ApplyPassiveTreatment(year);
                 }
+
+                SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+                SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
             }
         }
 

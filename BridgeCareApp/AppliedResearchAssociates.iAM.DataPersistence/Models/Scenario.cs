@@ -6,5 +6,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistence.Models
 {
     public class Scenario
     {
+        public string Name;
+        public string Status;
+        public int Id;
     }
 }

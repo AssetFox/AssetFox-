@@ -295,9 +295,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ImageComboBox.dll</HintPath>
     </Reference>
-    <Reference Include="Jace, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\BridgeCareApp\packages\Jace.0.9.3\lib\netstandard1.6\Jace.dll</HintPath>
-    </Reference>
     <Reference Include="LogicNP.CryptoLicensing, Version=5.1.0.0, Culture=neutral, PublicKeyToken=4a3c0a4c668b48b4">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\LogicNP.CryptoLicensing.dll</HintPath>
@@ -328,7 +325,7 @@
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\BridgeCareApp\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

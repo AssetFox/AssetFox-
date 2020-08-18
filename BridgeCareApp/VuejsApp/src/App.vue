@@ -82,9 +82,11 @@
                         Security
                     </v-btn>
                 </v-toolbar-title>
-                <v-toolbar-title class="white--text" v-if="selectedScenarioName !== ''">
+                <v-toolbar-title class="white--text" v-if="hasSelectedScenario">
                     <span class="font-weight-light">Scenario: </span>
-                    <span>{{selectedScenarioName}}</span>
+                    <span>{{selectedScenario.simulationName}}</span>
+                    <span v-if="selectedScenarioHasStatus" class="font-weight-light"> => Status: </span>
+                    <span v-if="selectedScenarioHasStatus">{{selectedScenario.status}}</span>
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
                 <!-- <v-toolbar-title  class="white--text">
@@ -117,6 +119,9 @@
                     <span class="font-weight-light">iAM </span>
                     <span>BridgeCare &copy; 2019</span>
                 </v-flex>
+                <v-flex xs1>
+                    <span>{{packageVersion}}</span>
+                </v-flex>
                 <v-spacer></v-spacer>
             </v-footer>
             <Spinner/>
@@ -140,6 +145,7 @@
     import Alert from '@/shared/modals/Alert.vue';
     import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
     import {clone} from 'ramda';
+    import {emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
 
     @Component({
         components: {Alert, Spinner}
@@ -150,12 +156,14 @@
         @State(state => state.authentication.hasRole) hasRole: boolean;
         @State(state => state.authentication.username) username: string;
         @State(state => state.authentication.isAdmin) isAdmin: boolean;
+        @State(state => state.authentication.refreshing) refreshing: boolean;
         @State(state => state.breadcrumb.navigation) navigation: any[];
         @State(state => state.toastr.successMessage) successMessage: string;
         @State(state => state.toastr.errorMessage) errorMessage: string;
         @State(state => state.toastr.infoMessage) infoMessage: string;
-        @State(state => state.scenario.selectedScenarioName) stateSelectedScenarioName: string;
         @State(state => state.unsavedChangesFlag.hasUnsavedChanges) hasUnsavedChanges: boolean;
+        @State(state => state.scenario.selectedScenario) stateSelectedScenario: Scenario;
+        @State(state => state.announcement.packageVersion) packageVersion: string;
 
         @Action('refreshTokens') refreshTokensAction: any;
         @Action('checkBrowserTokens') checkBrowserTokensAction: any;
@@ -171,10 +179,12 @@
         @Action('getUserCriteria') getUserCriteriaAction: any;
 
         drawer: boolean = false;
-        selectedScenarioName: string = '';
         alertDialogData: AlertData = clone(emptyAlertData);
         pushRouteUpdate: boolean = false;
         route: any = {};
+        selectedScenario: Scenario = clone(emptyScenario);
+        hasSelectedScenario: boolean = false;
+        selectedScenarioHasStatus: boolean = false;
 
         get container() {
             const container: any = {};
@@ -248,9 +258,11 @@
             }
         }
 
-        @Watch('stateSelectedScenarioName')
-        onStateSelectedScenarioNameChanged() {
-            this.selectedScenarioName = hasValue(this.stateSelectedScenarioName) ? this.stateSelectedScenarioName : '';
+        @Watch('stateSelectedScenario')
+        onStateSelectedScenarioChanged() {
+            this.selectedScenario = hasValue(this.stateSelectedScenario) ? clone(this.stateSelectedScenario) : clone(emptyScenario);
+            this.hasSelectedScenario = this.selectedScenario.simulationId !== 0;
+            this.selectedScenarioHasStatus = hasValue(this.selectedScenario.status);
         }
 
         @Watch('authenticatedWithRole')
@@ -264,19 +276,22 @@
 
         created() {
             // create a request handler
-            const requestHandler = (request: AxiosRequestConfig) => {
+            async function requestHandler(app: AppComponent, request: AxiosRequestConfig) {
                 request.headers = setContentTypeCharset(request.headers);
+                if (app.refreshing) {
+                    await new Promise(_ => setTimeout(_, 5000));
+                }
                 request.headers = setAuthHeader(request.headers);
-                this.setIsBusyAction({isBusy: true});
+                app.setIsBusyAction({isBusy: true});
                 return request;
-            };
+            }
             // set axios request interceptor to use request handler
             axiosInstance.interceptors.request.use(
-                (request: any) => requestHandler(request)
+                (request: any) => requestHandler(this, request)
             );
             // set nodejs axios request interceptor to use request handler
             nodejsAxiosInstance.interceptors.request.use(
-                (request: any) => requestHandler(request)
+                (request: any) => requestHandler(this, request)
             );
             // create a success & error handler
             const successHandler = (response: AxiosResponse) => {

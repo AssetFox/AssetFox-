@@ -268,10 +268,16 @@
     <ManifestKeyFile>RoadCare3_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Controls">
@@ -1198,6 +1204,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="packages.config" />
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -1278,6 +1285,10 @@
     <ProjectReference Include="..\DynamicSegmentation\DynamicSegmentation.csproj">
       <Project>{7A46601B-1900-4BD3-90C4-5199BE26FDFF}</Project>
       <Name>DynamicSegmentation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Jace\Jace.csproj">
+      <Project>{91cc2c02-72ea-43af-95b0-f45edf91538e}</Project>
+      <Name>Jace</Name>
     </ProjectReference>
     <ProjectReference Include="..\KMLManager\KMLManager.csproj">
       <Project>{32626ABF-9CE5-405C-8372-4D2BF8BE4BB2}</Project>

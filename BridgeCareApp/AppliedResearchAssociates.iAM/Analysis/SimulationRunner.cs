@@ -15,16 +15,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         // [REVIEW] The year-suffixed columns in the segment table, in the context of roll-forward,
         // are those values considered "start-of-year" or "end-of-year"? (In other words, to
         // "process" the roll-forward year 20XX, do you set the 20XX values and then apply curves
-        // and no-treatment? Or apply then set?)
-
-        // [REVIEW] Are cash flow rules only considered when the non-cash-flow payment logic isn't
-        // sufficient to cover the treatment cost? Or are they always used if their criteria are
-        // met? In other words, which is it: try to pay for treatment outright, then try to
-        // cash-flow if needed; or always try to cash-flow if eligible? ANSWERED BY JAKE: Always
-        // cash-flow if eligible.
-
-        // [REVIEW] Can committed projects be cash-flowed? Seems like they "shouldn't", from my
-        // limited dev perspective.
+        // and no-treatment? Or apply then set?) Currently, the logic treats them as start of year,
+        // and so it sets them, then applies curves and no-treatment.
 
         // [REVIEW] Are priority level settings respected when "required events" (like scheduled
         // treatments, committed projects, and cash flow project activities) are being handled?

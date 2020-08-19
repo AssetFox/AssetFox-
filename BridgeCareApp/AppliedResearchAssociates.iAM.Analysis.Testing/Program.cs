@@ -6,11 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 using Microsoft.Data.SqlClient;
 
-namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
+namespace AppliedResearchAssociates.iAM.Analysis.Testing
 {
     internal static class Program
     {
@@ -32,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
 
         private static readonly SimulationConnectionInfo SmallBridgeDatasetLocal = new SimulationConnectionInfo
         {
-            ConnectionFormat = @"Server=localhost;Database=PennDot_Light;Integrated Security=true",
+            ConnectionFormat = @"Server=localhost;Database=PennDot_Light;User Id={0};Password={1}",
             NetworkId = 13,
             SimulationId = 1181, // "District 2 Initial Run"
         };
@@ -46,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
 
         private static void Main()
         {
-            var simulationConnectionInfo = SmallBridgeDataset;
+            var simulationConnectionInfo = SmallBridgeDatasetLocal;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();

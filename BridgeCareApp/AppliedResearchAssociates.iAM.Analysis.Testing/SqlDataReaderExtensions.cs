@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 
-namespace AppliedResearchAssociates.iAM.Testing.CodeGeneration
+namespace AppliedResearchAssociates.iAM.Analysis.Testing
 {
     internal static class SqlDataReaderExtensions
     {

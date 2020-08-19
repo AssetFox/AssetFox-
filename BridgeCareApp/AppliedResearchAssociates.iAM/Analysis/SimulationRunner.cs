@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         // [REVIEW] In the segment_N_ns0 table, what is the use of the attribute columns whose names
         // are not suffixed with a year? Are those the values used for the "jurisdiction" filter
-        // prior to roll-forward? --- Yes, per meeting with Gregg.
+        // prior to roll-forward? --- These are "most recent" values. And "yes" for filtering, per meeting with Gregg.
 
         // [REVIEW] The year-suffixed columns in the segment table, in the context of roll-forward,
         // are those values considered "start-of-year" or "end-of-year"? (In other words, to
@@ -18,7 +18,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
         // and no-treatment? Or apply then set?) Currently, the logic treats them as start of year,
         // and so it sets them, then applies curves and no-treatment. --- After curves, before
         // no-treatment. Initialize with most recent value, e.g. 2010 roll-forward step needs to use
-        // 2016 values if it depends on other fields/attributes.
+        // 2016 values if it depends on other fields/attributes. --- Gregg seems to have said that
+        // no-treatment should not be applied. Just curves. Also seemed to say the applicable curve should be
+        // determined only once, up-front.
 
         // [REVIEW] Are priority level settings respected when "required events" (like scheduled
         // treatments, committed projects, and cash flow project activities) are being handled? --- No.

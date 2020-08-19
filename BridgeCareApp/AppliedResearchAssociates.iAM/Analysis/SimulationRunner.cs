@@ -10,57 +10,76 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         // [REVIEW] In the segment_N_ns0 table, what is the use of the attribute columns whose names
         // are not suffixed with a year? Are those the values used for the "jurisdiction" filter
-        // prior to roll-forward?
+        // prior to roll-forward? --- Yes, per meeting with Gregg.
 
         // [REVIEW] The year-suffixed columns in the segment table, in the context of roll-forward,
         // are those values considered "start-of-year" or "end-of-year"? (In other words, to
         // "process" the roll-forward year 20XX, do you set the 20XX values and then apply curves
         // and no-treatment? Or apply then set?) Currently, the logic treats them as start of year,
-        // and so it sets them, then applies curves and no-treatment.
+        // and so it sets them, then applies curves and no-treatment. --- After curves, before
+        // no-treatment. Initialize with most recent value, e.g. 2010 roll-forward step needs to use
+        // 2016 values if it depends on other fields/attributes.
 
         // [REVIEW] Are priority level settings respected when "required events" (like scheduled
-        // treatments, committed projects, and cash flow project activities) are being handled?
+        // treatments, committed projects, and cash flow project activities) are being handled? --- No.
+
+        // [REVIEW] --- Scheduled treatments will negative spend potentially.
 
         // [REVIEW] A treatment's "any" shadow applies to *all* treatments, including that same
-        // treatment, right? Currently "any" does apply to all including same.
+        // treatment, right? Currently "any" does apply to all including same. --- Yes.
 
         // [REVIEW] What is the "Actual_Spent" budget? It is not present in the budget order, yet it
-        // appears in the treatment table. (of the first test db, iAMBridgeCare)
+        // appears in the treatment table. (of the first test db, iAMBridgeCare) --- Just a report feature.
 
-        // [REVIEW] What is the "No_Funds" budget?
+        // [REVIEW] What is the "No_Funds" budget? --- Just a report feature and/or artifact of
+        // particular input settings etc.
 
         // [REVIEW] Is a treatment feasible only when *all* of its feasibility criteria are met? or
-        // when *any* are met? Currently the latter.
+        // when *any* are met? Currently the latter. --- Any.
 
-        // [REVIEW] How are inflation rate and discount rate used in the analysis logic? Currently unused.
+        // [REVIEW] How are inflation rate and discount rate used in the analysis logic? Currently
+        // unused. --- Inflation applies to cost in future years (only inflate for scheduled
+        // treatments and selected, not committed or cash flow), discount rate not being used correctly.
 
-        // [REVIEW] What is the "PerformanceCurve.Shift" bool supposed to do? Currently unused.
+        // [REVIEW] What is the "PerformanceCurve.Shift" bool supposed to do? Currently unused. ---
+        // Apparent age is calculated from the position on the curve. AGE is actual. if attr is 85
+        // on a 100-0 curve -2/year, then apparent is 7.5 years, but if actual is e.g. 3, then next
+        // year is not 83, it's 80.
 
         // [REVIEW] How should the change/equation pair on a consequence be handled? Currently, the
-        // presence of an equation expression will override the change expression.
+        // presence of an equation expression will override the change expression. --- Use the most
+        // conservative, like with multiple valid curves. With warning too.
 
         // [REVIEW] Are schedulings supposed to be used in outlook logic? Currently, they are. If
         // so, are their costs supposed to be considered as additional to the original treatment's
-        // cost? Currently, those costs are considered so.
+        // cost? Currently, those costs are considered so. --- and no inflation/discount. Warn when
+        // schedule slot is already taken (and was needed).
 
         // [REVIEW] What happens when one attribute has multiple consequences whose criteria are
-        // met? Currently, it throws.
+        // met? Currently, it throws. --- use the most conservative.
 
         // [REVIEW] What should happen when there are multiple applicable cash flow rules?
-        // Currently, it throws.
+        // Currently, it throws. --- Legacy just takes the first (likely). Ideally, warn, and use
+        // the one that would split it into more years. If there's a tie, pick the one that spends
+        // the most in the first year.
 
         // [REVIEW] Supposing multiple applicable cash flow rules are allowed (say, by using their
         // order to determine precedence), if one rule is found to not work for whatever reason,
-        // should another rule be attempted, and so on, until we run out of applicable rules?
+        // should another rule be attempted, and so on, until we run out of applicable rules? ---
+        // Ideally: Yes, keep trying (and warn/log).
+
+        // [REVIEW] 1-year distribution rules ~= "regular" selected.
+
+        // [REVIEW] Future option: Allow user to select something like "treat all warnings as errors".
 
         // [REVIEW] What happens when one calculated field has multiple equations whose criteria are
-        // met? Currently, it throws.
+        // met? Currently, it throws. --- Warn, and use most conservative.
 
         // [REVIEW] When a single budget has multiple conditions, do all of them have to be
-        // satisfied? or just one? Also, when a given budget has no condition rows entered, is there
+        // satisfied? or just one? (--- just one) Also, when a given budget has no condition rows entered, is there
         // effectively an implicit blank condition, i.e. the condition is always met? or does it
         // mean the budget can never be used? Currently, it's "met" when there are either no
-        // conditions or at least one condition is met.
+        // conditions or at least one condition is met. --- Yes, current is intended.
 
         // [REVIEW] What is the relationship between the two "Route/Section Definition" sub-nodes
         // and the set of all networks?

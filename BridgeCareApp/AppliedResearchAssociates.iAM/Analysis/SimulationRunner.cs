@@ -8,33 +8,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class SimulationRunner
     {
-        // [REVIEW] In the segment_N_ns0 table, what is the use of the attribute columns whose names
-        // are not suffixed with a year? Are those the values used for the "jurisdiction" filter
-        // prior to roll-forward? --- These are "most recent" values. And "yes" for filtering, per meeting with Gregg.
-
-        // [REVIEW] The year-suffixed columns in the segment table, in the context of roll-forward,
-        // are those values considered "start-of-year" or "end-of-year"? (In other words, to
-        // "process" the roll-forward year 20XX, do you set the 20XX values and then apply curves
-        // and no-treatment? Or apply then set?) Currently, the logic treats them as start of year,
-        // and so it sets them, then applies curves and no-treatment. --- After curves, before
-        // no-treatment. Initialize with most recent value, e.g. 2010 roll-forward step needs to use
-        // 2016 values if it depends on other fields/attributes. --- Gregg seems to have said that
-        // no-treatment should not be applied. Just curves. Also seemed to say the applicable curve should be
-        // determined only once, up-front.
-
-        // [REVIEW] Are priority level settings respected when "required events" (like scheduled
-        // treatments, committed projects, and cash flow project activities) are being handled? --- No.
-
         // [REVIEW] --- Scheduled treatments will negative spend potentially.
 
         // [REVIEW] A treatment's "any" shadow applies to *all* treatments, including that same
         // treatment, right? Currently "any" does apply to all including same. --- Yes.
-
-        // [REVIEW] What is the "Actual_Spent" budget? It is not present in the budget order, yet it
-        // appears in the treatment table. (of the first test db, iAMBridgeCare) --- Just a report feature.
-
-        // [REVIEW] What is the "No_Funds" budget? --- Just a report feature and/or artifact of
-        // particular input settings etc.
 
         // [REVIEW] Is a treatment feasible only when *all* of its feasibility criteria are met? or
         // when *any* are met? Currently the latter. --- Any.
@@ -42,11 +19,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         // [REVIEW] How are inflation rate and discount rate used in the analysis logic? Currently
         // unused. --- Inflation applies to cost in future years (only inflate for scheduled
         // treatments and selected, not committed or cash flow), discount rate not being used correctly.
-
-        // [REVIEW] What is the "PerformanceCurve.Shift" bool supposed to do? Currently unused. ---
-        // Apparent age is calculated from the position on the curve. AGE is actual. if attr is 85
-        // on a 100-0 curve -2/year, then apparent is 7.5 years, but if actual is e.g. 3, then next
-        // year is not 83, it's 80.
 
         // [REVIEW] How should the change/equation pair on a consequence be handled? Currently, the
         // presence of an equation expression will override the change expression. --- Use the most

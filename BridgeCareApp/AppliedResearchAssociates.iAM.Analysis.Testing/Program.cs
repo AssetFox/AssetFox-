@@ -254,7 +254,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
                 const string SECTIONID = "sectionid";
 
                 var attributeNames = simulation.Network.Explorer.AllAttributes.Select(attribute => attribute.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
-                var columnData = reader.GetColumnSchema()
+                var columnSchema = reader.GetColumnSchema();
+
+                var latestValueColumnPerAttribute = columnSchema
+                    .Where(column => attributeNames.Contains(column.ColumnName))
+                    .ToDictionary(column => column.ColumnName, column => column.ColumnOrdinal.Value);
+
+                var historyColumnsPerAttribute = columnSchema
                     .Where(column => !string.Equals(column.ColumnName, SECTIONID, StringComparison.OrdinalIgnoreCase) && !attributeNames.Contains(column.ColumnName))
                     .Select(column =>
                     {
@@ -279,12 +285,21 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
                         {
                             foreach (var attribute in attributes)
                             {
-                                foreach (var (columnOrdinal, year, _) in columnData[attribute.Name])
+                                var history = section.GetHistory(attribute);
+
+                                var latestValueColumnOrdinal = latestValueColumnPerAttribute[attribute.Name];
+
+                                if (!reader.IsDBNull(latestValueColumnOrdinal))
                                 {
-                                    if (!reader.IsDBNull(columnOrdinal))
+                                    history.MostRecentValue = getValue(latestValueColumnOrdinal);
+                                }
+
+                                foreach (var (historyColumnOrdinal, year, _) in historyColumnsPerAttribute[attribute.Name])
+                                {
+                                    if (!reader.IsDBNull(historyColumnOrdinal))
                                     {
-                                        var value = getValue(columnOrdinal);
-                                        section.GetHistory(attribute).Add(year, value);
+                                        var value = getValue(historyColumnOrdinal);
+                                        history.Add(year, value);
                                     }
                                 }
                             }

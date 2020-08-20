@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using AppliedResearchAssociates.Validation;
 
@@ -54,20 +53,20 @@ namespace AppliedResearchAssociates.iAM
             return results;
         }
 
-        public IDictionary<int, T> GetHistory<T>(Attribute<T> attribute)
+        public AttributeValueHistory<T> GetHistory<T>(Attribute<T> attribute)
         {
             if (!HistoryPerAttribute.TryGetValue(attribute, out var history))
             {
-                history = new Dictionary<int, T>();
+                history = new AttributeValueHistory<T>(attribute);
                 HistoryPerAttribute.Add(attribute, history);
             }
 
-            return (Dictionary<int, T>)history;
+            return (AttributeValueHistory<T>)history;
         }
 
         public bool Remove(Attribute attribute) => HistoryPerAttribute.Remove(attribute);
 
-        private readonly Dictionary<Attribute, IDictionary> HistoryPerAttribute = new Dictionary<Attribute, IDictionary>();
+        private readonly Dictionary<Attribute, object> HistoryPerAttribute = new Dictionary<Attribute, object>();
 
         private string _AreaUnit = "";
     }

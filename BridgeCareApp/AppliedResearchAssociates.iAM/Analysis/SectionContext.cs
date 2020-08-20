@@ -56,39 +56,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
         }
 
-        public void ApplyPerformanceCurves()
-        {
-            var dataUpdates = SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, curves =>
-            {
-                curves.Channel(
-                    curve => curve.Criterion.Evaluate(this),
-                    result => result ?? false,
-                    result => !result.HasValue,
-                    out var applicableCurves,
-                    out var defaultCurves);
-
-                var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
-
-                if (operativeCurves.Count == 0)
-                {
-                    throw new SimulationException("No performance curves are operative for a deteriorating attribute.");
-                }
-
-                if (operativeCurves.Count > 1)
-                {
-                    SimulationRunner.Warn("Two or more performance curves are simultaneously operative for a single deteriorating attribute.");
-                }
-
-                double calculate(PerformanceCurve curve) => curve.Equation.Compute(this);
-
-                return curves.Key.IsDecreasingWithDeterioration ? operativeCurves.Min(calculate) : operativeCurves.Max(calculate);
-            });
-
-            foreach (var (key, value) in dataUpdates)
-            {
-                SetNumber(key, value);
-            }
-        }
+        public void ApplyPerformanceCurves() => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute());
 
         public void ApplyTreatment(Treatment treatment, int year)
         {
@@ -187,6 +155,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void RollForward()
         {
+            // Per email on 2020-05-06 from Gregg to Jake, Chad, and William: "We roll forward
+            // attributes with performance curves. To do so we need to know which performance curve
+            // to use. When evaluating which performance curve to use it is necessary to evaluate
+            // the criteria. Ideally, the attribute in the criteria will have a value for the year
+            // in question. If it does not, use the Most Recent Value (from the rollup). If it does
+            // not have a Most Recent Value, use the default. Currently, I don't believe the Roll
+            // Forward uses the No Treatment consequences. It should in the new code."
+
             IEnumerable<int?> getMostRecentYearPerAttribute<T>(IEnumerable<Attribute<T>> attributes) =>
                 attributes.Select(attribute => Section.GetHistory(attribute).Keys.AsNullables().Max());
 
@@ -260,14 +236,56 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
+        private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
+        {
+            var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
+
+            foreach (var (key, value) in dataUpdates)
+            {
+                SetNumber(key, value);
+            }
+        }
+
+        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve.Shift ? curve.Attribute.Name : null);
+
+        private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
+        {
+            curves.Channel(
+                curve => curve.Criterion.Evaluate(this),
+                result => result ?? false,
+                result => !result.HasValue,
+                out var applicableCurves,
+                out var defaultCurves);
+
+            var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
+
+            if (operativeCurves.Count == 0)
+            {
+                throw new SimulationException("No performance curves are operative for a deteriorating attribute.");
+            }
+
+            if (operativeCurves.Count > 1)
+            {
+                SimulationRunner.Warn("Two or more performance curves are simultaneously operative for a single deteriorating attribute.");
+            }
+
+            Func<double>
+                calculateMinimum = () => operativeCurves.Min(CalculateValueOnCurve),
+                calculateMaximum = () => operativeCurves.Max(CalculateValueOnCurve);
+
+            return curves.Key.IsDecreasingWithDeterioration ? calculateMinimum : calculateMaximum;
+        }
+
+        private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
+
         private void Initialize()
         {
             base.SetNumber(Section.AreaIdentifier, Section.Area);
 
             var initialReferenceYear = SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
 
-            SetHistoricalValues(initialReferenceYear, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-            SetHistoricalValues(initialReferenceYear, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+            SetInitialValues(SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+            SetInitialValues(SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
             foreach (var committedProject in SimulationRunner.CommittedProjectsPerSection[Section])
             {
@@ -288,7 +306,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private void SetHistoricalValues<T>(int referenceYear, bool useMostRecentAsFallback, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
+        private void SetHistoricalValues<T>(int referenceYear, bool fallBack, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
         {
             foreach (var attribute in attributes)
             {
@@ -297,18 +315,27 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     setValue(attribute.Name, value);
                 }
-                else if (useMostRecentAsFallback)
+                else if (fallBack)
                 {
-                    var mostRecentYear = attributeHistory.Keys.Where(year => year < referenceYear).AsNullables().Max();
-                    if (mostRecentYear.HasValue)
+                    var mostRecentPastYear = attributeHistory.Keys.Where(year => year < referenceYear).AsNullables().Max();
+                    if (mostRecentPastYear.HasValue)
                     {
-                        setValue(attribute.Name, attributeHistory[mostRecentYear.Value]);
+                        setValue(attribute.Name, attributeHistory[mostRecentPastYear.Value]);
                     }
                     else
                     {
                         setValue(attribute.Name, attribute.DefaultValue);
                     }
                 }
+            }
+        }
+
+        private void SetInitialValues<T>(IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
+        {
+            foreach (var attribute in attributes)
+            {
+                var initialValue = Section.GetHistory(attribute).MostRecentValue;
+                setValue(attribute.Name, initialValue);
             }
         }
     }

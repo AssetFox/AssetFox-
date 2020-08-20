@@ -40,11 +40,17 @@ namespace AppliedResearchAssociates.iAM
 
         protected CompilableExpression() => _EnsureCompiled = _Compile;
 
-        protected static MalformedInputException ExpressionCouldNotBeCompiled(Exception innerException = null) => new MalformedInputException("Expression could not be compiled.", innerException);
+        protected static MalformedInputException ExpressionCouldNotBeCompiled() => new MalformedInputException(EXPRESSION_COULD_NOT_BE_COMPILED);
+
+        protected static MalformedInputException ExpressionCouldNotBeCompiled(Exception innerException) => new MalformedInputException(EXPRESSION_COULD_NOT_BE_COMPILED, innerException);
+
+        protected static MalformedInputException ExpressionCouldNotBeCompiled(string message) => new MalformedInputException(EXPRESSION_COULD_NOT_BE_COMPILED + " " + message);
 
         protected abstract void Compile();
 
         protected void EnsureCompiled() => _EnsureCompiled?.Invoke();
+
+        private const string EXPRESSION_COULD_NOT_BE_COMPILED = "Expression could not be compiled.";
 
         private Action _EnsureCompiled;
 

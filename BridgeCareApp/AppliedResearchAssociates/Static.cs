@@ -38,6 +38,48 @@ namespace AppliedResearchAssociates
 
         public static bool IsDefined<T>(this T enumValue) where T : Enum => Enum.IsDefined(typeof(T), enumValue);
 
+        public static bool IsSorted<T>(this IList<T> list, IComparer<T> comparer = null)
+        {
+            if (list is null)
+            {
+                throw new ArgumentNullException(nameof(list));
+            }
+
+            if (list.Count < 2)
+            {
+                return true;
+            }
+
+            comparer = comparer ?? Comparer<T>.Default;
+
+            var e0 = list[0];
+            var e1 = list[1];
+
+            var order = Math.Sign(comparer.Compare(e0, e1));
+
+            var i = 2;
+            for (; i < list.Count && order == 0; ++i)
+            {
+                e0 = e1;
+                e1 = list[i];
+
+                order = Math.Sign(comparer.Compare(e0, e1));
+            }
+
+            for (; i < list.Count; ++i)
+            {
+                e0 = e1;
+                e1 = list[i];
+
+                if (order != Math.Sign(comparer.Compare(e0, e1)))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public static IEnumerable<int> RangeFromBounds(int start, int end, int stride = 1)
         {
             switch (Math.Sign(stride))

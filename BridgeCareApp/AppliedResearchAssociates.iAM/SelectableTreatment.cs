@@ -100,22 +100,26 @@ namespace AppliedResearchAssociates.iAM
 
                 var changeApplicators = operativeConsequences.SelectMany(consequence => consequence.GetChangeApplicators(scope)).ToArray();
 
-                if (changeApplicators.Length > 1)
+                if (changeApplicators.Length == 0)
                 {
-                    if (!(consequences.Key is NumberAttribute numberAttribute))
-                    {
-                        throw new SimulationException(MessageStrings.NonNumberAttributeIsBeingActedOnByMultipleConsequences);
-                    }
-
-                    Array.Sort(changeApplicators, ChangeApplicatorComparer);
-
-                    if (!numberAttribute.IsDecreasingWithDeterioration)
-                    {
-                        Array.Reverse(changeApplicators);
-                    }
+                    return Enumerable.Empty<Action>();
                 }
 
-                return changeApplicators.Take(1).Select(applicator => applicator.Action);
+                if (changeApplicators.Length == 1)
+                {
+                    return changeApplicators[0].Action.Once();
+                }
+
+                if (!(consequences.Key is NumberAttribute numberAttribute))
+                {
+                    throw new SimulationException(MessageStrings.NonNumberAttributeIsBeingActedOnByMultipleConsequences);
+                }
+
+                Array.Sort(changeApplicators, ChangeApplicatorComparer);
+
+                var worstConsequence = numberAttribute.IsDecreasingWithDeterioration ? changeApplicators.First() : changeApplicators.Last();
+
+                return worstConsequence.Action.Once();
             }
         }
 

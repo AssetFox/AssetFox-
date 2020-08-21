@@ -25,6 +25,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
             // external programming mistakes (i.e. errors in this implementation or errors in other
             // code that uses this code).
 
+            if (Interlocked.Exchange(ref StatusCode, STATUS_CODE_RUNNING) == STATUS_CODE_RUNNING)
+            {
+                throw new InvalidOperationException("Runner is already running.");
+            }
+
+            Inform("Simulation initializing ...");
+
             var simulationValidationResults = Simulation.GetAllValidationResults();
 
             var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
@@ -38,13 +45,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 Warn($"Simulation has {numberOfWarnings} validation warnings.");
             }
-
-            if (Interlocked.Exchange(ref StatusCode, STATUS_CODE_RUNNING) == STATUS_CODE_RUNNING)
-            {
-                throw new InvalidOperationException("Runner is already running.");
-            }
-
-            Inform("Simulation initializing ...");
 
             ActiveTreatments = Simulation.GetActiveTreatments();
             BudgetContexts = Simulation.GetBudgetContextsWithCostAllocationsForCommittedProjects();

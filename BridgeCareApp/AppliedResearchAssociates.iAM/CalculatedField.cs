@@ -35,12 +35,14 @@ namespace AppliedResearchAssociates.iAM
                 throw new SimulationException(MessageStrings.CalculatedFieldHasNoOperativeEquations);
             }
 
-            if (operativeSources.Count > 1)
+            if (operativeSources.Count == 1)
             {
-                throw new SimulationException(MessageStrings.CalculatedFieldHasMultipleOperativeEquations);
+                return operativeSources[0].Equation.Compute(scope);
             }
 
-            return operativeSources[0].Equation.Compute(scope);
+            var potentialValues = operativeSources.Select(source => source.Equation.Compute(scope)).ToArray();
+
+            return IsDecreasingWithDeterioration ? potentialValues.Min() : potentialValues.Max();
         }
 
         public ValidationResultBag GetDirectValidationResults()
@@ -53,14 +55,10 @@ namespace AppliedResearchAssociates.iAM
             }
             else
             {
-                var numberOfEquationsWithBlankCriterion = ValueSources.Count(equation => equation.Criterion.ExpressionIsBlank);
-                if (numberOfEquationsWithBlankCriterion == 0)
+                var numberOfSourcesWithBlankCriterion = ValueSources.Count(source => source.Criterion.ExpressionIsBlank);
+                if (numberOfSourcesWithBlankCriterion == 0)
                 {
                     results.Add(ValidationStatus.Warning, "There are no value sources with a blank criterion.", this, nameof(ValueSources));
-                }
-                else if (numberOfEquationsWithBlankCriterion > 1)
-                {
-                    results.Add(ValidationStatus.Error, "There are multiple value sources with a blank criterion.", this, nameof(ValueSources));
                 }
             }
 

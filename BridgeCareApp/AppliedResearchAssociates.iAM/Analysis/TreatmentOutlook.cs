@@ -6,8 +6,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     internal sealed class TreatmentOutlook
     {
-        public TreatmentOutlook(SectionContext templateContext, SelectableTreatment initialTreatment, int initialYear, IEnumerable<RemainingLifeCalculator.Factory> remainingLifeCalculatorFactories)
+        public TreatmentOutlook(SimulationRunner simulationRunner, SectionContext templateContext, SelectableTreatment initialTreatment, int initialYear, IEnumerable<RemainingLifeCalculator.Factory> remainingLifeCalculatorFactories)
         {
+            SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
             TemplateContext = templateContext ?? throw new ArgumentNullException(nameof(templateContext));
             InitialTreatment = initialTreatment ?? throw new ArgumentNullException(nameof(initialTreatment));
             InitialYear = initialYear;
@@ -40,6 +41,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 RemainingLife - baseline.RemainingLife);
         }
 
+        private readonly SimulationRunner SimulationRunner;
         private readonly SectionContext TemplateContext;
         private readonly SectionContext AccumulationContext;
         private readonly SelectableTreatment InitialTreatment;
@@ -54,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private void AccumulateBenefit()
         {
             // The "cumulative benefit" is the "area under the curve" (a key phrase from the
-            // original system). To accumulate, we want to add the trapezoidal area between the
+            // legacy system). To accumulate, we want to add the trapezoidal area between the
             // previous data point and the current data point.
 
             var additionalBenefit = MostRecentBenefit; // Start with the rectangle area of (benefit_0) * 1 year.
@@ -67,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private void ApplyTreatment(Treatment treatment, int year)
         {
             var cost = AccumulationContext.GetCostOfTreatment(treatment);
-            CumulativeCost += cost;
+            CumulativeCost += cost * SimulationRunner.GetInflationFactor(year);
 
             AccumulationContext.ApplyTreatment(treatment, year);
         }

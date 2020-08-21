@@ -20,6 +20,7 @@ namespace AppliedResearchAssociates.iAM
 
         public IReadOnlyCollection<CashFlowRule> CashFlowRules => _CashFlowRules;
 
+        [Obsolete("Legacy analysis does not use this correctly.")] //--Gregg
         public double DiscountRatePercentage { get; set; }
 
         public int FirstYearOfAnalysisPeriod { get; set; }

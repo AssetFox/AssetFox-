@@ -163,6 +163,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal IReadOnlyDictionary<string, NumberAttribute> NumberAttributeByName { get; private set; }
 
+        internal double GetInflationFactor(int year) => Math.Pow(1 + Simulation.InvestmentPlan.InflationRatePercentage / 100, year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod);
+
         internal void Inform(string message) => OnInformation(new InformationEventArgs(message));
 
         internal void Warn(string message) => OnWarning(new WarningEventArgs(message));
@@ -388,11 +390,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                         group limit.Value by limit.Attribute into attributeLimitValues
                         select new RemainingLifeCalculator.Factory(attributeLimitValues));
 
-                    var baselineOutlook = new TreatmentOutlook(context, Simulation.DesignatedPassiveTreatment, year, remainingLifeCalculatorFactories);
+                    var baselineOutlook = new TreatmentOutlook(this, context, Simulation.DesignatedPassiveTreatment, year, remainingLifeCalculatorFactories);
 
                     foreach (var treatment in feasibleTreatments)
                     {
-                        var outlook = new TreatmentOutlook(context, treatment, year, remainingLifeCalculatorFactories);
+                        var outlook = new TreatmentOutlook(this, context, treatment, year, remainingLifeCalculatorFactories);
                         var option = outlook.GetOptionRelativeToBaseline(baselineOutlook);
                         treatmentOptionsBag.Add(option);
 
@@ -535,7 +537,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 return true;
             }
 
-            var remainingCost = (decimal)sectionContext.GetCostOfTreatment(treatment);
+            var remainingCost = (decimal)(sectionContext.GetCostOfTreatment(treatment) * GetInflationFactor(year));
 
             Action scheduleCashFlowEvents = null;
             treatmentConsideration.ReasonAgainstCashFlow = decideCashFlow();

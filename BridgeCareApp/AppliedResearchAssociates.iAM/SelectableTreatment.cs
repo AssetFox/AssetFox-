@@ -87,7 +87,7 @@ namespace AppliedResearchAssociates.iAM
         {
             return ConsequencesPerAttribute.SelectMany(getConsequenceAction).ToArray();
 
-            IEnumerable<Action> getConsequenceAction(IEnumerable<ConditionalTreatmentConsequence> consequences)
+            IEnumerable<Action> getConsequenceAction(IGrouping<Attribute, ConditionalTreatmentConsequence> consequences)
             {
                 consequences.Channel(
                     consequence => consequence.Criterion.Evaluate(scope),
@@ -98,12 +98,24 @@ namespace AppliedResearchAssociates.iAM
 
                 var operativeConsequences = applicableConsequences.Count > 0 ? applicableConsequences : defaultConsequences;
 
-                if (operativeConsequences.Count > 1)
+                var changeApplicators = operativeConsequences.SelectMany(consequence => consequence.GetChangeApplicators(scope)).ToArray();
+
+                if (changeApplicators.Length > 1)
                 {
-                    throw new SimulationException(MessageStrings.AttributeIsBeingActedOnByMultipleConsequences);
+                    if (!(consequences.Key is NumberAttribute numberAttribute))
+                    {
+                        throw new SimulationException(MessageStrings.NonNumberAttributeIsBeingActedOnByMultipleConsequences);
+                    }
+
+                    Array.Sort(changeApplicators, ChangeApplicatorComparer);
+
+                    if (!numberAttribute.IsDecreasingWithDeterioration)
+                    {
+                        Array.Reverse(changeApplicators);
+                    }
                 }
 
-                return operativeConsequences.Select(consequence => consequence.GetRecalculator(scope));
+                return changeApplicators.Take(1).Select(applicator => applicator.Action);
             }
         }
 
@@ -122,6 +134,8 @@ namespace AppliedResearchAssociates.iAM
         internal void SetConsequencesPerAttribute() => ConsequencesPerAttribute = Consequences.ToLookup(c => c.Attribute);
 
         internal void UnsetConsequencesPerAttribute() => ConsequencesPerAttribute = null;
+
+        private static readonly IComparer<ChangeApplicator> ChangeApplicatorComparer = SelectionComparer<ChangeApplicator>.Create(applicator => applicator.Number.Value);
 
         private readonly List<ConditionalTreatmentConsequence> _Consequences = new List<ConditionalTreatmentConsequence>();
 

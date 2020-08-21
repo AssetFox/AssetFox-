@@ -2,8 +2,6 @@
 {
     internal static class MessageStrings
     {
-        public static string AttributeIsBeingActedOnByMultipleConsequences => "Attribute is being acted on by multiple consequences.";
-
         public static string CalculatedFieldHasMultipleOperativeEquations => "Calculated field has multiple operative equations.";
 
         public static string CalculatedFieldHasNoOperativeEquations => "Calculated field has no operative equations.";
@@ -17,6 +15,8 @@
         public static string InvalidOptimizationStrategy => "Invalid optimization strategy.";
 
         public static string InvalidSpendingStrategy => "Invalid spending strategy.";
+
+        public static string NonNumberAttributeIsBeingActedOnByMultipleConsequences => "Non-number attribute is being acted on by multiple consequences.";
 
         public static string RemainingCostIsNegative => "Remaining cost is negative.";
 

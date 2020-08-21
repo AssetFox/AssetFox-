@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates
                 e0 = e1;
                 e1 = list[i];
 
-                if (order != Math.Sign(comparer.Compare(e0, e1)))
+                if (order == -Math.Sign(comparer.Compare(e0, e1)))
                 {
                     return false;
                 }
@@ -79,6 +79,8 @@ namespace AppliedResearchAssociates
 
             return true;
         }
+
+        public static IEnumerable<T> Once<T>(this T value) => Enumerable.Repeat(value, 1);
 
         public static IEnumerable<int> RangeFromBounds(int start, int end, int stride = 1)
         {

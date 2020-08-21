@@ -6,18 +6,18 @@ namespace AppliedResearchAssociates.iAM
 {
     public sealed class AttributeValueChange : CompilableExpression
     {
-        public Action GetApplicator(Attribute attribute, CalculateEvaluateScope scope)
+        internal ChangeApplicator GetApplicator(Attribute attribute, CalculateEvaluateScope scope)
         {
             switch (attribute)
             {
             case NumberAttribute _:
                 var oldNumber = scope.GetNumber(attribute.Name);
                 var newNumber = ChangeNumber(oldNumber);
-                return () => scope.SetNumber(attribute.Name, newNumber);
+                return new ChangeApplicator(() => scope.SetNumber(attribute.Name, newNumber), newNumber);
 
             case TextAttribute _:
                 var newText = Expression;
-                return () => scope.SetText(attribute.Name, newText);
+                return new ChangeApplicator(() => scope.SetText(attribute.Name, newText), null);
 
             default:
                 throw new ArgumentException("Invalid attribute type.", nameof(attribute));

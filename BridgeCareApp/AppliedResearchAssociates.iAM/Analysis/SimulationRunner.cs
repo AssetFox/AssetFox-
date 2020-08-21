@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
@@ -18,6 +19,26 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void Run()
         {
+            // During the execution of this method and its dependencies, the "SimulationException"
+            // type is used for errors that are caused by invalid user input. Other types like
+            // "InvalidOperationException" are used for errors that are caused by internal or
+            // external programming mistakes (i.e. errors in this implementation or errors in other
+            // code that uses this code).
+
+            var simulationValidationResults = Simulation.GetAllValidationResults();
+
+            var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
+            if (numberOfErrors > 0)
+            {
+                throw new SimulationException($"Simulation has {numberOfErrors} validation errors.");
+            }
+
+            var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
+            if (numberOfWarnings > 0)
+            {
+                Warn($"Simulation has {numberOfWarnings} validation warnings.");
+            }
+
             if (Interlocked.Exchange(ref StatusCode, STATUS_CODE_RUNNING) == STATUS_CODE_RUNNING)
             {
                 throw new InvalidOperationException("Runner is already running.");

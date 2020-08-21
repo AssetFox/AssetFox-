@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM
 
         internal override bool CanUseBudget(Budget budget) => budget == Budget;
 
-        internal override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope) => Consequences.Select(consequence => consequence.GetRecalculator(scope)).ToArray();
+        internal override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope) => Consequences.Select(consequence => consequence.GetChangeApplicators(scope).Single().Action).ToArray();
 
         internal override double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts) => Cost;
 

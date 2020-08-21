@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.Validation;
 
@@ -24,6 +24,6 @@ namespace AppliedResearchAssociates.iAM
             return results;
         }
 
-        public virtual Action GetRecalculator(CalculateEvaluateScope scope) => Change.GetApplicator(Attribute, scope);
+        internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(CalculateEvaluateScope scope) => Change.GetApplicator(Attribute, scope).Once();
     }
 }

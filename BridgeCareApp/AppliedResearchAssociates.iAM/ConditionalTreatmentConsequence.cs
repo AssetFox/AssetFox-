@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.Validation;
 
@@ -35,15 +37,30 @@ namespace AppliedResearchAssociates.iAM
             }
         }
 
-        public override Action GetRecalculator(CalculateEvaluateScope scope)
+        public override ValidationResultBag GetDirectValidationResults()
         {
-            if (!Equation.ExpressionIsBlank)
+            var results = base.GetDirectValidationResults();
+
+            if (!Equation.ExpressionIsBlank && !(Attribute is NumberAttribute))
             {
-                var newValue = Equation.Compute(scope);
-                return () => scope.SetNumber(Attribute.Name, newValue);
+                results.Add(ValidationStatus.Error, "Equation is set and attribute is not a number.", this);
             }
 
-            return base.GetRecalculator(scope);
+            return results;
+        }
+
+        internal override IEnumerable<ChangeApplicator> GetChangeApplicators(CalculateEvaluateScope scope)
+        {
+            var applicators = base.GetChangeApplicators(scope);
+
+            if (!Equation.ExpressionIsBlank && Attribute is NumberAttribute)
+            {
+                var newValue = Equation.Compute(scope);
+                var equationApplicator = new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newValue), newValue);
+                applicators = applicators.Append(equationApplicator);
+            }
+
+            return applicators;
         }
     }
 }

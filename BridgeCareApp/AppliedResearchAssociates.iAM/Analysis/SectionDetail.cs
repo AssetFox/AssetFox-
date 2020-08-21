@@ -21,13 +21,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public string FacilityName { get; }
 
-        public string NameOfUnfundedScheduledTreatment { get; set; }
-
         public string SectionName { get; }
 
         public TreatmentCause TreatmentCause { get; set; }
 
         public List<TreatmentConsiderationDetail> TreatmentConsiderations { get; } = new List<TreatmentConsiderationDetail>();
+
+        public bool TreatmentFundingIgnoresSpendingLimit { get; set; }
 
         public string TreatmentName { get; set; }
 
@@ -52,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             TreatmentName = original.TreatmentName;
             TreatmentCause = original.TreatmentCause;
             TreatmentStatus = original.TreatmentStatus;
-            NameOfUnfundedScheduledTreatment = original.NameOfUnfundedScheduledTreatment;
+            TreatmentFundingIgnoresSpendingLimit = original.TreatmentFundingIgnoresSpendingLimit;
 
             ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute);
             ValuePerTextAttribute.CopyFrom(original.ValuePerTextAttribute);

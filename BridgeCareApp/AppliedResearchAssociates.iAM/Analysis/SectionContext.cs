@@ -306,7 +306,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private void SetHistoricalValues<T>(int referenceYear, bool fallBack, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
+        private void SetHistoricalValues<T>(int referenceYear, bool fallBackward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
         {
             foreach (var attribute in attributes)
             {
@@ -315,7 +315,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     setValue(attribute.Name, value);
                 }
-                else if (fallBack)
+                else if (fallBackward)
                 {
                     var mostRecentPastYear = attributeHistory.Keys.Where(year => year < referenceYear).AsNullables().Max();
                     if (mostRecentPastYear.HasValue)

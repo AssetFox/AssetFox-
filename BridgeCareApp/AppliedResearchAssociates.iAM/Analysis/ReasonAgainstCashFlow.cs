@@ -3,9 +3,7 @@
     public enum ReasonAgainstCashFlow
     {
         Undefined,
-        TreatmentIsPartOfActiveCashFlowProject,
-        TreatmentIsDueToCommittedProject,
-        NoConditionMetForAnyCashFlowRule,
+        NotNeeded,
         ApplicableDistributionRuleIsForOnlyOneYear,
         LastYearOfCashFlowIsOutsideOfAnalysisPeriod,
         FutureEventScheduleIsBlocked,

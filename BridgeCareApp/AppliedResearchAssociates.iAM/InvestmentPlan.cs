@@ -18,7 +18,10 @@ namespace AppliedResearchAssociates.iAM
 
         public IReadOnlyList<Budget> Budgets => _Budgets;
 
-        public IReadOnlyCollection<CashFlowRule> CashFlowRules => _CashFlowRules;
+        /// <summary>
+        ///     The order of cash flow rules determines precedence when multiple rules may apply.
+        /// </summary>
+        public IReadOnlyList<CashFlowRule> CashFlowRules => _CashFlowRules;
 
         [Obsolete("Legacy analysis does not use this correctly.")] //--Gregg
         public double DiscountRatePercentage { get; set; }
@@ -60,14 +63,9 @@ namespace AppliedResearchAssociates.iAM
 
         public CashFlowRule AddCashFlowRule() => _CashFlowRules.GetAdd(new CashFlowRule(Simulation.Network.Explorer));
 
-        public void DecrementBudgetIndex(Budget budget)
-        {
-            var index = _Budgets.IndexOf(budget);
-            if (index > 0)
-            {
-                _Budgets.Swap(index - 1, index);
-            }
-        }
+        public void DecrementIndexOf(Budget budget) => _Budgets.DecrementIndexOf(budget);
+
+        public void DecrementIndexOf(CashFlowRule cashFlowRule) => _CashFlowRules.DecrementIndexOf(cashFlowRule);
 
         public ValidationResultBag GetDirectValidationResults()
         {
@@ -81,14 +79,9 @@ namespace AppliedResearchAssociates.iAM
             return results;
         }
 
-        public void IncrementBudgetIndex(Budget budget)
-        {
-            var index = _Budgets.IndexOf(budget);
-            if (index >= 0 && index < _Budgets.Count - 1)
-            {
-                _Budgets.Swap(index, index + 1);
-            }
-        }
+        public void IncrementIndexOf(Budget budget) => _Budgets.IncrementIndexOf(budget);
+
+        public void IncrementIndexOf(CashFlowRule cashFlowRule) => _CashFlowRules.IncrementIndexOf(cashFlowRule);
 
         public void Remove(Budget budget)
         {

@@ -30,10 +30,28 @@ namespace AppliedResearchAssociates
         [Obsolete(NET_STANDARD_2_1_AVAILABILITY)]
         public static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> keyValue, out TKey key, out TValue value) => (key, value) = (keyValue.Key, keyValue.Value);
 
+        public static void DecrementIndexOf<T>(this IList<T> list, T item)
+        {
+            var index = list.IndexOf(item);
+            if (index > 0)
+            {
+                list.Swap(index - 1, index);
+            }
+        }
+
         public static T GetAdd<T>(this ICollection<T> collection, T value)
         {
             collection.Add(value);
             return value;
+        }
+
+        public static void IncrementIndexOf<T>(this IList<T> list, T item)
+        {
+            var index = list.IndexOf(item);
+            if (index >= 0 && index < list.Count - 1)
+            {
+                list.Swap(index, index + 1);
+            }
         }
 
         public static bool IsDefined<T>(this T enumValue) where T : Enum => Enum.IsDefined(typeof(T), enumValue);

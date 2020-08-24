@@ -324,7 +324,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
                     else
                     {
-                        setValue(attribute.Name, attribute.DefaultValue);
+                        setValue(attribute.Name, attributeHistory.MostRecentValue);
                     }
                 }
             }

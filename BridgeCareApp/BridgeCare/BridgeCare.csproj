@@ -552,13 +552,12 @@
     <Folder Include="Views\SummaryReportBridgeData\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="connection.config">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="emailAlerts.config" />
+    <None Include="esec.config" />
+    <None Include="connection.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -567,7 +566,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Content Include="esec.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

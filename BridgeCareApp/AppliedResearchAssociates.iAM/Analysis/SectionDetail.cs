@@ -1,27 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public sealed class SectionDetail : ISection
+    public sealed class SectionDetail : SectionSummaryDetail
     {
-        public SectionDetail(Section section)
+        public SectionDetail(Section section) : base(section)
         {
-            if (section is null)
-            {
-                throw new ArgumentNullException(nameof(section));
-            }
-
-            FacilityName = section.Facility.Name;
-            SectionName = section.Name;
         }
-
-        public double Area { get; set; }
-
-        public string FacilityName { get; }
-
-        public string SectionName { get; }
 
         public TreatmentCause TreatmentCause { get; set; }
 
@@ -37,25 +23,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public TreatmentStatus TreatmentStatus { get; set; }
 
-        public Dictionary<string, double> ValuePerNumericAttribute { get; } = new Dictionary<string, double>();
-
-        public Dictionary<string, string> ValuePerTextAttribute { get; } = new Dictionary<string, string>();
-
-        double ISection.GetAttributeValue(string attributeName) => ValuePerNumericAttribute[attributeName];
-
-        internal SectionDetail(SectionDetail original)
+        internal SectionDetail(SectionDetail original) : base(original)
         {
-            FacilityName = original.FacilityName;
-            SectionName = original.SectionName;
-            Area = original.Area;
-
             TreatmentName = original.TreatmentName;
             TreatmentCause = original.TreatmentCause;
             TreatmentStatus = original.TreatmentStatus;
             TreatmentFundingIgnoresSpendingLimit = original.TreatmentFundingIgnoresSpendingLimit;
-
-            ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute);
-            ValuePerTextAttribute.CopyFrom(original.ValuePerTextAttribute);
 
             TreatmentOptions.AddRange(original.TreatmentOptions.Select(_ => new TreatmentOptionDetail(_)));
             TreatmentConsiderations.AddRange(original.TreatmentConsiderations.Select(_ => new TreatmentConsiderationDetail(_)));

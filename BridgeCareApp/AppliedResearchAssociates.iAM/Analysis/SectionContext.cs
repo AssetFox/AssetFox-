@@ -5,7 +5,7 @@ using AppliedResearchAssociates.CalculateEvaluate;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    internal sealed class SectionContext : CalculateEvaluateScope, ISection
+    internal sealed class SectionContext : CalculateEvaluateScope
     {
         public SectionContext(Section section, SimulationRunner simulationRunner)
         {
@@ -41,9 +41,17 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public SimulationRunner SimulationRunner { get; }
 
-        private AnalysisMethod AnalysisMethod => SimulationRunner.Simulation.AnalysisMethod;
+        public SectionSummaryDetail SummaryDetail
+        {
+            get
+            {
+                var detail = new SectionSummaryDetail(Section);
+                CopyAttributeValuesToDetail(detail);
+                return detail;
+            }
+        }
 
-        double ISection.Area => Section.Area;
+        private AnalysisMethod AnalysisMethod => SimulationRunner.Simulation.AnalysisMethod;
 
         public void ApplyPassiveTreatment(int year)
         {
@@ -87,20 +95,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Detail.TreatmentStatus = TreatmentStatus.Applied;
         }
 
-        public void CopyAttributeValuesToDetail()
-        {
-            Detail.Area = Section.Area;
-
-            foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.NumericAttributes)
-            {
-                Detail.ValuePerNumericAttribute.Add(attribute.Name, GetNumber(attribute.Name));
-            }
-
-            foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.TextAttributes)
-            {
-                Detail.ValuePerTextAttribute.Add(attribute.Name, GetText(attribute.Name));
-            }
-        }
+        public void CopyAttributeValuesToDetail() => CopyAttributeValuesToDetail(Detail);
 
         public void CopyDetailFrom(SectionContext other) => Detail = new SectionDetail(other.Detail);
 
@@ -218,8 +213,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public bool YearIsWithinShadowForSameTreatment(int year, Treatment treatment) => FirstUnshadowedYearForSameTreatment.TryGetValue(treatment.Name, out var firstUnshadowedYear) && year < firstUnshadowedYear;
 
-        double ISection.GetAttributeValue(string attributeName) => GetNumber(attributeName);
-
         private static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
         private readonly IDictionary<string, int> FirstUnshadowedYearForSameTreatment = new Dictionary<string, int>();
@@ -247,6 +240,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
         }
 
         private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve.Shift ? curve.Attribute.Name : null);
+
+        private void CopyAttributeValuesToDetail(SectionSummaryDetail detail)
+        {
+            foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.NumericAttributes)
+            {
+                detail.ValuePerNumericAttribute.Add(attribute.Name, GetNumber(attribute.Name));
+            }
+
+            foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.TextAttributes)
+            {
+                detail.ValuePerTextAttribute.Add(attribute.Name, GetText(attribute.Name));
+            }
+        }
 
         private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
         {

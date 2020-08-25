@@ -26,6 +26,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
             SimulationId = 1171, // "JML Run District 8"
         };
 
+        private static readonly SimulationConnectionInfo MainDatasetLocal = new SimulationConnectionInfo
+        {
+            ConnectionFormat = @"Server=localhost;Database=DbBackup;User Id={0};Password={1}",
+            NetworkId = 13,
+            SimulationId = 1171, // "JML Run District 8"
+        };
+
         private static readonly SimulationConnectionInfo SmallBridgeDataset = new SimulationConnectionInfo
         {
             ConnectionFormat = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=PennDot_Light;User Id={0};Password={1}",
@@ -44,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
         private static void Main()
         {
-            var simulationConnectionInfo = SmallBridgeDatasetLocal;
+            var simulationConnectionInfo = MainDatasetLocal;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();
@@ -85,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
             LogProgressToConsole(timer.Elapsed, "simulation run");
 
             Console.WriteLine();
-            Console.WriteLine("Network condition: " + simulation.AnalysisMethod.Benefit.GetNetworkCondition(simulation.Results.Last().Sections));
+            Console.WriteLine("Network condition: " + simulation.Results.FinalStatus.ConditionOfNetwork);
 
             var outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             var outputFile = $"{DateTime.Now:yyyyMMddHHmmss} - Network {simulationConnectionInfo.NetworkId} - Simulation {simulationConnectionInfo.SimulationId}.json";

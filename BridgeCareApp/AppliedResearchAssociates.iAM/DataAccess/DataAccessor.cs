@@ -290,6 +290,15 @@ where simulationid = {simulationId}
 
                         while (reader.Read())
                         {
+                            // With respect to memory footprint, it may be worthwhile to abbreviate
+                            // (where possible) the full history of each attribute in each section,
+                            // at least for the purpose of analysis. The analysis requires the
+                            // historical values only for roll-forward, and it only requires (for a
+                            // given section, per attribute) history back to the most recent year
+                            // before (or at) the earliest most recent year (for the same section,
+                            // across all attributes). Attributes with no history should be ignored
+                            // if applying this logic.
+
                             var sectionId = reader.GetInt32(sectionidColumnIndex);
                             if (sectionById.TryGetValue(sectionId, out var section))
                             {

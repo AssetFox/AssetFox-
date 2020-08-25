@@ -130,14 +130,24 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             ObjectiveFunction = Simulation.AnalysisMethod.ObjectiveFunction;
 
-            Simulation.Results.Clear();
+            Simulation.ClearResults();
 
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
                 Inform($"Simulating {year} ...");
 
-                var yearDetail = Simulation.Results.GetAdd(new SimulationYearDetail(year));
-                yearDetail.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
+                // Yearly set-up.
+
+                var yearDetail = Simulation.Results.Years.GetAdd(new SimulationYearDetail(year));
+
+                yearDetail.InitialStatus.ConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
+
+                UpdateConditionActuals(year);
+                RecordStatusOfConditionGoals(yearDetail.InitialStatus);
+
+                InParallel(SectionContexts, context => context.CopyAttributeValuesToDetail());
+
+                // Yearly activity.
 
                 var baselineContexts = ApplyRequiredEvents(year);
                 var baselineContextPerWorkingContext = baselineContexts.ToDictionary(_ => new SectionContext(_), _ => _);
@@ -157,9 +167,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 ConsiderSelectableTreatments(baselineContextPerWorkingContext, year);
 
-                RecordStatusOfConditionGoals(yearDetail);
-
-                InParallel(SectionContexts, context => context.CopyAttributeValuesToDetail());
+                // Yearly clean-up.
 
                 yearDetail.Sections.AddRange(SectionContexts.Select(context => context.Detail));
 
@@ -168,12 +176,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 MoveBudgetsToNextYear();
             }
 
-            Inform("Simulation complete.");
+            Simulation.Results.FinalStatus.ConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
+
+            RecordStatusOfConditionGoals(Simulation.Results.FinalStatus);
+
+            Simulation.Results.SectionSummaries.AddRange(SectionContexts.Select(context => context.SummaryDetail));
 
             foreach (var treatment in Simulation.Treatments)
             {
                 treatment.UnsetConsequencesPerAttribute();
             }
+
+            Inform("Simulation complete.");
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
         }
@@ -499,7 +513,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void OnWarning(WarningEventArgs e) => Warning?.Invoke(this, e);
 
-        private void RecordStatusOfConditionGoals(SimulationYearDetail detail)
+        private void RecordStatusOfConditionGoals(SimulationStatusDetail detail)
         {
             detail.TargetConditionGoals.AddRange(TargetConditionActuals.Select(actual => new TargetConditionGoalDetail
             {

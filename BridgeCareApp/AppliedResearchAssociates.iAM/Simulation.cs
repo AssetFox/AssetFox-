@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM
 
         public IReadOnlyCollection<PerformanceCurve> PerformanceCurves => _PerformanceCurves;
 
-        public ICollection<SimulationYearDetail> Results { get; } = new SetWithoutNulls<SimulationYearDetail>();
+        public SimulationOutput Results { get; private set; } = new SimulationOutput();
 
         public ValidatorBag Subvalidators => new ValidatorBag { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
 
@@ -41,6 +41,8 @@ namespace AppliedResearchAssociates.iAM
         public PerformanceCurve AddPerformanceCurve() => _PerformanceCurves.GetAdd(new PerformanceCurve(Network.Explorer));
 
         public SelectableTreatment AddTreatment() => _Treatments.GetAdd(new SelectableTreatment(this));
+
+        public void ClearResults() => Results = new SimulationOutput();
 
         public IReadOnlyCollection<SelectableTreatment> GetActiveTreatments()
         {

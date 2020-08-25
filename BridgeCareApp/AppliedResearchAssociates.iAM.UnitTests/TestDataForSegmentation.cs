@@ -9,10 +9,10 @@ namespace AppliedResearchAssociates.iAM.UnitTests
 {
     public static class TestDataForSegmentation
     {
-        public static Segment<double> NumericSegmentLinearLocation = new Segment<double>
+        public static Segment NumericSegmentLinearLocation = new Segment
             (TestDataForAttribute.NumericAttributeDataLinearLocation.Location, TestDataForAttribute.NumericAttributeDataLinearLocation);
 
-        public static Segment<string> TextSegmentLinearLocation = new Segment<string>
+        public static Segment TextSegmentLinearLocation = new Segment
             (TestDataForAttribute.TextAttributeDataLinearLocOutput.Location, TestDataForAttribute.TextAttributeDataLinearLocOutput);
     }
 }

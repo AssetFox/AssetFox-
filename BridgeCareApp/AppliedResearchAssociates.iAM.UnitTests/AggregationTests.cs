@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Aggregation;
+using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.Segmentation;
 using NUnit.Framework;
 
 namespace AppliedResearchAssociates.iAM.UnitTests
@@ -90,6 +92,21 @@ namespace AppliedResearchAssociates.iAM.UnitTests
 
             // Assert
             Assert.That(resultSet.Count(), Is.EqualTo(data.Count));
+        }
+
+        [Test]
+        public void AggregateTest()
+        {
+            var data = new List<IAttributeDatum>()
+            {
+                TestDataForAttribute.TextAttributeDataSectionLocOutput,
+                TestDataForAttribute.TextAttributeDataSectionLocOutput_2
+            };
+            var networkSegments = new List<Segment>()
+            {
+                new Segment(new SectionLocation("B-0-1"), null)
+            };
+            Aggregator.Aggregate(data, networkSegments);
         }
 
     }

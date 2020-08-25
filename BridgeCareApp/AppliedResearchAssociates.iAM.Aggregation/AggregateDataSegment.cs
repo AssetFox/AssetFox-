@@ -6,17 +6,17 @@ using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.Aggregation
 {
-    public class AggregateDataSegment<T>
+    public class AggregateDataSegment
     {
-        private List<AttributeDatum<T>> AttributeData { get; } = new List<AttributeDatum<T>>();
+        private List<IAttributeDatum> AttributeData { get; } = new List<IAttributeDatum>();
 
-        public AggregateDataSegment(Segment<T> segment) => Segment = segment;
+        public AggregateDataSegment(Segment segment) => Segment = segment;
 
-        public Segment<T> Segment { get; }
+        public Segment Segment { get; }
 
-        public void AddDatum(AttributeDatum<T> datum) => AttributeData.Add(datum);
+        public void AddDatum(IAttributeDatum datum) => AttributeData.Add(datum);
 
-        public IEnumerable<(int, T)> ApplyAggregationRule(Attribute attribute, AggregationRule<T> aggregationRule)
+        public IEnumerable<(int year, T value)> GetAggregatedValuesByYear<T>(Attribute attribute, AggregationRule<T> aggregationRule)
         {
             var specifiedData = AttributeData.Where(_ => _.Attribute.Guid == attribute.Guid);
             return aggregationRule.Apply(specifiedData);

@@ -98,6 +98,7 @@ async function run() {
 
     Scenario.watch([], options).on('change', data => {
         emitEvent('scenarioStatus', data);
+        
     });
 
     TargetLibrary.watch([], options).on('change', data => {
@@ -127,5 +128,4 @@ async function run() {
     app.use(function (err, req, res, next) {
         winston.error(err.stack);
       });
-
 }

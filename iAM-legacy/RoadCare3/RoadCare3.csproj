@@ -325,7 +325,7 @@
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\BridgeCareApp\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -1243,9 +1243,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\BridgeCareApp\PciDistress\PciDistress.csproj">
+    <ProjectReference Include="..\..\BridgeCareApp\AppliedResearchAssociates.PciDistress\AppliedResearchAssociates.PciDistress.csproj">
       <Project>{1a6e8f6e-1e99-40c8-8888-7005e7756cb3}</Project>
-      <Name>PciDistress</Name>
+      <Name>AppliedResearchAssociates.PciDistress</Name>
     </ProjectReference>
     <ProjectReference Include="..\AssetRollup\AssetRollup.csproj">
       <Project>{079A9D92-569A-4DE5-AEED-D97AF90124FE}</Project>

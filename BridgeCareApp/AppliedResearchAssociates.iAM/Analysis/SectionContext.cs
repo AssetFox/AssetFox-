@@ -117,6 +117,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override double GetNumber(string key)
         {
+            if (GetNumber_ActiveKeysOfInvocation.Contains(key))
+            {
+                var loop = GetNumber_ActiveKeysOfInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
+                var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));
+                throw new SimulationException("Loop encountered during number calculation: " + loopText);
+            }
+
+            GetNumber_ActiveKeysOfInvocation.Push(key);
+
             if (!NumberCache.TryGetValue(key, out var number))
             {
                 number = base.GetNumber(key);
@@ -136,6 +145,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 NumberCache[key] = number;
             }
+
+            _ = GetNumber_ActiveKeysOfInvocation.Pop();
 
             return number;
         }
@@ -214,6 +225,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public bool YearIsWithinShadowForSameTreatment(int year, Treatment treatment) => FirstUnshadowedYearForSameTreatment.TryGetValue(treatment.Name, out var firstUnshadowedYear) && year < firstUnshadowedYear;
 
         private static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
+
+        private readonly Stack<string> GetNumber_ActiveKeysOfInvocation = new Stack<string>();
 
         private readonly IDictionary<string, int> FirstUnshadowedYearForSameTreatment = new Dictionary<string, int>();
 

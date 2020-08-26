@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
@@ -9,6 +10,23 @@ namespace AppliedResearchAssociates.iAM
     public sealed class Equation : CompilableExpression
     {
         public Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
+
+        public IReadOnlyCollection<string> ReferencedParameters
+        {
+            get
+            {
+                try
+                {
+                    EnsureCompiled();
+                }
+                catch (MalformedInputException)
+                {
+                    return Array.Empty<string>();
+                }
+
+                return Calculator.ReferencedParameters;
+            }
+        }
 
         public double Compute(CalculateEvaluateScope scope, string attributeNameForShift = null)
         {
@@ -33,7 +51,7 @@ namespace AppliedResearchAssociates.iAM
 
             if (Calculator != null)
             {
-                return Calculator(scope);
+                return Calculator.Delegate(scope);
             }
 
             throw new InvalidOperationException("Expression has not been compiled.");

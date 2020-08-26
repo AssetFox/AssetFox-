@@ -10,6 +10,8 @@ namespace AppliedResearchAssociates.CalculateEvaluate
     {
         public CalculateEvaluateCompilerVisitor(IReadOnlyDictionary<string, CalculateEvaluateParameterType> parameterTypes) => ParameterTypes = parameterTypes ?? throw new ArgumentNullException(nameof(parameterTypes));
 
+        public SortedSet<string> ReferencedParameters { get; } = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+
         #region "Calculate"
 
         static CalculateEvaluateCompilerVisitor()
@@ -56,7 +58,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
         public override Expression VisitCalculationRoot(CalculateEvaluateParser.CalculationRootContext context)
         {
             var body = Visit(context.calculation());
-            var lambda = Expression.Lambda<Calculator>(body, ScopeParameter);
+            var lambda = Expression.Lambda<CalculateEvaluateDelegate<double>>(body, ScopeParameter);
             return lambda;
         }
 
@@ -163,6 +165,8 @@ namespace AppliedResearchAssociates.CalculateEvaluate
                 throw new CalculateEvaluateCompilationException("Parameter is not a number.");
             }
 
+            _ = ReferencedParameters.Add(identifierText);
+
             var identifierString = Expression.Constant(identifierText);
             result = Expression.Call(ScopeParameter, Number.GetterInfo, identifierString);
             return true;
@@ -187,7 +191,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
         public override Expression VisitEvaluationRoot(CalculateEvaluateParser.EvaluationRootContext context)
         {
             var body = Visit(context.evaluation());
-            var lambda = Expression.Lambda<Evaluator>(body, ScopeParameter);
+            var lambda = Expression.Lambda<CalculateEvaluateDelegate<bool>>(body, ScopeParameter);
             return lambda;
         }
 
@@ -269,6 +273,8 @@ namespace AppliedResearchAssociates.CalculateEvaluate
                 throw new InvalidOperationException("Invalid parameter type.");
             }
 
+            _ = ReferencedParameters.Add(identifierText);
+
             var identifier = Expression.Constant(identifierText);
             var reference = Expression.Call(ScopeParameter, argumentInfo.GetterInfo, identifier);
 
@@ -290,6 +296,8 @@ namespace AppliedResearchAssociates.CalculateEvaluate
                 {
                     throw new CalculateEvaluateCompilationException("Comparison types do not match.");
                 }
+
+                _ = ReferencedParameters.Add(operandIdentifierText);
 
                 var operandIdentifier = Expression.Constant(operandIdentifierText);
                 operand = Expression.Call(ScopeParameter, argumentInfo.GetterInfo, operandIdentifier);

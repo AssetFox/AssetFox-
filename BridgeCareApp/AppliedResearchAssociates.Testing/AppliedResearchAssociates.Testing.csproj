@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.Choice\AppliedResearchAssociates.Choice.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.Comparison\AppliedResearchAssociates.Comparison.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.CycleDetection\AppliedResearchAssociates.CycleDetection.csproj" />
   </ItemGroup>
 
 </Project>

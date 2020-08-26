@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM
         public bool? Evaluate(CalculateEvaluateScope scope)
         {
             EnsureCompiled();
-            return Evaluator?.Invoke(scope);
+            return Evaluator?.Delegate(scope);
         }
 
         public bool EvaluateOrDefault(CalculateEvaluateScope scope) => Evaluate(scope) ?? true;

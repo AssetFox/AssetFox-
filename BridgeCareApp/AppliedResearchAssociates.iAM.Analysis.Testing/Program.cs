@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AppliedResearchAssociates.iAM.DataAccess;
@@ -51,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
         private static void Main()
         {
-            var simulationConnectionInfo = MainDatasetLocal;
+            var simulationConnectionInfo = SmallBridgeDatasetLocal;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();

@@ -56,6 +56,18 @@ namespace AppliedResearchAssociates.iAM
                 results.Add(ValidationStatus.Error, "Multiple networks have the same name.", this, nameof(Networks));
             }
 
+            var calculatedFieldByName = CalculatedFields.ToDictionary(field => field.Name);
+            var cycles = CycleDetection.FindAllCycles(CalculatedFields, field => field.ValueSources.SelectMany(getReferencedFields));
+
+            IEnumerable<CalculatedField> getReferencedFields(CalculatedFieldValueSource source) => source.Equation.ReferencedParameters.SelectMany(getField);
+            IEnumerable<CalculatedField> getField(string parameter) => calculatedFieldByName.TryGetValue(parameter, out var referencedField) ? referencedField.Once() : Enumerable.Empty<CalculatedField>();
+
+            foreach (var cycle in cycles)
+            {
+                var loopText = string.Join(" to ", cycle.Append(cycle[0]).Select(field => "[" + field.Name + "]"));
+                results.Add(ValidationStatus.Warning, "Possible loop among calculated fields: " + loopText, this, nameof(CalculatedFields));
+            }
+
             return results;
         }
 

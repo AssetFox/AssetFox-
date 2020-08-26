@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates
 {
     public sealed class SequenceEqualityComparer : EqualityComparer<IEnumerable>
     {
-        new public static SequenceEqualityComparer Default { get; } = new SequenceEqualityComparer(EqualityComparer<object>.Default);
+        new public static IEqualityComparer<IEnumerable> Default { get; } = new SequenceEqualityComparer(EqualityComparer<object>.Default);
 
         public static SequenceEqualityComparer Create(IEqualityComparer equalityComparer) => new SequenceEqualityComparer(equalityComparer ?? throw new ArgumentNullException(nameof(equalityComparer)));
 
@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates
 
     public sealed class SequenceEqualityComparer<T> : EqualityComparer<IEnumerable<T>>
     {
-        new public static SequenceEqualityComparer<T> Default { get; } = new SequenceEqualityComparer<T>(EqualityComparer<T>.Default);
+        new public static IEqualityComparer<IEnumerable<T>> Default { get; } = new SequenceEqualityComparer<T>(EqualityComparer<T>.Default);
 
         public override bool Equals(IEnumerable<T> x, IEnumerable<T> y) => Comparison.SequenceEquals(x, y, EqualityComparer);
 

@@ -82,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.UnitTests
         {
             var predominantRule = new PredominantAggregationRule();
             // Arrange
-            var data = new List<AttributeDatum<string>>
+            var data = new List<IAttributeDatum>
             {
                 TestDataForAttribute.TextAttributeDataSectionLocOutput,
                 TestDataForAttribute.TextAttributeDataSectionLocOutput_2

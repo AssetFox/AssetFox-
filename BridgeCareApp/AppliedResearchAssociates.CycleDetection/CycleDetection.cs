@@ -63,9 +63,9 @@ namespace AppliedResearchAssociates
                     {
                         var cycle = new List<T>();
 
-                        for (var a = u; a != v; a = a.Parent)
+                        for (var w = u; w != v; w = w.Parent)
                         {
-                            cycle.Add(a.Value);
+                            cycle.Add(w.Value);
                         }
 
                         cycle.Add(v.Value);

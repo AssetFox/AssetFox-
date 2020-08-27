@@ -9,6 +9,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
         }
 
+        // TODO: list of treatment non-options: any-shadowed, same-shadowed, infeasible, superseded
+
         public TreatmentCause TreatmentCause { get; set; }
 
         public List<TreatmentConsiderationDetail> TreatmentConsiderations { get; } = new List<TreatmentConsiderationDetail>();

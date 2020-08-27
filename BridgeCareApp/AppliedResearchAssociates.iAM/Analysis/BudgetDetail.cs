@@ -4,27 +4,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class BudgetDetail
     {
-        public BudgetDetail(string budgetName)
+        public BudgetDetail(Budget budget, decimal availableFunding)
         {
-            if (string.IsNullOrWhiteSpace(budgetName))
-            {
-                throw new ArgumentException("Budget name is blank.", nameof(budgetName));
-            }
-
-            BudgetName = budgetName;
+            BudgetName = budget?.Name ?? throw new ArgumentNullException(nameof(budget));
+            AvailableFunding = availableFunding;
         }
+
+        public decimal AvailableFunding { get; }
 
         public string BudgetName { get; }
-
-        public BudgetReason BudgetReason { get; set; }
-
-        public decimal CoveredCost { get; set; }
-
-        internal BudgetDetail(BudgetDetail original)
-        {
-            BudgetName = original.BudgetName;
-            BudgetReason = original.BudgetReason;
-            CoveredCost = original.CoveredCost;
-        }
     }
 }

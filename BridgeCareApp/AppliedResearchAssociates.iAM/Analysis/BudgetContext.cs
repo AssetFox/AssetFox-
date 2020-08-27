@@ -20,6 +20,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public decimal? CurrentPrioritizedAmount { get; private set; }
 
+        public decimal FinalAmount => CumulativeAmountPerYear.Last();
+
         public BudgetPriority Priority
         {
             set

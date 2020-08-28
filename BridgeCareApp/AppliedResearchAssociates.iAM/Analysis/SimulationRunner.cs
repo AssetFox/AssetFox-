@@ -150,23 +150,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 // Yearly activity.
 
-                var baselineContexts = ApplyRequiredEvents(year);
-                var baselineContextPerWorkingContext = baselineContexts.ToDictionary(_ => new SectionContext(_), _ => _);
-
-                InParallel(baselineContextPerWorkingContext, _ =>
-                {
-                    var (working, baseline) = _;
-                    working.CopyDetailFrom(baseline);
-                });
-
-                InParallel(baselineContexts, context =>
-                {
-                    context.Detail.TreatmentCause = TreatmentCause.NoSelection;
-                    context.EventSchedule.Add(year, Simulation.DesignatedPassiveTreatment);
-                    context.ApplyPassiveTreatment(year);
-                });
-
-                ConsiderSelectableTreatments(baselineContextPerWorkingContext, year);
+                var unhandledContexts = ApplyRequiredEvents(year);
+                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
+                ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
 
                 // Yearly clean-up.
 
@@ -333,9 +319,22 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return ConditionGoalsEvaluator();
         }
 
-        private void ConsiderSelectableTreatments(IDictionary<SectionContext, SectionContext> baselineContextPerWorkingContext, int year)
+        private void ConsiderTreatmentOptions(IEnumerable<SectionContext> baselineContexts, IEnumerable<TreatmentOption> treatmentOptions, int year)
         {
-            var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(baselineContextPerWorkingContext.Keys, year);
+            var baselineContextPerWorkingContext = baselineContexts.ToDictionary(_ => new SectionContext(_), _ => _);
+
+            InParallel(baselineContextPerWorkingContext, _ =>
+            {
+                var (working, baseline) = _;
+                working.CopyDetailFrom(baseline);
+            });
+
+            InParallel(baselineContexts, context =>
+            {
+                context.Detail.TreatmentCause = TreatmentCause.NoSelection;
+                context.EventSchedule.Add(year, Simulation.DesignatedPassiveTreatment);
+                context.ApplyPassiveTreatment(year);
+            });
 
             if (SpendingLimit != SpendingLimit.Zero && !ConditionGoalsAreMet(year))
             {
@@ -392,45 +391,55 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var treatmentOptionsBag = new ConcurrentBag<TreatmentOption>();
             void addTreatmentOptions(SectionContext context)
             {
-                if (context.Section.Name == "22008106500000")
-                {
-                    // For the district 2 simulation in penndot_light (id 1181), this section is
-                    // getting ZERO feasible treatments in 2020 (the first analysis year), but the
-                    // legacy analysis output shows that this section is assigned the "Painting
-                    // (Joint/Spot/Zone)" treatment in year 2020.
-                    ;
-                }
-
                 if (context.YearIsWithinShadowForAnyTreatment(year))
                 {
+                    var rejections = ActiveTreatments.Select(treatment => new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForAnyTreatment));
+                    context.Detail.TreatmentRejections.AddRange(rejections);
                     return;
                 }
 
                 var feasibleTreatments = ActiveTreatments.ToHashSet();
 
-                _ = feasibleTreatments.RemoveWhere(treatment => context.YearIsWithinShadowForSameTreatment(year, treatment));
-                //_ = feasibleTreatments.RemoveWhere(treatment => !treatment.IsFeasible(context));
-
-                foreach (var treatment in feasibleTreatments.ToArray())
+                _ = feasibleTreatments.RemoveWhere(treatment =>
                 {
-                    if (treatment.Name == "Painting (Joint/Spot/Zone)")
+                    var isRejected = context.YearIsWithinShadowForSameTreatment(year, treatment);
+                    if (isRejected)
                     {
-                        ;
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.WithinShadowForSameTreatment));
                     }
 
-                    if (!treatment.IsFeasible(context))
-                    {
-                        feasibleTreatments.Remove(treatment);
-                    }
-                }
+                    return isRejected;
+                });
 
-                var supersededTreatments = Enumerable.ToArray(
+                _ = feasibleTreatments.RemoveWhere(treatment =>
+                {
+                    var isFeasible = treatment.IsFeasible(context);
+                    if (!isFeasible)
+                    {
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.NotFeasible));
+                    }
+
+                    return !isFeasible;
+                });
+
+                var supersededTreatmentsQuery = 
                     from treatment in feasibleTreatments
                     from supersession in treatment.Supersessions
                     where supersession.Criterion.EvaluateOrDefault(context)
-                    select supersession.Treatment);
+                    select supersession.Treatment;
 
-                feasibleTreatments.ExceptWith(supersededTreatments);
+                var supersededTreatments = supersededTreatmentsQuery.ToHashSet();
+
+                _ = feasibleTreatments.RemoveWhere(treatment =>
+                {
+                    var isSuperseded = supersededTreatments.Contains(treatment);
+                    if (isSuperseded)
+                    {
+                        context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.Superseded));
+                    }
+
+                    return isSuperseded;
+                });
 
                 if (feasibleTreatments.Count > 0)
                 {

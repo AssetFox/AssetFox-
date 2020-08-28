@@ -201,23 +201,35 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override void SetNumber(string key, double value)
         {
-            BlockUsageOfAreaIdentifier(key);
-            NumberCache.Clear();
+            PrepareSet(key);
             base.SetNumber(key, value);
         }
 
         public override void SetNumber(string key, Func<double> getValue)
         {
-            BlockUsageOfAreaIdentifier(key);
-            NumberCache.Clear();
+            PrepareSet(key);
             base.SetNumber(key, getValue);
         }
 
         public override void SetText(string key, string value)
         {
-            BlockUsageOfAreaIdentifier(key);
-            NumberCache.Clear();
+            PrepareSet(key);
             base.SetText(key, value);
+        }
+
+        private void PrepareSet(string key)
+        {
+            if (KeyComparer.Equals(key, Section.AreaIdentifier))
+            {
+                throw new SimulationException("Section area is being mutated. The analysis does not support this.");
+            }
+
+            if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key))
+            {
+                PreviousAge = GetNumber(key);
+            }
+
+            NumberCache.Clear();
         }
 
         public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
@@ -226,21 +238,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
-        private readonly Stack<string> GetNumber_ActiveKeysOfInvocation = new Stack<string>();
-
         private readonly IDictionary<string, int> FirstUnshadowedYearForSameTreatment = new Dictionary<string, int>();
+
+        private readonly Stack<string> GetNumber_ActiveKeysOfInvocation = new Stack<string>();
 
         private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(KeyComparer);
 
         private int? FirstUnshadowedYearForAnyTreatment;
 
-        private static void BlockUsageOfAreaIdentifier(string key)
-        {
-            if (KeyComparer.Equals(key, Section.AreaIdentifier))
-            {
-                throw new SimulationException("Section area is being mutated. The analysis does not support this.");
-            }
-        }
+        private double PreviousAge;
 
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
@@ -252,7 +258,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve.Shift ? curve.Attribute.Name : null);
+        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve, PreviousAge);
 
         private void CopyAttributeValuesToDetail(SectionSummaryDetail detail)
         {

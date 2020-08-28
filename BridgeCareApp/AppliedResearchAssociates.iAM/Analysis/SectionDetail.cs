@@ -9,8 +9,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
         }
 
-        // TODO: list of treatment non-options: any-shadowed, same-shadowed, infeasible, superseded
-
         public TreatmentCause TreatmentCause { get; set; }
 
         public List<TreatmentConsiderationDetail> TreatmentConsiderations { get; } = new List<TreatmentConsiderationDetail>();
@@ -20,6 +18,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public string TreatmentName { get; set; }
 
         public List<TreatmentOptionDetail> TreatmentOptions { get; } = new List<TreatmentOptionDetail>();
+
+        public List<TreatmentRejectionDetail> TreatmentRejections { get; } = new List<TreatmentRejectionDetail>();
 
         public List<TreatmentSchedulingCollisionDetail> TreatmentSchedulingCollisions { get; } = new List<TreatmentSchedulingCollisionDetail>();
 
@@ -32,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             TreatmentStatus = original.TreatmentStatus;
             TreatmentFundingIgnoresSpendingLimit = original.TreatmentFundingIgnoresSpendingLimit;
 
+            TreatmentRejections.AddRange(original.TreatmentRejections.Select(_ => new TreatmentRejectionDetail(_)));
             TreatmentOptions.AddRange(original.TreatmentOptions.Select(_ => new TreatmentOptionDetail(_)));
             TreatmentConsiderations.AddRange(original.TreatmentConsiderations.Select(_ => new TreatmentConsiderationDetail(_)));
             TreatmentSchedulingCollisions.AddRange(original.TreatmentSchedulingCollisions.Select(_ => new TreatmentSchedulingCollisionDetail(_)));

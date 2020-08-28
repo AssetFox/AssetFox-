@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using AppliedResearchAssociates.Validation;
@@ -321,11 +322,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void ConsiderTreatmentOptions(IEnumerable<SectionContext> baselineContexts, IEnumerable<TreatmentOption> treatmentOptions, int year)
         {
-            var baselineContextPerWorkingContext = baselineContexts.ToDictionary(_ => new SectionContext(_), _ => _);
+            var workingContextPerBaselineContext = baselineContexts.ToDictionary(_ => _, _ => new SectionContext(_));
 
-            InParallel(baselineContextPerWorkingContext, _ =>
+            InParallel(workingContextPerBaselineContext, _ =>
             {
-                var (working, baseline) = _;
+                var (baseline, working) = _;
                 working.CopyDetailFrom(baseline);
             });
 
@@ -347,28 +348,29 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     foreach (var option in treatmentOptions)
                     {
-                        if (baselineContextPerWorkingContext.ContainsKey(option.Context) && priority.Criterion.EvaluateOrDefault(option.Context))
+                        if (workingContextPerBaselineContext.TryGetValue(option.Context, out var workingContext) && priority.Criterion.EvaluateOrDefault(workingContext))
                         {
                             var costCoverage = TryToPayForTreatment(
-                                option.Context,
+                                workingContext,
                                 option.CandidateTreatment,
                                 year,
                                 context => context.CurrentPrioritizedAmount ?? context.CurrentAmount);
 
-                            option.Context.Detail.TreatmentConsiderations.Last().BudgetPriorityLevel = priority.PriorityLevel;
+                            workingContext.Detail.TreatmentConsiderations.Last().BudgetPriorityLevel = priority.PriorityLevel;
 
                             if (costCoverage != CostCoverage.None)
                             {
-                                _ = SectionContexts.Remove(baselineContextPerWorkingContext[option.Context]);
-                                SectionContexts.Add(option.Context);
-                                _ = baselineContextPerWorkingContext.Remove(option.Context);
+                                Debug.Assert(workingContextPerBaselineContext.Remove(option.Context));
 
-                                option.Context.Detail.TreatmentCause = TreatmentCause.SelectedTreatment;
+                                Debug.Assert(SectionContexts.Remove(option.Context));
+                                SectionContexts.Add(workingContext);
+
+                                workingContext.Detail.TreatmentCause = TreatmentCause.SelectedTreatment;
 
                                 if (costCoverage == CostCoverage.Full)
                                 {
-                                    option.Context.EventSchedule.Add(year, option.CandidateTreatment);
-                                    option.Context.ApplyTreatment(option.CandidateTreatment, year);
+                                    workingContext.EventSchedule.Add(year, option.CandidateTreatment);
+                                    workingContext.ApplyTreatment(option.CandidateTreatment, year);
 
                                     if (ConditionGoalsAreMet(year))
                                     {
@@ -377,7 +379,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 }
                                 else
                                 {
-                                    option.Context.MarkTreatmentProgress(option.CandidateTreatment);
+                                    workingContext.MarkTreatmentProgress(option.CandidateTreatment);
                                 }
                             }
                         }

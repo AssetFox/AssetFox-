@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AppliedResearchAssociates.iAM.DataAccess;
@@ -91,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
             LogProgressToConsole(timer.Elapsed, "simulation run");
 
             Console.WriteLine();
-            Console.WriteLine("Network condition: " + simulation.Results.FinalStatus.ConditionOfNetwork);
+            Console.WriteLine("Network condition: " + simulation.Results.Years.Last().ConditionOfNetwork);
 
             var outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             var outputFile = $"{DateTime.Now:yyyyMMddHHmmss} - Network {simulationConnectionInfo.NetworkId} - Simulation {simulationConnectionInfo.SimulationId}.json";

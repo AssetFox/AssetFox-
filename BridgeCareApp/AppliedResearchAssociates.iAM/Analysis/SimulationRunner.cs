@@ -133,43 +133,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             Simulation.ClearResults();
 
+            Simulation.Results.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
+            Simulation.Results.InitialSectionSummaries.AddRange(SectionContexts.Select(context => context.SummaryDetail));
+
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
                 Inform($"Simulating {year} ...");
-
-                // Yearly set-up.
-
-                var yearDetail = Simulation.Results.Years.GetAdd(new SimulationYearDetail(year));
-
-                yearDetail.InitialStatus.Budgets.AddRange(BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.CurrentAmount)));
-                yearDetail.InitialStatus.ConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
-
-                UpdateConditionActuals(year);
-                RecordStatusOfConditionGoals(yearDetail.InitialStatus);
-
-                InParallel(SectionContexts, context => context.CopyAttributeValuesToDetail());
-
-                // Yearly activity.
 
                 var unhandledContexts = ApplyRequiredEvents(year);
                 var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
                 ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
 
-                // Yearly clean-up.
-
-                yearDetail.Sections.AddRange(SectionContexts.Select(context => context.Detail));
-
-                InParallel(SectionContexts, context => context.ResetDetail());
-
-                MoveBudgetsToNextYear();
+                Snapshot(year);
             }
-
-            Simulation.Results.FinalStatus.Budgets.AddRange(BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.FinalAmount)));
-            Simulation.Results.FinalStatus.ConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
-
-            RecordStatusOfConditionGoals(Simulation.Results.FinalStatus);
-
-            Simulation.Results.SectionSummaries.AddRange(SectionContexts.Select(context => context.SummaryDetail));
 
             foreach (var treatment in Simulation.Treatments)
             {
@@ -424,7 +400,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     return !isFeasible;
                 });
 
-                var supersededTreatmentsQuery = 
+                var supersededTreatmentsQuery =
                     from treatment in feasibleTreatments
                     from supersession in treatment.Supersessions
                     where supersession.Criterion.EvaluateOrDefault(context)
@@ -539,7 +515,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void OnWarning(WarningEventArgs e) => Warning?.Invoke(this, e);
 
-        private void RecordStatusOfConditionGoals(SimulationStatusDetail detail)
+        private void RecordStatusOfConditionGoals(SimulationYearDetail detail)
         {
             detail.TargetConditionGoals.AddRange(TargetConditionActuals.Select(actual => new TargetConditionGoalDetail
             {
@@ -559,6 +535,22 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 AllowedDeficientPercentage = (actual.Goal as DeficientConditionGoal).AllowedDeficientPercentage,
                 ActualDeficientPercentage = actual.Value,
             }));
+        }
+
+        private void Snapshot(int year)
+        {
+            var yearDetail = Simulation.Results.Years.GetAdd(new SimulationYearDetail(year));
+
+            yearDetail.Budgets.AddRange(BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.CurrentAmount)));
+            yearDetail.ConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
+
+            RecordStatusOfConditionGoals(yearDetail);
+
+            InParallel(SectionContexts, context => context.CopyAttributeValuesToDetail());
+            yearDetail.Sections.AddRange(SectionContexts.Select(context => context.Detail));
+            InParallel(SectionContexts, context => context.ResetDetail());
+
+            MoveBudgetsToNextYear();
         }
 
         private CostCoverage TryToPayForTreatment(SectionContext sectionContext, Treatment treatment, int year, Func<BudgetContext, decimal> getAvailableAmount)

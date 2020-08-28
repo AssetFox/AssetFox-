@@ -3,6 +3,7 @@ import {clone, insert, propEq, reject} from 'ramda';
 import UserCriteriaService from '@/services/user-criteria.service';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
+import {http2XX} from '@/shared/utils/http-utils';
 
 const state = {
     allUserCriteria: [] as UserCriteria[]
@@ -15,6 +16,9 @@ const mutations = {
     userCriteriaMutator(state: any, userCriteria: UserCriteria) {
         const allUserCriteria = reject(propEq('username', userCriteria.username), state.allUserCriteria);
         state.allUserCriteria = insert(0, userCriteria, allUserCriteria);
+    },
+    deletedUserMutator(state: any, username: string) {
+        state.allUserCriteria = reject(propEq('username', username), state.allUserCriteria);
     }
 };
 
@@ -44,6 +48,15 @@ const actions = {
         await UserCriteriaService.setUserCriteria(payload.userCriteria)
             .then((response: AxiosResponse<UserCriteria>) => {
                 commit('userCriteriaMutator', payload.userCriteria);
+            });
+    },
+    async deleteUser({commit, dispatch}: any, payload: any) {
+        await UserCriteriaService.deleteUser(payload.user)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    commit('deletedUserMutator', payload.user);
+                    dispatch('setSuccessMessage', {message: 'Successfully deleted user'});
+                }
             });
     }
 };

@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using BridgeCare.Models;
+ using System.Data.Entity;
+ using BridgeCare.Models;
 
 namespace BridgeCare.EntityClasses
 {
@@ -19,6 +20,11 @@ namespace BridgeCare.EntityClasses
             USERNAME = userCriteriaModel.Username;
             CRITERIA = userCriteriaModel.Criteria;
             HAS_ACCESS = userCriteriaModel.HasAccess;
+        }
+
+        public static void DeleteEntry(UserCriteriaEntity entity, BridgeCareContext db)
+        {
+            db.Entry(entity).State = EntityState.Deleted;
         }
     }
 }

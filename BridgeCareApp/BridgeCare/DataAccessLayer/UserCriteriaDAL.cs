@@ -60,6 +60,25 @@ namespace BridgeCare.DataAccessLayer
         }
 
         /// <summary>
+        /// Deletes a user's criteria
+        /// </summary>
+        /// <param name="username">User's username</param>
+        /// <param name="db">database context</param>
+        public void DeleteUser(string username, BridgeCareContext db)
+        {
+            if (!db.UserCriteria.Any(criteria => criteria.USERNAME == username))
+            {
+                var errMsg = $"No user found with username {username}";
+                log.Error(errMsg);
+                throw new RowNotInTableException(errMsg);
+            }
+
+            var userCriteria = db.UserCriteria.Single(criteria => criteria.USERNAME == username);
+            UserCriteriaEntity.DeleteEntry(userCriteria, db);
+            db.SaveChanges();
+        }
+
+        /// <summary>
         /// Creates a default UserCriteriaModel for a new user, based on their role.
         /// Administrators have full access by default.
         /// All other users have no access by default.

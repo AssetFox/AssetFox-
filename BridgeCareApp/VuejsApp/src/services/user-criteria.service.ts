@@ -24,4 +24,11 @@ export default class UserCriteriaService {
     static setUserCriteria(userCriteria: UserCriteria): AxiosPromise {
         return axiosInstance.post('/api/SetUserCriteria', userCriteria);
     }
+
+    /**
+     * Deletes a user based on the given username
+     */
+    static deleteUser(username: string): AxiosPromise {
+        return axiosInstance.delete(`/api/DeleteUser/${username}`);
+    }
 }

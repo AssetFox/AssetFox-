@@ -230,6 +230,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 if (yearIsScheduled && scheduledEvent.IsT2(out var progress))
                 {
+                    if (Simulation.AnalysisMethod.ShouldDeteriorateDuringCashFlow)
+                    {
+                        context.ApplyPerformanceCurves();
+                    }
+
                     context.Detail.TreatmentConsiderations.Add(progress.TreatmentConsideration);
 
                     if (progress.IsComplete)

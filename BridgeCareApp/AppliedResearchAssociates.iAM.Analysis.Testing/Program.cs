@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
         private static void Main()
         {
-            var simulationConnectionInfo = SmallBridgeDatasetLocal;
+            var simulationConnectionInfo = MainDataset;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();
@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
             using var connection = new SqlConnection(connectionString);
             connection.Open();
 
-            var simulation = new DataAccessor().GetStandAloneSimulation(
+            var simulation = new DataAccessorModified().GetStandAloneSimulation(
                 connection,
                 simulationConnectionInfo.NetworkId,
                 simulationConnectionInfo.SimulationId,

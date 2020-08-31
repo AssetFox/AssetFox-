@@ -117,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override double GetNumber(string key)
         {
-            if (GetNumber_ActiveKeysOfInvocation.Contains(key))
+            if (GetNumber_ActiveKeysOfInvocation.Contains(key, StringComparer.OrdinalIgnoreCase))
             {
                 var loop = GetNumber_ActiveKeysOfInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
                 var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));
@@ -201,23 +201,35 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override void SetNumber(string key, double value)
         {
-            BlockUsageOfAreaIdentifier(key);
-            NumberCache.Clear();
+            PrepareSet(key);
             base.SetNumber(key, value);
         }
 
         public override void SetNumber(string key, Func<double> getValue)
         {
-            BlockUsageOfAreaIdentifier(key);
-            NumberCache.Clear();
+            PrepareSet(key);
             base.SetNumber(key, getValue);
         }
 
         public override void SetText(string key, string value)
         {
-            BlockUsageOfAreaIdentifier(key);
-            NumberCache.Clear();
+            PrepareSet(key);
             base.SetText(key, value);
+        }
+
+        private void PrepareSet(string key)
+        {
+            if (KeyComparer.Equals(key, Section.AreaIdentifier))
+            {
+                throw new SimulationException("Section area is being mutated. The analysis does not support this.");
+            }
+
+            if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key))
+            {
+                PreviousAge = GetNumber(key);
+            }
+
+            NumberCache.Clear();
         }
 
         public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
@@ -226,21 +238,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
-        private readonly Stack<string> GetNumber_ActiveKeysOfInvocation = new Stack<string>();
-
         private readonly IDictionary<string, int> FirstUnshadowedYearForSameTreatment = new Dictionary<string, int>();
+
+        private readonly Stack<string> GetNumber_ActiveKeysOfInvocation = new Stack<string>();
 
         private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(KeyComparer);
 
         private int? FirstUnshadowedYearForAnyTreatment;
 
-        private static void BlockUsageOfAreaIdentifier(string key)
-        {
-            if (KeyComparer.Equals(key, Section.AreaIdentifier))
-            {
-                throw new SimulationException("Section area is being mutated. The analysis does not support this.");
-            }
-        }
+        private double PreviousAge;
 
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
@@ -252,7 +258,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve.Shift ? curve.Attribute.Name : null);
+        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve, PreviousAge);
 
         private void CopyAttributeValuesToDetail(SectionSummaryDetail detail)
         {
@@ -325,7 +331,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private void SetHistoricalValues<T>(int referenceYear, bool fallBackward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
+        private void SetHistoricalValues<T>(int referenceYear, bool fallForward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
         {
             foreach (var attribute in attributes)
             {
@@ -334,12 +340,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     setValue(attribute.Name, value);
                 }
-                else if (fallBackward)
+                else if (fallForward)
                 {
-                    var mostRecentPastYear = attributeHistory.Keys.Where(year => year < referenceYear).AsNullables().Max();
-                    if (mostRecentPastYear.HasValue)
+                    var earliestFutureYear = attributeHistory.Keys.Where(year => year > referenceYear).AsNullables().Min();
+                    if (earliestFutureYear.HasValue)
                     {
-                        setValue(attribute.Name, attributeHistory[mostRecentPastYear.Value]);
+                        setValue(attribute.Name, attributeHistory[earliestFutureYear.Value]);
                     }
                     else
                     {

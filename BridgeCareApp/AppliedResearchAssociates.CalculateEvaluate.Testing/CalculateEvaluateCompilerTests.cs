@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             var calculator = compiler.GetCalculator(expression);
             var scope = new CalculateEvaluateScope();
             scope.SetNumber("PaRaM", n0);
-            var result = calculator(scope);
+            var result = calculator.Delegate(scope);
             Assert.That(result, Is.EqualTo(n0 * n0));
         }
 
@@ -178,7 +178,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             {
                 scope.SetNumber("PaRaM" + i, n);
             }
-            var result = evaluator(scope);
+            var result = evaluator.Delegate(scope);
             assert(result);
         }
 
@@ -196,7 +196,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             {
                 scope.SetNumber("PaRaM" + i, n);
             }
-            var result = calculator(scope);
+            var result = calculator.Delegate(scope);
             Assert.That(result, Is.EqualTo(expectedOutput));
         }
 
@@ -204,7 +204,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
         {
             var compiler = new CalculateEvaluateCompiler();
             var calculator = compiler.GetCalculator(inputExpression);
-            var result = calculator(null);
+            var result = calculator.Delegate(null);
             Assert.That(result, Is.EqualTo(expectedOutput));
         }
 
@@ -215,7 +215,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             var calculator = compiler.GetEvaluator(inputExpression);
             var scope = new CalculateEvaluateScope();
             scope.SetNumber("PaRaM", n0);
-            var result = calculator(scope);
+            var result = calculator.Delegate(scope);
             assert(result);
         }
 
@@ -226,7 +226,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             var calculator = compiler.GetEvaluator(inputExpression);
             var scope = new CalculateEvaluateScope();
             scope.SetText("PaRaM", s0);
-            var result = calculator(scope);
+            var result = calculator.Delegate(scope);
             assert(result);
         }
 
@@ -237,7 +237,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
             var calculator = compiler.GetEvaluator(inputExpression);
             var scope = new CalculateEvaluateScope();
             scope.SetTimestamp("PaRaM", d0);
-            var result = calculator(scope);
+            var result = calculator.Delegate(scope);
             assert(result);
         }
     }

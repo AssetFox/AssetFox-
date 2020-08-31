@@ -28,7 +28,9 @@ namespace AppliedResearchAssociates.iAM
             }
         }
 
-        public double Compute(CalculateEvaluateScope scope, string attributeNameForShift = null)
+        public double Compute(CalculateEvaluateScope scope) => Compute(scope, null, default);
+
+        internal double Compute(CalculateEvaluateScope scope, PerformanceCurve curve, double previousAge)
         {
             EnsureCompiled();
 
@@ -36,16 +38,25 @@ namespace AppliedResearchAssociates.iAM
             {
                 var actualAge = scope.GetNumber(Explorer.AgeAttribute.Name);
 
-                if (attributeNameForShift == null)
+                if (curve == null || previousAge <= 0 || actualAge <= previousAge)
                 {
                     return ValueVersusAge.Interpolate(actualAge);
                 }
                 else
                 {
-                    var previousValue = scope.GetNumber(attributeNameForShift);
-                    var apparentAge = AgeVersusValue.Interpolate(previousValue);
-                    var shiftedAge = actualAge * apparentAge / (actualAge - 1);
-                    return ValueVersusAge.Interpolate(shiftedAge);
+                    var previousValue = scope.GetNumber(curve.Attribute.Name);
+                    var apparentPreviousAge = AgeVersusValue.Interpolate(previousValue);
+
+                    if (curve.Shift)
+                    {
+                        var shiftFactor = apparentPreviousAge / previousAge;
+                        var shiftedAge = actualAge * shiftFactor;
+                        return ValueVersusAge.Interpolate(shiftedAge);
+                    }
+
+                    var ageDifference = actualAge - previousAge;
+                    var apparentAge = apparentPreviousAge + ageDifference;
+                    return ValueVersusAge.Interpolate(apparentAge);
                 }
             }
 

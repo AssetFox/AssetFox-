@@ -31,6 +31,8 @@ namespace AppliedResearchAssociates.iAM
 
         public bool ShouldApplyMultipleFeasibleCosts { get; set; }
 
+        public bool ShouldDeteriorateDuringCashFlow { get; set; }
+
         public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
 
         public SpendingStrategy SpendingStrategy { get; set; }

@@ -46,8 +46,9 @@ namespace AppliedResearchAssociates.iAM
 
         public IReadOnlyCollection<SelectableTreatment> GetActiveTreatments()
         {
-            var result = Treatments.ToHashSet();
+            var result = Treatments.ToList();
             _ = result.Remove(DesignatedPassiveTreatment);
+            result.Sort(TreatmentComparer);
             return result;
         }
 
@@ -158,6 +159,8 @@ namespace AppliedResearchAssociates.iAM
 
             return budgetContexts;
         }
+
+        private static readonly IComparer<SelectableTreatment> TreatmentComparer = SelectionComparer<SelectableTreatment>.Create(treatment => treatment.Name);
 
         private readonly List<PerformanceCurve> _PerformanceCurves = new List<PerformanceCurve>();
 

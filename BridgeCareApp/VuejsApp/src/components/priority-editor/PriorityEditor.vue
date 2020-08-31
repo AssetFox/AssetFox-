@@ -167,7 +167,7 @@
         PrioritiesDataTableRow,
         Priority,
         PriorityFund,
-        PriorityLibrary
+        PriorityLibrary, ScenarioPriority
     } from '@/shared/models/iAM/priority';
     import CreatePriorityDialog from '@/components/priority-editor/priority-editor-dialogs/CreatePriorityDialog.vue';
     import CriteriaEditorDialog from '@/shared/modals/CriteriaEditorDialog.vue';
@@ -239,6 +239,7 @@
         alertBeforeDelete: AlertData = clone(emptyAlertData);
         objectIdMOngoDBForScenario: string = '';
         rules: InputValidationRules = clone(rules);
+        isScenarioPriorityLibrary: boolean = false;
         nonBudgetKeys: string[] = ['id', 'priorityLevel', 'year', 'criteria'];
 
         /**
@@ -281,6 +282,13 @@
             }));
         }
 
+        @Watch('stateScenarioInvestmentLibrary')
+        onStateScenarioInvestmentLibraryChanged() {
+            if (this.stateScenarioInvestmentLibrary.id === this.selectedScenarioId) {
+                this.budgets = getPropertyValues('budgetName', this.stateScenarioInvestmentLibrary.criteriaDrivenBudgets);
+            }
+        }
+
         /**
          * Dispatches an action to set the selected priority library in state
          */
@@ -307,9 +315,8 @@
 
             this.hasSelectedPriorityLibrary = this.selectedPriorityLibrary.id !== '0';
 
-            this.budgets = getPropertyValues('budget',
-                flatten(getPropertyValues('priorityFunds', this.selectedPriorityLibrary.priorities))
-            );
+            this.isScenarioPriorityLibrary = this.hasSelectedPriorityLibrary &&
+                this.stateScenarioPriorityLibrary.id === this.selectedPriorityLibrary.id;
 
             this.setTableCriteriaColumnWidth();
             this.setTableHeaders();
@@ -387,7 +394,7 @@
             this.prioritiesDataTableRows = [];
 
             if (this.hasSelectedPriorityLibrary) {
-                this.prioritiesDataTableRows = this.selectedPriorityLibrary.priorities.map((priority: Priority) => {
+                this.prioritiesDataTableRows = (this.selectedPriorityLibrary.priorities as any[]).map((priority: any) => {
                     const row: PrioritiesDataTableRow = {
                         id: priority.id,
                         priorityLevel: priority.priorityLevel.toString(),
@@ -395,15 +402,19 @@
                         criteria: priority.criteria
                     };
 
-                    this.budgets.forEach((budget: any) => {
-                        let amount = '';
-                        if (any(propEq('budget', budget), priority.priorityFunds)) {
-                            const priorityFund: PriorityFund = priority.priorityFunds
-                                .find((pf: PriorityFund) => pf.budget === budget) as PriorityFund;
-                            amount = priorityFund.funding.toString();
-                        }
-                        row[budget] = amount.toString();
-                    });
+                    if (this.isScenarioPriorityLibrary && hasValue(this.budgets)) {
+                        this.budgets.forEach((budget: any) => {
+                            let amount = '100';
+                            if (any(propEq('budget', budget), priority.priorityFunds)) {
+                                const priorityFund: PriorityFund = priority.priorityFunds
+                                    .find((pf: PriorityFund) => pf.budget === budget) as PriorityFund;
+                                if (hasValue(priorityFund.funding.toString())) {
+                                    amount = priorityFund.funding.toString();
+                                }
+                            }
+                            row[budget] = amount.toString();
+                        });
+                    }
 
                     return row;
                 });
@@ -429,9 +440,12 @@
             this.showCreatePriorityDialog = false;
 
             if (!isNil(newPriority)) {
-                if (hasValue(this.budgets)) {
+                const priority: any = this.isScenarioPriorityLibrary
+                    ? {...newPriority, priorityFunds: []} as ScenarioPriority : {...newPriority} as Priority;
+
+                if (this.isScenarioPriorityLibrary && hasValue(this.budgets)) {
                     this.budgets.forEach((budgetName: string) => {
-                        newPriority.priorityFunds.push({
+                        priority.priorityFunds.push({
                             id: ObjectID.generate(),
                             budget: budgetName,
                             funding: 100
@@ -441,7 +455,7 @@
 
                 this.selectedPriorityLibrary = {
                     ...this.selectedPriorityLibrary,
-                    priorities: prepend(newPriority, this.selectedPriorityLibrary.priorities)
+                    priorities: prepend(priority, this.selectedPriorityLibrary.priorities)
                 };
             }
         }
@@ -482,7 +496,7 @@
          * @param amount Value to set on the found PriorityFund object's amount property
          */
         onEditPriorityFundAmount(priorityRow: PrioritiesDataTableRow, budget: string, amount: number) {
-            const priority: Priority = find(propEq('id', priorityRow.id), this.selectedPriorityLibrary.priorities) as Priority;
+            const priority: ScenarioPriority = find(propEq('id', priorityRow.id), this.selectedPriorityLibrary.priorities) as ScenarioPriority;
             const priorityFund: PriorityFund = find(propEq('budget', budget), priority.priorityFunds) as PriorityFund;
 
             this.selectedPriorityLibrary = {
@@ -588,8 +602,8 @@
         onDeletePriorities() {
             this.selectedPriorityLibrary = {
                 ...this.selectedPriorityLibrary,
-                priorities: this.selectedPriorityLibrary.priorities
-                    .filter((priority: Priority) => !contains(priority.id, this.selectedPriorityIds))
+                priorities: (this.selectedPriorityLibrary.priorities as any[])
+                    .filter((priority: any) => !contains(priority.id, this.selectedPriorityIds))
             };
         }
 
@@ -620,12 +634,14 @@
 
         disableSubmitAction() {
             if (this.hasSelectedPriorityLibrary) {
-                const allDataIsValid: boolean = this.selectedPriorityLibrary.priorities.every((p: Priority) => {
-                    const allSubDataIsValid: boolean = p.priorityFunds.every((pf: PriorityFund) => {
-                        return this.rules['generalRules'].valueIsNotEmpty(pf.budget) &&
-                                this.rules['generalRules'].valueIsNotEmpty(pf.funding) &&
-                                this.rules['generalRules'].valueIsWithinRange(pf.funding, [0, 100]);
-                    });
+                const allDataIsValid: boolean = (this.selectedPriorityLibrary.priorities as any[]).every((p: any) => {
+                    const allSubDataIsValid: boolean = this.isScenarioPriorityLibrary
+                        ? p.priorityFunds.every((pf: PriorityFund) => {
+                                return this.rules['generalRules'].valueIsNotEmpty(pf.budget) &&
+                                        this.rules['generalRules'].valueIsNotEmpty(pf.funding) &&
+                                        this.rules['generalRules'].valueIsWithinRange(pf.funding, [0, 100]);
+                            })
+                        : true;
 
                     return this.rules['generalRules'].valueIsNotEmpty(p.priorityLevel) === true && allSubDataIsValid;
                 });
@@ -640,6 +656,8 @@
 
             return true;
         }
+
+
     }
 </script>
 

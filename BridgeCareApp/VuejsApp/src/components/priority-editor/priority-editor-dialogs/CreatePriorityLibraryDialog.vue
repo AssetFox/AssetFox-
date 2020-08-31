@@ -72,7 +72,9 @@
         onSubmit(submit: boolean) {
             if (submit) {
                 if (!hasValue(this.newPriorityLibrary.priorities)) {
-                    this.newPriorityLibrary.priorities.push({...emptyPriority, year: moment().year()});
+                    this.newPriorityLibrary.priorities = [
+                        {...emptyPriority, id: ObjectID.generate(), year: moment().year()} as Priority
+                    ] as Priority[];
                 }
                 this.setIdsForNewPriorityLibrarySubData();
                 this.newPriorityLibrary.owner = getUserName();
@@ -88,14 +90,11 @@
          * Generates bson ids for the new priority library's priorities & priority funds if there are any
          */
         setIdsForNewPriorityLibrarySubData() {
-            this.newPriorityLibrary.priorities = this.newPriorityLibrary.priorities.map((priority: Priority) => ({
-                ...priority,
-                id: ObjectID.generate(),
-                priorityFunds: priority.priorityFunds.map((priorityFund: PriorityFund) => ({
-                    ...priorityFund,
+            this.newPriorityLibrary.priorities = (this.newPriorityLibrary.priorities as Priority[])
+                .map((priority: Priority) => ({
+                    ...priority,
                     id: ObjectID.generate()
-                }))
-            }));
+                }));
         }
     }
 </script>

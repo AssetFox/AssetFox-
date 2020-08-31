@@ -117,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override double GetNumber(string key)
         {
-            if (GetNumber_ActiveKeysOfInvocation.Contains(key))
+            if (GetNumber_ActiveKeysOfInvocation.Contains(key, StringComparer.OrdinalIgnoreCase))
             {
                 var loop = GetNumber_ActiveKeysOfInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
                 var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));

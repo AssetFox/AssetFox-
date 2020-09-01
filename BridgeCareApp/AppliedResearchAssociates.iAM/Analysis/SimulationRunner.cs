@@ -341,9 +341,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                             if (costCoverage != CostCoverage.None)
                             {
-                                Debug.Assert(workingContextPerBaselineContext.Remove(option.Context));
+                                _ = workingContextPerBaselineContext.Remove(option.Context);
 
-                                Debug.Assert(SectionContexts.Remove(option.Context));
+                                _ = SectionContexts.Remove(option.Context);
                                 SectionContexts.Add(workingContext);
 
                                 workingContext.Detail.TreatmentCause = TreatmentCause.SelectedTreatment;

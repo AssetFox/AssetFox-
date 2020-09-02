@@ -11,9 +11,8 @@
                     </v-card-text>
                     <v-divider style="margin: 0"/>
                     <div v-for="user in unassignedUsers">
-                        <v-layout row style="margin: auto; width: 75%;text-align: center">
-                            <v-flex style="display: flex; flex-direction: column; justify-content: center; font-size: 1.2em; padding-top: 0; padding-bottom: 0"
-                                    xs4>
+                        <v-layout row class="unassigned-user-layout">
+                            <v-flex class="unassigned-user-layout-username-flex" xs3>
                                 {{user.username}}
                             </v-flex>
                             <v-flex style="padding: 0" xs4>
@@ -23,11 +22,16 @@
                                     Assign Criteria Filter
                                 </v-btn>
                             </v-flex>
-                            <v-flex style="padding: 0; justify-content: center" xs4>
+                            <v-flex justify-center style="padding: 0" xs3>
                                 <v-btn @click="onGiveUnrestrictedAccess(user)" class="ara-blue-bg white--text"
                                        title="Allow the user to access the full bridge inventory">
                                     <v-icon size="1.5em" style="padding-right: 0.5em">fas fa-lock-open</v-icon>
                                     Allow All Assets
+                                </v-btn>
+                            </v-flex>
+                            <v-flex justify-center style="padding: 0" xs2>
+                                <v-btn @click="onDeleteUser(user)" class="ara-orange" icon title="Delete User">
+                                    <v-icon>fas fa-trash</v-icon>
                                 </v-btn>
                             </v-flex>
                         </v-layout>
@@ -51,7 +55,7 @@
                                             min-height="500px" min-width="500px" v-if="props.item.hasCriteria">
                                         <template slot="activator">
                                             <v-text-field class="sm-txt" :value="props.item.criteria" readonly
-                                                   style="width: 25em" type="text"/>
+                                                          style="width: 25em" type="text"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
@@ -88,6 +92,10 @@
                                        title="Revoke Access">
                                     <v-icon>fas fa-times-circle</v-icon>
                                 </v-btn>
+                                <v-btn @click="onDeleteUser(props.item)" class="ara-orange" icon
+                                       title="Delete User">
+                                    <v-icon>fas fa-trash</v-icon>
+                                </v-btn>
                             </td>
                         </template>
                     </v-data-table>
@@ -97,6 +105,8 @@
 
         <CriteriaEditorDialog :dialogData="criteriaEditorDialogData"
                               @submitCriteriaEditorDialogResult="onSubmitCriteria"/>
+
+        <Alert :dialogData="beforeDeleteAlertData" @submit="onSubmitDeleteUserResponse"/>
     </v-layout>
 </template>
 
@@ -111,8 +121,9 @@
         CriteriaEditorDialogData,
         emptyCriteriaEditorDialogData
     } from '@/shared/models/modals/criteria-editor-dialog-data';
-    import {clone, isNil} from 'ramda';
-    import {UserCriteria} from '@/shared/models/iAM/user-criteria';
+    import {isNil} from 'ramda';
+    import {emptyUserCriteria, UserCriteria} from '@/shared/models/iAM/user-criteria';
+    import {itemsAreEqual} from '@/shared/utils/equals-utils';
 
     @Component({
         components: {
@@ -124,25 +135,19 @@
 
         @Action('getAllUserCriteria') getAllUserCriteriaAction: any;
         @Action('setUserCriteria') setUserCriteriaAction: any;
+        @Action('deleteUser') deleteUserAction: any;
 
-        alertData: AlertData = clone(emptyAlertData);
-        alertBeforeDelete: AlertData = clone(emptyAlertData);
-        alertBeforeRunRollup: AlertData = clone(emptyAlertData);
-        showCreateScenarioDialog: boolean = false;
+        beforeDeleteAlertData: AlertData = {...emptyAlertData};
         userCriteriaGridHeaders: object[] = [
             {text: 'User', align: 'left', sortable: false, value: 'username'},
             {text: 'Criteria Filter', sortable: false, value: 'criteria'},
             {text: '', align: 'right', sortable: false, value: 'actions'}
         ];
-        newUserGridHeaders: object[] = [
-            {text: 'User', align: 'left', sortable: false, value: 'username'},
-            {text: '', align: 'right', sortable: false, value: 'actions'}
-        ];
 
         unassignedUsers: UserCriteria[] = [];
         assignedUsers: UserCriteria[] = [];
-        criteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
-        selectedUser: any = undefined;
+        criteriaEditorDialogData: CriteriaEditorDialogData = {...emptyCriteriaEditorDialogData};
+        selectedUser: UserCriteria = {...emptyUserCriteria};
 
         created() {
             this.getAllUserCriteriaAction();
@@ -164,7 +169,7 @@
         }
 
         onSubmitCriteria(criteria: string) {
-            this.criteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+            this.criteriaEditorDialogData = {...emptyCriteriaEditorDialogData};
 
             if (!isNil(criteria)) {
                 const userCriteria = {
@@ -176,7 +181,7 @@
                 this.setUserCriteriaAction({userCriteria});
             }
 
-            this.selectedUser = undefined;
+            this.selectedUser = {...emptyUserCriteria};
         }
 
         onRevokeAccess(targetUser: UserCriteria) {
@@ -198,10 +203,45 @@
             };
             this.setUserCriteriaAction({userCriteria});
         }
+
+        onDeleteUser(user: UserCriteria) {
+            this.selectedUser = user;
+
+            this.beforeDeleteAlertData = {
+                choice: true,
+                heading: 'Delete User',
+                message: `Are you sure you want to delete user ${this.selectedUser.username}?`,
+                showDialog: true
+            };
+        }
+
+        onSubmitDeleteUserResponse(doDelete: boolean) {
+            this.beforeDeleteAlertData = {...emptyAlertData};
+
+            if (doDelete && !itemsAreEqual(this.selectedUser, emptyUserCriteria)) {
+                this.deleteUserAction({user: this.selectedUser.username})
+                    .then(() => this.selectedUser = {...emptyUserCriteria});
+            }
+        }
     }
 </script>
 
 <style>
+    .unassigned-user-layout {
+        margin: auto !important;
+        width: 75%;
+        text-align: center
+    }
+
+    .unassigned-user-layout-username-flex {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        font-size: 1.2em;
+        padding-top: 0;
+        padding-bottom: 0
+    }
+
     .userCriteriaTableHeader {
         justify-content: center;
         font-size: 1.5em;

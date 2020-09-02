@@ -4,3 +4,9 @@ export interface UserCriteria {
     hasCriteria: boolean;
     hasAccess: boolean;
 }
+
+export const emptyUserCriteria: UserCriteria = {
+    username: '',
+    hasCriteria: false,
+    hasAccess: false
+};

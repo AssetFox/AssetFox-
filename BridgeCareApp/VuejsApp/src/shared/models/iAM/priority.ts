@@ -9,6 +9,9 @@ export interface Priority {
     priorityLevel: number;
     year: number | null;
     criteria: string;
+}
+
+export interface ScenarioPriority extends Priority {
     priorityFunds: PriorityFund[];
 }
 
@@ -18,21 +21,14 @@ export interface PriorityLibrary {
     owner?: string;
     shared?: boolean;
     description: string;
-    priorities: Priority[];
+    priorities: Priority[] | ScenarioPriority[];
 }
-
-export const emptyPriorityFund: PriorityFund = {
-    id: '0',
-    budget: '',
-    funding: 0
-};
 
 export const emptyPriority: Priority = {
     id: '0',
     priorityLevel: 1,
     year: null,
-    criteria: '',
-    priorityFunds: []
+    criteria: ''
 };
 
 export const emptyPriorityLibrary: PriorityLibrary = {

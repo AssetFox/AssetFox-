@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using Humanizer;
+//using Humanizer;
 
 namespace AppliedResearchAssociates.iAM.DataAccess
 {
@@ -106,7 +106,8 @@ where simulationid = {simulationId}
                         timer.Restart();
                         action();
                         var elapsed = timer.Elapsed;
-                        onProgress?.Invoke(elapsed, label.Humanize() + ".");
+                        //onProgress?.Invoke(elapsed, label.Humanize() + ".");
+                        onProgress?.Invoke(elapsed, label + ".");
                         _ = reader.NextResult();
                     }
 

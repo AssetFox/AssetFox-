@@ -32,14 +32,14 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
                 var dataReader = command.ExecuteReader();
                 while (dataReader.Read())
                 {
-                    routeName = dataReader.GetFieldValue<string>(1);
-                    start = dataReader.GetFieldValue<double>(2);
-                    end = dataReader.GetFieldValue<double>(3);
-                    var rawDirection = dataReader.GetFieldValue<string>(4);
-                    if(rawDirection == "North")
-                    {
-                        direction = 0;
-                    }
+                    //routeName = dataReader.GetFieldValue<string>(1);
+                    //start = dataReader.GetFieldValue<double>(2);
+                    //end = dataReader.GetFieldValue<double>(3);
+                    //var rawDirection = dataReader.GetFieldValue<string>(4);
+                    //if(rawDirection == "North")
+                    //{
+                    //    direction = 0;
+                    //}
                     var value = dataReader.GetFieldValue<T>(5);
                     var dataTime = dataReader.GetFieldValue<DateTime>(6);
 

@@ -15,6 +15,9 @@
     <ProjectReference Include="..\AppliedResearchAssociates.CalculateEvaluate\AppliedResearchAssociates.CalculateEvaluate.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.Choice\AppliedResearchAssociates.Choice.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.CycleDetection\AppliedResearchAssociates.CycleDetection.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Aggregation\AppliedResearchAssociates.iAM.Aggregation.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Segmentation\AppliedResearchAssociates.iAM.Segmentation.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.Option\AppliedResearchAssociates.Option.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.Validation\AppliedResearchAssociates.Validation.csproj" />
   </ItemGroup>

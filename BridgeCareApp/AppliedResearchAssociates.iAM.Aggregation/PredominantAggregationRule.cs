@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Aggregation
 {
     public class PredominantAggregationRule : AggregationRule<string>
     {
-        public override IEnumerable<(int, string)> Apply(IEnumerable<IAttributeDatum> attributeData)
+        public override IEnumerable<(int, string)> Apply(IEnumerable<IAttributeDatum> attributeData) // (int = year, string = value of the attribute)
         {
             var test = attributeData.Cast<AttributeDatum<string>>();
             var distinctYears = attributeData.Select(_ => _.TimeStamp.Year).Distinct();

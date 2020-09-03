@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
         private static void Main()
         {
-            var simulationConnectionInfo = MainDataset;
+            var simulationConnectionInfo = SmallBridgeDataset;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();

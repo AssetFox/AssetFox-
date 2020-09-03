@@ -4,6 +4,10 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using AppliedResearchAssociates.iAM.Aggregation;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.Segmentation;
 using Humanizer;
 using Newtonsoft.Json;
 
@@ -115,6 +119,15 @@ where simulationid = {simulationId}
                     var sectionById = new Dictionary<int, Section>();
                     var treatmentById = new Dictionary<int, SelectableTreatment>();
 
+                    var aggregatedSegments = new List<AggregateDataSegment>();
+                    var explorerNew = new Explorer();
+                    
+                    //var numAtt = explorerNew.AddNumberAttribute("ADTTOTAL");
+                    //numAtt.DefaultValue = 
+
+                    //var networkNew = new Network(explorerNew);
+                    //var simulationNew = new Simulation(networkNew);
+
                     var simulation = new Explorer().AddNetwork().AddSimulation();
 
                     time(createAttributes, nameof(createAttributes));
@@ -153,6 +166,7 @@ where simulationid = {simulationId}
 
                     #region Helper functions
 
+                    // We are putting a hold on this work. Right now, we are pulling data from metaData json file and creating attribute object
                     void createAttributes()
                     {
                         var rawAttributes = File.ReadAllText("metaData.json");
@@ -171,7 +185,7 @@ where simulationid = {simulationId}
 
                                 continue;
                             }
-                            switch (type)
+                            switch (type.ToUpper())
                             {
                             case NUMBER_ATTRIBUTE_TYPE_NAME:
                                 var isCalculated = item.IsCalculated;
@@ -195,91 +209,51 @@ where simulationid = {simulationId}
                                         numberAttribute.Maximum = swap;
                                     }
                                 }
+                                //var numericAttributeData = new NumericAttributeDataCreator();
+                                //var attributeData = numericAttributeData.GetNumericAttributeDatum(item);
+
+                                // Data miner
+                                var sqlConnection = new SqlAttributeConnection(item.ConnectionString, item.DataRetrievalCommand);
+                                var rawAttributeData = sqlConnection.GetData<double>();
+
+                                var numericAttribute = new NumericAttribute(item.AttributeName, sqlConnection,
+                                                                             Convert.ToDouble(item.DefaultValue), item.Maximum, item.Minimum);
+                                var numericAttributeData = AttributeDatumBuilder<double>.CreateAttributeData(numericAttribute, rawAttributeData);
+
+                                // Segmentation
+                                var numericSegments = Segmenter.CreateSegmentsFromAttributeDataRecords(numericAttributeData);
+
+                                // Aggregation
+                                var numericData = new List<IAttributeDatum>();
+                                numericData.AddRange(numericAttributeData);
+                                var numericAggregation = Aggregator.Aggregate(numericData, numericSegments);
+                                aggregatedSegments.AddRange(numericAggregation);
                                 break;
 
                             case STRING_ATTRIBUTE_TYPE_NAME:
                                 var textAttribute = simulation.Network.Explorer.AddTextAttribute(name);
                                 textAttribute.DefaultValue = item.DefaultValue;
+
+                                // Data miner
+                                sqlConnection = new SqlAttributeConnection(item.ConnectionString, item.DataRetrievalCommand);
+                                var rawTextAttributeData = sqlConnection.GetData<string>();
+                                var textAttributeData = new DataMiner.Attributes.TextAttribute(item.AttributeName, sqlConnection, item.DefaultValue);
+                                var textAttributeDatum = AttributeDatumBuilder<string>.CreateAttributeData(textAttributeData, rawTextAttributeData);
+
+                                // Segmentation
+                                var textSegments = Segmenter.CreateSegmentsFromAttributeDataRecords(textAttributeDatum);
+
+                                // Aggregation
+                                var textData = new List<IAttributeDatum>();
+                                textData.AddRange(textAttributeDatum);
+                                var textAggregation = Aggregator.Aggregate(textData, textSegments);
+                                aggregatedSegments.AddRange(textAggregation);
                                 break;
 
                             default:
                                 throw new InvalidOperationException($"Invalid attribute type \"{type}\".");
                             }
-                            //if (item.DataType.ToLower().Equals("number"))
-                            //{
-                            //    if (item.Location.ToLower().Equals("linear"))
-                            //    {
-                            //        var numericAttributeData = new NumericAttributeDataCreator();
-                            //        var result = numericAttributeData.GetNumericAttributeDatum(item);
-                            //    }
-                            //    else
-                            //    {
-
-                            //    }
-                            //}
-                            //else
-                            //{
-                            //    if (item.Location.ToLower().Equals("section"))
-                            //    {
-
-                            //    }
-                            //    else
-                            //    {
-
-                            //    }
-                            //}
                         }
-
-                        //while (reader.Read())
-                        //{
-                        //    var type = reader.GetNullableString(0);
-                        //    var name = reader.GetNullableString(1);
-
-                        //    if (name == simulation.Network.Explorer.AgeAttribute.Name)
-                        //    {
-                        //        if (type != NUMBER_ATTRIBUTE_TYPE_NAME)
-                        //        {
-                        //            throw new InvalidOperationException("Age attribute must be numeric.");
-                        //        }
-
-                        //        continue;
-                        //    }
-
-                        //    switch (type)
-                        //    {
-                        //    case NUMBER_ATTRIBUTE_TYPE_NAME:
-                        //        var isCalculated = reader.GetNullableBoolean(2) ?? false;
-                        //        if (isCalculated)
-                        //        {
-                        //            var calculatedField = simulation.Network.Explorer.AddCalculatedField(name);
-                        //            calculatedField.IsDecreasingWithDeterioration = reader.GetBoolean(3);
-                        //        }
-                        //        else
-                        //        {
-                        //            var numberAttribute = simulation.Network.Explorer.AddNumberAttribute(name);
-                        //            numberAttribute.IsDecreasingWithDeterioration = reader.GetBoolean(3);
-                        //            numberAttribute.DefaultValue = double.Parse(reader.GetNullableString(4));
-                        //            numberAttribute.Minimum = reader.GetNullableDouble(5);
-                        //            numberAttribute.Maximum = reader.GetNullableDouble(6);
-
-                        //            if (numberAttribute.Minimum > numberAttribute.Maximum)
-                        //            {
-                        //                var swap = numberAttribute.Minimum;
-                        //                numberAttribute.Minimum = numberAttribute.Maximum;
-                        //                numberAttribute.Maximum = swap;
-                        //            }
-                        //        }
-                        //        break;
-
-                        //    case STRING_ATTRIBUTE_TYPE_NAME:
-                        //        var textAttribute = simulation.Network.Explorer.AddTextAttribute(name);
-                        //        textAttribute.DefaultValue = reader.GetNullableString(4);
-                        //        break;
-
-                        //    default:
-                        //        throw new InvalidOperationException($"Invalid attribute type \"{type}\".");
-                        //    }
-                        //}
                     }
 
                     void fillCalculatedFields()
@@ -291,6 +265,7 @@ where simulationid = {simulationId}
                             var name = reader.GetNullableString(0);
                             if (!calculatedFieldByName.TryGetValue(name, out var calculatedField))
                             {
+                                continue;
                                 throw new InvalidOperationException("Unknown calculated field.");
                             }
 
@@ -313,6 +288,22 @@ where simulationid = {simulationId}
                     void createSections()
                     {
                         var facilityByName = new Dictionary<string, Facility>();
+
+                        foreach(var item in aggregatedSegments)
+                        {
+                            var sectionId = int.Parse(item.Segment.Location.UniqueIdentifier);
+                            var newFacility = simulation.Network.AddFacility();
+                            newFacility.Name = ""; // don't know yet
+
+                            var newSection = newFacility.AddSection();
+                            
+                            //var yearAndValues = item.GetAggregatedValuesByYear(item.Segment.SegmentationAttributeDatum.Attribute, )
+                            //newSection.Name = item.;
+                            //newSection.AreaUnit = item.Segment.;
+                            //section.Area = ;
+
+                            sectionById.Add(sectionId, newSection);
+                        }
 
                         while (reader.Read())
                         {
@@ -359,8 +350,16 @@ where simulationid = {simulationId}
                                 var columnOrdinal = column.ColumnOrdinal;
                                 var yearSeparatorIndex = column.ColumnName.LastIndexOf('_');
                                 var yearString = column.ColumnName.Substring(yearSeparatorIndex + 1);
-                                var year = int.Parse(yearString);
-                                var attributeName = column.ColumnName.Substring(0, yearSeparatorIndex);
+                                var isPossible = int.TryParse(yearString, out var result);
+                                var year = -1;
+                                var attributeName = "";
+                                if (isPossible)
+                                {
+                                    year = result;
+                                    attributeName = column.ColumnName.Substring(0, yearSeparatorIndex);
+                                }
+                                //var year = int.Parse(yearString);
+                                //var attributeName = column.ColumnName.Substring(0, yearSeparatorIndex);
                                 return (columnOrdinal, year, attributeName);
                             })
                             .ToLookup(columnDatum => columnDatum.attributeName);
@@ -473,11 +472,19 @@ where simulationid = {simulationId}
                         {
                             var curve = simulation.AddPerformanceCurve();
                             var attributeName = reader.GetNullableString(0);
-                            curve.Attribute = attributeByName[attributeName];
-                            curve.Name = reader.GetNullableString(1);
-                            curve.Criterion.Expression = reader.GetNullableString(2);
-                            curve.Equation.Expression = reader.GetNullableString(3);
-                            curve.Shift = reader.GetBoolean(4);
+                            if (attributeByName.ContainsKey(attributeName))
+                            {
+                                curve.Attribute = attributeByName[attributeName];
+                                curve.Name = reader.GetNullableString(1);
+                                curve.Criterion.Expression = reader.GetNullableString(2);
+                                curve.Equation.Expression = reader.GetNullableString(3);
+                                curve.Shift = reader.GetBoolean(4);
+                            }
+                            //curve.Attribute = attributeByName[attributeName];
+                            //curve.Name = reader.GetNullableString(1);
+                            //curve.Criterion.Expression = reader.GetNullableString(2);
+                            //curve.Equation.Expression = reader.GetNullableString(3);
+                            //curve.Shift = reader.GetBoolean(4);
                         }
                     }
 
@@ -548,10 +555,17 @@ where simulationid = {simulationId}
 
                             var consequence = treatment.AddConsequence();
                             var attributeName = reader.GetNullableString(6);
-                            consequence.Attribute = attributeByName[attributeName];
-                            consequence.Change.Expression = reader.GetNullableString(7);
-                            consequence.Equation.Expression = reader.GetNullableString(8);
-                            consequence.Criterion.Expression = reader.GetNullableString(9);
+                            if (attributeByName.ContainsKey(attributeName))
+                            {
+                                consequence.Attribute = attributeByName[attributeName];
+                                consequence.Change.Expression = reader.GetNullableString(7);
+                                consequence.Equation.Expression = reader.GetNullableString(8);
+                                consequence.Criterion.Expression = reader.GetNullableString(9);
+                            }
+                            //consequence.Attribute = attributeByName[attributeName];
+                            //consequence.Change.Expression = reader.GetNullableString(7);
+                            //consequence.Equation.Expression = reader.GetNullableString(8);
+                            //consequence.Criterion.Expression = reader.GetNullableString(9);
                         }
                     }
 
@@ -644,11 +658,19 @@ where simulationid = {simulationId}
                         {
                             var goal = simulation.AnalysisMethod.AddTargetConditionGoal();
                             var attributeName = reader.GetNullableString(0);
-                            goal.Attribute = attributeByName[attributeName];
-                            goal.Year = reader.GetNullableInt32(1);
-                            goal.Target = reader.GetDouble(2);
-                            goal.Name = reader.GetNullableString(3);
-                            goal.Criterion.Expression = reader.GetNullableString(4);
+                            if (attributeByName.ContainsKey(attributeName))
+                            {
+                                goal.Attribute = attributeByName[attributeName];
+                                goal.Year = reader.GetNullableInt32(1);
+                                goal.Target = reader.GetDouble(2);
+                                goal.Name = reader.GetNullableString(3);
+                                goal.Criterion.Expression = reader.GetNullableString(4);
+                            }
+                            //goal.Attribute = attributeByName[attributeName];
+                            //goal.Year = reader.GetNullableInt32(1);
+                            //goal.Target = reader.GetDouble(2);
+                            //goal.Name = reader.GetNullableString(3);
+                            //goal.Criterion.Expression = reader.GetNullableString(4);
                         }
                     }
 
@@ -660,11 +682,19 @@ where simulationid = {simulationId}
                         {
                             var goal = simulation.AnalysisMethod.AddDeficientConditionGoal();
                             var attributeName = reader.GetNullableString(0);
-                            goal.Attribute = attributeByName[attributeName];
-                            goal.Name = reader.GetNullableString(1);
-                            goal.DeficientLimit = reader.GetDouble(2);
-                            goal.AllowedDeficientPercentage = reader.GetDouble(3);
-                            goal.Criterion.Expression = reader.GetNullableString(4);
+                            if (attributeByName.ContainsKey(attributeName))
+                            {
+                                goal.Attribute = attributeByName[attributeName];
+                                goal.Name = reader.GetNullableString(1);
+                                goal.DeficientLimit = reader.GetDouble(2);
+                                goal.AllowedDeficientPercentage = reader.GetDouble(3);
+                                goal.Criterion.Expression = reader.GetNullableString(4);
+                            }
+                            //goal.Attribute = attributeByName[attributeName];
+                            //goal.Name = reader.GetNullableString(1);
+                            //goal.DeficientLimit = reader.GetDouble(2);
+                            //goal.AllowedDeficientPercentage = reader.GetDouble(3);
+                            //goal.Criterion.Expression = reader.GetNullableString(4);
                         }
                     }
 
@@ -676,9 +706,15 @@ where simulationid = {simulationId}
                         {
                             var limit = simulation.AnalysisMethod.AddRemainingLifeLimit();
                             var attributeName = reader.GetNullableString(0);
-                            limit.Attribute = attributeByName[attributeName];
-                            limit.Value = reader.GetDouble(1);
-                            limit.Criterion.Expression = reader.GetNullableString(2);
+                            if (attributeByName.ContainsKey(attributeName))
+                            {
+                                limit.Attribute = attributeByName[attributeName];
+                                limit.Value = reader.GetDouble(1);
+                                limit.Criterion.Expression = reader.GetNullableString(2);
+                            }
+                            //    limit.Attribute = attributeByName[attributeName];
+                            //limit.Value = reader.GetDouble(1);
+                            //limit.Criterion.Expression = reader.GetNullableString(2);
                         }
                     }
 
@@ -759,24 +795,24 @@ where simulationid = {simulationId}
             public int ColumnOrdinal { get; }
         }
 
-        //private class NumericAttributeDataCreator
-        //{
-        //    public List<AttributeDatum<double>> GetNumericAttributeDatum(AttributeMetaDatum item)
-        //    {
-        //        var sqlConnection = new SqlAttributeConnection(item.ConnectionString, item.DataRetrievalCommand);
-        //        var attributeData = sqlConnection.GetData<double>();
+        private class NumericAttributeDataCreator
+        {
+            public List<AttributeDatum<double>> GetNumericAttributeDatum(AttributeMetaDatum item)
+            {
+                var sqlConnection = new SqlAttributeConnection(item.ConnectionString, item.DataRetrievalCommand);
+                var attributeData = sqlConnection.GetData<double>();
 
-        //        var numericAttribute = new NumericAttribute(item.AttributeName, sqlConnection,
-        //                                                     Convert.ToDouble(item.DefaultValue), item.Maximum, item.Minimum);
-        //        var numericAttributeDatum = new List<AttributeDatum<double>>();
-        //        //var linearLocation = new LinearLocation(new SimpleRoute("Test simple route"), uniqueIdentifier, 0, 10);
-        //        foreach (var result in attributeData)
-        //        {
-        //            numericAttributeDatum.Add(new AttributeDatum<double>(numericAttribute, result.value, result.location, DateTime.Now));
-        //        }
+                var numericAttribute = new NumericAttribute(item.AttributeName, sqlConnection,
+                                                             Convert.ToDouble(item.DefaultValue), item.Maximum, item.Minimum);
+                var numericAttributeDatum = new List<AttributeDatum<double>>();
+                //var linearLocation = new LinearLocation(new SimpleRoute("Test simple route"), uniqueIdentifier, 0, 10);
+                foreach (var result in attributeData)
+                {
+                    numericAttributeDatum.Add(new AttributeDatum<double>(numericAttribute, result.value, result.location, DateTime.Now));
+                }
 
-        //        return numericAttributeDatum;
-        //    }
-        //}
+                return numericAttributeDatum;
+            }
+        }
     }
 }

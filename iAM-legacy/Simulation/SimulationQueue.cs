@@ -25,7 +25,6 @@ namespace Simulation
         private static string MongoConnection;
         private static IMongoCollection<SimulationModel> Simulations;
         private static int SimulationId;
-        //UpdateDefinition<SimulationModel> updateStatus = null;
         private static void LogProgressToConsole(TimeSpan elapsed, string label)
         {
             log.Info($"NewAnalysis: {elapsed} --- {label}");
@@ -151,7 +150,6 @@ namespace Simulation
             {
                 Console.WriteLine("Analysis should not run when validation errors are present. Terminating execution...");
                 log.Error("NewAnalysis: Analysis should not run when validation errors are present. Terminating execution...");
-                //LogProgressToConsole(new TimeSpan(), "simulation failed");
                 //Environment.Exit(1);
             }
 
@@ -172,10 +170,13 @@ namespace Simulation
             runner.Run();
             LogProgressToConsole(timer.Elapsed, "simulation run");
 
-            var outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var outputFile = $"{DateTime.Now:yyyyMMddHHmmss} - Network {parameters.NetworkId} - Simulation {parameters.SimulationId}.json";
-            var outputPath = Path.Combine(outputFolder, outputFile);
-            using var outputStream = File.Create(outputPath);
+            var folderPathForNewAnalysis = $"DownloadedReports\\{SimulationId}_NewAnalysis";
+            var relativeFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis);
+            Directory.CreateDirectory(relativeFolderPath);
+
+            var outputFile = $"Network {parameters.NetworkId} - Simulation {parameters.SimulationId}.json";
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis, outputFile);
+            using var outputStream = File.Create(filePath);
             using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });
             JsonSerializer.Serialize(outputWriter, newSimulation.Results, new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });
         }

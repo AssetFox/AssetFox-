@@ -2,6 +2,7 @@
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.Validation;
 using log4net;
+using MongoDB.Driver;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using static Simulation.Simulation;
 
 namespace Simulation
 {
@@ -19,10 +21,17 @@ namespace Simulation
     {
         public SimulationQueue(int maximumConcurrency) => MaximumConcurrency = maximumConcurrency;
 
-        private static readonly log4net.ILog log = LogManager.GetLogger(typeof(SimulationQueue));
+        private static readonly ILog log = LogManager.GetLogger(typeof(SimulationQueue));
+        private static string MongoConnection;
+        private static IMongoCollection<SimulationModel> Simulations;
+        private static int SimulationId;
+        //UpdateDefinition<SimulationModel> updateStatus = null;
         private static void LogProgressToConsole(TimeSpan elapsed, string label)
         {
             log.Info($"NewAnalysis: {elapsed} --- {label}");
+ 
+            var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"{elapsed} --- {label}");
+            Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
         }
 
         private static SimulationQueue mainSimulationQueueInstance = null;
@@ -112,9 +121,15 @@ namespace Simulation
         private static void SimulationForNewAnalysis(object state)
         {
             var parameters = (SimulationParameters)state;
+
+            MongoConnection = parameters.ConnectionString;
+            var mongoClient = new MongoClient(MongoConnection);
+            var mongoDB = mongoClient.GetDatabase("BridgeCare");
+            Simulations = mongoDB.GetCollection<SimulationModel>("scenarios");
+            SimulationId = parameters.SimulationId;
+
             using var connection = new SqlConnection(parameters.SQLConnection);
             connection.Open();
-
             var newSimulation = new DataAccessor().GetStandAloneSimulation(
             connection,
             parameters.NetworkId,
@@ -126,19 +141,31 @@ namespace Simulation
             {
                 errorIsPresent |= result.Status == ValidationStatus.Error;
                 Console.WriteLine($"[{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");
+
                 log.Info($"NewAnalysis: [{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");
+                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"[{result.Status}] {result.Message} - {result.Target.Key}");
+                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
             }
 
             if (errorIsPresent)
             {
                 Console.WriteLine("Analysis should not run when validation errors are present. Terminating execution...");
                 log.Error("NewAnalysis: Analysis should not run when validation errors are present. Terminating execution...");
-                Environment.Exit(1);
+                //LogProgressToConsole(new TimeSpan(), "simulation failed");
+                //Environment.Exit(1);
             }
 
             var runner = new SimulationRunner(newSimulation);
-            runner.Information += (sender, eventArgs) => log.Info(eventArgs.Message);
-            runner.Warning += (sender, eventArgs) => log.Info(eventArgs.Message);
+            runner.Information += (sender, eventArgs) => { 
+                log.Info(eventArgs.Message);
+                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"{eventArgs.Message}");
+                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+            };
+            runner.Warning += (sender, eventArgs) => { 
+                log.Info(eventArgs.Message);
+                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"{eventArgs.Message}");
+                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+            };
 
             var timer = Stopwatch.StartNew();
 
@@ -150,7 +177,7 @@ namespace Simulation
             var outputPath = Path.Combine(outputFolder, outputFile);
             using var outputStream = File.Create(outputPath);
             using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });
-            System.Text.Json.JsonSerializer.Serialize(outputWriter, newSimulation.Results, new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });
+            JsonSerializer.Serialize(outputWriter, newSimulation.Results, new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });
         }
 
         private void Consume(object state)

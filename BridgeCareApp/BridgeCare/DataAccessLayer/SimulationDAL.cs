@@ -246,7 +246,7 @@ namespace BridgeCare.DataAccessLayer
             }
             catch (Exception ex)
             {
-                DBMgr.CloseConnection();
+                //DBMgr.CloseConnection();
                 return Task.FromResult($"Simulation run failed::{ex.Message}");
             }
         }

@@ -38,6 +38,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
             if (numberOfErrors > 0)
             {
+                Inform($"Simulation faliled: It has {numberOfErrors} validation errors.");
                 throw new SimulationException($"Simulation has {numberOfErrors} validation errors.");
             }
 

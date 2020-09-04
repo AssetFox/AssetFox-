@@ -12,62 +12,31 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 {
     internal static class Program
     {
-        private static readonly SimulationConnectionInfo LocalZerothDataset = new SimulationConnectionInfo
-        {
-            ConnectionFormat = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=iAMBridgeCare;Integrated Security=True",
-            NetworkId = 13,
-            SimulationId = 91, // "MASTER - no commitments"
-        };
-
-        private static readonly SimulationConnectionInfo MainDataset = new SimulationConnectionInfo
-        {
-            ConnectionFormat = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=DbBackup;User Id={0};Password={1}",
-            NetworkId = 13,
-            SimulationId = 1171, // "JML Run District 8"
-        };
-
-        private static readonly SimulationConnectionInfo MainDatasetLocal = new SimulationConnectionInfo
-        {
-            ConnectionFormat = @"Server=localhost;Database=DbBackup;User Id={0};Password={1}",
-            NetworkId = 13,
-            SimulationId = 1171, // "JML Run District 8"
-        };
-
-        private static readonly SimulationConnectionInfo SmallBridgeDataset = new SimulationConnectionInfo
-        {
-            ConnectionFormat = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=PennDot_Light;User Id={0};Password={1}",
-            NetworkId = 13,
-            SimulationId = 1181, // "District 2 Initial Run"
-        };
-
-        private static readonly SimulationConnectionInfo SmallBridgeDatasetLocal = new SimulationConnectionInfo
-        {
-            ConnectionFormat = @"Server=localhost;Database=PennDot_Light;User Id={0};Password={1}",
-            NetworkId = 13,
-            SimulationId = 1181, // "District 2 Initial Run"
-        };
-
         private static void LogProgressToConsole(TimeSpan elapsed, string label) => Console.WriteLine($"{elapsed} --- {label}");
 
         private static void Main()
         {
-            var simulationConnectionInfo = SmallBridgeDatasetLocal;
+            const int networkId = 13;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();
             Console.WriteLine("Password:");
             var password = Console.ReadLine();
+            Console.WriteLine("Network ID:");
+            Console.WriteLine(networkId);
+            Console.WriteLine("Simulation ID:");
+            var simulationId = int.Parse(Console.ReadLine());
             Console.Clear();
 
-            var connectionString = string.Format(simulationConnectionInfo.ConnectionFormat, userId, password);
+            var connectionString = string.Format(ConnectionFormats.SmallBridgeDatasetLocal, userId, password);
 
             using var connection = new SqlConnection(connectionString);
             connection.Open();
 
             var simulation = new DataAccessor().GetStandAloneSimulation(
                 connection,
-                simulationConnectionInfo.NetworkId,
-                simulationConnectionInfo.SimulationId,
+                networkId,
+                simulationId,
                 LogProgressToConsole);
 
             var errorIsPresent = false;
@@ -95,20 +64,19 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
             Console.WriteLine("Network condition: " + simulation.Results.Years.Last().ConditionOfNetwork);
 
             var outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var outputFile = $"{DateTime.Now:yyyyMMddHHmmss} - Network {simulationConnectionInfo.NetworkId} - Simulation {simulationConnectionInfo.SimulationId}.json";
+            var outputFile = $"{DateTime.Now:yyyyMMddHHmmss} - Network {networkId} - Simulation {simulationId}.json";
             var outputPath = Path.Combine(outputFolder, outputFile);
             using var outputStream = File.Create(outputPath);
             using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });
             JsonSerializer.Serialize(outputWriter, simulation.Results, new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });
         }
 
-        private sealed class SimulationConnectionInfo
+        private static class ConnectionFormats
         {
-            public string ConnectionFormat;
-
-            public int NetworkId;
-
-            public int SimulationId;
+            public const string MainDataset = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=DbBackup;User Id={0};Password={1}";
+            public const string MainDatasetLocal = @"Server=localhost;Database=DbBackup;User Id={0};Password={1}";
+            public const string SmallBridgeDataset = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=PennDot_Light;User Id={0};Password={1}";
+            public const string SmallBridgeDatasetLocal = @"Server=localhost;Database=PennDot_Light;User Id={0};Password={1}";
         }
     }
 }

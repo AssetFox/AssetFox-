@@ -6,5 +6,7 @@ namespace BridgeCare.Interfaces
     {
         void GenerateExcelReport(SimulationModel simulationModel);
         byte[] DownloadExcelReport(SimulationModel simulationModel);
+
+        byte[] DownloadTempJsonReport(SimulationModel simulationModel);
     }
 }

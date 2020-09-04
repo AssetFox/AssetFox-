@@ -241,5 +241,20 @@ namespace BridgeCare.Services.SummaryReport
             //return Encoding.ASCII.GetBytes($"Summary report is not available in the path {filePath}");
             throw new FileNotFoundException($"Summary report is not available in the path {filePath}", "SummaryReport.xlsx");
         }
+
+        public byte[] DownloadTempJsonReport(SimulationModel simulationModel)
+        {
+            var folderPathForSimulation = $"DownloadedReports\\{simulationModel.simulationId}_NewAnalysis";
+            var outputFile = $"Network {simulationModel.networkId} - Simulation {simulationModel.simulationId}.json";
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForSimulation, outputFile);
+            if (File.Exists(filePath))
+            {
+                byte[] summaryReportData = File.ReadAllBytes(filePath);
+                return summaryReportData;
+            }
+            log.Error($"Summary report is not available in the path {filePath}");
+            //return Encoding.ASCII.GetBytes($"Summary report is not available in the path {filePath}");
+            throw new FileNotFoundException($"Summary report is not available in the path {filePath}", "SummaryReport.xlsx");
+        }
     }
 }

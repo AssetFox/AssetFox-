@@ -150,13 +150,12 @@ namespace Simulation
             {
                 Console.WriteLine("Analysis should not run when validation errors are present. Terminating execution...");
                 log.Error("NewAnalysis: Analysis should not run when validation errors are present. Terminating execution...");
-                //Environment.Exit(1);
             }
 
             var runner = new SimulationRunner(newSimulation);
             runner.Failure += (sender, eventArgs) => {
-                log.Info(eventArgs.Message);
-                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"{eventArgs.Message}");
+                log.Info($"Failed:  {eventArgs.Message}");
+                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"Failed: {eventArgs.Message}");
                 Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
             };
             runner.Information += (sender, eventArgs) => {

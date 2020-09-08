@@ -154,7 +154,12 @@ namespace Simulation
             }
 
             var runner = new SimulationRunner(newSimulation);
-            runner.Information += (sender, eventArgs) => { 
+            runner.Failure += (sender, eventArgs) => {
+                log.Info(eventArgs.Message);
+                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"{eventArgs.Message}");
+                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+            };
+            runner.Information += (sender, eventArgs) => {
                 log.Info(eventArgs.Message);
                 var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"{eventArgs.Message}");
                 Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);

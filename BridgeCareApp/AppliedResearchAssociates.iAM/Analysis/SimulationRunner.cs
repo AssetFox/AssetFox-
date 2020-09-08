@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
+        public event EventHandler<FailureEventArgs> Failure;
+
         public event EventHandler<InformationEventArgs> Information;
 
         public event EventHandler<WarningEventArgs> Warning;
@@ -37,8 +39,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
             if (numberOfErrors > 0)
             {
-                Inform($"Simulation faliled: It has {numberOfErrors} validation errors.");
-                throw new SimulationException($"Simulation has {numberOfErrors} validation errors.");
+                Fail($"Simulation faliled: It has {numberOfErrors} validation errors.");
             }
 
             var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
@@ -48,7 +49,16 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
 
             ActiveTreatments = Simulation.GetActiveTreatments();
-            BudgetContexts = Simulation.GetBudgetContextsWithCostAllocationsForCommittedProjects();
+
+            try
+            {
+                BudgetContexts = Simulation.GetBudgetContextsWithCostAllocationsForCommittedProjects();
+            }
+            catch (SimulationException e)
+            {
+                Fail(e.Message, false);
+                throw;
+            }
 
             BudgetPrioritiesPerYear = Simulation.InvestmentPlan.YearsOfAnalysis.ToDictionary(_ => _, year =>
             {
@@ -87,12 +97,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (SectionContexts.Count == 0)
             {
-                throw new SimulationException("There are no sections.");
+                Fail("There are no sections.");
             }
 
             if (SectionContexts.Select(context => context.Section.AreaUnit).Distinct().Count() > 1)
             {
-                throw new SimulationException("Sections have multiple distinct area units.");
+                Fail("Sections have multiple distinct area units.");
             }
 
             InParallel(SectionContexts, context => context.RollForward());
@@ -126,7 +136,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 break;
 
             default:
-                throw new SimulationException(MessageStrings.InvalidSpendingStrategy);
+                throw new InvalidOperationException(MessageStrings.InvalidSpendingStrategy);
             }
 
             ObjectiveFunction = Simulation.AnalysisMethod.ObjectiveFunction;
@@ -164,6 +174,16 @@ namespace AppliedResearchAssociates.iAM.Analysis
         internal IReadOnlyDictionary<string, NumberAttribute> NumberAttributeByName { get; private set; }
 
         internal double GetInflationFactor(int year) => Math.Pow(1 + Simulation.InvestmentPlan.InflationRatePercentage / 100, year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod);
+
+        internal void Fail(string message, bool shouldThrow = true)
+        {
+            OnFailure(new FailureEventArgs(message));
+
+            if (shouldThrow)
+            {
+                throw new SimulationException(message);
+            }
+        }
 
         internal void Inform(string message) => OnInformation(new InformationEventArgs(message));
 
@@ -516,6 +536,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
+        private void OnFailure(FailureEventArgs e) => Failure?.Invoke(this, e);
+
         private void OnInformation(InformationEventArgs e) => Information?.Invoke(this, e);
 
         private void OnWarning(WarningEventArgs e) => Warning?.Invoke(this, e);
@@ -763,7 +785,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 if (cost < 0)
                 {
-                    throw new SimulationException(MessageStrings.RemainingCostIsNegative);
+                    Fail(MessageStrings.RemainingCostIsNegative);
                 }
             }
         }

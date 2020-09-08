@@ -107,7 +107,6 @@ where simulationid = {simulationId}
                         action();
                         var elapsed = timer.Elapsed;
                         onProgress?.Invoke(elapsed, label.Humanize() + ".");
-                        //onProgress?.Invoke(elapsed, label + ".");
                         _ = reader.NextResult();
                     }
 

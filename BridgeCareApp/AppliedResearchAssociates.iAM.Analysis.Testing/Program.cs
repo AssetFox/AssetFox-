@@ -17,7 +17,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
         private static void Main()
         {
             const int networkId = 13;
-            var simulationConnectionInfo = SmallBridgeDataset;
 
             Console.WriteLine("User Id:");
             var userId = Console.ReadLine();

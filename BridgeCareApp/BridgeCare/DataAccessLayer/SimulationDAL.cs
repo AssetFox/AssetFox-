@@ -23,9 +23,6 @@ namespace BridgeCare.DataAccessLayer
         private static readonly log4net.ILog log = LogManager.GetLogger(typeof(SimulationDAL));
         private static readonly SimulationQueue SimulationQueue = SimulationQueue.MainSimulationQueue;
 
-        private static void LogProgressToConsole(TimeSpan elapsed, string label) {
-            log.Info($"NewAnalysis: {elapsed} --- {label}");
-        }
         /// <summary>
         /// Fetches all simulations
         /// </summary>

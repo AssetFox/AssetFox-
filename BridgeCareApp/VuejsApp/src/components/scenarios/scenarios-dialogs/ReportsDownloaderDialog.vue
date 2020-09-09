@@ -15,9 +15,9 @@
             <v-divider></v-divider>
             <v-card-text>
                 <v-flex>
-                    <v-btn :disabled="showMissingAttributesMessage" @click="generateSummaryReport()"
+                    <v-btn :disabled="true" @click="generateSummaryReport()"
                            class="green darken-2 white--text">
-                        Generate summary report
+                        Generate summary report (Intentionally disabled)
                         <v-icon right>star</v-icon>
                     </v-btn>
                 </v-flex>
@@ -141,14 +141,14 @@
                                 break;
                             }
                             case 'Summary Report': {
-                                await ReportsService.downloadSummaryReport(this.selectedScenarioData)
+                                await ReportsService.downloadTempSummaryReport(this.selectedScenarioData)
                                     .then((response: AxiosResponse<any>) => {
                                         if (response == undefined) {
                                             this.setErrorMessageAction({message: 'Summary report does not exists on the target path. Please generate the report before downloading'});
                                         } else {
                                             this.setSuccessMessageAction({message: 'Report has been downloaded'});
                                         }
-                                        FileDownload(response.data, 'SummaryReport.xlsx');
+                                        FileDownload(response.data, 'SummaryReportRawData.json');
                                     });
                                 break;
                             }

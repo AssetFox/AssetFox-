@@ -28,6 +28,10 @@ export default class ReportsService {
         return axiosInstance.post('/api/DownloadSummaryReport', selectedScenarioData, {responseType: 'blob'});
     }
 
+    static downloadTempSummaryReport(selectedScenarioData: Scenario): AxiosPromise {
+        return axiosInstance.post('/api/DownloadTempSummaryReport', selectedScenarioData, {responseType: 'blob'});
+    }
+
     static getJobList(): AxiosPromise {
         return axiosInstance.get('/api/GetJobList', {});
     }

@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var cost = GetCostOfTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment);
             if (cost != 0)
             {
-                throw new SimulationException(MessageStrings.CostOfPassiveTreatmentIsNonZero);
+                SimulationRunner.Fail(MessageStrings.CostOfPassiveTreatmentIsNonZero);
             }
 
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
@@ -68,10 +68,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void ApplyTreatment(Treatment treatment, int year)
         {
-            var consequenceActions = treatment.GetConsequenceActions(this);
-            foreach (var consequenceAction in consequenceActions)
+            try
             {
-                consequenceAction();
+                var consequenceActions = treatment.GetConsequenceActions(this);
+                foreach (var consequenceAction in consequenceActions)
+                {
+                    consequenceAction();
+                }
+            }
+            catch (SimulationException e)
+            {
+                SimulationRunner.Fail(e.Message, false);
+                throw;
             }
 
             foreach (var scheduling in treatment.GetSchedulings())
@@ -121,7 +129,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 var loop = GetNumber_ActiveKeysOfCurrentInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
                 var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));
-                throw new SimulationException("Loop encountered during number calculation: " + loopText);
+                SimulationRunner.Fail("Loop encountered during number calculation: " + loopText);
             }
 
             GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
@@ -221,7 +229,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             if (KeyComparer.Equals(key, Section.AreaIdentifier))
             {
-                throw new SimulationException("Section area is being mutated. The analysis does not support this.");
+                SimulationRunner.Fail("Section area is being mutated. The analysis does not support this.");
             }
 
             if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key))
@@ -286,7 +294,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (operativeCurves.Count == 0)
             {
-                throw new SimulationException("No performance curves are operative for a deteriorating attribute.");
+                SimulationRunner.Fail("No performance curves are operative for a deteriorating attribute.");
             }
 
             if (operativeCurves.Count > 1)
@@ -326,7 +334,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
             {
-                double calculate() => calculatedField.Calculate(this);
+                double calculate()
+                {
+                    try
+                    {
+                        return calculatedField.Calculate(this);
+                    }
+                    catch (SimulationException e)
+                    {
+                        SimulationRunner.Fail(e.Message, false);
+                        throw;
+                    }
+                }
+
                 SetNumber(calculatedField.Name, calculate);
             }
         }

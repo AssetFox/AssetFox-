@@ -8,7 +8,8 @@
             int simulationId,
             int networkId,
             string connectionString,
-            bool isApiCall)
+            bool isApiCall,
+            string sqlConnection = "")
         {
             SimulationName = simulationName;
             NetworkName = networkName;
@@ -16,6 +17,7 @@
             NetworkId = networkId;
             ConnectionString = connectionString;
             IsApiCall = isApiCall;
+            SQLConnection = sqlConnection;
         }
 
         public string ConnectionString { get; }
@@ -29,5 +31,7 @@
         public int SimulationId { get; }
 
         public string SimulationName { get; }
+
+        public string SQLConnection { get; }
     }
 }

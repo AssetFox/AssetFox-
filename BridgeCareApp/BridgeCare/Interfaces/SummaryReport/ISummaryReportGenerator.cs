@@ -4,6 +4,9 @@ namespace BridgeCare.Interfaces
 {
     public interface ISummaryReportGenerator
     {
-        byte[] GenerateExcelReport(SimulationModel simulationModel);
+        void GenerateExcelReport(SimulationModel simulationModel);
+        byte[] DownloadExcelReport(SimulationModel simulationModel);
+
+        byte[] DownloadTempJsonReport(SimulationModel simulationModel);
     }
 }

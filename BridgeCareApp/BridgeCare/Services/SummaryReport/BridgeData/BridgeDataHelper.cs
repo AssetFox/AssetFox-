@@ -83,14 +83,14 @@ namespace BridgeCare.Services
             if (projectCostEntry != null)
             {
                 var amount = projectCostEntry.COST_;
-                if (amount >= 500)
-                {
+                //if (amount >= 500)
+                //{
                     roundedCost = amount % 1000 >= 500 ? amount + 1000 - amount % 1000 : amount - amount % 1000;
-                }
-                else
-                {
-                    roundedCost = 1000;
-                }
+                //}
+                //else
+                //{
+                //    roundedCost = 1000;
+                //}
             }
             
             yearsData.Cost = year != 0 ? roundedCost : 0;

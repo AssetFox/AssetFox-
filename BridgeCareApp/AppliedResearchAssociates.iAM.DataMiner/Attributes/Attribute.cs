@@ -1,20 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public abstract class Attribute
     {
-        public Attribute(string name, AttributeConnection attributeConnection)
+        public Attribute(string name, AttributeConnection connection)
         {
             Guid = Guid.NewGuid();
             Name = name;
-            AttributeConnection = attributeConnection;
+            Connection = connection;
         }
 
         public Guid Guid { get; }
 
         public string Name { get; }
 
-        public AttributeConnection AttributeConnection { get; }
+        public AttributeConnection Connection { get; }
     }
 }

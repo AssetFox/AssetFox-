@@ -6,17 +6,11 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public class SqlAttributeConnection : AttributeConnection
     {
-        public override string ConnectionInformation { get; }
-
-        public override string DataRetrievalCommand { get; }
-
-        public SqlAttributeConnection(string connectionInformation, string dataRetrievalCommand)
+        public SqlAttributeConnection(Attribute attribute, string connectionString, string command) : base(attribute, connectionString, command)
         {
-            ConnectionInformation = connectionInformation;
-            DataRetrievalCommand = dataRetrievalCommand;
         }
-                
-        public override IEnumerable<(Location location, T value)> GetData<T>()
+
+        public override IEnumerable<IAttributeDatum> GetData<T>()
         {
             string routeName = null;
             double? start = null;
@@ -25,27 +19,21 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
             string wellKnownText = null;
             string uniqueIdentifeir = "";
 
-            using (var conn = new SqlConnection(ConnectionInformation))
+            using (var conn = new SqlConnection())
             {
-                var command = new SqlCommand(DataRetrievalCommand, conn);
-                command.Connection.Open();
-                var dataReader = command.ExecuteReader();
+                var sqlCommand = new SqlCommand(Command, conn);
+                sqlCommand.Connection.Open();
+                var dataReader = sqlCommand.ExecuteReader();
                 while (dataReader.Read())
                 {
-                    //routeName = dataReader.GetFieldValue<string>(1);
-                    //start = dataReader.GetFieldValue<double>(2);
-                    //end = dataReader.GetFieldValue<double>(3);
-                    //var rawDirection = dataReader.GetFieldValue<string>(4);
-                    //if(rawDirection == "North")
-                    //{
-                    //    direction = 0;
-                    //}
                     var value = dataReader.GetFieldValue<T>(5);
-                    var dataTime = dataReader.GetFieldValue<DateTime>(6);
+                    var dateTime = dataReader.GetFieldValue<DateTime>(6);
 
-                    yield return (LocationBuilder.CreateLocation(
-                        uniqueIdentifeir, routeName, start, end, direction, wellKnownText)
-                        , value);
+                    yield return
+                        new AttributeDatum<T>(Attribute,
+                                              value,
+                                              LocationBuilder.CreateLocation(uniqueIdentifeir, routeName, start, end, direction, wellKnownText),
+                                              dateTime);    
                 }
             }
         }

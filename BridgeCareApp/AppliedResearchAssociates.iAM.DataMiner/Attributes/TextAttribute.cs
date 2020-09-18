@@ -2,8 +2,9 @@
 {
     public class TextAttribute : Attribute
     {
-        public TextAttribute(string name, AttributeConnection attributeConnection, string defaultValue) :
-            base(name, attributeConnection) => DefaultValue = defaultValue;
+        public TextAttribute(string name,
+                             AttributeConnection attributeConnection,
+                             string defaultValue) : base(name, attributeConnection) => DefaultValue = defaultValue;
 
         public string DefaultValue { get; }
     }

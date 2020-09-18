@@ -26,17 +26,11 @@ namespace BridgeCare.Domain
             {
                 var type = rule.AttributeMetaDatum.DataType;
                 var name = rule.AttributeMetaDatum.AttributeName;
-                // this class
-                var dataRetrival = new RawSectionDataRetrival(rule.DataSource, section.AttributeMetaDatum.ConnectionString,
-                    section.AttributeMetaDatum.DataRetrievalCommand);
 
                 switch (type.ToUpper())
                 {
-                case NUMBER_ATTRIBUTE_TYPE_NAME:
-                    var rawData = dataRetrival.GetRawData<double>();
-                    var numericAttribute = dataRetrival.GetNumericAttribute(name, defaultValue: Convert.ToDouble(section.AttributeMetaDatum.DefaultValue),
-                                                                 maximum: section.AttributeMetaDatum.Maximum, minimum: section.AttributeMetaDatum.Minimum);
-
+                case NUMERIC_ATTRIBUTE:
+                    var numericAttribute = new NumericAttribute(name, )
                     var numericAttributeData = AttributeDatumBuilder<double>.CreateAttributeData(numericAttribute, rawData);
 
                     // Segmentation

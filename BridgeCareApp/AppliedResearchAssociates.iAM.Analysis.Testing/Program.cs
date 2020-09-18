@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
             using var connection = new SqlConnection(connectionString);
             connection.Open();
 
-            var simulation = new DataAccessorModified().GetStandAloneSimulation(
+            var simulation = new DataAccessor().GetStandAloneSimulation(
                 connection,
                 simulationConnectionInfo.NetworkId,
                 simulationConnectionInfo.SimulationId,

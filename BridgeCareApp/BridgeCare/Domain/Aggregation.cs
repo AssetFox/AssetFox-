@@ -33,13 +33,12 @@ namespace BridgeCare.Domain
 
             var aggregatedSegments = new List<AggregateDataSegment>();
             
-
             // Get the attribute data and start aggregating
             foreach (var item in attributeMetaData)
             {
                 var type = item.DataType;
                 var name = item.AttributeName;
-                var dataRetrival = new RawSectionDataRetrival(item.DataSource, item.ConnectionString, item.DataRetrievalCommand);
+                var dataRetrival = new AttributeDataProvider(item.DataSource, item.ConnectionString, item.DataRetrievalCommand);
                 switch (type.ToUpper())
                 {
                 case NUMBER_ATTRIBUTE_TYPE_NAME:

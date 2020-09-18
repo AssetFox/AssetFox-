@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
 namespace AppliedResearchAssociates.iAM.Segmentation
@@ -25,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.Segmentation
                     let segment = new Segment(attributeDatum.Location, attributeDatum)
                     select segment)
                     .ToList();
-            return new Network(segment,  );
+            return new Network(segments, Guid.NewGuid())
         }
     }
 }

@@ -129,11 +129,9 @@ namespace Simulation
 
             using var connection = new SqlConnection(parameters.SQLConnection);
             connection.Open();
-            var newSimulation = new DataAccessor().GetStandAloneSimulation(
-            connection,
-            parameters.NetworkId,
-            parameters.SimulationId,
-            LogProgressToConsole);
+            var newSimulation =
+                new DataAccessor(connection, LogProgressToConsole)
+                .GetStandAloneSimulation(parameters.NetworkId, parameters.SimulationId);
 
             var errorIsPresent = false;
             foreach (var result in newSimulation.Network.Explorer.GetAllValidationResults())

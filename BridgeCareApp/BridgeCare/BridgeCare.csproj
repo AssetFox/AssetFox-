@@ -263,11 +263,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\Aggregation.cs" />
+    <Compile Include="Domain\Segmentation.cs" />
     <Compile Include="ApplicationLog\HandleException.cs" />
     <Compile Include="ApplicationLog\UnhandledExceptionLogger.cs" />
     <Compile Include="App_Start\UnityResolver.cs" />
     <Compile Include="App_Start\UnityWebApiActivator.cs" />
+    <Compile Include="Controllers\AggregationController.cs" />
     <Compile Include="Controllers\CashFlowLibraryController.cs" />
+    <Compile Include="Controllers\SegmentationController.cs" />
     <Compile Include="Controllers\UserCriteriaController.cs" />
     <Compile Include="DataAccessLayer\CashFlowLibraryDAL.cs" />
     <Compile Include="DataAccessLayer\UserCriteriaDAL.cs" />
@@ -278,6 +282,7 @@
     <Compile Include="EntityClasses\UserCriteriaEntity.cs" />
     <Compile Include="Interfaces\ICashFlowLibrary.cs" />
     <Compile Include="Interfaces\IUserCriteria.cs" />
+    <Compile Include="Models\AggregationObjects\NetworkMetaData.cs" />
     <Compile Include="Models\AttributeSelectValuesResult.cs" />
     <Compile Include="Models\CashFlowLibraryModel.cs" />
     <Compile Include="Models\CriteriaValidationResult.cs" />
@@ -606,6 +611,22 @@
     <ProjectReference Include="..\..\iAM-legacy\Simulation\Simulation.csproj">
       <Project>{31db6cda-70a3-4c94-a002-fa1bd1df9b02}</Project>
       <Name>Simulation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Aggregation\AppliedResearchAssociates.iAM.Aggregation.csproj">
+      <Project>{F7460B91-2702-41DD-A59E-A7A6F9E31200}</Project>
+      <Name>AppliedResearchAssociates.iAM.Aggregation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj">
+      <Project>{B2769386-5922-49ED-8A95-32BCB912955D}</Project>
+      <Name>AppliedResearchAssociates.iAM.DataMiner</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistence\AppliedResearchAssociates.iAM.DataPersistence.csproj">
+      <Project>{CBB73747-93D4-4E17-B031-792E91C22FE4}</Project>
+      <Name>AppliedResearchAssociates.iAM.DataPersistence</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Segmentation\AppliedResearchAssociates.iAM.Segmentation.csproj">
+      <Project>{DB1D42AC-D45B-4256-9A3A-29156C74C2B5}</Project>
+      <Name>AppliedResearchAssociates.iAM.Segmentation</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

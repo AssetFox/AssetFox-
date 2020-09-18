@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
@@ -18,12 +19,13 @@ namespace AppliedResearchAssociates.iAM.Segmentation
         /// <typeparam name="T"></typeparam>
         /// <param name="attributeData"></param>
         /// <returns></returns>
-        public static List<Segment> CreateSegmentsFromAttributeDataRecords<T>(IEnumerable<AttributeDatum<T>> attributeData)
+        public static Network CreateNetworkFromAttributeDataRecords<T>(IEnumerable<IAttributeDatum> attributeData)
         {
-            return (from attributeDatum in attributeData
+            var segments = (from attributeDatum in attributeData
                     let segment = new Segment(attributeDatum.Location, attributeDatum)
                     select segment)
                     .ToList();
+            return new Network(segment,  );
         }
     }
 }

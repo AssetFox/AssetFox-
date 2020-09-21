@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using BridgeCare.Domain;
 
 namespace BridgeCare.Controllers
 {
@@ -26,10 +27,10 @@ namespace BridgeCare.Controllers
         [Route("api/ResegmentNetwork")]
         public async Task<IHttpActionResult> Post([FromBody] string networkId)
         {
-            var result = await Task.Factory.StartNew(() => Segmentation.Run(networkId));
+            //var result = await Task.Factory.StartNew(() => Segmentation.Run(networkId));
 
-            if (!result.IsCompleted)
-                return InternalServerError(new Exception(result.Result));
+            //if (!result.IsCompleted)
+            //    return InternalServerError(new Exception(result.Result));
 
             return Ok();
         }
@@ -38,10 +39,10 @@ namespace BridgeCare.Controllers
         [Route("api/CreateSegmentation")]
         public async Task<IHttpActionResult> Post()
         {
-            var result = await Task.Factory.StartNew(() => Segmentation.CreateSegmentation());
+            //var result = await Task.Factory.StartNew(() => Segmentation.CreateSegmentation());
 
-            if (!result.IsCompleted)
-                return InternalServerError(new Exception(result.Result));
+            //if (!result.IsCompleted)
+            //    return InternalServerError(new Exception(result.Result));
 
             return Ok();
         }

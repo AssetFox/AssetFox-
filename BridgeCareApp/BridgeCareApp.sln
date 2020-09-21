@@ -111,9 +111,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.i
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.Aggregation", "AppliedResearchAssociates.iAM.Aggregation\AppliedResearchAssociates.iAM.Aggregation.csproj", "{F7460B91-2702-41DD-A59E-A7A6F9E31200}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecutableForProtptype", "ExecutableForProtptype\ExecutableForProtptype.csproj", "{D4B4B820-82AF-443F-ACAB-FE48831A687E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppliedResearchAssociates.iAM.DataPersistence", "AppliedResearchAssociates.iAM.DataPersistence\AppliedResearchAssociates.iAM.DataPersistence.csproj", "{CBB73747-93D4-4E17-B031-792E91C22FE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.DataPersistence", "AppliedResearchAssociates.iAM.DataPersistence\AppliedResearchAssociates.iAM.DataPersistence.csproj", "{CBB73747-93D4-4E17-B031-792E91C22FE4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM", "AppliedResearchAssociates.iAM\AppliedResearchAssociates.iAM.csproj", "{F21F7AD7-CA1D-4DC5-BABF-57160413D659}"
 EndProject
@@ -133,7 +131,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Externally Sourced Projects
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpressionFormatter", "ExpressionFormatter\ExpressionFormatter.csproj", "{8DF80B96-99C5-4C13-929E-EF57AF3A7315}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppliedResearchAssociates.CycleDetection", "AppliedResearchAssociates.CycleDetection\AppliedResearchAssociates.CycleDetection.csproj", "{E5102830-D429-422F-8D95-C1A97512D0FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.CycleDetection", "AppliedResearchAssociates.CycleDetection\AppliedResearchAssociates.CycleDetection.csproj", "{E5102830-D429-422F-8D95-C1A97512D0FE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Custom Framework", "Custom Framework", "{37231516-FDE5-4C1B-9CEE-A9E2F7312654}"
 EndProject
@@ -1889,42 +1887,6 @@ Global
 		{F7460B91-2702-41DD-A59E-A7A6F9E31200}.Release|x64.Build.0 = Release|Any CPU
 		{F7460B91-2702-41DD-A59E-A7A6F9E31200}.Release|x86.ActiveCfg = Release|Any CPU
 		{F7460B91-2702-41DD-A59E-A7A6F9E31200}.Release|x86.Build.0 = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.AACOUNTY|Any CPU.ActiveCfg = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.AACOUNTY|Any CPU.Build.0 = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.AACOUNTY|x64.ActiveCfg = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.AACOUNTY|x64.Build.0 = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.AACOUNTY|x86.ActiveCfg = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.AACOUNTY|x86.Build.0 = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.DDOT|Any CPU.ActiveCfg = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.DDOT|Any CPU.Build.0 = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.DDOT|x64.ActiveCfg = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.DDOT|x64.Build.0 = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.DDOT|x86.ActiveCfg = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.DDOT|x86.Build.0 = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Debug|x64.Build.0 = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Debug|x86.Build.0 = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHADebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHADebug|Any CPU.Build.0 = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHADebug|x64.ActiveCfg = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHADebug|x64.Build.0 = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHADebug|x86.ActiveCfg = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHADebug|x86.Build.0 = Debug|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHARelease|Any CPU.ActiveCfg = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHARelease|Any CPU.Build.0 = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHARelease|x64.ActiveCfg = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHARelease|x64.Build.0 = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHARelease|x86.ActiveCfg = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.MDSHARelease|x86.Build.0 = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Release|x64.ActiveCfg = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Release|x64.Build.0 = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Release|x86.ActiveCfg = Release|Any CPU
-		{D4B4B820-82AF-443F-ACAB-FE48831A687E}.Release|x86.Build.0 = Release|Any CPU
 		{CBB73747-93D4-4E17-B031-792E91C22FE4}.AACOUNTY|Any CPU.ActiveCfg = Debug|Any CPU
 		{CBB73747-93D4-4E17-B031-792E91C22FE4}.AACOUNTY|Any CPU.Build.0 = Debug|Any CPU
 		{CBB73747-93D4-4E17-B031-792E91C22FE4}.AACOUNTY|x64.ActiveCfg = Debug|Any CPU

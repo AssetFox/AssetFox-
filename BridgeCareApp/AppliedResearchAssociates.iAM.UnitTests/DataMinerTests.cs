@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using ExecutableForProtptype;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Assert;
@@ -48,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.UnitTests
         public static LinearLocation LinearLocation = new LinearLocation(new SimpleRoute("Test simple route"), "unique identifier", 0, 10);
 
         public static AttributeDatum<double> NumericAttributeDatum = new AttributeDatum<double>(
-            new NumericAttribute("ADT", SQLConnection, 10, 100, 1), 5, LinearLocation, DateTime.Now);
+            new NumericAttribute("ADT", 10,100, 1, "select * from ADT", ConnectionType.MSSQL, TestDataForAttribute.Connectionstring), 5, LinearLocation, DateTime.Now);
 
         public DataMinerTests()
         {

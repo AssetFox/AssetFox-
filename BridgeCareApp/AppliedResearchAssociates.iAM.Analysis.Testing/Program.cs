@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -37,6 +38,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
             var idSpec = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(idSpec))
             {
+                accessor.RequestedSimulationsPerNetwork = new SortedDictionary<int, SortedSet<int>>();
                 foreach (var networkSpec in idSpec.Split(";"))
                 {
                     var netSims = networkSpec.Split(':');

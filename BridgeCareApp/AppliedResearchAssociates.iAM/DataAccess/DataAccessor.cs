@@ -20,13 +20,12 @@ namespace AppliedResearchAssociates.iAM.DataAccess
         public Dictionary<Simulation, int> IdPerSimulation { get; } = new Dictionary<Simulation, int>();
 
         /// <summary>
-        ///     When this is empty, all networks and all simulations are accessed. Otherwise, only
-        ///     networks whose ID is a "key" will be accessed. For each network: if the "value" is
-        ///     null, no simulations of that network are accessed; if the "value" is empty, all
-        ///     simulations of that network are accessed; otherwise, only simulations whose ID is
-        ///     contained will be accessed.
+        ///     When this is null, all networks and all simulations are accessed. Otherwise, only
+        ///     networks whose ID is contained will be accessed. For each key-network: if the
+        ///     value-set is null, all simulations of that network are accessed; otherwise, only
+        ///     simulations whose ID is contained in the value-set will be accessed.
         /// </summary>
-        public SortedDictionary<int, SortedSet<int>> RequestedSimulationsPerNetwork { get; private set; } = new SortedDictionary<int, SortedSet<int>>();
+        public SortedDictionary<int, SortedSet<int>> RequestedSimulationsPerNetwork { get; set; }
 
         public Explorer GetExplorer()
         {
@@ -139,7 +138,7 @@ order by networkid
                         while (reader.Read())
                         {
                             var networkId = reader.GetInt32(0);
-                            if (RequestedSimulationsPerNetwork.Count == 0 || RequestedSimulationsPerNetwork.ContainsKey(networkId))
+                            if (RequestedSimulationsPerNetwork?.ContainsKey(networkId) ?? true)
                             {
                                 var network = explorer.AddNetwork();
                                 networks.Add(networkId, network);
@@ -175,8 +174,7 @@ order by networkid
 
         public Simulation GetStandAloneSimulation(int networkId, int simulationId)
         {
-            RequestedSimulationsPerNetwork.Clear();
-            RequestedSimulationsPerNetwork.Add(networkId, new SortedSet<int> { simulationId });
+            RequestedSimulationsPerNetwork = new SortedDictionary<int, SortedSet<int>> { [networkId] = new SortedSet<int> { simulationId } };
             return GetExplorer().Networks.Single().Simulations.Single();
         }
 
@@ -320,15 +318,14 @@ where networkid = {networkId}
                     {
                         var simulations = new SortedList<int, Simulation>();
 
-                        var accessingEverything = RequestedSimulationsPerNetwork.Count == 0;
                         SortedSet<int> requestedSimulations = null;
 
-                        if (accessingEverything || RequestedSimulationsPerNetwork.TryGetValue(networkId, out requestedSimulations) && requestedSimulations is object)
+                        if (RequestedSimulationsPerNetwork?.TryGetValue(networkId, out requestedSimulations) ?? true)
                         {
                             while (reader.Read())
                             {
                                 var simulationId = reader.GetInt32(0);
-                                if (accessingEverything || requestedSimulations.Count == 0 || requestedSimulations.Contains(simulationId))
+                                if (requestedSimulations?.Contains(simulationId) ?? true)
                                 {
                                     var simulation = network.AddSimulation();
                                     simulations.Add(simulationId, simulation);

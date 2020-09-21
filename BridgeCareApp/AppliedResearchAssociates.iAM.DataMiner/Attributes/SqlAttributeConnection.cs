@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public class SqlAttributeConnection : AttributeConnection
     {
-        public SqlAttributeConnection(Attribute attribute, string connectionString, string command) : base(attribute, connectionString, command)
+        public SqlAttributeConnection(string connectionString, string command) : base(connectionString, command)
         {
         }
 

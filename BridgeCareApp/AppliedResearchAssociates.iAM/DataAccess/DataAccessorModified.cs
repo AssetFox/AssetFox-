@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataAccess
 {
     public sealed class DataAccessorModified
     {
-        public void Test()
+        public void CreateNewSegmentation()
         {
             var attributeJsonText = File.ReadAllText("attributeMetaData.json");
             var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataAccess
                             segmentationRulesMetaData.Minimum);
 
                     var attributeData = attribute.Connection.GetData<double>();
-                    GetNetworkFromSingleAttribute<double>(attributeData);
+                    CreateNetworkFromSingleAttribute<double>(attributeData);
 
                     // Save to the database
 
@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataAccess
                             segmentationRulesMetaData.DefaultValue);
 
                     var attributeData = attribute.Connection.GetData<double>();
-                    GetNetworkFromSingleAttribute<double>(attributeData);
+                    CreateNetworkFromSingleAttribute<double>(attributeData);
 
                     // Save to the database
 
@@ -65,9 +65,71 @@ namespace AppliedResearchAssociates.iAM.DataAccess
             }
         }
 
-        private AppliedResearchAssociates.iAM.Segmentation.Network GetNetworkFromSingleAttribute<T>(IEnumerable<IAttributeDatum> attributeData)
+        public void AggregateExistingNetwork(Guid networkGuid)
+        {
+            var network = GetNetwork(networkGuid);
+
+            var attributeJsonText = File.ReadAllText("attributeMetaData.json");
+            var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
+
+            var allAttributeData = new List<IAttributeDatum>();
+
+            foreach (var data in attributeMetaData)
+            {
+                switch (data.Type)
+                {
+                    case "NUMERIC":
+                    {
+                        if (!double.TryParse(data.DefaultValue, out double defaultValue))
+                        {
+                            throw new InvalidCastException($"Numeric attribute {data.Name} does not have a valid numeric default value. Please check the value in the configuration file and try again.");
+                        }
+
+                        var attribute = new NumericAttribute(
+                                data.Name,
+                                AttributeConnectionBuilder.Create(data.ConnectionType, data.ConnectionString, data.Command),
+                                defaultValue,
+                                data.Maximum,
+                                data.Minimum);
+
+                        var currentAttributeData = attribute.Connection.GetData<double>();
+                        allAttributeData.AddRange(currentAttributeData);
+                        break;
+                    }
+                    case "TEXT":
+                    {
+                        var attribute =
+                            new DataMiner.Attributes.TextAttribute(
+                                data.Name,
+                                AttributeConnectionBuilder.Create(
+                                    data.ConnectionType,
+                                    data.ConnectionString,
+                                    data.Command),
+                                data.DefaultValue);
+
+                        var currentAttributeData = attribute.Connection.GetData<string>();
+                        allAttributeData.AddRange(currentAttributeData);
+
+                        break;
+                    }
+                }
+            }
+            Aggregator.Aggregate(allAttributeData, network.Segments);
+        }
+
+        public void RunAnalysis(Guid scenarioGuid)
+        {
+
+        }
+
+        private Segmentation.Network CreateNetworkFromSingleAttribute<T>(IEnumerable<IAttributeDatum> attributeData)
         {
             return Segmenter.CreateNetworkFromAttributeDataRecords<T>(attributeData);
+        }
+
+        private Segmentation.Network GetNetwork(Guid networkGuid)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -3,10 +3,12 @@
     public class NumericAttribute : Attribute
     {
         public NumericAttribute(string name,
-                                AttributeConnection attributeConnection,
                                 double defaultValue,
                                 double maximum,
-                                double minimum) : base(name, attributeConnection)
+                                double minimum,
+                                string command,
+                                ConnectionType connectionType,
+                                string connectionString) : base(name, command, connectionType, connectionString)
         {
             DefaultValue = defaultValue;
             Maximum = maximum;

@@ -15,9 +15,6 @@ namespace AppliedResearchAssociates.iAM.DataAccess
     {
         public void CreateNewSegmentation()
         {
-            var attributeJsonText = File.ReadAllText("attributeMetaData.json");
-            var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
-
             var segmentationRulesJsonText = File.ReadAllText("segmentationMetaData.json");
             var segmentationRulesMetaData = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText, new { AttributeMetaData = default(AttributeMetaDatum) }).AttributeMetaData;
 
@@ -32,12 +29,14 @@ namespace AppliedResearchAssociates.iAM.DataAccess
 
                     var attribute = new NumericAttribute(
                             segmentationRulesMetaData.Name,
-                            AttributeConnectionBuilder.Create(segmentationRulesMetaData.ConnectionType, segmentationRulesMetaData.ConnectionString, segmentationRulesMetaData.Command),
                             defaultValue,
                             segmentationRulesMetaData.Maximum,
-                            segmentationRulesMetaData.Minimum);
+                            segmentationRulesMetaData.Minimum,
+                            segmentationRulesMetaData.Command,
+                            segmentationRulesMetaData.ConnectionType,
+                            segmentationRulesMetaData.ConnectionString);
 
-                    var attributeData = attribute.Connection.GetData<double>();
+                    var attributeData = AttributeConnectionBuilder.Create(attribute).GetData<double>();
                     CreateNetworkFromSingleAttribute<double>(attributeData);
 
                     // Save to the database
@@ -46,16 +45,14 @@ namespace AppliedResearchAssociates.iAM.DataAccess
                 }
                 case "TEXT":
                 {
-                    var attribute =
-                        new DataMiner.Attributes.TextAttribute(
+                    var attribute = new DataMiner.Attributes.TextAttribute(
                             segmentationRulesMetaData.Name,
-                            AttributeConnectionBuilder.Create(
-                                segmentationRulesMetaData.ConnectionType,
-                                segmentationRulesMetaData.ConnectionString,
-                                segmentationRulesMetaData.Command),
-                            segmentationRulesMetaData.DefaultValue);
+                            segmentationRulesMetaData.DefaultValue,
+                            segmentationRulesMetaData.Command,
+                            segmentationRulesMetaData.ConnectionType,
+                            segmentationRulesMetaData.ConnectionString);
 
-                    var attributeData = attribute.Connection.GetData<double>();
+                    var attributeData = AttributeConnectionBuilder.Create(attribute).GetData<string>();
                     CreateNetworkFromSingleAttribute<double>(attributeData);
 
                     // Save to the database
@@ -72,49 +69,48 @@ namespace AppliedResearchAssociates.iAM.DataAccess
             var attributeJsonText = File.ReadAllText("attributeMetaData.json");
             var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
 
-            var allAttributeData = new List<IAttributeDatum>();
+            var attributeData = new List<IAttributeDatum>();
 
-            foreach (var data in attributeMetaData)
+            foreach(var attributeMetaDatum in attributeMetaData)
             {
-                switch (data.Type)
+                switch (attributeMetaDatum.Type)
                 {
                     case "NUMERIC":
                     {
-                        if (!double.TryParse(data.DefaultValue, out double defaultValue))
+                        if (!double.TryParse(attributeMetaDatum.DefaultValue, out double defaultValue))
                         {
-                            throw new InvalidCastException($"Numeric attribute {data.Name} does not have a valid numeric default value. Please check the value in the configuration file and try again.");
+                            throw new InvalidCastException($"Numeric attribute {attributeMetaDatum.Name} does not have a valid numeric default value. Please check the value in the configuration file and try again.");
                         }
 
                         var attribute = new NumericAttribute(
-                                data.Name,
-                                AttributeConnectionBuilder.Create(data.ConnectionType, data.ConnectionString, data.Command),
+                                attributeMetaDatum.Name,
                                 defaultValue,
-                                data.Maximum,
-                                data.Minimum);
+                                attributeMetaDatum.Maximum,
+                                attributeMetaDatum.Minimum,
+                                attributeMetaDatum.Command,
+                                attributeMetaDatum.ConnectionType,
+                                attributeMetaDatum.ConnectionString);
 
-                        var currentAttributeData = attribute.Connection.GetData<double>();
-                        allAttributeData.AddRange(currentAttributeData);
+                        attributeData.AddRange(AttributeConnectionBuilder.Create(attribute).GetData<double>());
                         break;
                     }
                     case "TEXT":
                     {
-                        var attribute =
-                            new DataMiner.Attributes.TextAttribute(
-                                data.Name,
-                                AttributeConnectionBuilder.Create(
-                                    data.ConnectionType,
-                                    data.ConnectionString,
-                                    data.Command),
-                                data.DefaultValue);
+                        var attribute = new DataMiner.Attributes.TextAttribute(
+                                attributeMetaDatum.Name,
+                                attributeMetaDatum.DefaultValue,
+                                attributeMetaDatum.Command,
+                                attributeMetaDatum.ConnectionType,
+                                attributeMetaDatum.ConnectionString);
 
-                        var currentAttributeData = attribute.Connection.GetData<string>();
-                        allAttributeData.AddRange(currentAttributeData);
-
+                        attributeData.AddRange(AttributeConnectionBuilder.Create(attribute).GetData<string>());
                         break;
                     }
                 }
             }
-            Aggregator.Aggregate(allAttributeData, network.Segments);
+            var aggregatedDataSegments = Aggregator.Aggregate(attributeData, network.Segments);
+
+            // Save to database; Use in analysis.
         }
 
         public void RunAnalysis(Guid scenarioGuid)

@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public class SqlAttributeConnection : AttributeConnection
     {
-        public SqlAttributeConnection(string connectionString, string command) : base(connectionString, command)
+        public SqlAttributeConnection(Attribute attribute) : base(attribute)
         {
         }
 
@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 
             using (var conn = new SqlConnection())
             {
-                var sqlCommand = new SqlCommand(Command, conn);
+                var sqlCommand = new SqlCommand(Attribute.Command, conn);
                 sqlCommand.Connection.Open();
                 var dataReader = sqlCommand.ExecuteReader();
                 while (dataReader.Read())

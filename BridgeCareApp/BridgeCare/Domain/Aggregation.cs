@@ -34,51 +34,51 @@ namespace BridgeCare.Domain
             var aggregatedSegments = new List<AggregateDataSegment>();
             
             // Get the attribute data and start aggregating
-            foreach (var item in attributeMetaData)
-            {
-                var type = item.DataType;
-                var name = item.AttributeName;
-                var dataRetrival = new AttributeDataProvider(item.DataSource, item.ConnectionString, item.DataRetrievalCommand);
-                switch (type.ToUpper())
-                {
-                case NUMBER_ATTRIBUTE_TYPE_NAME:
+            //foreach (var item in attributeMetaData)
+            //{
+            //    var type = item.DataType;
+            //    var name = item.AttributeName;
+            //    var dataRetrival = new AttributeDataProvider(item.DataSource, item.ConnectionString, item.DataRetrievalCommand);
+            //    switch (type.ToUpper())
+            //    {
+            //    case NUMBER_ATTRIBUTE_TYPE_NAME:
 
-                    //Data miner
-                    var rawAttributeData = dataRetrival.GetRawData<double>();
+            //        //Data miner
+            //        var rawAttributeData = dataRetrival.GetRawData<double>();
 
-                    var numericAttribute = dataRetrival.GetNumericAttribute(name, Convert.ToDouble(item.DefaultValue),
-                                                                 item.Maximum, item.Minimum);
+            //        var numericAttribute = dataRetrival.GetNumericAttribute(name, Convert.ToDouble(item.DefaultValue),
+            //                                                     item.Maximum, item.Minimum);
 
-                    var attributeData = AttributeDatumBuilder<double>.CreateAttributeData(numericAttribute, rawAttributeData);
+            //        var attributeData = AttributeDatumBuilder<double>.CreateAttributeData(numericAttribute, rawAttributeData);
 
-                    // Aggregation
-                    var aggregateDataSegments = Aggregator.Aggregate(attributeData, network.Segments);
-                    foreach(var aggregateDataSegment in aggregateDataSegments)
-                    {
-                        var attributeYearValue = aggregateDataSegment.GetAggregatedValuesByYear(numericAttribute, new AverageAggregationRule()); // it should return the whole object
-                    }
-                    aggregatedSegments.AddRange(aggregateDataSegments); // we need to save the network also with EF core
+            //        // Aggregation
+            //        var aggregateDataSegments = Aggregator.Aggregate(attributeData, network.Segments);
+            //        foreach(var aggregateDataSegment in aggregateDataSegments)
+            //        {
+            //            var attributeYearValue = aggregateDataSegment.GetAggregatedValuesByYear(numericAttribute, new AverageAggregationRule()); // it should return the whole object
+            //        }
+            //        aggregatedSegments.AddRange(aggregateDataSegments); // we need to save the network also with EF core
                     
-                    break;
+            //        break;
 
-                case STRING_ATTRIBUTE_TYPE_NAME:
+            //    case STRING_ATTRIBUTE_TYPE_NAME:
 
-                    // Data miner
-                    var rawData = dataRetrival.GetRawData<string>();
-                    var textAttribute = dataRetrival.GetTextAttribute(name, item.DefaultValue);
-                    var textAttributeDatum = AttributeDatumBuilder<string>.CreateAttributeData(textAttribute, rawData);
+            //        // Data miner
+            //        var rawData = dataRetrival.GetRawData<string>();
+            //        var textAttribute = dataRetrival.GetTextAttribute(name, item.DefaultValue);
+            //        var textAttributeDatum = AttributeDatumBuilder<string>.CreateAttributeData(textAttribute, rawData);
 
-                    // Aggregation
-                    var textData = new List<IAttributeDatum>();
-                    textData.AddRange(textAttributeDatum);
-                    var textAggregation = Aggregator.Aggregate(textData, network.Segments);
-                    aggregatedSegments.AddRange(textAggregation);
-                    break;
+            //        // Aggregation
+            //        var textData = new List<IAttributeDatum>();
+            //        textData.AddRange(textAttributeDatum);
+            //        var textAggregation = Aggregator.Aggregate(textData, network.Segments);
+            //        aggregatedSegments.AddRange(textAggregation);
+            //        break;
 
-                default:
-                    throw new InvalidOperationException($"Invalid attribute type \"{type}\".");
-                }
-            }
+            //    default:
+            //        throw new InvalidOperationException($"Invalid attribute type \"{type}\".");
+            //    }
+            //}
 
             return Task.FromResult("Aggregation started");
         }

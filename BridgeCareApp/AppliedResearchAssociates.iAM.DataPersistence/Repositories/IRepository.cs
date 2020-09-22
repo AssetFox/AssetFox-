@@ -12,6 +12,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistence.Repositories
         T Get(Guid id);
         IEnumerable<T> All();
         IEnumerable<T> Find(Expression<Func<T, bool>> predicate);
-        void SaveChanges();
+        void SaveChanges(); // It can go in a separate interface
     }
 }

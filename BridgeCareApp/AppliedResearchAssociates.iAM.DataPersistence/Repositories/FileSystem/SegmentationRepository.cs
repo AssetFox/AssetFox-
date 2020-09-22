@@ -7,12 +7,12 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistence.Repositories.FileSystem
 {
-    public class SegmentaionRepository : GenericFileSystemRepository<SegmentationRule>
+    public class SegmentationRepository : GenericFileSystemRepository<SegmentationRule>
     {
         public override IEnumerable<SegmentationRule> All()
         {
             var folderPath = $"MetaData//Segment";
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPath, "sctionAttribute.json");
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPath, "sectionAttribute.json");
             var segmentMetaData = new List<SegmentationRule>();
             if (File.Exists(filePath))
             {

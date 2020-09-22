@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM
 {
     public abstract class CompilableExpression : IValidator
     {
-        public virtual string Expression
+        public string Expression
         {
             get => _Expression;
             set

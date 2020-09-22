@@ -178,7 +178,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
         public override Expression VisitEqual(CalculateEvaluateParser.EqualContext context)
         {
-            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.Equal, true);
+            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.Equal, GetCaseInsensitiveTextEqualityComparison_Equal);
             return result;
         }
 
@@ -197,25 +197,25 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
         public override Expression VisitGreaterThan(CalculateEvaluateParser.GreaterThanContext context)
         {
-            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.GreaterThan, false);
+            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.GreaterThan);
             return result;
         }
 
         public override Expression VisitGreaterThanOrEqual(CalculateEvaluateParser.GreaterThanOrEqualContext context)
         {
-            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.GreaterThanOrEqual, false);
+            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.GreaterThanOrEqual);
             return result;
         }
 
         public override Expression VisitLessThan(CalculateEvaluateParser.LessThanContext context)
         {
-            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.LessThan, false);
+            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.LessThan);
             return result;
         }
 
         public override Expression VisitLessThanOrEqual(CalculateEvaluateParser.LessThanOrEqualContext context)
         {
-            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.LessThanOrEqual, false);
+            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.LessThanOrEqual);
             return result;
         }
 
@@ -237,11 +237,26 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
         public override Expression VisitNotEqual(CalculateEvaluateParser.NotEqualContext context)
         {
-            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.NotEqual, true);
+            var result = GetComparisonExpression(context.parameterReference(), context.comparisonOperand(), Expression.NotEqual, GetCaseInsensitiveTextEqualityComparison_NotEqual);
             return result;
         }
 
-        private Expression GetComparisonExpression(CalculateEvaluateParser.ParameterReferenceContext parameterReference, CalculateEvaluateParser.ComparisonOperandContext comparisonOperand, Func<MethodCallExpression, Expression, BinaryExpression> getComparison, bool allowStrings)
+        private static readonly MethodInfo StringComparerEquals = typeof(StringComparer).GetMethod(nameof(StringComparer.Equals), new[] { typeof(string), typeof(string) });
+
+        private static readonly Expression StringComparerOrdinalIgnoreCase = Expression.Constant(StringComparer.OrdinalIgnoreCase);
+
+        private static readonly MethodInfo StringTrim = typeof(string).GetMethod(nameof(string.Trim), Type.EmptyTypes);
+
+        private static Expression GetCaseInsensitiveTextEqualityComparison_Equal(Expression string1, Expression string2)
+        {
+            string1 = Expression.Call(string1, StringTrim);
+            string2 = Expression.Call(string2, StringTrim);
+            return Expression.Call(StringComparerOrdinalIgnoreCase, StringComparerEquals, string1, string2);
+        }
+
+        private static Expression GetCaseInsensitiveTextEqualityComparison_NotEqual(Expression string1, Expression string2) => Expression.Not(GetCaseInsensitiveTextEqualityComparison_Equal(string1, string2));
+
+        private Expression GetComparisonExpression(CalculateEvaluateParser.ParameterReferenceContext parameterReference, CalculateEvaluateParser.ComparisonOperandContext comparisonOperand, Func<Expression, Expression, Expression> getDefaultComparison, Func<Expression, Expression, Expression> getTextComparison = null)
         {
             var identifierText = parameterReference.IDENTIFIER().GetText();
 
@@ -258,7 +273,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
                 break;
 
             case CalculateEvaluateParameterType.Text:
-                if (!allowStrings)
+                if (getTextComparison is null)
                 {
                     throw new CalculateEvaluateCompilationException("Ordering comparisons do not support text parameters.");
                 }
@@ -322,6 +337,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
                 throw new InvalidOperationException("Comparison operand context does not have exactly one sub-context.");
             }
 
+            var getComparison = parameterType == CalculateEvaluateParameterType.Text ? getTextComparison : getDefaultComparison;
             var result = getComparison(reference, operand);
             return result;
         }

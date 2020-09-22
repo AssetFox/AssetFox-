@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var cost = GetCostOfTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment);
             if (cost != 0)
             {
-                throw new SimulationException(MessageStrings.CostOfPassiveTreatmentIsNonZero);
+                SimulationRunner.Fail(MessageStrings.CostOfPassiveTreatmentIsNonZero);
             }
 
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
@@ -68,10 +68,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void ApplyTreatment(Treatment treatment, int year)
         {
-            var consequenceActions = treatment.GetConsequenceActions(this);
-            foreach (var consequenceAction in consequenceActions)
+            try
             {
-                consequenceAction();
+                var consequenceActions = treatment.GetConsequenceActions(this);
+                foreach (var consequenceAction in consequenceActions)
+                {
+                    consequenceAction();
+                }
+            }
+            catch (SimulationException e)
+            {
+                SimulationRunner.Fail(e.Message, false);
+                throw;
             }
 
             foreach (var scheduling in treatment.GetSchedulings())
@@ -117,14 +125,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override double GetNumber(string key)
         {
-            if (GetNumber_ActiveKeysOfInvocation.Contains(key))
+            if (GetNumber_ActiveKeysOfCurrentInvocation.Contains(key, StringComparer.OrdinalIgnoreCase))
             {
-                var loop = GetNumber_ActiveKeysOfInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
+                var loop = GetNumber_ActiveKeysOfCurrentInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
                 var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));
-                throw new SimulationException("Loop encountered during number calculation: " + loopText);
+                SimulationRunner.Fail("Loop encountered during number calculation: " + loopText);
             }
 
-            GetNumber_ActiveKeysOfInvocation.Push(key);
+            GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
 
             if (!NumberCache.TryGetValue(key, out var number))
             {
@@ -146,7 +154,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 NumberCache[key] = number;
             }
 
-            _ = GetNumber_ActiveKeysOfInvocation.Pop();
+            _ = GetNumber_ActiveKeysOfCurrentInvocation.Pop();
 
             return number;
         }
@@ -201,23 +209,35 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override void SetNumber(string key, double value)
         {
-            BlockUsageOfAreaIdentifier(key);
-            NumberCache.Clear();
+            PrepareSet(key);
             base.SetNumber(key, value);
         }
 
         public override void SetNumber(string key, Func<double> getValue)
         {
-            BlockUsageOfAreaIdentifier(key);
-            NumberCache.Clear();
+            PrepareSet(key);
             base.SetNumber(key, getValue);
         }
 
         public override void SetText(string key, string value)
         {
-            BlockUsageOfAreaIdentifier(key);
-            NumberCache.Clear();
+            PrepareSet(key);
             base.SetText(key, value);
+        }
+
+        private void PrepareSet(string key)
+        {
+            if (KeyComparer.Equals(key, Section.AreaIdentifier))
+            {
+                SimulationRunner.Fail("Section area is being mutated. The analysis does not support this.");
+            }
+
+            if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key))
+            {
+                PreviousAge = GetNumber(key);
+            }
+
+            NumberCache.Clear();
         }
 
         public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
@@ -226,21 +246,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private static readonly StringComparer KeyComparer = StringComparer.OrdinalIgnoreCase;
 
-        private readonly Stack<string> GetNumber_ActiveKeysOfInvocation = new Stack<string>();
-
         private readonly IDictionary<string, int> FirstUnshadowedYearForSameTreatment = new Dictionary<string, int>();
+
+        private readonly Stack<string> GetNumber_ActiveKeysOfCurrentInvocation = new Stack<string>();
 
         private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(KeyComparer);
 
         private int? FirstUnshadowedYearForAnyTreatment;
 
-        private static void BlockUsageOfAreaIdentifier(string key)
-        {
-            if (KeyComparer.Equals(key, Section.AreaIdentifier))
-            {
-                throw new SimulationException("Section area is being mutated. The analysis does not support this.");
-            }
-        }
+        private double PreviousAge;
 
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
@@ -252,7 +266,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve.Shift ? curve.Attribute.Name : null);
+        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve, PreviousAge);
 
         private void CopyAttributeValuesToDetail(SectionSummaryDetail detail)
         {
@@ -280,7 +294,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (operativeCurves.Count == 0)
             {
-                throw new SimulationException("No performance curves are operative for a deteriorating attribute.");
+                SimulationRunner.Fail("No performance curves are operative for a deteriorating attribute.");
             }
 
             if (operativeCurves.Count > 1)
@@ -320,12 +334,24 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
             {
-                double calculate() => calculatedField.Calculate(this);
+                double calculate()
+                {
+                    try
+                    {
+                        return calculatedField.Calculate(this);
+                    }
+                    catch (SimulationException e)
+                    {
+                        SimulationRunner.Fail(e.Message, false);
+                        throw;
+                    }
+                }
+
                 SetNumber(calculatedField.Name, calculate);
             }
         }
 
-        private void SetHistoricalValues<T>(int referenceYear, bool fallBackward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
+        private void SetHistoricalValues<T>(int referenceYear, bool fallForward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)
         {
             foreach (var attribute in attributes)
             {
@@ -334,12 +360,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     setValue(attribute.Name, value);
                 }
-                else if (fallBackward)
+                else if (fallForward)
                 {
-                    var mostRecentPastYear = attributeHistory.Keys.Where(year => year < referenceYear).AsNullables().Max();
-                    if (mostRecentPastYear.HasValue)
+                    var earliestFutureYear = attributeHistory.Keys.Where(year => year > referenceYear).AsNullables().Min();
+                    if (earliestFutureYear.HasValue)
                     {
-                        setValue(attribute.Name, attributeHistory[mostRecentPastYear.Value]);
+                        setValue(attribute.Name, attributeHistory[earliestFutureYear.Value]);
                     }
                     else
                     {

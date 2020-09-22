@@ -105,7 +105,8 @@ namespace BridgeCare.DataAccessLayer
 
                     while (reader.Read())
                     {
-                        values.Add(reader.GetString(0));
+                        if (reader[reader.GetName(0)] != null)
+                            values.Add(reader[reader.GetName(0)].ToString());
                     }
 
                     attributeSelectValuesResults.Add(new AttributeSelectValuesResult

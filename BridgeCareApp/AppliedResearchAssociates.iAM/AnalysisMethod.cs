@@ -31,6 +31,8 @@ namespace AppliedResearchAssociates.iAM
 
         public bool ShouldApplyMultipleFeasibleCosts { get; set; }
 
+        public bool ShouldDeteriorateDuringCashFlow { get; set; }
+
         public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
 
         public SpendingStrategy SpendingStrategy { get; set; }
@@ -93,6 +95,11 @@ namespace AppliedResearchAssociates.iAM
                 results.Add(ValidationStatus.Warning, "At least one attribute has more than one remaining life limit with a blank criterion.", this, nameof(RemainingLifeLimits));
             }
 
+            if (OptimizationStrategy.UsesRemainingLife() && RemainingLifeLimits.Count == 0)
+            {
+                results.Add(ValidationStatus.Error, "Optimization strategy uses remaining life, but no remaining life limits are defined.", this);
+            }
+
             return results;
         }
 
@@ -117,15 +124,13 @@ namespace AppliedResearchAssociates.iAM
                     return option => option.Benefit / option.Cost;
 
                 case OptimizationStrategy.RemainingLife:
-                    ValidateRemainingLifeOptimization();
                     return option => option.RemainingLife.Value;
 
                 case OptimizationStrategy.RemainingLifeToCostRatio:
-                    ValidateRemainingLifeOptimization();
                     return option => option.RemainingLife.Value / option.Cost;
 
                 default:
-                    throw new SimulationException(MessageStrings.InvalidOptimizationStrategy);
+                    throw new InvalidOperationException(MessageStrings.InvalidOptimizationStrategy);
                 }
             }
         }
@@ -155,7 +160,7 @@ namespace AppliedResearchAssociates.iAM
                     return SpendingLimit.Budget;
 
                 default:
-                    throw new SimulationException(MessageStrings.InvalidSpendingStrategy);
+                    throw new InvalidOperationException(MessageStrings.InvalidSpendingStrategy);
                 }
             }
         }
@@ -171,13 +176,5 @@ namespace AppliedResearchAssociates.iAM
         private readonly Simulation Simulation;
 
         private static IReadOnlyCollection<string> GetNames(IEnumerable<ConditionGoal> conditionGoals) => conditionGoals.Select(conditionGoal => conditionGoal.Name).Where(name => !string.IsNullOrWhiteSpace(name)).ToArray();
-
-        private void ValidateRemainingLifeOptimization()
-        {
-            if (RemainingLifeLimits.Count == 0)
-            {
-                throw new SimulationException(MessageStrings.RemainingLifeOptimizationHasNoLimits);
-            }
-        }
     }
 }

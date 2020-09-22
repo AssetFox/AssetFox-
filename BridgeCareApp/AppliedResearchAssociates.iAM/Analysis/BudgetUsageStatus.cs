@@ -1,6 +1,6 @@
 ﻿namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public enum BudgetReason
+    public enum BudgetUsageStatus
     {
         CostCoveredInFull,
         CostCoveredInPart,

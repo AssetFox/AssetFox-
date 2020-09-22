@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public int? BudgetPriorityLevel { get; set; }
 
-        public List<BudgetDetail> Budgets { get; } = new List<BudgetDetail>();
+        public List<BudgetUsageDetail> BudgetUsages { get; } = new List<BudgetUsageDetail>();
 
         public List<CashFlowConsiderationDetail> CashFlowConsiderations { get; } = new List<CashFlowConsiderationDetail>();
 
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         internal TreatmentConsiderationDetail(TreatmentConsiderationDetail original)
         {
             TreatmentName = original.TreatmentName;
-            Budgets.AddRange(original.Budgets.Select(_ => new BudgetDetail(_)));
+            BudgetUsages.AddRange(original.BudgetUsages.Select(_ => new BudgetUsageDetail(_)));
             CashFlowConsiderations.AddRange(original.CashFlowConsiderations.Select(_ => new CashFlowConsiderationDetail(_)));
 
             BudgetPriorityLevel = original.BudgetPriorityLevel;

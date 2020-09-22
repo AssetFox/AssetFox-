@@ -7,9 +7,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
     /// </summary>
     public sealed class SimulationOutput
     {
-        public SimulationStatusDetail FinalStatus { get; } = new SimulationStatusDetail();
+        public double InitialConditionOfNetwork { get; set; }
 
-        public List<SectionSummaryDetail> SectionSummaries { get; } = new List<SectionSummaryDetail>();
+        public List<SectionSummaryDetail> InitialSectionSummaries { get; } = new List<SectionSummaryDetail>();
 
         public List<SimulationYearDetail> Years { get; } = new List<SimulationYearDetail>();
     }

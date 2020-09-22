@@ -3,16 +3,10 @@ mongoose.set('useFindAndModify', false);
 
 const { Schema } = mongoose;
 
-const priorityFundSchema = new Schema({
-    budget: { type: String },
-    funding: { type: Number }
-});
-
 const prioritySchema = new Schema({
     priorityLevel: { type: Number },
     year: { type: Number },
-    criteria: { type: String },
-    priorityFunds: [priorityFundSchema]
+    criteria: { type: String }
 });
 
 const priorityLibrarySchema = new Schema({

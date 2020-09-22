@@ -9,9 +9,17 @@ namespace AppliedResearchAssociates.iAM
     {
         public string Name { get; set; }
 
-        public int ShadowForAnyTreatment { get; set; }
+        public int ShadowForAnyTreatment
+        {
+            get => _ShadowForAnyTreatment;
+            set => _ShadowForAnyTreatment = Math.Max(value, DEFAULT_SHADOW);
+        }
 
-        public int ShadowForSameTreatment { get; set; }
+        public int ShadowForSameTreatment
+        {
+            get => _ShadowForSameTreatment;
+            set => _ShadowForSameTreatment = Math.Max(value, DEFAULT_SHADOW);
+        }
 
         public virtual ValidatorBag Subvalidators => new ValidatorBag();
 
@@ -22,16 +30,6 @@ namespace AppliedResearchAssociates.iAM
             if (string.IsNullOrWhiteSpace(Name))
             {
                 results.Add(ValidationStatus.Error, "Name is blank.", this, nameof(Name));
-            }
-
-            if (ShadowForAnyTreatment < 1)
-            {
-                results.Add(ValidationStatus.Error, "Shadow for any treatment is less than one.", this, nameof(ShadowForAnyTreatment));
-            }
-
-            if (ShadowForSameTreatment < 1)
-            {
-                results.Add(ValidationStatus.Error, "Shadow for same treatment is less than one.", this, nameof(ShadowForSameTreatment));
             }
 
             if (ShadowForSameTreatment < ShadowForAnyTreatment)
@@ -49,5 +47,11 @@ namespace AppliedResearchAssociates.iAM
         internal abstract IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope);
 
         internal abstract double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts);
+
+        private const int DEFAULT_SHADOW = 1;
+
+        private int _ShadowForAnyTreatment = DEFAULT_SHADOW;
+
+        private int _ShadowForSameTreatment = DEFAULT_SHADOW;
     }
 }

@@ -83,6 +83,36 @@ namespace BridgeCare.Controllers
             return response;
         }
 
+        [HttpPost]
+        [Route("api/DownloadTempSummaryReport")]
+        [ModelValidation("The scenario data is invalid.")]
+        [RestrictAccess]
+        public HttpResponseMessage DownloadTempSummaryReport([FromBody] SimulationModel model)
+        {
+            var folderPath = $"DownloadedReports\\{model.simulationId}_NewAnalysis";
+            var outputFile = $"Network {model.networkId} - Simulation {model.simulationId}.json";
+
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPath, outputFile);
+            var response = new HttpResponseMessage();
+            if (!File.Exists(filePath))
+            {
+                response = Request.CreateResponse(HttpStatusCode.InternalServerError, $"Summary report is not available in the path {filePath}");
+                log.Error($"Summary report is not available in the path {filePath}");
+                return response;
+            }
+            else
+            {
+                response = Request.CreateResponse(HttpStatusCode.OK);
+                response.Content = new ByteArrayContent(summaryReportGenerator.DownloadTempJsonReport(model));
+            }
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+            {
+                FileName = outputFile
+            };
+            return response;
+        }
+
         [HttpGet]
         [Route("api/GetJobList")]
         [ModelValidation("Something went wrong on GetJobList API")]

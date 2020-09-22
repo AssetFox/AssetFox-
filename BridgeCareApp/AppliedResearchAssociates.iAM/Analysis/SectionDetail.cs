@@ -19,6 +19,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public List<TreatmentOptionDetail> TreatmentOptions { get; } = new List<TreatmentOptionDetail>();
 
+        public List<TreatmentRejectionDetail> TreatmentRejections { get; } = new List<TreatmentRejectionDetail>();
+
         public List<TreatmentSchedulingCollisionDetail> TreatmentSchedulingCollisions { get; } = new List<TreatmentSchedulingCollisionDetail>();
 
         public TreatmentStatus TreatmentStatus { get; set; }
@@ -30,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             TreatmentStatus = original.TreatmentStatus;
             TreatmentFundingIgnoresSpendingLimit = original.TreatmentFundingIgnoresSpendingLimit;
 
+            TreatmentRejections.AddRange(original.TreatmentRejections.Select(_ => new TreatmentRejectionDetail(_)));
             TreatmentOptions.AddRange(original.TreatmentOptions.Select(_ => new TreatmentOptionDetail(_)));
             TreatmentConsiderations.AddRange(original.TreatmentConsiderations.Select(_ => new TreatmentConsiderationDetail(_)));
             TreatmentSchedulingCollisions.AddRange(original.TreatmentSchedulingCollisions.Select(_ => new TreatmentSchedulingCollisionDetail(_)));

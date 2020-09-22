@@ -54,5 +54,19 @@ namespace BridgeCare.Controllers
             repo.SaveUserCriteria(userCriteria, db);
             return Ok();
         }
+
+        /// <summary>
+        /// API endpoint for deleting a user's criteria
+        /// </summary>
+        /// <param name="username">User's username</param>
+        /// <returns>IHttpActionResult</returns>
+        [HttpDelete]
+        [Route("api/DeleteUser/{username}")]
+        [RestrictAccess(Role.ADMINISTRATOR)]
+        public IHttpActionResult DeleteUser(string username)
+        {
+            repo.DeleteUser(username, db);
+            return Ok();
+        }
     }
 }

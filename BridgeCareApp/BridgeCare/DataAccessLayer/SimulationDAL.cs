@@ -22,6 +22,7 @@ namespace BridgeCare.DataAccessLayer
     {
         private static readonly log4net.ILog log = LogManager.GetLogger(typeof(SimulationDAL));
         private static readonly SimulationQueue SimulationQueue = SimulationQueue.MainSimulationQueue;
+
         /// <summary>
         /// Fetches all simulations
         /// </summary>
@@ -200,7 +201,7 @@ namespace BridgeCare.DataAccessLayer
                     throw new RowNotInTableException($"No scenario was found with id {model.simulationId}");
 
                 var connectionString = ConfigurationManager.ConnectionStrings["BridgeCareContext"].ConnectionString;
-                DBMgr.NativeConnectionParameters = new ConnectionParameters(connectionString, false, "MSSQL");
+                //DBMgr.NativeConnectionParameters = new ConnectionParameters(connectionString, false, "MSSQL");
 
 #if DEBUG
                 var mongoConnection = Settings.Default.MongoDBDevConnectionString;
@@ -208,24 +209,24 @@ namespace BridgeCare.DataAccessLayer
                 var mongoConnection = Settings.Default.MongoDBProdConnectionString;
 #endif
 
-                var simulation = db.Simulations
-                    .Include(s => s.COMMITTEDPROJECTS)
-                    .Single(s => s.SIMULATIONID == model.simulationId);
+                //var simulation = db.Simulations
+                //    .Include(s => s.COMMITTEDPROJECTS)
+                //    .Single(s => s.SIMULATIONID == model.simulationId);
 
-                if (simulation.COMMITTEDPROJECTS.Any())
-                {
-                    var earliestCommittedProjectStartYear = simulation.COMMITTEDPROJECTS
-                        .OrderBy(cp => cp.YEARS).First().YEARS;
-                    if (earliestCommittedProjectStartYear < simulation.COMMITTED_START)
-                    {
-                        var mongoClient = new MongoClient(mongoConnection);
-                        var mongoDB = mongoClient.GetDatabase("BridgeCare");
-                        var simulations = mongoDB.GetCollection<SimulationModel>("scenarios");
-                        var updateStatus = Builders<SimulationModel>.Update.Set("status", "Error: Projects committed before analysis start");
-                        simulations.UpdateOne(s => s.simulationId == model.simulationId, updateStatus);
-                        throw new ConstraintException("Analysis error: Projects committed before analysis start");
-                    }
-                }
+                //if (simulation.COMMITTEDPROJECTS.Any())
+                //{
+                //    var earliestCommittedProjectStartYear = simulation.COMMITTEDPROJECTS
+                //        .OrderBy(cp => cp.YEARS).First().YEARS;
+                //    if (earliestCommittedProjectStartYear < simulation.COMMITTED_START)
+                //    {
+                //        var mongoClient = new MongoClient(mongoConnection);
+                //        var mongoDB = mongoClient.GetDatabase("BridgeCare");
+                //        var simulations = mongoDB.GetCollection<SimulationModel>("scenarios");
+                //        var updateStatus = Builders<SimulationModel>.Update.Set("status", "Error: Projects committed before analysis start");
+                //        simulations.UpdateOne(s => s.simulationId == model.simulationId, updateStatus);
+                //        throw new ConstraintException("Analysis error: Projects committed before analysis start");
+                //    }
+                //}
 
                 var simulationParameters = new SimulationParameters(
                     model.simulationName,
@@ -233,15 +234,16 @@ namespace BridgeCare.DataAccessLayer
                     model.simulationId,
                     model.networkId,
                     mongoConnection,
-                    true);
+                    true,
+                    connectionString);
 
-                var simulationTask = SimulationQueue.Enqueue(simulationParameters);
+                var simulationTask = SimulationQueue.EnqueueForNewAnalysis(simulationParameters);
 
                 return Task.FromResult("Simulation running...");
             }
             catch (Exception ex)
             {
-                DBMgr.CloseConnection();
+                //DBMgr.CloseConnection();
                 return Task.FromResult($"Simulation run failed::{ex.Message}");
             }
         }

@@ -9,19 +9,190 @@ namespace AppliedResearchAssociates.iAM.DataAccess
 {
     public sealed class DataAccessor
     {
-        public Simulation GetStandAloneSimulation(IDbConnection connection, int networkId, int simulationId, Action<TimeSpan, string> onProgress = null)
+        public DataAccessor(IDbConnection connection, Action<TimeSpan, string> onProgress)
         {
-            var formattedCommandText = $@"
+            Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            OnProgress = onProgress ?? Inaction.Delegate;
+        }
+
+        public Dictionary<Network, int> IdPerNetwork { get; } = new Dictionary<Network, int>();
+
+        public Dictionary<Simulation, int> IdPerSimulation { get; } = new Dictionary<Simulation, int>();
+
+        /// <summary>
+        ///     When this is null, all networks and all simulations are accessed. Otherwise, only
+        ///     networks whose ID is contained will be accessed. For each key-network: if the
+        ///     value-set is null, all simulations of that network are accessed; otherwise, only
+        ///     simulations whose ID is contained in the value-set will be accessed.
+        /// </summary>
+        public SortedDictionary<int, SortedSet<int>> RequestedSimulationsPerNetwork { get; set; }
+
+        public Explorer GetExplorer()
+        {
+            IdPerNetwork.Clear();
+            IdPerSimulation.Clear();
+
+            var explorer = new Explorer();
+            IDictionary<int, Network> networkPerId;
+
+            using (var command = Connection.CreateCommand())
+            {
+                command.CommandText = @"
 select type_, attribute_, calculated, ascending, default_value, minimum_, maximum
 from attributes_
 
 select attribute_, equation, criteria
 from attributes_calculated
 
-select network_name
+select networkid, network_name
 from networks
-where networkid = {networkId}
+order by networkid
+";
 
+                using (var reader = command.ExecuteReader())
+                {
+                    var readerTimer = GetTimer(reader);
+
+                    readerTimer.Time(createAttributes, nameof(createAttributes));
+                    readerTimer.Time(fillCalculatedFields, nameof(fillCalculatedFields));
+                    networkPerId = readerTimer.Time(createNetworks, nameof(createNetworks));
+
+                    #region Helper functions
+
+                    void createAttributes()
+                    {
+                        while (reader.Read())
+                        {
+                            var type = reader.GetNullableString(0);
+                            var name = reader.GetNullableString(1);
+
+                            if (name == explorer.AgeAttribute.Name)
+                            {
+                                if (type != NUMBER_ATTRIBUTE_TYPE_NAME)
+                                {
+                                    throw new InvalidOperationException("Age attribute must be numeric.");
+                                }
+
+                                continue;
+                            }
+
+                            switch (type)
+                            {
+                            case NUMBER_ATTRIBUTE_TYPE_NAME:
+                                var isCalculated = reader.GetNullableBoolean(2) ?? false;
+                                if (isCalculated)
+                                {
+                                    var calculatedField = explorer.AddCalculatedField(name);
+                                    calculatedField.IsDecreasingWithDeterioration = reader.GetBoolean(3);
+                                }
+                                else
+                                {
+                                    var numberAttribute = explorer.AddNumberAttribute(name);
+                                    numberAttribute.IsDecreasingWithDeterioration = reader.GetBoolean(3);
+                                    numberAttribute.DefaultValue = double.Parse(reader.GetNullableString(4));
+                                    numberAttribute.Minimum = reader.GetNullableDouble(5);
+                                    numberAttribute.Maximum = reader.GetNullableDouble(6);
+
+                                    if (numberAttribute.Minimum > numberAttribute.Maximum)
+                                    {
+                                        var swap = numberAttribute.Minimum;
+                                        numberAttribute.Minimum = numberAttribute.Maximum;
+                                        numberAttribute.Maximum = swap;
+                                    }
+                                }
+                                break;
+
+                            case STRING_ATTRIBUTE_TYPE_NAME:
+                                var textAttribute = explorer.AddTextAttribute(name);
+                                textAttribute.DefaultValue = reader.GetNullableString(4);
+                                break;
+
+                            default:
+                                throw new InvalidOperationException($"Invalid attribute type \"{type}\".");
+                            }
+                        }
+                    }
+
+                    void fillCalculatedFields()
+                    {
+                        var calculatedFieldPerName = explorer.CalculatedFields.ToDictionary(field => field.Name, StringComparer.OrdinalIgnoreCase);
+
+                        while (reader.Read())
+                        {
+                            var name = reader.GetNullableString(0);
+                            if (!calculatedFieldPerName.TryGetValue(name, out var calculatedField))
+                            {
+                                throw new InvalidOperationException("Unknown calculated field.");
+                            }
+
+                            var source = calculatedField.AddValueSource();
+                            source.Equation.Expression = reader.GetNullableString(1);
+                            source.Criterion.Expression = reader.GetNullableString(2);
+                        }
+                    }
+
+                    IDictionary<int, Network> createNetworks()
+                    {
+                        var networks = new SortedList<int, Network>();
+
+                        while (reader.Read())
+                        {
+                            var networkId = reader.GetInt32(0);
+                            if (RequestedSimulationsPerNetwork?.ContainsKey(networkId) ?? true)
+                            {
+                                var network = explorer.AddNetwork();
+                                networks.Add(networkId, network);
+                                IdPerNetwork.Add(network, networkId);
+
+                                network.Name = reader.GetNullableString(1);
+                            }
+                        }
+
+                        return networks;
+                    }
+
+                    #endregion Helper functions
+                }
+            }
+
+            var helper = new DataHelper
+            {
+                AllAttributeNames = explorer.AllAttributes.Select(attribute => attribute.Name).ToHashSet(StringComparer.OrdinalIgnoreCase),
+                NumberAttributePerName = explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase),
+                NumericAttributePerName = explorer.NumericAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase),
+            };
+
+            var timer = GetTimer();
+
+            foreach (var (networkId, network) in networkPerId)
+            {
+                timer.Time(() => FillNetwork(network, networkId, helper), $"Fill network {networkId}");
+            }
+
+            return explorer;
+        }
+
+        public Simulation GetStandAloneSimulation(int networkId, int simulationId)
+        {
+            RequestedSimulationsPerNetwork = new SortedDictionary<int, SortedSet<int>> { [networkId] = new SortedSet<int> { simulationId } };
+            return GetExplorer().Networks.Single().Simulations.Single();
+        }
+
+        private const string NUMBER_ATTRIBUTE_TYPE_NAME = "NUMBER";
+        private const string PASSIVE_TREATMENT_NAME = "No Treatment";
+        private const string SECTIONID_COLUMN_NAME = "sectionid";
+        private const string STRING_ATTRIBUTE_TYPE_NAME = "STRING";
+
+        private readonly IDbConnection Connection;
+        private readonly Action<TimeSpan, string> OnProgress;
+
+        private void FillNetwork(Network network, int networkId, DataHelper helper)
+        {
+            IDictionary<int, Simulation> simulationPerId;
+
+            using (var command = Connection.CreateCommand())
+            {
+                command.CommandText = $@"
 select facility, section, area, units, sectionid
 from section_{networkId}
 order by sectionid
@@ -29,10 +200,186 @@ order by sectionid
 select *
 from segment_{networkId}_ns0
 
-select simulation, jurisdiction, analysis, budget_constraint, weighting, benefit_variable, benefit_limit, use_cumulative_cost, use_across_budget
+select simulationid, simulation, jurisdiction, analysis, budget_constraint, weighting, benefit_variable, benefit_limit, use_cumulative_cost, use_across_budget
 from simulations
-where simulationid = {simulationId}
+where networkid = {networkId}
+order by simulationid
+";
 
+                using (var reader = command.ExecuteReader())
+                {
+                    var readerTimer = GetTimer(reader);
+
+                    helper.SectionPerId = new Dictionary<int, Section>();
+
+                    readerTimer.Time(createSections, nameof(createSections));
+                    readerTimer.Time(fillSectionHistories, nameof(fillSectionHistories));
+                    simulationPerId = readerTimer.Time(createSimulations, nameof(createSimulations));
+
+                    #region Helper functions
+
+                    void createSections()
+                    {
+                        var facilityPerName = new Dictionary<string, Facility>();
+
+                        while (reader.Read())
+                        {
+                            var facilityName = reader.GetNullableString(0);
+                            if (!facilityPerName.TryGetValue(facilityName, out var facility))
+                            {
+                                facility = network.AddFacility();
+                                facility.Name = facilityName;
+                                facilityPerName.Add(facilityName, facility);
+                            }
+
+                            var sectionName = reader.GetNullableString(1);
+                            if (facility.Sections.All(section => section.Name != sectionName))
+                            {
+                                var section = facility.AddSection();
+                                section.Name = sectionName;
+                                section.Area = reader.GetDouble(2);
+                                section.AreaUnit = reader.GetNullableString(3);
+
+                                var sectionId = reader.GetInt32(4);
+                                helper.SectionPerId.Add(sectionId, section);
+                            }
+                        }
+                    }
+
+                    void fillSectionHistories()
+                    {
+                        var columnSchema = Enumerable.Range(0, reader.FieldCount)
+                            .Select(columnIndex => new DbColumn(reader.GetName(columnIndex), columnIndex))
+                            .ToArray();
+
+                        var sectionidColumnIndex = columnSchema.Single(column => StringComparer.OrdinalIgnoreCase.Equals(column.ColumnName, SECTIONID_COLUMN_NAME)).ColumnOrdinal;
+
+                        var latestValueColumnPerAttribute = columnSchema
+                            .Where(column => helper.AllAttributeNames.Contains(column.ColumnName))
+                            .ToDictionary(column => column.ColumnName, column => column.ColumnOrdinal);
+
+                        var historyColumnsPerAttribute = columnSchema
+                            .Where(column => !StringComparer.OrdinalIgnoreCase.Equals(column.ColumnName, SECTIONID_COLUMN_NAME) && !helper.AllAttributeNames.Contains(column.ColumnName))
+                            .Select(column =>
+                            {
+                                var columnOrdinal = column.ColumnOrdinal;
+                                var yearSeparatorIndex = column.ColumnName.LastIndexOf('_');
+                                var yearString = column.ColumnName.Substring(yearSeparatorIndex + 1);
+                                var year = int.Parse(yearString);
+                                var attributeName = column.ColumnName.Substring(0, yearSeparatorIndex);
+                                return (columnOrdinal, year, attributeName);
+                            })
+                            .ToLookup(columnDatum => columnDatum.attributeName);
+
+                        while (reader.Read())
+                        {
+                            // With respect to memory footprint, it may be worthwhile to abbreviate
+                            // (where possible) the full history of each attribute in each section,
+                            // at least for the purpose of analysis. The analysis requires the
+                            // historical values only for roll-forward, and roll-forward does not
+                            // require all history before a certain point. (See roll-forward logic
+                            // for exact details. At the very least, it requires all history back to
+                            // the earliest most-recent year.) Attributes with no history should be
+                            // ignored if applying this logic.
+
+                            var sectionId = reader.GetInt32(sectionidColumnIndex);
+                            if (helper.SectionPerId.TryGetValue(sectionId, out var section))
+                            {
+                                fillHistories(network.Explorer.NumberAttributes, reader.GetDouble);
+                                fillHistories(network.Explorer.TextAttributes, reader.GetNullableString);
+
+                                void fillHistories<T>(IEnumerable<Attribute<T>> attributes, Func<int, T> getValue)
+                                {
+                                    foreach (var attribute in attributes)
+                                    {
+                                        var history = section.GetHistory(attribute);
+
+                                        var latestValueColumnOrdinal = latestValueColumnPerAttribute[attribute.Name];
+
+                                        if (!reader.IsDBNull(latestValueColumnOrdinal))
+                                        {
+                                            history.MostRecentValue = getValue(latestValueColumnOrdinal);
+                                        }
+
+                                        foreach (var (historyColumnOrdinal, year, _) in historyColumnsPerAttribute[attribute.Name])
+                                        {
+                                            if (!reader.IsDBNull(historyColumnOrdinal))
+                                            {
+                                                var value = getValue(historyColumnOrdinal);
+                                                history.Add(year, value);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    IDictionary<int, Simulation> createSimulations()
+                    {
+                        var simulations = new SortedList<int, Simulation>();
+
+                        SortedSet<int> requestedSimulations = null;
+
+                        if (RequestedSimulationsPerNetwork?.TryGetValue(networkId, out requestedSimulations) ?? true)
+                        {
+                            while (reader.Read())
+                            {
+                                var simulationId = reader.GetInt32(0);
+                                if (requestedSimulations?.Contains(simulationId) ?? true)
+                                {
+                                    var simulation = network.AddSimulation();
+                                    simulations.Add(simulationId, simulation);
+                                    IdPerSimulation.Add(simulation, simulationId);
+
+                                    simulation.Name = reader.GetNullableString(1);
+                                    simulation.AnalysisMethod.Filter.Expression = reader.GetNullableString(2);
+
+                                    var optimizationStrategyLabel = reader.GetNullableString(3);
+                                    simulation.AnalysisMethod.OptimizationStrategy = OptimizationStrategyLookup.Instance[optimizationStrategyLabel];
+
+                                    var spendingStrategyLabel = reader.GetNullableString(4);
+                                    simulation.AnalysisMethod.SpendingStrategy = SpendingStrategyLookup.Instance[spendingStrategyLabel];
+
+                                    var weightingName = reader.GetNullableString(5);
+                                    if (helper.NumericAttributePerName.TryGetValue(weightingName, out var weighting))
+                                    {
+                                        simulation.AnalysisMethod.Weighting = weighting;
+                                    }
+
+                                    var benefitName = reader.GetNullableString(6);
+                                    if (benefitName is object && helper.NumericAttributePerName.TryGetValue(benefitName, out var benefit))
+                                    {
+                                        simulation.AnalysisMethod.Benefit.Attribute = benefit;
+                                    }
+
+                                    simulation.AnalysisMethod.Benefit.Limit = reader.GetDouble(7);
+                                    simulation.AnalysisMethod.ShouldApplyMultipleFeasibleCosts = reader.GetNullableBoolean(8) ?? false;
+                                    simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets = reader.GetNullableBoolean(9) ?? false;
+                                }
+                            }
+                        }
+
+                        return simulations;
+                    }
+
+                    #endregion Helper functions
+                }
+            }
+
+            var timer = GetTimer();
+
+            foreach (var (simulationId, simulation) in simulationPerId)
+            {
+                timer.Time(() => FillSimulation(simulation, simulationId, helper), $"Fill simulation {simulationId}");
+            }
+        }
+
+        private void FillSimulation(Simulation simulation, int simulationId, DataHelper helper)
+        {
+            using (var command = Connection.CreateCommand())
+            {
+                command.CommandText = $@"
 select firstyear, numberyears, inflationrate, discountrate, budgetorder
 from investments
 where simulationid = {simulationId}
@@ -94,48 +441,30 @@ from split_treatment st join split_treatment_limit stl on st.split_treatment_id 
 where simulationid = {simulationId}
 ";
 
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = formattedCommandText;
-
                 using (var reader = command.ExecuteReader())
                 {
-                    var timer = new Stopwatch();
-                    void time(Action action, string label)
-                    {
-                        timer.Restart();
-                        action();
-                        var elapsed = timer.Elapsed;
-                        onProgress?.Invoke(elapsed, label.Humanize() + ".");
-                        _ = reader.NextResult();
-                    }
+                    var treatmentPerId = new Dictionary<int, SelectableTreatment>();
 
-                    var sectionById = new Dictionary<int, Section>();
-                    var treatmentById = new Dictionary<int, SelectableTreatment>();
+                    var readerTimer = GetTimer(reader);
 
-                    var simulation = new Explorer().AddNetwork().AddSimulation();
+                    readerTimer.Time(fillInvestmentPlan, nameof(fillInvestmentPlan));
 
-                    time(createAttributes, nameof(createAttributes));
-                    time(fillCalculatedFields, nameof(fillCalculatedFields));
-                    time(fillNetwork, nameof(fillNetwork));
-                    time(createSections, nameof(createSections));
-                    time(fillSectionHistories, nameof(fillSectionHistories));
-                    time(fillAnalysisMethod, nameof(fillAnalysisMethod));
-                    time(fillInvestmentPlan, nameof(fillInvestmentPlan));
-                    time(createPerformanceCurves, nameof(createPerformanceCurves));
-                    time(createCommittedProjects, nameof(createCommittedProjects));
-                    time(createTreatmentsWithConsequences, nameof(createTreatmentsWithConsequences));
-                    time(fillTreatmentCosts, nameof(fillTreatmentCosts));
-                    time(fillTreatmentFeasibilities, nameof(fillTreatmentFeasibilities));
-                    time(fillTreatmentSchedulings, nameof(fillTreatmentSchedulings));
-                    time(fillTreatmentSupersessions, nameof(fillTreatmentSupersessions));
-                    time(createBudgetPriorities, nameof(createBudgetPriorities));
-                    time(createTargetConditionGoals, nameof(createTargetConditionGoals));
-                    time(createDeficientConditionGoals, nameof(createDeficientConditionGoals));
-                    time(createRemainingLifeLimits, nameof(createRemainingLifeLimits));
-                    time(fillBudgetAmounts, nameof(fillBudgetAmounts));
-                    time(createBudgetConditions, nameof(createBudgetConditions));
-                    time(createCashFlowRules, nameof(createCashFlowRules));
+                    var budgetPerName = simulation.InvestmentPlan.Budgets.ToDictionary(budget => budget.Name, SelectionEqualityComparer<string>.Create(name => name.Trim()));
+
+                    readerTimer.Time(createPerformanceCurves, nameof(createPerformanceCurves));
+                    readerTimer.Time(createCommittedProjects, nameof(createCommittedProjects));
+                    readerTimer.Time(createTreatmentsWithConsequences, nameof(createTreatmentsWithConsequences));
+                    readerTimer.Time(fillTreatmentCosts, nameof(fillTreatmentCosts));
+                    readerTimer.Time(fillTreatmentFeasibilities, nameof(fillTreatmentFeasibilities));
+                    readerTimer.Time(fillTreatmentSchedulings, nameof(fillTreatmentSchedulings));
+                    readerTimer.Time(fillTreatmentSupersessions, nameof(fillTreatmentSupersessions));
+                    readerTimer.Time(createBudgetPriorities, nameof(createBudgetPriorities));
+                    readerTimer.Time(createTargetConditionGoals, nameof(createTargetConditionGoals));
+                    readerTimer.Time(createDeficientConditionGoals, nameof(createDeficientConditionGoals));
+                    readerTimer.Time(createRemainingLifeLimits, nameof(createRemainingLifeLimits));
+                    readerTimer.Time(fillBudgetAmounts, nameof(fillBudgetAmounts));
+                    readerTimer.Time(createBudgetConditions, nameof(createBudgetConditions));
+                    readerTimer.Time(createCashFlowRules, nameof(createCashFlowRules));
 
                     foreach (var rule in simulation.InvestmentPlan.CashFlowRules)
                     {
@@ -147,225 +476,7 @@ where simulationid = {simulationId}
 
                     simulation.Treatments.Single(treatment => StringComparer.OrdinalIgnoreCase.Equals(treatment.Name.Trim(), PASSIVE_TREATMENT_NAME)).DesignateAsPassiveForSimulation();
 
-                    return simulation;
-
                     #region Helper functions
-
-                    void createAttributes()
-                    {
-                        while (reader.Read())
-                        {
-                            var type = reader.GetNullableString(0);
-                            var name = reader.GetNullableString(1);
-
-                            if (name == simulation.Network.Explorer.AgeAttribute.Name)
-                            {
-                                if (type != NUMBER_ATTRIBUTE_TYPE_NAME)
-                                {
-                                    throw new InvalidOperationException("Age attribute must be numeric.");
-                                }
-
-                                continue;
-                            }
-
-                            switch (type)
-                            {
-                            case NUMBER_ATTRIBUTE_TYPE_NAME:
-                                var isCalculated = reader.GetNullableBoolean(2) ?? false;
-                                if (isCalculated)
-                                {
-                                    var calculatedField = simulation.Network.Explorer.AddCalculatedField(name);
-                                    calculatedField.IsDecreasingWithDeterioration = reader.GetBoolean(3);
-                                }
-                                else
-                                {
-                                    var numberAttribute = simulation.Network.Explorer.AddNumberAttribute(name);
-                                    numberAttribute.IsDecreasingWithDeterioration = reader.GetBoolean(3);
-                                    numberAttribute.DefaultValue = double.Parse(reader.GetNullableString(4));
-                                    numberAttribute.Minimum = reader.GetNullableDouble(5);
-                                    numberAttribute.Maximum = reader.GetNullableDouble(6);
-
-                                    if (numberAttribute.Minimum > numberAttribute.Maximum)
-                                    {
-                                        var swap = numberAttribute.Minimum;
-                                        numberAttribute.Minimum = numberAttribute.Maximum;
-                                        numberAttribute.Maximum = swap;
-                                    }
-                                }
-                                break;
-
-                            case STRING_ATTRIBUTE_TYPE_NAME:
-                                var textAttribute = simulation.Network.Explorer.AddTextAttribute(name);
-                                textAttribute.DefaultValue = reader.GetNullableString(4);
-                                break;
-
-                            default:
-                                throw new InvalidOperationException($"Invalid attribute type \"{type}\".");
-                            }
-                        }
-                    }
-
-                    void fillCalculatedFields()
-                    {
-                        var calculatedFieldByName = simulation.Network.Explorer.CalculatedFields.ToDictionary(field => field.Name, StringComparer.OrdinalIgnoreCase);
-
-                        while (reader.Read())
-                        {
-                            var name = reader.GetNullableString(0);
-                            if (!calculatedFieldByName.TryGetValue(name, out var calculatedField))
-                            {
-                                throw new InvalidOperationException("Unknown calculated field.");
-                            }
-
-                            var source = calculatedField.AddValueSource();
-                            source.Equation.Expression = reader.GetNullableString(1);
-                            source.Criterion.Expression = reader.GetNullableString(2);
-                        }
-                    }
-
-                    void fillNetwork()
-                    {
-                        if (!reader.Read())
-                        {
-                            throw new InvalidOperationException("Invalid network ID.");
-                        }
-
-                        simulation.Network.Name = reader.GetNullableString(0);
-                    }
-
-                    void createSections()
-                    {
-                        var facilityByName = new Dictionary<string, Facility>();
-
-                        while (reader.Read())
-                        {
-                            var facilityName = reader.GetNullableString(0);
-                            if (!facilityByName.TryGetValue(facilityName, out var facility))
-                            {
-                                facility = simulation.Network.AddFacility();
-                                facility.Name = facilityName;
-                                facilityByName.Add(facilityName, facility);
-                            }
-
-                            var sectionName = reader.GetNullableString(1);
-                            if (facility.Sections.All(section => section.Name != sectionName))
-                            {
-                                var section = facility.AddSection();
-                                section.Name = sectionName;
-                                section.Area = reader.GetDouble(2);
-                                section.AreaUnit = reader.GetNullableString(3);
-
-                                var sectionId = reader.GetInt32(4);
-                                sectionById.Add(sectionId, section);
-                            }
-                        }
-                    }
-
-                    void fillSectionHistories()
-                    {
-                        var attributeNames = simulation.Network.Explorer.AllAttributes.Select(attribute => attribute.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-                        var columnSchema = Enumerable.Range(0, reader.FieldCount)
-                            .Select(columnIndex => new DbColumn(reader.GetName(columnIndex), columnIndex))
-                            .ToArray();
-
-                        var sectionidColumnIndex = columnSchema.Single(column => StringComparer.OrdinalIgnoreCase.Equals(column.ColumnName, SECTIONID_COLUMN_NAME)).ColumnOrdinal;
-
-                        var latestValueColumnPerAttribute = columnSchema
-                            .Where(column => attributeNames.Contains(column.ColumnName))
-                            .ToDictionary(column => column.ColumnName, column => column.ColumnOrdinal);
-
-                        var historyColumnsPerAttribute = columnSchema
-                            .Where(column => !StringComparer.OrdinalIgnoreCase.Equals(column.ColumnName, SECTIONID_COLUMN_NAME) && !attributeNames.Contains(column.ColumnName))
-                            .Select(column =>
-                            {
-                                var columnOrdinal = column.ColumnOrdinal;
-                                var yearSeparatorIndex = column.ColumnName.LastIndexOf('_');
-                                var yearString = column.ColumnName.Substring(yearSeparatorIndex + 1);
-                                var year = int.Parse(yearString);
-                                var attributeName = column.ColumnName.Substring(0, yearSeparatorIndex);
-                                return (columnOrdinal, year, attributeName);
-                            })
-                            .ToLookup(columnDatum => columnDatum.attributeName);
-
-                        while (reader.Read())
-                        {
-                            // With respect to memory footprint, it may be worthwhile to abbreviate
-                            // (where possible) the full history of each attribute in each section,
-                            // at least for the purpose of analysis. The analysis requires the
-                            // historical values only for roll-forward, and roll-forward does not
-                            // require all history before a certain point. (See roll-forward logic
-                            // for exact details. At the very least, it requires all history back to
-                            // the earliest most-recent year.) Attributes with no history should be
-                            // ignored if applying this logic.
-
-                            var sectionId = reader.GetInt32(sectionidColumnIndex);
-                            if (sectionById.TryGetValue(sectionId, out var section))
-                            {
-                                fillHistories(simulation.Network.Explorer.NumberAttributes, reader.GetDouble);
-                                fillHistories(simulation.Network.Explorer.TextAttributes, reader.GetNullableString);
-
-                                void fillHistories<T>(IEnumerable<Attribute<T>> attributes, Func<int, T> getValue)
-                                {
-                                    foreach (var attribute in attributes)
-                                    {
-                                        var history = section.GetHistory(attribute);
-
-                                        var latestValueColumnOrdinal = latestValueColumnPerAttribute[attribute.Name];
-
-                                        if (!reader.IsDBNull(latestValueColumnOrdinal))
-                                        {
-                                            history.MostRecentValue = getValue(latestValueColumnOrdinal);
-                                        }
-
-                                        foreach (var (historyColumnOrdinal, year, _) in historyColumnsPerAttribute[attribute.Name])
-                                        {
-                                            if (!reader.IsDBNull(historyColumnOrdinal))
-                                            {
-                                                var value = getValue(historyColumnOrdinal);
-                                                history.Add(year, value);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    void fillAnalysisMethod()
-                    {
-                        if (!reader.Read())
-                        {
-                            throw new InvalidOperationException("Invalid simulation ID.");
-                        }
-
-                        var attributeByName = simulation.Network.Explorer.NumericAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
-
-                        simulation.Name = reader.GetNullableString(0);
-                        simulation.AnalysisMethod.Filter.Expression = reader.GetNullableString(1);
-
-                        var optimizationStrategyLabel = reader.GetNullableString(2);
-                        simulation.AnalysisMethod.OptimizationStrategy = OptimizationStrategyLookup.Instance[optimizationStrategyLabel];
-
-                        var spendingStrategyLabel = reader.GetNullableString(3);
-                        simulation.AnalysisMethod.SpendingStrategy = SpendingStrategyLookup.Instance[spendingStrategyLabel];
-
-                        var weightingName = reader.GetNullableString(4);
-                        if (attributeByName.TryGetValue(weightingName, out var weighting))
-                        {
-                            simulation.AnalysisMethod.Weighting = weighting;
-                        }
-
-                        var benefitName = reader.GetNullableString(5);
-                        if (attributeByName.TryGetValue(benefitName, out var benefit))
-                        {
-                            simulation.AnalysisMethod.Benefit.Attribute = benefit;
-                        }
-
-                        simulation.AnalysisMethod.Benefit.Limit = reader.GetDouble(6);
-                        simulation.AnalysisMethod.ShouldApplyMultipleFeasibleCosts = reader.GetNullableBoolean(7) ?? false;
-                        simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets = reader.GetNullableBoolean(8) ?? false;
-                    }
 
                     void fillInvestmentPlan()
                     {
@@ -390,13 +501,11 @@ where simulationid = {simulationId}
 
                     void createPerformanceCurves()
                     {
-                        var attributeByName = simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name);
-
                         while (reader.Read())
                         {
                             var curve = simulation.AddPerformanceCurve();
                             var attributeName = reader.GetNullableString(0);
-                            curve.Attribute = attributeByName[attributeName];
+                            curve.Attribute = helper.NumberAttributePerName[attributeName];
                             curve.Name = reader.GetNullableString(1);
                             curve.Criterion.Expression = reader.GetNullableString(2);
                             curve.Equation.Expression = reader.GetNullableString(3);
@@ -409,45 +518,40 @@ where simulationid = {simulationId}
                         // per Jake 2020-07-30, ignore committed projects for now.
                         return;
 
-                        var attributeByName = simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name);
-                        var budgetByName = simulation.InvestmentPlan.Budgets.ToDictionary(budget => budget.Name);
-                        var projectById = new Dictionary<int, CommittedProject>();
+                        var projectPerId = new Dictionary<int, CommittedProject>();
 
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
-                            if (!projectById.TryGetValue(id, out var project))
+                            if (!projectPerId.TryGetValue(id, out var project))
                             {
                                 var sectionId = reader.GetInt32(1);
-                                var section = sectionById[sectionId];
+                                var section = helper.SectionPerId[sectionId];
                                 var year = reader.GetInt32(2);
                                 project = simulation.CommittedProjects.GetAdd(new CommittedProject(section, year)); // maybe modify this so that the project is ignored if the budget name is not found.
                                 project.Name = reader.GetNullableString(3);
                                 project.ShadowForSameTreatment = reader.GetInt32(4);
                                 project.ShadowForAnyTreatment = reader.GetInt32(5);
                                 var budgetName = reader.GetNullableString(6);
-                                project.Budget = budgetByName[budgetName];
+                                project.Budget = budgetPerName[budgetName];
                                 project.Cost = reader.GetDouble(7);
 
-                                projectById.Add(id, project);
+                                projectPerId.Add(id, project);
                             }
 
                             var consequence = project.Consequences.GetAdd(new TreatmentConsequence());
                             var attributeName = reader.GetNullableString(8);
-                            consequence.Attribute = attributeByName[attributeName];
+                            consequence.Attribute = helper.NumberAttributePerName[attributeName];
                             consequence.Change.Expression = reader.GetNullableString(9);
                         }
                     }
 
                     void createTreatmentsWithConsequences()
                     {
-                        var attributeByName = simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name);
-                        var budgetByName = simulation.InvestmentPlan.Budgets.ToDictionary(budget => budget.Name, SelectionEqualityComparer<string>.Create(name => name.Trim()));
-
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
-                            if (!treatmentById.TryGetValue(id, out var treatment))
+                            if (!treatmentPerId.TryGetValue(id, out var treatment))
                             {
                                 treatment = simulation.AddTreatment();
                                 treatment.Name = reader.GetNullableString(1);
@@ -458,7 +562,7 @@ where simulationid = {simulationId}
                                 var budgetNames = budgetField.Split(',');
                                 foreach (var budgetName in budgetNames)
                                 {
-                                    if (budgetByName.TryGetValue(budgetName, out var budget))
+                                    if (budgetPerName.TryGetValue(budgetName, out var budget))
                                     {
                                         treatment.Budgets.Add(budget);
                                     }
@@ -466,12 +570,12 @@ where simulationid = {simulationId}
 
                                 treatment.Description = reader.GetNullableString(5);
 
-                                treatmentById.Add(id, treatment);
+                                treatmentPerId.Add(id, treatment);
                             }
 
                             var consequence = treatment.AddConsequence();
                             var attributeName = reader.GetNullableString(6);
-                            consequence.Attribute = attributeByName[attributeName];
+                            consequence.Attribute = helper.NumberAttributePerName[attributeName];
                             consequence.Change.Expression = reader.GetNullableString(7);
                             consequence.Equation.Expression = reader.GetNullableString(8);
                             consequence.Criterion.Expression = reader.GetNullableString(9);
@@ -483,7 +587,7 @@ where simulationid = {simulationId}
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
-                            var treatment = treatmentById[id];
+                            var treatment = treatmentPerId[id];
                             var cost = treatment.AddCost();
                             cost.Equation.Expression = reader.GetNullableString(1);
                             cost.Criterion.Expression = reader.GetNullableString(2);
@@ -495,7 +599,7 @@ where simulationid = {simulationId}
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
-                            var treatment = treatmentById[id];
+                            var treatment = treatmentPerId[id];
                             var feasibility = treatment.AddFeasibilityCriterion();
                             feasibility.Expression = reader.GetNullableString(1);
                         }
@@ -506,11 +610,11 @@ where simulationid = {simulationId}
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
-                            var treatment = treatmentById[id];
+                            var treatment = treatmentPerId[id];
                             var scheduling = treatment.Schedulings.GetAdd(new TreatmentScheduling());
                             scheduling.OffsetToFutureYear = reader.GetInt32(1);
                             var scheduledId = reader.GetInt32(2);
-                            scheduling.Treatment = treatmentById[scheduledId];
+                            scheduling.Treatment = treatmentPerId[scheduledId];
                         }
                     }
 
@@ -519,23 +623,22 @@ where simulationid = {simulationId}
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
-                            var treatment = treatmentById[id];
+                            var treatment = treatmentPerId[id];
                             var supersession = treatment.AddSupersession();
                             var supersededId = reader.GetInt32(1);
-                            supersession.Treatment = treatmentById[supersededId];
+                            supersession.Treatment = treatmentPerId[supersededId];
                             supersession.Criterion.Expression = reader.GetNullableString(2);
                         }
                     }
 
                     void createBudgetPriorities()
                     {
-                        var budgetByName = simulation.InvestmentPlan.Budgets.ToDictionary(budget => budget.Name);
-                        var priorityById = new Dictionary<int, BudgetPriority>();
+                        var priorityPerId = new Dictionary<int, BudgetPriority>();
 
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
-                            if (!priorityById.TryGetValue(id, out var priority))
+                            if (!priorityPerId.TryGetValue(id, out var priority))
                             {
                                 priority = simulation.AnalysisMethod.AddBudgetPriority();
                                 priority.PriorityLevel = reader.GetInt32(1);
@@ -547,11 +650,11 @@ where simulationid = {simulationId}
                                     priority.Year = null;
                                 }
 
-                                priorityById.Add(id, priority);
+                                priorityPerId.Add(id, priority);
                             }
 
                             var budgetName = reader.GetNullableString(4);
-                            if (budgetByName.TryGetValue(budgetName, out var budget))
+                            if (budgetPerName.TryGetValue(budgetName, out var budget))
                             {
                                 var pair = priority.GetBudgetPercentagePair(budget);
                                 pair.Percentage = (decimal)reader.GetDouble(5);
@@ -561,13 +664,11 @@ where simulationid = {simulationId}
 
                     void createTargetConditionGoals()
                     {
-                        var attributeByName = simulation.Network.Explorer.NumericAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
-
                         while (reader.Read())
                         {
                             var goal = simulation.AnalysisMethod.AddTargetConditionGoal();
                             var attributeName = reader.GetNullableString(0);
-                            goal.Attribute = attributeByName[attributeName];
+                            goal.Attribute = helper.NumericAttributePerName[attributeName];
                             goal.Year = reader.GetNullableInt32(1);
                             goal.Target = reader.GetDouble(2);
                             goal.Name = reader.GetNullableString(3);
@@ -577,13 +678,11 @@ where simulationid = {simulationId}
 
                     void createDeficientConditionGoals()
                     {
-                        var attributeByName = simulation.Network.Explorer.NumericAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
-
                         while (reader.Read())
                         {
                             var goal = simulation.AnalysisMethod.AddDeficientConditionGoal();
                             var attributeName = reader.GetNullableString(0);
-                            goal.Attribute = attributeByName[attributeName];
+                            goal.Attribute = helper.NumericAttributePerName[attributeName];
                             goal.Name = reader.GetNullableString(1);
                             goal.DeficientLimit = reader.GetDouble(2);
                             goal.AllowedDeficientPercentage = reader.GetDouble(3);
@@ -593,13 +692,11 @@ where simulationid = {simulationId}
 
                     void createRemainingLifeLimits()
                     {
-                        var attributeByName = simulation.Network.Explorer.NumericAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
-
                         while (reader.Read())
                         {
                             var limit = simulation.AnalysisMethod.AddRemainingLifeLimit();
                             var attributeName = reader.GetNullableString(0);
-                            limit.Attribute = attributeByName[attributeName];
+                            limit.Attribute = helper.NumericAttributePerName[attributeName];
                             limit.Value = reader.GetDouble(1);
                             limit.Criterion.Expression = reader.GetNullableString(2);
                         }
@@ -607,12 +704,10 @@ where simulationid = {simulationId}
 
                     void fillBudgetAmounts()
                     {
-                        var budgetByName = simulation.InvestmentPlan.Budgets.ToDictionary(budget => budget.Name);
-
                         while (reader.Read())
                         {
                             var budgetName = reader.GetNullableString(0);
-                            var budget = budgetByName[budgetName];
+                            var budget = budgetPerName[budgetName];
                             var year = reader.GetInt32(1);
                             var yearOffset = year - simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
                             budget.YearlyAmounts[yearOffset].Value = (decimal)reader.GetDouble(2);
@@ -621,12 +716,10 @@ where simulationid = {simulationId}
 
                     void createBudgetConditions()
                     {
-                        var budgetByName = simulation.InvestmentPlan.Budgets.ToDictionary(budget => budget.Name);
-
                         while (reader.Read())
                         {
                             var budgetName = reader.GetNullableString(0);
-                            var budget = budgetByName[budgetName];
+                            var budget = budgetPerName[budgetName];
                             var criterion = reader.GetNullableString(1);
                             var budgetCondition = simulation.InvestmentPlan.AddBudgetCondition();
                             budgetCondition.Budget = budget;
@@ -636,18 +729,18 @@ where simulationid = {simulationId}
 
                     void createCashFlowRules()
                     {
-                        var ruleById = new Dictionary<int, CashFlowRule>();
+                        var rulePerId = new Dictionary<int, CashFlowRule>();
 
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
-                            if (!ruleById.TryGetValue(id, out var rule))
+                            if (!rulePerId.TryGetValue(id, out var rule))
                             {
                                 rule = simulation.InvestmentPlan.AddCashFlowRule();
                                 rule.Name = reader.GetNullableString(1);
                                 rule.Criterion.Expression = reader.GetNullableString(2);
 
-                                ruleById.Add(id, rule);
+                                rulePerId.Add(id, rule);
                             }
 
                             var distributionRule = rule.DistributionRules.GetAdd(new CashFlowDistributionRule());
@@ -661,13 +754,20 @@ where simulationid = {simulationId}
             }
         }
 
-        private const string NUMBER_ATTRIBUTE_TYPE_NAME = "NUMBER";
+        private Timer GetTimer() => new Timer(OnProgress);
 
-        private const string PASSIVE_TREATMENT_NAME = "No Treatment";
+        private ReaderTimer GetTimer(IDataReader reader) => new ReaderTimer(OnProgress, reader);
 
-        private const string SECTIONID_COLUMN_NAME = "sectionid";
+        private sealed class DataHelper
+        {
+            public ISet<string> AllAttributeNames { get; set; }
 
-        private const string STRING_ATTRIBUTE_TYPE_NAME = "STRING";
+            public IDictionary<string, NumberAttribute> NumberAttributePerName { get; set; }
+
+            public IDictionary<string, INumericAttribute> NumericAttributePerName { get; set; }
+
+            public IDictionary<int, Section> SectionPerId { get; set; }
+        }
 
         private sealed class DbColumn
         {
@@ -680,6 +780,48 @@ where simulationid = {simulationId}
             public string ColumnName { get; }
 
             public int ColumnOrdinal { get; }
+        }
+
+        private sealed class ReaderTimer : Timer
+        {
+            public ReaderTimer(Action<TimeSpan, string> onProgress, IDataReader reader) : base(onProgress) => Reader = reader;
+
+            protected override void OnTimed() => _ = Reader.NextResult();
+
+            private readonly IDataReader Reader;
+        }
+
+        private class Timer
+        {
+            public Timer(Action<TimeSpan, string> onProgress) => OnProgress = onProgress;
+
+            public void Time(Action action, string label)
+            {
+                _ = Time(actionAsFunc, label);
+
+                object actionAsFunc()
+                {
+                    action();
+                    return null;
+                }
+            }
+
+            public T Time<T>(Func<T> func, string label)
+            {
+                Stopwatch.Restart();
+                var result = func();
+                var elapsed = Stopwatch.Elapsed;
+                OnProgress?.Invoke(elapsed, label.Humanize() + ".");
+                OnTimed();
+                return result;
+            }
+
+            protected virtual void OnTimed()
+            {
+            }
+
+            private readonly Action<TimeSpan, string> OnProgress;
+            private readonly Stopwatch Stopwatch = new Stopwatch();
         }
     }
 }

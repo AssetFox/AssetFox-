@@ -4,8 +4,13 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public abstract class AttributeConnection
     {
-        public abstract string DataRetrievalCommand { get; }
-        public abstract string ConnectionInformation { get; }
-        public abstract IEnumerable<(Location location, T value)> GetData<T>();
+        public Attribute Attribute { get; }
+
+        public abstract IEnumerable<IAttributeDatum> GetData<T>();
+
+        public AttributeConnection(Attribute attribute)
+        {
+            Attribute = attribute;
+        }
     }
 }

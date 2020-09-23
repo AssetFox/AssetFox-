@@ -5,6 +5,6 @@ namespace AppliedResearchAssociates.iAM.Aggregation
 {
     public abstract class AggregationRule<T>
     {
-        public abstract IEnumerable<(int Year, T Value)> Apply(IEnumerable<IAttributeDatum> attributeData);
+        public abstract IEnumerable<(Attribute, (int Year, T Value))> Apply(IEnumerable<IAttributeDatum> attributeData, Attribute attribute);
     }
 }

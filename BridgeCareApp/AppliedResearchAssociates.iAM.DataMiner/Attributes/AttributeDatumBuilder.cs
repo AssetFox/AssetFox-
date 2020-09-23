@@ -5,9 +5,9 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public static class AttributeDatumBuilder<T>
     {
-        public static List<AttributeDatum<T>> CreateAttributeData(Attribute attribute, IEnumerable<(Location location, T value)> locationsAndValues)
+        public static List<IAttributeDatum> CreateAttributeData(Attribute attribute, IEnumerable<(Location location, T value)> locationsAndValues)
         {
-            var attributeData = new List<AttributeDatum<T>>();
+            var attributeData = new List<IAttributeDatum>();
             foreach (var locationAndValue in locationsAndValues)
             {
                 attributeData.Add(new AttributeDatum<T>(attribute, locationAndValue.value, locationAndValue.location, DateTime.Now));

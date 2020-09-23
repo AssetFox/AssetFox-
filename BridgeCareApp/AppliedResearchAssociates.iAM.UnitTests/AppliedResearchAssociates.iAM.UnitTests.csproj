@@ -113,10 +113,6 @@
       <Project>{db1d42ac-d45b-4256-9a3a-29156c74c2b5}</Project>
       <Name>AppliedResearchAssociates.iAM.Segmentation</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ExecutableForProtptype\ExecutableForProtptype.csproj">
-      <Project>{d4b4b820-82af-443f-acab-fe48831a687e}</Project>
-      <Name>ExecutableForProtptype</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Moq">

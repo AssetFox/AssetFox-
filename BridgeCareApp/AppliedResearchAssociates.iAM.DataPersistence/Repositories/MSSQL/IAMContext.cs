@@ -13,11 +13,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistence.Repositories.MSSQL
 
         }
         public DbSet<Inventory> Inventories { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer("connectionString"); // connection string will come from config file
-            base.OnConfiguring(optionsBuilder);
-        }
     }
 }

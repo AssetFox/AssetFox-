@@ -27,6 +27,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
             var connectionString = string.Format(ConnectionFormats.SmallBridgeDatasetLocal, userId, password);
 
+            var obj = new DataAccessorModified();
+            obj.CreateNewSegmentation();
+
             using var connection = new SqlConnection(connectionString);
             connection.Open();
 

@@ -16,23 +16,23 @@ namespace AppliedResearchAssociates.iAM.DataAccess
         public void CreateNewSegmentation()
         {
             var segmentationRulesJsonText = File.ReadAllText("segmentationMetaData.json");
-            var segmentationRulesMetaData = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText, new { AttributeMetaData = default(AttributeMetaDatum) }).AttributeMetaData;
+            var segmentationRulesMetaData = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText, new { SegmentationRules = default(SegmentationMetaDatum) }).SegmentationRules;
 
-            switch(segmentationRulesMetaData.Type)
+            switch (segmentationRulesMetaData.DataType)
             {
-                case "NUMERIC":
+                case "number":
                 {
                     if (!double.TryParse(segmentationRulesMetaData.DefaultValue, out double defaultValue))
                     {
-                        throw new InvalidCastException($"Numeric attribute {segmentationRulesMetaData.Name} does not have a valid numeric default value. Please check the value in the configuration file and try again.");
+                        throw new InvalidCastException($"Numeric attribute {segmentationRulesMetaData.AttributeName} does not have a valid numeric default value. Please check the value in the configuration file and try again.");
                     }
 
                     var attribute = new NumericAttribute(
-                            segmentationRulesMetaData.Name,
+                            segmentationRulesMetaData.AttributeName,
                             defaultValue,
                             segmentationRulesMetaData.Maximum,
                             segmentationRulesMetaData.Minimum,
-                            segmentationRulesMetaData.Command,
+                            segmentationRulesMetaData.DataRetrievalCommand,
                             segmentationRulesMetaData.ConnectionType,
                             segmentationRulesMetaData.ConnectionString);
 
@@ -46,9 +46,9 @@ namespace AppliedResearchAssociates.iAM.DataAccess
                 case "TEXT":
                 {
                     var attribute = new DataMiner.Attributes.TextAttribute(
-                            segmentationRulesMetaData.Name,
+                            segmentationRulesMetaData.AttributeName,
                             segmentationRulesMetaData.DefaultValue,
-                            segmentationRulesMetaData.Command,
+                            segmentationRulesMetaData.DataRetrievalCommand,
                             segmentationRulesMetaData.ConnectionType,
                             segmentationRulesMetaData.ConnectionString);
 

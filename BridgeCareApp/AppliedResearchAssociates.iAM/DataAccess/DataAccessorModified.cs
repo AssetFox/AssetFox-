@@ -108,7 +108,7 @@ namespace AppliedResearchAssociates.iAM.DataAccess
                     }
                 }
             }
-            var aggregatedDataSegments = Aggregator.Aggregate(attributeData, network.Segments);
+            var aggregatedDataSegments = Aggregator.AssignAttributeDataToSegments(attributeData, network.Segments);
 
             // Save to database; Use in analysis.
         }

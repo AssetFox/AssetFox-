@@ -31,7 +31,7 @@ namespace BridgeCare.Domain
         {
             var attributeMetaData = attributeRepository.All();
 
-            var aggregatedSegments = new List<AggregateDataSegment>();
+            var aggregatedSegments = new List<AssignedDataSegment>();
             
             // Get the attribute data and start aggregating
             //foreach (var item in attributeMetaData)

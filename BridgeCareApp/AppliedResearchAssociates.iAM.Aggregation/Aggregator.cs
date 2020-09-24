@@ -7,21 +7,21 @@ namespace AppliedResearchAssociates.iAM.Aggregation
 {
     public static class Aggregator
     {
-        public static List<AggregateDataSegment> Aggregate(
+        public static List<AssignedDataSegment> AssignAttributeDataToSegments(
             List<IAttributeDatum> attributeData,
             IEnumerable<Segment> networkSegments)
         {
-            var aggregateDataSegments = new List<AggregateDataSegment>();
+            var aggregateDataSegments = new List<AssignedDataSegment>();
 
             // Copy the network segments into a new list of AggregateDataSegments
             foreach (var networkSegment in networkSegments)
             {
-                aggregateDataSegments.Add(new AggregateDataSegment(networkSegment));
+                aggregateDataSegments.Add(new AssignedDataSegment(networkSegment));
             }
 
             foreach (var datum in attributeData)
             {
-                AggregateDataSegment matchingLocationSegment =
+                AssignedDataSegment matchingLocationSegment =
                     aggregateDataSegments.
                     FirstOrDefault(_ => datum.Location.MatchOn(_.Segment.Location));
 

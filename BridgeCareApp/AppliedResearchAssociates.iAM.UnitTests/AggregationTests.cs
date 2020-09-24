@@ -106,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.UnitTests
             {
                 new Segment(new SectionLocation("B-0-1"), null)
             };
-            Aggregator.Aggregate(data, networkSegments);
+            Aggregator.AssignAttributeDataToSegments(data, networkSegments);
         }
 
     }

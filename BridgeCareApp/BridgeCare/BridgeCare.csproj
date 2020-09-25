@@ -287,15 +287,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Domain\Aggregation.cs" />
-    <Compile Include="Domain\Segmentation.cs" />
     <Compile Include="ApplicationLog\HandleException.cs" />
     <Compile Include="ApplicationLog\UnhandledExceptionLogger.cs" />
     <Compile Include="App_Start\UnityResolver.cs" />
     <Compile Include="App_Start\UnityWebApiActivator.cs" />
-    <Compile Include="Controllers\AggregationController.cs" />
     <Compile Include="Controllers\CashFlowLibraryController.cs" />
-    <Compile Include="Controllers\SegmentationController.cs" />
     <Compile Include="Controllers\UserCriteriaController.cs" />
     <Compile Include="DataAccessLayer\CashFlowLibraryDAL.cs" />
     <Compile Include="DataAccessLayer\UserCriteriaDAL.cs" />

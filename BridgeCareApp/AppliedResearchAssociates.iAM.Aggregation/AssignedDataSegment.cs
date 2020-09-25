@@ -6,19 +6,19 @@ using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.Aggregation
 {
-    public class AggregateDataSegment
+    public class AssignedDataSegment
     {
-        private List<IAttributeDatum> AttributeData { get; } = new List<IAttributeDatum>();
+        private List<IAttributeDatum> AssignedData { get; } = new List<IAttributeDatum>();
 
-        public AggregateDataSegment(Segment segment) => Segment = segment;
+        public AssignedDataSegment(Segment segment) => Segment = segment;
 
         public Segment Segment { get; }
 
-        public void AddDatum(IAttributeDatum datum) => AttributeData.Add(datum);
+        public void AddDatum(IAttributeDatum datum) => AssignedData.Add(datum);
 
         public IEnumerable<(Attribute attribute, (int year, T value))> GetAggregatedValuesByYear<T>(Attribute attribute, AggregationRule<T> aggregationRule)
         {
-            var specifiedData = AttributeData.Where(_ => _.Attribute.Guid == attribute.Guid);
+            var specifiedData = AssignedData.Where(_ => _.Attribute.Guid == attribute.Guid);
             return aggregationRule.Apply(specifiedData, attribute);
         }
     }

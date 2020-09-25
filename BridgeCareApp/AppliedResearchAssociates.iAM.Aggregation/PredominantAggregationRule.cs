@@ -4,7 +4,7 @@ using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
 namespace AppliedResearchAssociates.iAM.Aggregation
 {
-    public class PredominantAggregationRule : AggregationRule<string>
+    public class PredominantAggregationRule : TextAggregationRule
     {
         public override IEnumerable<(Attribute, (int, string))> Apply(IEnumerable<IAttributeDatum> attributeData, Attribute attribute) // (int = year, string = value of the attribute)
         {

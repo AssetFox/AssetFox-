@@ -131,7 +131,7 @@ namespace AppliedResearchAssociates.iAM.UnitTests
         public void CreateNumericAttributeForLinearLocation()
         {
             // Arrange / Act
-            var output = AttributeDatumBuilder<double>.CreateAttributeData(iAMConfiguration.C, TestDataForAttribute.LinearLocationForNumberAttribute);
+            var output = AttributeDatumFactory<double>.CreateAttributeData(iAMConfiguration.C, TestDataForAttribute.LinearLocationForNumberAttribute);
 
             foreach (var item in output)
             {
@@ -144,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.UnitTests
         public void CreateTextAttributeForSectionLocation()
         {
             // Arrange / Act
-            var output = AttributeDatumBuilder<string>.CreateAttributeData(iAMConfiguration.B, TestDataForAttribute.SectionLocationForTextAttribute);
+            var output = AttributeDatumFactory<string>.CreateAttributeData(iAMConfiguration.B, TestDataForAttribute.SectionLocationForTextAttribute);
 
             foreach (var item in output)
             {
@@ -157,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.UnitTests
         public void CreateTextAttributeForLinearLocation()
         {
             // Arrange / Act
-            var output = AttributeDatumBuilder<string>.CreateAttributeData(iAMConfiguration.B, TestDataForAttribute.LinearLocationForTextAttribute);
+            var output = AttributeDatumFactory<string>.CreateAttributeData(iAMConfiguration.B, TestDataForAttribute.LinearLocationForTextAttribute);
 
             foreach (var item in output)
             {
@@ -170,7 +170,7 @@ namespace AppliedResearchAssociates.iAM.UnitTests
         public void CreateNumericAttributeForSectionLocation()
         {
             // Arrange / Act
-            var output = AttributeDatumBuilder<double>.CreateAttributeData(iAMConfiguration.C, TestDataForAttribute.SectionLocationForNumberAttribute);
+            var output = AttributeDatumFactory<double>.CreateAttributeData(iAMConfiguration.C, TestDataForAttribute.SectionLocationForNumberAttribute);
 
             foreach (var item in output)
             {

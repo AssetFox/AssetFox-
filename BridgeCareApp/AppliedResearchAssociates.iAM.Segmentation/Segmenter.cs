@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Segmentation
         /// <typeparam name="T"></typeparam>
         /// <param name="attributeData"></param>
         /// <returns></returns>
-        public static Network CreateNetworkFromAttributeDataRecords<T>(IEnumerable<IAttributeDatum> attributeData)
+        public static Network CreateNetworkFromAttributeDataRecords(IEnumerable<IAttributeDatum> attributeData)
         {
             var segments = (from attributeDatum in attributeData
                     let segment = new Segment(attributeDatum.Location, attributeDatum)

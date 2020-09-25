@@ -19,21 +19,22 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
             string wellKnownText = null;
             string uniqueIdentifeir = "";
 
-            using (var conn = new SqlConnection())
+            using (var conn = new SqlConnection(Attribute.ConnectionString))
             {
                 var sqlCommand = new SqlCommand(Attribute.Command, conn);
                 sqlCommand.Connection.Open();
                 var dataReader = sqlCommand.ExecuteReader();
                 while (dataReader.Read())
                 {
-                    var value = dataReader.GetFieldValue<T>(5);
-                    var dateTime = dataReader.GetFieldValue<DateTime>(6);
+                    var value = dataReader.GetFieldValue<T>(2);
+                    var dateTime = dataReader.GetFieldValue<DateTime>(1);
+                    uniqueIdentifeir = dataReader.GetFieldValue<string>(0);
 
                     yield return
                         new AttributeDatum<T>(Attribute,
                                               value,
                                               LocationBuilder.CreateLocation(uniqueIdentifeir, routeName, start, end, direction, wellKnownText),
-                                              dateTime);    
+                                              dateTime);
                 }
             }
         }

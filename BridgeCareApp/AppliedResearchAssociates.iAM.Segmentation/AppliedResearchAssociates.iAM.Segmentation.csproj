@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj" />
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistence\AppliedResearchAssociates.iAM.DataPersistence.csproj" />
   </ItemGroup>
 
 </Project>

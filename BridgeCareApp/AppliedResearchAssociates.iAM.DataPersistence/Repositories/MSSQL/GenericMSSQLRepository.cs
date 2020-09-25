@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistence.Repositories.MSSQL
         : IRepository<T> where T : class
     {
         //protected DbContext context;
-        public GenericMSSQLRepository(BridgeCareContext context)
+        public GenericMSSQLRepository(IAMContext context)
         {
             //this.context = context;
         }

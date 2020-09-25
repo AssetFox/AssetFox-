@@ -28,7 +28,7 @@ namespace BridgeCare.Controllers
         /// </summary>
         /// <param name="model">SimulationModel</param>
         /// <returns>IHttpActionResult task</returns>
-        [HttpPost]
+        /*[HttpPost]
         [Route("api/RunAggregation")]
         public async Task<IHttpActionResult> Post([FromBody] Network network)
         {
@@ -38,6 +38,6 @@ namespace BridgeCare.Controllers
                 return InternalServerError(new Exception(result.Result));
 
             return Ok();
-        }
+        }*/
     }
 }

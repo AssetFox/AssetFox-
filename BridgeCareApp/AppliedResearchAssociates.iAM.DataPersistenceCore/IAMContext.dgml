@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph GraphDirection="LeftToRight" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+<Node Id="IModel" Label="IAMContext" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot" PropertyAccessMode="PropertyAccessMode.Default" ProductVersion="3.1.8" Annotations="Relational:MaxIdentifierLength: 128
+SqlServer:ValueGenerationStrategy: IdentityColumn" Category="Model" Group="Expanded" />
+<Node Id = "AttributeEntity" Label="AttributeEntity" Name="AttributeEntity" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="ConstructorBinding: Microsoft.EntityFrameworkCore.Metadata.ConstructorBinding
+Relational:TableName: Attributes" Category="EntityType" Group="Expanded" />
+<Node Id = "DirectionalRouteEntity" Label="DirectionalRouteEntity" Name="DirectionalRouteEntity" BaseClass="RouteEntity" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="ConstructorBinding: Microsoft.EntityFrameworkCore.Metadata.ConstructorBinding
+DiscriminatorProperty:
+DiscriminatorValue: DirectionalRouteEntity" Category="EntityType" Group="Expanded" />
+<Node Id = "AttributeEntity.Id" Label="Id" Name="Id" Category="Property Primary" Type="Guid" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.GuidTypeMapping" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "AttributeEntity.Command" Label="Command" Name="Command" Category="Property Optional" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerStringTypeMapping" IsPrimaryKey="False" IsForeignKey="False" IsRequired="False" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "AttributeEntity.ConnectionType" Label="ConnectionType" Name="ConnectionType" Category="Property Required" Type="ConnectionType" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.IntTypeMapping" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "AttributeEntity.Name" Label="Name" Name="Name" Category="Property Optional" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerStringTypeMapping" IsPrimaryKey="False" IsForeignKey="False" IsRequired="False" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "LinearLocationEntity" Label="LinearLocationEntity" Name="LinearLocationEntity" BaseClass="LocationEntity" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="ConstructorBinding: Microsoft.EntityFrameworkCore.Metadata.ConstructorBinding
+DiscriminatorProperty:
+DiscriminatorValue: LinearLocationEntity" Category="EntityType" Group="Expanded" />
+<Node Id = "DirectionalRouteEntity.Direction" Label="Direction" Name="Direction" Category="Property Required" Type="Direction" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.IntTypeMapping" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "LocationEntity" Label="LocationEntity" Name="LocationEntity" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="ConstructorBinding: Microsoft.EntityFrameworkCore.Metadata.ConstructorBinding
+DiscriminatorProperty: Discriminator
+DiscriminatorValue: LocationEntity" Category="EntityType" Group="Expanded" />
+<Node Id = "LinearLocationEntity.End" Label="End" Name="End" Category="Property Required" Type="double" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerDoubleTypeMapping" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "LinearLocationEntity.Route" Label="Route (1)" Name="Route" Category="Navigation Property" Type="RouteEntity"  Field="" Dependent="RouteEntity" Principal="" Inverse="LinearLocation" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "LinearLocationEntity.Start" Label="Start" Name="Start" Category="Property Required" Type="double" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerDoubleTypeMapping" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "NetworkEntity" Label="NetworkEntity" Name="NetworkEntity" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="ConstructorBinding: Microsoft.EntityFrameworkCore.Metadata.ConstructorBinding
+Relational:TableName: Networks" Category="EntityType" Group="Expanded" />
+<Node Id = "LocationEntity.Id" Label="Id" Name="Id" Category="Property Primary" Type="Guid" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.GuidTypeMapping" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "LocationEntity.Segment" Label="Segment (1)" Name="Segment" Category="Navigation Property" Type="SegmentEntity"  Field="" Dependent="" Principal="SegmentEntity" Inverse="Location" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "LocationEntity.Discriminator" Label="Discriminator" Name="Discriminator" Category="Property Required" Type="string" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerStringTypeMapping
+ValueGeneratorFactory: System.Func`3[Microsoft.EntityFrameworkCore.Metadata.IProperty,Microsoft.EntityFrameworkCore.Metadata.IEntityType,Microsoft.EntityFrameworkCore.ValueGeneration.ValueGenerator]" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "LocationEntity.SegmentId" Label="SegmentId" Name="SegmentId" Category="Property Foreign" Type="Guid" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.GuidTypeMapping" IsPrimaryKey="False" IsForeignKey="True" IsRequired="True" IsIndexed="True" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "RouteEntity" Label="RouteEntity" Name="RouteEntity" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="ConstructorBinding: Microsoft.EntityFrameworkCore.Metadata.ConstructorBinding
+DiscriminatorProperty: Discriminator
+DiscriminatorValue: RouteEntity
+Relational:TableName: Routes" Category="EntityType" Group="Expanded" />
+<Node Id = "NetworkEntity.Id" Label="Id" Name="Id" Category="Property Primary" Type="Guid" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.GuidTypeMapping" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "NetworkEntity.Segments" Label="Segments (*)" Name="Segments" Category="Navigation Collection" Type="ICollection&lt;SegmentEntity&gt;"  Field="" Dependent="SegmentEntity" Principal="" Inverse="Network" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "NetworkEntity.Name" Label="Name" Name="Name" Category="Property Optional" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerStringTypeMapping" IsPrimaryKey="False" IsForeignKey="False" IsRequired="False" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "SectionLocationEntity" Label="SectionLocationEntity" Name="SectionLocationEntity" BaseClass="LocationEntity" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="ConstructorBinding: Microsoft.EntityFrameworkCore.Metadata.ConstructorBinding
+DiscriminatorProperty:
+DiscriminatorValue: SectionLocationEntity" Category="EntityType" Group="Expanded" />
+<Node Id = "RouteEntity.Id" Label="Id" Name="Id" Category="Property Primary" Type="Guid" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.GuidTypeMapping" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "RouteEntity.LinearLocation" Label="LinearLocation (1)" Name="LinearLocation" Category="Navigation Property" Type="LinearLocationEntity"  Field="" Dependent="" Principal="LinearLocationEntity" Inverse="Route" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "RouteEntity.Discriminator" Label="Discriminator" Name="Discriminator" Category="Property Required" Type="string" MaxLength="None" Field="nofield" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerStringTypeMapping
+ValueGeneratorFactory: System.Func`3[Microsoft.EntityFrameworkCore.Metadata.IProperty,Microsoft.EntityFrameworkCore.Metadata.IEntityType,Microsoft.EntityFrameworkCore.ValueGeneration.ValueGenerator]" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="True" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "RouteEntity.LinearLocationId" Label="LinearLocationId" Name="LinearLocationId" Category="Property Foreign" Type="Guid" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.GuidTypeMapping" IsPrimaryKey="False" IsForeignKey="True" IsRequired="True" IsIndexed="True" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "RouteEntity.Name" Label="Name" Name="Name" Category="Property Optional" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerStringTypeMapping" IsPrimaryKey="False" IsForeignKey="False" IsRequired="False" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "SegmentEntity" Label="SegmentEntity" Name="SegmentEntity" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="ConstructorBinding: Microsoft.EntityFrameworkCore.Metadata.ConstructorBinding
+Relational:TableName: Segments" Category="EntityType" Group="Expanded" />
+<Node Id = "SectionLocationEntity.UniqueIdentifier" Label="UniqueIdentifier" Name="UniqueIdentifier" Category="Property Optional" Type="string" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerStringTypeMapping" IsPrimaryKey="False" IsForeignKey="False" IsRequired="False" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "SegmentEntity" Label="SegmentEntity" Name="SegmentEntity" BaseClass="" IsAbstract="False" ChangeTrackingStrategy="ChangeTrackingStrategy.Snapshot"  Annotations="" Category="EntityType" Group="Expanded" />
+<Node Id = "SegmentEntity.Id" Label="Id" Name="Id" Category="Property Primary" Type="Guid" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.GuidTypeMapping" IsPrimaryKey="True" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="ValueGenerated.OnAdd" />
+<Node Id = "SegmentEntity.Attribute" Label="Attribute (1)" Name="Attribute" Category="Navigation Property" Type="AttributeEntity"  Field="" Dependent="" Principal="AttributeEntity" Inverse="" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "SegmentEntity.Location" Label="Location (1)" Name="Location" Category="Navigation Property" Type="LocationEntity"  Field="" Dependent="LocationEntity" Principal="" Inverse="Segment" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "SegmentEntity.Network" Label="Network (1)" Name="Network" Category="Navigation Property" Type="NetworkEntity"  Field="" Dependent="" Principal="NetworkEntity" Inverse="Segments" PropertyAccessMode="PropertyAccessMode.Default" />
+<Node Id = "SegmentEntity.AttributeId" Label="AttributeId" Name="AttributeId" Category="Property Foreign" Type="Guid" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.GuidTypeMapping" IsPrimaryKey="False" IsForeignKey="True" IsRequired="True" IsIndexed="True" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "SegmentEntity.NetworkId" Label="NetworkId" Name="NetworkId" Category="Property Foreign" Type="Guid" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.Storage.GuidTypeMapping" IsPrimaryKey="False" IsForeignKey="True" IsRequired="True" IsIndexed="True" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+<Node Id = "SegmentEntity.TimeStamp" Label="TimeStamp" Name="TimeStamp" Category="Property Required" Type="DateTime" MaxLength="None" Field="" PropertyAccessMode="PropertyAccessMode.Default" BeforeSaveBehavior="PropertySaveBehavior.Save" AfterSaveBehavior="PropertySaveBehavior.Save" Annotations="TypeMapping: Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerDateTimeTypeMapping" IsPrimaryKey="False" IsForeignKey="False" IsRequired="True" IsIndexed="False" IsShadow="False" IsAlternateKey="False" IsConcurrencyToken="False" IsUnicode="True" ValueGenerated="None" />
+  </Nodes>
+  <Links>
+<Link Source = "IModel" Target="AttributeEntity" Category="Contains" />
+<Link Source = "IModel" Target="DirectionalRouteEntity" Category="Contains" />
+<Link Source = "AttributeEntity" Target="AttributeEntity.Id" Category="Contains" />
+<Link Source = "AttributeEntity" Target="AttributeEntity.Command" Category="Contains" />
+<Link Source = "AttributeEntity" Target="AttributeEntity.ConnectionType" Category="Contains" />
+<Link Source = "AttributeEntity" Target="AttributeEntity.Name" Category="Contains" />
+<Link Source = "IModel" Target="LinearLocationEntity" Category="Contains" />
+<Link Source = "DirectionalRouteEntity" Target="DirectionalRouteEntity.Direction" Category="Contains" />
+<Link Source = "IModel" Target="LocationEntity" Category="Contains" />
+<Link Source = "LinearLocationEntity" Target="LinearLocationEntity.Route" Category="Contains" />
+<Link Source = "LinearLocationEntity" Target="LinearLocationEntity.End" Category="Contains" />
+<Link Source = "LinearLocationEntity" Target="LinearLocationEntity.Start" Category="Contains" />
+<Link Source = "IModel" Target="NetworkEntity" Category="Contains" />
+<Link Source = "LocationEntity" Target="LocationEntity.Segment" Category="Contains" />
+<Link Source = "LocationEntity" Target="LocationEntity.Id" Category="Contains" />
+<Link Source="LocationEntity" Target="SegmentEntity" From="LocationEntity.SegmentId" To="SegmentEntity.Id" Name="LocationEntity -> SegmentEntity" Annotations="" IsUnique="True" Label="1:1" Category="Foreign Key" />
+<Link Source = "LocationEntity" Target="LocationEntity.Discriminator" Category="Contains" />
+<Link Source = "LocationEntity" Target="LocationEntity.SegmentId" Category="Contains" />
+<Link Source = "IModel" Target="RouteEntity" Category="Contains" />
+<Link Source = "NetworkEntity" Target="NetworkEntity.Segments" Category="Contains" />
+<Link Source = "NetworkEntity" Target="NetworkEntity.Id" Category="Contains" />
+<Link Source = "NetworkEntity" Target="NetworkEntity.Name" Category="Contains" />
+<Link Source = "IModel" Target="SectionLocationEntity" Category="Contains" />
+<Link Source = "RouteEntity" Target="RouteEntity.LinearLocation" Category="Contains" />
+<Link Source = "RouteEntity" Target="RouteEntity.Id" Category="Contains" />
+<Link Source="RouteEntity" Target="LinearLocationEntity" From="RouteEntity.LinearLocationId" To="LinearLocationEntity.Id" Name="RouteEntity -> LinearLocationEntity" Annotations="" IsUnique="True" Label="1:1" Category="Foreign Key" />
+<Link Source = "RouteEntity" Target="RouteEntity.Discriminator" Category="Contains" />
+<Link Source = "RouteEntity" Target="RouteEntity.LinearLocationId" Category="Contains" />
+<Link Source = "RouteEntity" Target="RouteEntity.Name" Category="Contains" />
+<Link Source = "IModel" Target="SegmentEntity" Category="Contains" />
+<Link Source = "SectionLocationEntity" Target="SectionLocationEntity.UniqueIdentifier" Category="Contains" />
+<Link Source = "IModel" Target="SegmentEntity" Category="Contains" />
+<Link Source = "SegmentEntity" Target="SegmentEntity.Attribute" Category="Contains" />
+<Link Source = "SegmentEntity" Target="SegmentEntity.Location" Category="Contains" />
+<Link Source = "SegmentEntity" Target="SegmentEntity.Network" Category="Contains" />
+<Link Source = "SegmentEntity" Target="SegmentEntity.Id" Category="Contains" />
+<Link Source="SegmentEntity" Target="AttributeEntity" From="SegmentEntity.AttributeId" To="AttributeEntity.Id" Name="SegmentEntity -> AttributeEntity" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source="SegmentEntity" Target="NetworkEntity" From="SegmentEntity.NetworkId" To="NetworkEntity.Id" Name="SegmentEntity -> NetworkEntity" Annotations="" IsUnique="False" Label="1:*" Category="Foreign Key" />
+<Link Source = "SegmentEntity" Target="SegmentEntity.AttributeId" Category="Contains" />
+<Link Source = "SegmentEntity" Target="SegmentEntity.NetworkId" Category="Contains" />
+<Link Source = "SegmentEntity" Target="SegmentEntity.TimeStamp" Category="Contains" />
+  </Links>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="EntityType" ValueLabel="True">
+      <Condition Expression="HasCategory('EntityType')" />
+      <Setter Property="Background" Value="#FFC0C0C0" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Property Primary" ValueLabel="True">
+      <Condition Expression="HasCategory('Property Primary')" />
+      <Setter Property="Background" Value="#FF008000" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Property Optional" ValueLabel="True">
+      <Condition Expression="HasCategory('Property Optional')" />
+      <Setter Property="Background" Value="#FF808040" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Property Foreign" ValueLabel="True">
+      <Condition Expression="HasCategory('Property Foreign')" />
+      <Setter Property="Background" Value="#FF8080FF" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Property Required" ValueLabel="True">
+      <Condition Expression="HasCategory('Property Required')" />
+      <Setter Property="Background" Value="#FFC0A000" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Navigation Property" ValueLabel="True">
+      <Condition Expression="HasCategory('Navigation Property')" />
+      <Setter Property="Background" Value="#FF990000" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Navigation Collection" ValueLabel="True">
+      <Condition Expression="HasCategory('Navigation Collection')" />
+      <Setter Property="Background" Value="#FFFF3232" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Model" ValueLabel="True">
+      <Condition Expression="HasCategory('Model')" />
+      <Setter Property="Background" Value="#FFFFFFFF" />
+    </Style>
+  </Styles>
+  <Properties>
+    <Property Id="Name" Group="Model Properties" DataType="System.String" />
+    <Property Id="Field"  Description="Backing field" Group="Model Properties" DataType="System.String" />
+    <Property Id="Type"  Description="CLR data type" Group="Model Properties" DataType="System.String" />
+    <Property Id="To" Description="Source property" Group="Model Properties" DataType="System.String" />
+    <Property Id="From" Description="Target property" Group="Model Properties" DataType="System.String" />
+    <Property Id="Dependent" Description="Dependent entity" Group="Model Properties" DataType="System.String" />
+    <Property Id="Inverse" Description="Inverse entity" Group="Model Properties" DataType="System.String" />
+    <Property Id="Principal" Description="Principal entity" Group="Model Properties" DataType="System.String" />    
+    <Property Id="Annotations" Description="Annotations" Group="Model Properties" DataType="System.String" />
+    <Property Id="BaseClass"  Description="Base class" Group="Model Properties" DataType="System.String" />
+    <Property Id="ChangeTrackingStrategy" Description="Change tracking strategy" Group="Model Properties" DataType="System.String" />
+    <Property Id="IsUnique" Group="Model Properties" DataType="System.Boolean" />
+    <Property Id="IsAbstract" Group="Model Properties" DataType="System.Boolean" />
+    <Property Id="ProductVersion" Label="Product Version" Description="EF Core product version" Group="Model Properties" DataType="System.String" />
+    <Property Id="IsIndexed" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsRequired" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsPrimaryKey" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsForeignKey" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsShadow" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsAlternateKey" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsConcurrencyToken" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsIndexed" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="IsUnicode" Group="Property Flags" DataType="System.Boolean" />
+    <Property Id="ValueGenerated" Group="Property Flags" DataType="System.String" />
+    <Property Id="BeforeSaveBehavior" Group="Property Flags" DataType="System.String" />
+    <Property Id="AfterSaveBehavior" Group="Property Flags" DataType="System.String" />
+    <Property Id="PropertyAccessMode" Group="Property Flags" DataType="System.String" />
+  </Properties>
+</DirectedGraph>

@@ -644,10 +644,6 @@
       <Project>{B2769386-5922-49ED-8A95-32BCB912955D}</Project>
       <Name>AppliedResearchAssociates.iAM.DataMiner</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistence\AppliedResearchAssociates.iAM.DataPersistence.csproj">
-      <Project>{CBB73747-93D4-4E17-B031-792E91C22FE4}</Project>
-      <Name>AppliedResearchAssociates.iAM.DataPersistence</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Segmentation\AppliedResearchAssociates.iAM.Segmentation.csproj">
       <Project>{DB1D42AC-D45B-4256-9A3A-29156C74C2B5}</Project>
       <Name>AppliedResearchAssociates.iAM.Segmentation</Name>

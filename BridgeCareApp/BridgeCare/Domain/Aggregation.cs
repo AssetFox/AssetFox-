@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistence.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistence.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.Segmentation;
 using BridgeCare.Models.AggregationObjects;
+using Network = AppliedResearchAssociates.iAM.Segmentation.Network;
 
 namespace BridgeCare.Domain
 {

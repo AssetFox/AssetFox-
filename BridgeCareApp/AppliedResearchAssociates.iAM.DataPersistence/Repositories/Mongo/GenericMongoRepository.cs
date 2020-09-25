@@ -8,10 +8,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistence.Repositories.Mongo
     public class GenericMongoRepository<T>
         : IRepository<T> where T : class
     {
-        public GenericMongoRepository(MongoDriverContext context)
+        /*public GenericMongoRepository(MongoDriverContext context)
         {
             //this.context = context;
-        }
+        }*/
         public virtual T Add(T entity)
         {
             throw new NotImplementedException();

@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public override NetworkEntity Add(NetworkEntity network)
         {
             context.Add(network);
-            context.SaveChanges();
+            //context.SaveChanges();
 
             return network;
 

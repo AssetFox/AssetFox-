@@ -8,6 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public interface IRepository<T>
     {
         T Add(T entity);
+        List<T> AddAll(List<T> entity);
         T Update(T entity);
         T Get(Guid id);
         IEnumerable<T> All();

@@ -37,10 +37,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return base.Update(entity);
         }
 
-        public void AddAll(List<SegmentEntity> segments)
+        public override List<SegmentEntity> AddAll(List<SegmentEntity> segments)
         {
             context.AddRange(segments);
-            //return true;
+            return segments;
         }
     }
 }

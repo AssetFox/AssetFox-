@@ -17,6 +17,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Mongo
             throw new NotImplementedException();
         }
 
+        public List<T> AddAll(List<T> entity)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual IEnumerable<T> All()
         {
             throw new NotImplementedException();

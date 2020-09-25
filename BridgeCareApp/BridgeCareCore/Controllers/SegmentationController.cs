@@ -17,9 +17,11 @@ namespace BridgeCareCore.Controllers
     public class SegmentationController : ControllerBase
     {
         private readonly IRepository<NetworkEntity> NetworkRepository;
-        public SegmentationController(NetworkRepository networkRepository)
+        private readonly IRepository<SegmentEntity> SegmentRepository;
+        public SegmentationController(NetworkRepository networkRepository, SegmentRepository segmentRepository)
         {
             NetworkRepository = networkRepository;
+            SegmentRepository = segmentRepository;
         }
 
         [HttpPost]
@@ -30,8 +32,15 @@ namespace BridgeCareCore.Controllers
 
             var network = apiObject.CreateNewNetwork();
             var entity = new NetworkEntity { Id = network.Guid, Name = network.Name };
-
-            return Ok(NetworkRepository.Add(entity));
+            var newNetwork = NetworkRepository.Add(entity);
+            var segmentEntity = new SegmentEntity
+            {
+                
+            };
+            var segmentEntities = new List<SegmentEntity> { network..Segments };
+            SegmentRepository.AddAll()
+            NetworkRepository.SaveChanges();
+            return Ok(newNetwork);
 
         }
     }

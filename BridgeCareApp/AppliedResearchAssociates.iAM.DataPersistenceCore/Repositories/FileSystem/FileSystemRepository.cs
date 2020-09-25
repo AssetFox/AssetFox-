@@ -13,6 +13,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             throw new NotImplementedException();
         }
 
+        public List<T> AddAll(List<T> entity)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual IEnumerable<T> All()
         {
             throw new NotImplementedException();

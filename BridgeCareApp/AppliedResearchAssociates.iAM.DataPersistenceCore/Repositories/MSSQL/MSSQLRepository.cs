@@ -44,5 +44,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             throw new NotImplementedException();
         }
+
+        public virtual List<T> AddAll(List<T> entities)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

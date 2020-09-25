@@ -8,12 +8,13 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.Segmentation;
 using Newtonsoft.Json;
+using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataAccess
 {
     public sealed class ApiExamples
     {
-        public Segmentation.Network CreateNewSegmentation()
+        public Segmentation.Network CreateNewNetwork()
         {
             var segmentationRulesJsonText = File.ReadAllText("segmentationMetaData.json");
             var attributeMetaDatum = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText, new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum;
@@ -24,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataAccess
             return Segmenter.CreateNetworkFromAttributeDataRecords(attributeData);
         }
 
-        public void AggregateExistingNetwork(Guid networkGuid)
+        public void AggregateNetwork(Guid networkGuid)
         {
             var network = GetNetwork(networkGuid);
 
@@ -50,8 +51,8 @@ namespace AppliedResearchAssociates.iAM.DataAccess
             // Assign the attribute data to segments
             var segments = Aggregator.AssignAttributeDataToSegments(attributeData, network.Segments);
 
-            var aggregatedNumericResults = new List<(DataMiner.Attributes.Attribute attribute, (int year, double value))>();
-            var aggregatedTextResults = new List<(DataMiner.Attributes.Attribute attribute, (int year, string value))>();
+            //var aggregatedNumericResults = new DataMinerAttribute attribute (IEnumerable<(int year, double value);
+            var aggregatedTextResults = new List<(DataMinerAttribute attribute, (int year, string value))>();
             foreach (var attribute in attributes)
             {
                 foreach (var segment in segments)
@@ -59,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.DataAccess
                     switch (attribute.DataType)
                     {
                     case "NUMERIC":
-                        aggregatedNumericResults.AddRange(segment.GetAggregatedValuesByYear(attribute, AggregationRuleFactory.CreateNumericRule(attribute)));
+                        
                         break;
                     case "TEXT":
                         aggregatedTextResults.AddRange(segment.GetAggregatedValuesByYear(attribute, AggregationRuleFactory.CreateTextRule(attribute)));
@@ -70,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.DataAccess
                 }
             }
                         
-            // Save to database; Use in analysis.
+            // Save results to database, use them in the analysis.
         }
 
         private Segmentation.Network GetNetwork(Guid networkGuid)

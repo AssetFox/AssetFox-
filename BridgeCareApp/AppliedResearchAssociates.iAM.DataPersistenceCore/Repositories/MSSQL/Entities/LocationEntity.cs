@@ -6,7 +6,7 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class LocationEntity
+    public abstract class LocationEntity
     {
         [Key]
         public Guid Id { get; set; }

@@ -30,5 +30,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public DbSet<SectionLocationEntity> SectionLocations { get; set; }
         public DbSet<SegmentEntity> Segments { get; set; }
         public DbSet<LocationEntity> Locations { get; set; }
+        public DbSet<AttributeDatumEntity> AttributeDatum { get; set; }
     }
 }

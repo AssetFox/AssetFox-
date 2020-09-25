@@ -6,23 +6,19 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class SegmentEntity
+    public abstract class AttributeDatumEntity<T>
     {
         [Key]
-        public Guid Id { get; set; }
+        Guid Id { get; set; }
+        public Guid LocationId { get; set; }
         public Guid AttributeId { get; set; }
-        public Guid NetworkId { get; set; }
-        public Guid AttributeDatumId { get; set; }
+        public DateTime TimeStamp { get; set; }
+        public T Value { get; set; }
 
-        [ForeignKey("NetworkId")]
-        public virtual NetworkEntity Network { get; set; }
+        [ForeignKey("LocationId")]
+        public virtual LocationEntity Location { get; set; }
 
         [ForeignKey("AttributeId")]
         public virtual AttributeEntity Attribute { get; set; }
-
-        [ForeignKey("AttributeDatumId")]
-        public virtual AttributeDatumEntity AttributeDatum { get; set; }
-
-        public virtual LocationEntity Location { get; set; }
     }
 }

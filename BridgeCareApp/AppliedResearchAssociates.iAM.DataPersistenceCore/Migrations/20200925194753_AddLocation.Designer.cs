@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20200925181327_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20200925194753_AddLocation")]
+    partial class AddLocation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("SegmentId")
                         .IsUnique();
 
-                    b.ToTable("LocationEntity");
+                    b.ToTable("Locations");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("LocationEntity");
                 });

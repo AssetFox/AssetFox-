@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Models;
+using AppliedResearchAssociates.iAM.DataMiner;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public class AttributeRepository : GenericFileSystemRepository<AttributeMetaDatum>
+    public class AttributeRepository : FileSystemRepository<AttributeMetaDatum>
     {
         public AttributeRepository()
         {

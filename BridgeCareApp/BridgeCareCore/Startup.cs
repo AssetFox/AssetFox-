@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace BridgeCareCore
 {
@@ -25,6 +27,7 @@ namespace BridgeCareCore
             opt.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex"))
             .EnableSensitiveDataLogging()
             );
+            services.AddScoped<NetworkRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -3,17 +3,11 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public abstract class GenericMSSQLRepository<T>
+    public abstract class FileSystemRepository<T>
         : IRepository<T> where T : class
     {
-        //protected DbContext context;
-        public GenericMSSQLRepository(IAMContext context)
-        {
-            //this.context = context;
-        }
-        // If we ll use entity framework for MS SQL, then we ll get `context` to do operation on the database
         public virtual T Add(T entity)
         {
             throw new NotImplementedException();
@@ -29,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             throw new NotImplementedException();
         }
 
-        public virtual T Get(Guid id)
+        public T Get(Guid id)
         {
             throw new NotImplementedException();
         }

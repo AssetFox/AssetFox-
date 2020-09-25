@@ -17,7 +17,8 @@ namespace AppliedResearchAssociates.iAM.DataAccess
         public Segmentation.Network CreateNewNetwork()
         {
             var segmentationRulesJsonText = File.ReadAllText("segmentationMetaData.json");
-            var attributeMetaDatum = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText, new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum;
+            var attributeMetaDatum = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText,
+                new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum;
 
             var attribute = AttributeFactory.Create(attributeMetaDatum);
             var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));

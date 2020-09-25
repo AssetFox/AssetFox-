@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AttributeRepository : GenericMSSQLRepository<Attribute>
+    public class AttributeRepository : MSSQLRepository<Attribute>
     {
         public AttributeRepository(IAMContext context) : base(context) {}
     }

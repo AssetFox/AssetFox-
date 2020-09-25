@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(
-                "data source=localhost;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
+                "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,6 +30,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public DbSet<SectionLocationEntity> SectionLocations { get; set; }
         public DbSet<SegmentEntity> Segments { get; set; }
         public DbSet<LocationEntity> Locations { get; set; }
-        public DbSet<AttributeDatumEntity> AttributeDatum { get; set; }
+        public DbSet<AttributeDatumEntity> AttributeData { get; set; }
+        public DbSet<NumericAttributeDatumEntity> NumericAttributeData { get; set; }
+        public DbSet<TextAttributeDatumEntity> TextAttributeData { get; set; }
     }
 }

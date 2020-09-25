@@ -10,15 +10,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         [Key]
         public Guid Id { get; set; }
-        public Guid AttributeId { get; set; }
         public Guid NetworkId { get; set; }
         public Guid AttributeDatumId { get; set; }
 
         [ForeignKey("NetworkId")]
         public virtual NetworkEntity Network { get; set; }
-
-        [ForeignKey("AttributeId")]
-        public virtual AttributeEntity Attribute { get; set; }
 
         [ForeignKey("AttributeDatumId")]
         public virtual AttributeDatumEntity AttributeDatum { get; set; }

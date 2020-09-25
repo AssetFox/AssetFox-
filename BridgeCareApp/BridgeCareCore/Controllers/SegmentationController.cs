@@ -37,8 +37,8 @@ namespace BridgeCareCore.Controllers
             {
                 
             };
-            var segmentEntities = new List<SegmentEntity> { network..Segments };
-            SegmentRepository.AddAll()
+            /*var segmentEntities = new List<SegmentEntity> { network..Segments };
+            SegmentRepository.AddAll()*/
             NetworkRepository.SaveChanges();
             return Ok(newNetwork);
 

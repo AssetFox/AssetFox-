@@ -11,5 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public string Name { get; set; }
         public string Command { get; set; }
         public ConnectionType ConnectionType { get; set; }
+
+        public virtual SegmentEntity Segment { get; set; }
     }
 }

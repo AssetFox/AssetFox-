@@ -9,13 +9,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public IAMContext(DbContextOptions<IAMContext> options)
             : base(options)
         {
-
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(
-                "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
+                "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=iAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+
         }
 
         public DbSet<AttributeEntity> Attributes { get; set; }

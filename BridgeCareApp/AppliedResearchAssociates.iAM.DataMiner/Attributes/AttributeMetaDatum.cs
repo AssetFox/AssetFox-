@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataMiner;
 
-namespace AppliedResearchAssociates.iAM.DataAccess
+namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public class AttributeMetaDatum
     {

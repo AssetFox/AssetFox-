@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public static class AttributeConnectionBuilder
     {
-        public static AttributeConnection Create(Attribute attribute)
+        public static AttributeConnection Build(Attribute attribute)
         {
             switch (attribute.ConnectionType)
             {

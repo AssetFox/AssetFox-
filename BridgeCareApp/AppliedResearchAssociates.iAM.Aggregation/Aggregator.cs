@@ -11,18 +11,18 @@ namespace AppliedResearchAssociates.iAM.Aggregation
             List<IAttributeDatum> attributeData,
             IEnumerable<Segment> networkSegments)
         {
-            var aggregateDataSegments = new List<AssignedDataSegment>();
+            var assignedDataSegments = new List<AssignedDataSegment>();
 
             // Copy the network segments into a new list of AggregateDataSegments
             foreach (var networkSegment in networkSegments)
             {
-                aggregateDataSegments.Add(new AssignedDataSegment(networkSegment));
+                assignedDataSegments.Add(new AssignedDataSegment(networkSegment));
             }
 
             foreach (var datum in attributeData)
             {
                 AssignedDataSegment matchingLocationSegment =
-                    aggregateDataSegments.
+                    assignedDataSegments.
                     FirstOrDefault(_ => datum.Location.MatchOn(_.Segment.Location));
 
                 if (matchingLocationSegment != null)
@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.Aggregation
                     // TODO: No matching segment for the current data. What do we do?
                 }
             }
-            return aggregateDataSegments;
+            return assignedDataSegments;
         }
     }
 }

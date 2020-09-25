@@ -6,8 +6,8 @@ using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.Aggregation
 {
-    public abstract class AggregationRule<T>
+    public abstract class TextAggregationRule : AggregationRule<string>
     {
-        public abstract IEnumerable<(Attribute attribute, (int year, T value))> Apply(IEnumerable<IAttributeDatum> attributeData, Attribute attribute);
+        public abstract override IEnumerable<(Attribute attribute, (int year, string value))> Apply(IEnumerable<IAttributeDatum> attributeData, Attribute attribute);
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
-    public static class AttributeDataFactory
+    public static class AttributeDataBuilder
     {
         public static IEnumerable<IAttributeDatum> GetData(AttributeConnection connection)
         {

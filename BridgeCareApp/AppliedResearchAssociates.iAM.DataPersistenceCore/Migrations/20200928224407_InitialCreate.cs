@@ -47,7 +47,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         name: "FK_Segments_Networks_NetworkId",
                         column: x => x.NetworkId,
                         principalTable: "Networks",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -67,7 +68,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         name: "FK_Locations_Segments_SegmentId",
                         column: x => x.SegmentId,
                         principalTable: "Segments",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -90,17 +92,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         name: "FK_AttributeDatumEntity_Attributes_AttributeId",
                         column: x => x.AttributeId,
                         principalTable: "Attributes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_AttributeDatumEntity_Locations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "Locations",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_AttributeDatumEntity_Segments_SegmentId",
                         column: x => x.SegmentId,
                         principalTable: "Segments",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -120,7 +125,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         name: "FK_Routes_Locations_LinearLocationId",
                         column: x => x.LinearLocationId,
                         principalTable: "Locations",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

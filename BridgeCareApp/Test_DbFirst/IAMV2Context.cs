@@ -27,7 +27,7 @@ namespace Test_DbFirst
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Data Source=RMD-PPATORN2-LT\\SQLSERVER2014;User ID=sa;Password=20Pikachu^;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2");
+                optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2");
             }
         }
 
@@ -60,7 +60,8 @@ namespace Test_DbFirst
 
                 entity.HasOne(d => d.Segment)
                     .WithMany(p => p.AttributeDatumEntity)
-                    .HasForeignKey(d => d.SegmentId);
+                    .HasForeignKey(d => d.SegmentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull);
             });
 
             modelBuilder.Entity<Attributes>(entity =>
@@ -79,7 +80,8 @@ namespace Test_DbFirst
 
                 entity.HasOne(d => d.Segment)
                     .WithOne(p => p.Locations)
-                    .HasForeignKey<Locations>(d => d.SegmentId);
+                    .HasForeignKey<Locations>(d => d.SegmentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull);
             });
 
             modelBuilder.Entity<Networks>(entity =>

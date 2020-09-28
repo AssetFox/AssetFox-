@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,18 +15,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            /*optionsBuilder.UseSqlServer(
-                "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");*/
             optionsBuilder.UseSqlServer(
-                "data source=localhost;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
+                "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
+            /*optionsBuilder.UseSqlServer(
+                "data source=localhost;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");*/
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            /*foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
             {
                 relationship.DeleteBehavior = DeleteBehavior.NoAction;
-            }*/
+            }
+            /*modelBuilder.Entity<SegmentEntity>()
+                .HasOne<NetworkEntity>()
+                .WithMany(n => n.Segments)
+                .HasForeignKey(s => s.NetworkId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AttributeDatumEntity>()
+                .HasOne(e => e.Segment)
+                .WithMany(s => s.AttributeData)
+                .HasForeignKey(a => a.SegmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LocationEntity>()
+                .HasOne(e => e.Segment)
+                .WithOne(d => d.Location)
+                .HasForeignKey<LocationEntity>(e => e.SegmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AttributeDatumEntity>()
+                .HasOne<AttributeEntity>()
+                .WithMany(a => a.AttributeData)
+                .HasForeignKey(a => a.AttributeId)
+                .OnDelete(DeleteBehavior.NoAction);*/
         }
 
         public DbSet<AttributeEntity> Attributes { get; set; }

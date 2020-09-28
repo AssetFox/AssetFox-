@@ -8,6 +8,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Attributes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    Command = table.Column<string>(nullable: true),
+                    ConnectionType = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attributes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Networks",
                 columns: table => new
                 {
@@ -33,51 +47,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         name: "FK_Segments_Networks_NetworkId",
                         column: x => x.NetworkId,
                         principalTable: "Networks",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AttributeData",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    TimeStamp = table.Column<DateTime>(nullable: false),
-                    SegmentId = table.Column<Guid>(nullable: false),
-                    Discriminator = table.Column<string>(nullable: false),
-                    Value = table.Column<double>(nullable: true),
-                    TextAttributeDatumEntity_Value = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AttributeData", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AttributeData_Segments_SegmentId",
-                        column: x => x.SegmentId,
-                        principalTable: "Segments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Attributes",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Command = table.Column<string>(nullable: true),
-                    ConnectionType = table.Column<int>(nullable: false),
-                    AttributeDatumId = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Attributes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Attributes_AttributeData_AttributeDatumId",
-                        column: x => x.AttributeDatumId,
-                        principalTable: "AttributeData",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -86,27 +56,51 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     SegmentId = table.Column<Guid>(nullable: false),
-                    AttributeDatumId = table.Column<Guid>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
                     Start = table.Column<double>(nullable: true),
-                    End = table.Column<double>(nullable: true),
-                    UniqueIdentifier = table.Column<string>(nullable: true)
+                    End = table.Column<double>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Locations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Locations_AttributeData_AttributeDatumId",
-                        column: x => x.AttributeDatumId,
-                        principalTable: "AttributeData",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Locations_Segments_SegmentId",
                         column: x => x.SegmentId,
                         principalTable: "Segments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AttributeDatumEntity",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    TimeStamp = table.Column<DateTime>(nullable: false),
+                    SegmentId = table.Column<Guid>(nullable: false),
+                    LocationId = table.Column<Guid>(nullable: false),
+                    AttributeId = table.Column<Guid>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false),
+                    Value = table.Column<double>(nullable: true),
+                    TextAttributeDatumEntity_Value = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AttributeDatumEntity", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AttributeDatumEntity_Attributes_AttributeId",
+                        column: x => x.AttributeId,
+                        principalTable: "Attributes",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AttributeDatumEntity_Locations_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Locations",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AttributeDatumEntity_Segments_SegmentId",
+                        column: x => x.SegmentId,
+                        principalTable: "Segments",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -126,27 +120,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         name: "FK_Routes_Locations_LinearLocationId",
                         column: x => x.LinearLocationId,
                         principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AttributeData_SegmentId",
-                table: "AttributeData",
-                column: "SegmentId",
+                name: "IX_AttributeDatumEntity_AttributeId",
+                table: "AttributeDatumEntity",
+                column: "AttributeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AttributeDatumEntity_LocationId",
+                table: "AttributeDatumEntity",
+                column: "LocationId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Attributes_AttributeDatumId",
-                table: "Attributes",
-                column: "AttributeDatumId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Locations_AttributeDatumId",
-                table: "Locations",
-                column: "AttributeDatumId",
-                unique: true);
+                name: "IX_AttributeDatumEntity_SegmentId",
+                table: "AttributeDatumEntity",
+                column: "SegmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Locations_SegmentId",
@@ -169,16 +160,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Attributes");
+                name: "AttributeDatumEntity");
 
             migrationBuilder.DropTable(
                 name: "Routes");
 
             migrationBuilder.DropTable(
-                name: "Locations");
+                name: "Attributes");
 
             migrationBuilder.DropTable(
-                name: "AttributeData");
+                name: "Locations");
 
             migrationBuilder.DropTable(
                 name: "Segments");

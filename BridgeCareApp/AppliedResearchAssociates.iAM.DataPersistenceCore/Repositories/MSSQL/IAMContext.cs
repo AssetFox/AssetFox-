@@ -26,14 +26,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 relationship.DeleteBehavior = DeleteBehavior.NoAction;
             }*/
-            modelBuilder.Entity<NumericAttributeDatumEntity>()
-                .Property(a => a.Value)
-                .HasColumnName("Value");
-
-            modelBuilder.Entity<TextAttributeDatumEntity>()
-                .Property(a => a.Value)
-                .HasColumnName("Value");
-
         }
 
         public DbSet<AttributeEntity> Attributes { get; set; }
@@ -42,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public DbSet<RouteEntity> Routes { get; set; }
         public DbSet<SegmentEntity> Segments { get; set; }
         public DbSet<LocationEntity> Locations { get; set; }
-        public DbSet<AttributeDatumEntity> AttributeData { get; set; }
+        public DbSet<NumericAttributeDatumEntity> NumericAttributeData { get; set; }
+        public DbSet<TextAttributeDatumEntity> TextAttributeData { get; set; }
     }
 }

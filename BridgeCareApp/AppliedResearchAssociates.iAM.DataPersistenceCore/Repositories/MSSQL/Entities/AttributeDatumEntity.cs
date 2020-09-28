@@ -10,14 +10,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         [Key]
         public Guid Id { get; set; }
-        public Guid LocationId { get; set; }
-        public Guid AttributeId { get; set; }
         public DateTime TimeStamp { get; set; }
+        public Guid SegmentId { get; set; }
 
-        [ForeignKey("LocationId")]
+        [ForeignKey("SegmentId")]
+        public virtual SegmentEntity Segment { get; set; }
+
         public virtual LocationEntity Location { get; set; }
 
-        [ForeignKey("AttributeId")]
         public virtual AttributeEntity Attribute { get; set; }
     }
 }

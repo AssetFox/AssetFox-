@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Segmentation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace BridgeCareCore.Controllers
 {
@@ -18,10 +19,13 @@ namespace BridgeCareCore.Controllers
     {
         private readonly IRepository<NetworkEntity> NetworkRepository;
         private readonly IRepository<SegmentEntity> SegmentRepository;
-        public SegmentationController(NetworkRepository networkRepository, SegmentRepository segmentRepository)
+        private readonly ILogger<SegmentationController> _logger;
+
+        public SegmentationController(ILogger<SegmentationController> logger, NetworkRepository networkRepository, SegmentRepository segmentRepository)
         {
             NetworkRepository = networkRepository;
             SegmentRepository = segmentRepository;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost]
@@ -40,6 +44,7 @@ namespace BridgeCareCore.Controllers
             /*var segmentEntities = new List<SegmentEntity> { network..Segments };
             SegmentRepository.AddAll()*/
             NetworkRepository.SaveChanges();
+            _logger.LogInformation($"a network with name : {newNetwork.Name} has been created");
             return Ok(newNetwork);
 
         }

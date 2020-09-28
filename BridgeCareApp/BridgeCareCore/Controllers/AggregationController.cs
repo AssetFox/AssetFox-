@@ -2,7 +2,7 @@
 
 namespace BridgeCareCore.Controllers
 {
-    public class AggregationController : ApiControllerAttribute
+    public class AggregationController : ControllerBase
     {
         public AggregationController()
         {

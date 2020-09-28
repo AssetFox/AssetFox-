@@ -27,7 +27,7 @@ namespace BridgeCareCore
             opt.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex"))
             .EnableSensitiveDataLogging()
             );
-            services.AddScoped<NetworkRepository>();
+            services.AddScoped<IRepository<NetworkRepository>>();
             services.AddScoped<SegmentRepository>();
         }
 

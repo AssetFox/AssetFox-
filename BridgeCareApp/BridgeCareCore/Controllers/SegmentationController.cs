@@ -21,7 +21,8 @@ namespace BridgeCareCore.Controllers
         private readonly IRepository<SegmentEntity> SegmentRepository;
         private readonly ILogger<SegmentationController> _logger;
 
-        public SegmentationController(ILogger<SegmentationController> logger, NetworkRepository networkRepository, SegmentRepository segmentRepository)
+        public SegmentationController(ILogger<SegmentationController> logger, IRepository<NetworkEntity> networkRepository,
+            IRepository<SegmentEntity> segmentRepository)
         {
             NetworkRepository = networkRepository;
             SegmentRepository = segmentRepository;

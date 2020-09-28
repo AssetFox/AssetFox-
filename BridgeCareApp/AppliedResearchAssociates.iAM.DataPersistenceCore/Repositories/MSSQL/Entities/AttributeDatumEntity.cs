@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public abstract class AttributeDatumEntity
     {
         [Key]
-        Guid Id { get; set; }
+        public Guid Id { get; set; }
         public Guid LocationId { get; set; }
         public Guid AttributeId { get; set; }
         public DateTime TimeStamp { get; set; }

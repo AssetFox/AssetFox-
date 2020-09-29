@@ -2,7 +2,7 @@
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
-namespace AppliedResearchAssociates.iAM.Aggregation
+namespace AppliedResearchAssociates.iAM.DataAssignment.Aggregation
 {
     public class PredominantAggregationRule : TextAggregationRule
     {

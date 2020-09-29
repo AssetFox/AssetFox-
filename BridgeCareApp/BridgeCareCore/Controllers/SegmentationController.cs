@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Aggregation;
-using AppliedResearchAssociates.iAM.DataAccess;
+using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.Segmentation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -35,7 +31,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CreateNetwork")]
-        public async Task<IActionResult> CreateNetwork([FromBody]string name)
+        public async Task<IActionResult> CreateNetwork([FromBody] string name)
         {
             // Domain logic
             var segmentationRulesJsonText = System.IO.File.ReadAllText("segmentationMetaData.json");
@@ -47,17 +43,15 @@ namespace BridgeCareCore.Controllers
 
             var network = Segmenter.CreateNetworkFromAttributeDataRecords(attributeData);
             ICollection<SegmentEntity> segmentEntities = new List<SegmentEntity>();
-            foreach(var segment in network.Segments)
+            foreach (var segment in network.Segments)
             {
                 segmentEntities.Add(new SegmentEntity
                 {
-                    
                 });
             }
 
             // Mapping
             var networkEntity = new NetworkEntity { Id = network.Guid, Name = name };
-            
 
             var newNetwork = NetworkRepository.Add(networkEntity);
             SegmentRepository.AddAll(networkEntity.SegmentEntities.ToList());
@@ -66,7 +60,5 @@ namespace BridgeCareCore.Controllers
             _logger.LogInformation($"a network with name : {newNetwork.Name} has been created");
             return Ok(newNetwork);
         }
-
-        
     }
 }

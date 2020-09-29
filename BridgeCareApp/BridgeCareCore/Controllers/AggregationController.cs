@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Aggregation;
+using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -34,17 +36,8 @@ namespace BridgeCareCore.Controllers
         [Route("AssignNetworkData")]
         public async Task<IActionResult> AssignNetworkData(Guid networkGuid)
         {
-            // Mapping
             var networkEntity = NetworkRepository.Get(networkGuid);
-            var segments = new List<Segment>();
-
-            foreach (var segmentEntity in networkEntity.SegmentEntities)
-            {
-                segments.Add(new Segment(LocationEntityToLocation.CreateFromEntity(segmentEntity.LocationEntity)));
-            }
-
-            var network = new Network(segments, networkGuid, networkEntity.Name);
-
+            
             var attributeJsonText = System.IO.File.ReadAllText("attributeMetaData.json");
             var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
 
@@ -64,7 +57,24 @@ namespace BridgeCareCore.Controllers
                 attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
             }
 
-            return Ok(Aggregator.AssignAttributeDataToSegments(attributeData.AsEnumerable(), network.Segments));
+            var segments = new List<SegmentEntity>();
+            foreach (var segmentEntity in networkEntity.SegmentEntities)
+            {
+                var segment = new Segment(LocationEntityToLocation.CreateFromEntity(segmentEntity.LocationEntity));
+                segment.AssignAttributeData(attributeData);
+
+                segments.Add(new SegmentEntity
+                {
+                    AttributeData = (ICollection<AttributeDatumEntity>)segment.AssignedData,
+
+                });
+            }
+
+            SegmentRepository.AddAll(seg)
+            var network = new Network(segments, networkGuid, networkEntity.Name);
+
+
+            return Ok();
         }
     }
 }

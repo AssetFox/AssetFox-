@@ -2,25 +2,33 @@
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
+using Microsoft.Extensions.Options;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class IAMContext : DbContext
     {
+        private string ConnectionString;
         public IAMContext() {}
         public IAMContext(DbContextOptions<IAMContext> options)
             : base(options)
         {
+#if DEBUG
+            var sqlServerOptionsExtension =
+                    options.FindExtension<SqlServerOptionsExtension>();
+            if (sqlServerOptionsExtension != null)
+            {
+                ConnectionString = sqlServerOptionsExtension.ConnectionString;
+            }
+#endif
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseSqlServer(
-            //    "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
-            /*optionsBuilder.UseSqlServer(
-                "data source=localhost;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");*/
-            optionsBuilder.UseSqlServer(
-                "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2");
+#if DEBUG
+            optionsBuilder.UseSqlServer(ConnectionString);
+#endif
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

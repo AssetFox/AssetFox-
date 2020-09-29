@@ -12,13 +12,10 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 
         public override IEnumerable<IAttributeDatum> GetData<T>()
         {
-            string routeName = null;
             double? start = null;
             double? end = null;
             Direction? direction = null;
             string wellKnownText = null;
-            string uniqueIdentifeir = "";
-
             using (var conn = new SqlConnection(Attribute.ConnectionString))
             {
                 var sqlCommand = new SqlCommand(Attribute.Command, conn);
@@ -28,12 +25,11 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
                 {
                     var value = dataReader.GetFieldValue<T>(2);
                     var dateTime = dataReader.GetFieldValue<DateTime>(1);
-                    uniqueIdentifeir = dataReader.GetFieldValue<string>(0);
-
+                    var uniqueIdentifier = dataReader.GetFieldValue<string>(0);
                     yield return
                         new AttributeDatum<T>(Attribute,
                                               value,
-                                              LocationBuilder.CreateLocation(uniqueIdentifeir, routeName, start, end, direction, wellKnownText),
+                                              LocationBuilder.CreateLocation(uniqueIdentifier, start, end, direction, wellKnownText),
                                               dateTime);
                 }
             }

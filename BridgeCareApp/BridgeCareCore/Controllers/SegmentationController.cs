@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Aggregation;
 using AppliedResearchAssociates.iAM.DataAccess;
+using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Segmentation;
@@ -32,21 +35,20 @@ namespace BridgeCareCore.Controllers
         [Route("CreateNetwork")]
         public async Task<IActionResult> CreateNetwork()
         {
-            var apiObject = new ApiExamples();
+            var api = new ApiExamples();
 
-            var network = apiObject.CreateNewNetwork();
+            // Domain logic
+            var network = api.CreateNetwork();
+
+            // Mapping
             var entity = new NetworkEntity { Id = network.Guid, Name = network.Name };
             var newNetwork = NetworkRepository.Add(entity);
-            //var segmentEntity = new SegmentEntity
-            //{
-            /*var segmentEntities = new List<SegmentEntity> { network..Segments };
-                
-            };
-            SegmentRepository.AddAll()*/
+            
             NetworkRepository.SaveChanges();
             _logger.LogInformation($"a network with name : {newNetwork.Name} has been created");
             return Ok(newNetwork);
-
         }
+
+        
     }
 }

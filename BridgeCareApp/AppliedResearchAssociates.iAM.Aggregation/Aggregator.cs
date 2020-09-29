@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Aggregation
     public static class Aggregator
     {
         public static List<AssignedDataSegment> AssignAttributeDataToSegments(
-            List<IAttributeDatum> attributeData,
+            IEnumerable<IAttributeDatum> attributeData,
             IEnumerable<Segment> networkSegments)
         {
             var assignedDataSegments = new List<AssignedDataSegment>();

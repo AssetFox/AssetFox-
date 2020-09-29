@@ -1,10 +1,10 @@
-﻿namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
+﻿namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public class DirectionalRoute : Route
     {
         public Direction Direction { get; }
 
-        public DirectionalRoute(string name, Direction direction) : base(name)
+        public DirectionalRoute(string uniqueIdentifier, Direction direction) : base(uniqueIdentifier)
         {
             Direction = direction;
         }
@@ -12,9 +12,9 @@
         internal override bool MatchOn(Route route)
         {
             var directionalRoute = (DirectionalRoute)route;
-            return ((Name == directionalRoute.Name &&
+            return ((UniqueIdentifier == directionalRoute.UniqueIdentifier &&
                 Direction == directionalRoute.Direction) ||
-                Name == directionalRoute.Name);
+                UniqueIdentifier == directionalRoute.UniqueIdentifier);
         }
     }
 }

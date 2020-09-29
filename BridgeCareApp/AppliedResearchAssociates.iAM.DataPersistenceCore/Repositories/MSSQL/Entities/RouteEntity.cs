@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         [Key]
         public Guid Id { get; set; }
-        public string Name { get; set; }
+        public string UniqueIdentifier { get; set; }
         public Guid LinearLocationId { get; set; }
 
         [ForeignKey("LinearLocationId")]

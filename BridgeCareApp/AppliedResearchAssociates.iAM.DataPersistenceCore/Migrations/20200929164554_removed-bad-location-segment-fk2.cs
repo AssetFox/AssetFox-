@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class removedbadlocationsegmentfk2 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -99,7 +99,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         column: x => x.LocationId,
                         principalTable: "Locations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AttributeDatumEntity_Segments_SegmentId",
                         column: x => x.SegmentId,
@@ -126,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         column: x => x.LinearLocationId,
                         principalTable: "Locations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

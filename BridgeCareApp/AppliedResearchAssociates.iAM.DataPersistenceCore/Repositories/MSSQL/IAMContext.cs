@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 #if DEBUG
-            optionsBuilder.UseSqlServer(ConnectionString);
+            optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB; Integrated Security=True; Connect Timeout=30; Encrypt=False; TrustServerCertificate = False; ApplicationIntent = ReadWrite; MultiSubnetFailover = False; Initial Catalog = IAMV2");
 #endif
         }
 
@@ -38,12 +38,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.Attribute)
                         .WithMany(p => p.AttributeData)
                         .HasForeignKey(d => d.AttributeId)
-                        .OnDelete(DeleteBehavior.ClientSetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.Location)
                     .WithOne(p => p.AttributeData)
                     .HasForeignKey<AttributeDatumEntity>(d => d.LocationId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.Segment)
                     .WithMany(p => p.AttributeData)
@@ -64,9 +64,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.HasOne(d => d.Segment)
-                    .WithOne(p => p.Location)
+                    .WithOne(p => p.LocationEntity)
                     .HasForeignKey<LocationEntity>(d => d.SegmentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<NetworkEntity>(entity =>
@@ -84,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.LinearLocation)
                     .WithOne(p => p.Route)
                     .HasForeignKey<RouteEntity>(d => d.LinearLocationId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<SegmentEntity>(entity =>
@@ -94,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.HasOne(d => d.Network)
-                    .WithMany(p => p.Segments)
+                    .WithMany(p => p.SegmentEntities)
                     .HasForeignKey(d => d.NetworkId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

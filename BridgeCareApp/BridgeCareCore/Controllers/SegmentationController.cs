@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Aggregation;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Segmentation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace BridgeCareCore.Controllers
 {
@@ -35,15 +37,20 @@ namespace BridgeCareCore.Controllers
         [Route("CreateNetwork")]
         public async Task<IActionResult> CreateNetwork()
         {
-            var api = new ApiExamples();
-
             // Domain logic
-            var network = api.CreateNetwork();
+            var segmentationRulesJsonText = System.IO.File.ReadAllText("segmentationMetaData.json");
+            var attributeMetaDatum = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText,
+                new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum;
+
+            var attribute = AttributeFactory.Create(attributeMetaDatum);
+            var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
+
+            var network = Segmenter.CreateNetworkFromAttributeDataRecords(attributeData);
 
             // Mapping
-            var entity = new NetworkEntity { Id = network.Guid, Name = network.Name };
-            var newNetwork = NetworkRepository.Add(entity);
-            
+            var networkEntity = new NetworkEntity { Id = network.Guid, Name = network.Name };
+
+            var newNetwork = NetworkRepository.Add(networkEntity);
             NetworkRepository.SaveChanges();
             _logger.LogInformation($"a network with name : {newNetwork.Name} has been created");
             return Ok(newNetwork);

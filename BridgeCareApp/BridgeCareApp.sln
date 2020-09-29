@@ -139,7 +139,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BridgeCareCore", "BridgeCar
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.DataPersistenceCore", "AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj", "{B5383419-E3D2-4EAA-B9BD-6339A676AE9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_DbFirst", "Test_DbFirst\Test_DbFirst.csproj", "{97F23D1C-6B1B-4BC4-BDCC-20D07B6FCC5A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_DbFirst", "Test_DbFirst\Test_DbFirst.csproj", "{97F23D1C-6B1B-4BC4-BDCC-20D07B6FCC5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

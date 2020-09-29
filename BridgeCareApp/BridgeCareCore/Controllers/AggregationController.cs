@@ -1,7 +1,5 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Aggregation;
@@ -10,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Segmentation;
+using BridgeCareCore.Profile;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -41,7 +40,7 @@ namespace BridgeCareCore.Controllers
 
             foreach (var segmentEntity in networkEntity.SegmentEntities)
             {
-                segments.Add(new Segment(LocationBuilder.CreateFromEntity(segmentEntity.LocationEntity)));
+                segments.Add(new Segment(LocationEntityToLocation.CreateFromEntity(segmentEntity.LocationEntity)));
             }
 
             var network = new Network(segments, networkGuid, networkEntity.Name);

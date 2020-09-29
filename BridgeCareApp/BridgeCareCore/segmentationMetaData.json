@@ -4,7 +4,7 @@
 		"defaultValue": 10,
 		"maximum": 100,
 		"minimum": 1,
-	    "connectionString": "Server=localhost;Database=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;",
+	    "connectionString": "Server=52.188.172.73:1433;Database=DbBackup;persist security info=True;user id=sa;password=user1234A;MultipleActiveResultSets=True;",
 		"dataSource": "MSSQL",
 	    "type": "NUMERIC",
 		"location": "section",

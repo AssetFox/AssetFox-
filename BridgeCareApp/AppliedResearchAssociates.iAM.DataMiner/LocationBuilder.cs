@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace BridgeCareCore
+namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public static class LocationBuilder
     {
@@ -17,7 +12,7 @@ namespace BridgeCareCore
             Direction? direction = null,
             string wellKnownText = null)
         {
-            if(uniqueIdentifier != null && start != null && end != null && direction == null)
+            if (uniqueIdentifier != null && start != null && end != null && direction == null)
             {
                 // Linear route data with no defined direction
                 return new LinearLocation(new SimpleRoute(uniqueIdentifier), uniqueIdentifier, start.Value, end.Value);
@@ -31,7 +26,7 @@ namespace BridgeCareCore
             {
                 return new GisLocation(wellKnownText, uniqueIdentifier);
             }
-            else if(start == null && end == null && wellKnownText == null && uniqueIdentifier != null)
+            else if (start == null && end == null && wellKnownText == null && uniqueIdentifier != null)
             {
                 return new SectionLocation(uniqueIdentifier);
             }

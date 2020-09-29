@@ -46,11 +46,22 @@ namespace BridgeCareCore.Controllers
             var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
 
             var network = Segmenter.CreateNetworkFromAttributeDataRecords(attributeData);
+            ICollection<SegmentEntity> segmentEntities = new List<SegmentEntity>();
+            foreach(var segment in network.Segments)
+            {
+                segmentEntities.Add(new SegmentEntity
+                {
+                    
+                });
+            }
 
             // Mapping
             var networkEntity = new NetworkEntity { Id = network.Guid, Name = name };
+            
 
             var newNetwork = NetworkRepository.Add(networkEntity);
+            SegmentRepository.AddAll(networkEntity.SegmentEntities.ToList());
+
             NetworkRepository.SaveChanges();
             _logger.LogInformation($"a network with name : {newNetwork.Name} has been created");
             return Ok(newNetwork);

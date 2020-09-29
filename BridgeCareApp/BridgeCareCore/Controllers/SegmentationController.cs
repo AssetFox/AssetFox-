@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Segmentation;
 using Microsoft.AspNetCore.Http;
@@ -38,11 +37,11 @@ namespace BridgeCareCore.Controllers
             var network = apiObject.CreateNewNetwork();
             var entity = new NetworkEntity { Id = network.Guid, Name = network.Name };
             var newNetwork = NetworkRepository.Add(entity);
-            var segmentEntity = new SegmentEntity
-            {
+            //var segmentEntity = new SegmentEntity
+            //{
+            /*var segmentEntities = new List<SegmentEntity> { network..Segments };
                 
             };
-            /*var segmentEntities = new List<SegmentEntity> { network..Segments };
             SegmentRepository.AddAll()*/
             NetworkRepository.SaveChanges();
             _logger.LogInformation($"a network with name : {newNetwork.Name} has been created");

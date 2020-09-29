@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,29 +15,89 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            //optionsBuilder.UseSqlServer(
+            //    "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
             /*optionsBuilder.UseSqlServer(
-                "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");*/
+                "data source=localhost;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");*/
             optionsBuilder.UseSqlServer(
-                "data source=localhost;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
+                "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            /*foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            modelBuilder.Entity<AttributeDatumEntity>(entity =>
             {
-                relationship.DeleteBehavior = DeleteBehavior.NoAction;
-            }*/
+                entity.HasOne(d => d.Attribute)
+                        .WithMany(p => p.AttributeData)
+                        .HasForeignKey(d => d.AttributeId)
+                        .OnDelete(DeleteBehavior.ClientSetNull);
+
+                entity.HasOne(d => d.Location)
+                    .WithOne(p => p.AttributeData)
+                    .HasForeignKey<AttributeDatumEntity>(d => d.LocationId)
+                    .OnDelete(DeleteBehavior.ClientSetNull);
+
+                entity.HasOne(d => d.Segment)
+                    .WithMany(p => p.AttributeData)
+                    .HasForeignKey(d => d.SegmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AttributeEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+            });
+
+            modelBuilder.Entity<LocationEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SegmentId)
+                    .IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.HasOne(d => d.Segment)
+                    .WithOne(p => p.Location)
+                    .HasForeignKey<LocationEntity>(d => d.SegmentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull);
+            });
+
+            modelBuilder.Entity<NetworkEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+            });
+
+            modelBuilder.Entity<RouteEntity>(entity =>
+            {
+                entity.HasIndex(e => e.LinearLocationId)
+                    .IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.HasOne(d => d.LinearLocation)
+                    .WithOne(p => p.Route)
+                    .HasForeignKey<RouteEntity>(d => d.LinearLocationId)
+                    .OnDelete(DeleteBehavior.ClientSetNull);
+            });
+
+            modelBuilder.Entity<SegmentEntity>(entity =>
+            {
+                entity.HasIndex(e => e.NetworkId);
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.HasOne(d => d.Network)
+                    .WithMany(p => p.Segments)
+                    .HasForeignKey(d => d.NetworkId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
         public DbSet<AttributeEntity> Attributes { get; set; }
         public DbSet<DirectionalRouteEntity> DirectionalRoutes { get; set; }
-        public DbSet<LinearLocationEntity> LinearLocations { get; set; }
         public DbSet<NetworkEntity> Networks { get; set; }
         public DbSet<RouteEntity> Routes { get; set; }
-        public DbSet<SectionLocationEntity> SectionLocations { get; set; }
         public DbSet<SegmentEntity> Segments { get; set; }
         public DbSet<LocationEntity> Locations { get; set; }
-        public DbSet<AttributeDatumEntity> AttributeData { get; set; }
         public DbSet<NumericAttributeDatumEntity> NumericAttributeData { get; set; }
         public DbSet<TextAttributeDatumEntity> TextAttributeData { get; set; }
     }

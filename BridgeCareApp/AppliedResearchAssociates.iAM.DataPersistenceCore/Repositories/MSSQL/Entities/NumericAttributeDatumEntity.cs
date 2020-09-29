@@ -4,8 +4,9 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class NumericAttributeDatumEntity : AttributeDatumEntity
+    public class NumericAttributeDatumEntity : AttributeDatumEntity, IHaveAttributeDatumValue<double>
     {
         public double Value { get; set; }
+        public override LocationEntity Location { get; set; }
     }
 }

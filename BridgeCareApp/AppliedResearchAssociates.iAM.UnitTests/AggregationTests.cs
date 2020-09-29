@@ -104,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.UnitTests
             };
             var networkSegments = new List<Segment>()
             {
-                new Segment(new SectionLocation("B-0-1"), null)
+                new Segment(new SectionLocation("B-0-1"))
             };
             Aggregator.AssignAttributeDataToSegments(data, networkSegments);
         }

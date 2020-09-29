@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.Segmentation
         public static Network CreateNetworkFromAttributeDataRecords(IEnumerable<IAttributeDatum> attributeData)
         {
             var segments = (from attributeDatum in attributeData
-                    let segment = new Segment(attributeDatum.Location, attributeDatum)
+                    let segment = new Segment(attributeDatum.Location)
                     select segment)
                     .ToList();
             return new Network(segments, Guid.NewGuid());

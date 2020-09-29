@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -15,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         [ForeignKey("NetworkId")]
         public virtual NetworkEntity Network { get; set; }
 
-        public virtual AttributeDatumEntity AttributeDatum { get; set; }
+        public virtual ICollection<AttributeDatumEntity> AttributeData { get; set; }
 
         public virtual LocationEntity Location { get; set; }
     }

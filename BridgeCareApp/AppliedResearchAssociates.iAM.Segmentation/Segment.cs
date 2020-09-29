@@ -5,14 +5,11 @@ namespace AppliedResearchAssociates.iAM.Segmentation
 {
     public class Segment
     {
-        public Segment(Location segmentLocation, IAttributeDatum segmentationAttributeDatum)
+        public Segment(Location segmentLocation)
         {
             Location = segmentLocation;
-            SegmentationAttributeDatum = segmentationAttributeDatum;
         }
 
         public Location Location { get; }
-
-        public IAttributeDatum SegmentationAttributeDatum { get; }
     }
 }

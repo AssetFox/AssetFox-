@@ -35,7 +35,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CreateNetwork")]
-        public async Task<IActionResult> CreateNetwork()
+        public async Task<IActionResult> CreateNetwork([FromBody]string name)
         {
             // Domain logic
             var segmentationRulesJsonText = System.IO.File.ReadAllText("segmentationMetaData.json");
@@ -48,7 +48,7 @@ namespace BridgeCareCore.Controllers
             var network = Segmenter.CreateNetworkFromAttributeDataRecords(attributeData);
 
             // Mapping
-            var networkEntity = new NetworkEntity { Id = network.Guid, Name = network.Name };
+            var networkEntity = new NetworkEntity { Id = network.Guid, Name = name };
 
             var newNetwork = NetworkRepository.Add(networkEntity);
             NetworkRepository.SaveChanges();

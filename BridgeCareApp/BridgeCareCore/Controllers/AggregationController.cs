@@ -58,7 +58,11 @@ namespace BridgeCareCore.Controllers
                 attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
             }
 
-            var segments = new List<SegmentEntity>();
+            foreach (var segment in network.Segments)
+            {
+                segment.AssignAttributeData(attributeData);
+            }
+            
             //foreach (var segmentEntity in networkEntity.SegmentEntities)
             //{
             //    var segment = new Segment(LocationEntityToLocation.CreateFromEntity(segmentEntity.LocationEntity));

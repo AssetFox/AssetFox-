@@ -38,5 +38,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return network;
 
         }
+
+        public override Network Update(Network network)
+        {
+             var networkEntity = context.Networks.Find(network.Guid);
+            // mapping from domain to entity
+
+            context.Networks.Update(networkEntity);
+            return base.Update(network);
+        }
     }
 }

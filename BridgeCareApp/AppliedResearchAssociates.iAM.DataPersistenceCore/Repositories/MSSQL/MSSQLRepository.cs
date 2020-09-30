@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             context.SaveChanges();
         }
 
-        public virtual T Update(T entity)
+        public virtual T Update(T data)
         {
             throw new NotImplementedException();
         }

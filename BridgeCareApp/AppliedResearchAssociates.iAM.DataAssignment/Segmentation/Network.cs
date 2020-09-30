@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AppliedResearchAssociates.iAM.Segmentation
+namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
 {
     public class Network
     {

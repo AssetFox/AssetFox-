@@ -632,17 +632,9 @@
       <Project>{31db6cda-70a3-4c94-a002-fa1bd1df9b02}</Project>
       <Name>Simulation</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Aggregation\AppliedResearchAssociates.iAM.Aggregation.csproj">
-      <Project>{F7460B91-2702-41DD-A59E-A7A6F9E31200}</Project>
-      <Name>AppliedResearchAssociates.iAM.Aggregation</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj">
       <Project>{B2769386-5922-49ED-8A95-32BCB912955D}</Project>
       <Name>AppliedResearchAssociates.iAM.DataMiner</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Segmentation\AppliedResearchAssociates.iAM.Segmentation.csproj">
-      <Project>{DB1D42AC-D45B-4256-9A3A-29156C74C2B5}</Project>
-      <Name>AppliedResearchAssociates.iAM.Segmentation</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

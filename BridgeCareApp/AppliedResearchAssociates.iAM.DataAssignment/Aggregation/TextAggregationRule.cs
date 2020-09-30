@@ -4,7 +4,7 @@ using System.Text;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
-namespace AppliedResearchAssociates.iAM.Aggregation
+namespace AppliedResearchAssociates.iAM.DataAssignment.Aggregation
 {
     public abstract class TextAggregationRule : AggregationRule<string>
     {

@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public abstract class MSSQLRepository<T>
         : IRepository<T> where T : class
     {
-        protected DbContext context;
+        protected IAMContext context;
         public MSSQLRepository(IAMContext context)
         {
             this.context = context;
@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             throw new NotImplementedException();
         }
 
-        public virtual List<T> AddAll(List<T> entities)
+        public virtual List<T> AddAll(List<T> data)
         {
             throw new NotImplementedException();
         }

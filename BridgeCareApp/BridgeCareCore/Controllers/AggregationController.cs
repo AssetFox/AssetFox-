@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using BridgeCareCore.Profile;
 using Microsoft.AspNetCore.Mvc;
@@ -15,25 +16,27 @@ namespace BridgeCareCore.Controllers
 {
     public class AggregationController : ControllerBase
     {
-        private readonly IRepository<NetworkEntity> NetworkRepository;
-        private readonly IRepository<SegmentEntity> SegmentRepository;
+        private readonly IRepository<Network> NetworkRepository;
+        private readonly IRepository<Segment> SegmentRepository;
         private readonly ILogger<SegmentationController> _logger;
         private readonly IRepository<AttributeMetaDatum> AttributeMetaRepository;
+        private readonly ICustomNetworkDataRepository CustomNetorkRepository;
 
-        public AggregationController(ILogger<SegmentationController> logger, IRepository<NetworkEntity> networkRepository,
-            IRepository<SegmentEntity> segmentRepository, IRepository<AttributeMetaDatum> attributeRepo)
+        public AggregationController(ILogger<SegmentationController> logger, IRepository<Network> networkRepository,
+            IRepository<Segment> segmentRepository, IRepository<AttributeMetaDatum> attributeRepo, ICustomNetworkDataRepository partialNetworkRepo)
         {
             NetworkRepository = networkRepository;
             SegmentRepository = segmentRepository;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             AttributeMetaRepository = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
+            CustomNetorkRepository = partialNetworkRepo ?? throw new ArgumentNullException(nameof(partialNetworkRepo));
         }
 
         [HttpPost]
         [Route("AssignNetworkData")]
         public async Task<IActionResult> AssignNetworkData(Guid networkGuid)
         {
-            var networkEntity = NetworkRepository.Get(networkGuid);
+            var network = CustomNetorkRepository.GetNetworkWithNoAttributeData(networkGuid);
 
             var attributeMetaData = AttributeMetaRepository.All();
             //var attributeJsonText = System.IO.File.ReadAllText("attributeMetaData.json");
@@ -68,7 +71,7 @@ namespace BridgeCareCore.Controllers
                 });
             }
 
-            SegmentRepository.AddAll(seg)
+            SegmentRepository.AddAll()
             var network = new Network(segments, networkGuid, networkEntity.Name);
 
 

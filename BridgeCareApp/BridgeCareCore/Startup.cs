@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 
 namespace BridgeCareCore
 {
@@ -29,10 +30,11 @@ namespace BridgeCareCore
             opt.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex"))
             .EnableSensitiveDataLogging()
             );
-            services.AddScoped<IRepository<NetworkEntity>, NetworkRepository>();
-            services.AddScoped<IRepository<SegmentEntity>, SegmentRepository>();
+            services.AddScoped<IRepository<Network>, NetworkRepository>();
+            services.AddScoped<IRepository<Segment>, SegmentRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, SegmentationMetaDataRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
+            services.AddScoped<ICustomNetworkDataRepository, NetworkRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

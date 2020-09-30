@@ -17,13 +17,13 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class SegmentationController : ControllerBase
     {
-        private readonly IRepository<NetworkEntity> NetworkRepository;
-        private readonly IRepository<SegmentEntity> SegmentRepository;
+        private readonly IRepository<Network> NetworkRepository;
+        private readonly IRepository<Segment> SegmentRepository;
         private readonly ILogger<SegmentationController> _logger;
         private readonly IRepository<AttributeMetaDatum> _SegmentationFileRepository;
 
-        public SegmentationController(ILogger<SegmentationController> logger, IRepository<NetworkEntity> networkRepository,
-            IRepository<SegmentEntity> segmentRepository, IRepository<AttributeMetaDatum> segmentFileRepository)
+        public SegmentationController(ILogger<SegmentationController> logger, IRepository<Network> networkRepository,
+            IRepository<Segment> segmentRepository, IRepository<AttributeMetaDatum> segmentFileRepository)
         {
             NetworkRepository = networkRepository;
             SegmentRepository = segmentRepository;
@@ -45,21 +45,12 @@ namespace BridgeCareCore.Controllers
             var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
 
             var network = Segmenter.CreateNetworkFromAttributeDataRecords(attributeData);
-            ICollection<SegmentEntity> segmentEntities = new List<SegmentEntity>();
-            foreach (var segment in network.Segments)
-            {
-                segmentEntities.Add(new SegmentEntity
-                {
-                });
-            }
 
-            // Mapping
-            var networkEntity = new NetworkEntity { Id = network.Guid, Name = name };
+            network.Name = name;
+            var newNetwork = NetworkRepository.Add(network);
+            SegmentRepository.AddAll(network.Segments.ToList());
 
-            var newNetwork = NetworkRepository.Add(networkEntity);
-            SegmentRepository.AddAll(networkEntity.SegmentEntities.ToList());
-
-            NetworkRepository.SaveChanges();
+            NetworkRepository.SaveChanges(); // this will save all of the data in the IAMContext object
             _logger.LogInformation($"a network with name : {newNetwork.Name} has been created");
             return Ok(newNetwork);
         }

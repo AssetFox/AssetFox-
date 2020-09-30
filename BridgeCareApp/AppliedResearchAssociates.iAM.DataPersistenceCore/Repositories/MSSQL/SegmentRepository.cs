@@ -2,44 +2,33 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class SegmentRepository : MSSQLRepository<SegmentEntity>
+    public class SegmentRepository : MSSQLRepository<Segment>
     {
         public SegmentRepository(IAMContext context) : base(context)
         {
         }
 
-        public override SegmentEntity Add(SegmentEntity entity)
+        public override Segment Add(Segment segment)
         {
-            return base.Add(entity);
+            return base.Add(segment);
         }
 
-        public override IEnumerable<SegmentEntity> All()
+        public override IEnumerable<Segment> All()
         {
             return base.All();
         }
 
-        public override IEnumerable<SegmentEntity> Find(Expression<Func<SegmentEntity, bool>> predicate)
+        public override List<Segment> AddAll(List<Segment> segments)
         {
-            return base.Find(predicate);
-        }
+            // TODO: mapping from segments to segmentEntity
 
-        public override SegmentEntity Get(Guid id)
-        {
-            return base.Get(id);
-        }
-
-        public override SegmentEntity Update(SegmentEntity entity)
-        {
-            return base.Update(entity);
-        }
-
-        public override List<SegmentEntity> AddAll(List<SegmentEntity> segments)
-        {
-            context.AddRange(segments);
+            var segmentEntities = new List<SegmentEntity>();
+            context.Segments.AddRange(segmentEntities);
             return segments;
         }
     }

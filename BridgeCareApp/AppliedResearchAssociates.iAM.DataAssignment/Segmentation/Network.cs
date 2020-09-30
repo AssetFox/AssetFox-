@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
     {
         public ICollection<Segment> Segments { get; }
         public Guid Guid { get; }
-        public string Name { get; }
+        public string Name { get; set; }
 
         public Network(ICollection<Segment> segments, Guid guid, string name = "")
         {

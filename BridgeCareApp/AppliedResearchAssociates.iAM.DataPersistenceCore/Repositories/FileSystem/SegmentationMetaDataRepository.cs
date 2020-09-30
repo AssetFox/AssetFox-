@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public class SegmentationRepository : FileSystemRepository<AttributeMetaDatum>
+    public class SegmentationMetaDataRepository : FileSystemRepository<AttributeMetaDatum>
     {
         public override IEnumerable<AttributeMetaDatum> All()
         {
@@ -18,7 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
                 var segmentationRulesJsonText = File.ReadAllText(filePath);
                 segmentMetaData.Add(JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText,
                 new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum);
-                //segmentMetaData = JsonConvert.DeserializeAnonymousType(rawAttributes, new { SegmentData = default(List<AttributeMetaDatum>) }).SegmentData;
             }
             return segmentMetaData;
         }

@@ -31,7 +31,8 @@ namespace BridgeCareCore
             );
             services.AddScoped<IRepository<NetworkEntity>, NetworkRepository>();
             services.AddScoped<IRepository<SegmentEntity>, SegmentRepository>();
-            services.AddScoped<IRepository<AttributeMetaDatum>, SegmentationRepository>();
+            services.AddScoped<IRepository<AttributeMetaDatum>, SegmentationMetaDataRepository>();
+            services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

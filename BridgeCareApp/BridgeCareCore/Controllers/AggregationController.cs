@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Aggregation;
-using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.Segmentation;
 using BridgeCareCore.Profile;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace BridgeCareCore.Controllers
@@ -23,13 +18,15 @@ namespace BridgeCareCore.Controllers
         private readonly IRepository<NetworkEntity> NetworkRepository;
         private readonly IRepository<SegmentEntity> SegmentRepository;
         private readonly ILogger<SegmentationController> _logger;
+        private readonly IRepository<AttributeMetaDatum> AttributeMetaRepository;
 
         public AggregationController(ILogger<SegmentationController> logger, IRepository<NetworkEntity> networkRepository,
-            IRepository<SegmentEntity> segmentRepository)
+            IRepository<SegmentEntity> segmentRepository, IRepository<AttributeMetaDatum> attributeRepo)
         {
             NetworkRepository = networkRepository;
             SegmentRepository = segmentRepository;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            AttributeMetaRepository = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
         }
 
         [HttpPost]
@@ -37,9 +34,10 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> AssignNetworkData(Guid networkGuid)
         {
             var networkEntity = NetworkRepository.Get(networkGuid);
-            
-            var attributeJsonText = System.IO.File.ReadAllText("attributeMetaData.json");
-            var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
+
+            var attributeMetaData = AttributeMetaRepository.All();
+            //var attributeJsonText = System.IO.File.ReadAllText("attributeMetaData.json");
+            //var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
 
             var attributeData = new List<IAttributeDatum>();
             var attributes = new List<Attribute>();

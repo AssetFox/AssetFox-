@@ -24,13 +24,15 @@ namespace BridgeCareCore.Controllers
         private readonly IRepository<NetworkEntity> NetworkRepository;
         private readonly IRepository<SegmentEntity> SegmentRepository;
         private readonly ILogger<SegmentationController> _logger;
+        private readonly IRepository<AttributeMetaDatum> _SegmentationFileRepository;
 
         public SegmentationController(ILogger<SegmentationController> logger, IRepository<NetworkEntity> networkRepository,
-            IRepository<SegmentEntity> segmentRepository)
+            IRepository<SegmentEntity> segmentRepository, IRepository<AttributeMetaDatum> segmentFileRepository)
         {
             NetworkRepository = networkRepository;
             SegmentRepository = segmentRepository;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _SegmentationFileRepository = segmentFileRepository;
         }
 
         [HttpPost]
@@ -38,11 +40,12 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> CreateNetwork()
         {
             // Domain logic
-            var segmentationRulesJsonText = System.IO.File.ReadAllText("segmentationMetaData.json");
-            var attributeMetaDatum = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText,
-                new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum;
+            var attributeMetaData = _SegmentationFileRepository.All();
+            //var segmentationRulesJsonText = System.IO.File.ReadAllText("segmentationMetaData.json");
+            //var attributeMetaDatum = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText,
+            //    new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum;
 
-            var attribute = AttributeFactory.Create(attributeMetaDatum);
+            var attribute = AttributeFactory.Create(attributeMetaData.FirstOrDefault());
             var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
 
             var network = Segmenter.CreateNetworkFromAttributeDataRecords(attributeData);

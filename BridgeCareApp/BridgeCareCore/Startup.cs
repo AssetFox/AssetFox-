@@ -7,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
+using AppliedResearchAssociates.iAM.DataMiner;
 
 namespace BridgeCareCore
 {
@@ -29,12 +31,13 @@ namespace BridgeCareCore
             );
             services.AddScoped<IRepository<NetworkEntity>, NetworkRepository>();
             services.AddScoped<IRepository<SegmentEntity>, SegmentRepository>();
+            services.AddScoped<IRepository<AttributeMetaDatum>, SegmentationRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            UpdateDatabase(app);
+            //UpdateDatabase(app);
 
             if (env.IsDevelopment())
             {

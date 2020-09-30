@@ -11,12 +11,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
         public override IEnumerable<AttributeMetaDatum> All()
         {
             var folderPath = $"MetaData//Segment";
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPath, "sectionAttribute.json");
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPath, "segmentationMetaData.json");
             var segmentMetaData = new List<AttributeMetaDatum>();
             if (File.Exists(filePath))
             {
-                var rawAttributes = File.ReadAllText(filePath);
-                segmentMetaData = JsonConvert.DeserializeAnonymousType(rawAttributes, new { SegmentData = default(List<AttributeMetaDatum>) }).SegmentData;
+                var segmentationRulesJsonText = File.ReadAllText(filePath);
+                segmentMetaData.Add(JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText,
+                new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum);
+                //segmentMetaData = JsonConvert.DeserializeAnonymousType(rawAttributes, new { SegmentData = default(List<AttributeMetaDatum>) }).SegmentData;
             }
             return segmentMetaData;
         }

@@ -59,20 +59,20 @@ namespace BridgeCareCore.Controllers
             }
 
             var segments = new List<SegmentEntity>();
-            foreach (var segmentEntity in networkEntity.SegmentEntities)
-            {
-                var segment = new Segment(LocationEntityToLocation.CreateFromEntity(segmentEntity.LocationEntity));
-                segment.AssignAttributeData(attributeData);
+            //foreach (var segmentEntity in networkEntity.SegmentEntities)
+            //{
+            //    var segment = new Segment(LocationEntityToLocation.CreateFromEntity(segmentEntity.LocationEntity));
+            //    segment.AssignAttributeData(attributeData);
 
-                segments.Add(new SegmentEntity
-                {
-                    AttributeData = (ICollection<AttributeDatumEntity>)segment.AssignedData,
+            //    segments.Add(new SegmentEntity
+            //    {
+            //        AttributeData = (ICollection<AttributeDatumEntity>)segment.AssignedData,
 
-                });
-            }
+            //    });
+            //}
 
-            SegmentRepository.AddAll()
-            var network = new Network(segments, networkGuid, networkEntity.Name);
+            //SegmentRepository.AddAll()
+            //var network = new Network(segments, networkGuid, networkEntity.Name);
 
 
             return Ok();

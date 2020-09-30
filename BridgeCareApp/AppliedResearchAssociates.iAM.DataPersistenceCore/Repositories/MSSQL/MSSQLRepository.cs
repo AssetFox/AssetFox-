@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -17,22 +18,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         // If we ll use entity framework for MS SQL, then we ll get `context` to do operation on the database
         public virtual T Add(T entity)
         {
-            throw new NotImplementedException();
+            return context.Add(entity).Entity;
         }
 
         public virtual IEnumerable<T> All()
         {
-            throw new NotImplementedException();
+            return context.Set<T>().ToList();
         }
 
         public virtual IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
         {
-            throw new NotImplementedException();
+            return context.Set<T>()
+                .AsQueryable()
+                .Where(predicate)
+                .ToList();
         }
 
         public virtual T Get(Guid id)
         {
-            throw new NotImplementedException();
+            return context.Find<T>(id);
         }
 
         public void SaveChanges()
@@ -40,14 +44,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             context.SaveChanges();
         }
 
-        public virtual T Update(T data)
+        public virtual T Update(T entity)
         {
-            throw new NotImplementedException();
+            return context.Update(entity).Entity;
         }
 
-        public virtual List<T> AddAll(List<T> data)
+        public virtual List<T> AddAll(List<T> entities)
         {
-            throw new NotImplementedException();
+            context.AddRange(entities);
+            return entities;
         }
     }
 }

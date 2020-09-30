@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Aggregation
 {
     public static class Aggregator
     {
-        public static List<Segment> AssignAttributeDataToSegments(
+        public static void AssignAttributeDataToSegments(
             IEnumerable<IAttributeDatum> attributeData,
             IEnumerable<Segment> networkSegments)
         {
@@ -19,14 +19,13 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Aggregation
 
                 if (matchingLocationSegment != null)
                 {
-                    matchingLocationSegment.AddDatum(datum);
+                    matchingLocationSegment.AssignedData.Add(datum);
                 }
                 else
                 {
                     // TODO: No matching segment for the current data. What do we do?
                 }
             }
-            return assignedDataSegments;
         }
     }
 }

@@ -62,6 +62,8 @@ namespace BridgeCareCore.Controllers
             {
                 segment.AssignAttributeData(attributeData);
             }
+
+            NetworkRepository.Update(network);
             
             //foreach (var segmentEntity in networkEntity.SegmentEntities)
             //{

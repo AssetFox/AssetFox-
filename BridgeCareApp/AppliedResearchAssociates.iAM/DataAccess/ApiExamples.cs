@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataAccess
 {
     public sealed class ApiExamples
     {
-        public Segmentation.Network CreateNetwork()
+        /*public Segmentation.Network CreateNetwork()
         {
             var segmentationRulesJsonText = File.ReadAllText("segmentationMetaData.json");
             var attributeMetaDatum = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText,
@@ -100,6 +100,6 @@ namespace AppliedResearchAssociates.iAM.DataAccess
         public Segmentation.Network GetNetwork(Guid networkGuid)
         {
             throw new NotImplementedException();
-        }
+        }*/
     }
 }

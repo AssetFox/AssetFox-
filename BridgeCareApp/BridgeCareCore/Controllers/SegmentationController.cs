@@ -18,19 +18,17 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class SegmentationController : ControllerBase
     {
-        private readonly IRepository<Network> NetworkRepository;
         private readonly IRepository<Segment> SegmentRepository;
         private readonly ILogger<SegmentationController> _logger;
         private readonly IRepository<AttributeMetaDatum> _SegmentationFileRepository;
         private readonly INetworkDataRepository CustomNetworkRepository;
         private readonly ISaveChanges Repositories;
 
-        public SegmentationController(ILogger<SegmentationController> logger, IRepository<Network> networkRepository,
+        public SegmentationController(ILogger<SegmentationController> logger,
             IRepository<Segment> segmentRepository,
             IRepository<AttributeMetaDatum> segmentFileRepository,
             INetworkDataRepository networkRepo, ISaveChanges saveAll)
         {
-            NetworkRepository = networkRepository;
             SegmentRepository = segmentRepository;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _SegmentationFileRepository = segmentFileRepository;

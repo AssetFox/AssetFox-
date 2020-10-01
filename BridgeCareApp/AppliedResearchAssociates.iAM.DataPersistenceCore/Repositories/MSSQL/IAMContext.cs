@@ -108,5 +108,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public DbSet<LocationEntity> Locations { get; set; }
         public DbSet<NumericAttributeDatumEntity> NumericAttributeData { get; set; }
         public DbSet<TextAttributeDatumEntity> TextAttributeData { get; set; }
+        public DbSet<NumericAggregationResultEntity> NumericAggregationResultData { get; set; }
+        public DbSet<TextAggregationResultEntity> TextAggregationResultData { get; set; }
     }
 }

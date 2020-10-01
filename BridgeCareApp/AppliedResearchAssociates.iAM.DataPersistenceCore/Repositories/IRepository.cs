@@ -5,14 +5,12 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
-    public interface IRepository<T>
+    public interface IRepository<TDomain>
     {
-        T Add(T datum);
-        List<T> AddAll(List<T> data);
-        T Update(T datum);
-        T Get(Guid id);
-        IEnumerable<T> All();
-        IEnumerable<T> Find(Expression<Func<T, bool>> predicate);
-        void SaveChanges(); // It can go in a separate interface
+        List<TDomain> AddAll(List<TDomain> data);
+        TDomain Update(TDomain datum);
+        TDomain Get(Guid id);
+        IEnumerable<TDomain> All();
+        IEnumerable<TDomain> Find(Expression<Func<TDomain, bool>> predicate);
     }
 }

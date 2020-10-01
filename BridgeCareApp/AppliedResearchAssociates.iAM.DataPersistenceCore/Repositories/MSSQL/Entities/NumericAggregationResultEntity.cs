@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class NumericAggregationResultEntity : IHaveAggregatedResult<double>
+    public class NumericAggregationResultEntity : AggregationResultEntity, IHaveAggregatedResult<double>
     {
         public double Value { get; set; }
 

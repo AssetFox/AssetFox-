@@ -5,8 +5,9 @@ using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public interface ICustomNetworkDataRepository
+    public interface INetworkDataRepository
     {
+        Network AddNetworkWithoutAnyData(Network network);
         Network GetNetworkWithNoAttributeData(Guid id);
     }
 }

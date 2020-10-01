@@ -20,10 +20,11 @@ namespace BridgeCareCore.Controllers
         private readonly IRepository<Segment> SegmentRepository;
         private readonly ILogger<SegmentationController> _logger;
         private readonly IRepository<AttributeMetaDatum> AttributeMetaRepository;
-        private readonly ICustomNetworkDataRepository CustomNetorkRepository;
+        private readonly INetworkDataRepository CustomNetorkRepository;
 
         public AggregationController(ILogger<SegmentationController> logger, IRepository<Network> networkRepository,
-            IRepository<Segment> segmentRepository, IRepository<AttributeMetaDatum> attributeRepo, ICustomNetworkDataRepository partialNetworkRepo)
+            IRepository<Segment> segmentRepository,
+            IRepository<AttributeMetaDatum> attributeRepo, INetworkDataRepository partialNetworkRepo)
         {
             NetworkRepository = networkRepository;
             SegmentRepository = segmentRepository;

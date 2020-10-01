@@ -8,7 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class NetworkRepository : MSSQLRepository<Network>, ICustomNetworkDataRepository
+    public class NetworkRepository : MSSQLRepository<Network, NetworkEntity>, INetworkDataRepository
     {
         public NetworkRepository(IAMContext context) : base(context)
         {
@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return network;
         }
 
-        public override Network Add(Network network)
+        public Network AddNetworkWithoutAnyData(Network network)
         {
             // this mapping can go in a service
             var networkEntity = new NetworkEntity { Id = network.Guid, Name = network.Name };
@@ -46,6 +46,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             context.Networks.Update(networkEntity);
             return base.Update(network);
+        }
+
+        protected override NetworkEntity ToDataEntity(Network domainModel)
+        {
+            // I think the mapping will go here and the controller will call this method passing in the domain object
+            // Eg. NetworkRepository.ToDataEntity(networkDomainObject)
+            throw new NotImplementedException();
+        }
+
+        protected override Network ToDomainModel(NetworkEntity dataEntity)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -7,15 +7,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class SegmentRepository : MSSQLRepository<Segment>
+    public class SegmentRepository : MSSQLRepository<Segment, SegmentEntity>
     {
         public SegmentRepository(IAMContext context) : base(context)
         {
-        }
-
-        public override Segment Add(Segment segment)
-        {
-            return base.Add(segment);
         }
 
         public override IEnumerable<Segment> All()
@@ -30,6 +25,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var segmentEntities = new List<SegmentEntity>();
             context.Segments.AddRange(segmentEntities);
             return segments;
+        }
+
+        protected override SegmentEntity ToDataEntity(Segment domainModel)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Segment ToDomainModel(SegmentEntity dataEntity)
+        {
+            throw new NotImplementedException();
         }
     }
 }

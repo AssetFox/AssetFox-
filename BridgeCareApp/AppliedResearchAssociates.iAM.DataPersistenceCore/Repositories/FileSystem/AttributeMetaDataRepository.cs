@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public class AttributeMetaDataRepository : FileSystemRepository<AttributeMetaDatum>
+    public class AttributeMetaDataRepository : FileSystemRepository<AttributeMetaDatum, AttributeMetaDatum>
     {
         public AttributeMetaDataRepository()
         {

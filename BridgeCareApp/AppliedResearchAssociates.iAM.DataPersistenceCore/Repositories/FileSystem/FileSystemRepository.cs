@@ -5,30 +5,30 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public abstract class FileSystemRepository<T>
-        : IRepository<T> where T : class
+    public abstract class FileSystemRepository<TDomain, TEntity>
+        : IRepository<TDomain> where TDomain : class
     {
-        public virtual T Add(T entity)
+        public virtual TDomain Add(TDomain entity)
         {
             throw new NotImplementedException();
         }
 
-        public List<T> AddAll(List<T> entity)
+        public List<TDomain> AddAll(List<TDomain> entity)
         {
             throw new NotImplementedException();
         }
 
-        public virtual IEnumerable<T> All()
+        public virtual IEnumerable<TDomain> All()
         {
             throw new NotImplementedException();
         }
 
-        public virtual IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
+        public virtual IEnumerable<TDomain> Find(Expression<Func<TDomain, bool>> predicate)
         {
             throw new NotImplementedException();
         }
 
-        public T Get(Guid id)
+        public TDomain Get(Guid id)
         {
             throw new NotImplementedException();
         }
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             throw new NotImplementedException();
         }
 
-        public virtual T Update(T entity)
+        public virtual TDomain Update(TDomain entity)
         {
             throw new NotImplementedException();
         }

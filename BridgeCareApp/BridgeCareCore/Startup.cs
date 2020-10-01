@@ -25,7 +25,7 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
             services.AddDbContext<IAMContext>(opt =>
             opt.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex"))
             .EnableSensitiveDataLogging()
@@ -34,7 +34,8 @@ namespace BridgeCareCore
             services.AddScoped<IRepository<Segment>, SegmentRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, SegmentationMetaDataRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
-            services.AddScoped<ICustomNetworkDataRepository, NetworkRepository>();
+            services.AddScoped<INetworkDataRepository, NetworkRepository>();
+            services.AddScoped<ISaveChanges, SaveAllChanges>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -7,52 +7,45 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public abstract class MSSQLRepository<T>
-        : IRepository<T> where T : class
+    public abstract class MSSQLRepository<TDomain, TEntity>
+        : IRepository<TDomain> where TDomain : class
     {
         protected IAMContext context;
         public MSSQLRepository(IAMContext context)
         {
             this.context = context;
         }
-        // If we ll use entity framework for MS SQL, then we ll get `context` to do operation on the database
-        public virtual T Add(T entity)
+
+        public virtual IEnumerable<TDomain> All()
         {
-            return context.Add(entity).Entity;
+            return context.Set<TDomain>().ToList();
         }
 
-        public virtual IEnumerable<T> All()
+        public virtual IEnumerable<TDomain> Find(Expression<Func<TDomain, bool>> predicate)
         {
-            return context.Set<T>().ToList();
-        }
-
-        public virtual IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
-        {
-            return context.Set<T>()
+            return context.Set<TDomain>()
                 .AsQueryable()
                 .Where(predicate)
                 .ToList();
         }
 
-        public virtual T Get(Guid id)
+        public virtual TDomain Get(Guid id)
         {
-            return context.Find<T>(id);
+            return context.Find<TDomain>(id);
         }
 
-        public void SaveChanges()
-        {
-            context.SaveChanges();
-        }
-
-        public virtual T Update(T entity)
+        public virtual TDomain Update(TDomain entity)
         {
             return context.Update(entity).Entity;
         }
 
-        public virtual List<T> AddAll(List<T> entities)
+        public virtual List<TDomain> AddAll(List<TDomain> entities)
         {
             context.AddRange(entities);
             return entities;
         }
+
+        protected abstract TEntity ToDataEntity(TDomain domainModel);
+        protected abstract TDomain ToDomainModel(TEntity dataEntity);
     }
 }

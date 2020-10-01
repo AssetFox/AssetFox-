@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public class SegmentationMetaDataRepository : FileSystemRepository<AttributeMetaDatum>
+    public class SegmentationMetaDataRepository : FileSystemRepository<AttributeMetaDatum, AttributeMetaDatum>
     {
         public override IEnumerable<AttributeMetaDatum> All()
         {

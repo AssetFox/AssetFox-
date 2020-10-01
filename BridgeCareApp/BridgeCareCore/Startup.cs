@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 
 namespace BridgeCareCore
 {
@@ -26,10 +27,11 @@ namespace BridgeCareCore
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers().AddNewtonsoftJson();
-            services.AddDbContext<IAMContext>(opt =>
-            opt.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex"))
-            .EnableSensitiveDataLogging()
-            );
+
+            //It is an extension method in DataPersistenceCore project, which provides the connection to the database
+            // This way, BridgeCareCore app doesn't have to know about the provide (eg. EF core)
+            services.AddDataAccessServices(Configuration.GetConnectionString("BridgeCareConnex"));
+
             services.AddScoped<IRepository<Network>, NetworkRepository>();
             services.AddScoped<IRepository<Segment>, SegmentRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, SegmentationMetaDataRepository>();

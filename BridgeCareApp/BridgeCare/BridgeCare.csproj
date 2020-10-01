@@ -632,10 +632,6 @@
       <Project>{31db6cda-70a3-4c94-a002-fa1bd1df9b02}</Project>
       <Name>Simulation</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj">
-      <Project>{B2769386-5922-49ED-8A95-32BCB912955D}</Project>
-      <Name>AppliedResearchAssociates.iAM.DataMiner</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\analyzers\dotnet\cs\Microsoft.CodeAnalysis.VersionCheckAnalyzer.resources.dll" />

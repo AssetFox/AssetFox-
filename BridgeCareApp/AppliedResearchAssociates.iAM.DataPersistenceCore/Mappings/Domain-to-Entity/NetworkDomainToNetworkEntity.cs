@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings.Domain_to_E
         public static NetworkEntity CreateFromDomain(Network network) =>
             new NetworkEntity
             {
-                Id = network.Guid,
+                Id = network.Id,
                 Name = network.Name
             };
 

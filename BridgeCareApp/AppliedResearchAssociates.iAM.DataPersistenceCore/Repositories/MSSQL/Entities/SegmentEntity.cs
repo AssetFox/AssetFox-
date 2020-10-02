@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         [Key]
         public Guid Id { get; set; }
         public Guid NetworkId { get; set; }
+        public Guid LocationId { get; set; }
         public string UniqueIdentifier { get; set; }
 
         [ForeignKey("NetworkId")]
@@ -19,7 +20,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<AttributeDatumEntity> AttributeData { get; set; }
 
-        public virtual LocationEntity LocationEntity { get; set; }
+        [ForeignKey("LocationId")]
+        public virtual LocationEntity Location { get; set; }
 
         public virtual ICollection<AggregationResultEntity> AggregatedResults { get; set; }
     }

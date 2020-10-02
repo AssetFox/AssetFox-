@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public double Start { get; set; }
         public double End { get; set; }
 
+        public Guid RouteId { get; set; }
+        [ForeignKey("RouteId")]
         public virtual RouteEntity Route { get; set; }
     }
 }

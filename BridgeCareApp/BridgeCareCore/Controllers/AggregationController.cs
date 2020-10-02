@@ -14,6 +14,8 @@ using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace BridgeCareCore.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class AggregationController : ControllerBase
     {
         private readonly IRepository<Network> NetworkRepository;
@@ -35,7 +37,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("AssignNetworkData")]
-        public async Task<IActionResult> AssignNetworkData(Guid networkGuid)
+        public async Task<IActionResult> AssignNetworkData([FromBody] Guid networkGuid)
         {
             var network = CustomNetorkRepository.GetNetworkWithNoAttributeData(networkGuid);
 

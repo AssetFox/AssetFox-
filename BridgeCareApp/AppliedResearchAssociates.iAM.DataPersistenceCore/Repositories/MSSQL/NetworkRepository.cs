@@ -19,21 +19,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var entity = context.Networks
                 .Include(n => n.SegmentEntities)
-                .Include(n => n.SegmentEntities.Select(s => s.Location).FirstOrDefault())
+                .ThenInclude(s => s.Location)
                 .Single(n => n.Id == id);
 
             return entity.ToDomain();
         }
 
         public void AddNetworkWithoutAnyData(Network network) => context.Networks.Add(network.ToEntity());
-
-        public override Network Update(Network network)
-        {
-             var networkEntity = context.Networks.Find(network.Id);
-            // mapping from domain to entity
-
-            context.Networks.Update(networkEntity);
-            return base.Update(network);
-        }
     }
 }

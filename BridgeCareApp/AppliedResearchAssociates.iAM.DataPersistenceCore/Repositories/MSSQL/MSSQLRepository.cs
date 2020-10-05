@@ -44,8 +44,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             context.AddRange(entities);
             return entities;
         }
-
-        protected abstract TEntity ToDataEntity(TDomain domainModel);
-        protected abstract TDomain ToDomainModel(TEntity dataEntity);
     }
 }

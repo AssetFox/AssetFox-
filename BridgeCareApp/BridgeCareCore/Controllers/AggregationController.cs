@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using BridgeCareCore.Profile;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
@@ -22,8 +21,8 @@ namespace BridgeCareCore.Controllers
         private readonly IRepository<Network> NetworkRepository;
         private readonly IRepository<Segment> SegmentRepository;
         private readonly ILogger<SegmentationController> _logger;
-        private readonly IRepository<AttributeMetaDatum> AttributeMetaRepository;
-        private readonly INetworkDataRepository CustomNetorkRepository;
+        private readonly IRepository<AttributeMetaDatum> AttributeMetaDataRepository;
+        private readonly INetworkDataRepository NetorkRepository;
 
         public AggregationController(ILogger<SegmentationController> logger, IRepository<Network> networkRepository,
             IRepository<Segment> segmentRepository,
@@ -32,17 +31,17 @@ namespace BridgeCareCore.Controllers
             NetworkRepository = networkRepository;
             SegmentRepository = segmentRepository;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            AttributeMetaRepository = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
-            CustomNetorkRepository = partialNetworkRepo ?? throw new ArgumentNullException(nameof(partialNetworkRepo));
+            AttributeMetaDataRepository = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
+            NetorkRepository = partialNetworkRepo ?? throw new ArgumentNullException(nameof(partialNetworkRepo));
         }
 
         [HttpPost]
         [Route("AssignNetworkData")]
-        public async Task<IActionResult> AssignNetworkData([FromBody] Guid networkGuid)
+        public async Task<IActionResult> AssignNetworkData([FromBody] Guid networkId)
         {
-            var network = CustomNetorkRepository.GetNetworkWithNoAttributeData(networkGuid);
+            var network = NetorkRepository.GetNetworkWithNoAttributeData(networkId);
 
-            var attributeMetaData = AttributeMetaRepository.All();
+            var attributeMetaData = AttributeMetaDataRepository.All();
             //var attributeJsonText = System.IO.File.ReadAllText("attributeMetaData.json");
             //var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
 

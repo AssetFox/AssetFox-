@@ -13,12 +13,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
         {
             if (entity == null)
             {
-                throw new NullReferenceException("RouteEntity object is null");
+                throw new NullReferenceException("Cannot map null Route entity to Route domain");
             };
 
-            if (entity is DirectionalRouteEntity directionalRouteEntity)
+            if (entity.Discriminator == "DirectionalRoute")
             {
-                return new DirectionalRoute(directionalRouteEntity.UniqueIdentifier, directionalRouteEntity.Direction);
+                return new DirectionalRoute(entity.UniqueIdentifier, entity.Direction.Value);
             }
 
             return new SimpleRoute(entity.UniqueIdentifier);
@@ -28,23 +28,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
         {
             if (domain == null)
             {
-                throw new NullReferenceException("Route object is null");
+                throw new NullReferenceException("Cannot map null Route domain to Route entity");
             }
 
             if (domain is DirectionalRoute directionalRouteDomain)
             {
-                return new DirectionalRouteEntity
+                return new RouteEntity
                 {
                     Id = routeId,
                     Direction = directionalRouteDomain.Direction,
-                    UniqueIdentifier = directionalRouteDomain.UniqueIdentifier
+                    UniqueIdentifier = directionalRouteDomain.UniqueIdentifier,
+                    Discriminator = "DirectionalRoute"
                 };
             }
 
             return new RouteEntity
             {
                 Id = routeId,
-                UniqueIdentifier = domain.UniqueIdentifier
+                UniqueIdentifier = domain.UniqueIdentifier,
+                Discriminator = "SimpleRoute"
             };
         }
     }

@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
 
 namespace BridgeCareCore
 {
@@ -37,6 +38,7 @@ namespace BridgeCareCore
             services.AddScoped<IRepository<AttributeMetaDatum>, SegmentationMetaDataRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
             services.AddScoped<INetworkDataRepository, NetworkRepository>();
+            services.AddScoped<ISegmentDataRepository, SegmentRepository>();
             services.AddScoped<ISaveChanges, SaveAllChanges>();
         }
 

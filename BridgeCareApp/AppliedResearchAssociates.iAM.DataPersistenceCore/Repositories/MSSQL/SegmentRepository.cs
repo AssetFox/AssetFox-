@@ -1,40 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class SegmentRepository : MSSQLRepository<Segment, SegmentEntity>
+    public class SegmentRepository : MSSQLRepository<Segment, SegmentEntity>, ISegmentDataRepository
     {
         public SegmentRepository(IAMContext context) : base(context)
         {
         }
 
-        public override IEnumerable<Segment> All()
-        {
-            return base.All();
-        }
-
-        public override List<Segment> AddAll(List<Segment> segments)
-        {
-            // TODO: mapping from segments to segmentEntity
-
-            var segmentEntities = new List<SegmentEntity>();
-            context.Segments.AddRange(segmentEntities);
-            return segments;
-        }
-
-        protected override SegmentEntity ToDataEntity(Segment domainModel)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override Segment ToDomainModel(SegmentEntity dataEntity)
-        {
-            throw new NotImplementedException();
-        }
+        public void AddNetworkSegments(IEnumerable<Segment> segments, Guid networkId) => context.Segments.AddRange(segments.Select(d => d.ToEntity(networkId)));
     }
 }

@@ -17,30 +17,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Network GetNetworkWithNoAttributeData(Guid id)
         {
-            var entity = context.Networks.Where(n => n.Id == id)
+            var entity = context.Networks
                 .Include(n => n.SegmentEntities)
-                .Include(n => n.SegmentEntities.Select(s => s.Location)).First();
+                .Include(n => n.SegmentEntities.Select(s => s.Location).FirstOrDefault())
+                .Single(n => n.Id == id);
 
-            // mapping from entity to network domain object
-            var segments = new List<Segment>();
-            foreach (var segmentEntity in entity.SegmentEntities)
-            {
-                var segment = new Segment(LocationEntityToLocation.CreateFromEntity(segmentEntity.Location));
-                segments.Add(segment);
-            }
-
-            var network = new Network(segments, id);
-            return network;
+            return entity.ToDomain();
         }
 
-        public Network AddNetworkWithoutAnyData(Network network)
-        {
-            // this mapping can go in a service
-            var networkEntity = new NetworkEntity { Id = network.Id, Name = network.Name };
-            context.Networks.Add(networkEntity);
-            return network;
-
-        }
+        public void AddNetworkWithoutAnyData(Network network) => context.Networks.Add(network.ToEntity());
 
         public override Network Update(Network network)
         {
@@ -49,18 +34,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             context.Networks.Update(networkEntity);
             return base.Update(network);
-        }
-
-        protected override NetworkEntity ToDataEntity(Network domainModel)
-        {
-            // I think the mapping will go here and the controller will call this method passing in the domain object
-            // Eg. NetworkRepository.ToDataEntity(networkDomainObject)
-            throw new NotImplementedException();
-        }
-
-        protected override Network ToDomainModel(NetworkEntity dataEntity)
-        {
-            throw new NotImplementedException();
         }
     }
 }

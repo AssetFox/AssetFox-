@@ -9,21 +9,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
 {
     public static class NetworkItemMapper
     {
-        public static Network ToDomain(this NetworkEntity entity) =>
-            entity == null
-                ? new Network(new List<Segment>(), Guid.NewGuid())
-                : new Network(
-                    entity.SegmentEntities == null
-                        ? new List<Segment>()
-                        : entity.SegmentEntities.Select(e => e.ToDomain()).ToList(),
-                    entity.Id,
-                    entity.Name);
+        public static Network ToDomain(this NetworkEntity entity)
+        {
+            if (entity == null)
+            {
+                throw new NullReferenceException("Cannot map null Network entity to Network domain");
+            }
+
+            return new Network(
+                entity.SegmentEntities == null
+                    ? new List<Segment>()
+                    : entity.SegmentEntities.Select(e => e.ToDomain()).ToList(),
+                entity.Id,
+                entity.Name);
+        }
 
         public static NetworkEntity ToEntity(this Network domain)
         {
             if (domain == null)
             {
-                return new NetworkEntity {Id = Guid.NewGuid(), Name = ""};
+                throw new NullReferenceException("Cannot map null Network domain to Network entity");
             }
             
             return new NetworkEntity {Id = domain.Id, Name = domain.Name};

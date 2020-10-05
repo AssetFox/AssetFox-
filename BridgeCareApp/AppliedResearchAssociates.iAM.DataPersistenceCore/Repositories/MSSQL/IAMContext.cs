@@ -33,16 +33,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<NetworkEntity>(entity =>
-            {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-            });
-
             modelBuilder.Entity<SegmentEntity>(entity =>
             {
                 entity.HasIndex(e => e.NetworkId);
-
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.Network)
                     .WithMany(p => p.SegmentEntities)
@@ -54,9 +47,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            modelBuilder.Entity<AttributeEntity>(entity =>
+            modelBuilder.Entity<LocationEntity>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.HasOne(d => d.Route)
+                    .WithOne(p => p.Location)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<AttributeDatumEntity>(entity =>
@@ -69,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.Location)
                     .WithOne(p => p.AttributeData)
                     .HasForeignKey<AttributeDatumEntity>(d => d.LocationId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.Segment)
                     .WithMany(p => p.AttributeData)
@@ -77,22 +72,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<LocationEntity>(entity =>
-            {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-            });
-
-            modelBuilder.Entity<LinearLocationEntity>(entity =>
-            {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.HasOne(d => d.Route)
-                    .WithOne(p => p.LinearLocation)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
-
             modelBuilder.Entity<AggregationResultEntity>(entity =>
             {
+                entity.HasOne(d => d.Attribute)
+                    .WithOne(p => p.AggregationResult)
+                    .OnDelete(DeleteBehavior.Restrict);
+
                 entity.HasOne(d => d.Segment)
                     .WithMany(p => p.AggregatedResults)
                     .HasForeignKey(d => d.SegmentId)
@@ -100,15 +85,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
         }
 
-        public DbSet<AttributeEntity> Attributes { get; set; }
-        public DbSet<DirectionalRouteEntity> DirectionalRoutes { get; set; }
         public DbSet<NetworkEntity> Networks { get; set; }
-        public DbSet<RouteEntity> Routes { get; set; }
         public DbSet<SegmentEntity> Segments { get; set; }
         public DbSet<LocationEntity> Locations { get; set; }
-        public DbSet<NumericAttributeDatumEntity> NumericAttributeData { get; set; }
-        public DbSet<TextAttributeDatumEntity> TextAttributeData { get; set; }
-        public DbSet<NumericAggregationResultEntity> NumericAggregationResultData { get; set; }
-        public DbSet<TextAggregationResultEntity> TextAggregationResultData { get; set; }
+        public DbSet<RouteEntity> Routes { get; set; }
+        public DbSet<AttributeEntity> Attributes { get; set; }
+        public DbSet<AttributeDatumEntity> AttributeData { get; set; }
+        public DbSet<AggregationResultEntity> AggregationResults { get; set; }
     }
 }

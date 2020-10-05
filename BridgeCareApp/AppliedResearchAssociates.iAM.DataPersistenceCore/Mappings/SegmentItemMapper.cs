@@ -11,14 +11,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
 {
     public static class SegmentItemMapper
     {
-        public static Segment ToDomain(this SegmentEntity entity) =>
-            entity == null
-                ? new Segment(new SectionLocation("NA"))
-                : new Segment(entity.Location == null
-                    ? new SectionLocation("NA")
-                    : entity.Location.ToDomain());
+        public static Segment ToDomain(this SegmentEntity entity)
+        {
+            if (entity == null)
+            {
+                throw new NullReferenceException("Cannot map null Segment entity to Segment domain");
+            }
 
-        public static SegmentEntity ToEntity(this Segment domain, Guid networkId, string uniqueIdentifier)
+            if (entity.Location == null)
+            {
+                throw new NullReferenceException("Cannot map null Location entity to Location domain");
+            }
+
+            return new Segment(entity.Location.ToDomain());
+        }
+            
+
+        public static SegmentEntity ToEntity(this Segment domain, Guid networkId, string uniqueIdentifier = "")
         {
             var locationId = Guid.NewGuid();
 
@@ -31,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
                 Location = domain.Location.ToEntity(locationId)
             };
 
-            var numericValues = domain.AssignedData.Where(d => d.Attribute.DataType == "NUMERIC")
+            /*var numericValues = domain.AssignedData.Where(d => d.Attribute.DataType == "NUMERIC")
                 .Select(d =>
                     domain.GetAggregatedValuesByYear(d.Attribute, AggregationRuleFactory.CreateNumericRule(d.Attribute)))
                 .Select(d => d.ToEntity(segmentEntity.Id, locationId));
@@ -44,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
             foreach (var entity in numericValues)
             {
                 segmentEntity.AttributeData.Add((AttributeDatumEntity)Convert.ChangeType(entity, typeof(AttributeDatumEntity)));
-            }
+            }*/
 
             return segmentEntity;
         }

@@ -10,44 +10,46 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
 {
     public static class AttributeDataItemMapper
     {
-        public static List<NumericAttributeDatumEntity> ToEntity(
+        public static List<AttributeDatumEntity> ToEntity(
             this IEnumerable<(Attribute attribute, (int year, double value))> aggregatedResult,
             Guid segmentId, Guid locationId)
         {
-            if (aggregatedResult == null)
+            if (aggregatedResult == null || !aggregatedResult.Any())
             {
-                throw new NullReferenceException("Cannot create NumericAttributeDatumEntity without aggregated result values");
+                throw new NullReferenceException("Cannot map null or empty list of aggregated results to AttributeDatum entity list");
             }
 
             return aggregatedResult.Select(r =>
-                new NumericAttributeDatumEntity
+                new AttributeDatumEntity
                 {
                     Id = Guid.NewGuid(),
                     SegmentId = segmentId,
                     LocationId = locationId,
                     AttributeId = r.attribute.Id,
-                    Value = r.Item2.value,
+                    NumericValue = r.Item2.value,
+                    Discriminator = "NumericAttributeDatum",
                     TimeStamp = DateTime.Now
                 }).ToList();
         }
 
-        public static List<TextAttributeDatumEntity> ToEntity(
+        public static List<AttributeDatumEntity> ToEntity(
             this IEnumerable<(Attribute attribute, (int year, string value))> aggregatedResult,
             Guid segmentId, Guid locationId)
         {
-            if (aggregatedResult == null)
+            if (aggregatedResult == null || !aggregatedResult.Any())
             {
-                throw new NullReferenceException("Cannot create TextAttributeDatumEntity without aggregated result values");
+                throw new NullReferenceException("Cannot map null or empty list of aggregated results to AttributeDatum entity list");
             }
 
             return aggregatedResult.Select(r =>
-                new TextAttributeDatumEntity
+                new AttributeDatumEntity
                 {
                     Id = Guid.NewGuid(),
                     SegmentId = segmentId,
                     LocationId = locationId,
                     AttributeId = r.attribute.Id,
-                    Value = r.Item2.value,
+                    TextValue = r.Item2.value,
+                    Discriminator = "TextAttributeDatum",
                     TimeStamp = DateTime.Now
                 }).ToList();
         }

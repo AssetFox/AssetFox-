@@ -12,16 +12,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
         {
             if (entity == null)
             {
-                throw new NullReferenceException("LocationEntity object is null");
+                throw new NullReferenceException("Cannot map null Location entity to Location domain");
             }
 
-            if (entity is LinearLocationEntity linearLocationEntity)
+            if (entity.Discriminator == "LinearLocation")
             {
                 return new LinearLocation(
-                    linearLocationEntity.Route.ToDomain(),
-                    linearLocationEntity.UniqueIdentifier,
-                    linearLocationEntity.Start,
-                    linearLocationEntity.End);
+                    entity.Route.ToDomain(),
+                    entity.UniqueIdentifier,
+                    entity.Start.Value,
+                    entity.End.Value);
             }
 
             return new SectionLocation(entity.UniqueIdentifier);
@@ -31,27 +31,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
         {
             if (domain == null)
             {
-                throw new NullReferenceException("Location object is null");
+                throw new NullReferenceException("Cannot map null Location domain to Location entity");
             }
 
             if (domain is LinearLocation linearLocationDomain)
             {
-                var routeId = Guid.NewGuid();
-
-                return new LinearLocationEntity
+                var entity = new LocationEntity
                 {
                     Id = locationId,
                     Start = linearLocationDomain.Start,
                     End = linearLocationDomain.End,
-                    RouteId = routeId,
-                    Route = linearLocationDomain.Route.ToEntity(routeId)
+                    Discriminator = "LinearLocation"
                 };
+
+                if (linearLocationDomain.Route != null)
+                {
+                    var routeId = Guid.NewGuid();
+                    entity.RouteId = routeId;
+                    entity.Route = linearLocationDomain.Route.ToEntity(routeId);
+                }
+
+                return entity;
             }
 
-            return new SectionLocationEntity
+            return new LocationEntity
             {
                 Id = locationId,
-                UniqueIdentifier = domain.UniqueIdentifier
+                UniqueIdentifier = domain.UniqueIdentifier,
+                Discriminator = "SectionLocation"
             };
         }
     }

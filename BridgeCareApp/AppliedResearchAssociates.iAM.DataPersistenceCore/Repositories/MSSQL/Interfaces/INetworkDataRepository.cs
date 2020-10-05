@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public interface INetworkDataRepository
     {
-        Network AddNetworkWithoutAnyData(Network network);
+        void AddNetworkWithoutAnyData(Network network);
         Network GetNetworkWithNoAttributeData(Guid id);
     }
 }

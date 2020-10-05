@@ -26,5 +26,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public void AddNetworkWithoutAnyData(Network network) => context.Networks.Add(network.ToEntity());
+
+        public override Network Update(Network network)
+        {
+             //var networkEntity = context.Networks.Find(network.Id);
+            // mapping from domain to entity
+            var networkEntity = network.ToEntity();
+            networkEntity.SegmentEntities = new List<SegmentEntity>();
+            var id = network.Id;
+            foreach (var segment in network.Segments)
+            {
+                networkEntity.SegmentEntities.Add(segment.ToEntity(id));
+            }
+
+            context.Networks.Update(networkEntity);
+            return base.Update(network);
+        }
     }
 }

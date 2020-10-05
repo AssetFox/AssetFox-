@@ -7,6 +7,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class TextAttributeDatumEntity : AttributeDatumEntity, IHaveAttributeDatumValue<string>
     {
         public string Value { get; set; }
-        public override LocationEntity Location { get; set; }
     }
 }

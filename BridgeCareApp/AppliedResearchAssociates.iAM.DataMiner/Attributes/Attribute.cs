@@ -5,9 +5,9 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public abstract class Attribute
     {
-        public Attribute(Guid guid, string name, string command, string dataType, ConnectionType connectionType, string connectionString)
+        public Attribute(Guid id, string name, string command, string dataType, ConnectionType connectionType, string connectionString)
         {
-            Guid = guid;
+            Id = id;
             Name = name;
             DataType = dataType;
             Command = command;
@@ -15,8 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
             ConnectionString = connectionString;
         }
 
-        public Guid Guid { get; }
-
+        public Guid Id { get; }
         public string DataType { get; }
         public string Name { get; }
         public string Command { get; }

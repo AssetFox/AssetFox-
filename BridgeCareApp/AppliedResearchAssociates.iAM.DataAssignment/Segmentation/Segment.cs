@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
         }
         public IEnumerable<(Attribute attribute, (int year, T value))> GetAggregatedValuesByYear<T>(Attribute attribute, AggregationRule<T> aggregationRule)
         {
-            var specifiedData = AssignedData.Where(_ => _.Attribute.Guid == attribute.Guid);
+            var specifiedData = AssignedData.Where(_ => _.Attribute.Id == attribute.Id);
             return aggregationRule.Apply(specifiedData, attribute);
         }
         public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)

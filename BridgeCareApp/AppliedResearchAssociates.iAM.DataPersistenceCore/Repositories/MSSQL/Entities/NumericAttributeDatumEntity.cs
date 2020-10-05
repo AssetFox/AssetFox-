@@ -7,6 +7,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class NumericAttributeDatumEntity : AttributeDatumEntity, IHaveAttributeDatumValue<double>
     {
         public double Value { get; set; }
-        public override LocationEntity Location { get; set; }
     }
 }

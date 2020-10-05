@@ -4,14 +4,16 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    partial class IAMContextModelSnapshot : ModelSnapshot
+    [Migration("20201005213056_AddSegmentUniqueIdentifierIndex")]
+    partial class AddSegmentUniqueIdentifierIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,7 +88,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("AttributeId");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("LocationId")
+                        .IsUnique();
 
                     b.HasIndex("SegmentId");
 
@@ -232,9 +235,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LocationEntity", "Location")
-                        .WithMany("AttributeData")
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithOne("AttributeData")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", "LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SegmentEntity", "Segment")

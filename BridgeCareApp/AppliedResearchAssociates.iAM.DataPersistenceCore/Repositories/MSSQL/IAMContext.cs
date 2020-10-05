@@ -36,6 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             modelBuilder.Entity<SegmentEntity>(entity =>
             {
                 entity.HasIndex(e => e.NetworkId);
+                entity.HasIndex(e => e.UniqueIdentifier);
 
                 entity.HasOne(d => d.Network)
                     .WithMany(p => p.SegmentEntities)
@@ -62,9 +63,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.Location)
-                    .WithOne(p => p.AttributeData)
-                    .HasForeignKey<AttributeDatumEntity>(d => d.LocationId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .WithMany(p => p.AttributeData)
+                    .HasForeignKey(d => d.LocationId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.Segment)
                     .WithMany(p => p.AttributeData)

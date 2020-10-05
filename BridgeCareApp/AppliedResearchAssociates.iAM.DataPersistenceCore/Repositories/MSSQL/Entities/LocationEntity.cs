@@ -13,6 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public Guid Id { get; set; }
         [Required]
         public string Discriminator { get; set; }
+        [Required]
         public string UniqueIdentifier { get; set; }
         public double? Start { get; set; }
         public double? End { get; set; }
@@ -22,6 +23,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual RouteEntity Route { get; set; }
 
         public virtual SegmentEntity Segment { get; set; }
-        public virtual AttributeDatumEntity AttributeData { get; set; }
+        public virtual ICollection<AttributeDatumEntity> AttributeData { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
@@ -10,48 +11,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
 {
     public static class AttributeDataItemMapper
     {
-        public static List<AttributeDatumEntity> ToEntity(
-            this IEnumerable<(Attribute attribute, (int year, double value))> aggregatedResult,
-            Guid segmentId, Guid locationId)
+
+        public static AttributeDatumEntity ToEntity<T>(this AttributeDatum<T> domain, Guid segmentId, Guid locationId)
         {
-            if (aggregatedResult == null || !aggregatedResult.Any())
+            if (domain == null)
             {
-                throw new NullReferenceException("Cannot map null or empty list of aggregated results to AttributeDatum entity list");
+                throw new NullReferenceException("Cannot map null AttributeDatum domain to AttributeDatum entity");
             }
 
-            return aggregatedResult.Select(r =>
-                new AttributeDatumEntity
+            var valueType = typeof(T);
+
+            if (valueType == typeof(double))
+            {
+                return new AttributeDatumEntity
                 {
                     Id = Guid.NewGuid(),
+                    AttributeId = domain.Attribute.Id,
                     SegmentId = segmentId,
                     LocationId = locationId,
-                    AttributeId = r.attribute.Id,
-                    NumericValue = r.Item2.value,
                     Discriminator = "NumericAttributeDatum",
-                    TimeStamp = DateTime.Now
-                }).ToList();
-        }
-
-        public static List<AttributeDatumEntity> ToEntity(
-            this IEnumerable<(Attribute attribute, (int year, string value))> aggregatedResult,
-            Guid segmentId, Guid locationId)
-        {
-            if (aggregatedResult == null || !aggregatedResult.Any())
-            {
-                throw new NullReferenceException("Cannot map null or empty list of aggregated results to AttributeDatum entity list");
+                    TimeStamp = domain.TimeStamp,
+                    NumericValue = (double)Convert.ChangeType(domain.Value, typeof(double))
+                };
             }
 
-            return aggregatedResult.Select(r =>
-                new AttributeDatumEntity
-                {
-                    Id = Guid.NewGuid(),
-                    SegmentId = segmentId,
-                    LocationId = locationId,
-                    AttributeId = r.attribute.Id,
-                    TextValue = r.Item2.value,
-                    Discriminator = "TextAttributeDatum",
-                    TimeStamp = DateTime.Now
-                }).ToList();
+            return new AttributeDatumEntity
+            {
+                Id = Guid.NewGuid(),
+                AttributeId = domain.Attribute.Id,
+                SegmentId = segmentId,
+                LocationId = locationId,
+                Discriminator = "TextAttributeDatum",
+                TimeStamp = domain.TimeStamp,
+                TextValue = (string)Convert.ChangeType(domain.Value, typeof(string))
+            };
         }
     }
 }

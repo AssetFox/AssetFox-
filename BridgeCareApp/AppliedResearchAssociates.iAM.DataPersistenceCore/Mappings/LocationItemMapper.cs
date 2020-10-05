@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
             return new SectionLocation(entity.UniqueIdentifier);
         }
 
-        public static LocationEntity ToEntity(this Location domain, Guid locationId)
+        public static LocationEntity ToEntity(this Location domain)
         {
             if (domain == null)
             {
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
             {
                 var entity = new LocationEntity
                 {
-                    Id = locationId,
+                    Id = Guid.NewGuid(),
                     Start = linearLocationDomain.Start,
                     End = linearLocationDomain.End,
                     Discriminator = "LinearLocation"
@@ -46,9 +46,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
 
                 if (linearLocationDomain.Route != null)
                 {
-                    var routeId = Guid.NewGuid();
-                    entity.RouteId = routeId;
-                    entity.Route = linearLocationDomain.Route.ToEntity(routeId);
+                    var routeEntity = linearLocationDomain.Route.ToEntity();
+
+                    entity.RouteId = routeEntity.Id;
+                    entity.Route = routeEntity;
                 }
 
                 return entity;
@@ -56,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
 
             return new LocationEntity
             {
-                Id = locationId,
+                Id = Guid.NewGuid(),
                 UniqueIdentifier = domain.UniqueIdentifier,
                 Discriminator = "SectionLocation"
             };

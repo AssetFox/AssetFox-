@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
             return new SimpleRoute(entity.UniqueIdentifier);
         }
 
-        public static RouteEntity ToEntity(this Route domain, Guid routeId)
+        public static RouteEntity ToEntity(this Route domain)
         {
             if (domain == null)
             {
@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
             {
                 return new RouteEntity
                 {
-                    Id = routeId,
+                    Id = Guid.NewGuid(),
                     Direction = directionalRouteDomain.Direction,
                     UniqueIdentifier = directionalRouteDomain.UniqueIdentifier,
                     Discriminator = "DirectionalRoute"
@@ -44,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
 
             return new RouteEntity
             {
-                Id = routeId,
+                Id = Guid.NewGuid(),
                 UniqueIdentifier = domain.UniqueIdentifier,
                 Discriminator = "SimpleRoute"
             };

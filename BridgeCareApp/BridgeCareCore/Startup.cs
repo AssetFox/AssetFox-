@@ -10,8 +10,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
+using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace BridgeCareCore
 {
@@ -35,10 +37,16 @@ namespace BridgeCareCore
 
             services.AddScoped<IRepository<Network>, NetworkRepository>();
             services.AddScoped<IRepository<Segment>, SegmentRepository>();
+            services.AddScoped<IRepository<AttributeDatum<double>>, AttributeDatumRepository<double>>();
+            services.AddScoped<IRepository<AttributeDatum<string>>, AttributeDatumRepository<string>>();
             services.AddScoped<IRepository<AttributeMetaDatum>, SegmentationMetaDataRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
+            //services.AddScoped<IRepository<DataMinerAttribute>, AttributeRepository>();
             services.AddScoped<INetworkDataRepository, NetworkRepository>();
             services.AddScoped<ISegmentDataRepository, SegmentRepository>();
+            services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<double>>();
+            services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<string>>();
+            services.AddScoped<IAttributeDataRepository, AttributeRepository>();
             services.AddScoped<ISaveChanges, SaveAllChanges>();
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataMiner;
@@ -8,9 +9,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace BridgeCareCore.Controllers
 {
@@ -18,41 +21,55 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : ControllerBase
     {
-        private readonly IRepository<Network> NetworkRepository;
-        private readonly IRepository<Segment> SegmentRepository;
         private readonly ILogger<SegmentationController> _logger;
         private readonly IRepository<AttributeMetaDatum> AttributeMetaDataRepository;
-        private readonly INetworkDataRepository NetorkRepository;
+        private readonly INetworkDataRepository NetworkRepository;
+        private readonly IAttributeDataRepository AttributeRepository;
+        private readonly IAttributeDatumDataRepository AttributeDatumDataRepository;
+        private readonly ISaveChanges Repositories;
 
-        public AggregationController(ILogger<SegmentationController> logger, IRepository<Network> networkRepository,
-            IRepository<Segment> segmentRepository,
-            IRepository<AttributeMetaDatum> attributeRepo, INetworkDataRepository partialNetworkRepo)
+        public AggregationController(ILogger<SegmentationController> logger,
+            IRepository<AttributeMetaDatum> attributeRepo,
+            INetworkDataRepository partialNetworkRepo,
+            IAttributeDatumDataRepository attributeDatumDataRepository,
+            IAttributeDataRepository attributeRepository,
+            ISaveChanges repositories)
         {
-            NetworkRepository = networkRepository;
-            SegmentRepository = segmentRepository;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             AttributeMetaDataRepository = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
-            NetorkRepository = partialNetworkRepo ?? throw new ArgumentNullException(nameof(partialNetworkRepo));
+            NetworkRepository = partialNetworkRepo ?? throw new ArgumentNullException(nameof(partialNetworkRepo));
+            AttributeRepository = attributeRepository ?? throw new ArgumentNullException(nameof(attributeRepository));
+            AttributeDatumDataRepository = attributeDatumDataRepository ?? throw new ArgumentNullException(nameof(attributeDatumDataRepository));
+            Repositories = repositories ?? throw new ArgumentNullException(nameof(repositories));
+
         }
 
         [HttpPost]
         [Route("AssignNetworkData")]
         public async Task<IActionResult> AssignNetworkData([FromBody] Guid networkId)
         {
-            var network = NetorkRepository.GetNetworkWithNoAttributeData(networkId);
+            var network = NetworkRepository.GetNetworkWithNoAttributeData(networkId);
 
             var attributeMetaData = AttributeMetaDataRepository.All();
             //var attributeJsonText = System.IO.File.ReadAllText("attributeMetaData.json");
             //var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
 
             var attributeData = new List<IAttributeDatum>();
-            var attributes = new List<Attribute>();
+            var attributes = new List<DataMinerAttribute>();
 
             // Create the list of attributes
             foreach (var attributeMetaDatum in attributeMetaData)
             {
                 var attribute = AttributeFactory.Create(attributeMetaDatum);
                 attributes.Add(attribute);
+            }
+            // add the attributes to db context
+            if (attributes.Any())
+            {
+                foreach (var attribute in attributes)
+                {
+                    AttributeRepository.AddAttribute(attribute);
+                }
             }
 
             // Create the attribute data for each attribute
@@ -63,11 +80,24 @@ namespace BridgeCareCore.Controllers
 
             foreach (var segment in network.Segments)
             {
+                // assign attribute data to segments
                 segment.AssignAttributeData(attributeData);
+                // add attribute data to db context
+                foreach (var attributeDatum in segment.AssignedData)
+                {
+                    if (attributeDatum.Attribute.DataType == "NUMERIC")
+                    {
+                        var numericAttributeDatum = (AttributeDatum<double>)Convert.ChangeType(attributeDatum, typeof(AttributeDatum<double>));
+                        AttributeDatumDataRepository.AddAttributeDatum(numericAttributeDatum, segment.Location.UniqueIdentifier);
+                    }
+                    else
+                    {
+                        var textAttributeDatum = (AttributeDatum<string>)Convert.ChangeType(attributeDatum, typeof(AttributeDatum<string>));
+                        AttributeDatumDataRepository.AddAttributeDatum(textAttributeDatum, segment.Location.UniqueIdentifier);
+                    }
+                }
             }
 
-            NetworkRepository.Update(network);
-            
             //foreach (var segmentEntity in networkEntity.SegmentEntities)
             //{
             //    var segment = new Segment(LocationEntityToLocation.CreateFromEntity(segmentEntity.LocationEntity));
@@ -83,8 +113,9 @@ namespace BridgeCareCore.Controllers
             //SegmentRepository.AddAll()
             //var network = new Network(segments, networkGuid, networkEntity.Name);
 
-
-            return Ok();
+            Repositories.SaveChanges();
+            _logger.LogInformation("Attributes & attribute data have been created");
+            return Ok(network);
         }
     }
 }

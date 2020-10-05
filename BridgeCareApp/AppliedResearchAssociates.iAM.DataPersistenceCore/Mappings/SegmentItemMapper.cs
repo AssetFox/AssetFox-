@@ -27,33 +27,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
         }
             
 
-        public static SegmentEntity ToEntity(this Segment domain, Guid networkId, string uniqueIdentifier = "")
+        public static SegmentEntity ToEntity(this Segment domain, Guid networkId)
         {
-            var locationId = Guid.NewGuid();
+            var locationEntity = domain.Location.ToEntity();
 
             var segmentEntity = new SegmentEntity
             {
                 Id = Guid.NewGuid(),
                 NetworkId = networkId,
-                UniqueIdentifier = uniqueIdentifier,
-                LocationId = locationId,
-                Location = domain.Location.ToEntity(locationId)
+                UniqueIdentifier = locationEntity.UniqueIdentifier,
+                LocationId = locationEntity.Id,
+                Location = locationEntity
             };
-
-            /*var numericValues = domain.AssignedData.Where(d => d.Attribute.DataType == "NUMERIC")
-                .Select(d =>
-                    domain.GetAggregatedValuesByYear(d.Attribute, AggregationRuleFactory.CreateNumericRule(d.Attribute)))
-                .Select(d => d.ToEntity(segmentEntity.Id, locationId));
-
-            var textValues = domain.AssignedData.Where(d => d.Attribute.DataType == "TEXT")
-                .Select(d =>
-                    domain.GetAggregatedValuesByYear(d.Attribute, AggregationRuleFactory.CreateTextRule(d.Attribute)))
-                .Select(d => d.ToEntity(segmentEntity.Id, locationId));
-
-            foreach (var entity in numericValues)
-            {
-                segmentEntity.AttributeData.Add((AttributeDatumEntity)Convert.ChangeType(entity, typeof(AttributeDatumEntity)));
-            }*/
 
             return segmentEntity;
         }

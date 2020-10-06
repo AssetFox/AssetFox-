@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
@@ -116,6 +117,44 @@ namespace BridgeCareCore.Controllers
             Repositories.SaveChanges();
             _logger.LogInformation("Attributes & attribute data have been created");
             return Ok(network);
+        }
+
+        [HttpPost]
+        [Route("AggregateNetworkData")]
+        public async Task<IActionResult> AggregateNetworkData([FromBody] Guid networkId)
+        {
+            var attributeMetaData = AttributeMetaDataRepository.All();
+
+            var attributes = new List<DataMinerAttribute>();
+
+            // Create the list of attributes
+            foreach (var attributeMetaDatum in attributeMetaData)
+            {
+                var attribute = AttributeFactory.Create(attributeMetaDatum);
+                attributes.Add(attribute);
+            }
+
+            var network = NetworkRepository.GetNetworkWillAllData(networkId);
+
+            var aggregatedNumericResults = new List<(DataMinerAttribute attribute, (int year, double value))>();
+            var aggregatedTextResults = new List<(DataMinerAttribute attribute, (int year, string value))>();
+            foreach (var attribute in attributes)
+            {
+                foreach (var segment in network.Segments)
+                {
+                    switch (attribute.DataType)
+                    {
+                    case "NUMERIC":
+                        aggregatedNumericResults.AddRange(segment.GetAggregatedValuesByYear(attribute, AggregationRuleFactory.CreateNumericRule(attribute)));
+                        break;
+                    case "TEXT":
+                        aggregatedTextResults.AddRange(segment.GetAggregatedValuesByYear(attribute, AggregationRuleFactory.CreateTextRule(attribute)));
+                        break;
+                    }
+                }
+            }
+
+            return Ok();
         }
     }
 }

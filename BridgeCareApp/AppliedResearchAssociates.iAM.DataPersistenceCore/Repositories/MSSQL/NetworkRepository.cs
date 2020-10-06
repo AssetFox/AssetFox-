@@ -17,6 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Network GetNetworkWithNoAttributeData(Guid id)
         {
+            // if there is no id match, it throws an exception that sequence contains no element.
             var entity = context.Networks
                 .Include(n => n.SegmentEntities)
                 .ThenInclude(s => s.Location)
@@ -29,7 +30,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public override Network Update(Network network)
         {
-             //var networkEntity = context.Networks.Find(network.Id);
             // mapping from domain to entity
             var networkEntity = network.ToEntity();
             networkEntity.SegmentEntities = new List<SegmentEntity>();
@@ -41,6 +41,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             context.Networks.Update(networkEntity);
             return base.Update(network);
+        }
+
+        public Network GetNetworkWillAllData(Guid id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

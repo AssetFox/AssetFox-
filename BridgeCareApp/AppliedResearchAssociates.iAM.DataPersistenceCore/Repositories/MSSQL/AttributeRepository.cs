@@ -5,7 +5,7 @@ using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.At
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AttributeRepository : MSSQLRepository<DataMinerAttribute, AttributeEntity>, IAttributeDataRepository
+    public class AttributeRepository : MSSQLRepository<DataMinerAttribute>, IAttributeDataRepository
     {
         public AttributeRepository(IAMContext context) : base(context) { }
 

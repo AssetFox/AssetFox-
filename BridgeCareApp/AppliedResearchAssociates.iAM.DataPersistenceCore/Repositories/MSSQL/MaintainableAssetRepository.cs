@@ -8,12 +8,12 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Inter
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class MaintainableAssetRepository : MSSQLRepository<MaintainableAsset, MaintainableAssetEntity>, IMaintainableAssetRepository
+    public class MaintainableAssetRepository : MSSQLRepository<MaintainableAsset>, IMaintainableAssetRepository
     {
         public MaintainableAssetRepository(IAMContext context) : base(context)
         {
         }
 
-        public void AddNetworkSegments(IEnumerable<MaintainableAsset> maintainableAssets, Guid networkId) => context.MaintainableAssets.AddRange(maintainableAssets.Select(d => d.ToEntity(networkId)));
+        public void AddNetworkMaintainableAssets(IEnumerable<MaintainableAsset> maintainableAssets, Guid networkId) => context.MaintainableAssets.AddRange(maintainableAssets.Select(d => d.ToEntity(networkId)));
     }
 }

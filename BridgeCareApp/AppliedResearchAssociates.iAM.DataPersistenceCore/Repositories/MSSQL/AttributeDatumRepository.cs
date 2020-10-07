@@ -6,7 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Inter
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AttributeDatumRepository<T> : MSSQLRepository<AttributeDatum<T>, AttributeDatumEntity>, IAttributeDatumDataRepository
+    public class AttributeDatumRepository<T> : MSSQLRepository<AttributeDatum<T>>, IAttributeDatumDataRepository
     {
         public AttributeDatumRepository(IAMContext context) : base(context)
         {

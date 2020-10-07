@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class NetworkRepository : MSSQLRepository<Network, NetworkEntity>, INetworkDataRepository
+    public class NetworkRepository : MSSQLRepository<Network>, INetworkDataRepository
     {
         public NetworkRepository(IAMContext context) : base(context)
         {

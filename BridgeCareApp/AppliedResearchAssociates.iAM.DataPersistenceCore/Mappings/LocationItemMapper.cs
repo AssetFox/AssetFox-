@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
@@ -8,6 +9,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
     {
         public static Location ToDomain(this LocationEntity entity)
         {
+            
+
             if (entity == null)
             {
                 throw new NullReferenceException("Cannot map null Location entity to Location domain");

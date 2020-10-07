@@ -51,7 +51,7 @@ namespace BridgeCareCore.Controllers
             network.Name = name;
 
             NetworkRepository.AddNetworkWithoutAnyData(network);
-            SegmentRepository.AddNetworkSegments(network.MaintainableAssets, network.Id);
+            SegmentRepository.AddNetworkMaintainableAssets(network.MaintainableAssets, network.Id);
 
             Repositories.SaveChanges(); // this will save all of the data in the IAMContext object
             _logger.LogInformation($"a network with name : {network.Name} has been created");

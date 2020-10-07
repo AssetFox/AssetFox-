@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public abstract class MSSQLRepository<TDomain, TEntity>
+    public abstract class MSSQLRepository<TDomain>
         : IRepository<TDomain> where TDomain : class
     {
         protected IAMContext context;

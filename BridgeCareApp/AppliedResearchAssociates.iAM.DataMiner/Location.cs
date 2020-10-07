@@ -2,6 +2,7 @@
 {
     public abstract class Location
     {
+
         public Location(string uniqueIdentifier)
         {
             UniqueIdentifier = uniqueIdentifier;

@@ -1,15 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
 {
     public class MaintainableAsset
     {
-        public MaintainableAsset(Location location)
+        public Guid Id { get; }
+        public MaintainableAsset(Location location, Guid id)
         {
+            Id = id;
             Location = location;
         }
 

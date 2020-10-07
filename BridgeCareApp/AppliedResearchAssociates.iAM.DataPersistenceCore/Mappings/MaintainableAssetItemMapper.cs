@@ -4,7 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
 {
-    public static class SegmentItemMapper
+    public static class MaintainableAssetItemMapper
     {
         public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
         {
@@ -18,23 +18,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
                 throw new NullReferenceException("Cannot map null Location entity to Location domain");
             }
 
-            return new MaintainableAsset(entity.Location.ToDomain());
+            return new MaintainableAsset(entity.Location.ToDomain(), entity.Id);
         }
 
         public static MaintainableAssetEntity ToEntity(this MaintainableAsset domain, Guid networkId)
         {
             var locationEntity = domain.Location.ToEntity();
 
-            var segmentEntity = new MaintainableAssetEntity
+            var maintainableAssetEntity = new MaintainableAssetEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 NetworkId = networkId,
                 UniqueIdentifier = locationEntity.UniqueIdentifier,
                 LocationId = locationEntity.Id,
                 Location = locationEntity
             };
 
-            return segmentEntity;
+            return maintainableAssetEntity;
         }
     }
 }

@@ -25,6 +25,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<AttributeDatumEntity> AttributeData { get; set; }
 
-        public virtual ICollection<AggregationResultEntity> AggregatedResults { get; set; }
+        public virtual ICollection<AggregatedResultEntity> AggregatedResults { get; set; }
     }
 }

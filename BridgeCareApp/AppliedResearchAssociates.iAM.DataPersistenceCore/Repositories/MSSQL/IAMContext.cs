@@ -26,8 +26,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 #if DEBUG
-            //optionsBuilder.UseSqlServer("data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
-            optionsBuilder.UseSqlServer("data source=localhost;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
+            optionsBuilder.UseSqlServer("data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
+            //optionsBuilder.UseSqlServer("data source=localhost;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
 #endif
         }
 
@@ -73,10 +73,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<AggregationResultEntity>(entity =>
+            modelBuilder.Entity<AggregatedResultEntity>(entity =>
             {
                 entity.HasOne(d => d.Attribute)
-                    .WithOne(p => p.AggregationResult)
+                    .WithOne(p => p.AggregatedResult)
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.Segment)
@@ -96,6 +96,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public DbSet<AttributeDatumEntity> AttributeData { get; set; }
 
-        public DbSet<AggregationResultEntity> AggregationResults { get; set; }
+        public DbSet<AggregatedResultEntity> AggregatedResults { get; set; }
     }
 }

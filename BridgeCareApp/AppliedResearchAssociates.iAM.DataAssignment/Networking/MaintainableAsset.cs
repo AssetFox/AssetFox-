@@ -4,20 +4,20 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
 {
     public class MaintainableAsset
     {
         public Guid Id { get; }
-        public MaintainableAsset(Location location, Guid id)
+        public MaintainableAsset(Guid id, Location location, Guid id)
         {
             Id = id;
             Location = location;
         }
 
-        public IEnumerable<(Attribute attribute, (int year, T value))> GetAggregatedValuesByYear<T>(Attribute attribute, AggregationRule<T> aggregationRule)
+        public IEnumerable<(DataMinerAttribute attribute, (int year, T value))> GetAggregatedValuesByYear<T>(DataMinerAttribute attribute, AggregationRule<T> aggregationRule)
         {
             var specifiedData = AssignedData.Where(_ => _.Attribute.Id == attribute.Id);
             return aggregationRule.Apply(specifiedData, attribute);
@@ -38,6 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
             }
         }
 
+        public Guid Id { get; }
         public List<IAttributeDatum> AssignedData { get; } = new List<IAttributeDatum>();
 
         public Location Location { get; }

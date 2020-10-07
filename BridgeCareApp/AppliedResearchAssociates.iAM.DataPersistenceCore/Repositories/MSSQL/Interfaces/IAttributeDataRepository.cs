@@ -1,9 +1,11 @@
-﻿using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces
 {
     public interface IAttributeDataRepository
     {
-        void AddAttribute(DataMinerAttribute domain);
+        void AddAttributes(List<Attribute> domains);
+        void AddAttribute(Attribute domain);
     }
 }

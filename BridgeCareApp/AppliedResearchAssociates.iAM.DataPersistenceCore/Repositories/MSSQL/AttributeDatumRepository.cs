@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -8,18 +8,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AttributeDatumRepository<T> : MSSQLRepository<AttributeDatum<T>>, IAttributeDatumDataRepository
     {
-        public AttributeDatumRepository(IAMContext context) : base(context)
-        {
-        }
+        public AttributeDatumRepository(IAMContext context) : base(context) { }
 
-#pragma warning disable CS0693 // Type parameter has the same name as the type parameter from outer type
-
-        public void AddAttributeDatum<T>(AttributeDatum<T> domain, string uniqueIdentifier)
+        public void AddAttributeData<T>(IEnumerable<AttributeDatum<T>> domains, Guid segmentId)
         {
+            if (!context.Segments.Any(e => e.Id == segmentId))
+            {
+                throw new RowNotInTableException($"No segment was found using given the id: {segmentId}");
+            }
+
             var maintainableAssetEntity = context.MaintainableAssets
-                .First(e => e.UniqueIdentifier == uniqueIdentifier);
+                .Single(e => e.Id == segmentId);
 
-            context.AttributeData.Add(domain.ToEntity(maintainableAssetEntity.Id, maintainableAssetEntity.LocationId));
+            context.AttributeData.AddRange(domains.Select(d => d.ToEntity(maintainableAssetEntity.Id, maintainableAssetEntity.LocationId)));
         }
 
 #pragma warning restore CS0693 // Type parameter has the same name as the type parameter from outer type

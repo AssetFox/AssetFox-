@@ -7,5 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.I
     public interface IMaintainableAssetRepository
     {
         void AddNetworkMaintainableAssets(IEnumerable<MaintainableAsset> maintainableAssets, Guid networkId);
+        IEnumerable<Segment> GetNetworkSegmentsWithAssignedData(Guid networkId);
     }
 }

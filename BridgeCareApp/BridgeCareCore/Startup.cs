@@ -43,6 +43,8 @@ namespace BridgeCareCore
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
             services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<double>>();
             services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<string>>();
+            services.AddScoped<IAggregatedResultDataRepository, AggregatedResultRepository<double>>();
+            services.AddScoped<IAggregatedResultDataRepository, AggregatedResultRepository<string>>();
             services.AddScoped<IAttributeDataRepository, AttributeRepository>();
             services.AddScoped<ISaveChanges, SaveAllChanges>();
         }

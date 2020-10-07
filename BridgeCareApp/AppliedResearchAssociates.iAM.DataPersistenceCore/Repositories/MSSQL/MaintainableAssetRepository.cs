@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -15,5 +16,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public void AddNetworkMaintainableAssets(IEnumerable<MaintainableAsset> maintainableAssets, Guid networkId) => context.MaintainableAssets.AddRange(maintainableAssets.Select(d => d.ToEntity(networkId)));
+
+        public IEnumerable<Segment> GetNetworkSegmentsWithAssignedData(Guid networkId) => context.Segments.Where(s => s.NetworkId == networkId)
+            .Include(s => s.Location)
+            .Include(s => s.AttributeData)
+            .ThenInclude(a => a.Attribute)
+            .Select(s => s.ToDomain());
     }
 }

@@ -9,6 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         Network GetNetworkWithNoAttributeData(Guid id);
 
-        Network GetNetworkWillAllData(Guid id);
+        Network GetNetworkWithAllData(Guid id);
     }
 }

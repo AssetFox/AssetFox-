@@ -1,13 +1,13 @@
 ﻿using System;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataAssignment.Aggregation
 {
     public static class AggregationRuleFactory
     {
-        public static NumericAggregationRule CreateNumericRule(Attribute attribute)
+        public static NumericAggregationRule CreateNumericRule(DataMinerAttribute attribute)
         {
-            switch (attribute.DataType)
+            switch (attribute.AggregationRuleType)
             {
             case "AVERAGE":
                 return new AverageAggregationRule();
@@ -17,9 +17,9 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Aggregation
             }
         }
 
-        public static TextAggregationRule CreateTextRule(Attribute attribute)
+        public static TextAggregationRule CreateTextRule(DataMinerAttribute attribute)
         {
-            switch (attribute.DataType)
+            switch (attribute.AggregationRuleType)
             {
             case "PREDOMINANT":
                 return new PredominantAggregationRule();

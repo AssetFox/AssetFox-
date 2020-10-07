@@ -21,11 +21,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
                 return new LinearLocation(
                     entity.Route.ToDomain(),
                     entity.UniqueIdentifier,
-                    entity.Start.Value,
-                    entity.End.Value);
+                    entity.Start ?? 0,
+                    entity.End ?? 0);
             }
 
-            return new SectionLocation(entity.UniqueIdentifier);
+            if (entity.Discriminator == "SectionLocation")
+            {
+                return new SectionLocation(entity.UniqueIdentifier);
+            }
+
+            throw new InvalidOperationException("Cannot determine Location entity type");
         }
 
         public static LocationEntity ToEntity(this Location domain)
@@ -33,6 +38,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
             if (domain == null)
             {
                 throw new NullReferenceException("Cannot map null Location domain to Location entity");
+            }
+
+            if (string.IsNullOrEmpty(domain.UniqueIdentifier))
+            {
+                throw new InvalidOperationException("Location has no unique identifier");
             }
 
             if (domain is LinearLocation linearLocationDomain)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
@@ -16,6 +17,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Network GetNetworkWithNoAttributeData(Guid id)
         {
+            if (!context.Networks.Any(n => n.Id == id))
+            {
+                throw new RowNotInTableException($"Cannot find network with the given id: {id}");
+            }
             // if there is no id match, it throws an exception that sequence contains no element.
             var entity = context.Networks
                 .Include(n => n.MaintainableAssetEntities)
@@ -42,9 +47,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return base.Update(network);
         }
 
-        public Network GetNetworkWillAllData(Guid id)
+        public Network GetNetworkWithAllData(Guid id)
         {
-            throw new NotImplementedException();
+            if (!context.Networks.Any(n => n.Id == id))
+            {
+                throw new RowNotInTableException($"Cannot find network with the given id: {id}");
+            }
+
+            var entity = context.Networks
+                .Include(n => n.Segments)
+                .ThenInclude(s => s.Location)
+                .Include(n => n.Segments)
+                .ThenInclude(s => s.AttributeData)
+                .ThenInclude(a => a.Attribute)
+                .Single(n => n.Id == id);
+
+            return entity.ToDomain();
         }
     }
 }

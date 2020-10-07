@@ -5,7 +5,7 @@
       "defaultValue": 10,
       "maximum": 100,
       "minimum": 1,
-      "connectionString": "data source=localhost;Database=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;",
+      "connectionString": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
       "dataSource": "MSSQL",
       "type": "NUMERIC",
       "location": "section",
@@ -21,7 +21,7 @@
       dbo.PennDot_Report_A WHERE
       (ISNUMERIC(ADTTOTAL) =
       1)",
-      "aggregationRule": "average",
+      "aggregationRule": "AVERAGE",
       "isCalculated": false,
       "isAscending": true
     }

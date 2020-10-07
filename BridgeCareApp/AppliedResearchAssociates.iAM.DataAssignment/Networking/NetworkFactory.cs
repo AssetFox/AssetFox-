@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
         public static Network CreateNetworkFromAttributeDataRecords(IEnumerable<IAttributeDatum> attributeData)
         {
             var maintenanceAssets = (from attributeDatum in attributeData
-                                     let maintenanceAsset = new MaintainableAsset(attributeDatum.Location, Guid.NewGuid())
+                                     let maintenanceAsset = new MaintainableAsset(Guid.NewGuid(), attributeDatum.Location, Guid.NewGuid())
                                      select maintenanceAsset)
                     .ToList();
             return new Network(maintenanceAssets, Guid.NewGuid());

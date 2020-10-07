@@ -4,6 +4,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.I
 {
     public interface IAttributeDatumDataRepository
     {
-        void AddAttributeDatum<T>(AttributeDatum<T> domain, string locationUniqueIdentifier);
+        void AddAttributeData<T>(IEnumerable<AttributeDatum<T>> domains, Guid segmentId);
     }
 }

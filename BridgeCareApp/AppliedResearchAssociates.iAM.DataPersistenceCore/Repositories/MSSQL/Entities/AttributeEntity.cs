@@ -9,15 +9,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         [Key]
         public Guid Id { get; set; }
-
+        [Required]
         public string Name { get; set; }
-
+        [Required]
+        public string DataType { get; set; }
+        [Required]
+        public string AggregationRuleType { get; set; }
+        [Required]
         public string Command { get; set; }
-
+        [Required]
         public ConnectionType ConnectionType { get; set; }
 
         public virtual ICollection<AttributeDatumEntity> AttributeData { get; set; }
 
-        public virtual AggregationResultEntity AggregationResult { get; set; }
+        public virtual AggregatedResultEntity AggregatedResult { get; set; }
     }
 }

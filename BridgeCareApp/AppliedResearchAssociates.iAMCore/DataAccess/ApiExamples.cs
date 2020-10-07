@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAMCore.DataAccess
             var attribute = AttributeFactory.Create(attributeMetaDatum);
             var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
 
-            return NetworkFromSegmentProject.Segmenter.CreateNetworkFromAttributeDataRecords(attributeData);
+            return NetworkFromSegmentProject.NetworkFactory.CreateNetworkFromAttributeDataRecords(attributeData);
         }
 
         public void AssignDataToSegments(Guid networkGuid)
@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAMCore.DataAccess
                 attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
             }
 
-            Aggregator.AssignAttributeDataToSegments(attributeData, network.Segments);
+            Aggregator.AssignAttributeDataToMaintainableAsset(attributeData, network.MaintainableAssets);
         }
 
         public void AggregateNetwork(Guid networkGuid)
@@ -74,13 +74,13 @@ namespace AppliedResearchAssociates.iAMCore.DataAccess
             }
 
             // Assign the attribute data to segments
-            Aggregator.AssignAttributeDataToSegments(attributeData, network.Segments);
+            Aggregator.AssignAttributeDataToMaintainableAsset(attributeData, network.MaintainableAssets);
 
             //var aggregatedNumericResults = new DataMinerAttribute attribute (IEnumerable<(int year, double value);
             var aggregatedTextResults = new List<(DataMinerAttribute attribute, (int year, string value))>();
             foreach (var attribute in attributes)
             {
-                foreach (var segment in network.Segments)
+                foreach (var segment in network.MaintainableAssets)
                 {
                     switch (attribute.DataType)
                     {

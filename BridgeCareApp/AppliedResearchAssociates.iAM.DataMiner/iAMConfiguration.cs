@@ -1,6 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-
-namespace AppliedResearchAssociates.iAM.DataMiner
+﻿namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public static class iAMConfiguration
     {

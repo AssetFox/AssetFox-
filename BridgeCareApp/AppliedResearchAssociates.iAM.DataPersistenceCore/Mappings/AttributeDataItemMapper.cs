@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
 {
     public static class AttributeDataItemMapper
     {
-
-        public static AttributeDatumEntity ToEntity<T>(this AttributeDatum<T> domain, Guid segmentId, Guid locationId)
+        public static AttributeDatumEntity ToEntity<T>(this AttributeDatum<T> domain, Guid maintainableAssetId, Guid locationId)
         {
             if (domain == null)
             {
@@ -27,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
                 {
                     Id = Guid.NewGuid(),
                     AttributeId = domain.Attribute.Id,
-                    SegmentId = segmentId,
+                    MaintainableAssetId = maintainableAssetId,
                     LocationId = locationId,
                     Discriminator = "NumericAttributeDatum",
                     TimeStamp = domain.TimeStamp,
@@ -39,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
             {
                 Id = Guid.NewGuid(),
                 AttributeId = domain.Attribute.Id,
-                SegmentId = segmentId,
+                MaintainableAssetId = maintainableAssetId,
                 LocationId = locationId,
                 Discriminator = "TextAttributeDatum",
                 TimeStamp = domain.TimeStamp,

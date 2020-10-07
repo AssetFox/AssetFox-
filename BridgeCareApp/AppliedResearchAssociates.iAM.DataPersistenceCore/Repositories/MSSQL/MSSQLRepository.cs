@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -11,6 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         : IRepository<TDomain> where TDomain : class
     {
         protected IAMContext context;
+
         public MSSQLRepository(IAMContext context)
         {
             this.context = context;

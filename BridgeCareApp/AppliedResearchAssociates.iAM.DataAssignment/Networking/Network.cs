@@ -5,13 +5,15 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
 {
     public class Network
     {
-        public ICollection<Segment> Segments { get; }
+        public ICollection<MaintainableAsset> MaintainableAssets { get; }
+
         public Guid Id { get; }
+
         public string Name { get; set; }
 
-        public Network(ICollection<Segment> segments, Guid id, string name = "")
+        public Network(ICollection<MaintainableAsset> maintainableAssets, Guid id, string name = "")
         {
-            Segments = segments;
+            MaintainableAssets = maintainableAssets;
             Id = id;
             Name = name;
         }

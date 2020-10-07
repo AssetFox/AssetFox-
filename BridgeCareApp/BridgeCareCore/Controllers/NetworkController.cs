@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
@@ -7,26 +6,24 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SegmentationController : ControllerBase
+    public class NetworkController : ControllerBase
     {
-        private readonly ISegmentDataRepository SegmentRepository;
-        private readonly ILogger<SegmentationController> _logger;
+        private readonly IMaintainableAssetRepository SegmentRepository;
+        private readonly ILogger<NetworkController> _logger;
         private readonly IRepository<AttributeMetaDatum> _SegmentationFileRepository;
         private readonly INetworkDataRepository NetworkRepository;
         private readonly ISaveChanges Repositories;
 
-        public SegmentationController(ILogger<SegmentationController> logger,
-            ISegmentDataRepository segmentRepo,
+        public NetworkController(ILogger<NetworkController> logger,
+            IMaintainableAssetRepository segmentRepo,
             IRepository<AttributeMetaDatum> segmentFileRepository,
             INetworkDataRepository networkRepo, ISaveChanges saveAll)
         {
@@ -50,11 +47,11 @@ namespace BridgeCareCore.Controllers
             var attribute = AttributeFactory.Create(attributeMetaData.FirstOrDefault());
             var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
 
-            var network = Segmenter.CreateNetworkFromAttributeDataRecords(attributeData);
+            var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(attributeData);
             network.Name = name;
 
             NetworkRepository.AddNetworkWithoutAnyData(network);
-            SegmentRepository.AddNetworkSegments(network.Segments, network.Id);
+            SegmentRepository.AddNetworkSegments(network.MaintainableAssets, network.Id);
 
             Repositories.SaveChanges(); // this will save all of the data in the IAMContext object
             _logger.LogInformation($"a network with name : {network.Name} has been created");

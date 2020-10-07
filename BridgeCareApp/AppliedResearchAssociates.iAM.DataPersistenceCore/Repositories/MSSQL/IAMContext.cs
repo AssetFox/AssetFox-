@@ -1,16 +1,15 @@
-﻿using System;
-using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
-using Microsoft.Extensions.Options;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class IAMContext : DbContext
     {
         private string ConnectionString;
-        public IAMContext() {}
+
+        public IAMContext() { }
+
         public IAMContext(DbContextOptions<IAMContext> options)
             : base(options)
         {
@@ -34,18 +33,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<SegmentEntity>(entity =>
+            modelBuilder.Entity<MaintainableAssetEntity>(entity =>
             {
                 entity.HasIndex(e => e.NetworkId);
                 entity.HasIndex(e => e.UniqueIdentifier);
 
                 entity.HasOne(d => d.Network)
-                    .WithMany(p => p.SegmentEntities)
+                    .WithMany(p => p.MaintainableAssetEntities)
                     .HasForeignKey(d => d.NetworkId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.Location)
-                    .WithOne(p => p.Segment)
+                    .WithOne(p => p.MaintainableAssetEntity)
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -70,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.Segment)
                     .WithMany(p => p.AttributeData)
-                    .HasForeignKey(d => d.SegmentId)
+                    .HasForeignKey(d => d.MaintainableAssetId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -82,17 +81,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.Segment)
                     .WithMany(p => p.AggregatedResults)
-                    .HasForeignKey(d => d.SegmentId)
+                    .HasForeignKey(d => d.MaintainableAssetId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }
 
         public DbSet<NetworkEntity> Networks { get; set; }
-        public DbSet<SegmentEntity> Segments { get; set; }
+
+        public DbSet<MaintainableAssetEntity> MaintainableAssets { get; set; }
+
         public DbSet<LocationEntity> Locations { get; set; }
-        public DbSet<RouteEntity> Routes { get; set; }
+
         public DbSet<AttributeEntity> Attributes { get; set; }
+
         public DbSet<AttributeDatumEntity> AttributeData { get; set; }
+
         public DbSet<AggregationResultEntity> AggregationResults { get; set; }
     }
 }

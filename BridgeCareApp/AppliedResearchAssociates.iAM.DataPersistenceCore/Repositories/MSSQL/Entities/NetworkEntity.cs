@@ -8,8 +8,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         [Key]
         public Guid Id { get; set; }
+
         public string Name { get; set; }
 
-        public ICollection<SegmentEntity> SegmentEntities { get; set; }
+        public ICollection<MaintainableAssetEntity> MaintainableAssetEntities { get; set; }
     }
 }

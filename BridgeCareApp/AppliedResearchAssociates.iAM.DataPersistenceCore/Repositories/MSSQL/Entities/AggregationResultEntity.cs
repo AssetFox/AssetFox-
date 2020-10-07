@@ -18,10 +18,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public double? NumericValue { get; set; }
 
-        public Guid SegmentId { get; set; }
+        public Guid MaintainableAssetId { get; set; }
 
-        [ForeignKey("SegmentId")]
-        public virtual SegmentEntity Segment { get; set; }
+        [ForeignKey("MaintainableAssetId")]
+        public virtual MaintainableAssetEntity Segment { get; set; }
 
         public Guid AttributeId { get; set; }
 

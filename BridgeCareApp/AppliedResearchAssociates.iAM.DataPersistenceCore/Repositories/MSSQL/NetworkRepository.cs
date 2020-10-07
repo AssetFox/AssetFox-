@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             // if there is no id match, it throws an exception that sequence contains no element.
             var entity = context.Networks
-                .Include(n => n.SegmentEntities)
+                .Include(n => n.MaintainableAssetEntities)
                 .ThenInclude(s => s.Location)
                 .Single(n => n.Id == id);
 
@@ -32,11 +31,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             // mapping from domain to entity
             var networkEntity = network.ToEntity();
-            networkEntity.SegmentEntities = new List<SegmentEntity>();
+            networkEntity.MaintainableAssetEntities = new List<MaintainableAssetEntity>();
             var id = network.Id;
-            foreach (var segment in network.Segments)
+            foreach (var segment in network.MaintainableAssets)
             {
-                networkEntity.SegmentEntities.Add(segment.ToEntity(id));
+                networkEntity.MaintainableAssetEntities.Add(segment.ToEntity(id));
             }
 
             context.Networks.Update(networkEntity);

@@ -6,7 +6,9 @@
         {
             UniqueIdentifier = uniqueIdentifier;
         }
+
         public string UniqueIdentifier { get; }
+
         public abstract bool MatchOn(Location location);
     }
 }

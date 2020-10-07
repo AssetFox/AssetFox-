@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -10,12 +8,12 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Inter
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class SegmentRepository : MSSQLRepository<Segment, SegmentEntity>, ISegmentDataRepository
+    public class MaintainableAssetRepository : MSSQLRepository<MaintainableAsset, MaintainableAssetEntity>, IMaintainableAssetRepository
     {
-        public SegmentRepository(IAMContext context) : base(context)
+        public MaintainableAssetRepository(IAMContext context) : base(context)
         {
         }
 
-        public void AddNetworkSegments(IEnumerable<Segment> segments, Guid networkId) => context.Segments.AddRange(segments.Select(d => d.ToEntity(networkId)));
+        public void AddNetworkSegments(IEnumerable<MaintainableAsset> maintainableAssets, Guid networkId) => context.MaintainableAssets.AddRange(maintainableAssets.Select(d => d.ToEntity(networkId)));
     }
 }

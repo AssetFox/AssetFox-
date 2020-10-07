@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
+﻿namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    class LocationRepository
+    internal class LocationRepository
     {
     }
 }

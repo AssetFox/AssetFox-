@@ -6,17 +6,19 @@ using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
 namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
 {
-    public class Segment
+    public class MaintainableAsset
     {
-        public Segment(Location segmentLocation)
+        public MaintainableAsset(Location location)
         {
-            Location = segmentLocation;
+            Location = location;
         }
+
         public IEnumerable<(Attribute attribute, (int year, T value))> GetAggregatedValuesByYear<T>(Attribute attribute, AggregationRule<T> aggregationRule)
         {
             var specifiedData = AssignedData.Where(_ => _.Attribute.Id == attribute.Id);
             return aggregationRule.Apply(specifiedData, attribute);
         }
+
         public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
         {
             foreach (var datum in attributeData)
@@ -27,11 +29,13 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
                 }
                 else
                 {
-                    // TODO: No matching segment for the current data. What do we do?
+                    // TODO: No matching maintainable asset for the current data. What do we do?
                 }
             }
         }
+
         public List<IAttributeDatum> AssignedData { get; } = new List<IAttributeDatum>();
+
         public Location Location { get; }
     }
 }

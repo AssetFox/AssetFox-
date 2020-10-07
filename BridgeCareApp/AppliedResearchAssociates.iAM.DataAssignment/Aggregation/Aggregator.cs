@@ -7,14 +7,14 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Aggregation
 {
     public static class Aggregator
     {
-        public static void AssignAttributeDataToSegments(
+        public static void AssignAttributeDataToMaintainableAsset(
             IEnumerable<IAttributeDatum> attributeData,
-            IEnumerable<Segment> networkSegments)
+            IEnumerable<MaintainableAsset> maintainableAssets)
         {
             foreach (var datum in attributeData)
             {
-                Segment matchingLocationSegment =
-                    networkSegments.
+                MaintainableAsset matchingLocationSegment =
+                    maintainableAssets.
                     FirstOrDefault(_ => datum.Location.MatchOn(_.Location));
 
                 if (matchingLocationSegment != null)

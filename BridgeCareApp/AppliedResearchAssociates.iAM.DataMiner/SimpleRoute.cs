@@ -4,7 +4,6 @@
     {
         public SimpleRoute(string name) : base(name)
         {
-
         }
 
         internal override bool MatchOn(Route route)

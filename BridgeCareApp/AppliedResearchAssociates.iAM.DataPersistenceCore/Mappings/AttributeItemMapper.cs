@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 

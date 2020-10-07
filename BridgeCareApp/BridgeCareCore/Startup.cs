@@ -1,19 +1,17 @@
+using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
+using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
-using AppliedResearchAssociates.iAM.DataMiner;
-using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace BridgeCareCore
 {
@@ -36,14 +34,13 @@ namespace BridgeCareCore
             services.AddDataAccessServices(Configuration.GetConnectionString("BridgeCareConnex"));
 
             services.AddScoped<IRepository<Network>, NetworkRepository>();
-            services.AddScoped<IRepository<Segment>, SegmentRepository>();
+            services.AddScoped<IRepository<MaintainableAsset>, MaintainableAssetRepository>();
             services.AddScoped<IRepository<AttributeDatum<double>>, AttributeDatumRepository<double>>();
             services.AddScoped<IRepository<AttributeDatum<string>>, AttributeDatumRepository<string>>();
-            services.AddScoped<IRepository<AttributeMetaDatum>, SegmentationMetaDataRepository>();
+            services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
-            //services.AddScoped<IRepository<DataMinerAttribute>, AttributeRepository>();
             services.AddScoped<INetworkDataRepository, NetworkRepository>();
-            services.AddScoped<ISegmentDataRepository, SegmentRepository>();
+            services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
             services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<double>>();
             services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<string>>();
             services.AddScoped<IAttributeDataRepository, AttributeRepository>();
@@ -53,8 +50,6 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //UpdateDatabase(app);
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

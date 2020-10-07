@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Mongo
 {
@@ -12,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Mongo
         {
             //this.context = context;
         }*/
+
         public virtual TDomain Add(TDomain entity)
         {
             throw new NotImplementedException();

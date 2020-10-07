@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
-using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -22,14 +19,14 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : ControllerBase
     {
-        private readonly ILogger<SegmentationController> _logger;
+        private readonly ILogger<NetworkController> _logger;
         private readonly IRepository<AttributeMetaDatum> AttributeMetaDataRepository;
         private readonly INetworkDataRepository NetworkRepository;
         private readonly IAttributeDataRepository AttributeRepository;
         private readonly IAttributeDatumDataRepository AttributeDatumDataRepository;
         private readonly ISaveChanges Repositories;
 
-        public AggregationController(ILogger<SegmentationController> logger,
+        public AggregationController(ILogger<NetworkController> logger,
             IRepository<AttributeMetaDatum> attributeRepo,
             INetworkDataRepository partialNetworkRepo,
             IAttributeDatumDataRepository attributeDatumDataRepository,
@@ -42,7 +39,6 @@ namespace BridgeCareCore.Controllers
             AttributeRepository = attributeRepository ?? throw new ArgumentNullException(nameof(attributeRepository));
             AttributeDatumDataRepository = attributeDatumDataRepository ?? throw new ArgumentNullException(nameof(attributeDatumDataRepository));
             Repositories = repositories ?? throw new ArgumentNullException(nameof(repositories));
-
         }
 
         [HttpPost]
@@ -79,7 +75,7 @@ namespace BridgeCareCore.Controllers
                 attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
             }
 
-            foreach (var segment in network.Segments)
+            foreach (var segment in network.MaintainableAssets)
             {
                 // assign attribute data to segments
                 segment.AssignAttributeData(attributeData);
@@ -104,9 +100,7 @@ namespace BridgeCareCore.Controllers
             //    var segment = new Segment(LocationEntityToLocation.CreateFromEntity(segmentEntity.LocationEntity));
             //    segment.AssignAttributeData(attributeData);
 
-            //    segments.Add(new SegmentEntity
-            //    {
-            //        AttributeData = (ICollection<AttributeDatumEntity>)segment.AssignedData,
+            // segments.Add(new SegmentEntity { AttributeData = (ICollection<AttributeDatumEntity>)segment.AssignedData,
 
             //    });
             //}
@@ -140,13 +134,14 @@ namespace BridgeCareCore.Controllers
             var aggregatedTextResults = new List<(DataMinerAttribute attribute, (int year, string value))>();
             foreach (var attribute in attributes)
             {
-                foreach (var segment in network.Segments)
+                foreach (var segment in network.MaintainableAssets)
                 {
                     switch (attribute.DataType)
                     {
                     case "NUMERIC":
                         aggregatedNumericResults.AddRange(segment.GetAggregatedValuesByYear(attribute, AggregationRuleFactory.CreateNumericRule(attribute)));
                         break;
+
                     case "TEXT":
                         aggregatedTextResults.AddRange(segment.GetAggregatedValuesByYear(attribute, AggregationRuleFactory.CreateTextRule(attribute)));
                         break;

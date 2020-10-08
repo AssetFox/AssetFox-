@@ -8,18 +8,7 @@
     "dataSource": "MSSQL",
     "type": "NUMERIC",
     "location": "section",
-    "command": "SELECT concat(BRKEY, Bridge_ID) AS UniqueIdentifier,
-    CAST(INSPDATE AS
-    DATETIME) AS
-    DateTime,
-    CAST(REPLACE(ADTTOTAL,
-    ',',
-    '') AS
-    float) AS
-    Value FROM
-    dbo.PennDot_Report_A WHERE
-    (ISNUMERIC(ADTTOTAL) =
-    1)",
+    "command": "SELECT concat(BRKEY, Bridge_ID) AS UniqueIdentifier, CAST(INSPDATE AS DATETIME) AS DateTime, CAST(REPLACE(ADTTOTAL, ',', '') AS float) AS Value FROM dbo.PennDot_Report_A WHERE (ISNUMERIC(ADTTOTAL) = 1)",
     "aggregationRule": "average",
     "isCalculated": false,
     "isAscending": true

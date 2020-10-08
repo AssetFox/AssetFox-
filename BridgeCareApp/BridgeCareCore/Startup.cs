@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
@@ -38,15 +40,10 @@ namespace BridgeCareCore
             services.AddScoped<IRepository<Attribute>, AttributeRepository>();
             services.AddScoped<IRepository<AttributeDatum<double>>, AttributeDatumRepository<double>>();
             services.AddScoped<IRepository<AttributeDatum<string>>, AttributeDatumRepository<string>>();
+            services.AddScoped<IRepository<IEnumerable<(Attribute attribute, (int year, double value))>>, AggregatedResultRepository<double>>();
+            services.AddScoped<IRepository<IEnumerable<(Attribute attribute, (int year, string value))>>, AggregatedResultRepository<string>>();
             services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
-            /*services.AddScoped<INetworkDataRepository, NetworkRepository>();
-            services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();*/
-            /*services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<double>>();
-            services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<string>>();*/
-            services.AddScoped<IAggregatedResultDataRepository, AggregatedResultRepository<double>>();
-            services.AddScoped<IAggregatedResultDataRepository, AggregatedResultRepository<string>>();
-            //services.AddScoped<IAttributeDataRepository, AttributeRepository>();
             services.AddScoped<ISaveChanges, SaveAllChanges>();
         }
 

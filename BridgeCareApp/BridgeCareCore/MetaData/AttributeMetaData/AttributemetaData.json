@@ -24,6 +24,18 @@
       "aggregationRule": "AVERAGE",
       "isCalculated": false,
       "isAscending": true
+    },
+    {
+      "name": "COUNTY",
+      "defaultValue": "Jefferson",
+      "connectionString": "data source=localhost;Database=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;",
+      "dataSource": "MSSQL",
+      "type": "TEXT",
+      "location": "section",
+      "command": "SELECT concat(BRKEY, Bridge_ID) AS UniqueIdentifier, CAST(INSPDATE AS DATETIME) AS DateTime, CAST(COUNTY AS varchar(50)) AS Value FROM dbo.PennDot_Report_A",
+      "aggregationRule": "PREDOMINANT",
+      "isCalculated": false,
+      "isAscending": true
     }
   ]
 }

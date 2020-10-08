@@ -6,7 +6,7 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
-namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
+namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
 {
     public class MaintainableAsset
     {

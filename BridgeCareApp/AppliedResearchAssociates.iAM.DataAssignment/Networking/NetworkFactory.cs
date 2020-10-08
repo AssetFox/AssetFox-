@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
-namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
+namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
 {
     public static class NetworkFactory
     {

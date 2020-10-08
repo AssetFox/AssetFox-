@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         [ForeignKey("RouteId")]
         public virtual RouteEntity Route { get; set; }
 
-        public virtual MaintainableAssetEntity MaintainableAssetEntity { get; set; }
+        public virtual MaintainableAssetEntity MaintainableAsset { get; set; }
 
         public virtual ICollection<AttributeDatumEntity> AttributeData { get; set; }
     }

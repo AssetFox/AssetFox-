@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class AggregationResultEntity
+    public class AggregatedResultEntity
     {
         [Key]
         public Guid Id { get; set; }
@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         [Required]
         public string Discriminator { get; set; }
 
+        [Required]
         public int Year { get; set; }
 
         public string TextValue { get; set; }
@@ -21,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public Guid MaintainableAssetId { get; set; }
 
         [ForeignKey("MaintainableAssetId")]
-        public virtual MaintainableAssetEntity Segment { get; set; }
+        public virtual MaintainableAssetEntity MaintainableAsset { get; set; }
 
         public Guid AttributeId { get; set; }
 

@@ -1,9 +1,11 @@
-﻿using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+﻿using System;
+using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces
 {
     public interface IAttributeDatumDataRepository
     {
-        void AddAttributeData<T>(IEnumerable<AttributeDatum<T>> domains, Guid segmentId);
+        void AddAttributeData<T>(IEnumerable<AttributeDatum<T>> domains, Guid maintainableAssetId);
     }
 }

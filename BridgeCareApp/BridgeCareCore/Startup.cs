@@ -35,17 +35,18 @@ namespace BridgeCareCore
 
             services.AddScoped<IRepository<Network>, NetworkRepository>();
             services.AddScoped<IRepository<MaintainableAsset>, MaintainableAssetRepository>();
+            services.AddScoped<IRepository<Attribute>, AttributeRepository>();
             services.AddScoped<IRepository<AttributeDatum<double>>, AttributeDatumRepository<double>>();
             services.AddScoped<IRepository<AttributeDatum<string>>, AttributeDatumRepository<string>>();
             services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
-            services.AddScoped<INetworkDataRepository, NetworkRepository>();
-            services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
-            services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<double>>();
-            services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<string>>();
+            /*services.AddScoped<INetworkDataRepository, NetworkRepository>();
+            services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();*/
+            /*services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<double>>();
+            services.AddScoped<IAttributeDatumDataRepository, AttributeDatumRepository<string>>();*/
             services.AddScoped<IAggregatedResultDataRepository, AggregatedResultRepository<double>>();
             services.AddScoped<IAggregatedResultDataRepository, AggregatedResultRepository<string>>();
-            services.AddScoped<IAttributeDataRepository, AttributeRepository>();
+            //services.AddScoped<IAttributeDataRepository, AttributeRepository>();
             services.AddScoped<ISaveChanges, SaveAllChanges>();
         }
 

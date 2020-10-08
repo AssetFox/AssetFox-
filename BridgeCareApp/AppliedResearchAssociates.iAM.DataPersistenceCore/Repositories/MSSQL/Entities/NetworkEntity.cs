@@ -11,6 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string Name { get; set; }
 
-        public ICollection<MaintainableAssetEntity> MaintainableAssetEntities { get; set; }
+        public ICollection<MaintainableAssetEntity> MaintainableAssets { get; set; }
     }
 }

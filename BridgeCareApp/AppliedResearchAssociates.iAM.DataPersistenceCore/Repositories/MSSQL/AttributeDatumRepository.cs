@@ -1,4 +1,8 @@
 using System.Linq;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -6,23 +10,29 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Inter
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AttributeDatumRepository<T> : MSSQLRepository<AttributeDatum<T>>, IAttributeDatumDataRepository
+    public class AttributeDatumRepository<T> : MSSQLRepository<AttributeDatum<T>>
     {
         public AttributeDatumRepository(IAMContext context) : base(context) { }
 
-        public void AddAttributeData<T>(IEnumerable<AttributeDatum<T>> domains, Guid segmentId)
+        public override async void AddAll(IEnumerable<AttributeDatum<T>> domains, params object[] args)
         {
-            if (!context.Segments.Any(e => e.Id == segmentId))
+            if (!args.Any())
             {
-                throw new RowNotInTableException($"No segment was found using given the id: {segmentId}");
+                throw new NullReferenceException("No arguments found for attribute data query");
+            }
+
+            var maintainableAssetId = (Guid)args[0];
+
+            if (!context.MaintainableAssets.Any(e => e.Id == maintainableAssetId))
+            {
+                throw new RowNotInTableException($"No maintainable asset was found using given the id: {maintainableAssetId}");
             }
 
             var maintainableAssetEntity = context.MaintainableAssets
-                .Single(e => e.Id == segmentId);
+                .Single(e => e.Id == maintainableAssetId);
 
-            context.AttributeData.AddRange(domains.Select(d => d.ToEntity(maintainableAssetEntity.Id, maintainableAssetEntity.LocationId)));
+            await context.AttributeData.AddRangeAsync(domains.Select(d =>
+                d.ToEntity(maintainableAssetEntity.Id, maintainableAssetEntity.LocationId)));
         }
-
-#pragma warning restore CS0693 // Type parameter has the same name as the type parameter from outer type
     }
 }

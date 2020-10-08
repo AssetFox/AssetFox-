@@ -1,7 +1,6 @@
 ﻿using System;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
-using AppliedResearchAssociates.iAM.DataMiner;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
@@ -12,15 +11,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
         {
             if (entity == null)
             {
-                throw new NullReferenceException("Cannot map null Segment entity to Segment domain");
+                throw new NullReferenceException("Cannot map null MaintainableAsset entity to MaintainableAsset domain");
             }
 
             if (entity.Location == null)
             {
-                throw new NullReferenceException("Segment entity is missing related Location entity");
+                throw new NullReferenceException("MaintainableAsset entity is missing related Location entity");
             }
 
-            var segment = new Segment(entity.Id, entity.Location.ToDomain());
+            var maintainableAsset = new MaintainableAsset(entity.Id, entity.Location.ToDomain());
 
             if (entity.AttributeData != null && entity.AttributeData.Any())
             {
@@ -30,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
                         .Where(e => e.Discriminator == "NumericAttributeDatum")
                         .Select(e => e.ToDomain());
 
-                    segment.AssignAttributeData(numericAttributeData);
+                    maintainableAsset.AssignAttributeData(numericAttributeData);
                 }
 
                 if (entity.AttributeData.Any(a => a.Discriminator == "TextAttributeDatum"))
@@ -39,18 +38,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
                         .Where(e => e.Discriminator == "TextAttributeDatum")
                         .Select(e => e.ToDomain());
 
-                    segment.AssignAttributeData(textAttributeData);
+                    maintainableAsset.AssignAttributeData(textAttributeData);
                 }
             }
 
-            return new MaintainableAsset(entity.Location.ToDomain(), entity.Id);
+            return maintainableAsset;
         }
 
         public static MaintainableAssetEntity ToEntity(this MaintainableAsset domain, Guid networkId)
         {
+            if (domain == null)
+            {
+                throw new NullReferenceException("Cannot map null MaintainableAsset domain to MaintainableAsset entity");
+            }
+
             var locationEntity = domain.Location.ToEntity();
 
-            var maintainableAssetEntity = new MaintainableAssetEntity
+            return new MaintainableAssetEntity
             {
                 Id = domain.Id,
                 NetworkId = networkId,
@@ -58,8 +62,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
                 LocationId = locationEntity.Id,
                 Location = locationEntity
             };
-
-            return maintainableAssetEntity;
         }
     }
 }

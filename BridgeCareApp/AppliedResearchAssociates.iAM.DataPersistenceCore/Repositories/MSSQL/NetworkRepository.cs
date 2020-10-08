@@ -9,13 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class NetworkRepository : MSSQLRepository<Network>, INetworkDataRepository
+    public class NetworkRepository : MSSQLRepository<Network>
     {
-        public NetworkRepository(IAMContext context) : base(context)
-        {
-        }
+        public NetworkRepository(IAMContext context) : base(context) { }
 
-        public Network GetNetworkWithNoAttributeData(Guid id)
+        /*public override Network Get(Guid id)
         {
             if (!context.Networks.Any(n => n.Id == id))
             {
@@ -23,31 +21,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             // if there is no id match, it throws an exception that sequence contains no element.
             var entity = context.Networks
-                .Include(n => n.MaintainableAssetEntities)
+                .Include(n => n.MaintainableAssets)
                 .ThenInclude(s => s.Location)
                 .Single(n => n.Id == id);
 
             return entity.ToDomain();
-        }
+        }*/
 
-        public void AddNetworkWithoutAnyData(Network network) => context.Networks.Add(network.ToEntity());
+        public override void Add(Network network) => context.Networks.Add(network.ToEntity());
 
-        public override Network Update(Network network)
-        {
-            // mapping from domain to entity
-            var networkEntity = network.ToEntity();
-            networkEntity.MaintainableAssetEntities = new List<MaintainableAssetEntity>();
-            var id = network.Id;
-            foreach (var segment in network.MaintainableAssets)
-            {
-                networkEntity.MaintainableAssetEntities.Add(segment.ToEntity(id));
-            }
-
-            context.Networks.Update(networkEntity);
-            return base.Update(network);
-        }
-
-        public Network GetNetworkWithAllData(Guid id)
+        public override Network Get(Guid id)
         {
             if (!context.Networks.Any(n => n.Id == id))
             {
@@ -55,11 +38,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var entity = context.Networks
-                .Include(n => n.Segments)
-                .ThenInclude(s => s.Location)
-                .Include(n => n.Segments)
-                .ThenInclude(s => s.AttributeData)
+                .Include(n => n.MaintainableAssets)
+                .ThenInclude(m => m.Location)
+                .Include(n => n.MaintainableAssets)
+                .ThenInclude(m => m.AttributeData)
                 .ThenInclude(a => a.Attribute)
+                .Include(n => n.MaintainableAssets)
+                .ThenInclude(m => m.AttributeData)
+                .ThenInclude(a => a.Location)
                 .Single(n => n.Id == id);
 
             return entity.ToDomain();

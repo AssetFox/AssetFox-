@@ -16,9 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
             }
 
             return new Network(
-                entity.MaintainableAssetEntities == null
+                entity.MaintainableAssets == null
                     ? new List<MaintainableAsset>()
-                    : entity.MaintainableAssetEntities.Select(e => e.ToDomain()).ToList(),
+                    : entity.MaintainableAssets.Select(e => e.ToDomain()).ToList(),
                 entity.Id,
                 entity.Name);
         }
@@ -30,9 +30,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
                 throw new NullReferenceException("Cannot map null Network domain to Network entity");
             }
 
-            return new NetworkEntity { Id = domain.Id, Name = domain.Name };
+            return new NetworkEntity
+            {
+                Id = domain.Id,
+                Name = domain.Name,
+                MaintainableAssets = domain.MaintainableAssets.Any()
+                    ? domain.MaintainableAssets.Select(d => d.ToEntity(domain.Id)).ToList()
+                    : new List<MaintainableAssetEntity>()
+            };
         }
-
-        public static void UpdateEntity(this NetworkEntity entity, Network domain) => entity.Name = domain.Name;
     }
 }

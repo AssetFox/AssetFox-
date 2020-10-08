@@ -6,12 +6,8 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public class AttributeMetaDataRepository : FileSystemRepository<AttributeMetaDatum, AttributeMetaDatum>
+    public class AttributeMetaDataRepository : FileSystemRepository<AttributeMetaDatum>
     {
-        public AttributeMetaDataRepository()
-        {
-        }
-
         public override IEnumerable<AttributeMetaDatum> All()
         {
             var folderPath = $"MetaData//AttributeMetaData";
@@ -20,7 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             if (File.Exists(filePath))
             {
                 var rawAttributes = File.ReadAllText(filePath);
-                attributeMetaData = JsonConvert.DeserializeAnonymousType(rawAttributes, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
+                attributeMetaData = JsonConvert
+                    .DeserializeAnonymousType(rawAttributes,
+                        new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
             }
             return attributeMetaData;
         }

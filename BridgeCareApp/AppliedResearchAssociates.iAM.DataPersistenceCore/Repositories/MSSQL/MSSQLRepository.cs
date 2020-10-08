@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public abstract class MSSQLRepository<TDomain>
-        : IRepository<TDomain> where TDomain : class
+    public abstract class MSSQLRepository<TDomain> : IRepository<TDomain> where TDomain : class
     {
         protected IAMContext context;
 
@@ -15,17 +15,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             this.context = context;
         }
 
-        public virtual IEnumerable<TDomain> All()
+        public virtual void Add(TDomain datum)
         {
-            return context.Set<TDomain>().ToList();
+            context.Add(datum);
         }
 
-        public virtual IEnumerable<TDomain> Find(Expression<Func<TDomain, bool>> predicate)
+        public virtual void AddAll(IEnumerable<TDomain> data, params object[] args)
         {
-            return context.Set<TDomain>()
-                .AsQueryable()
-                .Where(predicate)
-                .ToList();
+            context.AddRange(data);
         }
 
         public virtual TDomain Get(Guid id)
@@ -33,15 +30,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return context.Find<TDomain>(id);
         }
 
-        public virtual TDomain Update(TDomain entity)
+        public virtual IEnumerable<TDomain> All()
         {
-            return context.Update(entity).Entity;
+            return context.Set<TDomain>();
         }
 
-        public virtual List<TDomain> AddAll(List<TDomain> entities)
+        public virtual IEnumerable<TDomain> Find(params object[] args)
         {
-            context.AddRange(entities);
-            return entities;
+            if (!args.Any())
+            {
+                throw new ArgumentNullException("No clause(s) found for query");
+            }
+
+            var result = context.Set<TDomain>()
+                .AsQueryable();
+
+            foreach (var predicate in args)
+            {
+                var convertedPredicate = (Expression<Func<TDomain, bool>>)Convert.ChangeType(predicate,
+                    typeof(Expression<Func<TDomain, bool>>));
+
+                result = result.Where(convertedPredicate);
+            }
+
+            return result;
+        }
+
+        public virtual void Update(TDomain datum)
+        {
+            context.Update(datum);
+        }
+
+        public virtual void Delete(TDomain datum)
+        {
+            context.Entry(datum).State = EntityState.Deleted;
         }
     }
 }

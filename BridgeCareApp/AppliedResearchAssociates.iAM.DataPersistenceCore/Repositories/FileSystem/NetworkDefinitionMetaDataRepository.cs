@@ -6,20 +6,20 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public class NetworkDefinitionMetaDataRepository : FileSystemRepository<AttributeMetaDatum, AttributeMetaDatum>
+    public class NetworkDefinitionMetaDataRepository : FileSystemRepository<AttributeMetaDatum>
     {
         public override IEnumerable<AttributeMetaDatum> All()
         {
             var folderPath = $"MetaData//NetworkDefinitionRules";
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPath, "networkDefinitionRules.json");
-            var segmentMetaData = new List<AttributeMetaDatum>();
+            var maintainableAssetMetaData = new List<AttributeMetaDatum>();
             if (File.Exists(filePath))
             {
-                var segmentationRulesJsonText = File.ReadAllText(filePath);
-                segmentMetaData.Add(JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText,
+                var jsonText = File.ReadAllText(filePath);
+                maintainableAssetMetaData.Add(JsonConvert.DeserializeAnonymousType(jsonText,
                 new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum);
             }
-            return segmentMetaData;
+            return maintainableAssetMetaData;
         }
     }
 }

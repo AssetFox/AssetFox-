@@ -10,8 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
 {
     public class MaintainableAsset
     {
-        public Guid Id { get; }
-        public MaintainableAsset(Guid id, Location location, Guid id)
+        public MaintainableAsset(Guid id, Location location)
         {
             Id = id;
             Location = location;
@@ -40,7 +39,6 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
 
         public Guid Id { get; }
         public List<IAttributeDatum> AssignedData { get; } = new List<IAttributeDatum>();
-
         public Location Location { get; }
     }
 }

@@ -9,8 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
     {
         public static Location ToDomain(this LocationEntity entity)
         {
-            
-
             if (entity == null)
             {
                 throw new NullReferenceException("Cannot map null Location entity to Location domain");

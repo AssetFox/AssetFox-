@@ -4,15 +4,19 @@ using System.Linq.Expressions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public abstract class FileSystemRepository<TDomain, TEntity>
-        : IRepository<TDomain> where TDomain : class
+    public abstract class FileSystemRepository<TDomain> : IRepository<TDomain> where TDomain : class
     {
-        public virtual TDomain Add(TDomain entity)
+        public virtual void Add(TDomain datum)
         {
             throw new NotImplementedException();
         }
 
-        public List<TDomain> AddAll(List<TDomain> entity)
+        public virtual void AddAll(IEnumerable<TDomain> data, params object[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual TDomain Get(Guid id)
         {
             throw new NotImplementedException();
         }
@@ -22,22 +26,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             throw new NotImplementedException();
         }
 
-        public virtual IEnumerable<TDomain> Find(Expression<Func<TDomain, bool>> predicate)
+        public virtual IEnumerable<TDomain> Find(params object[] args)
         {
             throw new NotImplementedException();
         }
 
-        public TDomain Get(Guid id)
+        public virtual void Update(TDomain datum)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveChanges()
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual TDomain Update(TDomain entity)
+        public virtual void Delete(TDomain datum)
         {
             throw new NotImplementedException();
         }

@@ -4,30 +4,19 @@ using System.Linq.Expressions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Mongo
 {
-    public class GenericMongoRepository<TDomain, TEntity>
-        : IRepository<TDomain>
+    public class GenericMongoRepository<TDomain> : IRepository<TDomain>
     {
         /*public GenericMongoRepository(MongoDriverContext context)
         {
-            //this.context = context;
+            this.context = context;
         }*/
 
-        public virtual TDomain Add(TDomain entity)
+        public virtual void Add(TDomain datum)
         {
             throw new NotImplementedException();
         }
 
-        public List<TDomain> AddAll(List<TDomain> entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual IEnumerable<TDomain> All()
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual IEnumerable<TDomain> Find(Expression<Func<TDomain, bool>> predicate)
+        public virtual void AddAll(IEnumerable<TDomain> data, params object[] args)
         {
             throw new NotImplementedException();
         }
@@ -37,12 +26,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Mongo
             throw new NotImplementedException();
         }
 
-        public void SaveChanges()
+        public virtual IEnumerable<TDomain> All()
         {
             throw new NotImplementedException();
         }
 
-        public virtual TDomain Update(TDomain entity)
+        public virtual IEnumerable<TDomain> Find(params object[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void Update(TDomain datum)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void Delete(TDomain datum)
         {
             throw new NotImplementedException();
         }

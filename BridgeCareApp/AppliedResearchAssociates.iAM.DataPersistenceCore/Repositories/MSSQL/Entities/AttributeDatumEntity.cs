@@ -31,6 +31,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public Guid MaintainableAssetId { get; set; }
 
         [ForeignKey("MaintainableAssetId")]
-        public virtual MaintainableAssetEntity Segment { get; set; }
+        public virtual MaintainableAssetEntity MaintainableAsset { get; set; }
     }
 }

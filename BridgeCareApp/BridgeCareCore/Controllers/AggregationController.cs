@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -18,113 +19,122 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : ControllerBase
     {
-        private readonly ILogger<NetworkController> _logger;
-        private readonly IRepository<AttributeMetaDatum> AttributeMetaDataRepository;
-        private readonly IAggregatedResultDataRepository AggregatedResultRepository;
-        private readonly INetworkDataRepository NetworkRepository;
-        private readonly ISegmentDataRepository SegmentRepository;
-        private readonly IAttributeDataRepository AttributeRepository;
-        private readonly IAttributeDatumDataRepository AttributeDatumDataRepository;
-        private readonly ISaveChanges Repositories;
+        private readonly IRepository<Network> NetworkRepo;
+        private readonly IRepository<AttributeMetaDatum> AttributeMetaDataRepo;
+        private readonly IRepository<DataMinerAttribute> AttributeRepo;
+        private readonly IRepository<AttributeDatum<double>> NumericAttributeDatumRepo;
+        private readonly IRepository<AttributeDatum<string>> TextAttributeDatumRepo;
+        private readonly IRepository<MaintainableAsset> MaintainableAssetRepo;
+        private readonly IAggregatedResultDataRepository AggregatedResultRepo;
+        private readonly ISaveChanges Repos;
+        private readonly ILogger<NetworkController> Logger;
 
-        public AggregationController(ILogger<NetworkController> logger,
-            IRepository<AttributeMetaDatum> attributeRepo,
-            INetworkDataRepository partialNetworkRepo,
-            ISegmentDataRepository segmentRepository,
-            IAttributeDatumDataRepository attributeDatumDataRepository,
-            IAttributeDataRepository attributeRepository,
-            IAggregatedResultDataRepository aggregatedResultRepository,
-            ISaveChanges repositories)
+        public AggregationController(IRepository<Network> networkRepo,
+            IRepository<AttributeMetaDatum> attributeMetaDataRepo,
+            IRepository<DataMinerAttribute> attributeRepo,
+            IRepository<AttributeDatum<double>> numericAttributeDatumRepo,
+            IRepository<AttributeDatum<string>> textAttributeDatumRepo,
+            IRepository<MaintainableAsset> maintainableAssetRepo,
+            IAggregatedResultDataRepository aggregatedResultRepo,
+            ISaveChanges repos,
+            ILogger<NetworkController> logger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            AttributeMetaDataRepository = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
-            NetworkRepository = partialNetworkRepo ?? throw new ArgumentNullException(nameof(partialNetworkRepo));
-            SegmentRepository = segmentRepository ?? throw new ArgumentNullException(nameof(segmentRepository));
-            AttributeRepository = attributeRepository ?? throw new ArgumentNullException(nameof(attributeRepository));
-            AttributeDatumDataRepository = attributeDatumDataRepository ?? throw new ArgumentNullException(nameof(attributeDatumDataRepository));
-            Repositories = repositories ?? throw new ArgumentNullException(nameof(repositories));
-            AggregatedResultRepository = aggregatedResultRepository ?? throw new ArgumentNullException(nameof(aggregatedResultRepository));
+            NetworkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
+            AttributeMetaDataRepo = attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
+            AttributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
+            NumericAttributeDatumRepo = numericAttributeDatumRepo ?? throw new ArgumentNullException(nameof(numericAttributeDatumRepo));
+            TextAttributeDatumRepo = textAttributeDatumRepo ?? throw new ArgumentNullException(nameof(textAttributeDatumRepo));
+            MaintainableAssetRepo = maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
+            AggregatedResultRepo = aggregatedResultRepo ?? throw new ArgumentNullException(nameof(aggregatedResultRepo));
+            Repos = repos ?? throw new ArgumentNullException(nameof(repos));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost]
         [Route("AssignNetworkData")]
         public async Task<IActionResult> AssignNetworkData([FromBody] Guid networkId)
         {
-            var network = NetworkRepository.GetNetworkWithNoAttributeData(networkId);
-
-            var attributeMetaData = AttributeMetaDataRepository.All();
-
-            var attributeData = new List<IAttributeDatum>();
-
-            // Create the list of attributes
-            foreach (var attributeMetaDatum in attributeMetaData)
+            try
             {
-                var attribute = AttributeFactory.Create(attributeMetaDatum);
-                attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
-                AttributeRepository.AddAttribute(attribute);
-            }
+                var network = NetworkRepo.Get(networkId);
 
-            if (attributeData.Any())
-            {
-                foreach (var segment in network.MaintainableAssets)
+                var attributeMetaData = AttributeMetaDataRepo.All();
+
+                var attributeData = new List<IAttributeDatum>();
+
+                // Create the list of attributes
+                foreach (var attributeMetaDatum in attributeMetaData)
                 {
-                    // assign attribute data to segment
-                    segment.AssignAttributeData(attributeData);
-                    // add assigned attribute data to db context
-                    if (segment.AssignedData.Any(a => a.Attribute.DataType == "NUMERIC"))
+                    var attribute = AttributeFactory.Create(attributeMetaDatum);
+                    attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
+                    AttributeRepo.Add(attribute);
+                }
+
+                if (attributeData.Any())
+                {
+                    foreach (var maintainableAsset in network.MaintainableAssets)
                     {
-                        var numericAttributeData = segment.AssignedData
-                            .Where(a => a.Attribute.DataType == "NUMERIC")
-                            .Select(a => (AttributeDatum<double>)Convert.ChangeType(a, typeof(AttributeDatum<double>)));
+                        // assign attribute data to maintainable asset
+                        maintainableAsset.AssignAttributeData(attributeData);
+                        // add assigned attribute data to db context
+                        if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "NUMERIC"))
+                        {
+                            var numericAttributeData = maintainableAsset.AssignedData
+                                .Where(a => a.Attribute.DataType == "NUMERIC")
+                                .Select(a => (AttributeDatum<double>)Convert.ChangeType(a, typeof(AttributeDatum<double>)));
 
-                        AttributeDatumDataRepository.AddAttributeData(numericAttributeData, segment.Id);
-                    }
+                            NumericAttributeDatumRepo.AddAll(numericAttributeData, maintainableAsset.Id);
+                        }
 
-                    if (segment.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
-                    {
-                        var textAttributeData = segment.AssignedData
-                            .Where(a => a.Attribute.DataType == "TEXT")
-                            .Select(a => (AttributeDatum<string>)Convert.ChangeType(a, typeof(AttributeDatum<string>)));
+                        if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
+                        {
+                            var textAttributeData = maintainableAsset.AssignedData
+                                .Where(a => a.Attribute.DataType == "TEXT")
+                                .Select(a => (AttributeDatum<string>)Convert.ChangeType(a, typeof(AttributeDatum<string>)));
 
-                        AttributeDatumDataRepository.AddAttributeData(textAttributeData, segment.Id);
+                            TextAttributeDatumRepo.AddAll(textAttributeData, maintainableAsset.Id);
+                        }
                     }
                 }
-            }
 
-            Repositories.SaveChanges();
-            _logger.LogInformation("Attributes & attribute data have been created");
-            return Ok();
+                Repos.SaveChanges();
+                Logger.LogInformation("Attributes & attribute data have been created");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e);
+            }
         }
 
         [HttpPost]
         [Route("AggregateNetworkData")]
         public async Task<IActionResult> AggregateNetworkData([FromBody] Guid networkId)
         {
-            var segments = SegmentRepository.GetNetworkSegmentsWithAssignedData(networkId);
+            var maintainableAssets = MaintainableAssetRepo.Find(networkId);
 
-            foreach (var segment in segments)
+            foreach (var maintainableAsset in maintainableAssets)
             {
-                if (segment.AssignedData.Any(a => a.Attribute.DataType == "NUMERIC"))
+                if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "NUMERIC"))
                 {
-                    var aggregatedNumericResults = segment.AssignedData
+                    var aggregatedNumericResults = maintainableAsset.AssignedData
                         .Where(a => a.Attribute.DataType == "NUMERIC")
                         .Select(a => a.Attribute)
-                        .Select(a => segment.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateNumericRule(a)))
+                        .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateNumericRule(a)))
                         .ToList();
 
-                    AggregatedResultRepository.AddAggregatedResults(aggregatedNumericResults, segment.Id);
+                    AggregatedResultRepo.AddAggregatedResults(aggregatedNumericResults, maintainableAsset.Id);
                 }
 
-                if (segment.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
+                if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
                 {
-                    var aggregatedTextResults = segment.AssignedData
+                    var aggregatedTextResults = maintainableAsset.AssignedData
                         .Where(a => a.Attribute.DataType == "TEXT")
                         .Select(a => a.Attribute)
-                        .Select(a => segment.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a)))
+                        .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a)))
                         .ToList();
 
-
-                    AggregatedResultRepository.AddAggregatedResults(aggregatedTextResults, segment.Id);
+                    AggregatedResultRepo.AddAggregatedResults(aggregatedTextResults, maintainableAsset.Id);
                 }
             }
 

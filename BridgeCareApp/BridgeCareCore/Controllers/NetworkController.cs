@@ -16,46 +16,56 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class NetworkController : ControllerBase
     {
-        private readonly IMaintainableAssetRepository SegmentRepository;
-        private readonly ILogger<NetworkController> _logger;
-        private readonly IRepository<AttributeMetaDatum> _SegmentationFileRepository;
-        private readonly INetworkDataRepository NetworkRepository;
-        private readonly ISaveChanges Repositories;
+        private readonly IRepository<AttributeMetaDatum> MaintainableAssetFileRepo;
+        private readonly IRepository<Network> NetworkRepo;
 
-        public NetworkController(ILogger<NetworkController> logger,
-            IMaintainableAssetRepository segmentRepo,
-            IRepository<AttributeMetaDatum> segmentFileRepository,
-            INetworkDataRepository networkRepo, ISaveChanges saveAll)
+        //private readonly IRepository<MaintainableAsset> MaintainableAssetRepo;
+        private readonly ISaveChanges Repos;
+
+        private readonly ILogger<NetworkController> Logger;
+
+        public NetworkController(IRepository<AttributeMetaDatum> maintainableAssetFileRepo,
+            IRepository<Network> networkRepo,
+            //IRepository<MaintainableAsset> maintainableAssetRepo,
+            ISaveChanges repos,
+            ILogger<NetworkController> logger)
         {
-            SegmentRepository = segmentRepo;
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _SegmentationFileRepository = segmentFileRepository;
-            NetworkRepository = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
-            Repositories = saveAll ?? throw new ArgumentNullException(nameof(networkRepo));
+            MaintainableAssetFileRepo = maintainableAssetFileRepo ?? throw new ArgumentNullException(nameof(maintainableAssetFileRepo));
+            NetworkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
+            //MaintainableAssetRepo = maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
+            Repos = repos ?? throw new ArgumentNullException(nameof(repos));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost]
         [Route("CreateNetwork")]
         public async Task<IActionResult> CreateNetwork([FromBody] string name)
         {
-            // Domain logic
-            var attributeMetaData = _SegmentationFileRepository.All();
-            //var segmentationRulesJsonText = System.IO.File.ReadAllText("segmentationMetaData.json");
-            //var attributeMetaDatum = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText,
-            //    new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum;
+            try
+            {
+                // get attribute meta data from maintainable asset json file
+                var attributeMetaData = MaintainableAssetFileRepo.All();
+                // create an attribute from the meta data
+                var attribute = AttributeFactory.Create(attributeMetaData.FirstOrDefault());
+                // build a connection from the attribute to create attribute data from attribute
+                // data in the data source
+                var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
+                // create a network domain from the attribute data
+                var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(attributeData);
+                network.Name = name;
+                // add the network to our data source
+                NetworkRepo.Add(network);
+                // add the maintainable assets to our data source
+                //MaintainableAssetRepo.AddAll(network.MaintainableAssets, network.Id);
 
-            var attribute = AttributeFactory.Create(attributeMetaData.FirstOrDefault());
-            var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
-
-            var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(attributeData);
-            network.Name = name;
-
-            NetworkRepository.AddNetworkWithoutAnyData(network);
-            SegmentRepository.AddNetworkMaintainableAssets(network.MaintainableAssets, network.Id);
-
-            Repositories.SaveChanges(); // this will save all of the data in the IAMContext object
-            _logger.LogInformation($"a network with name : {network.Name} has been created");
-            return Ok(network);
+                Repos.SaveChanges(); // this will save all of the data in the IAMContext object
+                Logger.LogInformation($"a network with name : {network.Name} has been created");
+                return Ok(network);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e);
+            }
         }
     }
 }

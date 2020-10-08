@@ -480,6 +480,7 @@ namespace Simulation
 
 
             var hashConsequences = new Hashtable();
+            if (!CommittedConsequences.ContainsKey(commit.ConsequenceID)) return hashInput;
             var committedConsequences = CommittedConsequences[commit.ConsequenceID];
 
             foreach (AttributeChange attributeChange in committedConsequences)

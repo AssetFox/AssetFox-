@@ -272,7 +272,7 @@ namespace RoadCare3
             }
 
             List<string> listColumns = new List<string>();
-            string simulationTable = "SIMULATION_" + m_strNetworkID.ToString() + "_" + strSimulationID.ToString();
+            string simulationTable = "SIMULATION_" + m_strNetworkID.ToString() + "_" + strSimulationID.ToString() + "_0";
             if (!string.IsNullOrWhiteSpace(strSimulationID))
             {
                listColumns = DBMgr.GetTableColumns(simulationTable);

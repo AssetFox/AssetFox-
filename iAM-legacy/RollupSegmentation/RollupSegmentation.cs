@@ -395,7 +395,7 @@ namespace RollupSegmentation
 
 			// SEGMENT_networkid_NS0
 			RollupMessaging.AddMessage("Count of total columns in segment_ table" + ((m_nCountNumber + m_nCountString).ToString()));
-			int columnLimit = 500;
+			int columnLimit = 600;
 			if(DBMgr.NativeConnectionParameters.Provider == "ORACLE")
 			{
 				columnLimit = 1000;

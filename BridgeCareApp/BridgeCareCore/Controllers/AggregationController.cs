@@ -25,7 +25,13 @@ namespace BridgeCareCore.Controllers
         private readonly IRepository<AttributeDatum<double>> NumericAttributeDatumRepo;
         private readonly IRepository<AttributeDatum<string>> TextAttributeDatumRepo;
         private readonly IRepository<MaintainableAsset> MaintainableAssetRepo;
-        private readonly IAggregatedResultDataRepository AggregatedResultRepo;
+
+        private readonly IRepository<IEnumerable<(DataMinerAttribute attribute, (int year, double value))>>
+            NumericAggregatedResultRepo;
+
+        private readonly IRepository<IEnumerable<(DataMinerAttribute attribute, (int year, string value))>>
+            TextAggregatedResultRepo;
+
         private readonly ISaveChanges Repos;
         private readonly ILogger<NetworkController> Logger;
 
@@ -35,7 +41,8 @@ namespace BridgeCareCore.Controllers
             IRepository<AttributeDatum<double>> numericAttributeDatumRepo,
             IRepository<AttributeDatum<string>> textAttributeDatumRepo,
             IRepository<MaintainableAsset> maintainableAssetRepo,
-            IAggregatedResultDataRepository aggregatedResultRepo,
+            IRepository<IEnumerable<(DataMinerAttribute attribute, (int year, double value))>> numericAggregatedResultRepo,
+            IRepository<IEnumerable<(DataMinerAttribute attribute, (int year, string value))>> textAggregatedResultRepo,
             ISaveChanges repos,
             ILogger<NetworkController> logger)
         {
@@ -45,7 +52,8 @@ namespace BridgeCareCore.Controllers
             NumericAttributeDatumRepo = numericAttributeDatumRepo ?? throw new ArgumentNullException(nameof(numericAttributeDatumRepo));
             TextAttributeDatumRepo = textAttributeDatumRepo ?? throw new ArgumentNullException(nameof(textAttributeDatumRepo));
             MaintainableAssetRepo = maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
-            AggregatedResultRepo = aggregatedResultRepo ?? throw new ArgumentNullException(nameof(aggregatedResultRepo));
+            NumericAggregatedResultRepo = numericAggregatedResultRepo ?? throw new ArgumentNullException(nameof(numericAggregatedResultRepo));
+            TextAggregatedResultRepo = textAggregatedResultRepo ?? throw new ArgumentNullException(nameof(textAggregatedResultRepo));
             Repos = repos ?? throw new ArgumentNullException(nameof(repos));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -99,7 +107,7 @@ namespace BridgeCareCore.Controllers
 
                 Repos.SaveChanges();
                 Logger.LogInformation("Attributes & attribute data have been created");
-                return Ok();
+                return Ok("Successfully assigned network data);
             }
             catch (Exception e)
             {
@@ -111,34 +119,41 @@ namespace BridgeCareCore.Controllers
         [Route("AggregateNetworkData")]
         public async Task<IActionResult> AggregateNetworkData([FromBody] Guid networkId)
         {
-            var maintainableAssets = MaintainableAssetRepo.Find(networkId);
-
-            foreach (var maintainableAsset in maintainableAssets)
+            try
             {
-                if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "NUMERIC"))
-                {
-                    var aggregatedNumericResults = maintainableAsset.AssignedData
-                        .Where(a => a.Attribute.DataType == "NUMERIC")
-                        .Select(a => a.Attribute)
-                        .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateNumericRule(a)))
-                        .ToList();
+                var maintainableAssets = MaintainableAssetRepo.Find(networkId);
 
-                    AggregatedResultRepo.AddAggregatedResults(aggregatedNumericResults, maintainableAsset.Id);
+                foreach (var maintainableAsset in maintainableAssets)
+                {
+                    if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "NUMERIC"))
+                    {
+                        var aggregatedNumericResults = maintainableAsset.AssignedData
+                            .Where(a => a.Attribute.DataType == "NUMERIC")
+                            .Select(a => a.Attribute)
+                            .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateNumericRule(a)).ToList());
+
+                        NumericAggregatedResultRepo.AddAll(aggregatedNumericResults, maintainableAsset.Id);
+                    }
+
+                    if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
+                    {
+                        var aggregatedTextResults = maintainableAsset.AssignedData
+                            .Where(a => a.Attribute.DataType == "TEXT")
+                            .Select(a => a.Attribute)
+                            .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a)).ToList());
+
+                        TextAggregatedResultRepo.AddAll(aggregatedTextResults, maintainableAsset.Id);
+                    }
                 }
 
-                if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
-                {
-                    var aggregatedTextResults = maintainableAsset.AssignedData
-                        .Where(a => a.Attribute.DataType == "TEXT")
-                        .Select(a => a.Attribute)
-                        .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a)))
-                        .ToList();
-
-                    AggregatedResultRepo.AddAggregatedResults(aggregatedTextResults, maintainableAsset.Id);
-                }
+                Repos.SaveChanges();
+                Logger.LogInformation("Attributes & attribute data have been created");
+                return Ok("Successfully aggregated network data");
             }
-
-            return Ok();
+            catch (Exception e)
+            {
+                return StatusCode(500, e);
+            }
         }
     }
 }

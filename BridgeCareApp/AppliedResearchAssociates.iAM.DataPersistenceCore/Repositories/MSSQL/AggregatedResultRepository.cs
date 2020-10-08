@@ -7,12 +7,22 @@ using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.At
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AggregatedResultRepository<T> : MSSQLRepository<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>>, IAggregatedResultDataRepository
+    public class AggregatedResultRepository<T> : MSSQLRepository<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>>
     {
         public AggregatedResultRepository(IAMContext context) : base(context) { }
 
-        public void AddAggregatedResults<T>(
-            List<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>> domains, Guid maintainableAssetId) =>
-            context.AggregatedResults.AddRange(domains.SelectMany(d => d.ToEntity(maintainableAssetId)));
+        public override async void AddAll(
+            IEnumerable<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>> domains,
+            params object[] args)
+        {
+            if (!args.Any())
+            {
+                throw new NullReferenceException("No arguments found for aggregated result query");
+            }
+
+            var maintainableAssetId = (Guid)args[0];
+
+            await context.AggregatedResults.AddRangeAsync(domains.SelectMany(d => d.ToEntity(maintainableAssetId)));
+        }
     }
 }

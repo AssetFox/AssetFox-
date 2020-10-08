@@ -60,7 +60,7 @@ namespace BridgeCareCore.Controllers
 
                 Repos.SaveChanges(); // this will save all of the data in the IAMContext object
                 Logger.LogInformation($"a network with name : {network.Name} has been created");
-                return Ok(network);
+                return Ok("Successfully created network");
             }
             catch (Exception e)
             {

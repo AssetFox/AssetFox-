@@ -165,8 +165,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_AggregatedResults_AttributeId",
                 table: "AggregatedResults",
-                column: "AttributeId",
-                unique: true);
+                column: "AttributeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AggregatedResults_MaintainableAssetId",

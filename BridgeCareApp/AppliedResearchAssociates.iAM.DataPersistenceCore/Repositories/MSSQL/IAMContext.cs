@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             modelBuilder.Entity<AggregatedResultEntity>(entity =>
             {
                 entity.HasOne(d => d.Attribute)
-                    .WithOne(p => p.AggregatedResult)
+                    .WithMany(p => p.AggregatedResults)
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.MaintainableAsset)

@@ -107,7 +107,7 @@ namespace BridgeCareCore.Controllers
 
                 Repos.SaveChanges();
                 Logger.LogInformation("Attributes & attribute data have been created");
-                return Ok("Successfully assigned network data);
+                return Ok("Successfully assigned network data");
             }
             catch (Exception e)
             {

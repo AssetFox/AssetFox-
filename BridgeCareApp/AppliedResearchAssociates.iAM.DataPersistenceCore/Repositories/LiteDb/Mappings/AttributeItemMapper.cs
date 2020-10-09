@@ -1,9 +1,9 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
     public static class AttributeItemMapper
     {

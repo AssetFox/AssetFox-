@@ -4,7 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
 {
     public static class AggregatedResultItemMapper
     {

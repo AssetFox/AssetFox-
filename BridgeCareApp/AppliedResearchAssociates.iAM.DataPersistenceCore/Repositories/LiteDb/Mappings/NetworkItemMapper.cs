@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
     public static class NetworkItemMapper
     {
@@ -34,9 +34,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
             {
                 Id = domain.Id,
                 Name = domain.Name,
-                MaintainableAssets = domain.MaintainableAssets.Any()
-                    ? domain.MaintainableAssets.Select(d => d.ToEntity(domain.Id)).ToList()
-                    : new List<MaintainableAssetEntity>()
+                MaintainableAssets = (ICollection<MaintainableAsset>)(domain.MaintainableAssets.Any()
+                    ? domain.MaintainableAssets.Select(d => d.ToEntity(domain.Id))
+                    : new List<MaintainableAssetEntity>())
             };
         }
     }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataMiner;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
     public static class LocationItemMapper
     {

@@ -58,7 +58,9 @@ namespace BridgeCareCore.Controllers
                 // add the maintainable assets to our data source
                 //MaintainableAssetRepo.AddAll(network.MaintainableAssets, network.Id);
 
+                // This probably doesn't belong in the controller if it is tied to IAMContext.
                 Repos.SaveChanges(); // this will save all of the data in the IAMContext object
+
                 Logger.LogInformation($"a network with name : {network.Name} has been created");
                 return Ok(network);
             }

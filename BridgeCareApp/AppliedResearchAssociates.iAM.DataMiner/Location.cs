@@ -1,4 +1,6 @@
-﻿namespace AppliedResearchAssociates.iAM.DataMiner
+﻿using System;
+
+namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public abstract class Location
     {

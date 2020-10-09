@@ -37,7 +37,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 
         public virtual TDomain Get(Guid id)
         {
-            throw new NotImplementedException();
+            using (var db = new LiteDatabase(@"C:\Users\cbecker\Desktop\MyData.db"))
+            {
+                var networkCollection = db.GetCollection<TDomain>("NETWORKS");
+                var testReturn = networkCollection.FindById(id);
+                return testReturn;
+            }
         }
 
         public virtual void Update(TDomain datum)
@@ -45,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             throw new NotImplementedException();
         }
 
-        protected abstract TEntity ToDataEntity(TDomain domainModel);
-        protected abstract TDomain ToDomainModel(TEntity dataEntity);
+        protected abstract TEntity ToEntity(TDomain domainModel);
+        protected abstract TDomain ToDomain(TEntity dataEntity);
     }
 }

@@ -17,11 +17,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Repositories
 
         public override void Add(Network datum)
         {
-            using (var db = new LiteDatabase(@"C:\Users\cbecker\Desktop\MyData.db"))
-            {
-                var networkCollection = db.GetCollection<NetworkEntity>("NETWORKS");
-                networkCollection.Insert(datum.ToEntity());
-            }
+            using var db = new LiteDatabase(@"C:\Users\cbecker\Desktop\MyData.db");
+            var networkCollection = db.GetCollection<NetworkEntity>("NETWORKS");
+            networkCollection.Insert(datum.ToEntity());
         }
 
         protected override NetworkEntity ToEntity(Network domainModel)

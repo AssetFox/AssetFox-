@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
     public static class AggregatedResultMapper
     {
-        public static AggregatedResultEntity<T> ToEntity<T>(this AggregatedResult<T> aggregatedResult, Network network)
+        public static AggregatedResultEntity<T> ToEntity<T>(this AggregatedResult<T> aggregatedResult)
         {
             if (aggregatedResult == null || !aggregatedResult.AggregatedData.Any())
             {
@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             }
             return new AggregatedResultEntity<T>()
             {
-                MaintainableAssetEntity = aggregatedResult.MaintainableAsset.ToEntity(network.Id),
+                MaintainableAssetEntity = aggregatedResult.MaintainableAsset.ToEntity(),
                 AggregatedData = aggregatedResult.AggregatedData.Select(_ => (_.attribute.ToEntity(), _.yearValuePair))
             };
         }

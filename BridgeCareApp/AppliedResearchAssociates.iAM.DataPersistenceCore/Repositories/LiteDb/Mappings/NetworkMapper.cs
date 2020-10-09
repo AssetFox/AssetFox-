@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 Id = domain.Id,
                 Name = domain.Name,
                 MaintainableAssetEntities = domain.MaintainableAssets.Any()
-                    ? domain.MaintainableAssets.Select(d => d.ToEntity(domain.Id)).ToList()
+                    ? domain.MaintainableAssets.Select(d => d.ToEntity()).ToList()
                     : new List<MaintainableAssetEntity>()
             };
         }

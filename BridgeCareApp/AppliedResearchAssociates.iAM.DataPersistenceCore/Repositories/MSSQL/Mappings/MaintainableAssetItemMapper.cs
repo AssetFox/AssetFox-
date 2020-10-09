@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
                 throw new NullReferenceException("MaintainableAsset entity is missing related Location entity");
             }
 
-            var maintainableAsset = new MaintainableAsset(entity.Location.ToDomain());
+            var maintainableAsset = new MaintainableAsset(entity.Id, entity.Location.ToDomain());
 
             if (entity.AttributeData != null && entity.AttributeData.Any())
             {

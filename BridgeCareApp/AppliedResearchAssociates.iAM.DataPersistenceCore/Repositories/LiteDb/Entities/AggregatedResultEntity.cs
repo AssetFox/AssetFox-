@@ -6,6 +6,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
 {
     public class AggregatedResultEntity<T>
     {
+        public AggregatedResultEntity()
+        {
+
+        }
         public IEnumerable<(AttributeEntity attribute, (int year, T value))> AggregatedData { get; set; }
         public MaintainableAssetEntity MaintainableAssetEntity { get; set; }
     }

@@ -124,7 +124,7 @@ namespace BridgeCareCore.Controllers
                         .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateNumericRule(a)))
                         .ToList();
 
-                    AggregatedResultRepo.AddAggregatedResults(aggregatedNumericResults);
+                    AggregatedResultRepo.AddAggregatedResults<double>(aggregatedNumericResults);
                 }
 
                 if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))

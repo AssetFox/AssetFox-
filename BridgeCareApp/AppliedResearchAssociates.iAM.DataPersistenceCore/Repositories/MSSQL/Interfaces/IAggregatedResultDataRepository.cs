@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.I
 {
     public interface IAggregatedResultDataRepository
     {
-        void AddAggregatedResults<T>(List<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>> domain, Guid maintainableAssetId);
+        void AddAggregatedResults<T>(List<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>> domain);
     }
 }

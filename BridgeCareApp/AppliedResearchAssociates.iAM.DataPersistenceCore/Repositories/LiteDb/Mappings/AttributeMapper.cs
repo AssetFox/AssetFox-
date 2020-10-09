@@ -5,7 +5,7 @@ using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.At
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
-    public static class AttributeItemMapper
+    public static class AttributeMapper
     {
         public static DataMinerAttribute ToDomain(this AttributeEntity entity)
         {

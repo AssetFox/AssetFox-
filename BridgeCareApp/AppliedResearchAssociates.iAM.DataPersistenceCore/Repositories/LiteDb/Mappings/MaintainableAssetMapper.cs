@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Enti
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
-    public static class MaintainableAssetItemMapper
+    public static class MaintainableAssetMapper
     {
         public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
         {
@@ -14,29 +14,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 throw new NullReferenceException("Cannot map null MaintainableAsset entity to MaintainableAsset domain");
             }
 
-            if (entity.Location == null)
+            if (entity.LocationEntity == null)
             {
                 throw new NullReferenceException("MaintainableAsset entity is missing related Location entity");
             }
 
-            var maintainableAsset = new MaintainableAsset(entity.Id, entity.Location.ToDomain());
+            var maintainableAsset = new MaintainableAsset(entity.Id, entity.LocationEntity.ToDomain());
 
-            if (entity.AssignedData != null && entity.AssignedData.Any())
+            if (entity.AttributeDatumEntities != null && entity.AttributeDatumEntities.Any())
             {
-                if (entity.AssignedData.Any(a => a.Discriminator == "NumericAttributeDatum"))
+                if (entity.AttributeDatumEntities.Any(a => a.Discriminator == "NumericAttributeDatum"))
                 {
-                    var numericAttributeData = entity.AssignedData
+                    var numericAttributeData = entity.AttributeDatumEntities
                         .Where(e => e.Discriminator == "NumericAttributeDatum")
-                        .Select(e => e.ToDomain());
+                        .Select(e => e.ToDomain<double>());
 
                     maintainableAsset.AssignAttributeData(numericAttributeData);
                 }
 
-                if (entity.AssignedData.Any(a => a.Discriminator == "TextAttributeDatum"))
+                if (entity.AttributeDatumEntities.Any(a => a.Discriminator == "TextAttributeDatum"))
                 {
-                    var textAttributeData = entity.AssignedData
+                    var textAttributeData = entity.AttributeDatumEntities
                         .Where(e => e.Discriminator == "TextAttributeDatum")
-                        .Select(e => e.ToDomain());
+                        .Select(e => e.ToDomain<string>());
 
                     maintainableAsset.AssignAttributeData(textAttributeData);
                 }
@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             return maintainableAsset;
         }
 
-        public static MaintainableAssetEntity ToEntity(this MaintainableAsset domain, Guid networkId)
+        public static MaintainableAssetEntity ToEntity(this MaintainableAsset domain)
         {
             if (domain == null)
             {
@@ -56,9 +56,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             return new MaintainableAssetEntity
             {
-                Id = domain.Id,
-                NetworkId = networkId,
-                Location = locationEntity
+                //Id = domain.Id,
+                LocationEntity = locationEntity
             };
         }
     }

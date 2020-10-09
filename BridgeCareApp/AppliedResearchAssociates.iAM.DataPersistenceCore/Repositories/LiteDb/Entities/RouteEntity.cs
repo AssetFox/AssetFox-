@@ -11,7 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
         {
 
         }
-        public Guid Id { get; set; }
         public string Discriminator { get; set; }
         public Direction Direction { get; set; }
 

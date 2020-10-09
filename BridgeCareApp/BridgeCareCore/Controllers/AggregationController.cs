@@ -67,7 +67,7 @@ namespace BridgeCareCore.Controllers
                 {
                     var attribute = AttributeFactory.Create(attributeMetaDatum);
                     attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
-                    AttributeRepo.Add(attribute);
+                    //AttributeRepo.Add(attribute);
                 }
 
                 if (attributeData.Any())
@@ -76,6 +76,7 @@ namespace BridgeCareCore.Controllers
                     {
                         // assign attribute data to maintainable asset
                         maintainableAsset.AssignAttributeData(attributeData);
+
                         // add assigned attribute data to db context
                         if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "NUMERIC"))
                         {
@@ -83,7 +84,7 @@ namespace BridgeCareCore.Controllers
                                 .Where(a => a.Attribute.DataType == "NUMERIC")
                                 .Select(a => (AttributeDatum<double>)Convert.ChangeType(a, typeof(AttributeDatum<double>)));
 
-                            NumericAttributeDatumRepo.AddAll(numericAttributeData, maintainableAsset.Id);
+                            NumericAttributeDatumRepo.AddAll(numericAttributeData);
                         }
 
                         if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
@@ -92,7 +93,7 @@ namespace BridgeCareCore.Controllers
                                 .Where(a => a.Attribute.DataType == "TEXT")
                                 .Select(a => (AttributeDatum<string>)Convert.ChangeType(a, typeof(AttributeDatum<string>)));
 
-                            TextAttributeDatumRepo.AddAll(textAttributeData, maintainableAsset.Id);
+                            TextAttributeDatumRepo.AddAll(textAttributeData);
                         }
                     }
                 }
@@ -123,7 +124,7 @@ namespace BridgeCareCore.Controllers
                         .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateNumericRule(a)))
                         .ToList();
 
-                    AggregatedResultRepo.AddAggregatedResults(aggregatedNumericResults, maintainableAsset.Id);
+                    AggregatedResultRepo.AddAggregatedResults(aggregatedNumericResults);
                 }
 
                 if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
@@ -134,7 +135,7 @@ namespace BridgeCareCore.Controllers
                         .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a)))
                         .ToList();
 
-                    AggregatedResultRepo.AddAggregatedResults(aggregatedTextResults, maintainableAsset.Id);
+                    AggregatedResultRepo.AddAggregatedResults(aggregatedTextResults);
                 }
             }
 

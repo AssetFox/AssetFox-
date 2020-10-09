@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             if (entity.Discriminator == "LinearLocation")
             {
                 return new LinearLocation(
-                    entity.Route.ToDomain(),
+                    entity.RouteEntity.ToDomain(),
                     entity.UniqueIdentifier,
                     entity.Start ?? 0,
                     entity.End ?? 0);
@@ -47,7 +47,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             {
                 var entity = new LocationEntity
                 {
-                    Id = Guid.NewGuid(),
                     Start = linearLocationDomain.Start,
                     End = linearLocationDomain.End,
                     Discriminator = "LinearLocation"
@@ -55,10 +54,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
                 if (linearLocationDomain.Route != null)
                 {
-                    var routeEntity = linearLocationDomain.Route.ToEntity();
-
-                    entity.RouteId = routeEntity.Id;
-                    entity.Route = routeEntity;
+                    entity.RouteEntity = linearLocationDomain.Route.ToEntity();
                 }
 
                 return entity;
@@ -66,7 +62,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             return new LocationEntity
             {
-                Id = Guid.NewGuid(),
                 UniqueIdentifier = domain.UniqueIdentifier,
                 Discriminator = "SectionLocation"
             };

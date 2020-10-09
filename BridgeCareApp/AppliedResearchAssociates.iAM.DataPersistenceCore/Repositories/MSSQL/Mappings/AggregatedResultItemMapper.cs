@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
 {
     public static class AggregatedResultItemMapper
     {
-        public static IEnumerable<AggregatedResultEntity> ToEntity<T>(this IEnumerable<(DataMinerAttribute attribute, (int year, T value))> domains, Guid maintainableAssetId)
+        public static IEnumerable<AggregatedResultEntity> ToEntity<T>(this IEnumerable<(DataMinerAttribute attribute, (int year, T value))> domains)
         {
             if (domains == null || !domains.Any())
             {
@@ -25,7 +25,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
                     Discriminator = "NumericAggregatedResult",
                     Year = d.Item2.year,
                     NumericValue = (double)Convert.ChangeType(d.Item2.value, typeof(double)),
-                    MaintainableAssetId = maintainableAssetId,
                     AttributeId = d.attribute.Id
                 });
             }
@@ -38,7 +37,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
                     Discriminator = "TextAggregatedResult",
                     Year = d.Item2.year,
                     TextValue = (string)Convert.ChangeType(d.Item2.value, typeof(string)),
-                    MaintainableAssetId = maintainableAssetId,
                     AttributeId = d.attribute.Id
                 });
             }

@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Enti
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
-    public static class RouteItemMapper
+    public static class RouteMapper
     {
         public static Route ToDomain(this RouteEntity entity)
         {
@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             if (entity.Discriminator == "DirectionalRoute")
             {
-                return new DirectionalRoute(entity.UniqueIdentifier, entity.Direction.Value);
+                return new DirectionalRoute(entity.UniqueIdentifier, entity.Direction);
             }
 
             return new SimpleRoute(entity.UniqueIdentifier);
@@ -32,8 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             if (domain is DirectionalRoute directionalRouteDomain)
             {
                 return new RouteEntity
-                {
-                    Id = Guid.NewGuid(),
+                { 
                     Direction = directionalRouteDomain.Direction,
                     UniqueIdentifier = directionalRouteDomain.UniqueIdentifier,
                     Discriminator = "DirectionalRoute"
@@ -42,7 +41,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             return new RouteEntity
             {
-                Id = Guid.NewGuid(),
                 UniqueIdentifier = domain.UniqueIdentifier,
                 Discriminator = "SimpleRoute"
             };

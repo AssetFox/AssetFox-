@@ -6,7 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Enti
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
-    public static class NetworkItemMapper
+    public static class NetworkMapper
     {
         public static Network ToDomain(this NetworkEntity entity)
         {
@@ -16,9 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             }
 
             return new Network(
-                entity.MaintainableAssets == null
+                entity.MaintainableAssetEntities == null
                     ? new List<MaintainableAsset>()
-                    : entity.MaintainableAssets.Select(e => e.ToDomain()).ToList(),
+                    : entity.MaintainableAssetEntities.Select(e => e.ToDomain()).ToList(),
                 entity.Id,
                 entity.Name);
         }
@@ -34,9 +34,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             {
                 Id = domain.Id,
                 Name = domain.Name,
-                MaintainableAssets = (ICollection<MaintainableAsset>)(domain.MaintainableAssets.Any()
-                    ? domain.MaintainableAssets.Select(d => d.ToEntity(domain.Id))
-                    : new List<MaintainableAssetEntity>())
+                MaintainableAssetEntities = domain.MaintainableAssets.Any()
+                    ? domain.MaintainableAssets.Select(d => d.ToEntity(domain.Id)).ToList()
+                    : new List<MaintainableAssetEntity>()
             };
         }
     }

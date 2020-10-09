@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public AttributeDatumRepository(IAMContext context) : base(context) { }
 
-        public override async void AddAll(IEnumerable<AttributeDatum<T>> domains, params object[] args)
+        public override async void AddAll(IEnumerable<AttributeDatum<T>> domainAttributeData, params object[] args)
         {
             if (!args.Any())
             {
@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var maintainableAssetEntity = context.MaintainableAssets
                 .Single(e => e.Id == maintainableAssetId);
 
-            await context.AttributeData.AddRangeAsync(domains.Select(d =>
+            await context.AttributeData.AddRangeAsync(domainAttributeData.Select(d =>
                 d.ToEntity(maintainableAssetEntity.Id, maintainableAssetEntity.LocationId)));
         }
     }

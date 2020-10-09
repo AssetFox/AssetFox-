@@ -14,6 +14,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
 
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public ICollection<MaintainableAsset> MaintainableAssets { get; set; }
+        public ICollection<MaintainableAssetEntity> MaintainableAssetEntities { get; set; }
     }
 }

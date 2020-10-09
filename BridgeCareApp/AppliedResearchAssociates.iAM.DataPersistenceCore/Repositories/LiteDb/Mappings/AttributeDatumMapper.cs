@@ -4,42 +4,46 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Enti
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
-    public static class AttributeDataItemMapper
+    public static class AttributeDatumMapper
     {
-        public static IAttributeDatum ToDomain<T>(this AttributeDatumEntity<T> entity)
+        public static IAttributeDatum ToDomain<T>(this IAttributeDatumEntity entity)
         {
             if (entity == null)
             {
                 throw new NullReferenceException("Cannot map null AttributeDatum entity to AttributeDatum domain");
             }
 
+            var attributeDatumEntity = entity as AttributeDatumEntity<T>;
+
             if (entity.Discriminator == "NumericAttributeDatum")
             {
                 return new AttributeDatum<double>(
-                    entity.Attribute.ToDomain(),
-                    Convert.ToDouble(entity.Value),
-                    entity.Location.ToDomain(),
-                    entity.TimeStamp);
+                    attributeDatumEntity.AttributeEntity.ToDomain(),
+                    Convert.ToDouble(attributeDatumEntity.Value),
+                    attributeDatumEntity.LocationEntity.ToDomain(),
+                    attributeDatumEntity.TimeStamp);
             }
 
             if (entity.Discriminator == "TextAttributeDatum")
             {
                 return new AttributeDatum<string>(
-                    entity.Attribute.ToDomain(),
-                    entity.Value.ToString() ?? throw new InvalidOperationException("Data value for attribute cannot be null"),
-                    entity.Location.ToDomain(),
-                    entity.TimeStamp);
+                    attributeDatumEntity.AttributeEntity.ToDomain(),
+                    attributeDatumEntity.Value.ToString() ?? throw new InvalidOperationException("Data value for attribute cannot be null"),
+                    attributeDatumEntity.LocationEntity.ToDomain(),
+                    attributeDatumEntity.TimeStamp);
             }
 
             throw new InvalidOperationException("Cannot determine AttributeDatum entity type");
         }
 
-        public static IAttributeDatumEntity ToEntity<T>(this AttributeDatum<T> domain)
+        public static IAttributeDatumEntity ToEntity<T>(this IAttributeDatum domain)
         {
             if (domain == null)
             {
                 throw new NullReferenceException("Cannot map null AttributeDatum domain to AttributeDatum entity");
             }
+
+            var attributeDatumDomain = domain as AttributeDatum<T>;
 
             var valueType = typeof(T);
 
@@ -48,11 +52,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 return new AttributeDatumEntity<double>
                 {
                     Id = Guid.NewGuid(),
-                    Attribute = domain.Attribute.ToEntity(),
-                    Location = domain.Location.ToEntity(),
+                    AttributeEntity = domain.Attribute.ToEntity(),
+                    LocationEntity = domain.Location.ToEntity(),
                     Discriminator = "NumericAttributeDatum",
                     TimeStamp = domain.TimeStamp,
-                    Value = Convert.ToDouble(domain.Value)
+                    Value = Convert.ToDouble(attributeDatumDomain.Value)
                 };
             }
 
@@ -61,11 +65,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 return new AttributeDatumEntity<string>
                 {
                     Id = Guid.NewGuid(),
-                    Attribute = domain.Attribute.ToEntity(),
-                    Location = domain.Location.ToEntity(),
+                    AttributeEntity = domain.Attribute.ToEntity(),
+                    LocationEntity = domain.Location.ToEntity(),
                     Discriminator = "TextAttributeDatum",
                     TimeStamp = domain.TimeStamp,
-                    Value = domain.Value.ToString()
+                    Value = attributeDatumDomain.Value.ToString()
                 };
             }
 

@@ -33,10 +33,10 @@ namespace BridgeCareCore
             // This way, BridgeCareCore app doesn't have to know about the provider (eg. EF core)
             services.AddDataAccessServices(Configuration.GetConnectionString("BridgeCareConnex"));
 
-
-            services.AddScoped<IRepository<Network>, NetworkRepository>();
-            //services.AddScoped<IRepository<Network>, AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.NetworkRepository>();
-            services.AddScoped<IRepository<MaintainableAsset>, MaintainableAssetRepository>();
+            //services.AddScoped<IRepository<Network>, NetworkRepository>();
+            //services.AddScoped<IRepository<MaintainableAsset>, MaintainableAssetRepository>();
+            services.AddScoped<IRepository<Network>, AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Repositories.NetworkRepository>();
+            
             services.AddScoped<IRepository<Attribute>, AttributeRepository>();
             services.AddScoped<IRepository<AttributeDatum<double>>, AttributeDatumRepository<double>>();
             services.AddScoped<IRepository<AttributeDatum<string>>, AttributeDatumRepository<string>>();

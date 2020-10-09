@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using LiteDB;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Repositories
 {
     public abstract class LiteDbRepository<TEntity, TDomain> : IRepository<TDomain>
     {
         public virtual void Add(TDomain datum)
         {
-            using (var db = new LiteDatabase(@"C:\Users\cbecker\Desktop\MyData.db"))
-            {
-                var networkCollection = db.GetCollection<TDomain>("NETWORKS");
-                networkCollection.Insert(datum);
-            }
+            throw new NotImplementedException();
         }
 
         public virtual void AddAll(IEnumerable<TDomain> data, params object[] args)
@@ -37,12 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 
         public virtual TDomain Get(Guid id)
         {
-            using (var db = new LiteDatabase(@"C:\Users\cbecker\Desktop\MyData.db"))
-            {
-                var networkCollection = db.GetCollection<TDomain>("NETWORKS");
-                var testReturn = networkCollection.FindById(id);
-                return testReturn;
-            }
+            throw new NotImplementedException();
         }
 
         public virtual void Update(TDomain datum)
@@ -51,6 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
         }
 
         protected abstract TEntity ToEntity(TDomain domainModel);
+
         protected abstract TDomain ToDomain(TEntity dataEntity);
     }
 }

@@ -17,7 +17,7 @@
     {
       "name": "COUNTY",
       "defaultValue": "Jefferson",
-      "connectionString": "data source=localhost;Database=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;",
+      "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",
       "dataSource": "MSSQL",
       "type": "TEXT",
       "location": "section",

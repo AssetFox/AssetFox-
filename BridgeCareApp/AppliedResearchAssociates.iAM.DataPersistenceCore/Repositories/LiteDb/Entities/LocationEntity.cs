@@ -11,7 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
         {
 
         }
-
         public string Discriminator { get; set; }
 
         public string UniqueIdentifier { get; set; }
@@ -20,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
 
         public double? End { get; set; }
 
-        public RouteEntity Route { get; set; }
+        public RouteEntity RouteEntity { get; set; }
 
 
     }

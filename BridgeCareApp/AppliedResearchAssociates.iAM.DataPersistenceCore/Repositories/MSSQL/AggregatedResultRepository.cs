@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AggregatedResultRepository(IAMContext context) : base(context) { }
 
         public void AddAggregatedResults<T>(
-            List<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>> domains, Guid maintainableAssetId) =>
-            context.AggregatedResults.AddRange(domains.SelectMany(d => d.ToEntity(maintainableAssetId)));
+            List<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>> domains) =>
+            context.AggregatedResults.AddRange(domains.SelectMany(d => d.ToEntity()));
     }
 }

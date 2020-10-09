@@ -13,8 +13,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
 
         }
         public Guid Id { get; set; }
-        public LocationEntity Location { get; set; }
-        public AttributeEntity Attribute { get; set; }
+        public LocationEntity LocationEntity { get; set; }
+        public AttributeEntity AttributeEntity { get; set; }
         public T Value { get; set; }
         public DateTime TimeStamp { get; set; }
         public string Discriminator { get; set; }

@@ -23,9 +23,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        public bool CurrentValueIsBeyondLimit() => _CurrentValueIsBeyondLimit();
+        public bool CurrentValueIsBeyondLimit => _CurrentValueIsBeyondLimit();
 
-        public double GetLimitLocationRelativeToLatestValues() => (Limit - PreviousValue) / (CurrentValue - PreviousValue);
+        public double GetLimitLocationRelativeToLatestValues() => (Limit - PreviousValue.Value) / (CurrentValue - PreviousValue.Value);
 
         public void UpdateValue()
         {
@@ -52,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private double CurrentValue;
 
-        private double PreviousValue = double.NaN;
+        private double? PreviousValue;
 
         private bool CurrentValueIsGreaterThanLimit() => CurrentValue > Limit;
 

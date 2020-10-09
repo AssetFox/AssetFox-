@@ -400,7 +400,7 @@ namespace BridgeCare.Services.SummaryReport
             var startingRowInvestment = 40;
             var startingBudgetHeaderColumn = 2;
             var nextBudget = 0;
-            var investmentGrid = new Dictionary<int, List<(string BudgetName, double? BudgetAmount)>>();
+            var investmentGrid = new SortedDictionary<int, List<(string BudgetName, double? BudgetAmount)>>();
             foreach (var item in inflationAndInvestments.BudgetYears)
             {
                 if (!investmentGrid.ContainsKey(item.Year))

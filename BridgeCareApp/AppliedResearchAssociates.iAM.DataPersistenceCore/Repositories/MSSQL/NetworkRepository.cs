@@ -13,21 +13,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public NetworkRepository(IAMContext context) : base(context) { }
 
-        /*public override Network Get(Guid id)
-        {
-            if (!context.Networks.Any(n => n.Id == id))
-            {
-                throw new RowNotInTableException($"Cannot find network with the given id: {id}");
-            }
-            // if there is no id match, it throws an exception that sequence contains no element.
-            var entity = context.Networks
-                .Include(n => n.MaintainableAssets)
-                .ThenInclude(s => s.Location)
-                .Single(n => n.Id == id);
-
-            return entity.ToDomain();
-        }*/
-
         public override void Add(Network network) => context.Networks.Add(network.ToEntity());
 
         public override Network Get(Guid id)

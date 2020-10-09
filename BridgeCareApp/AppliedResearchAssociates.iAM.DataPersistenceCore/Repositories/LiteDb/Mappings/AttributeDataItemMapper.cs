@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             {
                 return new AttributeDatum<double>(
                     entity.Attribute.ToDomain(),
-                    entity.Value ?? throw new InvalidOperationException("Data value for attribute cannot be null"),
+                    Convert.ToDouble(entity.Value),
                     entity.Location.ToDomain(),
                     entity.TimeStamp);
             }
@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             {
                 return new AttributeDatum<string>(
                     entity.Attribute.ToDomain(),
-                    entity.Value ?? throw new InvalidOperationException("Data value for attribute cannot be null"),
+                    entity.Value.ToString() ?? throw new InvalidOperationException("Data value for attribute cannot be null"),
                     entity.Location.ToDomain(),
                     entity.TimeStamp);
             }
@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             throw new InvalidOperationException("Cannot determine AttributeDatum entity type");
         }
 
-        public static IAttributeDatumEntity ToEntity<T>(this AttributeDatum<T> domain, Guid maintainableAssetId, Guid locationId)
+        public static IAttributeDatumEntity ToEntity<T>(this AttributeDatum<T> domain)
         {
             if (domain == null)
             {
@@ -48,6 +48,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 return new AttributeDatumEntity<double>
                 {
                     Id = Guid.NewGuid(),
+                    Attribute = domain.Attribute.ToEntity(),
+                    Location = domain.Location.ToEntity(),
                     Discriminator = "NumericAttributeDatum",
                     TimeStamp = domain.TimeStamp,
                     Value = Convert.ToDouble(domain.Value)
@@ -59,6 +61,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 return new AttributeDatumEntity<string>
                 {
                     Id = Guid.NewGuid(),
+                    Attribute = domain.Attribute.ToEntity(),
+                    Location = domain.Location.ToEntity(),
                     Discriminator = "TextAttributeDatum",
                     TimeStamp = domain.TimeStamp,
                     Value = domain.Value.ToString()

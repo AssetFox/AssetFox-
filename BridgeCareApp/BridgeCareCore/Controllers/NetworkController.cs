@@ -53,13 +53,13 @@ namespace BridgeCareCore.Controllers
                 var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(attributeData);
                 network.Name = name;
                 // add the network to our data source
-                NetworkRepo.Add(network);
+                var newlyGeneratedId = NetworkRepo.Add(network);
                 // add the maintainable assets to our data source
                 //MaintainableAssetRepo.AddAll(network.MaintainableAssets, network.Id);
 
                 Repos.SaveChanges(); // this will save all of the data in the IAMContext object
                 Logger.LogInformation($"a network with name : {network.Name} has been created");
-                return Ok("Successfully created network");
+                return Ok(newlyGeneratedId);
             }
             catch (Exception e)
             {

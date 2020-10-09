@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public NetworkRepository(IAMContext context) : base(context) { }
 
-        public override void Add(Network network) => context.Networks.Add(network.ToEntity());
+        public override Guid Add(Network network) => context.Networks.Add(network.ToEntity()).Entity.Id;
 
         public override Network Get(Guid id)
         {

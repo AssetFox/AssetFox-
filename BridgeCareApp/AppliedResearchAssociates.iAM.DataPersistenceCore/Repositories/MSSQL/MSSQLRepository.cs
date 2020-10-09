@@ -15,9 +15,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             this.context = context;
         }
 
-        public virtual void Add(TDomain datum)
+        public virtual Guid Add(TDomain datum)
         {
             context.Add(datum);
+            return Guid.Empty;  // this is wrong. It should return the actual Id
         }
 
         public virtual void AddAll(IEnumerable<TDomain> data, params object[] args)

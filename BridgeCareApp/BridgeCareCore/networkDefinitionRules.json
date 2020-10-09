@@ -4,22 +4,11 @@
     "defaultValue": 10,
     "maximum": 100,
     "minimum": 1,
-    "connectionString": "Data Source=(localdb)\\MSSQLLocalDB; Integrated Security=True; Connect Timeout=30; Encrypt=False; TrustServerCertificate = False; ApplicationIntent = ReadWrite; MultiSubnetFailover = False; Initial Catalog = IAMV2",
+    "connectionString": "data source=localhost;Database=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;",
     "dataSource": "MSSQL",
     "type": "NUMERIC",
     "location": "section",
-    "command": "SELECT concat(BRKEY, Bridge_ID) AS UniqueIdentifier,
-    CAST(INSPDATE AS
-    DATETIME) AS
-    DateTime,
-    CAST(REPLACE(ADTTOTAL,
-    ',',
-    '') AS
-    float) AS
-    Value FROM
-    dbo.PennDot_Report_A WHERE
-    (ISNUMERIC(ADTTOTAL) =
-    1)",
+    "command": "SELECT concat(BRKEY, Bridge_ID) AS UniqueIdentifier, CAST(INSPDATE AS DATETIME) AS DateTime, CAST(REPLACE(ADTTOTAL, ',', '') AS float) AS Value FROM dbo.PennDot_Report_A WHERE (ISNUMERIC(ADTTOTAL) = 1)",
     "aggregationRule": "average",
     "isCalculated": false,
     "isAscending": true

@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IRepository<TDomain>
     {
-        void Add(TDomain datum);
+        Guid Add(TDomain datum);
 
         void AddAll(IEnumerable<TDomain> data, params object[] args);
 

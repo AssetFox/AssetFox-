@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
 {
     public abstract class FileSystemRepository<TDomain> : IRepository<TDomain> where TDomain : class
     {
-        public virtual void Add(TDomain datum)
+        public virtual Guid Add(TDomain datum)
         {
             throw new NotImplementedException();
         }

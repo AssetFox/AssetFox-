@@ -1301,7 +1301,7 @@ namespace RoadCare3
             if (strSimulationID == "") return hashAttributeYear;
 
 
-            String strTable = "SIMULATION_" + strNetworkID.ToString() + "_" + strSimulationID; ;
+            String strTable = "SIMULATION_" + strNetworkID.ToString() + "_" + strSimulationID + "_0" ;
 
             List<string> listColumns = DBMgr.GetTableColumns(strTable);
             foreach (string strColumn in listColumns)

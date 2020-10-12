@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Security.Policy;
 using RoadCare3.Properties;
 using RoadCareDatabaseOperations;
+using DataAccessLayer;
 
 namespace RoadCare3
 {
@@ -55,7 +56,7 @@ namespace RoadCare3
             labelInvestment.Text = "Investment " + m_strSimulation + " : " + m_strNetwork;
             DataSet ds = new DataSet();
 
-            String strSelect = "SELECT FIRSTYEAR,NUMBERYEARS,INFLATIONRATE,DISCOUNTRATE,BUDGETORDER FROM INVESTMENTS WHERE SIMULATIONID='" + m_strSimID + "'";
+            String strSelect = "SELECT FIRSTYEAR,NUMBERYEARS,INFLATIONRATE,DISCOUNTRATE,BUDGETORDER,MINIMUM_PROJECT FROM INVESTMENTS WHERE SIMULATIONID='" + m_strSimID + "'";
             try
             {
                 ds = DBMgr.ExecuteQuery(strSelect);
@@ -73,6 +74,14 @@ namespace RoadCare3
             textBoxInflation.Text = ds.Tables[0].Rows[0].ItemArray[2].ToString();
             textBoxDiscount.Text = ds.Tables[0].Rows[0].ItemArray[3].ToString();
             textBoxBudgetOrder.Text = ds.Tables[0].Rows[0].ItemArray[4].ToString();
+            if (ds.Tables[0].Rows[0].ItemArray[5] != DBNull.Value)
+            {
+                textBoxMinimumProject.Text = ds.Tables[0].Rows[0].ItemArray[5].ToString();
+            }
+            else
+            { 
+                textBoxMinimumProject.Text = "0";
+            }
             m_bUpdate = true;
             UpdateInvestmentGrid();
             UpdateBudgetCriteria();
@@ -1313,6 +1322,24 @@ namespace RoadCare3
                 }
             }
             CheckLimits();
+        }
+
+        private void textBoxMinimumProject_Validated(object sender, EventArgs e)
+        {
+            if (!m_bUpdate) return;
+
+            String strUpdate = "UPDATE INVESTMENTS SET MINIMUM_PROJECT='" + textBoxMinimumProject.Text + "' WHERE SIMULATIONID='" + m_strSimID + "'";
+            try
+            {
+                DBMgr.ExecuteNonQuery(strUpdate);
+
+            }
+            catch (Exception except)
+            {
+                m_bUpdate = false;
+                m_bUpdate = true;
+                Global.WriteOutput("Error updating minimum project limit: " + except.Message);
+            }
         }
     }
 }

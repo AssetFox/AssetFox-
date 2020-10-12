@@ -24,6 +24,7 @@ namespace Simulation
         private Hashtable m_hashBudgetYear = new Hashtable();
         private String m_strBudgetOrder;
         private DateTime m_datetimeStart;
+        private float m_fMinimumProject;
 
         public DateTime StartDate
         {
@@ -125,6 +126,12 @@ namespace Simulation
             }
         }
 
+        public float MinimumProject
+        {
+            get { return m_fMinimumProject; }
+            set { m_fMinimumProject = value; }
+
+        }
         private int MaximumYear { get; set; }
 
         public void LoadBudgets()

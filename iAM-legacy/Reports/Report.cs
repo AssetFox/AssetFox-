@@ -85,7 +85,11 @@ namespace Reports
 
         public static void CloseExcel()
         {
-            XL.Quit();
+            try
+            {
+                XL.Quit();
+            }
+            catch { }
         }
 
         public static void CreateColClusterBarGraph(

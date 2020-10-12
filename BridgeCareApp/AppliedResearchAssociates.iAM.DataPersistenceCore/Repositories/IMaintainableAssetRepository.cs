@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IMaintainableAssetRepository
     {

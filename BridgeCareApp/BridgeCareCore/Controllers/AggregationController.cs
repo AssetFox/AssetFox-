@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
@@ -21,31 +20,21 @@ namespace BridgeCareCore.Controllers
     {
         private readonly IRepository<Network> NetworkRepo;
         private readonly IRepository<AttributeMetaDatum> AttributeMetaDataRepo;
-        private readonly IRepository<DataMinerAttribute> AttributeRepo;
-        private readonly IRepository<AttributeDatum<double>> NumericAttributeDatumRepo;
-        private readonly IRepository<AttributeDatum<string>> TextAttributeDatumRepo;
+        private readonly IAttributeDatumRepository AttributeDatumRepo;
         private readonly IRepository<MaintainableAsset> MaintainableAssetRepo;
-        private readonly IAggregatedResultDataRepository AggregatedResultRepo;
         private readonly ISaveChanges Repos;
+
         private readonly ILogger<NetworkController> Logger;
 
         public AggregationController(IRepository<Network> networkRepo,
             IRepository<AttributeMetaDatum> attributeMetaDataRepo,
-            IRepository<DataMinerAttribute> attributeRepo,
-            IRepository<AttributeDatum<double>> numericAttributeDatumRepo,
-            IRepository<AttributeDatum<string>> textAttributeDatumRepo,
-            IRepository<MaintainableAsset> maintainableAssetRepo,
-            IAggregatedResultDataRepository aggregatedResultRepo,
+            IAttributeDatumRepository attributeDatumRepo,
             ISaveChanges repos,
             ILogger<NetworkController> logger)
         {
             NetworkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
             AttributeMetaDataRepo = attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
-            AttributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
-            NumericAttributeDatumRepo = numericAttributeDatumRepo ?? throw new ArgumentNullException(nameof(numericAttributeDatumRepo));
-            TextAttributeDatumRepo = textAttributeDatumRepo ?? throw new ArgumentNullException(nameof(textAttributeDatumRepo));
-            MaintainableAssetRepo = maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
-            AggregatedResultRepo = aggregatedResultRepo ?? throw new ArgumentNullException(nameof(aggregatedResultRepo));
+            AttributeDatumRepo = attributeDatumRepo ?? throw new ArgumentNullException(nameof(attributeDatumRepo));
             Repos = repos ?? throw new ArgumentNullException(nameof(repos));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -67,7 +56,6 @@ namespace BridgeCareCore.Controllers
                 {
                     var attribute = AttributeFactory.Create(attributeMetaDatum);
                     attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
-                    //AttributeRepo.Add(attribute);
                 }
 
                 if (attributeData.Any())
@@ -82,24 +70,25 @@ namespace BridgeCareCore.Controllers
                         {
                             var numericAttributeData = maintainableAsset.AssignedData
                                 .Where(a => a.Attribute.DataType == "NUMERIC")
-                                .Select(a => (AttributeDatum<double>)Convert.ChangeType(a, typeof(AttributeDatum<double>)));
+                                .Select(a => (AttributeDatum<double>)a);
 
-                            NumericAttributeDatumRepo.AddAll(numericAttributeData);
+                            // First, delete all previously assigned data then create new data.
+                            AttributeDatumRepo.AddAttributeData(numericAttributeData, maintainableAsset.Id);
                         }
 
                         if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
                         {
                             var textAttributeData = maintainableAsset.AssignedData
                                 .Where(a => a.Attribute.DataType == "TEXT")
-                                .Select(a => (AttributeDatum<string>)Convert.ChangeType(a, typeof(AttributeDatum<string>)));
+                                .Select(a => (AttributeDatum<string>)a);
 
-                            TextAttributeDatumRepo.AddAll(textAttributeData);
+                            AttributeDatumRepo.AddAttributeData(textAttributeData, maintainableAsset.Id);
                         }
                     }
                 }
 
                 Repos.SaveChanges();
-                Logger.LogInformation("Attributes & attribute data have been created");
+                Logger.LogInformation("Attribute data have been assigned to maintenance assets.");
                 return Ok();
             }
             catch (Exception e)
@@ -124,7 +113,7 @@ namespace BridgeCareCore.Controllers
                         .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateNumericRule(a)))
                         .ToList();
 
-                    AggregatedResultRepo.AddAggregatedResults<double>(aggregatedNumericResults);
+                    //AggregatedResultRepo.AddAggregatedResults<double>(aggregatedNumericResults);
                 }
 
                 if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
@@ -135,7 +124,7 @@ namespace BridgeCareCore.Controllers
                         .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a)))
                         .ToList();
 
-                    AggregatedResultRepo.AddAggregatedResults(aggregatedTextResults);
+                    //AggregatedResultRepo.AddAggregatedResults(aggregatedTextResults);
                 }
             }
 

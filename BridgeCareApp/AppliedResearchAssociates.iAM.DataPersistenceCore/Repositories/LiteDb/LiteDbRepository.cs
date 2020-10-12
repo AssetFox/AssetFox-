@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Repositories
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
     public abstract class LiteDbRepository<TEntity, TDomain> : IRepository<TDomain>
     {

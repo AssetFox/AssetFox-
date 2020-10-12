@@ -5,13 +5,13 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using LiteDb = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb;
 
 namespace BridgeCareCore
 {
@@ -33,17 +33,12 @@ namespace BridgeCareCore
             // This way, BridgeCareCore app doesn't have to know about the provider (eg. EF core)
             services.AddDataAccessServices(Configuration.GetConnectionString("BridgeCareConnex"));
 
-            //services.AddScoped<IRepository<Network>, NetworkRepository>();
-            //services.AddScoped<IRepository<MaintainableAsset>, MaintainableAssetRepository>();
-            services.AddScoped<IRepository<Network>, AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Repositories.NetworkRepository>();
-            
-            services.AddScoped<IRepository<Attribute>, AttributeRepository>();
-            services.AddScoped<IRepository<AttributeDatum<double>>, AttributeDatumRepository<double>>();
-            services.AddScoped<IRepository<AttributeDatum<string>>, AttributeDatumRepository<string>>();
+            services.AddScoped<IRepository<Network>, LiteDb.NetworkRepository>();
+            services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<double>>();
+
+
             services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
-            services.AddScoped<IAggregatedResultDataRepository, AggregatedResultRepository<double>>();
-            services.AddScoped<IAggregatedResultDataRepository, AggregatedResultRepository<string>>();
             services.AddScoped<ISaveChanges, SaveAllChanges>();
         }
 

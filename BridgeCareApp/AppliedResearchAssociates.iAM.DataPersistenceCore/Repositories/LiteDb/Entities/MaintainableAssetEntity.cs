@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using AppliedResearchAssociates.iAM.DataMiner;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using LiteDB;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities
 {
@@ -10,11 +8,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
     {
         public MaintainableAssetEntity()
         {
-
         }
+        [BsonId]
         public Guid Id { get; set; }
-        public Guid NetworkId { get; set; }
+
         public List<IAttributeDatumEntity> AttributeDatumEntities { get; set; }
-        public LocationEntity LocationEntity {get; set;}
+
+        public LocationEntity LocationEntity { get; set; }
     }
 }

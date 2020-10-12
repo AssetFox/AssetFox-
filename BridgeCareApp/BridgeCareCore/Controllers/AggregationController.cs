@@ -60,30 +60,13 @@ namespace BridgeCareCore.Controllers
 
                 if (attributeData.Any())
                 {
+                    // When assigning network data, always remove the existing data from the network.
+                    AttributeDatumRepo.DeleteAssignedDataFromNetwork(networkId);
+
                     foreach (var maintainableAsset in network.MaintainableAssets)
                     {
-                        // assign attribute data to maintainable asset
                         maintainableAsset.AssignAttributeData(attributeData);
-
-                        // add assigned attribute data to db context
-                        if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "NUMERIC"))
-                        {
-                            var numericAttributeData = maintainableAsset.AssignedData
-                                .Where(a => a.Attribute.DataType == "NUMERIC")
-                                .Select(a => (AttributeDatum<double>)a);
-
-                            // First, delete all previously assigned data then create new data.
-                            AttributeDatumRepo.AddAttributeData(numericAttributeData, maintainableAsset.Id);
-                        }
-
-                        if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
-                        {
-                            var textAttributeData = maintainableAsset.AssignedData
-                                .Where(a => a.Attribute.DataType == "TEXT")
-                                .Select(a => (AttributeDatum<string>)a);
-
-                            AttributeDatumRepo.AddAttributeData(textAttributeData, maintainableAsset.Id);
-                        }
+                        AttributeDatumRepo.AddAttributeData(maintainableAsset.AssignedData, maintainableAsset.Id);
                     }
                 }
 

@@ -6,6 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeDatumRepository
     {
+        bool DeleteAssignedDataFromNetwork(Guid networkId);
         void AddAttributeData(IEnumerable<IAttributeDatum> domainAttributeData, Guid maintainableAssetId);
     }
 }

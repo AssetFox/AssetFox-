@@ -4,10 +4,15 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public class TextAttribute : Attribute
     {
-        public TextAttribute(Guid guid, string name, string defaultValue, string command, ConnectionType connectionType, string connectionString) : base(guid, name, command, "TEXT", connectionType, connectionString)
-        {
+        public TextAttribute(string defaultValue,
+            Guid id,
+            string name,
+            string ruleType,
+            string command,
+            ConnectionType connectionType,
+            string connectionString)
+            : base(id, name, "TEXT", ruleType, command, connectionType, connectionString) =>
             DefaultValue = defaultValue;
-        }
 
         public string DefaultValue { get; }
     }

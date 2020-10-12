@@ -81,7 +81,6 @@
   <ItemGroup>
     <Compile Include="AggregationTests.cs" />
     <Compile Include="DataMinerTests.cs" />
-    <Compile Include="DataPersistenceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SegmentationTests.cs" />
     <Compile Include="TestDataForAggregation.cs" />
@@ -104,10 +103,6 @@
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj">
       <Project>{b2769386-5922-49ed-8a95-32bcb912955d}</Project>
       <Name>AppliedResearchAssociates.iAM.DataMiner</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistence\AppliedResearchAssociates.iAM.DataPersistence.csproj">
-      <Project>{CBB73747-93D4-4E17-B031-792E91C22FE4}</Project>
-      <Name>AppliedResearchAssociates.iAM.DataPersistence</Name>
     </ProjectReference>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Segmentation\AppliedResearchAssociates.iAM.Segmentation.csproj">
       <Project>{db1d42ac-d45b-4256-9a3a-29156c74c2b5}</Project>

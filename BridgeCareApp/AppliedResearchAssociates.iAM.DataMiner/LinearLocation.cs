@@ -1,6 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-
-namespace AppliedResearchAssociates.iAM.DataMiner
+﻿namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public class LinearLocation : Location
     {
@@ -10,9 +8,9 @@ namespace AppliedResearchAssociates.iAM.DataMiner
 
         public double End { get; }
 
-        // The uniqueIdentifier can really be any uniquely identifiable string
-        // of characters. (ROUTE-BMP-EMP-DIR for example).
-        public LinearLocation(Route route, string uniqueIdentifier, double start, double end) :base(uniqueIdentifier)
+        // The uniqueIdentifier can really be any uniquely identifiable string of characters.
+        // (ROUTE-BMP-EMP-DIR for example).
+        public LinearLocation(Route route, string uniqueIdentifier, double start, double end) : base(uniqueIdentifier)
         {
             Route = route;
             Start = start;
@@ -21,17 +19,11 @@ namespace AppliedResearchAssociates.iAM.DataMiner
 
         public override bool MatchOn(Location location)
         {
-            if (location is LinearLocation linearLocation)
-            {
-                return
-                    linearLocation.Start <= Start &&
+            return location is LinearLocation linearLocation
+                ? linearLocation.Start <= Start &&
                     linearLocation.End > End &&
-                    linearLocation.Route.MatchOn(Route);
-            }
-            else
-            {
-                return false;
-            }
+                    linearLocation.Route.MatchOn(Route)
+                : false;
         }
     }
 }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
@@ -15,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner
             {
             case ConnectionType.MSSQL:
                 return new SqlAttributeConnection(attribute);
+
             case ConnectionType.MONGO_DB:
                 throw new NotImplementedException("Mongo Db data retrival has not been implemented");
             default:

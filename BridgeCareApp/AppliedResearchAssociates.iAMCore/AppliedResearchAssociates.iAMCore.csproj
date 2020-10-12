@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Humanizer.Core" Version="2.8.26" />
+    <PackageReference Include="MathNet.Numerics" Version="4.12.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AppliedResearchAssociates.CalculateEvaluate\AppliedResearchAssociates.CalculateEvaluate.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.Choice\AppliedResearchAssociates.Choice.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.CycleDetection\AppliedResearchAssociates.CycleDetection.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataAssignment\AppliedResearchAssociates.iAM.DataAssignment.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.Option\AppliedResearchAssociates.Option.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.Validation\AppliedResearchAssociates.Validation.csproj" />
+  </ItemGroup>
+
+</Project>

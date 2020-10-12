@@ -4,19 +4,11 @@
     {
         public SectionLocation(string uniqueIdentifier) : base(uniqueIdentifier)
         {
-
         }
 
         public override bool MatchOn(Location location)
         {
-            if (location is SectionLocation sectionLocation)
-            {
-                return sectionLocation.UniqueIdentifier == UniqueIdentifier;
-            }
-            else
-            {
-                return false;
-            }
+            return location is SectionLocation sectionLocation ? sectionLocation.UniqueIdentifier == UniqueIdentifier : false;
         }
     }
 }

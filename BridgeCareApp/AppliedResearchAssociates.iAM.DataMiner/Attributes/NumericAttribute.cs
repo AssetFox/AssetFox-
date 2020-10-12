@@ -4,14 +4,16 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public class NumericAttribute : Attribute
     {
-        public NumericAttribute(Guid guid,
-                                string name,
-                                double defaultValue,
-                                double maximum,
-                                double minimum,
-                                string command,
-                                ConnectionType connectionType,
-                                string connectionString) : base(guid, name, command, "NUMERIC", connectionType, connectionString)
+        public NumericAttribute(double defaultValue,
+            double maximum,
+            double minimum,
+            Guid id,
+            string name,
+            string ruleType,
+            string command,
+            ConnectionType connectionType,
+            string connectionString)
+            : base(id, name, "NUMERIC", ruleType, command, connectionType, connectionString)
         {
             DefaultValue = defaultValue;
             Maximum = maximum;

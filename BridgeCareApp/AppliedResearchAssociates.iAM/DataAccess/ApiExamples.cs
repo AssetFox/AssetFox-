@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
-using System.Linq;
-using AppliedResearchAssociates.iAM.Aggregation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.Segmentation;
 using Newtonsoft.Json;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
@@ -14,15 +10,42 @@ namespace AppliedResearchAssociates.iAM.DataAccess
 {
     public sealed class ApiExamples
     {
-        public Segmentation.Network CreateNewNetwork()
+        /*public Segmentation.Network CreateNetwork()
         {
             var segmentationRulesJsonText = File.ReadAllText("segmentationMetaData.json");
-            var attributeMetaDatum = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText, new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum;
+            var attributeMetaDatum = JsonConvert.DeserializeAnonymousType(segmentationRulesJsonText,
+                new { AttributeMetaDatum = default(AttributeMetaDatum) }).AttributeMetaDatum;
 
             var attribute = AttributeFactory.Create(attributeMetaDatum);
             var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
 
             return Segmenter.CreateNetworkFromAttributeDataRecords(attributeData);
+        }
+
+        public IEnumerable<AssignedDataSegment> AssignDataToSegments(Guid networkGuid)
+        {
+            var network = GetNetwork(networkGuid);
+
+            var attributeJsonText = File.ReadAllText("attributeMetaData.json");
+            var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
+
+            var attributeData = new List<IAttributeDatum>();
+            var attributes = new List<DataMiner.Attributes.Attribute>();
+
+            // Create the list of attributes
+            foreach (var attributeMetaDatum in attributeMetaData)
+            {
+                var attribute = AttributeFactory.Create(attributeMetaDatum);
+                attributes.Add(attribute);
+            }
+
+            // Create the attribute data for each attribute
+            foreach (var attribute in attributes)
+            {
+                attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
+            }
+
+            return Aggregator.AssignAttributeDataToSegments(attributeData, network.Segments);
         }
 
         public void AggregateNetwork(Guid networkGuid)
@@ -33,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataAccess
             var attributeMetaData = JsonConvert.DeserializeAnonymousType(attributeJsonText, new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
 
             var attributeData = new List<IAttributeDatum>();
-            var attributes = new List<DataMiner.Attributes.Attribute>();
+            var attributes = new List<DataMinerAttribute>();
 
             // Create the list of attributes
             foreach(var attributeMetaDatum in attributeMetaData)
@@ -74,9 +97,9 @@ namespace AppliedResearchAssociates.iAM.DataAccess
             // Save results to database, use them in the analysis.
         }
 
-        private Segmentation.Network GetNetwork(Guid networkGuid)
+        public Segmentation.Network GetNetwork(Guid networkGuid)
         {
             throw new NotImplementedException();
-        }
+        }*/
     }
 }

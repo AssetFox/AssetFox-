@@ -1478,7 +1478,7 @@ namespace RollupSegmentation
             foreach (String strTable in listTables)
             {
                 String strCalculatedTable = strTable + "_CALCULATE";
-                //RollupMessaging.AddMessge("Creating and populating Calculated Asset Table:" + strCalculatedTable);
+                //RollupMessaging.AddMessage("Creating and populating Calculated Asset Table:" + strCalculatedTable);
                 List<DatabaseManager.TableParameters> listColumn = new List<DatabaseManager.TableParameters>();
                 listColumn.Add(new DatabaseManager.TableParameters("ID", DataType.Int, false, true, false));
                 List<CalculatedAssetObject> listCalculatedAsset = listAssets.FindAll((
@@ -2251,7 +2251,7 @@ namespace RollupSegmentation
 					}
 					else
 					{
-						//RollupMessaging.AddMessge("Warning: Attribute " + strCalculated + " not available for calculation.");
+						//RollupMessaging.AddMessage("Warning: Attribute " + strCalculated + " not available for calculation.");
 					}
 
                 }
@@ -3784,7 +3784,7 @@ namespace RollupSegmentation
             String strSelect = "SELECT ATTRIBUTE_,DEFAULT_VALUE FROM ATTRIBUTES_ WHERE TYPE_='NUMBER'";
             try
             {
-				//RollupMessaging.AddMessge("Running ATTRIBUTE_ query");
+				//RollupMessaging.AddMessage("Running ATTRIBUTE_ query");
                 ds = DBMgr.ExecuteQuery(strSelect);
                 m_hashAttributeDefaults = new Hashtable();
                 foreach (DataRow row in ds.Tables[0].Rows)
@@ -3806,7 +3806,7 @@ namespace RollupSegmentation
 			String strArea = null;
             try
             {
-				//RollupMessaging.AddMessge("Running OPTION_VALUE query");
+				//RollupMessaging.AddMessage("Running OPTION_VALUE query");
                 ds = DBMgr.ExecuteQuery(strQuery);
 				strArea = ds.Tables[0].Rows[0].ItemArray[0].ToString();
             }
@@ -3818,9 +3818,9 @@ namespace RollupSegmentation
             
             
             m_crArea = new CalculateEvaluate.CalculateEvaluate();
-			//RollupMessaging.AddMessge("Building C/E Class");
+			//RollupMessaging.AddMessage("Building C/E Class");
             m_crArea.BuildTemporaryClass(strArea, true);
-			//RollupMessaging.AddMessge("Comiling C/E Assembly");
+			//RollupMessaging.AddMessage("Comiling C/E Assembly");
             m_crArea.CompileAssembly();
             if (m_crArea.m_listError.Count > 0)
             {
@@ -3829,7 +3829,7 @@ namespace RollupSegmentation
             }
             m_listArea = new List<String>();
 
-			//RollupMessaging.AddMessge("Calculating AREA");
+			//RollupMessaging.AddMessage("Calculating AREA");
             string[] listAreaParameters = strArea.Split(']');
             for (int i = 0; i < listAreaParameters.Length; i++)
             {
@@ -3850,7 +3850,7 @@ namespace RollupSegmentation
                     }
                 }
             }
-			//RollupMessaging.AddMessge("Successfully calculated AREA");
+			//RollupMessaging.AddMessage("Successfully calculated AREA");
             return true;
         }
     }

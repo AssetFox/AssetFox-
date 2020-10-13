@@ -1,6 +1,5 @@
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -31,11 +30,13 @@ namespace BridgeCareCore
 
             //It is an extension method in DataPersistenceCore project, which provides the connection to the database
             // This way, BridgeCareCore app doesn't have to know about the provider (eg. EF core)
-            services.AddDataAccessServices(Configuration.GetConnectionString("BridgeCareConnex"));
+            services.AddSqlServerDataAccessServices(Configuration.GetConnectionString("BridgeCareConnex"));
+
+            services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
+            services.AddSingleton<LiteDb.ILiteDbContext, LiteDb.LiteDbContext>();
 
             services.AddScoped<IRepository<Network>, LiteDb.NetworkRepository>();
             services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<double>>();
-
 
             services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();

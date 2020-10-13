@@ -15,6 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
 
         public Guid Id { get; set; }
         public string Name { get; set; }
+
         [BsonRef("MAINTAINABLE_ASSETS")]
         public ICollection<MaintainableAssetEntity> MaintainableAssetEntities { get; set; }
     }

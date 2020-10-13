@@ -17,6 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
             if (entity.Discriminator == "LinearLocation")
             {
                 return new LinearLocation(
+                    entity.Id,
                     entity.Route.ToDomain(),
                     entity.UniqueIdentifier,
                     entity.Start ?? 0,
@@ -25,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
 
             if (entity.Discriminator == "SectionLocation")
             {
-                return new SectionLocation(entity.UniqueIdentifier);
+                return new SectionLocation(entity.Id, entity.UniqueIdentifier);
             }
 
             throw new InvalidOperationException("Cannot determine Location entity type");
@@ -47,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
             {
                 var entity = new LocationEntity
                 {
-                    Id = Guid.NewGuid(),
+                    Id = domain.Id,
                     Start = linearLocationDomain.Start,
                     End = linearLocationDomain.End,
                     Discriminator = "LinearLocation"
@@ -66,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
 
             return new LocationEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 UniqueIdentifier = domain.UniqueIdentifier,
                 Discriminator = "SectionLocation"
             };

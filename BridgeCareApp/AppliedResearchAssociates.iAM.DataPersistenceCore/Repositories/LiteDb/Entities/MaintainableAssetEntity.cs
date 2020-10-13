@@ -14,6 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
 
         public List<IAttributeDatumEntity> AttributeDatumEntities { get; set; }
 
+        [BsonRef("LOCATIONS")]
         public LocationEntity LocationEntity { get; set; }
     }
 }

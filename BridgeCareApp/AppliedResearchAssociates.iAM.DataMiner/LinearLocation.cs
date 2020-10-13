@@ -1,4 +1,6 @@
-﻿namespace AppliedResearchAssociates.iAM.DataMiner
+﻿using System;
+
+namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public class LinearLocation : Location
     {
@@ -10,7 +12,7 @@
 
         // The uniqueIdentifier can really be any uniquely identifiable string of characters.
         // (ROUTE-BMP-EMP-DIR for example).
-        public LinearLocation(Route route, string uniqueIdentifier, double start, double end) : base(uniqueIdentifier)
+        public LinearLocation(Guid id, Route route, string uniqueIdentifier, double start, double end) : base(id, uniqueIdentifier)
         {
             Route = route;
             Start = start;

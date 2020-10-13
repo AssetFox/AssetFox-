@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             return new MaintainableAssetEntity
             {
-                //Id = domain.Id,
+                Id = domain.Id,
                 LocationEntity = locationEntity
             };
         }

@@ -6,6 +6,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
     public abstract class LiteDbRepository<TEntity, TDomain> : IRepository<TDomain>
     {
+        protected LiteDbContext Context { get; }
+
+        public LiteDbRepository(LiteDbContext context)
+        {
+            Context = context;
+        }
         public virtual void Add(TDomain datum)
         {
             throw new NotImplementedException();

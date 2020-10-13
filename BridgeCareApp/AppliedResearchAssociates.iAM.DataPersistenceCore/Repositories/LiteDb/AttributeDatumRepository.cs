@@ -10,8 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
     {
         public bool DeleteAssignedDataFromNetwork(Guid networkId)
         {
-            using var db = new LiteDatabase(@"C:\Users\cbecker\Desktop\MyData.db");
-            return db.GetCollection<NetworkEntity>("NETWORKS").Delete(networkId);
+            throw new NotImplementedException();
         }
         public void AddAttributeData(IEnumerable<IAttributeDatum> domainAttributeData, Guid maintainableAssetId)
         {

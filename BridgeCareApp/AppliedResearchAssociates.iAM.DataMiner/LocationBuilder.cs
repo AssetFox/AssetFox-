@@ -15,20 +15,20 @@ namespace AppliedResearchAssociates.iAM.DataMiner
             if (uniqueIdentifier != null && start != null && end != null && direction == null)
             {
                 // Linear route data with no defined direction
-                return new LinearLocation(new SimpleRoute(uniqueIdentifier), uniqueIdentifier, start.Value, end.Value);
+                return new LinearLocation(Guid.NewGuid(), new SimpleRoute(uniqueIdentifier), uniqueIdentifier, start.Value, end.Value);
             }
             else if (start != null & end != null && direction != null && uniqueIdentifier != null)
             {
                 // Linear route data with a defined direction
-                return new LinearLocation(new DirectionalRoute(uniqueIdentifier, direction.Value), uniqueIdentifier, start.Value, end.Value);
+                return new LinearLocation(Guid.NewGuid(), new DirectionalRoute(uniqueIdentifier, direction.Value), uniqueIdentifier, start.Value, end.Value);
             }
             else if (uniqueIdentifier != null && wellKnownText != null && start == null && end == null)
             {
-                return new GisLocation(wellKnownText, uniqueIdentifier);
+                return new GisLocation(Guid.NewGuid(), wellKnownText, uniqueIdentifier);
             }
             else if (start == null && end == null && wellKnownText == null && uniqueIdentifier != null)
             {
-                return new SectionLocation(uniqueIdentifier);
+                return new SectionLocation(Guid.NewGuid(), uniqueIdentifier);
             }
             else
             {

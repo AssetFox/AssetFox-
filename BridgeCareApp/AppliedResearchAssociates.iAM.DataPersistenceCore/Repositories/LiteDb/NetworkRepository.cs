@@ -16,18 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
         }
         public override Network Get(Guid id)
         {
-            
-
-            using var db = new LiteDatabase(@"C:\Users\cbecker\Desktop\MyData.db");
-
-            var mapper = new BsonMapper();
-            mapper.Entity<NetworkEntity>()
-                .DbRef(_ => _.MaintainableAssetEntities, "MAINTAINABLE_ASSETS");
-
-            mapper.Entity<MaintainableAssetEntity>()
-                .DbRef(_ => _.LocationEntity, "LOCATIONS");
-
-            return db.GetCollection<NetworkEntity>("NETWORKS")
+            return Context.Database.GetCollection<NetworkEntity>("NETWORKS")
                 .Include(_ => _.MaintainableAssetEntities.ToList())
                 .Include(_ => _.MaintainableAssetEntities.Select(_ => _.LocationEntity))
                 .FindById(id)
@@ -36,24 +25,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 
         public override void Add(Network datum)
         {
-            var mapper = new BsonMapper();
-            mapper.Entity<NetworkEntity>()
-                .DbRef(_ => _.MaintainableAssetEntities, "MAINTAINABLE_ASSETS");
-
-            mapper.Entity<MaintainableAssetEntity>()
-                .DbRef(_ => _.LocationEntity, "LOCATIONS");
-
-            using var db = new LiteDatabase(@"C:\Users\cbecker\Desktop\MyData.db", mapper);
-
-            // [TODO] Set up of LiteDb needs to be moved to a service as part of Startup.cs
-            var locationCollection = db.GetCollection<LocationEntity>("LOCATIONS");
+            var locationCollection = Context.Database.GetCollection<LocationEntity>("LOCATIONS");
             locationCollection.InsertBulk(datum.MaintainableAssets.Select(_ => _.Location.ToEntity()));
 
-            var maintainableAssetCollection = db.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
+            var maintainableAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
             maintainableAssetCollection.InsertBulk(datum.MaintainableAssets.Select(_ => _.ToEntity()));
 
 
-            var networkCollection = db.GetCollection<NetworkEntity>("NETWORKS");
+            var networkCollection = Context.Database.GetCollection<NetworkEntity>("NETWORKS");
             networkCollection.Insert(datum.ToEntity());
         }
 

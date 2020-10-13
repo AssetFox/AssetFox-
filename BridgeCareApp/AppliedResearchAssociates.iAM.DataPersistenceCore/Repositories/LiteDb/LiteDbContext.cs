@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using LiteDB;
+﻿using LiteDB;
 using Microsoft.Extensions.Options;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
@@ -12,7 +9,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 
         public LiteDbContext(IOptions<LiteDbOptions> options)
         {
-            Database = new LiteDatabase(options.Value.LiteDbFilePath, );
+            var mapper = new BsonMapper();
+            mapper.Entity<Entities.NetworkEntity>()
+                .DbRef(_ => _.MaintainableAssetEntities, "MAINTAINABLE_ASSETS");
+
+            mapper.Entity<Entities.MaintainableAssetEntity>()
+                .DbRef(_ => _.LocationEntity, "LOCATIONS");
+
+            Database = new LiteDatabase(options.Value.LiteDbFilePath, mapper);
         }
     }
 }

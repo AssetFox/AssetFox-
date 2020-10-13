@@ -32,6 +32,8 @@ namespace AppliedResearchAssociates.iAM
 
         public int LastYearOfAnalysisPeriod => FirstYearOfAnalysisPeriod + NumberOfYearsInAnalysisPeriod - 1;
 
+        public decimal MinimumProjectCostLimit { get; set; }
+
         public int NumberOfYearsInAnalysisPeriod
         {
             get => _NumberOfYearsInAnalysisPeriod;
@@ -70,6 +72,11 @@ namespace AppliedResearchAssociates.iAM
         public ValidationResultBag GetDirectValidationResults()
         {
             var results = new ValidationResultBag();
+
+            if (MinimumProjectCostLimit < 0)
+            {
+                results.Add(ValidationStatus.Error, "Minimum project cost limit is less than zero.", this, nameof(MinimumProjectCostLimit));
+            }
 
             if (NumberOfYearsInAnalysisPeriod < 1)
             {

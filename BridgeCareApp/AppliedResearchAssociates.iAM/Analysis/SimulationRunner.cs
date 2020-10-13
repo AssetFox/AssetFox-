@@ -173,8 +173,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal IReadOnlyDictionary<string, NumberAttribute> NumberAttributeByName { get; private set; }
 
-        internal double GetInflationFactor(int year) => Math.Pow(1 + Simulation.InvestmentPlan.InflationRatePercentage / 100, year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod);
-
         internal void Fail(string message, bool shouldThrow = true)
         {
             OnFailure(new FailureEventArgs(message));
@@ -184,6 +182,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 throw new SimulationException(message);
             }
         }
+
+        internal double GetInflationFactor(int year) => Math.Pow(1 + Simulation.InvestmentPlan.InflationRatePercentage / 100, year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod);
 
         internal void Inform(string message) => OnInformation(new InformationEventArgs(message));
 
@@ -238,6 +238,20 @@ namespace AppliedResearchAssociates.iAM.Analysis
 #else
             _ = System.Threading.Tasks.Parallel.ForEach(items, action);
 #endif
+        }
+
+        private static bool TryConvertToDecimal(double value, out decimal convertedValue)
+        {
+            try
+            {
+                convertedValue = (decimal)value;
+                return true;
+            }
+            catch (OverflowException)
+            {
+                convertedValue = default;
+                return false;
+            }
         }
 
         private ICollection<SectionContext> ApplyRequiredEvents(int year)
@@ -444,6 +458,24 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     return isSuperseded;
                 });
 
+                _ = feasibleTreatments.RemoveWhere(treatment =>
+                {
+                    var cost = context.GetCostOfTreatment(treatment);
+                    if (TryConvertToDecimal(cost, out var convertedCost) && convertedCost > 0)
+                    {
+                        if (convertedCost < Simulation.InvestmentPlan.MinimumProjectCostLimit)
+                        {
+                            context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.CostIsBelowMinimumProjectCostLimit));
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
+                    return true;
+                });
+
                 if (feasibleTreatments.Count > 0)
                 {
                     var remainingLifeCalculatorFactories = Enumerable.ToArray(
@@ -582,12 +614,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private CostCoverage TryToPayForTreatment(SectionContext sectionContext, Treatment treatment, int year, Func<BudgetContext, decimal> getAvailableAmount)
         {
-            var remainingCost = (decimal)(sectionContext.GetCostOfTreatment(treatment) * GetInflationFactor(year));
+            var treatmentCost = sectionContext.GetCostOfTreatment(treatment);
 
-            if (remainingCost < 0)
-            {
-                Fail("Treatment cost is negative.");
-            }
+            // This variable is updated as payment for the treatment is arranged.
+            var remainingCost = (decimal)(treatmentCost * GetInflationFactor(year));
 
             var treatmentConsideration = sectionContext.Detail.TreatmentConsiderations.GetAdd(new TreatmentConsiderationDetail(treatment.Name));
 

@@ -36,18 +36,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             throw new InvalidOperationException("Cannot determine AttributeDatum entity type");
         }
 
-        public static IAttributeDatumEntity ToEntity<T>(this IAttributeDatum domain)
+        public static IAttributeDatumEntity ToEntity(this IAttributeDatum domain)
         {
             if (domain == null)
             {
                 throw new NullReferenceException("Cannot map null AttributeDatum domain to AttributeDatum entity");
             }
 
-            var attributeDatumDomain = domain as AttributeDatum<T>;
 
-            var valueType = typeof(T);
-
-            if (valueType == typeof(double))
+            if (domain is AttributeDatum<double> attributeDatumNumericDomain)
             {
                 return new AttributeDatumEntity<double>
                 {
@@ -56,11 +53,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                     LocationEntity = domain.Location.ToEntity(),
                     Discriminator = "NumericAttributeDatum",
                     TimeStamp = domain.TimeStamp,
-                    Value = Convert.ToDouble(attributeDatumDomain.Value)
+                    Value = Convert.ToDouble(attributeDatumNumericDomain.Value)
                 };
             }
 
-            if (valueType == typeof(string))
+            if (domain is AttributeDatum<string> attributeDatumTextDomain)
             {
                 return new AttributeDatumEntity<string>
                 {
@@ -69,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                     LocationEntity = domain.Location.ToEntity(),
                     Discriminator = "TextAttributeDatum",
                     TimeStamp = domain.TimeStamp,
-                    Value = attributeDatumDomain.Value.ToString()
+                    Value = attributeDatumTextDomain.Value.ToString()
                 };
             }
 

@@ -19,11 +19,12 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
         /// <returns></returns>
         public static Network CreateNetworkFromAttributeDataRecords(IEnumerable<IAttributeDatum> attributeData)
         {
+            var networkId = Guid.NewGuid();
             var maintenanceAssets = (from attributeDatum in attributeData
-                                     let maintenanceAsset = new MaintainableAsset(Guid.NewGuid(), attributeDatum.Location)
+                                     let maintenanceAsset = new MaintainableAsset(Guid.NewGuid(), networkId, attributeDatum.Location)
                                      select maintenanceAsset)
                     .ToList();
-            return new Network(maintenanceAssets, Guid.NewGuid());
+            return new Network(maintenanceAssets, networkId);
         }
     }
 }

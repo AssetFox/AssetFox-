@@ -6,21 +6,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddSqlServerDataAccessServices(this IServiceCollection services, string connectionString)
+        public static void AddMSSQLServices(this IServiceCollection services, string connectionString)
         {
             services.AddDbContext<IAMContext>(options =>
             {
                 options.UseSqlServer(connectionString)
                 .EnableSensitiveDataLogging();
             });
-        }
-
-        public static void AddLiteDbDataAccessServices(this IServiceCollection services, string databaseFilePath)
-        {
-            services.AddDbContext<LiteDbContext>(options =>
-            {
-                options
-            })
         }
     }
 }

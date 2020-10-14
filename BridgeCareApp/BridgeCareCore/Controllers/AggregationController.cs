@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace BridgeCareCore.Controllers
 {
@@ -46,9 +45,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var network = NetworkRepo.Get(networkId);
-
                 var attributeMetaData = AttributeMetaDataRepo.All();
-
                 var attributeData = new List<IAttributeDatum>();
 
                 // Create the list of attributes
@@ -60,14 +57,11 @@ namespace BridgeCareCore.Controllers
 
                 if (attributeData.Any())
                 {
-                    // When assigning network data, always remove the existing data from the network.
-                    AttributeDatumRepo.DeleteAssignedDataFromNetwork(networkId);
-
                     foreach (var maintainableAsset in network.MaintainableAssets)
                     {
                         maintainableAsset.AssignAttributeData(attributeData);
-                        AttributeDatumRepo.AddAttributeData(maintainableAsset.AssignedData, maintainableAsset.Id);
                     }
+                    AttributeDatumRepo.UpdateAssignedData(network);
                 }
 
                 Repos.SaveChanges();

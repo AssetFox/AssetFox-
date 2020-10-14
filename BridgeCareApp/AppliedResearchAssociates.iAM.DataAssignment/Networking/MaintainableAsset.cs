@@ -10,9 +10,10 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
 {
     public class MaintainableAsset
     {
-        public MaintainableAsset(Guid id, Location location)
+        public MaintainableAsset(Guid id, Guid networkId, Location location)
         {
             Id = id;
+            NetworkId = networkId;
             Location = location;
         }
 
@@ -38,6 +39,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
         }
         public List<IAttributeDatum> AssignedData { get; } = new List<IAttributeDatum>();
         public Guid Id { get; }
+        public Guid NetworkId { get; }
         public Location Location { get; }
     }
 }

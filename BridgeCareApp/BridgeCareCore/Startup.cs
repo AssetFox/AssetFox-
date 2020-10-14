@@ -26,11 +26,7 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers().AddNewtonsoftJson();
-
-            //It is an extension method in DataPersistenceCore project, which provides the connection to the database
-            // This way, BridgeCareCore app doesn't have to know about the provider (eg. EF core)
-            services.AddSqlServerDataAccessServices(Configuration.GetConnectionString("BridgeCareConnex"));
+            services.AddMSSQLServices(Configuration.GetConnectionString("BridgeCareConnex"));
 
             services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
             services.AddSingleton<LiteDb.ILiteDbContext, LiteDb.LiteDbContext>();
@@ -41,6 +37,8 @@ namespace BridgeCareCore
             services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
             services.AddScoped<ISaveChanges, SaveAllChanges>();
+
+            services.AddControllers().AddNewtonsoftJson();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

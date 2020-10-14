@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
     public class NetworkRepository : LiteDbRepository<NetworkEntity, Network>, INetworkRepository
     {
-        public NetworkRepository(LiteDbContext context) : base(context)
+        public NetworkRepository(ILiteDbContext context) : base(context)
         {
 
         }
@@ -30,7 +30,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 
             var maintainableAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
             maintainableAssetCollection.InsertBulk(datum.MaintainableAssets.Select(_ => _.ToEntity()));
-
 
             var networkCollection = Context.Database.GetCollection<NetworkEntity>("NETWORKS");
             networkCollection.Insert(datum.ToEntity());

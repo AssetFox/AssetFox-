@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
         }
         [BsonId]
         public Guid Id { get; set; }
-
+        public Guid NetworkId { get; set; }
         public List<IAttributeDatumEntity> AttributeDatumEntities { get; set; }
 
         [BsonRef("LOCATIONS")]

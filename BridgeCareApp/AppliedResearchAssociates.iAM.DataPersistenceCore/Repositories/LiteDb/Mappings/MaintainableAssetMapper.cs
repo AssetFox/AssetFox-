@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
@@ -19,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 throw new NullReferenceException("MaintainableAsset entity is missing related Location entity");
             }
 
-            var maintainableAsset = new MaintainableAsset(entity.Id, entity.LocationEntity.ToDomain());
+            var maintainableAsset = new MaintainableAsset(entity.Id, entity.NetworkId, entity.LocationEntity.ToDomain());
 
             if (entity.AttributeDatumEntities != null && entity.AttributeDatumEntities.Any())
             {
@@ -57,6 +58,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             return new MaintainableAssetEntity
             {
                 Id = domain.Id,
+                AttributeDatumEntities = domain.AssignedData.Select(_ => _.ToEntity()).ToList(),
+                NetworkId = domain.NetworkId,
                 LocationEntity = locationEntity
             };
         }

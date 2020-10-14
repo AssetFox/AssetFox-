@@ -17,4 +17,5 @@ export interface AttributeSelectValuesResult {
     attribute: string;
     values: string[];
     resultMessage: string;
+    resultType: string;
 }

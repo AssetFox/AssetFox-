@@ -66,7 +66,8 @@ namespace BridgeCare.DataAccessLayer
                             {
                                 Attribute = validAttributes[i],
                                 Values = new List<string>(),
-                                ResultMessage = $"Number of values for attribute {validAttributes[i]} exceeds 100; use text input"
+                                ResultMessage = $"Number of values for attribute {validAttributes[i]} exceeds 100; use text input",
+                                ResultType = "warning"
                             });
                         }
                         else if (reader.GetInt32(i) == 0)
@@ -75,7 +76,8 @@ namespace BridgeCare.DataAccessLayer
                             {
                                 Attribute = validAttributes[i],
                                 Values = new List<string>(),
-                                ResultMessage = $"No values found for attribute {validAttributes[i]}; use text input"
+                                ResultMessage = $"No values found for attribute {validAttributes[i]}; use text input",
+                                ResultType = "warning"
                             });
                         }
                         else
@@ -113,7 +115,8 @@ namespace BridgeCare.DataAccessLayer
                     {
                         Attribute = attributesWithValues[index],
                         Values = values,
-                        ResultMessage = "Success"
+                        ResultMessage = "Success",
+                        ResultType = "success"
                     });
 
                     index++;

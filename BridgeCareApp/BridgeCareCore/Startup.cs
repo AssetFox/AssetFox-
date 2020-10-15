@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,7 @@ namespace BridgeCareCore
             //It is an extension method in DataPersistenceCore project, which provides the connection to the database
             // This way, BridgeCareCore app doesn't have to know about the provider (eg. EF core)
             services.AddDataAccessServices(Configuration.GetConnectionString("BridgeCareConnex"));
+            services.AddSignalR();
 
             services.AddScoped<IRepository<Network>, NetworkRepository>();
             services.AddScoped<IRepository<MaintainableAsset>, MaintainableAssetRepository>();
@@ -62,6 +64,7 @@ namespace BridgeCareCore
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<BridgeCareHub>("/bridgecarehub");
             });
         }
 

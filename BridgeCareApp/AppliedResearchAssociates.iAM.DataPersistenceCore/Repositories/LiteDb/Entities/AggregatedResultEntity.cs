@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using LiteDB;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities
 {
@@ -10,7 +11,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
         {
 
         }
-        public IEnumerable<(AttributeEntity attribute, (int year, T value))> AggregatedData { get; set; }
+        [BsonId]
+        public Guid Id { get; set; }
+        public IEnumerable<GarbageEntity<T>> AggregatedData { get; set; }
+        [BsonRef("MAINTAINABLE_ASSETS")]
         public MaintainableAssetEntity MaintainableAssetEntity { get; set; }
     }
 }

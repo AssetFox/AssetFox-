@@ -1,5 +1,5 @@
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -31,10 +31,12 @@ namespace BridgeCareCore
             services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
             services.AddSingleton<LiteDb.ILiteDbContext, LiteDb.LiteDbContext>();
 
-            services.AddScoped<IRepository<Network>, LiteDb.NetworkRepository>();
+            services.AddScoped<INetworkRepository, LiteDb.NetworkRepository>();
             services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<double>>();
-
-            services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();
+            services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<string>>();
+            services.AddScoped<IMaintainableAssetRepository, LiteDb.MaintainableAssetRepository>();
+            services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<double>>();
+            services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<string>>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
             services.AddScoped<ISaveChanges, SaveAllChanges>();
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
@@ -10,10 +9,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
     public class NetworkRepository : LiteDbRepository<NetworkEntity, Network>, INetworkRepository
     {
-        public NetworkRepository(ILiteDbContext context) : base(context)
-        {
+        public NetworkRepository(ILiteDbContext context) : base(context) { }
 
-        }
         public override Network Get(Guid id)
         {
             return Context.Database.GetCollection<NetworkEntity>("NETWORKS")

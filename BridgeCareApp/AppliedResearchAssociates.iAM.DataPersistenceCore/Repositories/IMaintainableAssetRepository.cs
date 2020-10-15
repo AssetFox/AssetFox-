@@ -4,10 +4,8 @@ using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
-    public interface IMaintainableAssetRepository
+    public interface IMaintainableAssetRepository : IRepository<MaintainableAsset>
     {
-        void AddNetworkMaintainableAssets(IEnumerable<MaintainableAsset> maintainableAssets, Guid networkId);
-
-        IEnumerable<MaintainableAsset> GetMaintainableAssetsWithAssignedData(Guid networkId);
+        IEnumerable<MaintainableAsset> GetAllInNetwork(Guid networkId);
     }
 }

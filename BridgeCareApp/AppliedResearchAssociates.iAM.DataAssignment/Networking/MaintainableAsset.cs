@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
         public AggregatedResult<T> GetAggregatedValuesByYear<T>(DataMinerAttribute attribute, AggregationRule<T> aggregationRule)
         {
             var specifiedData = AssignedData.Where(_ => _.Attribute.Id == attribute.Id);
-            return new AggregatedResult<T>(this, aggregationRule.Apply(specifiedData, attribute));
+            return new AggregatedResult<T>(Guid.NewGuid(), this, aggregationRule.Apply(specifiedData, attribute));
         }
 
         public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)

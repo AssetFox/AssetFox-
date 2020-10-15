@@ -7,26 +7,20 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Aggregation
     {
         public static NumericAggregationRule CreateNumericRule(DataMinerAttribute attribute)
         {
-            switch (attribute.AggregationRuleType)
+            return attribute.AggregationRuleType switch
             {
-            case "AVERAGE":
-                return new AverageAggregationRule();
-
-            default:
-                throw new InvalidOperationException();
-            }
+                "AVERAGE" => new AverageAggregationRule(),
+                _ => throw new InvalidOperationException(),
+            };
         }
 
         public static TextAggregationRule CreateTextRule(DataMinerAttribute attribute)
         {
-            switch (attribute.AggregationRuleType)
+            return attribute.AggregationRuleType switch
             {
-            case "PREDOMINANT":
-                return new PredominantAggregationRule();
-
-            default:
-                throw new InvalidOperationException();
-            }
+                "PREDOMINANT" => new PredominantAggregationRule(),
+                _ => throw new InvalidOperationException(),
+            };
         }
     }
 }

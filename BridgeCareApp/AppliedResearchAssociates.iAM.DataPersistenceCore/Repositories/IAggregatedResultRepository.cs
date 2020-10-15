@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
-    //public interface IAggregatedResultRepository
-    //{
-    //    void AddAggregatedResults<T>(IEnumerable<AggregatedResult<T>> domainAggregatedResults);
-    //}
+    public interface IAggregatedResultRepository
+    {
+        int AddAggregatedResults<T>(IEnumerable<AggregatedResult<T>> domainAggregatedResults, Guid networkId);
+        int DeleteAggregatedResults(Guid networkId);
+    }
 }

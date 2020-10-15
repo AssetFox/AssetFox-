@@ -10,9 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
     public class AttributeDatumRepository<T> : LiteDbRepository<IAttributeDatum, IAttributeDatum>, IAttributeDatumRepository
     {
-        public AttributeDatumRepository(ILiteDbContext context) : base(context)
-        {
-        }
+        public AttributeDatumRepository(ILiteDbContext context) : base(context) { }
 
         private int DeleteAssignedDataFromNetwork(Guid networkId)
         {

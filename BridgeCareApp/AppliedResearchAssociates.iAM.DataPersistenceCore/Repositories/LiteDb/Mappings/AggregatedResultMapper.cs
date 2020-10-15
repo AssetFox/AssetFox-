@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
@@ -16,9 +15,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             }
             return new AggregatedResultEntity<T>()
             {
+                Id = aggregatedResult.Id,
                 MaintainableAssetEntity = aggregatedResult.MaintainableAsset.ToEntity(),
-                AggregatedData = aggregatedResult.AggregatedData.Select(_ => (_.attribute.ToEntity(), _.yearValuePair))
+
+                // LiteDB doesn't support tuples...so that's nice. :(
+                //AggregatedData = aggregatedResult.AggregatedData.Select(_ => (_.attribute.ToEntity(), _.yearValuePair))
+                AggregatedData = aggregatedResult.AggregatedData.Select(_ => new GarbageEntity<T>()
+                {
+                    AttributeEntity = _.attribute.ToEntity(),
+                    Value = _.yearValuePair.value,
+                    Year = _.yearValuePair.year
+                })
             };
+        }
+
+        public static AggregatedResult<T> ToDomain<T>(this AggregatedResultEntity<T> aggregatedResultEntity)
+        {
+            if (aggregatedResultEntity == null || !aggregatedResultEntity.AggregatedData.Any())
+            {
+                throw new NullReferenceException("Cannot map null AggregatedResult domains to AggregatedResult entities");
+            }
+            return new AggregatedResult<T>(
+                aggregatedResultEntity.Id,
+                aggregatedResultEntity.MaintainableAssetEntity.ToDomain(),
+                (aggregatedResultEntity.AggregatedData.Select(_ => _.AttributeEntity)
         }
     }
 }

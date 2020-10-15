@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -17,24 +16,30 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : ControllerBase
     {
-        private readonly IRepository<Network> NetworkRepo;
-        private readonly IRepository<AttributeMetaDatum> AttributeMetaDataRepo;
-        private readonly IAttributeDatumRepository AttributeDatumRepo;
-        private readonly IRepository<MaintainableAsset> MaintainableAssetRepo;
-        private readonly ISaveChanges Repos;
+        private readonly INetworkRepository NetworkRepository;
+        private readonly IRepository<AttributeMetaDatum> AttributeMetaDataRepository;
+        private readonly IMaintainableAssetRepository MaintainableAssetRepository;
+        private readonly IAttributeDatumRepository AttributeDatumRepository;
+        private readonly IAggregatedResultRepository AggregatedResultRepository;
+        private readonly ISaveChanges SaveChangesRepository;
 
         private readonly ILogger<NetworkController> Logger;
 
-        public AggregationController(IRepository<Network> networkRepo,
-            IRepository<AttributeMetaDatum> attributeMetaDataRepo,
-            IAttributeDatumRepository attributeDatumRepo,
-            ISaveChanges repos,
+        public AggregationController(
+            INetworkRepository networkRepository,
+            IRepository<AttributeMetaDatum> attributeMetaDataRepository,
+            IMaintainableAssetRepository maintainableAssetRepository,
+            IAttributeDatumRepository attributeDatumRepository,
+            IAggregatedResultRepository aggregatedResultRepository,
+            ISaveChanges saveChangesRepository,
             ILogger<NetworkController> logger)
         {
-            NetworkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
-            AttributeMetaDataRepo = attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
-            AttributeDatumRepo = attributeDatumRepo ?? throw new ArgumentNullException(nameof(attributeDatumRepo));
-            Repos = repos ?? throw new ArgumentNullException(nameof(repos));
+            NetworkRepository = networkRepository ?? throw new ArgumentNullException(nameof(networkRepository));
+            AttributeMetaDataRepository = attributeMetaDataRepository ?? throw new ArgumentNullException(nameof(attributeMetaDataRepository));
+            MaintainableAssetRepository = maintainableAssetRepository ?? throw new ArgumentNullException(nameof(maintainableAssetRepository));
+            AttributeDatumRepository = attributeDatumRepository ?? throw new ArgumentNullException(nameof(attributeDatumRepository));
+            AggregatedResultRepository = aggregatedResultRepository ?? throw new ArgumentNullException(nameof(aggregatedResultRepository));
+            SaveChangesRepository = saveChangesRepository ?? throw new ArgumentNullException(nameof(saveChangesRepository));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -44,11 +49,11 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var network = NetworkRepo.Get(networkId);
-                var attributeMetaData = AttributeMetaDataRepo.All();
+                var network = NetworkRepository.Get(networkId);
+                var attributeMetaData = AttributeMetaDataRepository.All();
                 var attributeData = new List<IAttributeDatum>();
 
-                // Create the list of attributes
+                // Create the list of attributes from meta data
                 foreach (var attributeMetaDatum in attributeMetaData)
                 {
                     var attribute = AttributeFactory.Create(attributeMetaDatum);
@@ -61,10 +66,10 @@ namespace BridgeCareCore.Controllers
                     {
                         maintainableAsset.AssignAttributeData(attributeData);
                     }
-                    AttributeDatumRepo.UpdateAssignedData(network);
+                    AttributeDatumRepository.UpdateAssignedData(network);
                 }
 
-                Repos.SaveChanges();
+                SaveChangesRepository.SaveChanges();
                 Logger.LogInformation("Attribute data have been assigned to maintenance assets.");
                 return Ok();
             }
@@ -78,32 +83,32 @@ namespace BridgeCareCore.Controllers
         [Route("AggregateNetworkData")]
         public async Task<IActionResult> AggregateNetworkData([FromBody] Guid networkId)
         {
-            var maintainableAssets = MaintainableAssetRepo.Find(networkId);
-
+            var maintainableAssets = MaintainableAssetRepository.GetAllInNetwork(networkId);
+            var aggregatedNumericResults = new List<AggregatedResult<double>>();
+            var aggregatedTextResults = new List<AggregatedResult<string>>();
             foreach (var maintainableAsset in maintainableAssets)
             {
                 if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "NUMERIC"))
                 {
-                    var aggregatedNumericResults = maintainableAsset.AssignedData
+                    aggregatedNumericResults.AddRange(maintainableAsset.AssignedData
                         .Where(a => a.Attribute.DataType == "NUMERIC")
                         .Select(a => a.Attribute)
                         .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateNumericRule(a)))
-                        .ToList();
-
-                    //AggregatedResultRepo.AddAggregatedResults<double>(aggregatedNumericResults);
+                        .ToList());
                 }
 
                 if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
                 {
-                    var aggregatedTextResults = maintainableAsset.AssignedData
+                    aggregatedTextResults.AddRange(maintainableAsset.AssignedData
                         .Where(a => a.Attribute.DataType == "TEXT")
                         .Select(a => a.Attribute)
                         .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a)))
-                        .ToList();
-
-                    //AggregatedResultRepo.AddAggregatedResults(aggregatedTextResults);
+                        .ToList());
                 }
             }
+            AggregatedResultRepository.DeleteAggregatedResults(networkId);
+            AggregatedResultRepository.AddAggregatedResults(aggregatedNumericResults, networkId);
+            AggregatedResultRepository.AddAggregatedResults(aggregatedTextResults, networkId);
 
             return Ok();
         }

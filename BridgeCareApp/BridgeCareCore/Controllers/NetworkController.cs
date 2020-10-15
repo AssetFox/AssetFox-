@@ -45,21 +45,22 @@ namespace BridgeCareCore.Controllers
             {
                 // get attribute meta data from maintainable asset json file
                 var attributeMetaData = MaintainableAssetFileRepo.All();
+
                 // create an attribute from the meta data
                 var attribute = AttributeFactory.Create(attributeMetaData.FirstOrDefault());
+
                 // build a connection from the attribute to create attribute data from attribute
                 // data in the data source
                 var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
+
                 // create a network domain from the attribute data
                 var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(attributeData);
                 network.Name = name;
+
                 // add the network to our data source
                 NetworkRepo.Add(network);
-                // add the maintainable assets to our data source
-                //MaintainableAssetRepo.AddAll(network.MaintainableAssets, network.Id);
 
-                // This probably doesn't belong in the controller if it is tied to IAMContext.
-                Repos.SaveChanges(); // this will save all of the data in the IAMContext object
+                Repos.SaveChanges();
 
                 Logger.LogInformation($"a network with name : {network.Name} has been created");
                 return Ok(network);

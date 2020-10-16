@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             if (entity.Discriminator == "LinearLocation")
             {
                 return new LinearLocation(
-                    entity.Id,
+                    Guid.Parse(entity.Id),
                     entity.RouteEntity.ToDomain(),
                     entity.UniqueIdentifier,
                     entity.Start ?? 0,
@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             if (entity.Discriminator == "SectionLocation")
             {
-                return new SectionLocation(entity.Id, entity.UniqueIdentifier);
+                return new SectionLocation(Guid.Parse(entity.Id), entity.UniqueIdentifier);
             }
 
             throw new InvalidOperationException("Cannot determine Location entity type");
@@ -48,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             {
                 var entity = new LocationEntity
                 {
-                    Id = domain.Id,
+                    Id = domain.Id.ToString(),
                     Start = linearLocationDomain.Start,
                     End = linearLocationDomain.End,
                     Discriminator = "LinearLocation"
@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             return new LocationEntity
             {
-                Id = domain.Id,
+                Id = domain.Id.ToString(),
                 UniqueIdentifier = domain.UniqueIdentifier,
                 Discriminator = "SectionLocation"
             };

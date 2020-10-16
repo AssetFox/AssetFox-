@@ -16,23 +16,18 @@ namespace BridgeCareCore.Controllers
     public class NetworkController : ControllerBase
     {
         private readonly IRepository<AttributeMetaDatum> MaintainableAssetFileRepo;
-        private readonly IRepository<Network> NetworkRepo;
-
-        //private readonly IRepository<MaintainableAsset> MaintainableAssetRepo;
+        private readonly INetworkRepository NetworkRepo;
         private readonly ISaveChanges Repos;
 
         private readonly ILogger<NetworkController> Logger;
 
         public NetworkController(IRepository<AttributeMetaDatum> maintainableAssetFileRepo,
-            IRepository<Network> networkRepo,
-            //IRepository<MaintainableAsset> maintainableAssetRepo,
-            
+            INetworkRepository networkRepo,            
             ISaveChanges repos,
             ILogger<NetworkController> logger)
         {
             MaintainableAssetFileRepo = maintainableAssetFileRepo ?? throw new ArgumentNullException(nameof(maintainableAssetFileRepo));
             NetworkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
-            //MaintainableAssetRepo = maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
             Repos = repos ?? throw new ArgumentNullException(nameof(repos));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }

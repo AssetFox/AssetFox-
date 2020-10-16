@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             if (entity.DataType == "NUMERIC")
             {
                 return new NumericAttribute(0, 0, 0,
-                    entity.Id,
+                    Guid.Parse(entity.Id),
                     entity.Name,
                     entity.AggregationRuleType,
                     entity.Command,
@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             if (entity.DataType == "TEXT")
             {
                 return new TextAttribute("",
-                    entity.Id,
+                    Guid.Parse(entity.Id),
                     entity.Name,
                     entity.AggregationRuleType,
                     entity.Command,
@@ -48,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             return new AttributeEntity
             {
-                Id = domain.Id,
+                Id = domain.Id.ToString(),
                 Name = domain.Name,
                 DataType = domain.DataType,
                 AggregationRuleType = domain.AggregationRuleType,

@@ -83,7 +83,7 @@ namespace BridgeCareCore.Controllers
         [Route("AggregateNetworkData")]
         public async Task<IActionResult> AggregateNetworkData([FromBody] Guid networkId)
         {
-            var maintainableAssets = MaintainableAssetRepository.GetAllInNetwork(networkId);
+            var maintainableAssets = MaintainableAssetRepository.GetAllInNetwork(networkId.ToString());
             var aggregatedNumericResults = new List<AggregatedResult<double>>();
             var aggregatedTextResults = new List<AggregatedResult<string>>();
             foreach (var maintainableAsset in maintainableAssets)
@@ -106,9 +106,9 @@ namespace BridgeCareCore.Controllers
                         .ToList());
                 }
             }
-            AggregatedResultRepository.DeleteAggregatedResults(networkId);
-            AggregatedResultRepository.AddAggregatedResults(aggregatedNumericResults, networkId);
-            AggregatedResultRepository.AddAggregatedResults(aggregatedTextResults, networkId);
+            AggregatedResultRepository.DeleteAggregatedResults(networkId.ToString());
+            AggregatedResultRepository.AddAggregatedResults(aggregatedNumericResults);
+            AggregatedResultRepository.AddAggregatedResults(aggregatedTextResults);
 
             return Ok();
         }

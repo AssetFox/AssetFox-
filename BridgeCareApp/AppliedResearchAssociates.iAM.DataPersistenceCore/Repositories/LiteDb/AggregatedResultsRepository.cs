@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
@@ -11,19 +10,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
     {
         public AggregatedResultsRepository(ILiteDbContext context) : base(context) { }
 
-        public int AddAggregatedResults<T>(IEnumerable<AggregatedResult<T>> domainAggregatedResults, Guid networkId)
+        public int AddAggregatedResults<U>(IEnumerable<AggregatedResult<U>> domainAggregatedResults)
         {
-            var aggregatedResultCollection = Context.Database.GetCollection<AggregatedResultEntity<T>>("AGGREGATED_RESULTS");
-            var test = domainAggregatedResults.Select(_ => _.ToEntity());
-            return aggregatedResultCollection.InsertBulk(test);
+            var aggregatedResultCollection = Context.Database.GetCollection<IAggregatedResultEntity>("AGGREGATED_RESULTS");
+            return aggregatedResultCollection.InsertBulk(domainAggregatedResults.Select(_ => _.ToEntity()));
         }
 
-        public int DeleteAggregatedResults(Guid networkId)
+        public int DeleteAggregatedResults(string networkId)
         {
-            var value = Context.Database.GetCollection<AggregatedResultEntity<T>>("AGGREGATED_RESULTS")
+            var aggregatedResultsCollection = Context.Database.GetCollection<IAggregatedResultEntity>("AGGREGATED_RESULTS");
+
+            var items = aggregatedResultsCollection
                 .Include(_ => _.MaintainableAssetEntity)
-                .DeleteMany(_ => _.MaintainableAssetEntity.NetworkId == networkId);
-            return value;
+                .Find(_ => _.MaintainableAssetEntity.NetworkId == networkId);
+
+            Context.Database.BeginTrans();
+            foreach (var item in items)
+            {
+                aggregatedResultsCollection.Delete(item.Id);
+            }
+            Context.Database.Commit();
+            return 0;
         }
 
         protected override AggregatedResult<T> ToDomain(AggregatedResultEntity<T> dataEntity)

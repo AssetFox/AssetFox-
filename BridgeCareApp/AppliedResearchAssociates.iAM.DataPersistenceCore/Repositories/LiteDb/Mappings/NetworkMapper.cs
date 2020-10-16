@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 entity.MaintainableAssetEntities == null
                     ? new List<MaintainableAsset>()
                     : entity.MaintainableAssetEntities.Select(e => e.ToDomain()).ToList(),
-                entity.Id,
+                Guid.Parse(entity.Id),
                 entity.Name);
         }
 
@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             return new NetworkEntity
             {
-                Id = domain.Id,
+                Id = domain.Id.ToString(),
                 Name = domain.Name,
                 MaintainableAssetEntities = domain.MaintainableAssets.Any()
                     ? domain.MaintainableAssets.Select(d => d.ToEntity()).ToList()

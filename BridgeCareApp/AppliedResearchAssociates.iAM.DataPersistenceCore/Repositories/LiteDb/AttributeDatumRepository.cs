@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
     {
         public AttributeDatumRepository(ILiteDbContext context) : base(context) { }
 
-        private int DeleteAssignedDataFromNetwork(Guid networkId)
+        private int DeleteAssignedDataFromNetwork(string networkId)
         {
             var maintenanceAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTENANCE_ASSETS");
             return maintenanceAssetCollection.UpdateMany(_ => new MaintainableAssetEntity()
@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
         {
             var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity());
 
-            _ = DeleteAssignedDataFromNetwork(network.Id);
+            _ = DeleteAssignedDataFromNetwork(network.Id.ToString());
 
             var maintainableAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
 

@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
         {
 
         }
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public string DataType { get; set; }
         public string Name { get; set; }
         public string AggregationRuleType { get; set; }

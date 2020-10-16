@@ -13,10 +13,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 
         public override Network Get(Guid id)
         {
+            var networkIdString = id.ToString();
             return Context.Database.GetCollection<NetworkEntity>("NETWORKS")
                 .Include(_ => _.MaintainableAssetEntities.ToList())
                 .Include(_ => _.MaintainableAssetEntities.Select(_ => _.LocationEntity))
-                .FindById(id)
+                .FindById(networkIdString)
                 .ToDomain();
         }
 

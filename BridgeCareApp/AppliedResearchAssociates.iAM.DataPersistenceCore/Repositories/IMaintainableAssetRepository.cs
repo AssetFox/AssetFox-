@@ -6,6 +6,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IMaintainableAssetRepository : IRepository<MaintainableAsset>
     {
-        IEnumerable<MaintainableAsset> GetAllInNetwork(string networkId);
+        IEnumerable<MaintainableAsset> GetAllInNetwork(Guid networkId);
     }
 }

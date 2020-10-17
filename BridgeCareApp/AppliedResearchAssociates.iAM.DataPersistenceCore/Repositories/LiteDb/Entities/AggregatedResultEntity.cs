@@ -11,9 +11,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
         }
 
         [BsonId]
-        public string Id { get; set; }
+        public Guid Id { get; set; }
 
-        public IEnumerable<GarbageEntity<T>> AggregatedData { get; set; }
+        public IEnumerable<AttributeYearValueEntity<T>> AggregatedData { get; set; }
 
         [BsonRef("MAINTAINABLE_ASSETS")]
         public MaintainableAssetEntity MaintainableAssetEntity { get; set; }
@@ -23,9 +23,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
     /// Used for LiteDB management of Tuples. LiteDB does not support BSON Tuple structures.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class GarbageEntity<T>
+    public class AttributeYearValueEntity<T>
     {
-        public GarbageEntity()
+        public AttributeYearValueEntity()
         {
         }
 

@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
 
         }
         [BsonId]
-        public string Id { get; set; }
+        public Guid Id { get; set; }
         public string Discriminator { get; set; }
 
         public string UniqueIdentifier { get; set; }

@@ -48,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             {
                 return new AttributeDatumEntity<double>
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = Guid.NewGuid(),
                     AttributeEntity = domain.Attribute.ToEntity(),
                     LocationEntity = domain.Location.ToEntity(),
                     Discriminator = "NumericAttributeDatum",
@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             {
                 return new AttributeDatumEntity<string>
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = Guid.NewGuid(),
                     AttributeEntity = domain.Attribute.ToEntity(),
                     LocationEntity = domain.Location.ToEntity(),
                     Discriminator = "TextAttributeDatum",

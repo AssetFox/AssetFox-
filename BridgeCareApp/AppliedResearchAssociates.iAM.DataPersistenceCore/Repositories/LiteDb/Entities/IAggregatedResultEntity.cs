@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
     {
 
         [BsonId]
-        string Id { get; set; }
+        Guid Id { get; set; }
 
 
         [BsonRef("MAINTAINABLE_ASSETS")]

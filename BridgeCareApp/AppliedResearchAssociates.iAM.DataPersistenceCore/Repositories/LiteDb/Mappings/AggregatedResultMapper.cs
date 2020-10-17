@@ -16,12 +16,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             }
             return new AggregatedResultEntity<T>()
             {
-                Id = aggregatedResult.Id.ToString(),
+                Id = aggregatedResult.Id,
                 MaintainableAssetEntity = aggregatedResult.MaintainableAsset.ToEntity(),
 
                 // LiteDB doesn't support tuples...so that's nice. :(
                 //AggregatedData = aggregatedResult.AggregatedData.Select(_ => (_.attribute.ToEntity(), _.yearValuePair))
-                AggregatedData = aggregatedResult.AggregatedData.Select(_ => new GarbageEntity<T>()
+                AggregatedData = aggregatedResult.AggregatedData.Select(_ => new AttributeYearValueEntity<T>()
                 {
                     AttributeEntity = _.attribute.ToEntity(),
                     Value = _.yearValuePair.value,
@@ -30,16 +30,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             };
         }
 
-        public static AggregatedResult<T> ToDomain<T>(this AggregatedResultEntity<T> aggregatedResultEntity)
+        public static AggregatedResult<T> ToDomain<T>(this IAggregatedResultEntity aggregatedResultEntity)
         {
-            if (aggregatedResultEntity == null || !aggregatedResultEntity.AggregatedData.Any())
+            var aggregatedResultEntityOfT = aggregatedResultEntity as AggregatedResultEntity<T>;
+            if (aggregatedResultEntityOfT == null || !aggregatedResultEntityOfT.AggregatedData.Any())
             {
                 throw new NullReferenceException("Cannot map null AggregatedResult domains to AggregatedResult entities");
             }
             return new AggregatedResult<T>(
-                Guid.Parse(aggregatedResultEntity.Id),
-                aggregatedResultEntity.MaintainableAssetEntity.ToDomain(),
-                aggregatedResultEntity.AggregatedData.Select(_ => (_.AttributeEntity.ToDomain(), (_.Year, _.Value))));
+                aggregatedResultEntityOfT.Id,
+                aggregatedResultEntityOfT.MaintainableAssetEntity.ToDomain(),
+                aggregatedResultEntityOfT.AggregatedData.Select(_ => (_.AttributeEntity.ToDomain(), (_.Year, _.Value))));
         }
     }
 }

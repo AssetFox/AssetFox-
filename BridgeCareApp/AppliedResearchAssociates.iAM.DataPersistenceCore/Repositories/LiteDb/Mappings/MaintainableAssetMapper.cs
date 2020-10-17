@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 throw new NullReferenceException("MaintainableAsset entity is missing related Location entity");
             }
 
-            var maintainableAsset = new MaintainableAsset(Guid.Parse(entity.Id), Guid.Parse(entity.NetworkId), entity.LocationEntity.ToDomain());
+            var maintainableAsset = new MaintainableAsset(entity.Id, entity.NetworkId, entity.LocationEntity.ToDomain());
 
             if (entity.AttributeDatumEntities != null && entity.AttributeDatumEntities.Any())
             {
@@ -57,9 +57,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             return new MaintainableAssetEntity
             {
-                Id = domain.Id.ToString(),
+                Id = domain.Id,
                 AttributeDatumEntities = domain.AssignedData.Select(_ => _.ToEntity()).ToList(),
-                NetworkId = domain.NetworkId.ToString(),
+                NetworkId = domain.NetworkId,
                 LocationEntity = locationEntity
             };
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
@@ -16,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             return aggregatedResultCollection.InsertBulk(domainAggregatedResults.Select(_ => _.ToEntity()));
         }
 
-        public int DeleteAggregatedResults(string networkId)
+        public int DeleteAggregatedResults(Guid networkId)
         {
             var aggregatedResultsCollection = Context.Database.GetCollection<IAggregatedResultEntity>("AGGREGATED_RESULTS");
 
@@ -31,6 +32,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             }
             Context.Database.Commit();
             return 0;
+        }
+
+        public IEnumerable<IAggregatedResultEntity> GetAggregatedResultEntities(Guid networkId)
+        {
+            var aggregatedResultsCollection = Context.Database.GetCollection<IAggregatedResultEntity>("AGGREGATED_RESULTS");
+            var result = aggregatedResultsCollection
+                .Include(_ => _.MaintainableAssetEntity)
+                .Find(_ => _.MaintainableAssetEntity.NetworkId == networkId).ToList();
+            return result.Select(_ => _.ToDomain());
         }
 
         protected override AggregatedResult<T> ToDomain(AggregatedResultEntity<T> dataEntity)

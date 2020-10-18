@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AppliedResearchAssociates.iAM.DataMiner;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities
 {
@@ -10,13 +6,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
     {
         public AttributeDatumEntity()
         {
-
         }
+
         public Guid Id { get; set; }
+
         public LocationEntity LocationEntity { get; set; }
+
         public AttributeEntity AttributeEntity { get; set; }
+
         public T Value { get; set; }
+
         public DateTime TimeStamp { get; set; }
+
         public string Discriminator { get; set; }
     }
 }

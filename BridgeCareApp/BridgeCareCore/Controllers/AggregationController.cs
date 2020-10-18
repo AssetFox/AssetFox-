@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace BridgeCareCore.Controllers
 {
@@ -50,13 +51,23 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var network = NetworkRepository.Get(networkId);
-                var attributeMetaData = AttributeMetaDataRepository.All();
                 var attributeData = new List<IAttributeDatum>();
+                var numberUpdatedRecords = 0;
 
-                // Create the list of attributes from meta data
+                var attributes = new List<Attribute>();
+                var attributeMetaData = AttributeMetaDataRepository.All();
                 foreach (var attributeMetaDatum in attributeMetaData)
                 {
-                    var attribute = AttributeFactory.Create(attributeMetaDatum);
+                    // Note that attributes have NEW guids assigned as part of this process. All
+                    // attributes referenced later in the application will NOT have these Guids.
+                    // This means each network data assignment creates a UNIQUE network. This is NOT
+                    // the desired behavior. I think we'll need to save the GUIDs out to the JSON
+                    // file and then check back against those GUIDS.
+                    attributes.Add(AttributeFactory.Create(attributeMetaDatum));
+                }
+
+                foreach (var attribute in attributes)
+                {
                     attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
                 }
 
@@ -66,12 +77,12 @@ namespace BridgeCareCore.Controllers
                     {
                         maintainableAsset.AssignAttributeData(attributeData);
                     }
-                    AttributeDatumRepository.UpdateAssignedData(network);
+                    numberUpdatedRecords = AttributeDatumRepository.UpdateAssignedData(network);
                 }
 
                 SaveChangesRepository.SaveChanges();
                 Logger.LogInformation("Attribute data have been assigned to maintenance assets.");
-                return Ok();
+                return Ok($"Updated {numberUpdatedRecords} records.");
             }
             catch (Exception e)
             {
@@ -93,8 +104,7 @@ namespace BridgeCareCore.Controllers
                     aggregatedNumericResults.AddRange(maintainableAsset.AssignedData
                         .Where(a => a.Attribute.DataType == "NUMERIC")
                         .Select(a => a.Attribute)
-                        .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateNumericRule(a)))
-                        .ToList());
+                        .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateNumericRule(a))));
                 }
 
                 if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "TEXT"))
@@ -102,23 +112,22 @@ namespace BridgeCareCore.Controllers
                     aggregatedTextResults.AddRange(maintainableAsset.AssignedData
                         .Where(a => a.Attribute.DataType == "TEXT")
                         .Select(a => a.Attribute)
-                        .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a)))
-                        .ToList());
+                        .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a))));
                 }
             }
-            AggregatedResultRepository.DeleteAggregatedResults(networkId);
-            AggregatedResultRepository.AddAggregatedResults(aggregatedNumericResults);
-            AggregatedResultRepository.AddAggregatedResults(aggregatedTextResults);
+            var numberDeletedEntries = AggregatedResultRepository.DeleteAggregatedResults(networkId);
+            var numberNumericResults = AggregatedResultRepository.AddAggregatedResults(aggregatedNumericResults);
+            var numberTextResults = AggregatedResultRepository.AddAggregatedResults(aggregatedTextResults);
 
-            return Ok();
+            return Ok($"{numberDeletedEntries} removed from database. {numberNumericResults + numberTextResults} added.");
         }
 
         [HttpGet]
         [Route("GetAggregatedNetworkData")]
         public async Task<IActionResult> GetAggregatedNetworkData([FromHeader] Guid networkId)
         {
-            AggregatedResultRepository.GetAggregatedResultEntities(networkId);
-            return Ok($"Aggregated {} retrived succesfully.");
+            var results = AggregatedResultRepository.GetAggregatedResults(networkId);
+            return Ok($"Retrieved {results.Count()} results successfully.");
         }
     }
 }

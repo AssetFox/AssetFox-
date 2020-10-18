@@ -31,16 +31,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
                 aggregatedResultsCollection.Delete(item.Id);
             }
             Context.Database.Commit();
-            return 0;
+            return items.Count();
         }
 
-        public IEnumerable<IAggregatedResultEntity> GetAggregatedResultEntities(Guid networkId)
+        public IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId)
         {
             var aggregatedResultsCollection = Context.Database.GetCollection<IAggregatedResultEntity>("AGGREGATED_RESULTS");
             var result = aggregatedResultsCollection
                 .Include(_ => _.MaintainableAssetEntity)
+                .Include(_ => _.MaintainableAssetEntity.LocationEntity)
                 .Find(_ => _.MaintainableAssetEntity.NetworkId == networkId).ToList();
-            return result.Select(_ => _.ToDomain());
+            
+            var numericAggregatedResultEntities = result.Where(_ => _ is AggregatedResultEntity<double>).Select(_ => _.ToDomain<double>());
+            var textAggregatedResultEntities = result.Where(_ => _ is AggregatedResultEntity<string>).Select(_ => _.ToDomain<string>());
+
+            return numericAggregatedResultEntities.Concat(textAggregatedResultEntities);
         }
 
         protected override AggregatedResult<T> ToDomain(AggregatedResultEntity<T> dataEntity)

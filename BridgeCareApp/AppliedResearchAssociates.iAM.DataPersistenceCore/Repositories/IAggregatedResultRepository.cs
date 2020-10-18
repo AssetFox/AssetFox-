@@ -9,6 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         int AddAggregatedResults<T>(IEnumerable<AggregatedResult<T>> domainAggregatedResults);
         int DeleteAggregatedResults(Guid networkId);
-        IEnumerable<IAggregatedResultEntity> GetAggregatedResultEntities(Guid networkId);
+        IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId);
     }
 }

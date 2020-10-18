@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 throw new NullReferenceException("Cannot map null AttributeDatum entity to AttributeDatum domain");
             }
 
-            var attributeDatumEntity = entity as AttributeDatumEntity<T>;
+            var attributeDatumEntity = entity as Repositories.LiteDb.Entities.AttributeDatumEntity<T>;
 
             if (entity.Discriminator == "NumericAttributeDatum")
             {
@@ -43,10 +43,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 throw new NullReferenceException("Cannot map null AttributeDatum domain to AttributeDatum entity");
             }
 
-
-            if (domain is AttributeDatum<double> attributeDatumNumericDomain)
+            if (domain is DataMiner.Attributes.AttributeDatum<double> attributeDatumNumericDomain)
             {
-                return new AttributeDatumEntity<double>
+                return new Repositories.LiteDb.Entities.AttributeDatumEntity<double>
                 {
                     Id = Guid.NewGuid(),
                     AttributeEntity = domain.Attribute.ToEntity(),
@@ -57,9 +56,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 };
             }
 
-            if (domain is AttributeDatum<string> attributeDatumTextDomain)
+            if (domain is DataMiner.Attributes.AttributeDatum<string> attributeDatumTextDomain)
             {
-                return new AttributeDatumEntity<string>
+                return new Repositories.LiteDb.Entities.AttributeDatumEntity<string>
                 {
                     Id = Guid.NewGuid(),
                     AttributeEntity = domain.Attribute.ToEntity(),
@@ -70,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 };
             }
 
-            throw new InvalidOperationException("Unable to determine Value data type for AttributeDatum entity");
+            throw new InvalidOperationException("Unable to determine Value data type for AttributeDatum");
         }
     }
 }

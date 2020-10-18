@@ -1,7 +1,7 @@
 {
   "AttributeMetaData": [
     {
-      "name": "ADTTOTAL",
+      "name": "ADT TOTAL",
       "defaultValue": 10,
       "maximum": 100,
       "minimum": 1,
@@ -15,16 +15,26 @@
       "isAscending": true
     },
     {
+      "name": "MATERIAL TYPE",
+      "defaultValue": "",
+      "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",
+      "dataSource": "MSSQL",
+      "type": "TEXT",
+      "location": "section",
+      "command": "SELECT concat(BRKEY, Bridge_ID) AS UniqueIdentifier, CAST(INSPDATE AS DATETIME) AS DateTime, Material_Type AS Value FROM dbo.PennDot_Report_A",
+      "aggregationRule": "PREDOMINANT",
+      "isCalculated": false
+    },
+    {
       "name": "COUNTY",
-      "defaultValue": "Jefferson",
+      "defaultValue": "",
       "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",
       "dataSource": "MSSQL",
       "type": "TEXT",
       "location": "section",
       "command": "SELECT concat(BRKEY, Bridge_ID) AS UniqueIdentifier, CAST(INSPDATE AS DATETIME) AS DateTime, CAST(COUNTY AS varchar(50)) AS Value FROM dbo.PennDot_Report_A",
       "aggregationRule": "PREDOMINANT",
-      "isCalculated": false,
-      "isAscending": true
+      "isCalculated": false
     }
   ]
 }

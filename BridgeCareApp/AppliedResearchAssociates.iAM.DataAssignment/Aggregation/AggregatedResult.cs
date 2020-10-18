@@ -5,7 +5,7 @@ using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataAssignment.Aggregation
 {
-    public class AggregatedResult<T>
+    public class AggregatedResult<T> : IAggregatedResult
     {
         public AggregatedResult(Guid id, MaintainableAsset maintainableAsset, IEnumerable<(Attribute attribute, (int year, T value))> aggregatedData)
         {

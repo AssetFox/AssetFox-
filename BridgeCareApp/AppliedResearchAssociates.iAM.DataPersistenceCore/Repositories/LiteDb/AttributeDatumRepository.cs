@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using LiteDB;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
@@ -34,6 +37,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             var maintainableAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
 
             return maintainableAssetCollection.Update(maintainableAssetEntities);
+        }
+
+        public IEnumerable<Attribute> GetAttributesFromNetwork(Guid networkId)
+        {
+            var maintainableAssetsCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
+            var toReturn = maintainableAssetsCollection
+                .Include(_ => _.AttributeDatumEntities)
+                .Find(_ => _.NetworkId == networkId)
+                .SelectMany(_ => _.AttributeDatumEntities.Select(_ => _.AttributeEntity.ToDomain()))
+                .DistinctBy(_ => _.Id);
+            return toReturn;
         }
 
         protected override IAttributeDatum ToDomain(IAttributeDatum dataEntity)

@@ -1,46 +1,77 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
     public static class AggregatedResultMapper
     {
-        public static AggregatedResultEntity<T> ToEntity<T>(this AggregatedResult<T> aggregatedResult)
+        public static IAggregatedResultEntity ToEntity(this IAggregatedResult aggregatedResult)
         {
-            if (aggregatedResult == null || !aggregatedResult.AggregatedData.Any())
+            if (aggregatedResult == null)
             {
-                throw new NullReferenceException("Cannot map null AggregatedResult domains to AggregatedResult entities");
+                throw new NullReferenceException("Cannot map null aggregated result value.");
             }
-            return new AggregatedResultEntity<T>()
-            {
-                Id = aggregatedResult.Id,
-                MaintainableAssetEntity = aggregatedResult.MaintainableAsset.ToEntity(),
 
-                // LiteDB doesn't support tuples...so that's nice. :(
-                //AggregatedData = aggregatedResult.AggregatedData.Select(_ => (_.attribute.ToEntity(), _.yearValuePair))
-                AggregatedData = aggregatedResult.AggregatedData.Select(_ => new AttributeYearValueEntity<T>()
+            if (aggregatedResult is AggregatedResult<double> numericAggregatedResult)
+            {
+                return new AggregatedResultEntity<double>
                 {
-                    AttributeEntity = _.attribute.ToEntity(),
-                    Value = _.yearValuePair.value,
-                    Year = _.yearValuePair.year
-                })
-            };
+                    AggregatedData = numericAggregatedResult.AggregatedData
+                    .Select(_ => new AttributeYearValueEntity<double>()
+                    {
+                        AttributeEntity = _.attribute.ToEntity(),
+                        Value = _.yearValuePair.value,
+                        Year = _.yearValuePair.year
+                    }),
+                    Id = numericAggregatedResult.Id,
+                    MaintainableAssetEntity = numericAggregatedResult.MaintainableAsset.ToEntity()
+                };
+            }
+
+            if (aggregatedResult is AggregatedResult<string> textAggregatedResult)
+            {
+                return new AggregatedResultEntity<string>
+                {
+                    AggregatedData = textAggregatedResult.AggregatedData
+                    .Select(_ => new AttributeYearValueEntity<string>()
+                    {
+                        AttributeEntity = _.attribute.ToEntity(),
+                        Value = _.yearValuePair.value,
+                        Year = _.yearValuePair.year
+                    }),
+                    Id = textAggregatedResult.Id,
+                    MaintainableAssetEntity = textAggregatedResult.MaintainableAsset.ToEntity()
+                };
+            }
+
+            throw new InvalidOperationException("Unable to determine aggregated result type.");
         }
 
-        public static AggregatedResult<T> ToDomain<T>(this IAggregatedResultEntity aggregatedResultEntity)
+        public static IAggregatedResult ToDomain<T>(this IAggregatedResultEntity aggregatedResultEntity)
         {
-            var aggregatedResultEntityOfT = aggregatedResultEntity as AggregatedResultEntity<T>;
-            if (aggregatedResultEntityOfT == null || !aggregatedResultEntityOfT.AggregatedData.Any())
+            if (aggregatedResultEntity == null)
             {
-                throw new NullReferenceException("Cannot map null AggregatedResult domains to AggregatedResult entities");
+                throw new NullReferenceException("Cannot map null aggregated result entity.");
             }
-            return new AggregatedResult<T>(
-                aggregatedResultEntityOfT.Id,
-                aggregatedResultEntityOfT.MaintainableAssetEntity.ToDomain(),
-                aggregatedResultEntityOfT.AggregatedData.Select(_ => (_.AttributeEntity.ToDomain(), (_.Year, _.Value))));
+
+            if (aggregatedResultEntity is AggregatedResultEntity<double> numericAggregatedResultEntity)
+            {
+                var tuple = numericAggregatedResultEntity.AggregatedData.Select(_ => (_.AttributeEntity.ToDomain(), (_.Year, _.Value)));
+                return new AggregatedResult<double>(numericAggregatedResultEntity.Id, numericAggregatedResultEntity.MaintainableAssetEntity.ToDomain(), tuple);
+            }
+
+            if (aggregatedResultEntity is AggregatedResultEntity<string> textAggregatedResultEntity)
+            {
+                var tuple = textAggregatedResultEntity.AggregatedData.Select(_ => (_.AttributeEntity.ToDomain(), (_.Year, _.Value)));
+                return new AggregatedResult<string>(textAggregatedResultEntity.Id, textAggregatedResultEntity.MaintainableAssetEntity.ToDomain(), tuple);
+            }
+
+            throw new InvalidOperationException("Cannot determine aggregated result entity type");
         }
     }
 }

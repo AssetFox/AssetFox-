@@ -18,6 +18,8 @@ import '@progress/kendo-theme-default/dist/all.css';
 import {KendoChartInstaller} from '@progress/kendo-charts-vue-wrapper';
 import VueCurrencyInput from 'vue-currency-input';
 import connectionHub from './connectionHub';
+// @ts-ignore
+//import VueSignalR from 'vue-signalr';
 
 Vue.use(Vuetify, {
     iconfont: 'fa'
@@ -29,6 +31,7 @@ Vue.use(KendoChartInstaller);
 
 Vue.use(VueCurrencyInput);
 Vue.use(connectionHub);
+//Vue.use(VueSignalR, 'http://localhost:64469/bridgecarehub/');
 
 Vue.config.productionTip = false;
 

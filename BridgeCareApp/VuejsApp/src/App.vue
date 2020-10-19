@@ -345,6 +345,10 @@
             // Generate a polling session id, and begin polling once per 5 seconds
             this.generatePollingSessionIdAction();
             window.setInterval(this.pollEventsAction, 5000);
+
+            // this.$socket.start({
+            //     log: false // Active only in development for debugging.
+            // })
         }
 
         onAlertResult(submit: boolean) {

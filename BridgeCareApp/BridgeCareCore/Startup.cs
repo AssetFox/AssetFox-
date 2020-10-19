@@ -35,6 +35,14 @@ namespace BridgeCareCore
             services.AddDataAccessServices(Configuration.GetConnectionString("BridgeCareConnex"));
             services.AddSignalR();
 
+            services.AddCors(o => o.AddPolicy("CorsPolicy", builder => {
+                builder
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com");
+            }));
+
             services.AddScoped<IRepository<Network>, NetworkRepository>();
             services.AddScoped<IRepository<MaintainableAsset>, MaintainableAssetRepository>();
             services.AddScoped<IRepository<Attribute>, AttributeRepository>();
@@ -54,6 +62,8 @@ namespace BridgeCareCore
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
 

@@ -14,6 +14,7 @@
     "lint-fix": "wotan --fix 'src/**'"
   },
   "dependencies": {
+    "@microsoft/signalr": "^3.1.9",
     "@progress/kendo-charts-vue-wrapper": "2020.1.115",
     "@progress/kendo-grid-vue-wrapper": "2020.1.219",
     "@progress/kendo-theme-default": "4.12.2",
@@ -43,7 +44,6 @@
     "vuex-class": "0.3.1"
   },
   "devDependencies": {
-    "@aspnet/signalr": "^1.1.4",
     "@fimbul/valtyr": "0.19.0",
     "@fimbul/ve": "0.18.0",
     "@fimbul/wotan": "0.19.0",

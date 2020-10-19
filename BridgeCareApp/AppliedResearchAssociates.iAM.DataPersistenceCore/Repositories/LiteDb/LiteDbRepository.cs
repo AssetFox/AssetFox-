@@ -12,6 +12,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
         {
             Context = context;
         }
+
+        protected abstract TEntity ToEntity(TDomain domainModel);
+
+        protected abstract TDomain ToDomain(TEntity dataEntity);
+
         public virtual void Add(TDomain datum)
         {
             throw new NotImplementedException();
@@ -22,12 +27,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             throw new NotImplementedException();
         }
 
-        public virtual IEnumerable<TDomain> All()
+        public virtual TDomain Get(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public virtual void Delete(TDomain datum)
+        public virtual IEnumerable<TDomain> All()
         {
             throw new NotImplementedException();
         }
@@ -37,18 +42,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             throw new NotImplementedException();
         }
 
-        public virtual TDomain Get(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
         public virtual void Update(TDomain datum)
         {
             throw new NotImplementedException();
         }
 
-        protected abstract TEntity ToEntity(TDomain domainModel);
-
-        protected abstract TDomain ToDomain(TEntity dataEntity);
+        public virtual void Delete(TDomain datum)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

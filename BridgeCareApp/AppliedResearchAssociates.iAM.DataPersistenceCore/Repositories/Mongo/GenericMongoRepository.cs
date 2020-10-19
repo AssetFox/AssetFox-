@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Mongo
             this.context = context;
         }*/
 
-        public virtual Guid Add(TDomain datum)
+        public virtual void Add(TDomain datum)
         {
             throw new NotImplementedException();
         }

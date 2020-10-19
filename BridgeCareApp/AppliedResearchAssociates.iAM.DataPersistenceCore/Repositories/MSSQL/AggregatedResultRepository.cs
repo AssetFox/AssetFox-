@@ -1,26 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AggregatedResultRepository<T> : MSSQLRepository<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>>
+    public class AggregatedResultRepository<T> : MSSQLRepository<AggregatedResult<T>>, IAggregatedResultRepository
     {
         public AggregatedResultRepository(IAMContext context) : base(context) { }
 
-        public override async void AddAll(
-            IEnumerable<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>> domains,
-            params object[] args)
+        public int AddAggregatedResults<U>(IEnumerable<AggregatedResult<U>> domainAggregatedResults)
         {
-            if (!args.Any())
-            {
-                throw new NullReferenceException("No arguments found for aggregated result query");
-            }
+            context.AggregatedResults.AddRange(domainAggregatedResults.SelectMany(_ => _.ToEntity()));
+            return domainAggregatedResults.Count();
+        }
 
-            var maintainableAssetId = (Guid)args[0];
+        public int DeleteAggregatedResults(Guid networkId)
+        {
+            throw new NotImplementedException();
+        }
 
-            await context.AggregatedResults.AddRangeAsync(domains.SelectMany(d => d.ToEntity(maintainableAssetId)));
+        public IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

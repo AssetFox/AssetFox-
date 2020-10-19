@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 

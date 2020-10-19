@@ -7,7 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Enti
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
-    public class AggregatedResultsRepository<T> : LiteDbRepository<AggregatedResultEntity<T>, AggregatedResult<T>>, IAggregatedResultRepository, IRepository<AggregatedResult<T>>
+    public class AggregatedResultsRepository<T> : LiteDbRepository<AggregatedResultEntity<T>, AggregatedResult<T>>, IAggregatedResultRepository
     {
         public AggregatedResultsRepository(ILiteDbContext context) : base(context) { }
 

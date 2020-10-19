@@ -12,6 +12,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public override void AddAll(IEnumerable<Attribute> domains, params object[] args) =>
             context.Attributes.AddRange(domains.Select(d => d.ToEntity()));
 
-        public override System.Guid Add(Attribute domain) => context.Attributes.Add(domain.ToEntity()).Entity.Id;
+        public override void Add(Attribute domain) => context.Attributes.Add(domain.ToEntity());
     }
 }

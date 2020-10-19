@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
@@ -8,35 +9,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
 {
     public static class AggregatedResultItemMapper
     {
-        public static IEnumerable<AggregatedResultEntity> ToEntity<T>(this IEnumerable<(DataMinerAttribute attribute, (int year, T value))> domains)
+        public static IEnumerable<AggregatedResultEntity> ToEntity(this IAggregatedResult domain)
         {
-            if (domains == null || !domains.Any())
+            if (domain == null)
             {
                 throw new NullReferenceException("Cannot map null AggregatedResult domains to AggregatedResult entities");
             }
 
-            var valueType = typeof(T);
-
-            if (valueType == typeof(double))
+            if(domain is AggregatedResult<double> numericAggregationResult)
             {
-                return domains.Select(d => new AggregatedResultEntity
+                return numericAggregationResult.AggregatedData.Select(d => new AggregatedResultEntity
                 {
                     Id = Guid.NewGuid(),
-                    Discriminator = "NumericAggregatedResult",
-                    Year = d.Item2.year,
-                    NumericValue = (double)Convert.ChangeType(d.Item2.value, typeof(double)),
+                    Discriminator = "TextAggregatedResult",
+                    Year = d.yearValuePair.year,
+                    NumericValue = Convert.ToDouble(d.yearValuePair.value),
                     AttributeId = d.attribute.Id
                 });
             }
 
-            if (valueType == typeof(string))
+            if(domain is AggregatedResult<string> textAggregationResult)
             {
-                return domains.Select(d => new AggregatedResultEntity
+                return textAggregationResult.AggregatedData.Select(d => new AggregatedResultEntity
                 {
                     Id = Guid.NewGuid(),
                     Discriminator = "TextAggregatedResult",
-                    Year = d.Item2.year,
-                    TextValue = (string)Convert.ChangeType(d.Item2.value, typeof(string)),
+                    Year = d.yearValuePair.year,
+                    TextValue = d.yearValuePair.value.ToString(),
                     AttributeId = d.attribute.Id
                 });
             }

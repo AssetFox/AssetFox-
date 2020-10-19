@@ -1958,6 +1958,56 @@
             UpdateRoadcareForSplitTreatmentCascade();
             UpdateRoadCareForInvestmentDescription();
             UpdateRoadCareForOutputReasons();
+            UpdateRoadCareForCreator();
+            UpdateRoadCareForMinimumBudget();
+        }
+
+        private static void UpdateRoadCareForMinimumBudget()
+        {
+                var ds = DBMgr.GetTableColumnsWithTypes("INVESTMENTS");
+                bool isMinimumProject = false;
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    if (row["column_name"].ToString().ToUpper() == "MINIMUM_PROJECT")
+                    {
+                    isMinimumProject = true;
+                    }
+                }
+                if (!isMinimumProject)
+                {
+                    if (DBMgr.NativeConnectionParameters.Provider == "ORACLE")
+                    {
+                        throw new NotImplementedException();
+                    }
+                    else
+                    {
+                        DBMgr.ExecuteNonQuery("ALTER TABLE INVESTMENTS ADD MINIMUM_PROJECT FLOAT NULL");
+                    }
+                }
+        }
+
+        private static void UpdateRoadCareForCreator()
+        {
+            var ds = DBMgr.GetTableColumnsWithTypes("SIMULATIONS");
+            bool isCreator = false;
+            foreach (DataRow row in ds.Tables[0].Rows)
+            {
+                if (row["column_name"].ToString().ToUpper() == "CREATOR")
+                {
+                    isCreator = true;
+                }
+            }
+            if (!isCreator)
+            {
+                if (DBMgr.NativeConnectionParameters.Provider == "ORACLE")
+                {
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    DBMgr.ExecuteNonQuery("ALTER TABLE SIMULATIONS ADD CREATOR VARCHAR(MAX) NULL");
+                }
+            }
         }
 
         private static void UpdateRoadCareForOutputReasons()

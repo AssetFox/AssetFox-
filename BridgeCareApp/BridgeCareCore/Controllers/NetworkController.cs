@@ -56,7 +56,9 @@ namespace BridgeCareCore.Controllers
                 Repos.SaveChanges();
 
                 Logger.LogInformation($"a network with name : {network.Name} has been created");
-                return Ok($"Network {network.Name} with {network.MaintainableAssets.Count()} maintainable assets was created successfully.");
+
+                // [TODO] Create DTO to return network information neccessary to be stored in the UI for future reference.
+                return Ok($"Network {network.Name} with ID {network.Id} and {network.MaintainableAssets.Count()} maintainable assets was created successfully.");
             }
             catch (Exception e)
             {

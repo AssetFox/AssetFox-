@@ -1514,7 +1514,8 @@ namespace Simulation
 
             strTable = SimulationMessaging.ReasonsTable;
             listColumn = new List<TableParameters>();
-            listColumn.Add(new TableParameters("SECTIONID", DataType.Int, false, true, false));
+            listColumn.Add(new TableParameters("REASON_ORDER", DataType.Int, false, true, true));
+            listColumn.Add(new TableParameters("SECTIONID", DataType.Int, false));
             listColumn.Add(new TableParameters("YEARS", DataType.Int, true));
             listColumn.Add(new TableParameters("TREATMENT", DataType.VarChar(50), true));
             listColumn.Add(new TableParameters("REASON", DataType.VarCharMax, true));
@@ -2875,7 +2876,7 @@ namespace Simulation
 
         public bool GetInvestmentData()
         {
-            String strSelect = "SELECT FIRSTYEAR,NUMBERYEARS,INFLATIONRATE,DISCOUNTRATE,BUDGETORDER FROM " + cgOMS.Prefix + "INVESTMENTS WHERE SIMULATIONID='" + m_strSimulationID + "'";
+            String strSelect = "SELECT FIRSTYEAR,NUMBERYEARS,INFLATIONRATE,DISCOUNTRATE,BUDGETORDER,MINIMUM_PROJECT FROM " + cgOMS.Prefix + "INVESTMENTS WHERE SIMULATIONID='" + m_strSimulationID + "'";
             if (SimulationMessaging.IsOMS)
             {
                 strSelect = "SELECT FIRSTYEAR,NUMBERYEARS,INFLATIONRATE,DISCOUNTRATE,BUDGETORDER,SIMULATION_START_DATE FROM " + cgOMS.Prefix + "INVESTMENTS WHERE SIMULATIONID='" + m_strSimulationID + "'";
@@ -2906,12 +2907,15 @@ namespace Simulation
             int nNumberYear = 1;
             float fInflation = 0;
             float fDiscount = 0;
+            float fMinimumProject = 0;
 
             Investment.InvestmentID = m_strSimulationID;
             int.TryParse(row[0].ToString(), out nStartYear);
             int.TryParse(row[1].ToString(), out nNumberYear);
             float.TryParse(row[2].ToString(), out fInflation);
             float.TryParse(row[3].ToString(), out fDiscount);
+            float.TryParse(row[5].ToString(), out fMinimumProject);
+
 
             DateTime startDate = new DateTime(nStartYear, 1, 1);
             if (SimulationMessaging.IsOMS)
@@ -2926,6 +2930,8 @@ namespace Simulation
             Investment.AnalysisPeriod = nNumberYear;
             Investment.Inflation = fInflation;
             Investment.Discount = fDiscount;
+            Investment.MinimumProject = fMinimumProject;
+
             Investment.BudgetOrderString = row[4].ToString().Replace('|', ',');
             Investment.StartDate = startDate;
             Investment.LoadBudgets();
@@ -3631,6 +3637,18 @@ namespace Simulation
                         section.NumberTreatment++;
                         //Cost includes treatment and all scheduled treatments
                         fCost = GetTreatmentCost(section, treatment, nYear, out int cumulativeCostId, out float treatmentOnlyCost, out Dictionary<string, float> scheduledCost);
+
+
+                        if(float.IsNaN(fCost))
+                        {
+                            continue;
+                        }
+
+                        if(fCost <= 0)
+                        {
+                            continue;
+                        }
+
 
                         #region benefit
 
@@ -5360,6 +5378,21 @@ namespace Simulation
                         bRemoveTreatedSection = false;
                         continue;
                     }
+
+                    
+                    if (fCost < Investment.MinimumProject)
+                    {
+                        //SimulationMessaging.AddMessage(new SimulationMessage("Warning! Applying treatment " + treatment.Treatment + " to section " + section.Section + " produces as negative benefit cost. Please evaluate your treatment consequence parameters. Treatment will not be suggested."));
+                        //Added May 16, 2014.  If negative benefit/cost remove section from possible list go to next.
+                        m_listApplyTreatment.Remove(treatment);
+                        reasonReportWriter.WriteLine(MakeReasonReportLine(treatment.SectionID, sTreatment, "Project cost less than minimum allowed.", "", "", nYear, 0, treatment.NumberTreatmentDeficient, benefitOrder, treatment.SelectionWeight));
+
+                        bRemoveTreatedSection = false;
+                        continue;
+                    }
+
+
+
                     if (!section.IsTreatmentAllowed(sTreatment, nAny.ToString(), nSame.ToString(), nYear))
                     {
                         m_listApplyTreatment.Remove(treatment);
@@ -6319,6 +6352,7 @@ namespace Simulation
                         var treatmentsWithBudget = m_listApplyTreatment.Where(t => t.Budget.Contains(strBudget));
                         foreach (var treatment in treatmentsWithBudget)
                         {
+                            if (float.IsNaN(treatment.Cost)) continue;
                             nBenefitOrder++;
                             sSectionID = treatment.SectionID;
                             sTreatment = treatment.Treatment;
@@ -6361,6 +6395,17 @@ namespace Simulation
                                 continue;
                             }
                             float fAmount = treatment.TreatmentOnlyCost * fInflationMultiplier;
+
+
+                            if (fAmount < Investment.MinimumProject)
+                            {
+                                reasonReportWriter.WriteLine(MakeReasonReportLine(treatment.SectionID, sTreatment, "Project cost less than minimum allowed.", "", "", nYear, priority.PriorityLevel, 1, nBenefitOrder, treatment.BenefitCostRatio));
+                                continue;
+                            }
+
+
+
+
                             string budgetSelected = "";
                             //Checks budget and priorities
                             var limits = GetSplitTreatmentLimits(section.m_hashNextAttributeValue);
@@ -6666,7 +6711,7 @@ namespace Simulation
 
         private string MakeReasonReportLine(string sectionId, string treatmentName, string reason, string budget, string budgetHash, int year, int priority, int numberTarget, int benefitOrder, double benefitCost )
         {
-            var reasonReportLine = sectionId + ","
+            var reasonReportLine = "," + sectionId + ","
                 + year + ","
                 + treatmentName + "," 
                 + reason + ","
@@ -7165,7 +7210,16 @@ namespace Simulation
             if (!SimulationMessaging.IsOMS)
             {
                 Hashtable hashConsequences = new Hashtable();
-                var committedConsequences = m_dictionaryCommittedConsequences[commit.ConsequenceID];
+
+                List<AttributeChange> committedConsequences;
+                if (!m_dictionaryCommittedEquations.ContainsKey(commit.ConsequenceID))
+                {
+                    committedConsequences = new List<AttributeChange>();
+                }
+                else
+                {
+                    committedConsequences = m_dictionaryCommittedConsequences[commit.ConsequenceID];
+                }
 
                 foreach (AttributeChange attributeChange in committedConsequences)
                 {

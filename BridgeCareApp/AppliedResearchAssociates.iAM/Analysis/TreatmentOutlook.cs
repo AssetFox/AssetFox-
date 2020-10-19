@@ -91,12 +91,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     var minimumFractionalRemainingLife = Enumerable.Min(
                         from calculator in RemainingLifeCalculators
-                        where calculator.CurrentValueIsBeyondLimit()
+                        where calculator.CurrentValueIsBeyondLimit
                         select calculator.GetLimitLocationRelativeToLatestValues().AsNullable());
 
                     if (minimumFractionalRemainingLife.HasValue)
                     {
                         RemainingLife += minimumFractionalRemainingLife.Value;
+                        RemainingLife = Math.Max(RemainingLife.Value, 0);
                         updateRemainingLife = null;
                     }
                     else

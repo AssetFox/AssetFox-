@@ -31,12 +31,20 @@ namespace BridgeCareCore
             services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
             services.AddSingleton<LiteDb.ILiteDbContext, LiteDb.LiteDbContext>();
 
-            services.AddScoped<INetworkRepository, LiteDb.NetworkRepository>();
-            services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<double>>();
-            services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<string>>();
-            services.AddScoped<IMaintainableAssetRepository, LiteDb.MaintainableAssetRepository>();
-            services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<double>>();
-            services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<string>>();
+            services.AddScoped<IRepository<Network>, NetworkRepository>();
+            services.AddScoped<IRepository<MaintainableAsset>, MaintainableAssetRepository>();
+            services.AddScoped<IRepository<Attribute>, AttributeRepository>();
+            services.AddScoped<IRepository<AttributeDatum<double>>, AttributeDatumRepository<double>>();
+            services.AddScoped<IRepository<AttributeDatum<string>>, AttributeDatumRepository<string>>();
+            services.AddScoped<IRepository<IEnumerable<(Attribute attribute, (int year, double value))>>, AggregatedResultRepository<double>>();
+            services.AddScoped<IRepository<IEnumerable<(Attribute attribute, (int year, string value))>>, AggregatedResultRepository<string>>();
+            services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();
+            //services.AddScoped<INetworkRepository, LiteDb.NetworkRepository>();
+            //services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<double>>();
+            //services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<string>>();
+            //services.AddScoped<IMaintainableAssetRepository, LiteDb.MaintainableAssetRepository>();
+            //services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<double>>();
+            //services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<string>>();
             services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
             services.AddScoped<ISaveChanges, SaveAllChanges>();
 

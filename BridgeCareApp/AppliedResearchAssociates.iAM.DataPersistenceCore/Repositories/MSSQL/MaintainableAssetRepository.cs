@@ -11,16 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public MaintainableAssetRepository(IAMContext context) : base(context) { }
 
-        /*public override void AddAll(IEnumerable<MaintainableAsset> maintainableAssets, params object[] args)
-        {
-            if (!args.Any())
-            {
-                throw new NullReferenceException("No network was provided for given maintainable assets");
-            }
-
-            context.MaintainableAssets.AddRange(maintainableAssets.Select(d => d.ToEntity((Guid)args[0])));
-        }*/
-
         public override IEnumerable<MaintainableAsset> Find(params object[] args)
         {
             if (!args.Any())

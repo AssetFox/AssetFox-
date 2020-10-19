@@ -61,6 +61,8 @@ namespace RoadCare3
             this.dataGridViewSplitTreatmentCriteria = new System.Windows.Forms.DataGridView();
             this.DESCRIPTION = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CRITERIA = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.label5 = new System.Windows.Forms.Label();
+            this.textBoxMinimumProject = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBudget)).BeginInit();
             this.contextMenuStripInvesment.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -219,7 +221,7 @@ namespace RoadCare3
             this.dgvBudget.Margin = new System.Windows.Forms.Padding(2);
             this.dgvBudget.Name = "dgvBudget";
             this.dgvBudget.RowTemplate.Height = 24;
-            this.dgvBudget.Size = new System.Drawing.Size(637, 295);
+            this.dgvBudget.Size = new System.Drawing.Size(738, 295);
             this.dgvBudget.TabIndex = 7;
             this.dgvBudget.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvBudget_CellEnter);
             this.dgvBudget.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvBudget_CellValueChanged);
@@ -261,14 +263,14 @@ namespace RoadCare3
             this.textBoxBudgetOrder.Margin = new System.Windows.Forms.Padding(2);
             this.textBoxBudgetOrder.Name = "textBoxBudgetOrder";
             this.textBoxBudgetOrder.ReadOnly = true;
-            this.textBoxBudgetOrder.Size = new System.Drawing.Size(453, 20);
+            this.textBoxBudgetOrder.Size = new System.Drawing.Size(614, 20);
             this.textBoxBudgetOrder.TabIndex = 8;
             this.textBoxBudgetOrder.TextChanged += new System.EventHandler(this.textBoxBudgetOrder_TextChanged);
             this.textBoxBudgetOrder.Validated += new System.EventHandler(this.textBoxBudgetOrder_Validated);
             // 
             // buttonEditOrder
             // 
-            this.buttonEditOrder.Location = new System.Drawing.Point(555, 64);
+            this.buttonEditOrder.Location = new System.Drawing.Point(716, 67);
             this.buttonEditOrder.Margin = new System.Windows.Forms.Padding(2);
             this.buttonEditOrder.Name = "buttonEditOrder";
             this.buttonEditOrder.Size = new System.Drawing.Size(27, 19);
@@ -355,11 +357,13 @@ namespace RoadCare3
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(659, 435);
+            this.tabControl1.Size = new System.Drawing.Size(760, 435);
             this.tabControl1.TabIndex = 26;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.textBoxMinimumProject);
+            this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Controls.Add(this.dgvBudget);
             this.tabPage1.Controls.Add(this.pictureBox1);
             this.tabPage1.Controls.Add(this.labelInvestment);
@@ -377,7 +381,7 @@ namespace RoadCare3
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(651, 409);
+            this.tabPage1.Size = new System.Drawing.Size(752, 409);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Investment";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -470,11 +474,30 @@ namespace RoadCare3
             this.CRITERIA.HeaderText = "Criteria";
             this.CRITERIA.Name = "CRITERIA";
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(562, 41);
+            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(101, 13);
+            this.label5.TabIndex = 24;
+            this.label5.Text = "Mimimum Project($):";
+            // 
+            // textBoxMinimumProject
+            // 
+            this.textBoxMinimumProject.Location = new System.Drawing.Point(670, 39);
+            this.textBoxMinimumProject.Margin = new System.Windows.Forms.Padding(2);
+            this.textBoxMinimumProject.Name = "textBoxMinimumProject";
+            this.textBoxMinimumProject.Size = new System.Drawing.Size(55, 20);
+            this.textBoxMinimumProject.TabIndex = 25;
+            this.textBoxMinimumProject.Validated += new System.EventHandler(this.textBoxMinimumProject_Validated);
+            // 
             // FormInvestment
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(659, 435);
+            this.ClientSize = new System.Drawing.Size(760, 435);
             this.Controls.Add(this.tabControl1);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "FormInvestment";
@@ -531,5 +554,7 @@ namespace RoadCare3
         private System.Windows.Forms.DataGridViewTextBoxColumn SPLIT_YEAR;
         private System.Windows.Forms.DataGridViewTextBoxColumn SPLIT_AMOUNT;
         private System.Windows.Forms.DataGridViewTextBoxColumn PERCENTAGE_SPLIT;
+        private System.Windows.Forms.TextBox textBoxMinimumProject;
+        private System.Windows.Forms.Label label5;
     }
 }

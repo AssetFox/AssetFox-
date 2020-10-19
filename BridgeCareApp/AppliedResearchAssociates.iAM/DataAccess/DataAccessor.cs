@@ -380,7 +380,7 @@ order by simulationid
             using (var command = Connection.CreateCommand())
             {
                 command.CommandText = $@"
-select firstyear, numberyears, inflationrate, discountrate, budgetorder
+select firstyear, numberyears, inflationrate, discountrate, budgetorder, minimum_project
 from investments
 where simulationid = {simulationId}
 
@@ -497,6 +497,9 @@ where simulationid = {simulationId}
                             var budget = simulation.InvestmentPlan.AddBudget();
                             budget.Name = budgetName;
                         }
+
+                        var minimumProjectCostLimit = reader.GetNullableDouble(5);
+                        simulation.InvestmentPlan.MinimumProjectCostLimit = (decimal)(minimumProjectCostLimit ?? default);
                     }
 
                     void createPerformanceCurves()

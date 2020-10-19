@@ -7,5 +7,7 @@
         WithinShadowForSameTreatment,
         NotFeasible,
         Superseded,
+        InvalidCost,
+        CostIsBelowMinimumProjectCostLimit,
     }
 }

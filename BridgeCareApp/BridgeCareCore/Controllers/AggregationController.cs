@@ -56,13 +56,28 @@ namespace BridgeCareCore.Controllers
 
                 var attributes = new List<Attribute>();
                 var attributeMetaData = AttributeMetaDataRepository.All();
+
+                // Check to see if the GUIDs in the meta data repo are blank. A blank GUID requires
+                // that the attribute has never been assigned in a network previously.
+
+                // If a GUID is present in the attribute meta data repo then we need to see if we
+                // can match it with an attribute in the current network if we cannot match it, the
+                // attribute is new to the network and we proceed normally.
+
+                // If a GUID is present for an attribute from the network, but NOT in the meta data
+                // repository, then the attribute is simply skipped during data assignment and
+                // aggregation. The existing data for that attribute must be PRESERVED in the
+                // network so it can be utilized during analysis
+                var networkAttributeMetaData = AttributeDatumRepository.GetAttributesFromNetwork(networkId).ToList();
                 foreach (var attributeMetaDatum in attributeMetaData)
                 {
-                    // Note that attributes have NEW guids assigned as part of this process. All
-                    // attributes referenced later in the application will NOT have these Guids.
-                    // This means each network data assignment creates a UNIQUE network. This is NOT
-                    // the desired behavior. I think we'll need to save the GUIDs out to the JSON
-                    // file and then check back against those GUIDS.
+                    if (attributeMetaDatum.Id.ToString() == "")
+                    {
+                        // No ID for this attribute found. Create a new attribute with a new GUID.
+                        attributeMetaDatum.Id = Guid.NewGuid();
+                    }
+                    // Persist any changes back out to the attribute meta data repository.
+                    //AttributeMetaDataRepository.UpdateAll(attributeMetaData);
                     attributes.Add(AttributeFactory.Create(attributeMetaDatum));
                 }
 

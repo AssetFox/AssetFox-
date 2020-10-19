@@ -1,6 +1,7 @@
 {
   "AttributeMetaData": [
     {
+      "id": "",
       "name": "ADT TOTAL",
       "defaultValue": 10,
       "maximum": 100,
@@ -15,6 +16,7 @@
       "isAscending": true
     },
     {
+      "id": "",
       "name": "MATERIAL TYPE",
       "defaultValue": "",
       "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",
@@ -26,6 +28,7 @@
       "isCalculated": false
     },
     {
+      "id": "",
       "name": "COUNTY",
       "defaultValue": "",
       "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",

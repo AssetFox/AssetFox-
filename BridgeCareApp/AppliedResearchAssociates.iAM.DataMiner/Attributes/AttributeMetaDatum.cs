@@ -1,8 +1,12 @@
-﻿namespace AppliedResearchAssociates.iAM.DataMiner
+﻿using System;
+
+namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public class AttributeMetaDatum
     {
         public string Name { get; set; }
+
+        public Guid Id { get; set; }
 
         public string DefaultValue { get; set; }
 

@@ -115,12 +115,12 @@
             </v-container>
             <v-footer app class="ara-blue-pantone-289-bg white--text" fixed>
                 <v-spacer></v-spacer>
-                <v-flex xs1>
-                    <span class="font-weight-light">iAM </span>
-                    <span>BridgeCare &copy; 2019</span>
-                </v-flex>
-                <v-flex xs1>
-                    <span>{{packageVersion}}</span>
+                <v-flex xs2>
+                    <div class="dev-and-ver-div">
+                        <div class="font-weight-light">iAM </div>
+                        <div>BridgeCare &copy; 2019</div>
+                        <div>{{packageVersion}}</div>
+                    </div>
                 </v-flex>
                 <v-spacer></v-spacer>
             </v-footer>
@@ -423,5 +423,10 @@
 
     .v-list__group__header__prepend-icon .primary--text .v-icon {
         color: #008FCA;
+    }
+
+    .dev-and-ver-div {
+        display: flex;
+        justify-content: space-evenly;
     }
 </style>

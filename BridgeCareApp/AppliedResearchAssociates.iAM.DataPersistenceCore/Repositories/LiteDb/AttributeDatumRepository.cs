@@ -11,22 +11,16 @@ using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
-    public class AttributeDatumRepository<T> : LiteDbRepository<IAttributeDatum, IAttributeDatum>, IAttributeDatumRepository
+    public class AttributeDatumRepository : LiteDbRepository, IAttributeDatumRepository
     {
         public AttributeDatumRepository(ILiteDbContext context) : base(context) { }
 
-        private int DeleteAssignedDataFromNetwork(Guid networkId)
-        {
-            var maintenanceAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTENANCE_ASSETS");
-            return maintenanceAssetCollection.UpdateMany(_ => new MaintainableAssetEntity()
-            {
-                AttributeDatumEntities = new List<IAttributeDatumEntity>() { },
-                Id = _.Id,
-                LocationEntity = _.LocationEntity,
-                NetworkId = _.NetworkId
-            },
-            _ => _.NetworkId == networkId);
-        }
+        public IEnumerable<Attribute> GetAttributesFromNetwork(Guid networkId) =>
+            Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS")
+                .Include(_ => _.AttributeDatumEntities)
+                .Find(_ => _.NetworkId == networkId)
+                .SelectMany(_ => _.AttributeDatumEntities.Select(_ => _.AttributeEntity.ToDomain()))
+                .DistinctBy(_ => _.Id);
 
         public int UpdateAssignedData(Network network)
         {
@@ -34,30 +28,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 
             _ = DeleteAssignedDataFromNetwork(network.Id);
 
-            var maintainableAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
-
-            return maintainableAssetCollection.Update(maintainableAssetEntities);
+            return Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS")
+                .Update(maintainableAssetEntities);
         }
 
-        public IEnumerable<Attribute> GetAttributesFromNetwork(Guid networkId)
+        public int DeleteAssignedDataFromNetwork(Guid networkId)
         {
-            var maintainableAssetsCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
-            var toReturn = maintainableAssetsCollection
-                .Include(_ => _.AttributeDatumEntities)
-                .Find(_ => _.NetworkId == networkId)
-                .SelectMany(_ => _.AttributeDatumEntities.Select(_ => _.AttributeEntity.ToDomain()))
-                .DistinctBy(_ => _.Id);
-            return toReturn;
-        }
-
-        protected override IAttributeDatum ToDomain(IAttributeDatum dataEntity)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override IAttributeDatum ToEntity(IAttributeDatum domainModel)
-        {
-            throw new NotImplementedException();
+            var maintenanceAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTENANCE_ASSETS");
+            return maintenanceAssetCollection.UpdateMany(_ => new MaintainableAssetEntity()
+                {
+                    AttributeDatumEntities = new List<IAttributeDatumEntity>(),
+                    Id = _.Id,
+                    LocationEntity = _.LocationEntity,
+                    NetworkId = _.NetworkId
+                },
+                _ => _.NetworkId == networkId);
         }
     }
 }

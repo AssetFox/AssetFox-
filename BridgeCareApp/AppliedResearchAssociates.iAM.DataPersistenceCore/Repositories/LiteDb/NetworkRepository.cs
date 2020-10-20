@@ -3,24 +3,14 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
-using LiteDB;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
-    public class NetworkRepository : LiteDbRepository<NetworkEntity, Network>, INetworkRepository
+    public class NetworkRepository : LiteDbRepository, INetworkRepository
     {
         public NetworkRepository(ILiteDbContext context) : base(context) { }
 
-        public override Network Get(Guid id)
-        {
-            return Context.Database.GetCollection<NetworkEntity>("NETWORKS")
-                .Include(_ => _.MaintainableAssetEntities.ToList())
-                .Include(_ => _.MaintainableAssetEntities.Select(_ => _.LocationEntity))
-                .FindById(id)
-                .ToDomain();
-        }
-
-        public override void Add(Network datum)
+        public void CreateNetwork(Network datum)
         {
             var locationCollection = Context.Database.GetCollection<LocationEntity>("LOCATIONS");
             locationCollection.InsertBulk(datum.MaintainableAssets.Select(_ => _.Location.ToEntity()));
@@ -32,14 +22,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             networkCollection.Insert(datum.ToEntity());
         }
 
-        protected override NetworkEntity ToEntity(Network domainModel)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override Network ToDomain(NetworkEntity dataEntity)
-        {
-            throw new NotImplementedException();
-        }
+        public Network GetNetworkWithAssetsAndLocations(Guid id) =>
+            Context.Database.GetCollection<NetworkEntity>("NETWORKS")
+                .Include(_ => _.MaintainableAssetEntities.ToList())
+                .Include(_ => _.MaintainableAssetEntities.Select(_ => _.LocationEntity))
+                .FindById(id)
+                .ToDomain();
     }
 }

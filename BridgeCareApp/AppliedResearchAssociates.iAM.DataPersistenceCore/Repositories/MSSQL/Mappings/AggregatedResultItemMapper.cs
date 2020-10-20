@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
@@ -16,31 +18,63 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
                 throw new NullReferenceException("Cannot map null AggregatedResult domains to AggregatedResult entities");
             }
 
-            if(domain is AggregatedResult<double> numericAggregationResult)
+            if(domain is AggregatedResult<double> numericAggregatedResult)
             {
-                return numericAggregationResult.AggregatedData.Select(d => new AggregatedResultEntity
+                return numericAggregatedResult.AggregatedData.Select(_ => new AggregatedResultEntity
                 {
                     Id = Guid.NewGuid(),
-                    Discriminator = "TextAggregatedResult",
-                    Year = d.yearValuePair.year,
-                    NumericValue = Convert.ToDouble(d.yearValuePair.value),
-                    AttributeId = d.attribute.Id
+                    MaintainableAssetId = numericAggregatedResult.MaintainableAsset.Id,
+                    AttributeId = _.attribute.Id,
+                    Discriminator = "NumericAggregatedResult",
+                    Year = _.yearValuePair.year,
+                    NumericValue = Convert.ToDouble(_.yearValuePair.value),
                 });
             }
 
-            if(domain is AggregatedResult<string> textAggregationResult)
+            if(domain is AggregatedResult<string> textAggregatedResult)
             {
-                return textAggregationResult.AggregatedData.Select(d => new AggregatedResultEntity
+                return textAggregatedResult.AggregatedData.Select(_ => new AggregatedResultEntity
                 {
                     Id = Guid.NewGuid(),
+                    MaintainableAssetId = textAggregatedResult.MaintainableAsset.Id,
+                    AttributeId = _.attribute.Id,
                     Discriminator = "TextAggregatedResult",
-                    Year = d.yearValuePair.year,
-                    TextValue = d.yearValuePair.value.ToString(),
-                    AttributeId = d.attribute.Id
+                    Year = _.yearValuePair.year,
+                    TextValue = _.yearValuePair.value.ToString(),
                 });
             }
 
             throw new InvalidOperationException("Unable to determine Value data type for AttributeDatum entity");
+        }
+
+        public static List<IAggregatedResult> ToDomain(this IEnumerable<AggregatedResultEntity> entities)
+        {
+            if (entities == null || !entities.Any())
+            {
+                throw new NullReferenceException("Cannot map null AggregatedResult entities to AggregatedResult domains");
+            }
+
+            var aggregatedResults = new List<IAggregatedResult>();
+
+            if (entities.Any(_ => _.Discriminator == "NumericAggregatedResult"))
+            {
+                var aggregatedData = entities.Where(_ => _.Discriminator == "NumericAggregatedResult")
+                    .Select(_ => (_.Attribute.ToDomain(), (_.Year, _.NumericValue ?? 0)));
+
+                aggregatedResults.Add(new AggregatedResult<double>(Guid.NewGuid(),
+                    entities.First().MaintainableAsset.ToDomain(), aggregatedData));
+            }
+
+            if (entities.Any(_ => _.Discriminator == "TextAggregatedResult"))
+            {
+                var aggregatedData = entities.Where(_ => _.Discriminator == "TextAggregatedResult")
+                    .Select(_ => (_.Attribute.ToDomain(), (_.Year, _.TextValue ?? "")));
+
+                aggregatedResults.Add(new AggregatedResult<string>(Guid.NewGuid(),
+                    entities.First().MaintainableAsset.ToDomain(), aggregatedData));
+            }
+
+            return aggregatedResults;
         }
     }
 }

@@ -7,11 +7,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Enti
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
-    public class AggregatedResultsRepository<T> : LiteDbRepository<AggregatedResultEntity<T>, AggregatedResult<T>>, IAggregatedResultRepository
+    public class AggregatedResultsRepository : LiteDbRepository, IAggregatedResultRepository
     {
         public AggregatedResultsRepository(ILiteDbContext context) : base(context) { }
 
-        public int AddAggregatedResults<U>(IEnumerable<AggregatedResult<U>> domainAggregatedResults)
+        public int CreateAggregatedResults<T>(IEnumerable<AggregatedResult<T>> domainAggregatedResults)
         {
             var aggregatedResultCollection = Context.Database.GetCollection<IAggregatedResultEntity>("AGGREGATED_RESULTS");
             return aggregatedResultCollection.InsertBulk(domainAggregatedResults.Select(_ => _.ToEntity()));
@@ -46,16 +46,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             var textAggregatedResultEntities = result.Where(_ => _ is AggregatedResultEntity<string>).Select(_ => _.ToDomain<string>());
 
             return numericAggregatedResultEntities.Concat(textAggregatedResultEntities);
-        }
-
-        protected override AggregatedResult<T> ToDomain(AggregatedResultEntity<T> dataEntity)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        protected override AggregatedResultEntity<T> ToEntity(AggregatedResult<T> domainModel)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

@@ -1,13 +1,13 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
     public static class AttributeItemMapper
     {
-        public static DataMinerAttribute ToDomain(this AttributeEntity entity)
+        public static Attribute ToDomain(this AttributeEntity entity)
         {
             if (entity == null)
             {
@@ -39,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
         }
 
-        public static AttributeEntity ToEntity(this DataMinerAttribute domain)
+        public static AttributeEntity ToEntity(this Attribute domain)
         {
             if (domain == null)
             {

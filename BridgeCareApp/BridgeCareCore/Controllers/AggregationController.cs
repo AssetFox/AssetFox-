@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -17,45 +19,45 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : ControllerBase
     {
-        private readonly INetworkRepository NetworkRepository;
-        private readonly IRepository<AttributeMetaDatum> AttributeMetaDataRepository;
-        private readonly IMaintainableAssetRepository MaintainableAssetRepository;
-        private readonly IAttributeDatumRepository AttributeDatumRepository;
-        private readonly IAggregatedResultRepository AggregatedResultRepository;
-        private readonly ISaveChanges SaveChangesRepository;
-
-        private readonly ILogger<NetworkController> Logger;
+        private readonly INetworkRepository _networkRepo;
+        private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
+        private readonly IMaintainableAssetRepository _maintainableAssetRepo;
+        private readonly IAttributeDatumRepository _attributeDatumRepo;
+        private readonly IAggregatedResultRepository _aggregatedResultRepo;
+        private readonly ILogger<NetworkController> _logger;
 
         public AggregationController(
-            INetworkRepository networkRepository,
-            IRepository<AttributeMetaDatum> attributeMetaDataRepository,
-            IMaintainableAssetRepository maintainableAssetRepository,
-            IAttributeDatumRepository attributeDatumRepository,
-            IAggregatedResultRepository aggregatedResultRepository,
-            ISaveChanges saveChangesRepository,
+            INetworkRepository networkRepo,
+            IAttributeMetaDataRepository attributeMetaDataRepo,
+            IMaintainableAssetRepository maintainableAssetRepo,
+            IAttributeDatumRepository attributeDatumRepo,
+            IAggregatedResultRepository aggregatedResultRepo,
             ILogger<NetworkController> logger)
         {
-            NetworkRepository = networkRepository ?? throw new ArgumentNullException(nameof(networkRepository));
-            AttributeMetaDataRepository = attributeMetaDataRepository ?? throw new ArgumentNullException(nameof(attributeMetaDataRepository));
-            MaintainableAssetRepository = maintainableAssetRepository ?? throw new ArgumentNullException(nameof(maintainableAssetRepository));
-            AttributeDatumRepository = attributeDatumRepository ?? throw new ArgumentNullException(nameof(attributeDatumRepository));
-            AggregatedResultRepository = aggregatedResultRepository ?? throw new ArgumentNullException(nameof(aggregatedResultRepository));
-            SaveChangesRepository = saveChangesRepository ?? throw new ArgumentNullException(nameof(saveChangesRepository));
-            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
+            _attributeMetaDataRepo = attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
+            _maintainableAssetRepo = maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
+            _attributeDatumRepo = attributeDatumRepo ?? throw new ArgumentNullException(nameof(attributeDatumRepo));
+            _aggregatedResultRepo = aggregatedResultRepo ?? throw new ArgumentNullException(nameof(aggregatedResultRepo));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost]
         [Route("AssignNetworkData")]
-        public async Task<IActionResult> AssignNetworkData([FromBody] Guid networkId)
+        public IActionResult AssignNetworkData([FromBody] Guid networkId)
         {
             try
             {
-                var network = NetworkRepository.Get(networkId);
-                var attributeData = new List<IAttributeDatum>();
+                // get attribute meta data from json file
+                var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
+                    "MetaData//AttributeMetaData", "attributeMetaData.json");
+                var attributeMetaData = _attributeMetaDataRepo.All(filePath);
+
+                var network = _networkRepo.GetNetworkWithAssetsAndLocations(networkId);
                 var numberUpdatedRecords = 0;
 
                 var attributes = new List<Attribute>();
-                var attributeMetaData = AttributeMetaDataRepository.All();
+                
 
                 // Check to see if the GUIDs in the meta data repo are blank. A blank GUID requires
                 // that the attribute has never been assigned in a network previously.
@@ -68,7 +70,7 @@ namespace BridgeCareCore.Controllers
                 // repository, then the attribute is simply skipped during data assignment and
                 // aggregation. The existing data for that attribute must be PRESERVED in the
                 // network so it can be utilized during analysis
-                var networkAttributeMetaData = AttributeDatumRepository.GetAttributesFromNetwork(networkId).ToList();
+                var networkAttributeMetaData = _attributeDatumRepo.GetAttributesFromNetwork(networkId).ToList();
                 foreach (var attributeMetaDatum in attributeMetaData)
                 {
                     if (attributeMetaDatum.Id.ToString() == "")
@@ -81,6 +83,7 @@ namespace BridgeCareCore.Controllers
                     attributes.Add(AttributeFactory.Create(attributeMetaDatum));
                 }
 
+                var attributeData = new List<IAttributeDatum>();
                 foreach (var attribute in attributes)
                 {
                     attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
@@ -88,15 +91,17 @@ namespace BridgeCareCore.Controllers
 
                 if (attributeData.Any())
                 {
+                    _attributeDatumRepo.DeleteAssignedDataFromNetwork(network.Id);
+
                     foreach (var maintainableAsset in network.MaintainableAssets)
                     {
                         maintainableAsset.AssignAttributeData(attributeData);
                     }
-                    numberUpdatedRecords = AttributeDatumRepository.UpdateAssignedData(network);
+                    
+                    numberUpdatedRecords = _attributeDatumRepo.UpdateAssignedData(network);
                 }
 
-                SaveChangesRepository.SaveChanges();
-                Logger.LogInformation("Attribute data have been assigned to maintenance assets.");
+                _logger.LogInformation("Attribute data have been assigned to maintenance assets.");
                 return Ok($"Updated {numberUpdatedRecords} records.");
             }
             catch (Exception e)
@@ -107,9 +112,9 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("AggregateNetworkData")]
-        public async Task<IActionResult> AggregateNetworkData([FromBody] Guid networkId)
+        public IActionResult AggregateNetworkData([FromBody] Guid networkId)
         {
-            var maintainableAssets = MaintainableAssetRepository.GetAllInNetwork(networkId);
+            var maintainableAssets = _maintainableAssetRepo.GetAllInNetwork(networkId);
             var aggregatedNumericResults = new List<AggregatedResult<double>>();
             var aggregatedTextResults = new List<AggregatedResult<string>>();
             foreach (var maintainableAsset in maintainableAssets)
@@ -130,9 +135,9 @@ namespace BridgeCareCore.Controllers
                         .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a))));
                 }
             }
-            var numberDeletedEntries = AggregatedResultRepository.DeleteAggregatedResults(networkId);
-            var numberNumericResults = AggregatedResultRepository.AddAggregatedResults(aggregatedNumericResults);
-            var numberTextResults = AggregatedResultRepository.AddAggregatedResults(aggregatedTextResults);
+            var numberDeletedEntries = _aggregatedResultRepo.DeleteAggregatedResults(networkId);
+            var numberNumericResults = _aggregatedResultRepo.CreateAggregatedResults(aggregatedNumericResults);
+            var numberTextResults = _aggregatedResultRepo.CreateAggregatedResults(aggregatedTextResults);
 
             return Ok($"{numberDeletedEntries} removed from database. {numberNumericResults + numberTextResults} added.");
         }
@@ -141,7 +146,7 @@ namespace BridgeCareCore.Controllers
         [Route("GetAggregatedNetworkData")]
         public async Task<IActionResult> GetAggregatedNetworkData([FromHeader] Guid networkId)
         {
-            var results = AggregatedResultRepository.GetAggregatedResults(networkId);
+            var results = _aggregatedResultRepo.GetAggregatedResults(networkId);
             return Ok($"Retrieved {results.Count()} results successfully.");
         }
     }

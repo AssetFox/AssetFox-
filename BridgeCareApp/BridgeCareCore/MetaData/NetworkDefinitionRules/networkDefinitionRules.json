@@ -1,10 +1,11 @@
 {
   "AttributeMetaDatum": {
+    "id": "d783695c-d832-4d1c-b74f-e183c9ea2ffa",
     "name": "ADTTOTAL",
     "defaultValue": 10,
     "maximum": 100,
     "minimum": 1,
-    "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",
+    "connectionString": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
     "dataSource": "MSSQL",
     "type": "NUMERIC",
     "location": "section",

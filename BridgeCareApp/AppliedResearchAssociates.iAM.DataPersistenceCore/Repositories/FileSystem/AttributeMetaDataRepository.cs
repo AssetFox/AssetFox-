@@ -1,37 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using AppliedResearchAssociates.iAM.DataMiner;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public class AttributeMetaDataRepository : FileSystemRepository<AttributeMetaDatum>, IAttributeMetaDatumRepository
+    public class AttributeMetaDataRepository : IAttributeMetaDataRepository
     {
-        public override IEnumerable<AttributeMetaDatum> All()
+        public List<AttributeMetaDatum> All(string filePath)
         {
-            var folderPath = $"MetaData//AttributeMetaData";
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPath, "attributeMetaData.json");
-            var attributeMetaData = new List<AttributeMetaDatum>();
-            if (File.Exists(filePath))
+            if (!File.Exists(filePath))
             {
-                var rawAttributes = File.ReadAllText(filePath);
-                attributeMetaData = JsonConvert
-                    .DeserializeAnonymousType(rawAttributes,
-                        new { AttributeMetaData = default(List<AttributeMetaDatum>) }).AttributeMetaData;
+                throw new FileNotFoundException($"{filePath} does not exist");
             }
-            return attributeMetaData;
+
+            var rawAttributes = File.ReadAllText(filePath);
+            return JsonConvert
+                .DeserializeAnonymousType(rawAttributes, new {AttributeMetaData = default(List<AttributeMetaDatum>)})
+                .AttributeMetaData;
         }
 
-        public void UpdateAll(List<AttributeMetaDatum> attriubuteMetaData)
+        public void UpdateAll(string filePath, List<AttributeMetaDatum> attributeMetaData)
         {
-            var folderPath = $"MetaData//AttributeMetaData";
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPath, "attributeMetaData.json");
-            if (File.Exists(filePath))
+            if (!File.Exists(filePath))
             {
-                using var writer = new StreamWriter(filePath);
-                writer.Write(JsonConvert.SerializeObject(attriubuteMetaData));
+                throw new FileNotFoundException($"{filePath} does not exist");
             }
+
+            using var writer = new StreamWriter(filePath);
+            writer.Write(JsonConvert.SerializeObject(attributeMetaData));
         }
     }
 }

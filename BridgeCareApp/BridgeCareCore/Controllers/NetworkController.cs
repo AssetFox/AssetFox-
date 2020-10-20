@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace BridgeCareCore.Controllers
 {
@@ -15,49 +16,54 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class NetworkController : ControllerBase
     {
-        private readonly IRepository<AttributeMetaDatum> networkDefinitionFileRepository;
-        private readonly INetworkRepository NetworkRepo;
-        private readonly ISaveChanges Repos;
+        private readonly IAttributeMetaDataRepository _attributeMetaDataFileRepo;
+        private readonly INetworkRepository _networkRepo;
+        private readonly IAttributeRepository _attributeRepo;
+        private readonly ILogger<NetworkController> _logger;
 
-        private readonly ILogger<NetworkController> Logger;
-
-        public NetworkController(IRepository<AttributeMetaDatum> maintainableAssetFileRepo,
-            INetworkRepository networkRepo,            
-            ISaveChanges repos,
+        public NetworkController(IAttributeMetaDataRepository attributeMetaDataFileRepo,
+            INetworkRepository networkRepo,
+            IAttributeRepository attributeRepo,
             ILogger<NetworkController> logger)
         {
-            networkDefinitionFileRepository = maintainableAssetFileRepo ?? throw new ArgumentNullException(nameof(maintainableAssetFileRepo));
-            NetworkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
-            Repos = repos ?? throw new ArgumentNullException(nameof(repos));
-            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _attributeMetaDataFileRepo = attributeMetaDataFileRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataFileRepo));
+            _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
+            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost]
         [Route("CreateNetwork")]
-        public async Task<IActionResult> CreateNetwork([FromBody] string name)
+        public IActionResult CreateNetwork([FromBody] string name)
         {
             try
             {
-                // get attribute meta data from maintainable asset json file
-                var attributeMetaData = networkDefinitionFileRepository.All().ToList();
-                if(attributeMetaData.Count() != 1)
+                // get attribute meta data from json file
+                var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
+                    "MetaData//AttributeMetaData", "networkDefinitionRules.json");
+                var attributeMetaDatum = _attributeMetaDataFileRepo.All(filePath).FirstOrDefault();
+
+                if(attributeMetaDatum == null)
                 {
-                    throw new InvalidOperationException("Segmentation supports only a single meta data attribute.");
+                    throw new InvalidOperationException("No attribute meta data found");
                 }
 
-                var attribute = AttributeFactory.Create(attributeMetaData.FirstOrDefault());
+                // create attribute from meta datum
+                var attribute = AttributeFactory.Create(attributeMetaDatum);
+
+                // get attribute data
                 var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
+
+                // create network domain from attribute data
                 var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(attributeData);
                 network.Name = name;
 
-                NetworkRepo.Add(network);
+                // insert network domain data into data source
+                _networkRepo.CreateNetwork(network);
 
-                // [TODO] This call is dependent on a MSSQL repo and doesn't go in the controller. Need to remove it.
-                Repos.SaveChanges();
+                _logger.LogInformation($"a network with name : {network.Name} has been created");
 
-                Logger.LogInformation($"a network with name : {network.Name} has been created");
-
-                // [TODO] Create DTO to return network information neccessary to be stored in the UI for future reference.
+                // [TODO] Create DTO to return network information necessary to be stored in the UI for future reference.
                 return Ok($"Network {network.Name} with ID {network.Id} and {network.MaintainableAssets.Count()} maintainable assets was created successfully.");
             }
             catch (Exception e)

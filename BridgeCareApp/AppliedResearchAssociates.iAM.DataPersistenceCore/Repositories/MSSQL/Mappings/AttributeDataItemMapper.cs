@@ -1,6 +1,7 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
 {
@@ -34,40 +35,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
             throw new InvalidOperationException("Cannot determine AttributeDatum entity type");
         }
 
-        public static AttributeDatumEntity ToEntity<T>(this AttributeDatum<T> domain, Guid maintainableAssetId, Guid locationId)
+        public static AttributeDatumEntity ToEntity(this IAttributeDatum domain, Guid maintainableAssetId)
         {
             if (domain == null)
             {
                 throw new NullReferenceException("Cannot map null AttributeDatum domain to AttributeDatum entity");
             }
 
-            var valueType = typeof(T);
-
-            if (valueType == typeof(double))
+            if (domain is AttributeDatum<double> numericAttributeDatum)
             {
                 return new AttributeDatumEntity
                 {
                     Id = Guid.NewGuid(),
-                    AttributeId = domain.Attribute.Id,
                     MaintainableAssetId = maintainableAssetId,
-                    LocationId = locationId,
+                    AttributeId = numericAttributeDatum.Attribute.Id,
+                    LocationId = numericAttributeDatum.Location.Id,
                     Discriminator = "NumericAttributeDatum",
-                    TimeStamp = domain.TimeStamp,
-                    NumericValue = domain.Value != null ? (double)Convert.ChangeType(domain.Value, typeof(double)) : 0
+                    TimeStamp = numericAttributeDatum.TimeStamp,
+                    NumericValue = Convert.ToDouble(numericAttributeDatum.Value)
                 };
             }
 
-            if (valueType == typeof(string))
+            if (domain is AttributeDatum<string> textAttributeDatum)
             {
                 return new AttributeDatumEntity
                 {
                     Id = Guid.NewGuid(),
-                    AttributeId = domain.Attribute.Id,
                     MaintainableAssetId = maintainableAssetId,
-                    LocationId = locationId,
+                    AttributeId = textAttributeDatum.Attribute.Id,
+                    LocationId = textAttributeDatum.Location.Id,
                     Discriminator = "TextAttributeDatum",
-                    TimeStamp = domain.TimeStamp,
-                    TextValue = (string)Convert.ChangeType(domain.Value, typeof(string))
+                    TimeStamp = textAttributeDatum.TimeStamp,
+                    TextValue = textAttributeDatum.Value
                 };
             }
 

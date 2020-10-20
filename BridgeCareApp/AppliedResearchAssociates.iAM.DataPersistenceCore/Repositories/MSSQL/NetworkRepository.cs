@@ -7,28 +7,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class NetworkRepository : MSSQLRepository<Network>
+    public class NetworkRepository : MSSQLRepository, INetworkRepository
     {
         public NetworkRepository(IAMContext context) : base(context) { }
 
-        public override void Add(Network network) => context.Networks.Add(network.ToEntity());
-
-        public override Network Get(Guid id)
+        public void CreateNetwork(Network network)
         {
-            if (!context.Networks.Any(n => n.Id == id))
+            Context.Networks.Add(network.ToEntity());
+            Context.SaveChanges();
+        }
+
+        public Network GetNetworkWithAssetsAndLocations(Guid id)
+        {
+            if (!Context.Networks.Any(n => n.Id == id))
             {
                 throw new RowNotInTableException($"Cannot find network with the given id: {id}");
             }
 
-            var entity = context.Networks
+            var entity = Context.Networks
                 .Include(n => n.MaintainableAssets)
                 .ThenInclude(m => m.Location)
-                .Include(n => n.MaintainableAssets)
-                .ThenInclude(m => m.AttributeData)
-                .ThenInclude(a => a.Attribute)
-                .Include(n => n.MaintainableAssets)
-                .ThenInclude(m => m.AttributeData)
-                .ThenInclude(a => a.Location)
                 .Single(n => n.Id == id);
 
             return entity.ToDomain();

@@ -1,4 +1,8 @@
+using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
@@ -26,29 +30,37 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers().AddNewtonsoftJson();
+
+            services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
+
+            // SQL SERVER SCOPINGS
             services.AddMSSQLServices(Configuration.GetConnectionString("BridgeCareConnex"));
 
-            services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
+            /*services.AddScoped<IRepository<Network>, NetworkRepository>();
+            services.AddScoped<IRepository<MaintainableAsset>, MaintainableAssetRepository>();
+            services.AddScoped<IRepository<Attribute>, AttributeRepository>();
+            services.AddScoped<IRepository<AttributeDatum<double>>, AttributeDatumRepository<double>>();
+            services.AddScoped<IRepository<AttributeDatum<string>>, AttributeDatumRepository<string>>();
+            services.AddScoped<IRepository<AggregatedResult<double>>, AggregatedResultRepository<double>>();
+            services.AddScoped<IRepository<AggregatedResult<string>>, AggregatedResultRepository<string>>();
+            services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();*/
+            services.AddScoped<INetworkRepository, NetworkRepository>();
+            services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
+            services.AddScoped<IAttributeRepository, AttributeRepository>();
+            services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
+            services.AddScoped<IAggregatedResultRepository, AggregatedResultRepository>();
+
+            // LITE DB SCOPINGS
+            /*services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
             services.AddSingleton<LiteDb.ILiteDbContext, LiteDb.LiteDbContext>();
 
-            //services.AddScoped<IRepository<Network>, NetworkRepository>();
-            //services.AddScoped<IRepository<MaintainableAsset>, MaintainableAssetRepository>();
-            //services.AddScoped<IRepository<Attribute>, AttributeRepository>();
-            //services.AddScoped<IRepository<AttributeDatum<double>>, AttributeDatumRepository<double>>();
-            //services.AddScoped<IRepository<AttributeDatum<string>>, AttributeDatumRepository<string>>();
-            //services.AddScoped<IRepository<IEnumerable<(Attribute attribute, (int year, double value))>>, AggregatedResultRepository<double>>();
-            //services.AddScoped<IRepository<IEnumerable<(Attribute attribute, (int year, string value))>>, AggregatedResultRepository<string>>();
-            //services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();
-            //services.AddScoped<INetworkRepository, LiteDb.NetworkRepository>();
-            //services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<double>>();
-            //services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<string>>();
-            //services.AddScoped<IMaintainableAssetRepository, LiteDb.MaintainableAssetRepository>();
-            //services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<double>>();
-            //services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<string>>();
-            services.AddScoped<IRepository<AttributeMetaDatum>, AttributeMetaDataRepository>();
-            services.AddScoped<ISaveChanges, SaveAllChanges>();
-
-            services.AddControllers().AddNewtonsoftJson();
+            services.AddScoped<INetworkRepository, LiteDb.NetworkRepository>();
+            services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<double>>();
+            services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<string>>();
+            services.AddScoped<IMaintainableAssetRepository, LiteDb.MaintainableAssetRepository>();
+            services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<double>>();
+            services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<string>>();*/
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

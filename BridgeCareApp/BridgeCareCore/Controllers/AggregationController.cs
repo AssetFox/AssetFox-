@@ -24,6 +24,7 @@ namespace BridgeCareCore.Controllers
         private readonly IMaintainableAssetRepository _maintainableAssetRepo;
         private readonly IAttributeDatumRepository _attributeDatumRepo;
         private readonly IAggregatedResultRepository _aggregatedResultRepo;
+        private readonly IAttributeRepository _attributeRepo;
         private readonly ILogger<NetworkController> _logger;
 
         public AggregationController(
@@ -32,6 +33,7 @@ namespace BridgeCareCore.Controllers
             IMaintainableAssetRepository maintainableAssetRepo,
             IAttributeDatumRepository attributeDatumRepo,
             IAggregatedResultRepository aggregatedResultRepo,
+            IAttributeRepository attributeRepo,
             ILogger<NetworkController> logger)
         {
             _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
@@ -39,6 +41,7 @@ namespace BridgeCareCore.Controllers
             _maintainableAssetRepo = maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
             _attributeDatumRepo = attributeDatumRepo ?? throw new ArgumentNullException(nameof(attributeDatumRepo));
             _aggregatedResultRepo = aggregatedResultRepo ?? throw new ArgumentNullException(nameof(aggregatedResultRepo));
+            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -48,6 +51,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+
                 // get attribute meta data from json file
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
                     "MetaData//AttributeMetaData", "attributeMetaData.json");
@@ -56,11 +60,16 @@ namespace BridgeCareCore.Controllers
                 var network = _networkRepo.GetNetworkWithAssetsAndLocations(networkId);
                 var numberUpdatedRecords = 0;
 
+                var newAttributes = new List<Attribute>();
                 var attributes = new List<Attribute>();
                 
-
                 // Check to see if the GUIDs in the meta data repo are blank. A blank GUID requires
                 // that the attribute has never been assigned in a network previously.
+                if (attributeMetaData.Any(_ => string.IsNullOrEmpty(_.Id.ToString())))
+                {
+                    //newAttributes.AddRange(attributeMetaData.Where(_ => string.IsNullOrEmpty(_.Id.ToString())));
+                    attributeMetaData = attributeMetaData.Where(_ => !string.IsNullOrEmpty(_.Id.ToString())).ToList();
+                }
 
                 // If a GUID is present in the attribute meta data repo then we need to see if we
                 // can match it with an attribute in the current network if we cannot match it, the
@@ -70,7 +79,7 @@ namespace BridgeCareCore.Controllers
                 // repository, then the attribute is simply skipped during data assignment and
                 // aggregation. The existing data for that attribute must be PRESERVED in the
                 // network so it can be utilized during analysis
-                var networkAttributeMetaData = _attributeDatumRepo.GetAttributesFromNetwork(networkId).ToList();
+                var networkAttributeMetaData = _attributeRepo.GetAttributesFromNetwork(networkId).ToList();
                 foreach (var attributeMetaDatum in attributeMetaData)
                 {
                     if (attributeMetaDatum.Id.ToString() == "")

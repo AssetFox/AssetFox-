@@ -7,7 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeDatumRepository
     {
-        IEnumerable<Attribute> GetAttributesFromNetwork(Guid networkId);
         int UpdateAssignedData(Network network);
         int DeleteAssignedDataFromNetwork(Guid networkId);
     }

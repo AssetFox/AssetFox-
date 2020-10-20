@@ -15,8 +15,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public AttributeDatumRepository(IAMContext context) : base(context) { }
 
-        public IEnumerable<Attribute> GetAttributesFromNetwork(Guid networkId) => throw new NotImplementedException();
-
         public int UpdateAssignedData(Network network)
         {
             DeleteAssignedDataFromNetwork(network.Id);

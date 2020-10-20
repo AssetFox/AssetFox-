@@ -17,8 +17,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public int UpdateAssignedData(Network network)
         {
-            DeleteAssignedDataFromNetwork(network.Id);
-
             var attributeDatumEntities = network.MaintainableAssets
                     .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id)))
                     .ToList();
@@ -29,23 +27,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return attributeDatumEntities.Count();
         }
 
-        public int DeleteAssignedDataFromNetwork(Guid networkId)
+        public int DeleteAssignedDataFromNetwork(Guid networkId, List<Guid> existingAttributeIds)
         {
             if (Context.Networks.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var network = Context.Networks.Include(_ => _.MaintainableAssets)
-                .ThenInclude(_ => _.AggregatedResults)
-                .Single(_ => _.Id == networkId);
+            var assignedData = Context.MaintainableAssets
+                .Include(_ => _.AttributeData)
+                .Where(_ => _.Id == networkId)
+                .SelectMany(_ => _.AttributeData.Where(__ => existingAttributeIds.Contains(__.AttributeId)))
+                .ToList();
 
-            if (network == null)
+            if (!assignedData.Any())
             {
                 return 0;
             }
-
-            var assignedData = network.MaintainableAssets.SelectMany(_ => _.AggregatedResults).ToList();
 
             assignedData.ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
             Context.SaveChanges();

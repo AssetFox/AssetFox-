@@ -57,19 +57,42 @@ namespace BridgeCareCore.Controllers
                     "MetaData//AttributeMetaData", "attributeMetaData.json");
                 var attributeMetaData = _attributeMetaDataRepo.All(filePath);
 
-                var network = _networkRepo.GetNetworkWithAssetsAndLocations(networkId);
-                var numberUpdatedRecords = 0;
-
-                var newAttributes = new List<Attribute>();
-                var attributes = new List<Attribute>();
-                
                 // Check to see if the GUIDs in the meta data repo are blank. A blank GUID requires
                 // that the attribute has never been assigned in a network previously.
                 if (attributeMetaData.Any(_ => string.IsNullOrEmpty(_.Id.ToString())))
                 {
-                    //newAttributes.AddRange(attributeMetaData.Where(_ => string.IsNullOrEmpty(_.Id.ToString())));
-                    attributeMetaData = attributeMetaData.Where(_ => !string.IsNullOrEmpty(_.Id.ToString())).ToList();
+                    attributeMetaData = attributeMetaData.Select(_ =>
+                    {
+                        if (string.IsNullOrEmpty(_.Id.ToString()))
+                        {
+                            _.Id = Guid.NewGuid();
+                        }
+
+                        return _;
+                    }).ToList();
+
+                    _attributeMetaDataRepo.UpdateAll(filePath, attributeMetaData);
                 }
+
+                // get attribute dictionary containing all attributes created from the meta data
+                var attributeDictionary = _attributeRepo.GetAttributeDictionary(filePath);
+
+                // create database records for any missing attributes
+                _attributeRepo.CreateMissingAttributes(attributeDictionary.Values.ToList());
+
+                // get the network attributes
+                var networkAttributes = _attributeRepo.GetAttributesFromNetwork(networkId).ToList();
+
+                // delete any assigned data where a network attribute has a matching attribute from the meta data file
+                _attributeDatumRepo.DeleteAssignedDataFromNetwork(networkId, attributeDictionary.Keys.ToList(),
+                    networkAttributes.Select(_ => _.Id).ToList());
+
+                var network = _networkRepo.GetNetworkWithAssetsAndLocations(networkId);
+                var numberUpdatedRecords = 0;
+
+                var attributes = new List<Attribute>();
+
+                
 
                 // If a GUID is present in the attribute meta data repo then we need to see if we
                 // can match it with an attribute in the current network if we cannot match it, the
@@ -79,16 +102,11 @@ namespace BridgeCareCore.Controllers
                 // repository, then the attribute is simply skipped during data assignment and
                 // aggregation. The existing data for that attribute must be PRESERVED in the
                 // network so it can be utilized during analysis
-                var networkAttributeMetaData = _attributeRepo.GetAttributesFromNetwork(networkId).ToList();
+
+                // do not skip attributes that didn't have an id
+                
                 foreach (var attributeMetaDatum in attributeMetaData)
                 {
-                    if (attributeMetaDatum.Id.ToString() == "")
-                    {
-                        // No ID for this attribute found. Create a new attribute with a new GUID.
-                        attributeMetaDatum.Id = Guid.NewGuid();
-                    }
-                    // Persist any changes back out to the attribute meta data repository.
-                    //AttributeMetaDataRepository.UpdateAll(attributeMetaData);
                     attributes.Add(AttributeFactory.Create(attributeMetaDatum));
                 }
 
@@ -100,7 +118,8 @@ namespace BridgeCareCore.Controllers
 
                 if (attributeData.Any())
                 {
-                    _attributeDatumRepo.DeleteAssignedDataFromNetwork(network.Id);
+                    // do not delete assigned data where an id in the database does not exist in the meta data
+                    _attributeDatumRepo.DeleteAssignedDataFromNetwork(network.Id, );
 
                     foreach (var maintainableAsset in network.MaintainableAssets)
                     {
@@ -123,6 +142,9 @@ namespace BridgeCareCore.Controllers
         [Route("AggregateNetworkData")]
         public IActionResult AggregateNetworkData([FromBody] Guid networkId)
         {
+            /*
+             *
+             */
             var maintainableAssets = _maintainableAssetRepo.GetAllInNetwork(networkId);
             var aggregatedNumericResults = new List<AggregatedResult<double>>();
             var aggregatedTextResults = new List<AggregatedResult<string>>();
@@ -144,6 +166,7 @@ namespace BridgeCareCore.Controllers
                         .Select(a => maintainableAsset.GetAggregatedValuesByYear(a, AggregationRuleFactory.CreateTextRule(a))));
                 }
             }
+            // only delete aggregated data where an attribute guid exist in the database but not in the meta data
             var numberDeletedEntries = _aggregatedResultRepo.DeleteAggregatedResults(networkId);
             var numberNumericResults = _aggregatedResultRepo.CreateAggregatedResults(aggregatedNumericResults);
             var numberTextResults = _aggregatedResultRepo.CreateAggregatedResults(aggregatedTextResults);

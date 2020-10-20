@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public interface IAttributeDatumRepository
     {
         int UpdateAssignedData(Network network);
-        int DeleteAssignedDataFromNetwork(Guid networkId);
+        int DeleteAssignedDataFromNetwork(Guid networkId, List<Guid> metaDataAttributeIds, List<Guid> networkAttributeIds);
     }
 }

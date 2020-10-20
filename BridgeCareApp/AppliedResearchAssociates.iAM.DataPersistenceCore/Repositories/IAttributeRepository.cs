@@ -6,7 +6,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeRepository
     {
-        void CreateAttributes(IEnumerable<Attribute> attributes);
+        Dictionary<Guid, Attribute> GetAttributeDictionary(string filePath);
+        void CreateMissingAttributes(List<Attribute> attributes);
         IEnumerable<Attribute> GetAttributesFromNetwork(Guid networkId);
     }
 }

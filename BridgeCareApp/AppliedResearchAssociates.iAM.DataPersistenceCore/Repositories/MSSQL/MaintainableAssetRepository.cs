@@ -12,19 +12,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public MaintainableAssetRepository(IAMContext context) : base(context) { }
 
-        public IEnumerable<MaintainableAsset> GetAllInNetwork(Guid networkId)
+        public IEnumerable<MaintainableAsset> GetAllInNetworkWithAssignedData(Guid networkId)
         {
             if (!Context.Networks.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var network = Context.Networks.Include(_ => _.MaintainableAssets)
-                .Single(_ => _.Id == networkId);
+            var maintainableAssets = Context.MaintainableAssets
+                .Include(_ => _.AttributeData)
+                .ThenInclude(_ => _.Attribute)
+                .Where(_ => _.Id == networkId);
 
-            return network == null
-                ? new List<MaintainableAsset>()
-                : network.MaintainableAssets.Select(_ => _.ToDomain());
+            if (!maintainableAssets.Any())
+            {
+                throw new RowNotInTableException($"Could not find maintainable assets with assigned data");
+            }
+
+            return maintainableAssets.Select(_ => _.ToDomain());
         }
     }
 }

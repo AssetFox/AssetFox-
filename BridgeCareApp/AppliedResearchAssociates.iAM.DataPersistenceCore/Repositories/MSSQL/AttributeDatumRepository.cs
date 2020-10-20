@@ -21,23 +21,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id)))
                     .ToList();
 
-            Context.AttributeData.AddRange(attributeDatumEntities);
-            Context.SaveChanges();
+            if (attributeDatumEntities.Any())
+            {
+                Context.AttributeData.AddRange(attributeDatumEntities);
+                Context.SaveChanges();
+            }
 
             return attributeDatumEntities.Count();
         }
 
-        public int DeleteAssignedDataFromNetwork(Guid networkId, List<Guid> existingAttributeIds)
+        public int DeleteAssignedDataFromNetwork(Guid networkId, List<Guid> metaDataAttributeIds, List<Guid> networkAttributeIds)
         {
             if (Context.Networks.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
+            var filteredAttributeIds = metaDataAttributeIds.Where(networkAttributeIds.Contains);
+
             var assignedData = Context.MaintainableAssets
                 .Include(_ => _.AttributeData)
                 .Where(_ => _.Id == networkId)
-                .SelectMany(_ => _.AttributeData.Where(__ => existingAttributeIds.Contains(__.AttributeId)))
+                .SelectMany(_ => _.AttributeData.Where(__ => filteredAttributeIds.Contains(__.AttributeId)))
                 .ToList();
 
             if (!assignedData.Any())

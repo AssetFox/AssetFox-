@@ -11,13 +11,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
     {
         public AggregatedResultsRepository(ILiteDbContext context) : base(context) { }
 
-        public int CreateAggregatedResults<T>(IEnumerable<AggregatedResult<T>> domainAggregatedResults)
+        public int CreateAggregatedResults<T>(List<AggregatedResult<T>> domainAggregatedResults)
         {
             var aggregatedResultCollection = Context.Database.GetCollection<IAggregatedResultEntity>("AGGREGATED_RESULTS");
             return aggregatedResultCollection.InsertBulk(domainAggregatedResults.Select(_ => _.ToEntity()));
         }
 
-        public int DeleteAggregatedResults(Guid networkId)
+        public int DeleteAggregatedResults(Guid networkId, List<Guid> metaDataAttributeIds, List<Guid> networkAttributeIds)
         {
             var aggregatedResultsCollection = Context.Database.GetCollection<IAggregatedResultEntity>("AGGREGATED_RESULTS");
 

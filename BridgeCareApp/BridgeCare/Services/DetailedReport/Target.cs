@@ -9,10 +9,10 @@ namespace BridgeCare.Services
 {
     public class Target
     {
-        private readonly ITarget repo;
+        private readonly ITargetRepository repo;
         private readonly BridgeCareContext db;
 
-        public Target(ITarget repo, BridgeCareContext db)
+        public Target(ITargetRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

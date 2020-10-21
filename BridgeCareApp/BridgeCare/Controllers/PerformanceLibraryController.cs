@@ -13,14 +13,14 @@ namespace BridgeCare.Controllers
 
     public class PerformanceLibraryController : ApiController
     {
-        private readonly IPerformanceLibrary repo;
+        private readonly IPerformanceLibraryRepository repo;
         private readonly BridgeCareContext db;
         /// <summary>Maps user roles to methods for getting performance libraries.</summary>
         private readonly IReadOnlyDictionary<string, PerformanceLibraryGetMethod> PerformanceLibraryGetMethods;
         /// <summary>Maps user roles to methods for saving performance libraries.</summary>
         private readonly IReadOnlyDictionary<string, PerformanceLibrarySaveMethod> PerformanceLibrarySaveMethods;
 
-        public PerformanceLibraryController(IPerformanceLibrary repo, BridgeCareContext db)
+        public PerformanceLibraryController(IPerformanceLibraryRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

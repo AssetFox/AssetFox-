@@ -14,7 +14,7 @@ namespace BridgeCare.Controllers
     {
         private readonly BridgeCareContext db;
 
-        private readonly ISimulationAnalysis repo;
+        private readonly ISimulationAnalysisRepository repo;
 
         private readonly IReadOnlyDictionary<string, SimulationAnalysisGetMethod> SimulationAnalysisGetMethods;
 
@@ -60,9 +60,9 @@ namespace BridgeCare.Controllers
             };
         }
 
-        public SimulationAnalysisController(ISimulationAnalysis simulationAnalysis, BridgeCareContext context)
+        public SimulationAnalysisController(ISimulationAnalysisRepository simulationAnalysisRepository, BridgeCareContext context)
         {
-            repo = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
+            repo = simulationAnalysisRepository ?? throw new ArgumentNullException(nameof(simulationAnalysisRepository));
             db = context ?? throw new ArgumentNullException(nameof(context));
 
             SimulationAnalysisGetMethods = CreateGetMethods();

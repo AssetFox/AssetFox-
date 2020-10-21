@@ -10,17 +10,17 @@ namespace BridgeCare.Services
     public class ReportCreator : IReportCreator
     {
         private readonly BridgeCareContext db;
-        private readonly IDetailedReport investment;
+        private readonly IDetailedReportRepository investment;
         private readonly Target targetReport;
         private readonly Deficient deficientReport;
         private readonly Detailed detailReport;
         private readonly Budget budgetReport;
 
-        public ReportCreator(IDetailedReport yearlyReport, Budget getBudget,
+        public ReportCreator(IDetailedReportRepository detailedReportRepository, Budget getBudget,
                    Target targetCell, Deficient deficientCell, Detailed details, BridgeCareContext context)
         {
             db = context ?? throw new ArgumentNullException(nameof(context));
-            investment = yearlyReport ?? throw new ArgumentNullException(nameof(yearlyReport));
+            investment = detailedReportRepository ?? throw new ArgumentNullException(nameof(detailedReportRepository));
             targetReport = targetCell ?? throw new ArgumentNullException(nameof(targetCell));
             deficientReport = deficientCell ?? throw new ArgumentNullException(nameof(deficientCell));
             detailReport = details ?? throw new ArgumentNullException(nameof(details));

@@ -17,14 +17,14 @@ namespace BridgeCare.Controllers
     /// </summary>
     public class InvestmentLibraryController : ApiController
     {
-        private readonly IInvestmentLibrary repo;
+        private readonly IInvestmentLibraryRepository repo;
         private readonly BridgeCareContext db;
         /// <summary>Maps user roles to methods for fetching an investment library</summary>
         private readonly IReadOnlyDictionary<string, InvestmentLibraryGetMethod> InvestmentLibraryGetMethods;
         /// <summary>Maps user roles to methods for saving an investment library</summary>
         private readonly IReadOnlyDictionary<string, InvestmentLibrarySaveMethod> InvestmentLibrarySaveMethods;
 
-        public InvestmentLibraryController(IInvestmentLibrary repo, BridgeCareContext db)
+        public InvestmentLibraryController(IInvestmentLibraryRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

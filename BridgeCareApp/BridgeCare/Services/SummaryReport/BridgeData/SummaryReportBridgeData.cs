@@ -15,7 +15,7 @@ namespace BridgeCare.Services
 {
     public class SummaryReportBridgeData
     {
-        private readonly IBridgeData bridgeData;
+        private readonly IBridgeDataRepository _bridgeDataRepository;
         private readonly BridgeDataHelper bridgeDataHelper;
         private readonly ExcelHelper excelHelper;
         private readonly HighlightWorkDoneCells highlightWorkDoneCells;
@@ -23,10 +23,10 @@ namespace BridgeCare.Services
         private List<int> SpacerColumnNumbers;
         private readonly ParametersModel parametersModel;
 
-        public SummaryReportBridgeData(IBridgeData bridgeData, BridgeDataHelper bridgeDataHelper, ExcelHelper excelHelper,
+        public SummaryReportBridgeData(IBridgeDataRepository bridgeDataRepository, BridgeDataHelper bridgeDataHelper, ExcelHelper excelHelper,
             HighlightWorkDoneCells highlightWorkDoneCells, ParametersModel parametersModel)
         {
-            this.bridgeData = bridgeData;
+            this._bridgeDataRepository = bridgeDataRepository;
             this.bridgeDataHelper = bridgeDataHelper;
             this.excelHelper = excelHelper;
             this.highlightWorkDoneCells = highlightWorkDoneCells;
@@ -45,19 +45,19 @@ namespace BridgeCare.Services
         {
             var BRKeys = new List<int>();
 
-            var sections = bridgeData.GetSectionData(simulationModel, dbContext);
-            var treatments = bridgeData.GetTreatments(simulationModel.simulationId, dbContext);
-            var simulationDataTable = bridgeData.GetSimulationData(simulationModel, dbContext, simulationYears);
-            var projectCostModels = bridgeData.GetReportData(simulationModel, dbContext, simulationYears);
+            var sections = _bridgeDataRepository.GetSectionData(simulationModel, dbContext);
+            var treatments = _bridgeDataRepository.GetTreatments(simulationModel.simulationId, dbContext);
+            var simulationDataTable = _bridgeDataRepository.GetSimulationData(simulationModel, dbContext, simulationYears);
+            var projectCostModels = _bridgeDataRepository.GetReportData(simulationModel, dbContext, simulationYears);
             var sectionIdsFromSimulationTable = from dt in simulationDataTable.AsEnumerable()
                                                 select dt.Field<int>("SECTIONID");
             var sectionsForSummaryReport = sections.Where(sm => sectionIdsFromSimulationTable.Contains(sm.SECTIONID)).ToList();
             BRKeys = sectionsForSummaryReport.Select(sm => Convert.ToInt32(sm.FACILITY)).ToList();
-            var bridgeDataModels = bridgeData.GetBridgeData(BRKeys, simulationModel, dbContext, parametersModel);
-            var budgetsPerBrKey = bridgeData.GetBudgetsPerBRKey(simulationModel, dbContext);
+            var bridgeDataModels = _bridgeDataRepository.GetBridgeData(BRKeys, simulationModel, dbContext, parametersModel);
+            var budgetsPerBrKey = _bridgeDataRepository.GetBudgetsPerBRKey(simulationModel, dbContext);
 
             var simulationDataModels = bridgeDataHelper.GetSimulationDataModels(simulationDataTable, simulationYears, projectCostModels, budgetsPerBrKey);
-            var unfundedRecommendations = bridgeData.GetUnfundedRcommendations(simulationModel, dbContext);
+            var unfundedRecommendations = _bridgeDataRepository.GetUnfundedRcommendations(simulationModel, dbContext);
             unfundedRecommendations.ForEach(_ => {
                 _.TotalProjectCost = Convert.ToDouble(_.Budget_Hash.Split('/')[1]);
             });

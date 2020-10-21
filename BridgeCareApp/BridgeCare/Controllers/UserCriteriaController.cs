@@ -9,10 +9,10 @@ namespace BridgeCare.Controllers
 {
     public class UserCriteriaController : ApiController
     {
-        private readonly IUserCriteria repo;
+        private readonly IUserCriteriaRepository repo;
         private readonly BridgeCareContext db;
 
-        public UserCriteriaController(IUserCriteria repo, BridgeCareContext db)
+        public UserCriteriaController(IUserCriteriaRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

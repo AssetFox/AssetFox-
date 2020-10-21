@@ -15,7 +15,7 @@ namespace BridgeCare.Controllers
 
     public class CriteriaDrivenBudgetsController : ApiController
     {
-        private readonly ICriteriaDrivenBudgets repo;
+        private readonly ICriteriaDrivenBudgetsRepository repo;
         private readonly BridgeCareContext db;
         /// <summary>Maps user roles to methods for fetching Criteria Driven Budgets for them</summary>
         private readonly IReadOnlyDictionary<string, CriteriaDrivenBudgetsGetMethod> CriteriaDrivenBudgetsGetMethods;
@@ -23,7 +23,7 @@ namespace BridgeCare.Controllers
         private readonly IReadOnlyDictionary<string, CriteriaDrivenBudgetsSaveMethod> CriteriaDrivenBudgetsSaveMethods;
 
         public CriteriaDrivenBudgetsController() { }
-        public CriteriaDrivenBudgetsController(ICriteriaDrivenBudgets repo, BridgeCareContext db)
+        public CriteriaDrivenBudgetsController(ICriteriaDrivenBudgetsRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

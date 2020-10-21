@@ -13,14 +13,14 @@ namespace BridgeCare.Controllers
 
     public class TreatmentLibraryController : ApiController
     {
-        private readonly ITreatmentLibrary repo;
+        private readonly ITreatmentLibraryRepository repo;
         private readonly BridgeCareContext db;
         /// <summary>Maps user roles to methods for getting treatment libraries.</summary>
         private readonly IReadOnlyDictionary<string, TreatmentLibraryGetMethod> TreatmentLibraryGetMethods;
         /// <summary>Maps user roles to methods for saving treatment libraries.</summary>
         private readonly IReadOnlyDictionary<string, TreatmentLibrarySaveMethod> TreatmentLibrarySaveMethods;
 
-        public TreatmentLibraryController(ITreatmentLibrary repo, BridgeCareContext db)
+        public TreatmentLibraryController(ITreatmentLibraryRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

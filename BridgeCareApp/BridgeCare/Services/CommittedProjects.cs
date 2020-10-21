@@ -23,8 +23,8 @@ namespace BridgeCare.Services
 
     public class CommittedProjects : ICommittedProjects
     {
-        readonly ICommitted committedRepo;
-        private readonly ISections sectionsRepo;
+        readonly ICommittedRepository _committedRepositoryRepo;
+        private readonly ISectionsRepository _sectionsRepository;
         private static readonly SimulationQueue SimulationQueue = SimulationQueue.MainSimulationQueue;
         /// <summary>Maps user roles to methods for fetching committed projects</summary>
         private readonly IReadOnlyDictionary<string, CommittedProjectsGetMethod> CommittedProjectsGetMethods;
@@ -32,20 +32,20 @@ namespace BridgeCare.Services
         private readonly IReadOnlyDictionary<string, CommittedProjectsSaveMethod> CommittedProjectsSaveMethods;
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(CommittedProjects));
 
-        public CommittedProjects(ICommitted committedRepo, ISections sectionsRepo)
+        public CommittedProjects(ICommittedRepository committedRepositoryRepo, ISectionsRepository sectionsRepository)
         {
-            this.committedRepo = committedRepo;
-            this.sectionsRepo = sectionsRepo;
+            this._committedRepositoryRepo = committedRepositoryRepo;
+            this._sectionsRepository = sectionsRepository;
 
             List<CommittedEntity> GetAnyProjects(int id, BridgeCareContext db, UserInformationModel userInformation) => 
-                committedRepo.GetCommittedProjects(id, db);
+                committedRepositoryRepo.GetCommittedProjects(id, db);
             List<CommittedEntity> GetPermittedProjects(int id, BridgeCareContext db, UserInformationModel userInformation) => 
-                committedRepo.GetPermittedCommittedProjects(id, db, userInformation.Name);
+                committedRepositoryRepo.GetPermittedCommittedProjects(id, db, userInformation.Name);
 
             void SaveAnyProjects(List<CommittedProjectModel> models, BridgeCareContext db, UserInformationModel userInformation) => 
-                committedRepo.SaveCommittedProjects(models, db);
+                committedRepositoryRepo.SaveCommittedProjects(models, db);
             void SavePermittedProjects(List<CommittedProjectModel> models, BridgeCareContext db, UserInformationModel userInformation) => 
-                committedRepo.SavePermittedCommittedProjects(models, db, userInformation.Name);
+                committedRepositoryRepo.SavePermittedCommittedProjects(models, db, userInformation.Name);
 
             CommittedProjectsGetMethods = new Dictionary<string, CommittedProjectsGetMethod>
             {
@@ -179,7 +179,7 @@ namespace BridgeCare.Services
         private void AddDataCells(ExcelWorksheet worksheet, List<CommittedEntity> committedProjects, int networkId, BridgeCareContext db)
         {
             var committedProjectsSectionIds = committedProjects.Select(cproj => cproj.SECTIONID).ToList();
-            var sectionModels = sectionsRepo.GetSections(networkId, db);
+            var sectionModels = _sectionsRepository.GetSections(networkId, db);
             // get all committed projects that have a matching section, if any, and add them to the excel file
             var row = 2;
             sectionModels?.Where(sec => committedProjectsSectionIds.Contains(sec.SectionId)).OrderBy(sec => sec.ReferenceKey).ToList().ForEach(model =>
@@ -277,7 +277,7 @@ namespace BridgeCare.Services
             {
                 var column = start.Column + 2;
                 var brKey = Convert.ToInt32(GetCellValue(worksheet, row, 1));
-                var sectionId = sectionsRepo.GetSectionId(networkId, brKey, db);
+                var sectionId = _sectionsRepository.GetSectionId(networkId, brKey, db);
 
                 // BMSID till COST -> entry in COMMITTED_                    
                 var committedProjectModel = new CommittedProjectModel

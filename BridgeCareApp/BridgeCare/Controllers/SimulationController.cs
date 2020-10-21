@@ -19,7 +19,7 @@ namespace BridgeCare.Controllers
 
     public class SimulationController : ApiController
     {
-        private readonly ISimulation repo;
+        private readonly ISimulationRepository repo;
         private readonly BridgeCareContext db;
         /// <summary>Maps user roles to methods for fetching simulations</summary>
         private readonly IReadOnlyDictionary<string, SimulationGetMethod> SimulationGetMethods;
@@ -32,7 +32,7 @@ namespace BridgeCare.Controllers
         /// <summary>Maps user roles to methods for setting simulation users</summary>
         private readonly IReadOnlyDictionary<string, SimulationUserUpdateMethod> SimulationUserUpdateMethods;
 
-        public SimulationController(ISimulation repo, BridgeCareContext db)
+        public SimulationController(ISimulationRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

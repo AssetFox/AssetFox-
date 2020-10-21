@@ -159,6 +159,7 @@
         @State(state => state.authentication.refreshing) refreshing: boolean;
         @State(state => state.breadcrumb.navigation) navigation: any[];
         @State(state => state.toastr.successMessage) successMessage: string;
+        @State(state => state.toastr.warningMessage) warningMessage: string;
         @State(state => state.toastr.errorMessage) errorMessage: string;
         @State(state => state.toastr.infoMessage) infoMessage: string;
         @State(state => state.unsavedChangesFlag.hasUnsavedChanges) hasUnsavedChanges: boolean;
@@ -172,6 +173,7 @@
         @Action('getNetworks') getNetworksAction: any;
         @Action('getAttributes') getAttributesAction: any;
         @Action('setSuccessMessage') setSuccessMessageAction: any;
+        @Action('setWarningMessage') setWarningMessageAction: any;
         @Action('setErrorMessage') setErrorMessageAction: any;
         @Action('setInfoMessage') setInfoMessageAction: any;
         @Action('pollEvents') pollEventsAction: any;
@@ -228,6 +230,20 @@
                 });
                 this.setSuccessMessageAction({message: ''});
             }
+        }
+
+        @Watch('warningMessage')
+        onWarningMessageChanged() {
+          if (hasValue(this.warningMessage)) {
+            iziToast.warning({
+              title: 'Warning',
+              message: this.warningMessage,
+              position: 'topRight',
+              closeOnClick: true,
+              timeout: 3000
+            });
+            this.setWarningMessageAction({message: ''});
+          }
         }
 
         @Watch('errorMessage')

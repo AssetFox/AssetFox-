@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -61,7 +62,7 @@ namespace BridgeCareCore.Controllers
                 // Create list of attributes we are allowed to update with assigned data.
                 var networkAttributeIds = _attributeRepo.GetAttributesFromNetwork(networkId).Select(_ => _.Id);
 
-                var maintainableAssets = _maintainableAssetRepo.GetAllInNetworkWithAssignedData(networkId);
+                var maintainableAssets = _maintainableAssetRepo.GetAllInNetworkWithAssignedData(networkId).ToList();
 
                 var attributeData = new List<IAttributeDatum>();
                 foreach (var attribute in configurationAttributes)
@@ -74,7 +75,6 @@ namespace BridgeCareCore.Controllers
                     maintainableAsset.AssignAttributeData(attributeData);
                 }
 
-                // Attribute Ids for clearing assigned data
                 var attributeIdsToBeUpdatedWithAssignedData = configurationAttributes.Select(_ => _.Id).Union(networkAttributeIds).Distinct();
 
                 var updatedRecordsCount = _attributeDatumRepo.UpdateAssignedDataByAttributeId(networkId, attributeIdsToBeUpdatedWithAssignedData, maintainableAssets);

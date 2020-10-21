@@ -14,7 +14,7 @@
                                     <td>{{ props.item.name }}</td>
                                     <td>{{ props.item.createdDate }}</td>
                                     <td>{{ props.item.lastModifiedDate }}</td>
-                                    <td>{{ props.item.assignmentStatus }}</td>
+                                    <td>{{ assignDataStatusUpdate }}</td>
                                     <td>
                                         <v-layout row wrap>
                                             <v-flex>
@@ -340,6 +340,7 @@
         sharingScenario: Scenario = clone(emptyScenario);
         rules: InputValidationRules = {...rules};
         newNetworkId: string = '';
+        assignDataStatusUpdate: string = '';
 
         @Watch('stateScenarios')
         onStateScenariosChanged() {
@@ -510,6 +511,7 @@
         }
 
         onShowAssignDataAlert(networkId: string){
+            this.$statusHub.$on('user-added-event', this.getStatusUpdate)
             this.newNetworkId = networkId;
             this.alertBeforeAssignData = {
                 showDialog: true,
@@ -518,6 +520,10 @@
                 message: 'The assign data operation can take around five minutes to finish. ' +
                     'Are you sure that you want to continue?'
             };
+        }
+
+        getStatusUpdate(data: any){
+            this.assignDataStatusUpdate = data.status;
         }
 
         onSubmitAssignDataDecision(response: boolean){

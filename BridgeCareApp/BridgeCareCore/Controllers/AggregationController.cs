@@ -8,7 +8,9 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
@@ -24,6 +26,7 @@ namespace BridgeCareCore.Controllers
         private readonly IRepository<AttributeDatum<double>> NumericAttributeDatumRepo;
         private readonly IRepository<AttributeDatum<string>> TextAttributeDatumRepo;
         private readonly IRepository<MaintainableAsset> MaintainableAssetRepo;
+        private readonly IHubContext<BridgeCareHub> HubContext;
 
         private readonly IRepository<IEnumerable<(DataMinerAttribute attribute, (int year, double value))>>
             NumericAggregatedResultRepo;
@@ -43,7 +46,7 @@ namespace BridgeCareCore.Controllers
             IRepository<IEnumerable<(DataMinerAttribute attribute, (int year, double value))>> numericAggregatedResultRepo,
             IRepository<IEnumerable<(DataMinerAttribute attribute, (int year, string value))>> textAggregatedResultRepo,
             ISaveChanges repos,
-            ILogger<NetworkController> logger)
+            ILogger<NetworkController> logger, IHubContext<BridgeCareHub> hub)
         {
             NetworkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
             AttributeMetaDataRepo = attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
@@ -55,6 +58,7 @@ namespace BridgeCareCore.Controllers
             TextAggregatedResultRepo = textAggregatedResultRepo ?? throw new ArgumentNullException(nameof(textAggregatedResultRepo));
             Repos = repos ?? throw new ArgumentNullException(nameof(repos));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            HubContext = hub;
         }
 
         [HttpPost]
@@ -63,6 +67,11 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                await HubContext
+                    .Clients
+                    .All
+                    .SendAsync("BroadcastMessage", "from controller");
+
                 var network = NetworkRepo.Get(networkId);
 
                 var attributeMetaData = AttributeMetaDataRepo.All();

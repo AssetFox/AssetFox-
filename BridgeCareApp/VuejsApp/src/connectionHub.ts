@@ -15,7 +15,7 @@ export default {
             Vue.prototype.$statusHub = statusHub;
 
             connection.on('BroadcastMessage', (status) => {
-                statusHub.$emit('user-added-event', {status :'status test'});
+                statusHub.$emit('user-added-event', {status});
                 console.log('test message' + status);
             });
 

@@ -5,17 +5,21 @@ export default {
     install(Vue: any) {
         const connection = new HubConnectionBuilder()
             .withUrl(`http://localhost:64469/bridgecarehub/`, {
-                skipNegotiation: false,
+                //skipNegotiation: false,
                 transport: HttpTransportType.LongPolling
             })
             .configureLogging(LogLevel.Information)
             .build();
 
-            connection.on("BroadcastMessage", data => {
-                console.log(data);
+            const statusHub = new Vue();
+            Vue.prototype.$statusHub = statusHub;
+
+            connection.on('BroadcastMessage', (status) => {
+                statusHub.$emit('user-added-event', {status :'status test'});
+                console.log('test message' + status);
             });
 
-        let startedPromise = null
+        let startedPromise = null;
         function start() {
             startedPromise = connection.start().catch(err => {
                 console.error('Failed to connect with hub', err);

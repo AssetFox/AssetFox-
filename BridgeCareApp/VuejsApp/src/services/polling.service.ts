@@ -1,5 +1,5 @@
 import {AxiosPromise} from 'axios';
-import {nodejsBackgroundAxiosInstance} from '@/shared/utils/axios-instance';
+import {nodejsBackgroundAxiosInstance, bridgecareCoreAxiosInstance} from '@/shared/utils/axios-instance';
 
 export default class PollingService {
     /**
@@ -7,5 +7,9 @@ export default class PollingService {
      */
     static pollEvents(sessionId: string): AxiosPromise {
         return nodejsBackgroundAxiosInstance.get(`/api/Polling/${sessionId}`);
+    }
+
+    static getRealTimeData(): AxiosPromise {
+        return bridgecareCoreAxiosInstance.get(`api/StatusHub/GetStatus/`);
     }
 }

@@ -8,9 +8,9 @@ namespace BridgeCareCore.Hubs
 {
     public class BridgeCareHub : Hub
     {
-        public async Task SendMessage(string user, string message)
+        public async Task SendMessage(string status = "test")
         {
-            await Clients.All.SendAsync("BroadcastMessage", user, message);
+            await Clients.All.SendAsync("BroadcastMessage", status);
         }
     }
 }

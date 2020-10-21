@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
@@ -34,6 +35,23 @@ namespace BridgeCareCore.Controllers
             //MaintainableAssetRepo = maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
             Repos = repos ?? throw new ArgumentNullException(nameof(repos));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        [HttpGet]
+        [Route("GetAllNetworks")]
+        public IActionResult GetAllNetworks()
+        {
+            try
+            {
+                var networks = NetworkRepo.All();
+                // Sending the first network because PennDOT will always have only 1 network
+                var filteredNetworks = new List<Network> { networks.FirstOrDefault() };
+                return Ok(filteredNetworks);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e);
+            }
         }
 
         [HttpPost]

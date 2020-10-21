@@ -11,10 +11,20 @@
                                           class="elevation-1"
                                           hide-actions>
                                 <template slot="items" slot-scope="props">
-                                    <td>{{ props.item.networkName }}</td>
+                                    <td>{{ props.item.name }}</td>
                                     <td>{{ props.item.createdDate }}</td>
                                     <td>{{ props.item.lastModifiedDate }}</td>
-                                    <td>{{ props.item.rollupStatus }}</td>
+                                    <td>{{ props.item.assignmentStatus }}</td>
+                                    <td>
+                                        <v-layout row wrap>
+                                            <v-flex>
+                                                <v-btn @click="onShowAssignDataAlert(props.item.id)" class="green--text darken-1"
+                                                       icon>
+                                                    <v-icon>fas fa-play</v-icon>
+                                                </v-btn>
+                                            </v-flex>
+                                        </v-layout>
+                                    </td>
                                     <td>
                                         <v-layout row wrap>
                                             <v-flex>
@@ -223,6 +233,7 @@
 
         <Alert :dialogData="alertBeforeDelete" @submit="onSubmitResponse"/>
         <Alert :dialogData="alertBeforeRunRollup" @submit="onSubmitRollupDecision"/>
+        <Alert :dialogData="alertBeforeAssignData" @submit="onSubmitAssignDataDecision" />
 
         <CreateScenarioDialog :showDialog="showCreateScenarioDialog" @submit="onSubmitNewScenario"/>
 
@@ -251,6 +262,7 @@
     import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
     import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
     import {Network} from '@/shared/models/iAM/network';
+    import { NewNetwork } from '@/shared/models/iAM/newNetwork';
     import {any, clone} from 'ramda';
     import {Simulation} from '@/shared/models/iAM/simulation';
     import {emptyRollup, Rollup} from '@/shared/models/iAM/rollup';
@@ -266,10 +278,10 @@
         @State(state => state.breadcrumb.navigation) navigation: any[];
         @State(state => state.network.networks) networks: Network[];
         @State(state => state.authentication.authenticated) authenticated: boolean;
-        @State(state => state.rollup.rollups) rollups: Rollup[];
+        //@State(state => state.rollup.rollups) rollups: Rollup[];
         @State(state => state.authentication.isAdmin) isAdmin: boolean;
         @State(state => state.authentication.isCWOPA) isCWOPA: boolean;
-
+        @State(state => state.rollup.newNetworks) newNetworks: NewNetwork[];
         @Action('getMongoScenarios') getMongoScenariosAction: any;
         @Action('getLegacyScenarios') getLegacyScenariosAction: any;
         @Action('runSimulation') runSimulationAction: any;
@@ -278,15 +290,18 @@
         @Action('updateScenario') updateScenarioAction: any;
         @Action('updateScenarioUsers') updateScenarioUsersAction: any;
         @Action('getSummaryReportMissingAttributes') getSummaryReportMissingAttributesAction: any;
-        @Action('getMongoRollups') getMongoRollupsAction: any;
+        //@Action('getMongoRollups') getMongoRollupsAction: any;
         @Action('rollupNetwork') rollupNetworkAction: any;
+        @Action('assignNetworkData') assignNetworkDataAction: any;
         @Action('getLegacyNetworks') getLegacyNetworksAction: any;
         @Action('cloneScenario') cloneScenarioAction: any;
         @Action('deleteDuplicateMongoScenario') deleteDuplicateMongoScenarioAction: any;
+        @Action('getAllNetworks') getAllNetworksAction: any;
 
         alertData: AlertData = clone(emptyAlertData);
         alertBeforeDelete: AlertData = clone(emptyAlertData);
         alertBeforeRunRollup: AlertData = clone(emptyAlertData);
+        alertBeforeAssignData: AlertData = clone(emptyAlertData);
         reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(emptyReportsDownloadDialogData);
         showCreateScenarioDialog: boolean = false;
         showShareScenarioDialog: boolean = false;
@@ -305,8 +320,9 @@
             {text: 'Network name', align: 'left', sortable: false, value: 'rollupName'},
             {text: 'Date Created', sortable: false, value: 'createdDate'},
             {text: 'Date Last Modified', sortable: false, value: 'lastModifiedDate'},
-            {text: 'Status', sortable: false, value: 'rollupStatus'},
-            {text: '', sortable: false, value: 'actions'}
+            {text: 'Status', sortable: false, value: 'assignmentStatus'},
+            {text: 'Assign Data', sortable: false, value: 'actions'},
+            {text: 'Aggregate Data', sortable: false, value: 'actions'}
         ];
         scenarios: Scenario[] = [];
         userScenarios: Scenario[] = [];
@@ -323,6 +339,7 @@
         currentRollup: Rollup = clone(emptyRollup);
         sharingScenario: Scenario = clone(emptyScenario);
         rules: InputValidationRules = {...rules};
+        newNetworkId: string = '';
 
         @Watch('stateScenarios')
         onStateScenariosChanged() {
@@ -347,21 +364,31 @@
 
         }
 
-        @Watch('rollups')
-        onRollupsChanged() {
-            if (hasValue(this.rollups)) {
-                this.adminRollup = this.rollups;
-            } else {
+        // @Watch('rollups')
+        // onRollupsChanged() {
+        //     if (hasValue(this.rollups)) {
+        //         this.adminRollup = this.rollups;
+        //     } else {
+        //         this.adminRollup = [];
+        //     }
+
+        // }
+        @Watch('newNetworks')
+        onNewNetworkChanged(){
+            if(hasValue(this.newNetworks)){
+                this.adminRollup = this.newNetworks;
+            }
+            else {
                 this.adminRollup = [];
             }
-
         }
 
         @Watch('authenticated')
         onAuthenticated() {
             if (this.authenticated) {
                 this.getMongoScenariosAction({userId: this.userId});
-                this.getMongoRollupsAction({});
+                //this.getMongoRollupsAction({});
+                this.getAllNetworksAction();
             }
         }
 
@@ -371,7 +398,8 @@
         mounted() {
             if (this.authenticated) {
                 this.getMongoScenariosAction({userId: this.userId});
-                this.getMongoRollupsAction({});
+                //this.getMongoRollupsAction({});
+                this.getAllNetworksAction();
             }
         }
 
@@ -481,6 +509,25 @@
             };
         }
 
+        onShowAssignDataAlert(networkId: string){
+            this.newNetworkId = networkId;
+            this.alertBeforeAssignData = {
+                showDialog: true,
+                heading: 'Warning',
+                choice: true,
+                message: 'The assign data operation can take around five minutes to finish. ' +
+                    'Are you sure that you want to continue?'
+            };
+        }
+
+        onSubmitAssignDataDecision(response: boolean){
+            this.alertBeforeAssignData = clone(emptyAlertData);
+
+            if(response){
+                this.assignNetworkData();
+            }
+        }
+
         onSubmitRollupDecision(response: boolean) {
             this.alertBeforeRunRollup = clone(emptyAlertData);
 
@@ -509,6 +556,12 @@
                 selectedScenario: this.currentScenario,
                 userId: this.userId
             });
+        }
+
+        assignNetworkData(){
+            this.assignNetworkDataAction({
+                networkId: this.newNetworkId
+            })
         }
 
         rollupNetwork() {

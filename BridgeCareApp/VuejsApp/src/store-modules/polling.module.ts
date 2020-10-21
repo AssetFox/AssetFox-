@@ -36,7 +36,7 @@ const actions = {
             if(hasValue(response, 'data')){
                 console.log(response.data);
             }
-        })
+        });
     },
 
     /**

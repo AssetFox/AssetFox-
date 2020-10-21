@@ -166,28 +166,28 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
-import { Watch } from "vue-property-decorator";
-import { Action, State } from "vuex-class";
-import Spinner from "./shared/modals/Spinner.vue";
-import iziToast from "izitoast";
-import { hasValue } from "@/shared/utils/has-value-util";
-import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { Watch } from 'vue-property-decorator';
+import { Action, State } from 'vuex-class';
+import Spinner from './shared/modals/Spinner.vue';
+import iziToast from 'izitoast';
+import { hasValue } from '@/shared/utils/has-value-util';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import {
   axiosInstance,
   nodejsAxiosInstance,
-} from "@/shared/utils/axios-instance";
+} from '@/shared/utils/axios-instance';
 import {
   getErrorMessage,
   setAuthHeader,
   setContentTypeCharset,
-} from "@/shared/utils/http-utils";
-import ReportsService from "./services/reports.service";
-import Alert from "@/shared/modals/Alert.vue";
-import { AlertData, emptyAlertData } from "@/shared/models/modals/alert-data";
-import { clone } from "ramda";
-import { emptyScenario, Scenario } from "@/shared/models/iAM/scenario";
+} from '@/shared/utils/http-utils';
+import ReportsService from './services/reports.service';
+import Alert from '@/shared/modals/Alert.vue';
+import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import { clone } from 'ramda';
+import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 
 @Component({
   components: { Alert, Spinner },
@@ -209,19 +209,19 @@ export default class AppComponent extends Vue {
   stateSelectedScenario: Scenario;
   @State((state) => state.announcement.packageVersion) packageVersion: string;
 
-  @Action("refreshTokens") refreshTokensAction: any;
-  @Action("checkBrowserTokens") checkBrowserTokensAction: any;
-  @Action("logOut") logOutAction: any;
-  @Action("setIsBusy") setIsBusyAction: any;
-  @Action("getNetworks") getNetworksAction: any;
-  @Action("getAttributes") getAttributesAction: any;
-  @Action("setSuccessMessage") setSuccessMessageAction: any;
-  @Action("setErrorMessage") setErrorMessageAction: any;
-  @Action("setInfoMessage") setInfoMessageAction: any;
-  @Action("pollEvents") pollEventsAction: any;
-  @Action("generatePollingSessionId") generatePollingSessionIdAction: any;
-  @Action("getUserCriteria") getUserCriteriaAction: any;
-  @Action("getRealTimeData") getRealTimeDataAction: any;
+  @Action('refreshTokens') refreshTokensAction: any;
+  @Action('checkBrowserTokens') checkBrowserTokensAction: any;
+  @Action('logOut') logOutAction: any;
+  @Action('setIsBusy') setIsBusyAction: any;
+  @Action('getNetworks') getNetworksAction: any;
+  @Action('getAttributes') getAttributesAction: any;
+  @Action('setSuccessMessage') setSuccessMessageAction: any;
+  @Action('setErrorMessage') setErrorMessageAction: any;
+  @Action('setInfoMessage') setInfoMessageAction: any;
+  @Action('pollEvents') pollEventsAction: any;
+  @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
+  @Action('getUserCriteria') getUserCriteriaAction: any;
+  @Action('getRealTimeData') getRealTimeDataAction: any;
 
   drawer: boolean = false;
   alertDialogData: AlertData = clone(emptyAlertData);
@@ -236,23 +236,23 @@ export default class AppComponent extends Vue {
     const container: any = {};
 
     if (this.$vuetify.breakpoint.xs) {
-      container["grid-list-xs"] = true;
+      container['grid-list-xs'] = true;
     }
 
     if (this.$vuetify.breakpoint.sm) {
-      container["grid-list-sm"] = true;
+      container['grid-list-sm'] = true;
     }
 
     if (this.$vuetify.breakpoint.md) {
-      container["grid-list-md"] = true;
+      container['grid-list-md'] = true;
     }
 
     if (this.$vuetify.breakpoint.lg) {
-      container["grid-list-lg"] = true;
+      container['grid-list-lg'] = true;
     }
 
     if (this.$vuetify.breakpoint.xl) {
-      container["grid-list-xl"] = true;
+      container['grid-list-xl'] = true;
     }
 
     return container;
@@ -262,49 +262,49 @@ export default class AppComponent extends Vue {
     return this.authenticated && this.hasRole;
   }
 
-  @Watch("successMessage")
+  @Watch('successMessage')
   onSuccessMessageChanged() {
     if (hasValue(this.successMessage)) {
       iziToast.success({
-        title: "Success",
+        title: 'Success',
         message: this.successMessage,
-        position: "topRight",
+        position: 'topRight',
         closeOnClick: true,
         timeout: 3000,
       });
-      this.setSuccessMessageAction({ message: "" });
+      this.setSuccessMessageAction({ message: '' });
     }
   }
 
-  @Watch("errorMessage")
+  @Watch('errorMessage')
   onErrorMessageChanged() {
     if (hasValue(this.errorMessage)) {
       iziToast.error({
-        title: "Error",
+        title: 'Error',
         message: this.errorMessage,
-        position: "topRight",
+        position: 'topRight',
         closeOnClick: true,
         timeout: 3000,
       });
-      this.setErrorMessageAction({ message: "" });
+      this.setErrorMessageAction({ message: '' });
     }
   }
 
-  @Watch("infoMessage")
+  @Watch('infoMessage')
   onInfoMessageChanged() {
     if (hasValue(this.infoMessage)) {
       iziToast.info({
-        title: "Info",
+        title: 'Info',
         message: this.infoMessage,
-        position: "topRight",
+        position: 'topRight',
         closeOnClick: true,
         timeout: 3000,
       });
-      this.setInfoMessageAction({ message: "" });
+      this.setInfoMessageAction({ message: '' });
     }
   }
 
-  @Watch("stateSelectedScenario")
+  @Watch('stateSelectedScenario')
   onStateSelectedScenarioChanged() {
     this.selectedScenario = hasValue(this.stateSelectedScenario)
       ? clone(this.stateSelectedScenario)
@@ -313,7 +313,7 @@ export default class AppComponent extends Vue {
     this.selectedScenarioHasStatus = hasValue(this.selectedScenario.status);
   }
 
-  @Watch("authenticatedWithRole")
+  @Watch('authenticatedWithRole')
   onAuthenticationChange() {
     if (this.authenticated && this.hasRole) {
       this.onLogin();
@@ -379,9 +379,9 @@ export default class AppComponent extends Vue {
       if (showAlert) {
         this.alertDialogData = {
           showDialog: true,
-          heading: "Unsaved Changes",
+          heading: 'Unsaved Changes',
           message:
-            "You have unsaved changes. Are you sure you wish to continue?",
+            'You have unsaved changes. Are you sure you wish to continue?',
           choice: true,
         };
       } else {
@@ -440,17 +440,17 @@ this.testVal = data;
   onLogout() {
     this.logOutAction().then(() => {
       window.clearInterval(this.refreshIntervalID);
-      if (window.location.host.toLowerCase().indexOf("penndot.gov") === -1) {
+      if (window.location.host.toLowerCase().indexOf('penndot.gov') === -1) {
         /*
          * In order to log out properly, the browser must visit the /iAM page of a penndot deployment, as iam-deploy.com cannot
          * modify browser cookies for penndot.gov. So, the current host is sent as part of the query to the penndot site
          * to allow the landing page to redirect the browser to the original host.
          */
         window.location.href =
-          "http://bamssyst.penndot.gov/iAM?host=" +
+          'http://bamssyst.penndot.gov/iAM?host=' +
           encodeURI(window.location.host);
       } else {
-        this.onNavigate("/iAM/");
+        this.onNavigate('/iAM/');
       }
     });
   }
@@ -468,9 +468,9 @@ this.testVal = data;
   async onJobQueue() {
     await ReportsService.getJobList().then((response: AxiosResponse<any>) => {
       if (response == undefined) {
-        this.setErrorMessageAction({ message: "unauthorized access" });
+        this.setErrorMessageAction({ message: 'unauthorized access' });
       } else {
-        window.open(process.env.VUE_APP_URL + "/hangfire/");
+        window.open(process.env.VUE_APP_URL + '/hangfire/');
       }
     });
   }

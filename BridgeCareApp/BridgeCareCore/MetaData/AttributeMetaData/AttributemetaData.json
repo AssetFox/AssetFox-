@@ -5,7 +5,7 @@
       "defaultValue": 10,
       "maximum": 100,
       "minimum": 1,
-      "connectionString": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
+      "connectionString": "data source=localhost;Database=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;",
       "dataSource": "MSSQL",
       "type": "NUMERIC",
       "location": "section",

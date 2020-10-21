@@ -58,8 +58,8 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("AssignNetworkData")]
-        public async Task<IActionResult> AssignNetworkData([FromBody] Guid networkId)
+        [Route("AssignNetworkData/{networkId}")]
+        public async Task<IActionResult> AssignNetworkData(Guid networkId)
         {
             try
             {

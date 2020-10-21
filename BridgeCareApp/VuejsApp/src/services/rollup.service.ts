@@ -1,8 +1,10 @@
 ﻿import {AxiosPromise, AxiosResponse} from 'axios';
-import {axiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
+import {axiosInstance, bridgecareCoreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {any, propEq} from 'ramda';
 import {Rollup} from '@/shared/models/iAM/rollup';
+import { Network } from '@/shared/models/iAM/network';
+import { NewNetwork } from '@/shared/models/iAM/newNetwork';
 
 export default class RollupService {
     static getMongoRollups(): AxiosPromise {
@@ -49,6 +51,24 @@ export default class RollupService {
                     return resolve(error.response);
                 });
         });
+    }
+
+    static getAllNetworks() : AxiosPromise {
+        return new Promise<AxiosResponse<NewNetwork[]>>((resolve) => {
+            bridgecareCoreAxiosInstance.get('api/Network/GetAllNetworks')
+            .then((response: AxiosResponse<NewNetwork[]>) => {
+                if(hasValue(response)){
+                    return resolve(response);
+                }
+            })
+            .catch((error: any) => {
+                return resolve(error.response);
+            });
+        });
+    }
+
+    static assignNetworkData(networkId: string) : AxiosPromise {
+        return bridgecareCoreAxiosInstance.post(`api/Aggregation/AssignNetworkData/${networkId}`);
     }
 
     static rollupNetwork(selectedNetwork: Rollup): AxiosPromise {

@@ -9,10 +9,10 @@ namespace BridgeCare.Controllers
 {
     public class RunRollupController : ApiController
     {
-        private readonly IRunRollup repo;
+        private readonly IRunRollupRepository repo;
         private readonly BridgeCareContext db;
 
-        public RunRollupController(IRunRollup repo, BridgeCareContext db)
+        public RunRollupController(IRunRollupRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

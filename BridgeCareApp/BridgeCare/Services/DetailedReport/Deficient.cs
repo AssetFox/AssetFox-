@@ -10,9 +10,9 @@ namespace BridgeCare.Services
 {
     public class Deficient
     {
-        private readonly IDeficientReport deficientResult;
+        private readonly IDeficientReportRepository deficientResult;
 
-        public Deficient(IDeficientReport deficient)
+        public Deficient(IDeficientReportRepository deficient)
         {
             deficientResult = deficient ?? throw new ArgumentNullException(nameof(deficient));
         }

@@ -13,7 +13,7 @@ namespace BridgeCare.Controllers
 
     public class DeficientController: ApiController
     {
-        private readonly IDeficient repo;
+        private readonly IDeficientRepository repo;
         private readonly BridgeCareContext db;
         /// <summary>Maps user roles to methods for fetching a target library</summary>
         private readonly IReadOnlyDictionary<string, DeficientLibraryGetMethod> DeficientLibraryGetMethods;
@@ -22,7 +22,7 @@ namespace BridgeCare.Controllers
 
         public DeficientController() { }
 
-        public DeficientController(IDeficient repo, BridgeCareContext db)
+        public DeficientController(IDeficientRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

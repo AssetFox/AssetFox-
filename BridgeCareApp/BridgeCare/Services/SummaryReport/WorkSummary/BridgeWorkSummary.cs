@@ -13,27 +13,27 @@ namespace BridgeCare.Services
         private readonly CostBudgetsWorkSummary costBudgetsWorkSummary;
         private readonly BridgesCulvertsWorkSummary bridgesCulvertsWorkSummary;
         private readonly BridgeRateDeckAreaWorkSummary bridgeRateDeckAreaWorkSummary;
-        private readonly IBridgeWorkSummaryData bridgeWorkSummaryData;
+        private readonly IBridgeWorkSummaryDataRepository _bridgeWorkSummaryDataRepository;
         private readonly NHSBridgeDeckAreaWorkSummary nhsBridgeDeckAreaWorkSummary;
         private readonly PostedClosedBridgeWorkSummary postedClosedBridgeWorkSummary;
         private readonly DeckAreaBridgeWorkSummary deckAreaBridgeWorkSummary;
-        private readonly IWorkSummaryByBudget workSummaryByBudgetData;
-        private readonly IBridgeData bridgeData;
+        private readonly IWorkSummaryByBudgetRepository _workSummaryByBudgetRepository;
+        private readonly IBridgeDataRepository _bridgeDataRepository;
 
         public BridgeWorkSummary(CostBudgetsWorkSummary costBudgetsWorkSummary, BridgesCulvertsWorkSummary bridgesCulvertsWorkSummary,
-            BridgeRateDeckAreaWorkSummary bridgeRateDeckAreaWorkSummary, IBridgeWorkSummaryData bridgeWorkSummaryData,
+            BridgeRateDeckAreaWorkSummary bridgeRateDeckAreaWorkSummary, IBridgeWorkSummaryDataRepository bridgeWorkSummaryDataRepository,
             NHSBridgeDeckAreaWorkSummary nhsBridgeDeckAreaWorkSummary, PostedClosedBridgeWorkSummary postedClosedBridgeWorkSummary,
-            DeckAreaBridgeWorkSummary deckAreaBridgeWorkSummary, IWorkSummaryByBudget summaryByBudget, IBridgeData bridgeData)
+            DeckAreaBridgeWorkSummary deckAreaBridgeWorkSummary, IWorkSummaryByBudgetRepository workSummaryByBudgetRepository, IBridgeDataRepository bridgeDataRepository)
         {
             this.costBudgetsWorkSummary = costBudgetsWorkSummary ?? throw new ArgumentNullException(nameof(costBudgetsWorkSummary));
             this.bridgesCulvertsWorkSummary = bridgesCulvertsWorkSummary ?? throw new ArgumentNullException(nameof(bridgesCulvertsWorkSummary));
             this.bridgeRateDeckAreaWorkSummary = bridgeRateDeckAreaWorkSummary ?? throw new ArgumentNullException(nameof(bridgeRateDeckAreaWorkSummary));
-            this.bridgeWorkSummaryData = bridgeWorkSummaryData ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryData));
+            this._bridgeWorkSummaryDataRepository = bridgeWorkSummaryDataRepository ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryDataRepository));
             this.nhsBridgeDeckAreaWorkSummary = nhsBridgeDeckAreaWorkSummary ?? throw new ArgumentNullException(nameof(nhsBridgeDeckAreaWorkSummary));
             this.postedClosedBridgeWorkSummary = postedClosedBridgeWorkSummary ?? throw new ArgumentNullException(nameof(postedClosedBridgeWorkSummary));
             this.deckAreaBridgeWorkSummary = deckAreaBridgeWorkSummary ?? throw new ArgumentNullException(nameof(deckAreaBridgeWorkSummary));
-            workSummaryByBudgetData = summaryByBudget ?? throw new ArgumentNullException(nameof(summaryByBudget));
-            this.bridgeData = bridgeData ?? throw new ArgumentNullException(nameof(bridgeData));
+            _workSummaryByBudgetRepository = workSummaryByBudgetRepository ?? throw new ArgumentNullException(nameof(workSummaryByBudgetRepository));
+            this._bridgeDataRepository = bridgeDataRepository ?? throw new ArgumentNullException(nameof(bridgeDataRepository));
         }
 
         /// <summary>
@@ -49,9 +49,9 @@ namespace BridgeCare.Services
         public ChartRowsModel Fill(ExcelWorksheet worksheet, List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, List<int> simulationYears, BridgeCareContext dbContext, SimulationModel simulationModel, List<string> treatments)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
-            var yearlyBudgetAmounts = bridgeWorkSummaryData.GetYearlyBudgetAmounts(simulationModel.simulationId, simulationYears, dbContext);
+            var yearlyBudgetAmounts = _bridgeWorkSummaryDataRepository.GetYearlyBudgetAmounts(simulationModel.simulationId, simulationYears, dbContext);
 
-            var comittedProjectsData = workSummaryByBudgetData.GetAllCommittedProjects(simulationModel, dbContext);
+            var comittedProjectsData = _workSummaryByBudgetRepository.GetAllCommittedProjects(simulationModel, dbContext);
 
             costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, simulationDataModels, yearlyBudgetAmounts, treatments, comittedProjectsData);
 

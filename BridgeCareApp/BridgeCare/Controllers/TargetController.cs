@@ -13,14 +13,14 @@ namespace BridgeCare.Controllers
 
     public class TargetController: ApiController
     {
-        private readonly ITarget repo;
+        private readonly ITargetRepository repo;
         private readonly BridgeCareContext db;
         /// <summary>Maps user roles to methods for fetching a target library</summary>
         private readonly IReadOnlyDictionary<string, TargetLibraryGetMethod> TargetLibraryGetMethods;
         /// <summary>Maps user roles to methods for saving a target library</summary>
         private readonly IReadOnlyDictionary<string, TargetLibrarySaveMethod> TargetLibrarySaveMethods;
 
-        public TargetController(ITarget repo, BridgeCareContext db)
+        public TargetController(ITargetRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

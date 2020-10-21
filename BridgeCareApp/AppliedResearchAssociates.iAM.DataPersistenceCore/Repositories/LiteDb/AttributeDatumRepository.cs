@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using LiteDB;
 using MoreLinq;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
@@ -22,22 +22,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
                 .SelectMany(_ => _.AttributeDatumEntities.Select(_ => _.AttributeEntity.ToDomain()))
                 .DistinctBy(_ => _.Id);
 
-        public int UpdateAssignedData(Network network)
+        // Removes assigned data on maintainable assets in the given network that have attribute data with attributeIds in the provided list.
+        public int UpdateAssignedDataByAttributeId(Guid networkId, IEnumerable<Guid> attributeIds, IEnumerable<MaintainableAsset> maintainableAssets)
         {
-            var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity());
+            var maintainableAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
+            var maintainableAssetEntities = maintainableAssets.Select(_ => _.ToEntity());
 
-            _ = DeleteAssignedDataFromNetwork(network.Id);
+            var attributeDatumEntitiesToUpdate = maintainableAssetEntities.SelectMany(_ => _.AttributeDatumEntities)
+                    .Where(_ => attributeIds.Contains(_.AttributeEntity.Id)).ToList();
 
-            return Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS")
-                .Update(maintainableAssetEntities);
-        }
-
-        public int DeleteAssignedDataFromNetwork(Guid networkId)
-        {
-            var maintenanceAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTENANCE_ASSETS");
-            return maintenanceAssetCollection.UpdateMany(_ => new MaintainableAssetEntity()
+            return maintainableAssetCollection
+                .UpdateMany(_ =>
+                new MaintainableAssetEntity()
                 {
-                    AttributeDatumEntities = new List<IAttributeDatumEntity>(),
+                    AttributeDatumEntities = attributeDatumEntitiesToUpdate,
                     Id = _.Id,
                     LocationEntity = _.LocationEntity,
                     NetworkId = _.NetworkId

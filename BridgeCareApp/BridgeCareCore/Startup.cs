@@ -45,22 +45,21 @@ namespace BridgeCareCore
             services.AddScoped<IRepository<AggregatedResult<double>>, AggregatedResultRepository<double>>();
             services.AddScoped<IRepository<AggregatedResult<string>>, AggregatedResultRepository<string>>();
             services.AddScoped<IRepository<AttributeMetaDatum>, NetworkDefinitionMetaDataRepository>();*/
-            services.AddScoped<INetworkRepository, NetworkRepository>();
-            services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
-            services.AddScoped<IAttributeRepository, AttributeRepository>();
-            services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
-            services.AddScoped<IAggregatedResultRepository, AggregatedResultRepository>();
+            //services.AddScoped<INetworkRepository, NetworkRepository>();
+            //services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
+            //services.AddScoped<IAttributeRepository, AttributeRepository>();
+            //services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
+            //services.AddScoped<IAggregatedResultRepository, AggregatedResultRepository>();
 
             // LITE DB SCOPINGS
-            /*services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
+            services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
             services.AddSingleton<LiteDb.ILiteDbContext, LiteDb.LiteDbContext>();
 
+            services.AddScoped<IAttributeRepository, LiteDb.AttributeRepository>();
+            services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository>();
             services.AddScoped<INetworkRepository, LiteDb.NetworkRepository>();
-            services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<double>>();
-            services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository<string>>();
+            services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository>();
             services.AddScoped<IMaintainableAssetRepository, LiteDb.MaintainableAssetRepository>();
-            services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<double>>();
-            services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository<string>>();*/
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

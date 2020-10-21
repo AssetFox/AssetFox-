@@ -1,12 +1,11 @@
 {
   "AttributeMetaData": [
     {
-      "id": "",
       "name": "ADT TOTAL",
       "defaultValue": 10,
       "maximum": 100,
       "minimum": 1,
-      "connectionString": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
+      "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",
       "dataSource": "MSSQL",
       "type": "NUMERIC",
       "location": "section",
@@ -16,10 +15,9 @@
       "isAscending": true
     },
     {
-      "id": "",
       "name": "MATERIAL TYPE",
       "defaultValue": "",
-      "connectionString": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
+      "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",
       "dataSource": "MSSQL",
       "type": "TEXT",
       "location": "section",
@@ -28,10 +26,9 @@
       "isCalculated": false
     },
     {
-      "id": "",
       "name": "COUNTY",
       "defaultValue": "",
-      "connectionString": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
+      "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",
       "dataSource": "MSSQL",
       "type": "TEXT",
       "location": "section",

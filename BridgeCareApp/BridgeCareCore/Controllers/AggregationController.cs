@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MoreLinq.Extensions;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace BridgeCareCore.Controllers
 {
@@ -49,81 +50,34 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-
-                // get attribute meta data from json file
+                // Get configurable attribute meta data.
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
                     "MetaData//AttributeMetaData", "attributeMetaData.json");
                 var attributeMetaData = _attributeMetaDataRepo.All(filePath);
 
-                // Check to see if the GUIDs in the meta data repo are blank. A blank GUID requires
-                // that the attribute has never been assigned in a network previously.
-                if (attributeMetaData.Any(_ => string.IsNullOrEmpty(_.Id.ToString())))
-                {
-                    // give new meta data a guid
-                    attributeMetaData = attributeMetaData.Select(_ =>
-                    {
-                        if (string.IsNullOrEmpty(_.Id.ToString()))
-                        {
-                            _.Id = Guid.NewGuid();
-                        }
+                // Create attributes from the meta data.
+                var configurationAttributes = attributeMetaData.Select(_ => AttributeFactory.Create(_));
 
-                        return _;
-                    }).ToList();
+                // Create list of attributes we are allowed to update with assigned data.
+                var networkAttributeIds = _attributeRepo.GetAttributesFromNetwork(networkId).Select(_ => _.Id);
 
-                    // update the meta data file
-                    _attributeMetaDataRepo.UpdateAll(filePath, attributeMetaData);
-                }
-
-                // get attribute dictionary containing all attributes created from the meta data
-                var attributeDictionary = _attributeRepo.GetAttributeDictionary(filePath);
-
-                // create database records for any missing attributes
-                _attributeRepo.CreateMissingAttributes(attributeDictionary.Values.ToList());
-
-                // get the network attributes
-                var networkAttributes = _attributeRepo.GetAttributesFromNetwork(networkId).ToList();
-
-                // delete any assigned data where a network attribute has a matching attribute from the meta data file
-                _attributeDatumRepo.DeleteAssignedDataFromNetwork(networkId, attributeDictionary.Keys.ToList(),
-                    networkAttributes.Select(_ => _.Id).ToList());
-
-                // If a GUID is present in the attribute meta data repo then we need to see if we
-                // can match it with an attribute in the current network if we cannot match it, the
-                // attribute is new to the network and we proceed normally.
-
-                // If a GUID is present for an attribute from the network, but NOT in the meta data
-                // repository, then the attribute is simply skipped during data assignment and
-                // aggregation. The existing data for that attribute must be PRESERVED in the
-                // network so it can be utilized during analysis
-
-                // do not skip attributes that didn't have an id
-                var metaDataAttributes = attributeDictionary.Values.
-                    Where(_ => networkAttributes.Select(__ => __.Id).Contains(_.Id))
-                    .ToList();
-
-                var databaseAttributes = networkAttributes
-                    .Where(_ => attributeDictionary.Keys.Contains(_.Id))
-                    .ToList();
-
-                var attributes = metaDataAttributes.Concat(databaseAttributes).DistinctBy(_ => _.Id);
+                var maintainableAssets = _maintainableAssetRepo.GetAllInNetworkWithAssignedData(networkId);
 
                 var attributeData = new List<IAttributeDatum>();
-                foreach (var attribute in attributes)
+                foreach (var attribute in configurationAttributes)
                 {
                     attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
                 }
 
-                var updatedRecordsCount = 0;
-                if (attributeData.Any())
+                foreach (var maintainableAsset in maintainableAssets)
                 {
-                    var network = _networkRepo.GetNetworkWithAssetsAndLocations(networkId);
-                    foreach (var maintainableAsset in network.MaintainableAssets)
-                    {
-                        maintainableAsset.AssignAttributeData(attributeData);
-                    }
-                    
-                    updatedRecordsCount = _attributeDatumRepo.UpdateAssignedData(network);
+                    maintainableAsset.AssignAttributeData(attributeData);
                 }
+
+                // Attribute Ids for clearing assigned data
+                var attributeIdsToBeUpdatedWithAssignedData = configurationAttributes.Select(_ => _.Id).Union(networkAttributeIds).Distinct();
+
+                var updatedRecordsCount = _attributeDatumRepo.UpdateAssignedDataByAttributeId(networkId, attributeIdsToBeUpdatedWithAssignedData, maintainableAssets);
 
                 _logger.LogInformation("Attribute data have been assigned to maintenance assets.");
                 return Ok($"Updated {updatedRecordsCount} records.");
@@ -144,29 +98,26 @@ namespace BridgeCareCore.Controllers
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
                     "MetaData//AttributeMetaData", "attributeMetaData.json");
 
-                // get the attribute dictionary
-                var attributeDictionary = _attributeRepo.GetAttributeDictionary(filePath);
-
                 // get the network attributes
-                var networkAttributes = _attributeRepo.GetAttributesFromNetwork(networkId).ToList();
+                // var networkAttributes = _attributeRepo.GetAttributesFromNetwork(networkId).ToList();
 
                 // delete aggregated data with an attribute id in the database that has a matching attribute id in the meta data file
-                var numberDeletedEntries = _aggregatedResultRepo.DeleteAggregatedResults(networkId,
-                    attributeDictionary.Keys.ToList(), networkAttributes.Select(_ => _.Id).ToList());
+                //var numberDeletedEntries = _aggregatedResultRepo.DeleteAggregatedResults(networkId,
+                //    attributeDictionary.Keys.ToList(), networkAttributes.Select(_ => _.Id).ToList());
 
                 // 
-                var metaDataAttributes = attributeDictionary.Values.
-                    Where(_ => networkAttributes.Select(__ => __.Id).Contains(_.Id))
-                    .ToList();
+                //var metaDataAttributes = attributeDictionary.Values.
+                //    Where(_ => networkAttributes.Select(__ => __.Id).Contains(_.Id))
+                //    .ToList();
 
-                var databaseAttributes = networkAttributes
-                    .Where(_ => attributeDictionary.Keys.Contains(_.Id))
-                    .ToList();
+                //var databaseAttributes = networkAttributes
+                //    .Where(_ => attributeDictionary.Keys.Contains(_.Id))
+                //    .ToList();
 
-                var attributeIds = metaDataAttributes.Concat(databaseAttributes)
-                    .DistinctBy(_ => _.Id)
-                    .Select(_ => _.Id)
-                    .ToList();
+                //var attributeIds = metaDataAttributes.Concat(databaseAttributes)
+                //    .DistinctBy(_ => _.Id)
+                //    .Select(_ => _.Id)
+                //    .ToList();
 
                 // get all maintainable assets in the network
                 var maintainableAssets = _maintainableAssetRepo.GetAllInNetworkWithAssignedData(networkId);
@@ -175,30 +126,31 @@ namespace BridgeCareCore.Controllers
                 var aggregatedTextResults = new List<AggregatedResult<string>>();
                 foreach (var maintainableAsset in maintainableAssets)
                 {
-                    // aggregate numeric data
-                    if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "NUMERIC" && attributeIds.Contains(_.Attribute.Id)))
-                    {
-                        aggregatedNumericResults.AddRange(maintainableAsset.AssignedData
-                            .Where(_ => _.Attribute.DataType == "NUMERIC" && attributeIds.Contains(_.Attribute.Id))
-                            .Select(_ => _.Attribute)
-                            .Select(_ => maintainableAsset.GetAggregatedValuesByYear(_, AggregationRuleFactory.CreateNumericRule(_))));
-                    }
+                    //// aggregate numeric data
+                    //if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "NUMERIC" && attributeIds.Contains(_.Attribute.Id)))
+                    //{
+                    //    aggregatedNumericResults.AddRange(maintainableAsset.AssignedData
+                    //        .Where(_ => _.Attribute.DataType == "NUMERIC" && attributeIds.Contains(_.Attribute.Id))
+                    //        .Select(_ => _.Attribute)
+                    //        .Select(_ => maintainableAsset.GetAggregatedValuesByYear(_, AggregationRuleFactory.CreateNumericRule(_))));
+                    //}
 
-                    //aggregate text data
-                    if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "TEXT"))
-                    {
-                        aggregatedTextResults.AddRange(maintainableAsset.AssignedData
-                            .Where(_ => _.Attribute.DataType == "TEXT" && attributeIds.Contains(_.Attribute.Id))
-                            .Select(_ => _.Attribute)
-                            .Select(_ => maintainableAsset.GetAggregatedValuesByYear(_, AggregationRuleFactory.CreateTextRule(_))));
-                    }
+                    ////aggregate text data
+                    //if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "TEXT"))
+                    //{
+                    //    aggregatedTextResults.AddRange(maintainableAsset.AssignedData
+                    //        .Where(_ => _.Attribute.DataType == "TEXT" && attributeIds.Contains(_.Attribute.Id))
+                    //        .Select(_ => _.Attribute)
+                    //        .Select(_ => maintainableAsset.GetAggregatedValuesByYear(_, AggregationRuleFactory.CreateTextRule(_))));
+                    //}
                 }
 
                 // create aggregated data records in the data source
                 var numberNumericResults = _aggregatedResultRepo.CreateAggregatedResults(aggregatedNumericResults);
                 var numberTextResults = _aggregatedResultRepo.CreateAggregatedResults(aggregatedTextResults);
 
-                return Ok($"{numberDeletedEntries} removed from database. {numberNumericResults + numberTextResults} added.");
+                //return Ok($"{numberDeletedEntries} removed from database. {numberNumericResults + numberTextResults} added.");
+                return Ok();
             }
             catch (Exception e)
             {

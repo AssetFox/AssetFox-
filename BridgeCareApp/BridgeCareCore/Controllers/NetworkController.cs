@@ -18,17 +18,14 @@ namespace BridgeCareCore.Controllers
     {
         private readonly IAttributeMetaDataRepository _attributeMetaDataFileRepo;
         private readonly INetworkRepository _networkRepo;
-        private readonly IAttributeRepository _attributeRepo;
         private readonly ILogger<NetworkController> _logger;
 
         public NetworkController(IAttributeMetaDataRepository attributeMetaDataFileRepo,
             INetworkRepository networkRepo,
-            IAttributeRepository attributeRepo,
             ILogger<NetworkController> logger)
         {
             _attributeMetaDataFileRepo = attributeMetaDataFileRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataFileRepo));
             _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
-            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -40,7 +37,7 @@ namespace BridgeCareCore.Controllers
             {
                 // get attribute meta data from json file
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
-                    "MetaData//AttributeMetaData", "networkDefinitionRules.json");
+                    "MetaData//NetworkDefinitionRules", "networkDefinitionRules.json");
                 var attributeMetaDatum = _attributeMetaDataFileRepo.All(filePath).FirstOrDefault();
 
                 if(attributeMetaDatum == null)

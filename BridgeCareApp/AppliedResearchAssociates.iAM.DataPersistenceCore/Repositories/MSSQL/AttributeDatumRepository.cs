@@ -15,45 +15,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public AttributeDatumRepository(IAMContext context) : base(context) { }
 
-        public int UpdateAssignedData(Network network)
-        {
-            var attributeDatumEntities = network.MaintainableAssets
-                    .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id)))
-                    .ToList();
-
-            if (attributeDatumEntities.Any())
-            {
-                Context.AttributeData.AddRange(attributeDatumEntities);
-                Context.SaveChanges();
-            }
-
-            return attributeDatumEntities.Count();
-        }
-
-        public int DeleteAssignedDataFromNetwork(Guid networkId, List<Guid> metaDataAttributeIds, List<Guid> networkAttributeIds)
+        public int UpdateAssignedDataByAttributeId(Guid networkId, IEnumerable<Guid> attributeIds, IEnumerable<MaintainableAsset> maintainableAssets)
         {
             if (Context.Networks.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
+            return 1;
+            //var filteredAttributeIds = metaDataAttributeIds.Where(networkAttributeIds.Contains);
 
-            var filteredAttributeIds = metaDataAttributeIds.Where(networkAttributeIds.Contains);
+            //var assignedData = Context.MaintainableAssets
+            //    .Include(_ => _.AttributeData)
+            //    .Where(_ => _.Id == network.Id)
+            //    .SelectMany(_ => _.AttributeData.Where(__ => filteredAttributeIds.Contains(__.AttributeId)))
+            //    .ToList();
 
-            var assignedData = Context.MaintainableAssets
-                .Include(_ => _.AttributeData)
-                .Where(_ => _.Id == networkId)
-                .SelectMany(_ => _.AttributeData.Where(__ => filteredAttributeIds.Contains(__.AttributeId)))
-                .ToList();
+            //if (!assignedData.Any())
+            //{
+            //    return 0;
+            //}
 
-            if (!assignedData.Any())
-            {
-                return 0;
-            }
-
-            assignedData.ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-            Context.SaveChanges();
-
-            return assignedData.Count();
+            //assignedData.ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
+            //Context.SaveChanges();
+            //return assignedData.Count();
         }
     }
 }

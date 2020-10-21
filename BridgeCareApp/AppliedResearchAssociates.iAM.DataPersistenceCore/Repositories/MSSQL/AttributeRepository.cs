@@ -23,27 +23,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Dictionary<Guid, Attribute> AttributeDictionary { get; set; }
 
-        public Dictionary<Guid, Attribute> GetAttributeDictionary(string filePath)
-        {
-            if (AttributeDictionary == null || !AttributeDictionary.Any())
-            {
-                AttributeDictionary = new Dictionary<Guid, Attribute>();
+        //public Dictionary<Guid, Attribute> GetAttributeDictionary(string filePath)
+        //{
+        //    if (AttributeDictionary == null || !AttributeDictionary.Any())
+        //    {
+        //        AttributeDictionary = new Dictionary<Guid, Attribute>();
 
-                var attributeMetaData = _attributeMetaDataRepo.All(filePath);
-                if (attributeMetaData.Any())
-                {
-                    foreach (var attributeMetaDatum in attributeMetaData)
-                    {
-                        if (!AttributeDictionary.ContainsKey(attributeMetaDatum.Id))
-                        {
-                            AttributeDictionary.Add(attributeMetaDatum.Id, AttributeFactory.Create(attributeMetaDatum));
-                        }
-                    }
-                }
-            }
+        //        var attributeMetaData = _attributeMetaDataRepo.All(filePath);
+        //        if (attributeMetaData.Any())
+        //        {
+        //            foreach (var attributeMetaDatum in attributeMetaData)
+        //            {
+        //                if (!AttributeDictionary.ContainsKey(attributeMetaDatum.Id))
+        //                {
+        //                    AttributeDictionary.Add(attributeMetaDatum.Id, AttributeFactory.Create(attributeMetaDatum));
+        //                }
+        //            }
+        //        }
+        //    }
 
-            return AttributeDictionary;
-        }
+        //    return AttributeDictionary;
+        //}
 
         public void CreateMissingAttributes(List<Attribute> attributes)
         {

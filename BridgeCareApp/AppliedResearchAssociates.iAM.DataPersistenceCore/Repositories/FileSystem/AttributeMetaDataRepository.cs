@@ -17,22 +17,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             {
                 throw new FileNotFoundException($"{filePath} does not exist");
             }
-
             var rawAttributes = File.ReadAllText(filePath);
-            return JsonConvert
-                .DeserializeAnonymousType(rawAttributes, new {AttributeMetaData = default(List<AttributeMetaDatum>)})
+            var attributeMetaData = JsonConvert
+                .DeserializeAnonymousType(rawAttributes, new { AttributeMetaData = default(List<AttributeMetaDatum>) })
                 .AttributeMetaData;
-        }
 
-        public void UpdateAll(string filePath, List<AttributeMetaDatum> attributeMetaData)
-        {
-            if (!File.Exists(filePath))
+            // Check to see if the GUIDs in the meta data repo are blank. A blank GUID requires
+            // that the attribute has never been assigned in a network previously.
+            if (attributeMetaData.Any(_ => Guid.Empty == _.Id))
             {
-                throw new FileNotFoundException($"{filePath} does not exist");
-            }
+                // give new meta data a guid
+                attributeMetaData = attributeMetaData.Select(_ =>
+                {
+                    if (Guid.Empty == _.Id)
+                    {
+                        _.Id = Guid.NewGuid();
+                    }
 
-            using var writer = new StreamWriter(filePath);
-            writer.Write(JsonConvert.SerializeObject(attributeMetaData));
+                    return _;
+                }).ToList();
+
+                using var writer = new StreamWriter(filePath);
+                writer.Write(JsonConvert.SerializeObject(new { AttributeMetaData = attributeMetaData }));
+            }
+            return attributeMetaData;
         }
     }
 }

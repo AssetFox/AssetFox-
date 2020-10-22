@@ -65,12 +65,14 @@ namespace BridgeCareCore.Controllers
         [Route("AssignNetworkData/{networkId}")]
         public async Task<IActionResult> AssignNetworkData(Guid networkId)
         {
+            var broadcastingMessage = "Starting data assignment";
+            var percentage = 0.0;
             try
             {
                 await HubContext
                     .Clients
                     .All
-                    .SendAsync("BroadcastAssignDataStatus", "from controller");
+                    .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
 
                 var network = NetworkRepo.Get(networkId);
 
@@ -88,8 +90,20 @@ namespace BridgeCareCore.Controllers
 
                 if (attributeData.Any())
                 {
+                    var totalAssests = (double)network.MaintainableAssets.Count;
+                    var i = 0.0;
                     foreach (var maintainableAsset in network.MaintainableAssets)
                     {
+                        if(i % 500 == 0)
+                        {
+                            broadcastingMessage = $"Assigning attribute data";
+                            percentage = Math.Round((i / totalAssests) * 100, 1);
+                            _ = HubContext
+                           .Clients
+                           .All
+                           .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
+                        }
+                        i++;
                         // assign attribute data to maintainable asset
                         maintainableAsset.AssignAttributeData(attributeData);
                         // add assigned attribute data to db context
@@ -111,14 +125,25 @@ namespace BridgeCareCore.Controllers
                             TextAttributeDatumRepo.AddAll(textAttributeData, maintainableAsset.Id);
                         }
                     }
+                    broadcastingMessage = $"Finished assigning attribute data. Saving it to the datasource...";
+                    await HubContext
+                            .Clients
+                            .All
+                            .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 }
 
                 Repos.SaveChanges();
+                broadcastingMessage = $"Successfully assigned Network data";
+                await HubContext
+                            .Clients
+                            .All
+                            .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 Logger.LogInformation("Attributes & attribute data have been created");
                 return Ok("Successfully assigned network data");
             }
             catch (Exception e)
             {
+                broadcastingMessage = "An error has occured";
                 return StatusCode(500, e);
             }
         }

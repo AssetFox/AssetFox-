@@ -14,8 +14,8 @@ export default {
             const statusHub = new Vue();
             Vue.prototype.$statusHub = statusHub;
 
-            connection.on('BroadcastAssignDataStatus', (status) => {
-                statusHub.$emit('assignedData-status-event', {status});
+            connection.on('BroadcastAssignDataStatus', (status, percentage) => {
+                statusHub.$emit('assignedData-status-event', {status, percentage});
             });
 
         let startedPromise = null;

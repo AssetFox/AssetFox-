@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
@@ -7,6 +8,8 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
         public Attribute Attribute { get; }
 
         public abstract IEnumerable<IAttributeDatum> GetData<T>();
+
+        public abstract event EventHandler<InformationEventArgs> Information;
 
         public AttributeConnection(Attribute attribute)
         {

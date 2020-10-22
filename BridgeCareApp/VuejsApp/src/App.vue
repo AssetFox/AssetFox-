@@ -110,7 +110,7 @@
             v-if="isAdmin"
           >
             <v-icon style="padding-right: 12px">fas fa-lock</v-icon>
-            Security {{testVal}}
+            Security
           </v-btn>
         </v-toolbar-title>
         <v-toolbar-title class="white--text" v-if="hasSelectedScenario">
@@ -230,7 +230,6 @@ export default class AppComponent extends Vue {
   selectedScenario: Scenario = clone(emptyScenario);
   hasSelectedScenario: boolean = false;
   selectedScenarioHasStatus: boolean = false;
-  testVal: string = 'from comp';
 
   get container() {
     const container: any = {};
@@ -398,12 +397,6 @@ export default class AppComponent extends Vue {
     // Generate a polling session id, and begin polling once per 5 seconds
     this.generatePollingSessionIdAction();
     window.setInterval(this.pollEventsAction, 5000);
-
-    // this.$socket.start({
-    //     log: false // Active only in development for debugging.
-    // })
-    this.$statusHub.$on('user-added-event', this.testM);
-    this.getRealTimeDataAction();
   }
 
   onAlertResult(submit: boolean) {
@@ -414,10 +407,6 @@ export default class AppComponent extends Vue {
       this.onNavigate(this.route);
     }
   }
-
-testM(data: any){
-this.testVal = data;
-}
   /**
    * Sets up a recurring attempt at refreshing user tokens, and fetches network and attribute data
    */
@@ -473,11 +462,6 @@ this.testVal = data;
         window.open(process.env.VUE_APP_URL + '/hangfire/');
       }
     });
-  }
-
-  beforeDestroy() {
-    //clean SignalR event
-    this.$statusHub.$off('user-added-event', this.testVal);
   }
 }
 </script>

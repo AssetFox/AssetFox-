@@ -4,7 +4,7 @@
             <v-card elevation=5>
                 <v-flex xs10>
                     <v-layout>
-                        <div>
+                        <div style="min-width: 1000px;">
                             <v-data-table :headers="rollupGridHeader"
                                           :items="adminRollup"
                                           :items-per-page="5"
@@ -13,8 +13,17 @@
                                 <template slot="items" slot-scope="props">
                                     <td>{{ props.item.name }}</td>
                                     <td>{{ props.item.createdDate }}</td>
-                                    <td>{{ props.item.lastModifiedDate }}</td>
-                                    <td>{{ assignDataStatusUpdate }}</td>
+                                    <td>
+                                        {{ assignDataStatusUpdate }}
+                                        <v-progress-linear
+                                        v-model="percentage"
+                                        color="light-green darken-1"
+                                        height="25"
+                                        striped
+                                        >
+                                        <strong>{{ Math.ceil(percentage) }}%</strong>
+                                        </v-progress-linear>
+                                        </td>
                                     <td>
                                         <v-layout row wrap>
                                             <v-flex>
@@ -319,7 +328,6 @@
         rollupGridHeader: object[] = [
             {text: 'Network name', align: 'left', sortable: false, value: 'rollupName'},
             {text: 'Date Created', sortable: false, value: 'createdDate'},
-            {text: 'Date Last Modified', sortable: false, value: 'lastModifiedDate'},
             {text: 'Status', sortable: false, value: 'assignmentStatus'},
             {text: 'Assign Data', sortable: false, value: 'actions'},
             {text: 'Aggregate Data', sortable: false, value: 'actions'}
@@ -341,6 +349,7 @@
         rules: InputValidationRules = {...rules};
         newNetworkId: string = '';
         assignDataStatusUpdate: string = '';
+        percentage = 0;
 
         @Watch('stateScenarios')
         onStateScenariosChanged() {
@@ -524,6 +533,7 @@
 
         getStatusUpdate(data: any){
             this.assignDataStatusUpdate = data.status;
+            this.percentage = data.percentage;
         }
 
         onSubmitAssignDataDecision(response: boolean){

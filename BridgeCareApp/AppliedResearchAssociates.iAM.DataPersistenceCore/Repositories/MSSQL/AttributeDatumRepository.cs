@@ -15,13 +15,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public AttributeDatumRepository(IAMContext context) : base(context) { }
 
-        public int UpdateAssignedDataByAttributeId(Guid networkId, IEnumerable<Guid> attributeIds, IEnumerable<MaintainableAsset> maintainableAssets)
+        public int UpdateMaintainableAssetAssignedData(IEnumerable<MaintainableAsset> maintainableAssets)
         {
-            if (Context.Networks.Any(_ => _.Id == networkId))
-            {
-                throw new RowNotInTableException($"No network found having id {networkId}");
-            }
-            return 1;
             //var filteredAttributeIds = metaDataAttributeIds.Where(networkAttributeIds.Contains);
 
             //var assignedData = Context.MaintainableAssets
@@ -38,6 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             //assignedData.ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
             //Context.SaveChanges();
             //return assignedData.Count();
+            return 1;
         }
     }
 }

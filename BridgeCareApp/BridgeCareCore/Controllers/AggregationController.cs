@@ -57,7 +57,7 @@ namespace BridgeCareCore.Controllers
                 var attributeMetaData = _attributeMetaDataRepo.All(filePath);
 
                 // Create attributes from the meta data.
-                var configurationAttributes = attributeMetaData.Select(_ => AttributeFactory.Create(_));
+                var configurationAttributes = attributeMetaData.Select(_ => AttributeFactory.Create(_)).ToList();
 
                 // Create list of attributes we are allowed to update with assigned data.
                 var networkAttributeIds = _attributeRepo.GetAttributesFromNetwork(networkId).Select(_ => _.Id);
@@ -70,14 +70,15 @@ namespace BridgeCareCore.Controllers
                     attributeData.AddRange(AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
                 }
 
+                var attributeIdsToBeUpdatedWithAssignedData = configurationAttributes.Select(_ => _.Id).Intersect(networkAttributeIds).Distinct().ToList();
+
                 foreach (var maintainableAsset in maintainableAssets)
                 {
+                    maintainableAsset.AssignedData.RemoveAll(_ => attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
                     maintainableAsset.AssignAttributeData(attributeData);
                 }
 
-                var attributeIdsToBeUpdatedWithAssignedData = configurationAttributes.Select(_ => _.Id).Union(networkAttributeIds).Distinct();
-
-                var updatedRecordsCount = _attributeDatumRepo.UpdateAssignedDataByAttributeId(networkId, attributeIdsToBeUpdatedWithAssignedData, maintainableAssets);
+                var updatedRecordsCount = _attributeDatumRepo.UpdateMaintainableAssetAssignedData(maintainableAssets);
 
                 _logger.LogInformation("Attribute data have been assigned to maintenance assets.");
                 return Ok($"Updated {updatedRecordsCount} records.");

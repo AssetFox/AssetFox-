@@ -7,6 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeDatumRepository
     {
-        int UpdateAssignedDataByAttributeId(Guid network, IEnumerable<Guid> assignedDataAttributeIdsToClear, IEnumerable<MaintainableAsset> maintainableAssets);
+        int UpdateMaintainableAssetAssignedData(IEnumerable<MaintainableAsset> maintainableAssets);
     }
 }

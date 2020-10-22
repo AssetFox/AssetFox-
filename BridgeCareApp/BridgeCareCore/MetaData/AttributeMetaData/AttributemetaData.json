@@ -1,6 +1,7 @@
 {
   "AttributeMetaData": [
     {
+      "id": "b4f70926-2dd9-4adc-be78-115412ad64e8",
       "name": "ADT TOTAL",
       "defaultValue": 10,
       "maximum": 100,
@@ -15,17 +16,7 @@
       "isAscending": true
     },
     {
-      "name": "MATERIAL TYPE",
-      "defaultValue": "",
-      "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",
-      "dataSource": "MSSQL",
-      "type": "TEXT",
-      "location": "section",
-      "command": "SELECT concat(BRKEY, Bridge_ID) AS UniqueIdentifier, CAST(INSPDATE AS DATETIME) AS DateTime, Material_Type AS Value FROM dbo.PennDot_Report_A",
-      "aggregationRule": "PREDOMINANT",
-      "isCalculated": false
-    },
-    {
+      "id": "6137cb8d-2c2d-4955-b21c-20807f884255",
       "name": "COUNTY",
       "defaultValue": "",
       "connectionString": "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2",

@@ -43,11 +43,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 throw new NullReferenceException("Cannot map null AttributeDatum domain to AttributeDatum entity");
             }
 
-            if (domain is DataMiner.Attributes.AttributeDatum<double> attributeDatumNumericDomain)
+            if (domain is AttributeDatum<double> attributeDatumNumericDomain)
             {
-                return new Repositories.LiteDb.Entities.AttributeDatumEntity<double>
+                return new AttributeDatumEntity<double>
                 {
-                    Id = Guid.NewGuid(),
                     AttributeEntity = domain.Attribute.ToEntity(),
                     LocationEntity = domain.Location.ToEntity(),
                     Discriminator = "NumericAttributeDatum",
@@ -56,11 +55,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 };
             }
 
-            if (domain is DataMiner.Attributes.AttributeDatum<string> attributeDatumTextDomain)
+            if (domain is AttributeDatum<string> attributeDatumTextDomain)
             {
-                return new Repositories.LiteDb.Entities.AttributeDatumEntity<string>
+                return new AttributeDatumEntity<string>
                 {
-                    Id = Guid.NewGuid(),
                     AttributeEntity = domain.Attribute.ToEntity(),
                     LocationEntity = domain.Location.ToEntity(),
                     Discriminator = "TextAttributeDatum",

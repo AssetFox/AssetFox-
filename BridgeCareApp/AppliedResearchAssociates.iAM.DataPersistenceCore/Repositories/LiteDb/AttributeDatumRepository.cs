@@ -23,24 +23,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
                 .DistinctBy(_ => _.Id);
 
         // Removes assigned data on maintainable assets in the given network that have attribute data with attributeIds in the provided list.
-        public int UpdateAssignedDataByAttributeId(Guid networkId, IEnumerable<Guid> attributeIds, IEnumerable<MaintainableAsset> maintainableAssets)
+        public int UpdateMaintainableAssetAssignedData(IEnumerable<MaintainableAsset> assignedMaintainableAssets)
         {
-            var maintainableAssetCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
-            var maintainableAssetEntities = maintainableAssets.Select(_ => _.ToEntity());
-
-            var attributeDatumEntitiesToUpdate = maintainableAssetEntities.SelectMany(_ => _.AttributeDatumEntities)
-                    .Where(_ => attributeIds.Contains(_.AttributeEntity.Id)).ToList();
-
-            return maintainableAssetCollection
-                .UpdateMany(_ =>
-                new MaintainableAssetEntity()
-                {
-                    AttributeDatumEntities = attributeDatumEntitiesToUpdate,
-                    Id = _.Id,
-                    LocationEntity = _.LocationEntity,
-                    NetworkId = _.NetworkId
-                },
-                _ => _.NetworkId == networkId);
+            var maintainableAssetEntityCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
+            return maintainableAssetEntityCollection.Update(assignedMaintainableAssets.Select(_ => _.ToEntity()));
         }
     }
 }

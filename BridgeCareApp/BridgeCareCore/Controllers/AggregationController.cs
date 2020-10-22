@@ -70,7 +70,7 @@ namespace BridgeCareCore.Controllers
                 await HubContext
                     .Clients
                     .All
-                    .SendAsync("BroadcastMessage", "from controller");
+                    .SendAsync("BroadcastAssignDataStatus", "from controller");
 
                 var network = NetworkRepo.Get(networkId);
 

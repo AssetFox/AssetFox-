@@ -402,6 +402,7 @@
                 //this.getMongoRollupsAction({});
                 this.getAllNetworksAction();
             }
+            this.$statusHub.$on('assignedData-status-event', this.getStatusUpdate)
         }
 
         onUpdateScenarioList() {
@@ -511,7 +512,6 @@
         }
 
         onShowAssignDataAlert(networkId: string){
-            this.$statusHub.$on('user-added-event', this.getStatusUpdate)
             this.newNetworkId = networkId;
             this.alertBeforeAssignData = {
                 showDialog: true,

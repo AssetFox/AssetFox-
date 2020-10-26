@@ -4,7 +4,7 @@
             <v-card elevation=5>
                 <v-flex xs10>
                     <v-layout>
-                        <div style="min-width: 1000px;">
+                        <div class="network-min-width">
                             <v-data-table :headers="rollupGridHeader"
                                           :items="adminRollup"
                                           :items-per-page="5"
@@ -13,7 +13,7 @@
                                 <template slot="items" slot-scope="props">
                                     <td>{{ props.item.name }}</td>
                                     <td>{{ props.item.createdDate }}</td>
-                                    <td>
+                                    <td class="status-min-width">
                                         {{ assignDataStatusUpdate }}
                                         <v-progress-linear
                                         v-model="percentage"
@@ -34,7 +34,7 @@
                                             </v-flex>
                                         </v-layout>
                                     </td>
-                                    <td>
+                                    <!-- <td>
                                         <v-layout row wrap>
                                             <v-flex>
                                                 <v-btn @click="onShowRunRollupAlert(props.item)" class="green--text darken-2"
@@ -43,7 +43,7 @@
                                                 </v-btn>
                                             </v-flex>
                                         </v-layout>
-                                    </td>
+                                    </td> -->
                                 </template>
                             </v-data-table>
                         </div>
@@ -329,8 +329,7 @@
             {text: 'Network name', align: 'left', sortable: false, value: 'rollupName'},
             {text: 'Date Created', sortable: false, value: 'createdDate'},
             {text: 'Status', sortable: false, value: 'assignmentStatus'},
-            {text: 'Assign Data', sortable: false, value: 'actions'},
-            {text: 'Aggregate Data', sortable: false, value: 'actions'}
+            {text: 'Assign Data', sortable: false, value: 'actions'}
         ];
         scenarios: Scenario[] = [];
         userScenarios: Scenario[] = [];
@@ -662,5 +661,11 @@
 <style>
     .pad-button {
         padding-top: 33px;
+    }
+    .network-min-width {
+        min-width: 1000px;
+    }
+    .status-min-width {
+        min-width: 300px;
     }
 </style>

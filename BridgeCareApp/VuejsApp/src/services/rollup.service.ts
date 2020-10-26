@@ -5,6 +5,7 @@ import {any, propEq} from 'ramda';
 import {Rollup} from '@/shared/models/iAM/rollup';
 import { Network } from '@/shared/models/iAM/network';
 import { NewNetwork } from '@/shared/models/iAM/newNetwork';
+import { http2XX } from '@/shared/utils/http-utils';
 
 export default class RollupService {
     static getMongoRollups(): AxiosPromise {
@@ -68,7 +69,18 @@ export default class RollupService {
     }
 
     static assignNetworkData(networkId: string) : AxiosPromise {
-        return bridgecareCoreAxiosInstance.post(`api/Aggregation/AssignNetworkData/${networkId}`);
+        return new Promise<AxiosResponse<string>>((resolve) => {
+            bridgecareCoreAxiosInstance.post(`api/Aggregation/AssignNetworkData/${networkId}`)
+            .then((response: AxiosResponse<string>) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    bridgecareCoreAxiosInstance.post(`api/Aggregation/AggregateNetworkData/${networkId}`)
+                    .catch((error: any) => resolve(error.response));
+                }
+            })
+            .catch((error: any) => {
+                return resolve(error.response);
+            });
+        });
     }
 
     static rollupNetwork(selectedNetwork: Rollup): AxiosPromise {

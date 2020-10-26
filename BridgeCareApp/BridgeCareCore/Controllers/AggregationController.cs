@@ -144,13 +144,17 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 broadcastingMessage = "An error has occured";
+                await HubContext
+                            .Clients
+                            .All
+                            .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 return StatusCode(500, e);
             }
         }
 
         [HttpPost]
-        [Route("AggregateNetworkData")]
-        public async Task<IActionResult> AggregateNetworkData([FromBody] Guid networkId)
+        [Route("AggregateNetworkData/{networkId}")]
+        public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
             try
             {

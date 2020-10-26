@@ -17,6 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             {
                 throw new FileNotFoundException($"{filePath} does not exist");
             }
+
             var rawAttributes = File.ReadAllText(filePath);
             var attributeMetaData = JsonConvert
                 .DeserializeAnonymousType(rawAttributes, new { AttributeMetaData = default(List<AttributeMetaDatum>) })
@@ -40,6 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
                 using var writer = new StreamWriter(filePath);
                 writer.Write(JsonConvert.SerializeObject(new { AttributeMetaData = attributeMetaData }));
             }
+
             return attributeMetaData;
         }
     }

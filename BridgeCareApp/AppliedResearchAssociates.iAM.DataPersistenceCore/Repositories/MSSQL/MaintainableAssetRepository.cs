@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -12,21 +12,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public MaintainableAssetRepository(IAMContext context) : base(context) { }
 
-        public IEnumerable<MaintainableAsset> GetAllInNetworkWithAssignedData(Guid networkId)
+        public IEnumerable<MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId)
         {
             if (!Context.Networks.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssets = Context.MaintainableAssets
+            var maintainableAssets = Context.MaintainableAssets.Include(_ => _.Location)
                 .Include(_ => _.AttributeData)
                 .ThenInclude(_ => _.Attribute)
-                .Where(_ => _.Id == networkId);
+                .Include(_ => _.AttributeData)
+                .ThenInclude(_ => _.Location)
+                .Where(_ => _.NetworkId == networkId)
+                .ToList();
 
             if (!maintainableAssets.Any())
             {
-                throw new RowNotInTableException($"Could not find maintainable assets with assigned data");
+                throw new RowNotInTableException($"The network has no maintainable assets for rollup");
             }
 
             return maintainableAssets.Select(_ => _.ToDomain());

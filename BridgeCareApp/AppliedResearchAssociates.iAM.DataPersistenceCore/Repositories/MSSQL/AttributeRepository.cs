@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
-using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
@@ -14,36 +10,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AttributeRepository : MSSQLRepository, IAttributeRepository
     {
-        private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
+        private readonly IMaintainableAssetRepository _maintainableAssetRepo;
 
-        public AttributeRepository(IAMContext context, IAttributeMetaDataRepository attributeMetaDataRepo) :
+        public AttributeRepository(IMaintainableAssetRepository maintainableAssetRepo,
+            IAMContext context) :
             base(context) =>
-            _attributeMetaDataRepo =
-                attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
+            _maintainableAssetRepo =
+                maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
 
         public Dictionary<Guid, Attribute> AttributeDictionary { get; set; }
-
-        //public Dictionary<Guid, Attribute> GetAttributeDictionary(string filePath)
-        //{
-        //    if (AttributeDictionary == null || !AttributeDictionary.Any())
-        //    {
-        //        AttributeDictionary = new Dictionary<Guid, Attribute>();
-
-        //        var attributeMetaData = _attributeMetaDataRepo.All(filePath);
-        //        if (attributeMetaData.Any())
-        //        {
-        //            foreach (var attributeMetaDatum in attributeMetaData)
-        //            {
-        //                if (!AttributeDictionary.ContainsKey(attributeMetaDatum.Id))
-        //                {
-        //                    AttributeDictionary.Add(attributeMetaDatum.Id, AttributeFactory.Create(attributeMetaDatum));
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    return AttributeDictionary;
-        //}
 
         public void CreateMissingAttributes(List<Attribute> attributes)
         {
@@ -63,10 +38,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"Could not find network with id {networkId}");
             }
 
-            var maintainableAssets = Context.MaintainableAssets
-                .Include(_ => _.AttributeData)
-                .ThenInclude(_ => _.Attribute)
-                .Where(_ => _.NetworkId == networkId);
+            var maintainableAssets =
+                _maintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId).ToList();
 
             if (!maintainableAssets.Any())
             {
@@ -74,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return maintainableAssets.SelectMany(_ =>
-                _.AttributeData.Select(__ => __.Attribute).DistinctBy(__ => __.Id).Select(__ => __.ToDomain()));
+                _.AssignedData.Select(__ => __.Attribute).DistinctBy(__ => __.Id));
         }
     }
 }

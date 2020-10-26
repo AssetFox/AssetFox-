@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -12,11 +13,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public AggregatedResultRepository(IAMContext context) : base(context) { }
 
-        public int CreateAggregatedResults<T>(List<AggregatedResult<T>> data)
+        public int CreateAggregatedResults(List<IAggregatedResult> aggregatedResults)
         {
-            var entities = data.Select(_ => _.ToEntity());
-            Context.AggregatedResults.AddRange();
+            DeleteAggregatedResults(aggregatedResults.First().MaintainableAsset.NetworkId);
+
+            var entities = aggregatedResults.SelectMany(_ => _.ToEntity()).ToList();
+
+            Context.BulkInsert(entities);
             Context.SaveChanges();
+
             return entities.Count();
         }
 
@@ -36,30 +41,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 : network.MaintainableAssets.SelectMany(__ => __.AggregatedResults.ToDomain());
         }
 
-        public int DeleteAggregatedResults(Guid networkId, List<Guid> metaDataAttributeIds, List<Guid> networkAttributeIds)
+        private void DeleteAggregatedResults(Guid networkId)
         {
             if (!Context.Networks.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var filteredAttributeIds = metaDataAttributeIds.Where(networkAttributeIds.Contains);
-
-            var aggregatedResults = Context.MaintainableAssets
-                .Include(_ => _.AggregatedResults)
-                .Where(_ => _.NetworkId == networkId)
-                .SelectMany(_ => _.AggregatedResults.Where(__ => filteredAttributeIds.Contains(__.AttributeId)))
-                .ToList();
-
-            if (!aggregatedResults.Any())
-            {
-                return 0;
-            }
-
-            aggregatedResults.ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-            Context.SaveChanges();
-
-            return aggregatedResults.Count();
+            Context.Database.ExecuteSqlRaw(
+                $"DELETE FROM dbo.AggregatedResults WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAssets WHERE NetworkId = '{networkId}')");
         }
     }
 }

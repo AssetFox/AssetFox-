@@ -6,8 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAggregatedResultRepository
     {
-        int CreateAggregatedResults<T>(List<AggregatedResult<T>> aggregatedResults);
-        int DeleteAggregatedResults(Guid networkId, List<Guid> metaDataAttributeIds, List<Guid> networkAttributeIds);
+        int CreateAggregatedResults(List<IAggregatedResult> aggregatedResults);
         IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId);
     }
 }

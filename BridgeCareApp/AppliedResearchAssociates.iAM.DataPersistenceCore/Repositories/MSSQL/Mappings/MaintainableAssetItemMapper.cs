@@ -3,7 +3,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
     public static class MaintainableAssetItemMapper
     {
@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
                         .Where(e => e.Discriminator == "NumericAttributeDatum")
                         .Select(e => e.ToDomain());
 
-                    maintainableAsset.AssignAttributeData(numericAttributeData);
+                    maintainableAsset.AssignAttributeDataFromDataSource(numericAttributeData);
                 }
 
                 if (entity.AttributeData.Any(a => a.Discriminator == "TextAttributeDatum"))
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
                         .Where(e => e.Discriminator == "TextAttributeDatum")
                         .Select(e => e.ToDomain());
 
-                    maintainableAsset.AssignAttributeData(textAttributeData);
+                    maintainableAsset.AssignAttributeDataFromDataSource(textAttributeData);
                 }
             }
 
@@ -56,6 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.MSSQL.Mappings
 
             return new MaintainableAssetEntity
             {
+                Id = domain.Id,
                 NetworkId = networkId,
                 UniqueIdentifier = locationEntity.UniqueIdentifier,
                 LocationId = locationEntity.Id,

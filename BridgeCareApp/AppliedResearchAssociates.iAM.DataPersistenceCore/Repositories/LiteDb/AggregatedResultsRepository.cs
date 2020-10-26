@@ -11,13 +11,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
     {
         public AggregatedResultsRepository(ILiteDbContext context) : base(context) { }
 
-        public int CreateAggregatedResults<T>(List<AggregatedResult<T>> domainAggregatedResults)
+        public int CreateAggregatedResults(List<IAggregatedResult> domainAggregatedResults)
         {
+            DeleteAggregatedResults(domainAggregatedResults.First().MaintainableAsset.NetworkId);
+
             var aggregatedResultCollection = Context.Database.GetCollection<IAggregatedResultEntity>("AGGREGATED_RESULTS");
             return aggregatedResultCollection.InsertBulk(domainAggregatedResults.Select(_ => _.ToEntity()));
         }
 
-        public int DeleteAggregatedResults(Guid networkId, List<Guid> metaDataAttributeIds, List<Guid> networkAttributeIds)
+        private void DeleteAggregatedResults(Guid networkId)
         {
             var aggregatedResultsCollection = Context.Database.GetCollection<IAggregatedResultEntity>("AGGREGATED_RESULTS");
 
@@ -31,7 +33,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
                 aggregatedResultsCollection.Delete(item.Id);
             }
             Context.Database.Commit();
-            return items.Count();
         }
 
         public IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId)

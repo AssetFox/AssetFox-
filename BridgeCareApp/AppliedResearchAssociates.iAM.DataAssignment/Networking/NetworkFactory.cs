@@ -21,9 +21,8 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
         {
             var networkId = Guid.NewGuid();
             var maintenanceAssets = (from attributeDatum in attributeData
-                                     let maintenanceAsset = new MaintainableAsset(Guid.NewGuid(), networkId, attributeDatum.Location)
-                                     select maintenanceAsset)
-                    .ToList();
+                    let maintenanceAsset = new MaintainableAsset(Guid.NewGuid(), networkId, attributeDatum.Location)
+                    select maintenanceAsset).ToList();
             return new Network(maintenanceAssets, networkId);
         }
     }

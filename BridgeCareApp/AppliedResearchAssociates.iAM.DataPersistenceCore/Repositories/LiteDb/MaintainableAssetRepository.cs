@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
     {
         public MaintainableAssetRepository(ILiteDbContext context) : base(context) { }
 
-        public IEnumerable<MaintainableAsset> GetAllInNetworkWithAssignedData(Guid networkId) =>
+        public IEnumerable<MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId) =>
             Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS")
                 .Include(_ => _.LocationEntity)
                 .Find(_ => _.NetworkId == networkId)

@@ -34,7 +34,7 @@ const actions = {
     },
 
     async createNetwork({dispatch, commit}: any, payload: any){
-        return await NetworkService.createNetwork(payload.createNetworkData)
+        return await NetworkService.createNetwork(payload.networkName)
             .then((response: AxiosResponse<NewNetwork>) => {
                 if (hasValue(response, 'data')) {
                     const network: NewNetwork = response.data;

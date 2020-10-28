@@ -55,8 +55,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("CreateNetwork")]
-        public async Task<IActionResult> CreateNetwork([FromBody] string name)
+        [Route("CreateNetwork/{networkName}")]
+        //[Consumes("application/x-www-form-urlencoded")]
+        public async Task<IActionResult> CreateNetwork(string networkName)
         {
             try
             {
@@ -69,7 +70,7 @@ namespace BridgeCareCore.Controllers
                 var attributeData = AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute));
                 // create a network domain from the attribute data
                 var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(attributeData);
-                network.Name = name;
+                network.Name = networkName;
                 // add the network to our data source
                 var newlyGeneratedId = NetworkRepo.Add(network);
                 // add the maintainable assets to our data source
@@ -83,6 +84,10 @@ namespace BridgeCareCore.Controllers
             {
                 return StatusCode(500, e);
             }
+        }
+        public class NetworkName
+        {
+            internal string name { get; set; }
         }
     }
 }

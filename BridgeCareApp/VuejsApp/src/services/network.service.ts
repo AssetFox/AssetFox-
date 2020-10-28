@@ -19,14 +19,9 @@ export default class NetworkService {
         });
     }
 
-    static createNetwork(createScenarioData: NetworkCreationData): AxiosPromise {
-        var name = JSON.stringify(createScenarioData.name);
+    static createNetwork(networkName: any): AxiosPromise {
         return new Promise<AxiosResponse<NewNetwork>>((resolve) => {
-            bridgecareCoreAxiosInstance.request({
-                method: 'post',
-                url: 'api/Network/CreateNetwork',
-                data: name
-            }).then((response: AxiosResponse<NewNetwork>) => {
+            bridgecareCoreAxiosInstance.post(`api/Network/CreateNetwork/${networkName.name}`).then((response: AxiosResponse<NewNetwork>) => {
                     if (hasValue(response)) {
                         return resolve(response);
                     }

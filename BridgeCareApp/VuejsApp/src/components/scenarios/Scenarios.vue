@@ -48,7 +48,7 @@
                             </v-data-table>
                         </div>
                         <div class="pad-button" v-if="isAdmin">
-                            <v-btn @click="onLoadNetworks()" color="green darken-2 white--text" round>Load networks
+                            <v-btn @click="onCreateNetwork()" color="green darken-2 white--text" round>Create network
                             </v-btn>
                         </div>
                     </v-layout>
@@ -245,6 +245,7 @@
         <Alert :dialogData="alertBeforeAssignData" @submit="onSubmitAssignDataDecision" />
 
         <CreateScenarioDialog :showDialog="showCreateScenarioDialog" @submit="onSubmitNewScenario"/>
+        <CreateNetworkDialog :showDialog="showCreateNetworkDialog" @submit="onSubmitNewNetwork"/>
 
         <ReportsDownloaderDialog :dialogData="reportsDownloaderDialogData"/>
 
@@ -277,9 +278,11 @@
     import {emptyRollup, Rollup} from '@/shared/models/iAM/rollup';
     import {getUserName} from '@/shared/utils/get-user-info';
     import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
+    import CreateNetworkDialog from '@/components/scenarios/scenarios-dialogs/CreateNetworkDialog.vue';
+    import { NetworkCreationData } from '@/shared/models/modals/network-creation-data';
 
     @Component({
-        components: {Alert, ReportsDownloaderDialog, CreateScenarioDialog, ShareScenarioDialog}
+        components: {Alert, ReportsDownloaderDialog, CreateScenarioDialog, CreateNetworkDialog, ShareScenarioDialog}
     })
     export default class Scenarios extends Vue {
         @State(state => state.scenario.scenarios) stateScenarios: Scenario[];
@@ -290,7 +293,7 @@
         //@State(state => state.rollup.rollups) rollups: Rollup[];
         @State(state => state.authentication.isAdmin) isAdmin: boolean;
         @State(state => state.authentication.isCWOPA) isCWOPA: boolean;
-        @State(state => state.rollup.newNetworks) newNetworks: NewNetwork[];
+        @State(state => state.network.newNetworks) newNetworks: NewNetwork[];
         @Action('getMongoScenarios') getMongoScenariosAction: any;
         @Action('getLegacyScenarios') getLegacyScenariosAction: any;
         @Action('runSimulation') runSimulationAction: any;
@@ -305,7 +308,9 @@
         @Action('getLegacyNetworks') getLegacyNetworksAction: any;
         @Action('cloneScenario') cloneScenarioAction: any;
         @Action('deleteDuplicateMongoScenario') deleteDuplicateMongoScenarioAction: any;
-        @Action('getAllNetworks') getAllNetworksAction: any;
+        //@Action('getAllNetworks') getAllNetworksAction: any;
+        @Action('createNetwork') createNetworkAction: any;
+        @Action('getNetworks') getNetworksAction: any;
 
         alertData: AlertData = clone(emptyAlertData);
         alertBeforeDelete: AlertData = clone(emptyAlertData);
@@ -314,6 +319,7 @@
         reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(emptyReportsDownloadDialogData);
         showCreateScenarioDialog: boolean = false;
         showShareScenarioDialog: boolean = false;
+        showCreateNetworkDialog: boolean = false;
         scenarioGridHeaders: object[] = [
             {text: 'Scenario Name', align: 'left', sortable: true, value: 'simulationName'},
             {text: 'Creator', sortable: false, value: 'creator'},
@@ -397,7 +403,7 @@
             if (this.authenticated) {
                 this.getMongoScenariosAction({userId: this.userId});
                 //this.getMongoRollupsAction({});
-                this.getAllNetworksAction();
+                this.getNetworksAction();
             }
         }
 
@@ -408,9 +414,9 @@
             if (this.authenticated) {
                 this.getMongoScenariosAction({userId: this.userId});
                 //this.getMongoRollupsAction({});
-                this.getAllNetworksAction();
+                this.getNetworksAction();
             }
-            this.$statusHub.$on('assignedData-status-event', this.getStatusUpdate)
+            this.$statusHub.$on('assignedData-status-event', this.getStatusUpdate);
         }
 
         onUpdateScenarioList() {
@@ -423,6 +429,10 @@
 
         onLoadNetworks() {
             this.getLegacyNetworksAction({networks: this.adminRollup});
+        }
+
+        onCreateNetwork(){
+            this.showCreateNetworkDialog = true;
         }
 
         /**
@@ -576,7 +586,7 @@
         assignNetworkData(){
             this.assignNetworkDataAction({
                 networkId: this.newNetworkId
-            })
+            });
         }
 
         rollupNetwork() {
@@ -642,6 +652,16 @@
             }
         }
 
+        onSubmitNewNetwork(createNetworkData: NetworkCreationData){
+            this.showCreateNetworkDialog = false;
+
+            if(hasValue(createNetworkData)){
+                this.createNetworkAction({
+                    createNetworkData: {createNetworkData}
+                });
+            }
+        }
+
         onSubmitSharedScenario(scenarioUsers: ScenarioUser[]) {
             this.showShareScenarioDialog = false;
 
@@ -654,6 +674,10 @@
             }
 
             this.sharingScenario = clone(emptyScenario);
+        }
+
+        beforeDestroy () {
+            this.$statusHub.$off('score-changed', this.onScoreChanged);
         }
     }
 </script>

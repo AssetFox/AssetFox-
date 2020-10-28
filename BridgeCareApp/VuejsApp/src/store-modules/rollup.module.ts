@@ -10,8 +10,8 @@ import { Network } from '@/shared/models/iAM/network';
 import { NewNetwork } from '@/shared/models/iAM/newNetwork';
 
 const state = {
-    rollups: [] as Rollup[],
-    newNetworks: [] as NewNetwork[]
+    rollups: [] as Rollup[]
+    //newNetworks: [] as NewNetwork[]
 };
 
 const mutations = {
@@ -28,10 +28,10 @@ const mutations = {
             rollups[index] = clone(updatedRollup);
             state.rollups = rollups;
         }
-    },
-    newNetworksMutator(state: any, network: NewNetwork[]){
-        state.newNetworks = clone(network);
     }
+    // newNetworksMutator(state: any, network: NewNetwork[]){
+    //     state.newNetworks = clone(network);
+    // }
 };
 
 const actions = {
@@ -61,13 +61,13 @@ const actions = {
                 }
             });
     },
-    async getAllNetworks({commit}: any){
-        return await RollupService.getAllNetworks()
-        .then((response: AxiosResponse<NewNetwork[]>) => {
-            const networks: NewNetwork[] = response.data;
-            commit('newNetworksMutator', networks);
-        });
-    },
+    // async getAllNetworks({commit}: any){
+    //     return await RollupService.getAllNetworks()
+    //     .then((response: AxiosResponse<NewNetwork[]>) => {
+    //         const networks: NewNetwork[] = response.data;
+    //         commit('newNetworksMutator', networks);
+    //     });
+    // },
     async assignNetworkData({dispatch, commit}: any, payload: any){
         await RollupService.assignNetworkData(payload.networkId)
         .then((response: AxiosResponse<any>) => {

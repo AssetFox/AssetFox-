@@ -54,19 +54,19 @@ export default class RollupService {
         });
     }
 
-    static getAllNetworks() : AxiosPromise {
-        return new Promise<AxiosResponse<NewNetwork[]>>((resolve) => {
-            bridgecareCoreAxiosInstance.get('api/Network/GetAllNetworks')
-            .then((response: AxiosResponse<NewNetwork[]>) => {
-                if(hasValue(response)){
-                    return resolve(response);
-                }
-            })
-            .catch((error: any) => {
-                return resolve(error.response);
-            });
-        });
-    }
+    // static getAllNetworks() : AxiosPromise {
+    //     return new Promise<AxiosResponse<NewNetwork[]>>((resolve) => {
+    //         bridgecareCoreAxiosInstance.get('api/Network/GetAllNetworks')
+    //         .then((response: AxiosResponse<NewNetwork[]>) => {
+    //             if(hasValue(response)){
+    //                 return resolve(response);
+    //             }
+    //         })
+    //         .catch((error: any) => {
+    //             return resolve(error.response);
+    //         });
+    //     });
+    // }
 
     static assignNetworkData(networkId: string) : AxiosPromise {
         return new Promise<AxiosResponse<string>>((resolve) => {

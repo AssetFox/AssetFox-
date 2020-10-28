@@ -143,7 +143,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                broadcastingMessage = "An error has occured";
+                broadcastingMessage = "An error has occured while assigning data";
                 await HubContext
                             .Clients
                             .All
@@ -156,12 +156,30 @@ namespace BridgeCareCore.Controllers
         [Route("AggregateNetworkData/{networkId}")]
         public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
+            var broadcastingMessage = "Starting data aggregation";
+            var percentage = 0.0;
             try
             {
-                var maintainableAssets = MaintainableAssetRepo.Find(networkId);
+                await HubContext
+                    .Clients
+                    .All
+                    .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
 
+                var maintainableAssets = MaintainableAssetRepo.Find(networkId).ToList();
+                var totalAssests = (double)maintainableAssets.Count;
+                var i = 0.0;
                 foreach (var maintainableAsset in maintainableAssets)
                 {
+                    if (i % 500 == 0)
+                    {
+                        broadcastingMessage = $"Aggregating data";
+                        percentage = Math.Round((i / totalAssests) * 100, 1);
+                        _ = HubContext
+                       .Clients
+                       .All
+                       .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
+                    }
+                    i++;
                     if (maintainableAsset.AssignedData.Any(a => a.Attribute.DataType == "NUMERIC"))
                     {
                         var aggregatedNumericResults = maintainableAsset.AssignedData
@@ -183,12 +201,30 @@ namespace BridgeCareCore.Controllers
                     }
                 }
 
+                broadcastingMessage = $"Finished aggregation. Saving it to the datasource...";
+                await HubContext
+                        .Clients
+                        .All
+                        .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
+
                 Repos.SaveChanges();
+
+                broadcastingMessage = $"Successfully aggregated Network data";
+                await HubContext
+                            .Clients
+                            .All
+                            .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
+
                 Logger.LogInformation("Attributes & attribute data have been created");
                 return Ok("Successfully aggregated network data");
             }
             catch (Exception e)
             {
+                broadcastingMessage = "An error has occured while aggregating data";
+                await HubContext
+                            .Clients
+                            .All
+                            .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 return StatusCode(500, e);
             }
         }

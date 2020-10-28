@@ -38,18 +38,16 @@ namespace BridgeCareCore.Controllers
                 // get attribute meta data from json file
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
                     "MetaData//NetworkDefinitionRules", "networkDefinitionRules.json");
-                var attributeMetaDatum = _attributeMetaDataFileRepo.All(filePath);
+                var attribute = _attributeMetaDataFileRepo.GetAllAttributes(filePath).FirstOrDefault();
 
-                if(attributeMetaDatum == null || !attributeMetaDatum.Any())
+                if(attribute == null)
                 {
                     throw new InvalidOperationException("No attribute meta data found");
                 }
 
                 // create network domain from attribute data
                 var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
-                    attributeMetaDatum.Select(AttributeFactory.Create)
-                        .Select(AttributeConnectionBuilder.Build)
-                        .SelectMany(AttributeDataBuilder.GetData));
+                    AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
                 network.Name = name;
 
                 // insert network domain data into data source

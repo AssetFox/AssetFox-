@@ -32,13 +32,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var network = Context.Networks.Include(_ => _.MaintainableAssets)
-                .ThenInclude(_ => _.AggregatedResults)
-                .Single(_ => _.Id == networkId);
+            var maintainableAssets = Context.MaintainableAssets
+                .Include(_ => _.AggregatedResults)
+                .Where(_ => _.Id == networkId)
+                .ToList();
 
-            return network == null
-                ? new List<IAggregatedResult>()
-                : network.MaintainableAssets.SelectMany(__ => __.AggregatedResults.ToDomain());
+            return !maintainableAssets.Any()
+                ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")
+                : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToDomain());
         }
 
         private void DeleteAggregatedResults(Guid networkId)

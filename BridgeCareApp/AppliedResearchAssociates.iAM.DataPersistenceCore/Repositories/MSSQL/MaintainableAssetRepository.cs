@@ -19,20 +19,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssets = Context.MaintainableAssets.Include(_ => _.Location)
+            var maintainableAssets = Context.MaintainableAssets
+                .Include(_ => _.MaintainableAssetLocation)
                 .Include(_ => _.AttributeData)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.AttributeData)
-                .ThenInclude(_ => _.Location)
+                .ThenInclude(_ => _.AttributeDatumLocation)
                 .Where(_ => _.NetworkId == networkId)
                 .ToList();
 
-            if (!maintainableAssets.Any())
-            {
-                throw new RowNotInTableException($"The network has no maintainable assets for rollup");
-            }
-
-            return maintainableAssets.Select(_ => _.ToDomain());
+            return !maintainableAssets.Any()
+                ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")
+                : maintainableAssets.Select(_ => _.ToDomain());
         }
     }
 }

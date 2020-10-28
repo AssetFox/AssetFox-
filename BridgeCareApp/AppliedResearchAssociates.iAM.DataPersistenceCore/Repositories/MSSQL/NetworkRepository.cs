@@ -23,10 +23,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 Name = network.Name
             });
 
-            Context.BulkInsert(network.MaintainableAssets.Select(_ => _.Location).DistinctBy(_ => _.Id)
-                .Select(_ => _.ToEntity()).ToList());
+            // convert maintainable asset and all child domains to entities
+            var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity(network.Id)).ToList();
 
-            Context.BulkInsert(network.MaintainableAssets.Select(_ => _.ToEntity(network.Id)).ToList());
+            // bulk insert maintainable assets
+            Context.BulkInsert(maintainableAssetEntities);
+
+            // bulk insert maintainable asset locations
+            Context.BulkInsert(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
 
             Context.SaveChanges();
         }
@@ -40,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entity = Context.Networks
                 .Include(n => n.MaintainableAssets)
-                .ThenInclude(m => m.Location)
+                .ThenInclude(m => m.MaintainableAssetLocation)
                 .Single(n => n.Id == id);
 
             return entity.ToDomain();

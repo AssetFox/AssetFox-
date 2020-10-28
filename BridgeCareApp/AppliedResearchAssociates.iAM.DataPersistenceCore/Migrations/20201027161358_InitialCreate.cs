@@ -36,59 +36,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RouteEntity",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    Discriminator = table.Column<string>(nullable: false),
-                    UniqueIdentifier = table.Column<string>(nullable: true),
-                    Direction = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RouteEntity", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Locations",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    Discriminator = table.Column<string>(nullable: false),
-                    UniqueIdentifier = table.Column<string>(nullable: false),
-                    Start = table.Column<double>(nullable: true),
-                    End = table.Column<double>(nullable: true),
-                    RouteId = table.Column<Guid>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Locations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Locations_RouteEntity_RouteId",
-                        column: x => x.RouteId,
-                        principalTable: "RouteEntity",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MaintainableAssets",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
                     UniqueIdentifier = table.Column<string>(nullable: false),
-                    NetworkId = table.Column<Guid>(nullable: false),
-                    LocationId = table.Column<Guid>(nullable: false)
+                    NetworkId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MaintainableAssets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MaintainableAssets_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_MaintainableAssets_Networks_NetworkId",
                         column: x => x.NetworkId,
@@ -136,7 +93,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     NumericValue = table.Column<double>(nullable: true),
                     TextValue = table.Column<string>(nullable: true),
                     AttributeId = table.Column<Guid>(nullable: false),
-                    LocationId = table.Column<Guid>(nullable: false),
                     MaintainableAssetId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
@@ -149,15 +105,55 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_AttributeData_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_AttributeData_MaintainableAssets_MaintainableAssetId",
                         column: x => x.MaintainableAssetId,
                         principalTable: "MaintainableAssets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MaintainableAssetLocations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false),
+                    UniqueIdentifier = table.Column<string>(nullable: false),
+                    Start = table.Column<double>(nullable: true),
+                    End = table.Column<double>(nullable: true),
+                    Direction = table.Column<int>(nullable: true),
+                    MaintainableAssetId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MaintainableAssetLocations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MaintainableAssetLocations_MaintainableAssets_MaintainableAssetId",
+                        column: x => x.MaintainableAssetId,
+                        principalTable: "MaintainableAssets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AttributeDatumLocations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false),
+                    UniqueIdentifier = table.Column<string>(nullable: false),
+                    Start = table.Column<double>(nullable: true),
+                    End = table.Column<double>(nullable: true),
+                    Direction = table.Column<int>(nullable: true),
+                    AttributeDatumId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AttributeDatumLocations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AttributeDatumLocations_AttributeData_AttributeDatumId",
+                        column: x => x.AttributeDatumId,
+                        principalTable: "AttributeData",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -178,43 +174,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 column: "AttributeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AttributeData_LocationId",
-                table: "AttributeData",
-                column: "LocationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AttributeData_MaintainableAssetId",
                 table: "AttributeData",
                 column: "MaintainableAssetId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Locations_RouteId",
-                table: "Locations",
-                column: "RouteId",
-                unique: true,
-                filter: "[RouteId] IS NOT NULL");
+                name: "IX_AttributeDatumLocations_AttributeDatumId",
+                table: "AttributeDatumLocations",
+                column: "AttributeDatumId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_MaintainableAssets_LocationId",
-                table: "MaintainableAssets",
-                column: "LocationId",
+                name: "IX_MaintainableAssetLocations_MaintainableAssetId",
+                table: "MaintainableAssetLocations",
+                column: "MaintainableAssetId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_MaintainableAssets_NetworkId",
                 table: "MaintainableAssets",
                 column: "NetworkId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MaintainableAssets_UniqueIdentifier",
-                table: "MaintainableAssets",
-                column: "UniqueIdentifier");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "AggregatedResults");
+
+            migrationBuilder.DropTable(
+                name: "AttributeDatumLocations");
+
+            migrationBuilder.DropTable(
+                name: "MaintainableAssetLocations");
 
             migrationBuilder.DropTable(
                 name: "AttributeData");
@@ -226,13 +217,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "MaintainableAssets");
 
             migrationBuilder.DropTable(
-                name: "Locations");
-
-            migrationBuilder.DropTable(
                 name: "Networks");
-
-            migrationBuilder.DropTable(
-                name: "RouteEntity");
         }
     }
 }

@@ -14,12 +14,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 throw new NullReferenceException("Cannot map null MaintainableAsset entity to MaintainableAsset domain");
             }
 
-            if (entity.Location == null)
+            if (entity.MaintainableAssetLocation == null)
             {
-                throw new NullReferenceException("MaintainableAsset entity is missing related Location entity");
+                throw new NullReferenceException("MaintainableAsset entity is missing related MaintainableAssetLocation entity");
             }
 
-            var maintainableAsset = new MaintainableAsset(entity.Id, entity.NetworkId, entity.Location.ToDomain());
+            var maintainableAsset = new MaintainableAsset(entity.Id, entity.NetworkId, entity.MaintainableAssetLocation.ToDomain());
 
             if (entity.AttributeData != null && entity.AttributeData.Any())
             {
@@ -52,15 +52,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 throw new NullReferenceException("Cannot map null MaintainableAsset domain to MaintainableAsset entity");
             }
 
-            var locationEntity = domain.Location.ToEntity();
+            var locationEntity = domain.Location.ToEntity(domain.Id, "MaintainableAssetEntity");
 
             return new MaintainableAssetEntity
             {
                 Id = domain.Id,
                 NetworkId = networkId,
                 UniqueIdentifier = locationEntity.UniqueIdentifier,
-                LocationId = locationEntity.Id,
-                Location = locationEntity
+                MaintainableAssetLocation = (MaintainableAssetLocationEntity)locationEntity
             };
         }
     }

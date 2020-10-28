@@ -11,7 +11,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
 {
     public class AttributeMetaDataRepository : IAttributeMetaDataRepository
     {
-        public List<AttributeMetaDatum> All(string filePath)
+        private readonly IAttributeRepository _attributeRepo;
+
+        public AttributeMetaDataRepository(IAttributeRepository attributeRepo) =>
+            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
+
+        public List<Attribute> GetAllAttributes(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -42,7 +47,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
                 writer.Write(JsonConvert.SerializeObject(new { AttributeMetaData = attributeMetaData }));
             }
 
-            return attributeMetaData;
+            var attributes = attributeMetaData.Select(AttributeFactory.Create).ToList();
+
+            if (!filePath.Contains("networkDefinitionRules"))
+            {
+                _attributeRepo.CreateMissingAttributes(attributes);
+            }
+            
+            return attributes;
         }
     }
 }

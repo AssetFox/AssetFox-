@@ -18,9 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         [ForeignKey("NetworkId")]
         public virtual NetworkEntity Network { get; set; }
 
-        public Guid LocationId { get; set; }
-        [ForeignKey("LocationId")]
-        public virtual LocationEntity Location { get; set; }
+        public virtual MaintainableAssetLocationEntity MaintainableAssetLocation { get; set; }
 
         public virtual ICollection<AttributeDatumEntity> AttributeData { get; set; }
 

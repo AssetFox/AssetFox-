@@ -41,13 +41,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var maintainableAssets =
                 _maintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId).ToList();
 
-            if (!maintainableAssets.Any())
-            {
-                return new List<Attribute>();
-            }
-
-            return maintainableAssets.SelectMany(_ =>
-                _.AssignedData.Select(__ => __.Attribute).DistinctBy(__ => __.Id));
+            return !maintainableAssets.Any()
+                ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")
+                : maintainableAssets.SelectMany(_ =>
+                    _.AssignedData.Select(__ => __.Attribute).DistinctBy(__ => __.Id));
         }
     }
 }

@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using MoreLinq.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -29,16 +30,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
                 "MetaData//AttributeMetaData", "AttributemetaData.json");
-            var configurableAttributeIds = _attributeMetaDataRepo.All(filePath).Select(_ => _.Id);
+            var configurableAttributeIds = _attributeMetaDataRepo.GetAllAttributes(filePath).Select(_ => _.Id);
 
             // get the attribute ids off of the assigned data on the maintainable assets that have not been modified yet
-            var networkAttributeIds = maintainableAssets
-                .SelectMany(_ =>
-                {
-                    return _.AssignedData != null
-                        ? _.AssignedData.Select(__ => __.Attribute.Id).Distinct()
-                        : new List<Guid>();
-                });
+            var networkAttributeIds = maintainableAssets.Where(_ => _.AssignedData.Any())
+                .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct());
 
             // get the attribute ids that will be used to delete the assigned data where there is an attribute match in both
             // the meta data file and the data source
@@ -47,39 +43,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (attributeIdsToBeUpdatedWithAssignedData.Any())
             {
+                // use a raw sql query to delete AttributeData
                 var query =
                     $"DELETE FROM dbo.AttributeData WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAssets WHERE NetworkId = '{maintainableAssets.First().NetworkId}') AND AttributeId IN ('{string.Join("','", attributeIdsToBeUpdatedWithAssignedData)}')";
                 Context.Database.ExecuteSqlRaw(query);
             }
 
+            // convert any assigned data to their equivalent entity object types
             var assignedData = maintainableAssets
-                .SelectMany(_ => _.AssignedData.Select(__ =>
-                {
-                    // this must be done to ensure the assigned data receives a matching location with its maintainable asset in the data source
-                    if (__ is AttributeDatum<double> numericAttributeDatum)
-                    {
-                        return new AttributeDatum<double>(__.Attribute, numericAttributeDatum.Value, _.Location, __.TimeStamp)
-                            .ToEntity(_.Id);
-                    }
+                .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id))).ToList();
 
-                    // this must be done to ensure the assigned data receives a matching location with its maintainable asset in the data source
-                    if (__ is AttributeDatum<string> textAttributeDatum)
-                    {
-                        return new AttributeDatum<string>(__.Attribute, textAttributeDatum.Value, _.Location, __.TimeStamp)
-                            .ToEntity(_.Id);
-                    }
-
-                    return null;
-                }))
-                .Where(_ => _ != null)
-                .ToList();
-
+            // save any assigned data to the data source and return the count of objects indicating the number of inserted rows
             if (!assignedData.Any())
             {
                 return 0;
             }
 
             Context.BulkInsert(assignedData);
+            Context.BulkInsert(assignedData.Select(_ => _.AttributeDatumLocation).ToList());
             Context.SaveChanges();
 
             return assignedData.Count();

@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Dynamic;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
-    public static class AttributeDataItemMapper
+    public static class AttributeDatumItemMapper
     {
         public static IAttributeDatum ToDomain(this AttributeDatumEntity entity)
         {
@@ -18,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 return new AttributeDatum<double>(
                     entity.Attribute.ToDomain(),
                     entity.NumericValue ?? 0,
-                    entity.Location.ToDomain(),
+                    entity.AttributeDatumLocation.ToDomain(),
                     entity.TimeStamp);
             }
 
@@ -27,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 return new AttributeDatum<string>(
                     entity.Attribute.ToDomain(),
                     entity.TextValue ?? "",
-                    entity.Location.ToDomain(),
+                    entity.AttributeDatumLocation.ToDomain(),
                     entity.TimeStamp);
             }
 
@@ -41,35 +44,37 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 throw new NullReferenceException("Cannot map null AttributeDatum domain to AttributeDatum entity");
             }
 
+            if (domain.Location == null)
+            {
+                throw new NullReferenceException("No location found for assigned data");
+            }
+
+            var id = Guid.NewGuid();
+
+            var entity = new AttributeDatumEntity
+            {
+                Id = id,
+                MaintainableAssetId = maintainableAssetId,
+                AttributeId = domain.Attribute.Id,
+                TimeStamp = domain.TimeStamp,
+                AttributeDatumLocation = (AttributeDatumLocationEntity)domain.Location.ToEntity(id, "AttributeDatumEntity")
+            };
+
             if (domain is AttributeDatum<double> numericAttributeDatum)
             {
-                return new AttributeDatumEntity
-                {
-                    Id = Guid.NewGuid(),
-                    MaintainableAssetId = maintainableAssetId,
-                    AttributeId = numericAttributeDatum.Attribute.Id,
-                    LocationId = numericAttributeDatum.Location.Id,
-                    Discriminator = "NumericAttributeDatum",
-                    TimeStamp = numericAttributeDatum.TimeStamp,
-                    NumericValue = Convert.ToDouble(numericAttributeDatum.Value)
-                };
+                entity.Discriminator = "NumericAttributeDatum";
+                entity.NumericValue = Convert.ToDouble(numericAttributeDatum.Value);
+                return entity;
             }
 
             if (domain is AttributeDatum<string> textAttributeDatum)
             {
-                return new AttributeDatumEntity
-                {
-                    Id = Guid.NewGuid(),
-                    MaintainableAssetId = maintainableAssetId,
-                    AttributeId = textAttributeDatum.Attribute.Id,
-                    LocationId = textAttributeDatum.Location.Id,
-                    Discriminator = "TextAttributeDatum",
-                    TimeStamp = textAttributeDatum.TimeStamp,
-                    TextValue = textAttributeDatum.Value
-                };
+                entity.Discriminator = "TextAttributeDatum";
+                entity.TextValue = textAttributeDatum.Value;
+                return entity;
             }
 
-            throw new InvalidOperationException("Unable to determine Value data type for AttributeDatum entity");
+            throw new InvalidOperationException("Could not determine Value data type for AttributeDatum entity");
         }
     }
 }

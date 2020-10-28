@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20201022163505_InitialCreate")]
+    [Migration("20201027161358_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,9 +68,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("LocationId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("MaintainableAssetId")
                         .HasColumnType("uniqueidentifier");
 
@@ -87,11 +84,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("AttributeId");
 
-                    b.HasIndex("LocationId");
-
                     b.HasIndex("MaintainableAssetId");
 
                     b.ToTable("AttributeData");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumLocationEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeDatumId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Direction")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("End")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Start")
+                        .HasColumnType("float");
+
+                    b.Property<string>("UniqueIdentifier")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeDatumId")
+                        .IsUnique();
+
+                    b.ToTable("AttributeDatumLocations");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", b =>
@@ -124,11 +153,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("Attributes");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LocationEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("NetworkId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UniqueIdentifier")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NetworkId");
+
+                    b.ToTable("MaintainableAssets");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetLocationEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Direction")
+                        .HasColumnType("int");
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
@@ -137,7 +189,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<double?>("End")
                         .HasColumnType("float");
 
-                    b.Property<Guid?>("RouteId")
+                    b.Property<Guid>("MaintainableAssetId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double?>("Start")
@@ -149,39 +201,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RouteId")
-                        .IsUnique()
-                        .HasFilter("[RouteId] IS NOT NULL");
-
-                    b.ToTable("Locations");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("LocationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("NetworkId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UniqueIdentifier")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LocationId")
+                    b.HasIndex("MaintainableAssetId")
                         .IsUnique();
 
-                    b.HasIndex("NetworkId");
-
-                    b.HasIndex("UniqueIdentifier");
-
-                    b.ToTable("MaintainableAssets");
+                    b.ToTable("MaintainableAssetLocations");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", b =>
@@ -196,27 +219,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Networks");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RouteEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("Direction")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UniqueIdentifier")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RouteEntity");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AggregatedResultEntity", b =>
@@ -242,12 +244,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LocationEntity", "Location")
-                        .WithMany("AttributeData")
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
                         .WithMany("AttributeData")
                         .HasForeignKey("MaintainableAssetId")
@@ -255,25 +251,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LocationEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumLocationEntity", b =>
                 {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RouteEntity", "Route")
-                        .WithOne("Location")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LocationEntity", "RouteId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", "AttributeDatum")
+                        .WithOne("AttributeDatumLocation")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumLocationEntity", "AttributeDatumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
                 {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LocationEntity", "Location")
-                        .WithOne("MaintainableAsset")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "LocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
                         .WithMany("MaintainableAssets")
                         .HasForeignKey("NetworkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetLocationEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
+                        .WithOne("MaintainableAssetLocation")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetLocationEntity", "MaintainableAssetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

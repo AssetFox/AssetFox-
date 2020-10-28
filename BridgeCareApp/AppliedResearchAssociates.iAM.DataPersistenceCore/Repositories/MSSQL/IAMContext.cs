@@ -38,23 +38,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             modelBuilder.Entity<MaintainableAssetEntity>(entity =>
             {
                 entity.HasIndex(e => e.NetworkId);
-                entity.HasIndex(e => e.UniqueIdentifier);
 
                 entity.HasOne(d => d.Network)
                     .WithMany(p => p.MaintainableAssets)
                     .HasForeignKey(d => d.NetworkId)
                     .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Location)
-                    .WithOne(p => p.MaintainableAsset)
-                    .OnDelete(DeleteBehavior.Restrict);
             });
 
-            modelBuilder.Entity<LocationEntity>(entity =>
+            modelBuilder.Entity<MaintainableAssetLocationEntity>(entity =>
             {
-                entity.HasOne(d => d.Route)
-                    .WithOne(p => p.Location)
-                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(d => d.MaintainableAsset)
+                    .WithOne(p => p.MaintainableAssetLocation)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<AttributeDatumEntity>(entity =>
@@ -64,14 +59,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .HasForeignKey(d => d.AttributeId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(d => d.Location)
-                    .WithMany(p => p.AttributeData)
-                    .HasForeignKey(d => d.LocationId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
                 entity.HasOne(d => d.MaintainableAsset)
                     .WithMany(p => p.AttributeData)
                     .HasForeignKey(d => d.MaintainableAssetId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AttributeDatumLocationEntity>(entity =>
+            {
+                entity.HasOne(d => d.AttributeDatum)
+                    .WithOne(p => p.AttributeDatumLocation)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -79,6 +76,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 entity.HasOne(d => d.Attribute)
                     .WithMany(p => p.AggregatedResults)
+                    .HasForeignKey(d => d.AttributeId)
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.MaintainableAsset)
@@ -92,11 +90,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public DbSet<MaintainableAssetEntity> MaintainableAssets { get; set; }
 
-        public DbSet<LocationEntity> Locations { get; set; }
+        public DbSet<MaintainableAssetLocationEntity> MaintainableAssetLocations { get; set; }
 
         public DbSet<AttributeEntity> Attributes { get; set; }
 
         public DbSet<AttributeDatumEntity> AttributeData { get; set; }
+
+        public DbSet<AttributeDatumLocationEntity> AttributeDatumLocations { get; set; }
 
         public DbSet<AggregatedResultEntity> AggregatedResults { get; set; }
     }

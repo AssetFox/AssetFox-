@@ -1,12 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+using AppliedResearchAssociates.iAM.DataMiner;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class LocationEntity
+    public abstract class LocationEntity
     {
+        protected LocationEntity(Guid id, string discriminator, string uniqueIdentifier)
+        {
+            Id = id;
+            Discriminator = discriminator;
+            UniqueIdentifier = uniqueIdentifier;
+        }
+
         [Key]
         public Guid Id { get; set; }
 
@@ -20,13 +28,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public double? End { get; set; }
 
-        public Guid? RouteId { get; set; }
-
-        [ForeignKey("RouteId")]
-        public virtual RouteEntity Route { get; set; }
-
-        public virtual MaintainableAssetEntity MaintainableAsset { get; set; }
-
-        public virtual ICollection<AttributeDatumEntity> AttributeData { get; set; }
+        public Direction? Direction { get; set; }
     }
 }

@@ -23,14 +23,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         [ForeignKey("AttributeId")]
         public virtual AttributeEntity Attribute { get; set; }
 
-        public Guid LocationId { get; set; }
-
-        [ForeignKey("LocationId")]
-        public virtual LocationEntity Location { get; set; }
-
         public Guid MaintainableAssetId { get; set; }
 
         [ForeignKey("MaintainableAssetId")]
         public virtual MaintainableAssetEntity MaintainableAsset { get; set; }
+
+        public virtual AttributeDatumLocationEntity AttributeDatumLocation { get; set; }
     }
 }

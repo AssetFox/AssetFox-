@@ -54,24 +54,15 @@ namespace BridgeCareCore.Controllers
                 // Get/create configurable attributes
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
                     "MetaData//AttributeMetaData", "AttributemetaData.json");
-                var configurationAttributes =
-                    _attributeMetaDataRepo.All(filePath).Select(AttributeFactory.Create).ToList();
-
-                // create any missing attributes in the data source before assigning data
-                _attributeRepo.CreateMissingAttributes(configurationAttributes);
+                var configurationAttributes = _attributeMetaDataRepo.GetAllAttributes(filePath).ToList();
 
                 // get all maintainable assets in the network with their assigned data (if any) and locations
                 var maintainableAssets = _maintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId)
                     .ToList();
 
                 // Create list of attribute ids we are allowed to update with assigned data.
-                var networkAttributeIds = maintainableAssets
-                    .SelectMany(_ =>
-                    {
-                        return _.AssignedData != null && _.AssignedData.Any()
-                            ? _.AssignedData.Select(__ => __.Attribute.Id).Distinct()
-                            : new List<Guid>();
-                    }).ToList();
+                var networkAttributeIds = maintainableAssets.Where(_ => _.AssignedData != null && _.AssignedData.Any())
+                    .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();
 
                 // create list of attribute data from configuration attributes
                 var attributeData = configurationAttributes.Select(AttributeConnectionBuilder.Build)

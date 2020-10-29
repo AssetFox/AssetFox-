@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
-    public static class MaintainableAssetItemMapper
+    public static class MaintainableAssetMapper
     {
         public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
         {

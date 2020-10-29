@@ -18,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             if (entity.Discriminator == "NumericAttributeDatum")
             {
                 return new AttributeDatum<double>(
+                    attributeDatumEntity.Id,
                     attributeDatumEntity.AttributeEntity.ToDomain(),
                     Convert.ToDouble(attributeDatumEntity.Value),
                     attributeDatumEntity.LocationEntity.ToDomain(),
@@ -27,6 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             if (entity.Discriminator == "TextAttributeDatum")
             {
                 return new AttributeDatum<string>(
+                    attributeDatumEntity.Id,
                     attributeDatumEntity.AttributeEntity.ToDomain(),
                     attributeDatumEntity.Value.ToString() ?? throw new InvalidOperationException("Data value for attribute cannot be null"),
                     attributeDatumEntity.LocationEntity.ToDomain(),
@@ -47,6 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             {
                 return new AttributeDatumEntity<double>
                 {
+                    Id = attributeDatumNumericDomain.Id,
                     AttributeEntity = domain.Attribute.ToEntity(),
                     LocationEntity = domain.Location.ToEntity(),
                     Discriminator = "NumericAttributeDatum",
@@ -59,6 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             {
                 return new AttributeDatumEntity<string>
                 {
+                    Id = attributeDatumTextDomain.Id,
                     AttributeEntity = domain.Attribute.ToEntity(),
                     LocationEntity = domain.Location.ToEntity(),
                     Discriminator = "TextAttributeDatum",

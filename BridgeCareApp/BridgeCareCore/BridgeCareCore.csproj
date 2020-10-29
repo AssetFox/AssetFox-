@@ -2,6 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LiteDbDebug|AnyCPU'">
+    <DefineConstants>TRACE;LiteDbDebug</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MsSqlDebug|AnyCPU'">
+    <DefineConstants>TRACE;MsSqlDebug</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +25,15 @@
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataAssignment\AppliedResearchAssociates.iAM.DataAssignment.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="MetaData\AttributeMetaData\metaData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="MetaData\NetworkDefinitionRules\definitionRules.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 

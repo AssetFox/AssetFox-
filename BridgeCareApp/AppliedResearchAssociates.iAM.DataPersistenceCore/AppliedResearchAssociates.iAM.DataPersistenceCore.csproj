@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>AppliedResearchAssociates.iAM.DataPersistenceCore</AssemblyName>
     <RootNamespace>AppliedResearchAssociates.iAM.DataPersistenceCore</RootNamespace>
+    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

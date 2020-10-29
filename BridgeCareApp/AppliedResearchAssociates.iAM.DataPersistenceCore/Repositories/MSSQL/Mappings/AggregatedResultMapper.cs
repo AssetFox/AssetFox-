@@ -6,7 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
-    public static class AggregatedResultItemMapper
+    public static class AggregatedResultMapper
     {
         public static IEnumerable<AggregatedResultEntity> ToEntity(this IAggregatedResult domain)
         {
@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 throw new NullReferenceException("Cannot map null AggregatedResult domains to AggregatedResult entities");
             }
 
-            if(domain is AggregatedResult<double> numericAggregatedResult)
+            if (domain is AggregatedResult<double> numericAggregatedResult)
             {
                 return numericAggregatedResult.AggregatedData.Select(_ => new AggregatedResultEntity
                 {
@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 });
             }
 
-            if(domain is AggregatedResult<string> textAggregatedResult)
+            if (domain is AggregatedResult<string> textAggregatedResult)
             {
                 return textAggregatedResult.AggregatedData.Select(_ => new AggregatedResultEntity
                 {

@@ -9,9 +9,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
         public MaintainableAssetEntity()
         {
         }
+
         [BsonId]
         public Guid Id { get; set; }
+
         public Guid NetworkId { get; set; }
+
         public List<IAttributeDatumEntity> AttributeDatumEntities { get; set; }
 
         [BsonRef("LOCATIONS")]

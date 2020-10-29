@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
@@ -21,12 +20,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             var networkCollection = Context.Database.GetCollection<NetworkEntity>("NETWORKS");
             networkCollection.Insert(datum.ToEntity());
         }
-
-        public Network GetNetworkWithAssetsAndLocations(Guid id) =>
-            Context.Database.GetCollection<NetworkEntity>("NETWORKS")
-                .Include(_ => _.MaintainableAssetEntities.ToList())
-                .Include(_ => _.MaintainableAssetEntities.Select(_ => _.LocationEntity))
-                .FindById(id)
-                .ToDomain();
     }
 }

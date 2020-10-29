@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Dynamic;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
-    public static class AttributeDatumItemMapper
+    public static class AttributeDatumMapper
     {
         public static IAttributeDatum ToDomain(this AttributeDatumEntity entity)
         {
@@ -19,6 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (entity.Discriminator == "NumericAttributeDatum")
             {
                 return new AttributeDatum<double>(
+                    entity.Id,
                     entity.Attribute.ToDomain(),
                     entity.NumericValue ?? 0,
                     entity.AttributeDatumLocation.ToDomain(),
@@ -28,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (entity.Discriminator == "TextAttributeDatum")
             {
                 return new AttributeDatum<string>(
+                    entity.Id,
                     entity.Attribute.ToDomain(),
                     entity.TextValue ?? "",
                     entity.AttributeDatumLocation.ToDomain(),
@@ -49,28 +48,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 throw new NullReferenceException("No location found for assigned data");
             }
 
-            var id = Guid.NewGuid();
-
             var entity = new AttributeDatumEntity
             {
-                Id = id,
                 MaintainableAssetId = maintainableAssetId,
                 AttributeId = domain.Attribute.Id,
-                TimeStamp = domain.TimeStamp,
-                AttributeDatumLocation = (AttributeDatumLocationEntity)domain.Location.ToEntity(id, "AttributeDatumEntity")
+                TimeStamp = domain.TimeStamp
             };
 
             if (domain is AttributeDatum<double> numericAttributeDatum)
             {
+                entity.Id = numericAttributeDatum.Id;
                 entity.Discriminator = "NumericAttributeDatum";
                 entity.NumericValue = Convert.ToDouble(numericAttributeDatum.Value);
+                entity.AttributeDatumLocation =
+                    (AttributeDatumLocationEntity)domain.Location.ToEntity(numericAttributeDatum.Id,
+                        "AttributeDatumEntity");
                 return entity;
             }
 
             if (domain is AttributeDatum<string> textAttributeDatum)
             {
+                entity.Id = textAttributeDatum.Id;
                 entity.Discriminator = "TextAttributeDatum";
                 entity.TextValue = textAttributeDatum.Value;
+                entity.AttributeDatumLocation =
+                    (AttributeDatumLocationEntity)domain.Location.ToEntity(textAttributeDatum.Id,
+                        "AttributeDatumEntity");
                 return entity;
             }
 

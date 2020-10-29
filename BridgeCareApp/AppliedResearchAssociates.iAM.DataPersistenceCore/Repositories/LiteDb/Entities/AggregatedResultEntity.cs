@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
     }
 
     /// <summary>
-    /// Used for LiteDB management of Tuples. LiteDB does not support BSON Tuple structures.
+    ///     Used for LiteDB management of Tuples. LiteDB does not support BSON Tuple structures.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class AttributeYearValueEntity<T>

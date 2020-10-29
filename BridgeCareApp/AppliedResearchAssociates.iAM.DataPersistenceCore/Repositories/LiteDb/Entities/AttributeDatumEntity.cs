@@ -1,4 +1,5 @@
 ﻿using System;
+using LiteDB;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities
 {
@@ -7,6 +8,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
         public AttributeDatumEntity()
         {
         }
+
+        [BsonId]
+        public Guid Id { get; set; }
 
         public LocationEntity LocationEntity { get; set; }
 

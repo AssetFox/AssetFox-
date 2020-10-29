@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings

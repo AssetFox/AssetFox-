@@ -11,25 +11,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
 {
     public class AttributeMetaDataRepository : IAttributeMetaDataRepository
     {
-        private readonly IAttributeRepository _attributeRepo;
-
-        public AttributeMetaDataRepository(IAttributeRepository attributeRepo) =>
-            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
-
-        public List<Attribute> GetAllAttributes(string filePath)
+        public List<Attribute> GetAllAttributes()
         {
+            // set the attribute meta data json file path
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
+                "MetaData//AttributeMetaData", "metaData.json");
+
+            // check that the file exists
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException($"{filePath} does not exist");
             }
 
+            // get the raw json from the file
             var rawAttributes = File.ReadAllText(filePath);
+
+            // convert the json string into attribute meta data models
             var attributeMetaData = JsonConvert
                 .DeserializeAnonymousType(rawAttributes, new { AttributeMetaData = default(List<AttributeMetaDatum>) })
                 .AttributeMetaData;
 
-            // Check to see if the GUIDs in the meta data repo are blank. A blank GUID requires
-            // that the attribute has never been assigned in a network previously.
+            // Check to see if the GUIDs in the meta data are blank. A blank GUID requires that
+            // the attribute has never been assigned in a network previously.
             if (attributeMetaData.Any(_ => Guid.Empty == _.Id))
             {
                 // give new meta data a guid
@@ -43,18 +46,42 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
                     return _;
                 }).ToList();
 
+                // update the json file with the guid changes
                 using var writer = new StreamWriter(filePath);
                 writer.Write(JsonConvert.SerializeObject(new { AttributeMetaData = attributeMetaData }));
             }
 
+            // convert meta data into attribute domain models
             var attributes = attributeMetaData.Select(AttributeFactory.Create).ToList();
 
-            if (!filePath.Contains("networkDefinitionRules"))
-            {
-                _attributeRepo.CreateMissingAttributes(attributes);
-            }
-            
             return attributes;
+        }
+
+        public Attribute GetNetworkAttribute()
+        {
+            // get the network definition rules file path
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
+                "MetaData//NetworkDefinitionRules", "definitionRules.json");
+
+            // check that the file exists
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException($"{filePath} does not exist");
+            }
+
+            // get the raw json from the file
+            var rawAttributes = File.ReadAllText(filePath);
+
+            // convert the json string into attribute meta data models
+            var attributeMetaData = JsonConvert
+                .DeserializeAnonymousType(rawAttributes, new { AttributeMetaData = default(List<AttributeMetaDatum>) })
+                .AttributeMetaData;
+
+            // convert meta data into attribute domain models
+            var attributes = attributeMetaData.Select(AttributeFactory.Create).ToList();
+
+            // return only the first attribute from the list, or null if there isn't any
+            return attributes.FirstOrDefault();
         }
     }
 }

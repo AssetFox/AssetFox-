@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
                 .Include(_ => _.MaintainableAssetEntity)
                 .Include(_ => _.MaintainableAssetEntity.LocationEntity)
                 .Find(_ => _.MaintainableAssetEntity.NetworkId == networkId).ToList();
-            
+
             var numericAggregatedResultEntities = result.Where(_ => _ is AggregatedResultEntity<double>).Select(_ => _.ToDomain<double>());
             var textAggregatedResultEntities = result.Where(_ => _ is AggregatedResultEntity<string>).Select(_ => _.ToDomain<string>());
 

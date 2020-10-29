@@ -6,7 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
-    public static class NetworkItemMapper
+    public static class NetworkMapper
     {
         public static Network ToDomain(this NetworkEntity entity)
         {

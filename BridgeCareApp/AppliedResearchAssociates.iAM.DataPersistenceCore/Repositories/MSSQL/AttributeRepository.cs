@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
-using MoreLinq.Extensions;
+using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -20,31 +20,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Dictionary<Guid, Attribute> AttributeDictionary { get; set; }
 
-        public void CreateMissingAttributes(List<Attribute> attributes)
+        public void UpsertAttributes(List<Attribute> attributes)
         {
-            var existingAttributeIds = Context.Attributes.Select(_ => _.Id).ToList();
-            if (attributes.Any(_ => !existingAttributeIds.Contains(_.Id)))
-            {
-                Context.Attributes.AddRange(attributes.Where(_ => !existingAttributeIds.Contains(_.Id))
-                    .Select(_ => _.ToEntity()));
-                Context.SaveChanges();
-            }
-        }
+            Context.BulkInsertOrUpdate(attributes.Select(_ => _.ToEntity()).ToList());
 
-        public IEnumerable<Attribute> GetAttributesFromNetwork(Guid networkId)
-        {
-            if (!Context.Networks.Any(_ => _.Id == networkId))
-            {
-                throw new RowNotInTableException($"Could not find network with id {networkId}");
-            }
-
-            var maintainableAssets =
-                _maintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId).ToList();
-
-            return !maintainableAssets.Any()
-                ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")
-                : maintainableAssets.SelectMany(_ =>
-                    _.AssignedData.Select(__ => __.Attribute).DistinctBy(__ => __.Id));
+            Context.SaveChanges();
         }
     }
 }

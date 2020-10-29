@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             if (domain is DirectionalRoute directionalRouteDomain)
             {
                 return new RouteEntity
-                { 
+                {
                     Direction = directionalRouteDomain.Direction,
                     UniqueIdentifier = directionalRouteDomain.UniqueIdentifier,
                     Discriminator = "DirectionalRoute"

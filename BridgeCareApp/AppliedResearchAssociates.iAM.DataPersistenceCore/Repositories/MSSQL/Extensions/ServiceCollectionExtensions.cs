@@ -1,5 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions

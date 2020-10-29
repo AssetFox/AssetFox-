@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 using LiteDB;
@@ -22,8 +21,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
                 .SelectMany(_ => _.AttributeDatumEntities.Select(_ => _.AttributeEntity.ToDomain()))
                 .DistinctBy(_ => _.Id);
 
-        // Removes assigned data on maintainable assets in the given network that have attribute data with attributeIds in the provided list.
-        public int UpdateMaintainableAssetsAssignedData(List<MaintainableAsset> assignedMaintainableAssets)
+        // Removes assigned data on maintainable assets in the given network that have attribute
+        // data with attributeIds in the provided list.
+        public int UpdateAssignedData(List<MaintainableAsset> assignedMaintainableAssets)
         {
             var maintainableAssetEntityCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
             return maintainableAssetEntityCollection.Update(assignedMaintainableAssets.Select(_ => _.ToEntity()));

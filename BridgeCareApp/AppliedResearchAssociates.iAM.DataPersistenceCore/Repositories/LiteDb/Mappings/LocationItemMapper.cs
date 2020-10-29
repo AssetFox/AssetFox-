@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 

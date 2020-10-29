@@ -5,7 +5,7 @@ using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
-    public static class AttributeItemMapper
+    public static class AttributeMapper
     {
         public static Attribute ToDomain(this AttributeEntity entity)
         {

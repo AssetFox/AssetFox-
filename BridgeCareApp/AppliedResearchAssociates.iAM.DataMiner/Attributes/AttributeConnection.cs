@@ -8,9 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 
         public abstract IEnumerable<IAttributeDatum> GetData<T>();
 
-        public AttributeConnection(Attribute attribute)
-        {
-            Attribute = attribute;
-        }
+        protected AttributeConnection(Attribute attribute) => Attribute = attribute;
     }
 }

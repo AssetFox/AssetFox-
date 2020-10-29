@@ -1,27 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AggregatedResultRepository<T> : MSSQLRepository<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>>
+    public class AggregatedResultRepository : MSSQLRepository, IAggregatedResultRepository
     {
         public AggregatedResultRepository(IAMContext context) : base(context) { }
 
-        public override async void AddAll(
-            IEnumerable<IEnumerable<(DataMinerAttribute attribute, (int year, T value))>> domains,
-            params object[] args)
+        public int CreateAggregatedResults(List<IAggregatedResult> aggregatedResults)
         {
-            if (!args.Any())
+            DeleteAggregatedResults(aggregatedResults.First().MaintainableAsset.NetworkId);
+
+            var entities = aggregatedResults.SelectMany(_ => _.ToEntity()).ToList();
+
+            Context.BulkInsert(entities);
+            Context.SaveChanges();
+
+            return entities.Count();
+        }
+
+        public IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId)
+        {
+            if (!Context.Networks.Any(_ => _.Id == networkId))
             {
-                throw new NullReferenceException("No arguments found for aggregated result query");
+                throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssetId = (Guid)args[0];
+            var maintainableAssets = Context.MaintainableAssets
+                .Include(_ => _.AggregatedResults)
+                .Where(_ => _.Id == networkId)
+                .ToList();
 
-            await context.AggregatedResults.AddRangeAsync(domains.SelectMany(d => d.ToEntity(maintainableAssetId)));
+            return !maintainableAssets.Any()
+                ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")
+                : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToDomain());
+        }
+
+        private void DeleteAggregatedResults(Guid networkId)
+        {
+            if (!Context.Networks.Any(_ => _.Id == networkId))
+            {
+                throw new RowNotInTableException($"No network found having id {networkId}");
+            }
+
+            Context.Database.ExecuteSqlRaw(
+                $"DELETE FROM dbo.AggregatedResults WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAssets WHERE NetworkId = '{networkId}')");
         }
     }
 }

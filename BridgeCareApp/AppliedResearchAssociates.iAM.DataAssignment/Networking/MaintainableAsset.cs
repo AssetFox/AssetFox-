@@ -6,20 +6,21 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
-namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
+namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
 {
     public class MaintainableAsset
     {
-        public MaintainableAsset(Guid id, Location location)
+        public MaintainableAsset(Guid id, Guid networkId, Location location)
         {
             Id = id;
+            NetworkId = networkId;
             Location = location;
         }
 
-        public IEnumerable<(DataMinerAttribute attribute, (int year, T value))> GetAggregatedValuesByYear<T>(DataMinerAttribute attribute, AggregationRule<T> aggregationRule)
+        public AggregatedResult<T> GetAggregatedValuesByYear<T>(DataMinerAttribute attribute, AggregationRule<T> aggregationRule)
         {
             var specifiedData = AssignedData.Where(_ => _.Attribute.Id == attribute.Id);
-            return aggregationRule.Apply(specifiedData, attribute);
+            return new AggregatedResult<T>(Guid.NewGuid(), this, aggregationRule.Apply(specifiedData, attribute));
         }
 
         public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
@@ -37,8 +38,11 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
             }
         }
 
-        public Guid Id { get; }
+        public void AssignAttributeDataFromDataSource(IEnumerable<IAttributeDatum> attributeData) => AssignedData.AddRange(attributeData);
+
         public List<IAttributeDatum> AssignedData { get; } = new List<IAttributeDatum>();
+        public Guid Id { get; }
+        public Guid NetworkId { get; }
         public Location Location { get; }
     }
 }

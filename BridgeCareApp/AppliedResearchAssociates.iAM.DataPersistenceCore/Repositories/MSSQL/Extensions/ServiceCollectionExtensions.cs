@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddDataAccessServices(this IServiceCollection services, string connectionString)
+        public static void AddMSSQLServices(this IServiceCollection services, string connectionString)
         {
             services.AddDbContext<IAMContext>(options =>
             {

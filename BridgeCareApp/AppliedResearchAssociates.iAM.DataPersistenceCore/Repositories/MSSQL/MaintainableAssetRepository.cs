@@ -1,29 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
+using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class MaintainableAssetRepository : MSSQLRepository<MaintainableAsset>
+    public class MaintainableAssetRepository : MSSQLRepository, IMaintainableAssetRepository
     {
         public MaintainableAssetRepository(IAMContext context) : base(context) { }
 
-        public override IEnumerable<MaintainableAsset> Find(params object[] args)
+        public IEnumerable<MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId)
         {
-            if (!args.Any())
+            if (!Context.Networks.Any(_ => _.Id == networkId))
             {
-                throw new NullReferenceException("No arguments found for maintainable assets query");
+                throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            return context.MaintainableAssets
-                .Where(m => m.NetworkId == (Guid)args[0])
-                .Include(m => m.Location)
-                .Include(m => m.AttributeData)
-                .ThenInclude(a => a.Attribute)
-                .Select(m => m.ToDomain());
+            var maintainableAssets = Context.MaintainableAssets
+                .Include(_ => _.MaintainableAssetLocation)
+                .Include(_ => _.AttributeData)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.AttributeData)
+                .ThenInclude(_ => _.AttributeDatumLocation)
+                .Where(_ => _.NetworkId == networkId)
+                .ToList();
+
+            return !maintainableAssets.Any()
+                ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")
+                : maintainableAssets.Select(_ => _.ToDomain());
         }
     }
 }

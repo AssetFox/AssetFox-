@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
-namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
+namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
 {
     public static class NetworkFactory
     {
@@ -19,11 +19,11 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Segmentation
         /// <returns></returns>
         public static Network CreateNetworkFromAttributeDataRecords(IEnumerable<IAttributeDatum> attributeData)
         {
+            var networkId = Guid.NewGuid();
             var maintenanceAssets = (from attributeDatum in attributeData
-                                     let maintenanceAsset = new MaintainableAsset(Guid.NewGuid(), attributeDatum.Location)
-                                     select maintenanceAsset)
-                    .ToList();
-            return new Network(maintenanceAssets, Guid.NewGuid());
+                    let maintenanceAsset = new MaintainableAsset(Guid.NewGuid(), networkId, attributeDatum.Location)
+                    select maintenanceAsset).ToList();
+            return new Network(maintenanceAssets, networkId);
         }
     }
 }

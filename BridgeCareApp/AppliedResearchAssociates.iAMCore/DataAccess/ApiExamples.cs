@@ -4,7 +4,7 @@ using System.IO;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using Newtonsoft.Json;
-using NetworkFromSegmentProject = AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
+using NetworkFromSegmentProject = AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 
@@ -88,7 +88,7 @@ namespace AppliedResearchAssociates.iAMCore.DataAccess
 
                         break;
                     case "TEXT":
-                        aggregatedTextResults.AddRange(segment.GetAggregatedValuesByYear(attribute, AggregationRuleFactory.CreateTextRule(attribute)));
+                        //aggregatedTextResults.AddRange(segment.GetAggregatedValuesByYear(attribute, AggregationRuleFactory.CreateTextRule(attribute)));
                         break;
                     }
 

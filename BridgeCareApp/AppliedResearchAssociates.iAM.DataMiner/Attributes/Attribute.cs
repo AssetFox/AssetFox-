@@ -22,15 +22,11 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
         }
 
         public Guid Id { get; }
-
         public string DataType { get; }
-
         public string Name { get; }
         public string AggregationRuleType { get; }
         public string Command { get; }
-
         public ConnectionType ConnectionType { get; }
-
         public string ConnectionString { get; }
     }
 }

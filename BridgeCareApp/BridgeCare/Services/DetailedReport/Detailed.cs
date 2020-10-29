@@ -11,12 +11,12 @@ namespace BridgeCare.Services
     public class Detailed
     {
         private Dictionary<bool, Action<DetailReportModel, ExcelWorksheet>> ExcelValues = new Dictionary<bool, Action<DetailReportModel, ExcelWorksheet>>();
-        private readonly IDetailedReport detailedReport;
+        private readonly IDetailedReportRepository _detailedReportRepository;
         private readonly FillDetailedSheet fillWorkSheet;
 
-        public Detailed(IDetailedReport yearlyReport, FillDetailedSheet sheet)
+        public Detailed(IDetailedReportRepository detailedReportRepository, FillDetailedSheet sheet)
         {
-            detailedReport = yearlyReport ?? throw new ArgumentNullException(nameof(yearlyReport));
+            _detailedReportRepository = detailedReportRepository ?? throw new ArgumentNullException(nameof(detailedReportRepository));
             fillWorkSheet = sheet ?? throw new ArgumentNullException(nameof(sheet));
 
             ExcelValues.Add(true, fillWorkSheet.OnCommittedTrue);
@@ -26,7 +26,7 @@ namespace BridgeCare.Services
         public void Fill(ExcelWorksheet worksheet, int[] totalYears, SimulationModel data, BridgeCareContext dbContext)
         {
             var totalYearsCount = totalYears.Count();
-            var rawQueryForData = detailedReport.GetRawQuery(data, dbContext);
+            var rawQueryForData = _detailedReportRepository.GetRawQuery(data, dbContext);
 
             var headers = new List<string>
             {

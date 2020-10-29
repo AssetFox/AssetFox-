@@ -9,10 +9,10 @@ namespace BridgeCare.Controllers
 {
     public class RemainingLifeLimitController : ApiController
     {
-        private readonly IRemainingLifeLimit repo;
+        private readonly IRemainingLifeLimitRepository repo;
         private readonly BridgeCareContext db;
 
-        public RemainingLifeLimitController(IRemainingLifeLimit repo, BridgeCareContext db)
+        public RemainingLifeLimitController(IRemainingLifeLimitRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

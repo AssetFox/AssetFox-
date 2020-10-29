@@ -13,11 +13,11 @@ namespace BridgeCare.Services
 {
     public class Budget
     {
-        private readonly IBudgetReport budget;
+        private readonly IBudgetReportRepository budget;
 
-        public Budget(IBudgetReport report)
+        public Budget(IBudgetReportRepository reportRepository)
         {
-            budget = report ?? throw new ArgumentNullException(nameof(report));
+            budget = reportRepository ?? throw new ArgumentNullException(nameof(reportRepository));
         }
 
         public void Fill(ExcelWorksheet budgetReport, int[] totalYears, SimulationModel data, List<YearlyDataModel> yearlyInvestment)

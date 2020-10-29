@@ -13,7 +13,7 @@ namespace BridgeCare.Controllers
 
     public class PriorityController : ApiController
     {
-        private readonly IPriority repo;
+        private readonly IPriorityRepository repo;
         private readonly BridgeCareContext db;
         /// <summary>Maps user roles to methods for getting performance libraries.</summary>
         private readonly IReadOnlyDictionary<string, PriorityLibraryGetMethod> PriorityLibraryGetMethods;
@@ -22,7 +22,7 @@ namespace BridgeCare.Controllers
 
         public PriorityController() { }
 
-        public PriorityController(IPriority repo, BridgeCareContext db)
+        public PriorityController(IPriorityRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

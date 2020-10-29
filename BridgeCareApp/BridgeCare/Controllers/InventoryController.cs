@@ -10,10 +10,10 @@ namespace BridgeCare.Controllers
     public class InventoryController : ApiController
     {
         private readonly IInventoryItemDetailModelGenerator modelGenerator;
-        private readonly IInventory repo;
+        private readonly IInventoryRepository repo;
         private readonly BridgeCareContext db;
 
-        public InventoryController(IInventoryItemDetailModelGenerator modelGenerator, IInventory repo, BridgeCareContext db)
+        public InventoryController(IInventoryItemDetailModelGenerator modelGenerator, IInventoryRepository repo, BridgeCareContext db)
         {
             this.modelGenerator = modelGenerator ?? throw new ArgumentNullException(nameof(modelGenerator));
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));

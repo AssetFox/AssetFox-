@@ -7,10 +7,10 @@ namespace BridgeCare.Controllers
 {
     public class NetworksController : ApiController
     {
-        private readonly INetwork repo;
+        private readonly INetworkRepository repo;
         private readonly BridgeCareContext db;
 
-        public NetworksController(INetwork repo, BridgeCareContext db)
+        public NetworksController(INetworkRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

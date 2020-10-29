@@ -22,7 +22,7 @@ namespace BridgeCare.Services.SummaryReport
     /// </summary>
     public class SummaryReportGenerator : ISummaryReportGenerator
     {
-        private readonly ICommonSummaryReportData commonSummaryReportData;
+        private readonly ICommonSummaryReportDataRepository _commonSummaryReportDataRepository;
         private readonly SummaryReportBridgeData summaryReportBridgeData;        
         private readonly BridgeWorkSummary bridgeWorkSummary;
         private readonly ConditionBridgeCount conditionBridgeCount;
@@ -40,7 +40,7 @@ namespace BridgeCare.Services.SummaryReport
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(SummaryReportGenerator));
 
-        public SummaryReportGenerator(ICommonSummaryReportData commonSummaryReportData, SummaryReportBridgeData summaryReportBridgeData,
+        public SummaryReportGenerator(ICommonSummaryReportDataRepository commonSummaryReportDataRepository, SummaryReportBridgeData summaryReportBridgeData,
             BridgeWorkSummary bridgeWorkSummary, ConditionBridgeCount conditionBridgeCount, ConditionDeckArea conditionDeckArea, PoorBridgeCount poorBridgeCount,
             PoorBridgeDeckArea poorBridgeDeckArea, NHSConditionChart nhsConditionBridgeCount, SummaryReportParameters summaryReportParameters,
             BridgeWorkSummaryByBudget workSummaryByBudget, BridgeWorkSummaryCharts bridgeWorkSummaryCharts,
@@ -48,7 +48,7 @@ namespace BridgeCare.Services.SummaryReport
             UnfundedRecommendations unfundedRecommendations)
         {
             this.summaryReportBridgeData = summaryReportBridgeData ?? throw new ArgumentNullException(nameof(summaryReportBridgeData));
-            this.commonSummaryReportData = commonSummaryReportData ?? throw new ArgumentNullException(nameof(commonSummaryReportData));
+            this._commonSummaryReportDataRepository = commonSummaryReportDataRepository ?? throw new ArgumentNullException(nameof(commonSummaryReportDataRepository));
             this.bridgeWorkSummary = bridgeWorkSummary ?? throw new ArgumentNullException(nameof(bridgeWorkSummary));
             this.conditionBridgeCount = conditionBridgeCount ?? throw new ArgumentNullException(nameof(conditionBridgeCount));
             this.conditionDeckArea = conditionDeckArea ?? throw new ArgumentNullException(nameof(conditionDeckArea));
@@ -74,7 +74,7 @@ namespace BridgeCare.Services.SummaryReport
         {
             // Get data
             var simulationId = simulationModel.simulationId;
-            var simulationYearsModel = commonSummaryReportData.GetSimulationYearsData(simulationId);
+            var simulationYearsModel = _commonSummaryReportDataRepository.GetSimulationYearsData(simulationId);
             var simulationYears = simulationYearsModel.Years;
             simulationYears.Sort();
             var simulationYearsCount = simulationYears.Count;            

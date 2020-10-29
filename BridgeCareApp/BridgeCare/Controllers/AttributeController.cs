@@ -8,12 +8,12 @@ namespace BridgeCare.Controllers
 {
     public class AttributeController : ApiController
     {
-        private readonly IAttributeRepo repo;
+        private readonly IAttributeRepository _repository;
         private readonly BridgeCareContext db;
 
-        public AttributeController(IAttributeRepo repo, BridgeCareContext db)
+        public AttributeController(IAttributeRepository repository, BridgeCareContext db)
         {
-            this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
+            this._repository = repository ?? throw new ArgumentNullException(nameof(repository));
             this.db = db ?? throw new ArgumentNullException(nameof(db));
         }
 
@@ -24,11 +24,11 @@ namespace BridgeCare.Controllers
         [HttpGet]
         [Route("api/GetAttributes")]
         [RestrictAccess]
-        public IHttpActionResult GetAttributes() => Ok(repo.GetAttributes(db));
+        public IHttpActionResult GetAttributes() => Ok(_repository.GetAttributes(db));
 
         [HttpPost]
         [Route("api/GetAttributesSelectValues")]
         [RestrictAccess]
-        public IHttpActionResult GetAttributeSelectValues([FromBody] NetworkAttributes model) => Ok(repo.GetAttributeSelectValues(model, db));
+        public IHttpActionResult GetAttributeSelectValues([FromBody] NetworkAttributes model) => Ok(_repository.GetAttributeSelectValues(model, db));
     }
 }

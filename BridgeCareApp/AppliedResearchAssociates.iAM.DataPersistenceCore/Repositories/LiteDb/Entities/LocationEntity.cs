@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
 
         public string Discriminator { get; set; }
 
-        public string UniqueIdentifier { get; set; }
+        public string LocationIdentifier { get; set; }
 
         public double? Start { get; set; }
 

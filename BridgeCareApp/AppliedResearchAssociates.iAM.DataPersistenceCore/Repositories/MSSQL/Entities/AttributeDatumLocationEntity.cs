@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class AttributeDatumLocationEntity : LocationEntity
     {
-        public AttributeDatumLocationEntity(Guid id, string discriminator, string uniqueIdentifier) : base(id, discriminator, uniqueIdentifier) { }
+        public AttributeDatumLocationEntity(Guid id, string discriminator, string locationIdentifier) : base(id, discriminator, locationIdentifier) { }
 
         public Guid AttributeDatumId { get; set; }
 

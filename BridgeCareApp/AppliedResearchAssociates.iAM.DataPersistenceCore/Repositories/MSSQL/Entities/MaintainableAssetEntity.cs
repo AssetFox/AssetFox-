@@ -10,9 +10,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         [Key]
         public Guid Id { get; set; }
 
-        [Required]
-        public string UniqueIdentifier { get; set; }
-
         public Guid NetworkId { get; set; }
 
         [ForeignKey("NetworkId")]

@@ -57,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             return attributes;
         }
 
-        public Attribute GetNetworkAttribute()
+        public Attribute GetNetworkDefinitionAttribute()
         {
             // get the network definition rules file path
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,

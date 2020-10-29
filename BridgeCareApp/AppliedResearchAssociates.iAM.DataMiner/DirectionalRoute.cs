@@ -12,9 +12,9 @@
         internal override bool MatchOn(Route route)
         {
             var directionalRoute = (DirectionalRoute)route;
-            return ((UniqueIdentifier == directionalRoute.UniqueIdentifier &&
+            return ((LocationIdentifier == directionalRoute.LocationIdentifier &&
                 Direction == directionalRoute.Direction) ||
-                UniqueIdentifier == directionalRoute.UniqueIdentifier);
+                LocationIdentifier == directionalRoute.LocationIdentifier);
         }
     }
 }

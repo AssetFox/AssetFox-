@@ -58,7 +58,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = domain.Id,
                 NetworkId = networkId,
-                UniqueIdentifier = locationEntity.UniqueIdentifier,
                 MaintainableAssetLocation = (MaintainableAssetLocationEntity)locationEntity
             };
         }

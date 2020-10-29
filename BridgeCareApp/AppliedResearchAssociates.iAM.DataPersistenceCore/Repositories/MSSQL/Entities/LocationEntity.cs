@@ -6,11 +6,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public abstract class LocationEntity
     {
-        protected LocationEntity(Guid id, string discriminator, string uniqueIdentifier)
+        protected LocationEntity(Guid id, string discriminator, string locationIdentifier)
         {
             Id = id;
             Discriminator = discriminator;
-            UniqueIdentifier = uniqueIdentifier;
+            LocationIdentifier = locationIdentifier;
         }
 
         [Key]
@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public string Discriminator { get; set; }
 
         [Required]
-        public string UniqueIdentifier { get; set; }
+        public string LocationIdentifier { get; set; }
 
         public double? Start { get; set; }
 

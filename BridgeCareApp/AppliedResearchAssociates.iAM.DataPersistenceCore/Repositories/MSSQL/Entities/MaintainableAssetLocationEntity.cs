@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class MaintainableAssetLocationEntity : LocationEntity
     {
-        public MaintainableAssetLocationEntity(Guid id, string discriminator, string uniqueIdentifier) : base(id, discriminator, uniqueIdentifier) { }
+        public MaintainableAssetLocationEntity(Guid id, string discriminator, string locationIdentifier) : base(id, discriminator, locationIdentifier) { }
 
         public Guid MaintainableAssetId { get; set; }
 

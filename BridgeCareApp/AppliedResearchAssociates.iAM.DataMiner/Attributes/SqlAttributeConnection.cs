@@ -30,10 +30,10 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
                     {
                         var value = (T)Convert.ChangeType(dataReader["DATA_"], typeof(T));
                         var dateTime = Convert.ToDateTime(dataReader["DATE_"]);
-                        var uniqueIdentifier = $"{dataReader["FACILITY"]}{dataReader["SECTION"]}";
+                        var locationIdentifier = $"{dataReader["FACILITY"]}{dataReader["SECTION"]}";
 
                         yield return new AttributeDatum<T>(Guid.NewGuid(), Attribute, value,
-                            LocationBuilder.CreateLocation(uniqueIdentifier, start, end, direction, wellKnownText),
+                            LocationBuilder.CreateLocation(locationIdentifier, start, end, direction, wellKnownText),
                             dateTime);
                     }
                 }

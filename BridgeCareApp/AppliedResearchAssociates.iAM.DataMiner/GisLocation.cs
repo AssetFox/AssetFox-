@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public class GisLocation : Location
     {
-        public GisLocation(Guid id, string wellKnownTextString, string uniqueIdentifier) : base(id, uniqueIdentifier)
+        public GisLocation(Guid id, string wellKnownTextString, string locationIdentifier) : base(id, locationIdentifier)
         {
             WellKnownTextString = wellKnownTextString;
         }

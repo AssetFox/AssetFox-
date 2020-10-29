@@ -16,10 +16,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             if (entity.Discriminator == "DirectionalRoute")
             {
-                return new DirectionalRoute(entity.UniqueIdentifier, entity.Direction);
+                return new DirectionalRoute(entity.LocationIdentifier, entity.Direction);
             }
 
-            return new SimpleRoute(entity.UniqueIdentifier);
+            return new SimpleRoute(entity.LocationIdentifier);
         }
 
         public static RouteEntity ToEntity(this Route domain)
@@ -34,14 +34,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 return new RouteEntity
                 {
                     Direction = directionalRouteDomain.Direction,
-                    UniqueIdentifier = directionalRouteDomain.UniqueIdentifier,
+                    LocationIdentifier = directionalRouteDomain.LocationIdentifier,
                     Discriminator = "DirectionalRoute"
                 };
             }
 
             return new RouteEntity
             {
-                UniqueIdentifier = domain.UniqueIdentifier,
+                LocationIdentifier = domain.LocationIdentifier,
                 Discriminator = "SimpleRoute"
             };
         }

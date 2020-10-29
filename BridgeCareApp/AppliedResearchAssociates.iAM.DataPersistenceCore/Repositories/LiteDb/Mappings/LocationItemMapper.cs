@@ -18,14 +18,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 return new LinearLocation(
                     entity.Id,
                     entity.RouteEntity.ToDomain(),
-                    entity.UniqueIdentifier,
+                    entity.LocationIdentifier,
                     entity.Start ?? 0,
                     entity.End ?? 0);
             }
 
             if (entity.Discriminator == "SectionLocation")
             {
-                return new SectionLocation(entity.Id, entity.UniqueIdentifier);
+                return new SectionLocation(entity.Id, entity.LocationIdentifier);
             }
 
             throw new InvalidOperationException("Cannot determine Location entity type");
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
                 throw new NullReferenceException("Cannot map null Location domain to Location entity");
             }
 
-            if (string.IsNullOrEmpty(domain.UniqueIdentifier))
+            if (string.IsNullOrEmpty(domain.LocationIdentifier))
             {
                 throw new InvalidOperationException("Location has no unique identifier");
             }
@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             return new LocationEntity
             {
                 Id = domain.Id,
-                UniqueIdentifier = domain.UniqueIdentifier,
+                LocationIdentifier = domain.LocationIdentifier,
                 Discriminator = "SectionLocation"
             };
         }

@@ -7,6 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         List<Attribute> GetAllAttributes();
 
-        Attribute GetNetworkAttribute();
+        Attribute GetNetworkDefinitionAttribute();
     }
 }

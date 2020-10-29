@@ -33,7 +33,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 // get network definition attribute from json file
-                var attribute = _attributeMetaDataFileRepo.GetNetworkAttribute();
+                var attribute = _attributeMetaDataFileRepo.GetNetworkDefinitionAttribute();
 
                 // throw an exception if not network definition attribute is present
                 if (attribute == null)

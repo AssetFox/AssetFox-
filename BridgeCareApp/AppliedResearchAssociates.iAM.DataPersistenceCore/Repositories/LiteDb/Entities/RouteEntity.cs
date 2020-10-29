@@ -12,6 +12,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
 
         public Direction Direction { get; set; }
 
-        public string UniqueIdentifier { get; set; }
+        public string LocationIdentifier { get; set; }
     }
 }

@@ -4,45 +4,44 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public static class AttributeFactory
     {
-        public static Attribute Create(AttributeMetaDatum attributeMetaDatum)
+        public static Attribute Create(AttributeMetaDatum available)
         {
             Attribute attribute;
-
-            switch (attributeMetaDatum.Type)
+            switch (available.Type)
             {
-                case "NUMERIC":
+            case "NUMERIC":
+                {
+                    if (!double.TryParse(available.DefaultValue, out var defaultValue))
                     {
-                        if (!double.TryParse(attributeMetaDatum.DefaultValue, out var defaultValue))
-                        {
-                            throw new InvalidCastException($"Numeric attribute {attributeMetaDatum.Name} does not have a valid numeric default value. Please check the value in the configuration file and try again.");
-                        }
-
-                        attribute = new NumericAttribute(defaultValue,
-                            attributeMetaDatum.Maximum,
-                            attributeMetaDatum.Minimum,
-                            Guid.NewGuid(),
-                            attributeMetaDatum.Name,
-                            attributeMetaDatum.AggregationRule,
-                            attributeMetaDatum.Command,
-                            attributeMetaDatum.ConnectionType,
-                            attributeMetaDatum.ConnectionString);
-
-                        break;
+                        throw new InvalidCastException($"Numeric attribute {available.Name} does not have a valid numeric default value. Please check the value in the configuration file and try again.");
                     }
-                case "TEXT":
-                    {
-                        attribute = new TextAttribute(attributeMetaDatum.DefaultValue,
-                            Guid.NewGuid(),
-                            attributeMetaDatum.Name,
-                            attributeMetaDatum.AggregationRule,
-                            attributeMetaDatum.Command,
-                            attributeMetaDatum.ConnectionType,
-                            attributeMetaDatum.ConnectionString);
 
-                        break;
-                    }
-                default:
-                    throw new InvalidOperationException();
+                    attribute = new NumericAttribute(defaultValue,
+                        available.Maximum,
+                        available.Minimum,
+                        available.Id,
+                        available.Name,
+                        available.AggregationRule,
+                        available.Command,
+                        available.ConnectionType,
+                        available.ConnectionString);
+
+                    break;
+                }
+            case "TEXT":
+                {
+                    attribute = new TextAttribute(available.DefaultValue,
+                        available.Id,
+                        available.Name,
+                        available.AggregationRule,
+                        available.Command,
+                        available.ConnectionType,
+                        available.ConnectionString);
+
+                    break;
+                }
+            default:
+                throw new InvalidOperationException();
             }
 
             return attribute;

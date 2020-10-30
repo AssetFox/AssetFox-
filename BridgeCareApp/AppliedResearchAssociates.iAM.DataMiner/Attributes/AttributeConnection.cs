@@ -9,11 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 
         public abstract IEnumerable<IAttributeDatum> GetData<T>();
 
-        public abstract event EventHandler<InformationEventArgs> Information;
-
-        public AttributeConnection(Attribute attribute)
-        {
-            Attribute = attribute;
-        }
+        protected AttributeConnection(Attribute attribute) => Attribute = attribute;
     }
 }

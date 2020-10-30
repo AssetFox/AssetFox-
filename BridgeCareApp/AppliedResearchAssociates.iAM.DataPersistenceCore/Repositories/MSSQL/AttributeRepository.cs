@@ -1,17 +1,30 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AttributeRepository : MSSQLRepository<Attribute>
+    public class AttributeRepository : MSSQLRepository, IAttributeRepository
     {
-        public AttributeRepository(IAMContext context) : base(context) { }
+        private readonly IMaintainableAssetRepository _maintainableAssetRepo;
 
-        public override void AddAll(IEnumerable<Attribute> domains, params object[] args) =>
-            context.Attributes.AddRange(domains.Select(d => d.ToEntity()));
+        public AttributeRepository(IMaintainableAssetRepository maintainableAssetRepo,
+            IAMContext context) :
+            base(context) =>
+            _maintainableAssetRepo =
+                maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
 
-        public override System.Guid Add(Attribute domain) => context.Attributes.Add(domain.ToEntity()).Entity.Id;
+        public Dictionary<Guid, Attribute> AttributeDictionary { get; set; }
+
+        public void UpsertAttributes(List<Attribute> attributes)
+        {
+            Context.BulkInsertOrUpdate(attributes.Select(_ => _.ToEntity()).ToList());
+
+            Context.SaveChanges();
+        }
     }
 }

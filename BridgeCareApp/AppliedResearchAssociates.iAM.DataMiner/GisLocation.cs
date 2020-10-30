@@ -1,8 +1,10 @@
-﻿namespace AppliedResearchAssociates.iAM.DataMiner
+﻿using System;
+
+namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public class GisLocation : Location
     {
-        public GisLocation(string wellKnownTextString, string uniqueIdentifier) : base(uniqueIdentifier)
+        public GisLocation(Guid id, string wellKnownTextString, string locationIdentifier) : base(id, locationIdentifier)
         {
             WellKnownTextString = wellKnownTextString;
         }

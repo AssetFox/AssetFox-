@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,14 +1,14 @@
-﻿namespace AppliedResearchAssociates.iAM.DataMiner
+﻿using System;
+
+namespace AppliedResearchAssociates.iAM.DataMiner
 {
     public class SectionLocation : Location
     {
-        public SectionLocation(string uniqueIdentifier) : base(uniqueIdentifier)
+        public SectionLocation(Guid id, string locationIdentifier) : base(id, locationIdentifier)
         {
         }
 
-        public override bool MatchOn(Location location)
-        {
-            return location is SectionLocation sectionLocation ? sectionLocation.UniqueIdentifier == UniqueIdentifier : false;
-        }
+        public override bool MatchOn(Location location) =>
+            location is SectionLocation sectionLocation && sectionLocation.LocationIdentifier == LocationIdentifier;
     }
 }

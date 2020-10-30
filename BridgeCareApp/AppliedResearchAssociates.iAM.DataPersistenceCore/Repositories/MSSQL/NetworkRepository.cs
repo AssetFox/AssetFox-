@@ -1,39 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataAssignment.Segmentation;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Mappings;
+using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class NetworkRepository : MSSQLRepository<Network>
+    public class NetworkRepository : MSSQLRepository, INetworkRepository
     {
         public NetworkRepository(IAMContext context) : base(context) { }
 
-        public override Guid Add(Network network) => context.Networks.Add(network.ToEntity()).Entity.Id;
-
-        public override Network Get(Guid id)
+        public void CreateNetwork(Network network)
         {
-            if (!context.Networks.Any(n => n.Id == id))
+            // prevent EF from attempting to create the network's child entities (create them
+            // separately as part of a bulk insert)
+            Context.Networks.Add(new NetworkEntity
             {
-                throw new RowNotInTableException($"Cannot find network with the given id: {id}");
-            }
+                Id = network.Id,
+                Name = network.Name
+            });
 
-            var entity = context.Networks
-                .Include(n => n.MaintainableAssets)
-                .ThenInclude(m => m.Location)
-                .Include(n => n.MaintainableAssets)
-                .ThenInclude(m => m.AttributeData)
-                .ThenInclude(a => a.Attribute)
-                .Include(n => n.MaintainableAssets)
-                .ThenInclude(m => m.AttributeData)
-                .ThenInclude(a => a.Location)
-                .Single(n => n.Id == id);
+            // convert maintainable assets and all child domains to entities
+            var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity(network.Id)).ToList();
 
-            return entity.ToDomain();
+            // bulk insert maintainable assets
+            Context.BulkInsert(maintainableAssetEntities);
+
+            // bulk insert maintainable asset locations
+            Context.BulkInsert(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
+
+            Context.SaveChanges();
         }
 
         public override IEnumerable<Network> All()

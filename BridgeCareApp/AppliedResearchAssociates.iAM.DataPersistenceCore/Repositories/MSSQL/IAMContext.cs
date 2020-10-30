@@ -1,6 +1,10 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
+using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -26,11 +30,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 #if DEBUG
-            //optionsBuilder.UseSqlServer(ConnectionString);
-            //optionsBuilder.UseSqlServer("data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
-            optionsBuilder.UseSqlServer("data source=localhost;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
-            //optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Initial Catalog=IAMV2");
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Repositories\\MSSQL", "migrationConnection.json");
+            var migrationConnection = new MigrationConnection();
+            using (FileStream fs = File.Open(filePath, FileMode.Open))
+            {
+                using (StreamReader sr = new StreamReader(fs))
+                {
+                    string rawConnection = sr.ReadToEnd();
+                    migrationConnection = JsonConvert
+                                .DeserializeAnonymousType(rawConnection, new { ConnectionStrings = default(MigrationConnection) })
+                                .ConnectionStrings;
+                }
+            }
+
+            optionsBuilder.UseSqlServer(migrationConnection.BridgeCareConnex);
 #endif
+        }
+
+        private class MigrationConnection
+        {
+            public string BridgeCareConnex { get; set; }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

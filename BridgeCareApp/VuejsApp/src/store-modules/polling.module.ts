@@ -30,15 +30,6 @@ const actions = {
             });
     },
 
-    async getRealTimeData({dispatch}: any){
-        await PollingService.getRealTimeData()
-        .then((response: AxiosResponse<any>) => {
-            if(hasValue(response, 'data')){
-                console.log(response.data);
-            }
-        });
-    },
-
     /**
      * Creates an identifier that the node server will use to determine
      * if this browser session has already been sent an event.

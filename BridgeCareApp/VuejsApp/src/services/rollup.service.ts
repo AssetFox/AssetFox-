@@ -4,7 +4,6 @@ import {hasValue} from '@/shared/utils/has-value-util';
 import {any, propEq} from 'ramda';
 import {Rollup} from '@/shared/models/iAM/rollup';
 import { Network } from '@/shared/models/iAM/network';
-import { NewNetwork } from '@/shared/models/iAM/newNetwork';
 import { http2XX } from '@/shared/utils/http-utils';
 
 export default class RollupService {
@@ -54,21 +53,7 @@ export default class RollupService {
         });
     }
 
-    // static getAllNetworks() : AxiosPromise {
-    //     return new Promise<AxiosResponse<NewNetwork[]>>((resolve) => {
-    //         bridgecareCoreAxiosInstance.get('api/Network/GetAllNetworks')
-    //         .then((response: AxiosResponse<NewNetwork[]>) => {
-    //             if(hasValue(response)){
-    //                 return resolve(response);
-    //             }
-    //         })
-    //         .catch((error: any) => {
-    //             return resolve(error.response);
-    //         });
-    //     });
-    // }
-
-    static assignNetworkData(networkId: string) : AxiosPromise {
+    static aggregateNetworkData(networkId: string) : AxiosPromise {
         return new Promise<AxiosResponse<string>>((resolve) => {
             bridgecareCoreAxiosInstance.post(`api/Aggregation/AggregateNetworkData/${networkId}`)
             .then((response: AxiosResponse<string>) => {

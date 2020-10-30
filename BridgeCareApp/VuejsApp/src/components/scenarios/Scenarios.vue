@@ -27,7 +27,7 @@
                                     <td>
                                         <v-layout row wrap>
                                             <v-flex>
-                                                <v-btn @click="onShowAssignDataAlert(props.item.id)" class="green--text darken-1"
+                                                <v-btn @click="onShowAggregateDataAlert(props.item.id)" class="green--text darken-1"
                                                        icon>
                                                     <v-icon>fas fa-play</v-icon>
                                                 </v-btn>
@@ -47,10 +47,10 @@
                                 </template>
                             </v-data-table>
                         </div>
-                        <div class="pad-button" v-if="isAdmin">
+                        <!-- <div class="pad-button" v-if="isAdmin">
                             <v-btn @click="onCreateNetwork()" color="green darken-2 white--text" round>Create network
                             </v-btn>
-                        </div>
+                        </div> -->
                     </v-layout>
                 </v-flex>
             </v-card>
@@ -272,14 +272,13 @@
     import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
     import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
     import {Network} from '@/shared/models/iAM/network';
-    import { NewNetwork } from '@/shared/models/iAM/newNetwork';
+    import { NewNetwork, NetworkCreationData } from '@/shared/models/iAM/newNetwork';
     import {any, clone} from 'ramda';
     import {Simulation} from '@/shared/models/iAM/simulation';
     import {emptyRollup, Rollup} from '@/shared/models/iAM/rollup';
     import {getUserName} from '@/shared/utils/get-user-info';
     import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
     import CreateNetworkDialog from '@/components/scenarios/scenarios-dialogs/CreateNetworkDialog.vue';
-    import { NetworkCreationData } from '@/shared/models/modals/network-creation-data';
 
     @Component({
         components: {Alert, ReportsDownloaderDialog, CreateScenarioDialog, CreateNetworkDialog, ShareScenarioDialog}
@@ -304,11 +303,10 @@
         @Action('getSummaryReportMissingAttributes') getSummaryReportMissingAttributesAction: any;
         //@Action('getMongoRollups') getMongoRollupsAction: any;
         @Action('rollupNetwork') rollupNetworkAction: any;
-        @Action('assignNetworkData') assignNetworkDataAction: any;
+        @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
         @Action('getLegacyNetworks') getLegacyNetworksAction: any;
         @Action('cloneScenario') cloneScenarioAction: any;
         @Action('deleteDuplicateMongoScenario') deleteDuplicateMongoScenarioAction: any;
-        //@Action('getAllNetworks') getAllNetworksAction: any;
         @Action('createNetwork') createNetworkAction: any;
         @Action('getNetworks') getNetworksAction: any;
 
@@ -335,7 +333,7 @@
             {text: 'Network name', align: 'left', sortable: false, value: 'rollupName'},
             {text: 'Date Created', sortable: false, value: 'createdDate'},
             {text: 'Status', sortable: false, value: 'assignmentStatus'},
-            {text: 'Assign Data', sortable: false, value: 'actions'}
+            {text: 'Aggregate Data', sortable: false, value: 'actions'}
         ];
         scenarios: Scenario[] = [];
         userScenarios: Scenario[] = [];
@@ -529,13 +527,13 @@
             };
         }
 
-        onShowAssignDataAlert(networkId: string){
+        onShowAggregateDataAlert(networkId: string){
             this.newNetworkId = networkId;
             this.alertBeforeAssignData = {
                 showDialog: true,
                 heading: 'Warning',
                 choice: true,
-                message: 'The assign data operation can take around five minutes to finish. ' +
+                message: 'The assign data operation can take around 1 hour to finish. ' +
                     'Are you sure that you want to continue?'
             };
         }
@@ -549,7 +547,7 @@
             this.alertBeforeAssignData = clone(emptyAlertData);
 
             if(response){
-                this.assignNetworkData();
+                this.aggregateNetworkData();
             }
         }
 
@@ -583,8 +581,8 @@
             });
         }
 
-        assignNetworkData(){
-            this.assignNetworkDataAction({
+        aggregateNetworkData(){
+            this.aggregateNetworkDataAction({
                 networkId: this.newNetworkId
             });
         }
@@ -677,7 +675,7 @@
         }
 
         beforeDestroy () {
-            this.$statusHub.$off('score-changed', this.onScoreChanged);
+            this.$statusHub.$off('assignedData-status-event', this.getStatusUpdate);
         }
     }
 </script>

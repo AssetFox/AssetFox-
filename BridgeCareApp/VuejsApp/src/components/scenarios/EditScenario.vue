@@ -240,8 +240,6 @@
             if (this.selectedScenarioId !== 0) {
                 this.selectScenarioAction({simulationId: this.selectedScenarioId});
             }
-            console.log(`screen width: ${this.$screen.width}`);
-            console.log(`lg breakpoint: ${this.$screen.lg}`);
         }
 
         beforeDestroy() {

@@ -1,6 +1,5 @@
 import {AxiosPromise, AxiosResponse} from 'axios';
 import {axiosInstance, bridgecareCoreAxiosInstance} from '@/shared/utils/axios-instance';
-import { NetworkCreationData } from '@/shared/models/modals/network-creation-data';
 import { NewNetwork } from '@/shared/models/iAM/newNetwork';
 import { hasValue } from '@/shared/utils/has-value-util';
 

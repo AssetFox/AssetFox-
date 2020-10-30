@@ -27,7 +27,7 @@
 <script lang="ts">
     import Vue from 'vue';
     import {Component, Prop, Watch} from 'vue-property-decorator';
-    import {emptyCreateNetworkData, NetworkCreationData} from '@/shared/models/modals/network-creation-data';
+    import { emptyCreateNetworkData, NetworkCreationData } from '@/shared/models/iAM/newNetwork';
     import {clone} from 'ramda';
     import {getUserName} from '../../../shared/utils/get-user-info';
 
@@ -58,7 +58,7 @@
                 this.$emit('submit', null);
             }
 
-            this.createNetworkData = clone(emptyCreateNetworkData);
+            this.createNetworkData = {...emptyCreateNetworkData};
             this.createNetworkData.creator = getUserName();
             this.createNetworkData.owner = this.createNetworkData.creator;
             this.public = false;

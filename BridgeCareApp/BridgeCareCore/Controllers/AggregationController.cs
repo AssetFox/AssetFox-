@@ -41,7 +41,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
-        public async Task<IActionResult> AssignNetworkData(Guid networkId)
+        public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
             var broadcastingMessage = "Starting data assignment";
             var percentage = 0.0;

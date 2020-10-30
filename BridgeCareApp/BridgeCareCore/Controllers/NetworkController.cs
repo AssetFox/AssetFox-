@@ -71,7 +71,7 @@ namespace BridgeCareCore.Controllers
 
                 // [TODO] Create DTO to return network information necessary to be stored in the UI
                 // for future reference.
-                return Ok($"Network {network.Name} with ID {network.Id} and {network.MaintainableAssets.Count()} maintainable assets was created successfully.");
+                return Ok(network.Id);
             }
             catch (Exception e)
             {

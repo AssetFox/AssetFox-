@@ -61,15 +61,8 @@ const actions = {
                 }
             });
     },
-    // async getAllNetworks({commit}: any){
-    //     return await RollupService.getAllNetworks()
-    //     .then((response: AxiosResponse<NewNetwork[]>) => {
-    //         const networks: NewNetwork[] = response.data;
-    //         commit('newNetworksMutator', networks);
-    //     });
-    // },
-    async assignNetworkData({dispatch, commit}: any, payload: any){
-        await RollupService.assignNetworkData(payload.networkId)
+    async aggregateNetworkData({dispatch, commit}: any, payload: any){
+        await RollupService.aggregateNetworkData(payload.networkId)
         .then((response: AxiosResponse<any>) => {
             if(http2XX.test(response.status.toString())){
                 dispatch('setSuccessMessage', {message: 'Data assignment started'});

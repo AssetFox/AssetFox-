@@ -10,8 +10,6 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
         {
         }
 
-        public override event EventHandler<InformationEventArgs> Information;
-
         public override IEnumerable<IAttributeDatum> GetData<T>()
         {
             double? start = null;
@@ -21,7 +19,6 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 
             using (var conn = new SqlConnection(Attribute.ConnectionString))
             {
-                Inform("Fetching arrtibute data");
                 var sqlCommand = new SqlCommand(Attribute.Command, conn);
                 sqlCommand.Connection.Open();
                 var dataReader = sqlCommand.ExecuteReader();
@@ -42,9 +39,5 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
                 }
             }
         }
-
-        internal void Inform(string message) => OnInformation(new InformationEventArgs(message));
-
-        private void OnInformation(InformationEventArgs e) => Information?.Invoke(this, e);
     }
 }

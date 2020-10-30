@@ -70,11 +70,10 @@ export default class RollupService {
 
     static assignNetworkData(networkId: string) : AxiosPromise {
         return new Promise<AxiosResponse<string>>((resolve) => {
-            bridgecareCoreAxiosInstance.post(`api/Aggregation/AssignNetworkData/${networkId}`)
+            bridgecareCoreAxiosInstance.post(`api/Aggregation/AggregateNetworkData/${networkId}`)
             .then((response: AxiosResponse<string>) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    bridgecareCoreAxiosInstance.post(`api/Aggregation/AggregateNetworkData/${networkId}`)
-                    .catch((error: any) => resolve(error.response));
+                    return resolve(response);
                 }
             })
             .catch((error: any) => {

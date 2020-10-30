@@ -28,6 +28,7 @@ namespace BridgeCareCore
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
+            services.AddSignalR();
 
 #if MsSqlDebug
             // SQL SERVER SCOPINGS
@@ -38,18 +39,7 @@ namespace BridgeCareCore
             services.AddScoped<IAttributeRepository, AttributeRepository>();
             services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
             services.AddScoped<IAggregatedResultRepository, AggregatedResultRepository>();
-            //It is an extension method in DataPersistenceCore project, which provides the connection to the database
-            // This way, BridgeCareCore app doesn't have to know about the provider (eg. EF core)
-            services.AddDataAccessServices(Configuration.GetConnectionString("BridgeCareConnex"));
-            services.AddSignalR();
 
-             services.AddCors(o => o.AddPolicy("CorsPolicy", builder => {
-                builder
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials()
-                .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com");
-            }));
 #elif LiteDbDebug
             // LITE DB SCOPINGS
             services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
@@ -61,6 +51,13 @@ namespace BridgeCareCore
             services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository>();
             services.AddScoped<IMaintainableAssetRepository, LiteDb.MaintainableAssetRepository>();
 #endif
+            services.AddCors(o => o.AddPolicy("CorsPolicy", builder => {
+                builder
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com");
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

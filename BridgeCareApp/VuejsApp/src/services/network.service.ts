@@ -21,7 +21,7 @@ export default class NetworkService {
 
     static createNetwork(networkName: any): AxiosPromise {
         return new Promise<AxiosResponse<NewNetwork>>((resolve) => {
-            bridgecareCoreAxiosInstance.post(`api/Network/CreateNetwork/${networkName.name}`).then((response: AxiosResponse<NewNetwork>) => {
+            bridgecareCoreAxiosInstance.post(`api/Network/CreateNetwork/${networkName}`).then((response: AxiosResponse<NewNetwork>) => {
                     if (hasValue(response)) {
                         return resolve(response);
                     }

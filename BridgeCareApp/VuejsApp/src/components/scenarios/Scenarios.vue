@@ -47,10 +47,10 @@
                                 </template>
                             </v-data-table>
                         </div>
-                        <!-- <div class="pad-button" v-if="isAdmin">
+                        <div class="pad-button" v-if="isAdmin">
                             <v-btn @click="onCreateNetwork()" color="green darken-2 white--text" round>Create network
                             </v-btn>
-                        </div> -->
+                        </div>
                     </v-layout>
                 </v-flex>
             </v-card>

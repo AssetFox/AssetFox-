@@ -33,7 +33,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var networks = NetworkRepo.All();
+                var networks = _networkRepo.GetAllNetworks();
                 // Sending the first network because PennDOT will always have only 1 network
                 var filteredNetworks = new List<Network> { networks.FirstOrDefault() };
                 return Ok(filteredNetworks);
@@ -46,7 +46,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CreateNetwork/{networkName}")]
-        public IActionResult CreateNetwork([FromBody] string networkName)
+        public IActionResult CreateNetwork(string networkName)
         {
             try
             {

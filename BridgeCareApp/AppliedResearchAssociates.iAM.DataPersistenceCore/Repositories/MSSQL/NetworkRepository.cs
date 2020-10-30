@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -33,22 +34,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             Context.SaveChanges();
         }
 
-        public override IEnumerable<Network> All()
+        public IEnumerable<Network> GetAllNetworks()
         {
-            if (context.Networks.Count() == 0)
+            if (Context.Networks.Count() == 0)
             {
                 throw new RowNotInTableException($"Cannot find networks in the database");
             }
 
             // consumer of this call will only need the network information. Not the maintainable assest information
-            var entities = context.Networks.ToList();
-
-            var networks = new List<Network>();
-            foreach (var entity in entities)
-            {
-                networks.Add(entity.ToDomain());
-            }
-            return networks;
+            return Context.Networks.Select(_ => _.ToDomain()).ToList();
         }
     }
 }

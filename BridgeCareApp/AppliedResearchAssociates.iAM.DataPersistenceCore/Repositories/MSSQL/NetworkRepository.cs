@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -31,6 +32,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             Context.BulkInsert(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
 
             Context.SaveChanges();
+        }
+
+        public IEnumerable<Network> GetAllNetworks()
+        {
+            if (Context.Networks.Count() == 0)
+            {
+                throw new RowNotInTableException($"Cannot find networks in the database");
+            }
+
+            // consumer of this call will only need the network information. Not the maintainable assest information
+            return Context.Networks.Select(_ => _.ToDomain()).ToList();
         }
     }
 }

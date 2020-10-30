@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
@@ -26,9 +27,26 @@ namespace BridgeCareCore.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        [HttpGet]
+        [Route("GetAllNetworks")]
+        public IActionResult GetAllNetworks()
+        {
+            try
+            {
+                var networks = _networkRepo.GetAllNetworks();
+                // Sending the first network because PennDOT will always have only 1 network
+                var filteredNetworks = new List<Network> { networks.FirstOrDefault() };
+                return Ok(filteredNetworks);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e);
+            }
+        }
+
         [HttpPost]
-        [Route("CreateNetwork")]
-        public IActionResult CreateNetwork([FromBody] string name)
+        [Route("CreateNetwork/{networkName}")]
+        public IActionResult CreateNetwork(string networkName)
         {
             try
             {
@@ -44,7 +62,7 @@ namespace BridgeCareCore.Controllers
                 // create network domain model from attribute data created from the network attribute
                 var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
                     AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
-                network.Name = name;
+                network.Name = networkName;
 
                 // insert network domain data into the data source
                 _networkRepo.CreateNetwork(network);
@@ -53,12 +71,16 @@ namespace BridgeCareCore.Controllers
 
                 // [TODO] Create DTO to return network information necessary to be stored in the UI
                 // for future reference.
-                return Ok($"Network {network.Name} with ID {network.Id} and {network.MaintainableAssets.Count()} maintainable assets was created successfully.");
+                return Ok(network.Id);
             }
             catch (Exception e)
             {
                 return StatusCode(500, e);
             }
+        }
+        public class NetworkName
+        {
+            internal string name { get; set; }
         }
     }
 }

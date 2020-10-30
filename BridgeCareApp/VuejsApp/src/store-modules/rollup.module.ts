@@ -6,9 +6,12 @@ import prepend from 'ramda/es/prepend';
 import {Rollup} from '@/shared/models/iAM/rollup';
 import RollupService from '../services/rollup.service';
 import {convertFromMongoToVue} from '@/shared/utils/mongo-model-conversion-utils';
+import { Network } from '@/shared/models/iAM/network';
+import { NewNetwork } from '@/shared/models/iAM/newNetwork';
 
 const state = {
-    rollups: [] as Rollup[],
+    rollups: [] as Rollup[]
+    //newNetworks: [] as NewNetwork[]
 };
 
 const mutations = {
@@ -26,6 +29,9 @@ const mutations = {
             state.rollups = rollups;
         }
     }
+    // newNetworksMutator(state: any, network: NewNetwork[]){
+    //     state.newNetworks = clone(network);
+    // }
 };
 
 const actions = {
@@ -54,6 +60,14 @@ const actions = {
                     commit('rollupsMutator', networks);
                 }
             });
+    },
+    async aggregateNetworkData({dispatch, commit}: any, payload: any){
+        await RollupService.aggregateNetworkData(payload.networkId)
+        .then((response: AxiosResponse<any>) => {
+            if(http2XX.test(response.status.toString())){
+                dispatch('setSuccessMessage', {message: 'Data assignment started'});
+            }
+        })
     },
     async socket_rollupStatus({dispatch, state, commit}: any, payload: any) {
         if (payload.operationType == 'update' || payload.operationType == 'replace') {

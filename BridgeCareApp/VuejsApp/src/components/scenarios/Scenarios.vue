@@ -4,18 +4,37 @@
             <v-card elevation=5>
                 <v-flex xs10>
                     <v-layout>
-                        <div>
+                        <div class="network-min-width">
                             <v-data-table :headers="rollupGridHeader"
                                           :items="adminRollup"
                                           :items-per-page="5"
                                           class="elevation-1"
                                           hide-actions>
                                 <template slot="items" slot-scope="props">
-                                    <td>{{ props.item.networkName }}</td>
+                                    <td>{{ props.item.name }}</td>
                                     <td>{{ props.item.createdDate }}</td>
-                                    <td>{{ props.item.lastModifiedDate }}</td>
-                                    <td>{{ props.item.rollupStatus }}</td>
+                                    <td class="status-min-width">
+                                        {{ assignDataStatusUpdate }}
+                                        <v-progress-linear
+                                        v-model="percentage"
+                                        color="light-green darken-1"
+                                        height="25"
+                                        striped
+                                        >
+                                        <strong>{{ Math.ceil(percentage) }}%</strong>
+                                        </v-progress-linear>
+                                        </td>
                                     <td>
+                                        <v-layout row wrap>
+                                            <v-flex>
+                                                <v-btn @click="onShowAggregateDataAlert(props.item.id)" class="green--text darken-1"
+                                                       icon>
+                                                    <v-icon>fas fa-play</v-icon>
+                                                </v-btn>
+                                            </v-flex>
+                                        </v-layout>
+                                    </td>
+                                    <!-- <td>
                                         <v-layout row wrap>
                                             <v-flex>
                                                 <v-btn @click="onShowRunRollupAlert(props.item)" class="green--text darken-2"
@@ -24,14 +43,14 @@
                                                 </v-btn>
                                             </v-flex>
                                         </v-layout>
-                                    </td>
+                                    </td> -->
                                 </template>
                             </v-data-table>
                         </div>
-                        <div class="pad-button" v-if="isAdmin">
-                            <v-btn @click="onLoadNetworks()" color="green darken-2 white--text" round>Load networks
+                        <!-- <div class="pad-button" v-if="isAdmin">
+                            <v-btn @click="onCreateNetwork()" color="green darken-2 white--text" round>Create network
                             </v-btn>
-                        </div>
+                        </div> -->
                     </v-layout>
                 </v-flex>
             </v-card>
@@ -223,8 +242,10 @@
 
         <Alert :dialogData="alertBeforeDelete" @submit="onSubmitResponse"/>
         <Alert :dialogData="alertBeforeRunRollup" @submit="onSubmitRollupDecision"/>
+        <Alert :dialogData="alertBeforeAssignData" @submit="onSubmitAssignDataDecision" />
 
         <CreateScenarioDialog :showDialog="showCreateScenarioDialog" @submit="onSubmitNewScenario"/>
+        <CreateNetworkDialog :showDialog="showCreateNetworkDialog" @submit="onSubmitNewNetwork"/>
 
         <ReportsDownloaderDialog :dialogData="reportsDownloaderDialogData"/>
 
@@ -251,14 +272,16 @@
     import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
     import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
     import {Network} from '@/shared/models/iAM/network';
+    import { NewNetwork, NetworkCreationData } from '@/shared/models/iAM/newNetwork';
     import {any, clone} from 'ramda';
     import {Simulation} from '@/shared/models/iAM/simulation';
     import {emptyRollup, Rollup} from '@/shared/models/iAM/rollup';
     import {getUserName} from '@/shared/utils/get-user-info';
     import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
+    import CreateNetworkDialog from '@/components/scenarios/scenarios-dialogs/CreateNetworkDialog.vue';
 
     @Component({
-        components: {Alert, ReportsDownloaderDialog, CreateScenarioDialog, ShareScenarioDialog}
+        components: {Alert, ReportsDownloaderDialog, CreateScenarioDialog, CreateNetworkDialog, ShareScenarioDialog}
     })
     export default class Scenarios extends Vue {
         @State(state => state.scenario.scenarios) stateScenarios: Scenario[];
@@ -266,10 +289,10 @@
         @State(state => state.breadcrumb.navigation) navigation: any[];
         @State(state => state.network.networks) networks: Network[];
         @State(state => state.authentication.authenticated) authenticated: boolean;
-        @State(state => state.rollup.rollups) rollups: Rollup[];
+        //@State(state => state.rollup.rollups) rollups: Rollup[];
         @State(state => state.authentication.isAdmin) isAdmin: boolean;
         @State(state => state.authentication.isCWOPA) isCWOPA: boolean;
-
+        @State(state => state.network.newNetworks) newNetworks: NewNetwork[];
         @Action('getMongoScenarios') getMongoScenariosAction: any;
         @Action('getLegacyScenarios') getLegacyScenariosAction: any;
         @Action('runSimulation') runSimulationAction: any;
@@ -278,18 +301,23 @@
         @Action('updateScenario') updateScenarioAction: any;
         @Action('updateScenarioUsers') updateScenarioUsersAction: any;
         @Action('getSummaryReportMissingAttributes') getSummaryReportMissingAttributesAction: any;
-        @Action('getMongoRollups') getMongoRollupsAction: any;
+        //@Action('getMongoRollups') getMongoRollupsAction: any;
         @Action('rollupNetwork') rollupNetworkAction: any;
+        @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
         @Action('getLegacyNetworks') getLegacyNetworksAction: any;
         @Action('cloneScenario') cloneScenarioAction: any;
         @Action('deleteDuplicateMongoScenario') deleteDuplicateMongoScenarioAction: any;
+        @Action('createNetwork') createNetworkAction: any;
+        @Action('getNetworks') getNetworksAction: any;
 
         alertData: AlertData = clone(emptyAlertData);
         alertBeforeDelete: AlertData = clone(emptyAlertData);
         alertBeforeRunRollup: AlertData = clone(emptyAlertData);
+        alertBeforeAssignData: AlertData = clone(emptyAlertData);
         reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(emptyReportsDownloadDialogData);
         showCreateScenarioDialog: boolean = false;
         showShareScenarioDialog: boolean = false;
+        showCreateNetworkDialog: boolean = false;
         scenarioGridHeaders: object[] = [
             {text: 'Scenario Name', align: 'left', sortable: true, value: 'simulationName'},
             {text: 'Creator', sortable: false, value: 'creator'},
@@ -304,9 +332,8 @@
         rollupGridHeader: object[] = [
             {text: 'Network name', align: 'left', sortable: false, value: 'rollupName'},
             {text: 'Date Created', sortable: false, value: 'createdDate'},
-            {text: 'Date Last Modified', sortable: false, value: 'lastModifiedDate'},
-            {text: 'Status', sortable: false, value: 'rollupStatus'},
-            {text: '', sortable: false, value: 'actions'}
+            {text: 'Status', sortable: false, value: 'assignmentStatus'},
+            {text: 'Aggregate Data', sortable: false, value: 'actions'}
         ];
         scenarios: Scenario[] = [];
         userScenarios: Scenario[] = [];
@@ -323,6 +350,9 @@
         currentRollup: Rollup = clone(emptyRollup);
         sharingScenario: Scenario = clone(emptyScenario);
         rules: InputValidationRules = {...rules};
+        newNetworkId: string = '';
+        assignDataStatusUpdate: string = '';
+        percentage = 0;
 
         @Watch('stateScenarios')
         onStateScenariosChanged() {
@@ -347,21 +377,31 @@
 
         }
 
-        @Watch('rollups')
-        onRollupsChanged() {
-            if (hasValue(this.rollups)) {
-                this.adminRollup = this.rollups;
-            } else {
+        // @Watch('rollups')
+        // onRollupsChanged() {
+        //     if (hasValue(this.rollups)) {
+        //         this.adminRollup = this.rollups;
+        //     } else {
+        //         this.adminRollup = [];
+        //     }
+
+        // }
+        @Watch('newNetworks')
+        onNewNetworkChanged(){
+            if(hasValue(this.newNetworks)){
+                this.adminRollup = this.newNetworks;
+            }
+            else {
                 this.adminRollup = [];
             }
-
         }
 
         @Watch('authenticated')
         onAuthenticated() {
             if (this.authenticated) {
                 this.getMongoScenariosAction({userId: this.userId});
-                this.getMongoRollupsAction({});
+                //this.getMongoRollupsAction({});
+                this.getNetworksAction();
             }
         }
 
@@ -371,8 +411,10 @@
         mounted() {
             if (this.authenticated) {
                 this.getMongoScenariosAction({userId: this.userId});
-                this.getMongoRollupsAction({});
+                //this.getMongoRollupsAction({});
+                this.getNetworksAction();
             }
+            this.$statusHub.$on('assignedData-status-event', this.getStatusUpdate);
         }
 
         onUpdateScenarioList() {
@@ -385,6 +427,10 @@
 
         onLoadNetworks() {
             this.getLegacyNetworksAction({networks: this.adminRollup});
+        }
+
+        onCreateNetwork(){
+            this.showCreateNetworkDialog = true;
         }
 
         /**
@@ -481,6 +527,30 @@
             };
         }
 
+        onShowAggregateDataAlert(networkId: string){
+            this.newNetworkId = networkId;
+            this.alertBeforeAssignData = {
+                showDialog: true,
+                heading: 'Warning',
+                choice: true,
+                message: 'The assign data operation can take around 1 hour to finish. ' +
+                    'Are you sure that you want to continue?'
+            };
+        }
+
+        getStatusUpdate(data: any){
+            this.assignDataStatusUpdate = data.status;
+            this.percentage = data.percentage;
+        }
+
+        onSubmitAssignDataDecision(response: boolean){
+            this.alertBeforeAssignData = clone(emptyAlertData);
+
+            if(response){
+                this.aggregateNetworkData();
+            }
+        }
+
         onSubmitRollupDecision(response: boolean) {
             this.alertBeforeRunRollup = clone(emptyAlertData);
 
@@ -508,6 +578,12 @@
             this.runSimulationAction({
                 selectedScenario: this.currentScenario,
                 userId: this.userId
+            });
+        }
+
+        aggregateNetworkData(){
+            this.aggregateNetworkDataAction({
+                networkId: this.newNetworkId
             });
         }
 
@@ -574,6 +650,16 @@
             }
         }
 
+        onSubmitNewNetwork(createNetworkData: NetworkCreationData){
+            this.showCreateNetworkDialog = false;
+            var name = createNetworkData.name;
+            if(hasValue(createNetworkData)){
+                this.createNetworkAction({
+                    networkName: {name: name}
+                });
+            }
+        }
+
         onSubmitSharedScenario(scenarioUsers: ScenarioUser[]) {
             this.showShareScenarioDialog = false;
 
@@ -587,11 +673,21 @@
 
             this.sharingScenario = clone(emptyScenario);
         }
+
+        beforeDestroy () {
+            this.$statusHub.$off('assignedData-status-event', this.getStatusUpdate);
+        }
     }
 </script>
 
 <style>
     .pad-button {
         padding-top: 33px;
+    }
+    .network-min-width {
+        min-width: 1000px;
+    }
+    .status-min-width {
+        min-width: 300px;
     }
 </style>

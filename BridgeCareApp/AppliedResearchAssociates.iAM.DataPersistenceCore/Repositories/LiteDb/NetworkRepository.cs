@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
@@ -19,6 +20,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 
             var networkCollection = Context.Database.GetCollection<NetworkEntity>("NETWORKS");
             networkCollection.Insert(datum.ToEntity());
+        }
+
+        public IEnumerable<Network> GetAllNetworks()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

@@ -373,3 +373,4 @@ iAM-legacy/DatabaseManager.dll
 
 # core connection file
 /BridgeCareApp/BridgeCareCore/coreConnection.json
+/BridgeCareApp/AppliedResearchAssociates.iAM.DataPersistenceCore/Repositories/MSSQL/migrationConnection.json

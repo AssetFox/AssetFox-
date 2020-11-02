@@ -28,6 +28,7 @@ namespace BridgeCareCore
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
+            services.AddScoped<ISimulationOutputRepository, SimulationOutputRepository>();
             services.AddSignalR();
 
 #if MsSqlDebug

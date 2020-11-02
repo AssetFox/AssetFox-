@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
 {
     public class AttributeMetaDataRepository : IAttributeMetaDataRepository
     {
-        public List<Attribute> GetAllAttributes()
+        public List<DataMiner.Attributes.Attribute> GetAllAttributes()
         {
             // set the attribute meta data json file path
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
@@ -57,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             return attributes;
         }
 
-        public Attribute GetNetworkDefinitionAttribute()
+        public DataMiner.Attributes.Attribute GetNetworkDefinitionAttribute()
         {
             // get the network definition rules file path
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,

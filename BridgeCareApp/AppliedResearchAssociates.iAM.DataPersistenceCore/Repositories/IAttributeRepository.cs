@@ -5,6 +5,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeRepository
     {
-        void UpsertAttributes(List<Attribute> attributes);
+        void UpsertAttributes(List<DataMiner.Attributes.Attribute> attributes);
     }
 }

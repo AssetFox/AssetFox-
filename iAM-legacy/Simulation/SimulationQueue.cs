@@ -3,6 +3,7 @@ using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.Validation;
 using log4net;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -178,9 +179,14 @@ namespace Simulation
 
             var outputFile = $"Network {parameters.NetworkId} - Simulation {parameters.SimulationId}.json";
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis, outputFile);
-            using var outputStream = File.Create(filePath);
-            using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });
-            JsonSerializer.Serialize(outputWriter, newSimulation.Results, new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });
+            //using var outputStream = File.Create(filePath);
+            //using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });
+            var settings = new JsonSerializerSettings
+            {
+                ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+            };
+            var resultObject = JsonConvert.SerializeObject(newSimulation.Results, settings);
+            File.WriteAllText(filePath, resultObject);
         }
 
         private void Consume(object state)

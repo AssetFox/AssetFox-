@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -18,9 +17,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _maintainableAssetRepo =
                 maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
 
-        public Dictionary<Guid, Attribute> AttributeDictionary { get; set; }
+        public Dictionary<Guid, DataMinerAttribute> AttributeDictionary { get; set; }
 
-        public void UpsertAttributes(List<Attribute> attributes)
+        public void UpsertAttributes(List<DataMinerAttribute> attributes)
         {
             Context.BulkInsertOrUpdate(attributes.Select(_ => _.ToEntity()).ToList());
 

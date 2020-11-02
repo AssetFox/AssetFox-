@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
     {
         public NetworkRepository(ILiteDbContext context) : base(context) { }
 
-        public void CreateNetwork(Network datum)
+        public void CreateNetwork(DataAssignment.Networking.Network datum)
         {
             var locationCollection = Context.Database.GetCollection<LocationEntity>("LOCATIONS");
             locationCollection.InsertBulk(datum.MaintainableAssets.Select(_ => _.Location.ToEntity()));
@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             networkCollection.Insert(datum.ToEntity());
         }
 
-        public IEnumerable<Network> GetAllNetworks()
+        public IEnumerable<DataAssignment.Networking.Network> GetAllNetworks()
         {
             throw new System.NotImplementedException();
         }

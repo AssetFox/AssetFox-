@@ -599,7 +599,7 @@
          */
         onShowReportsDownloaderDialog(scenario: Scenario) {
             this.getSummaryReportMissingAttributesAction({
-                    selectedScenarioId: scenario.simulationId, selectedNetworkId: this.networks[0].networkId
+                    selectedScenarioId: 1181, selectedNetworkId: 13 // this.networks[0].networkId ..... scenario.simulationId
                 }
             ).then(() => {
                 setTimeout(() => {

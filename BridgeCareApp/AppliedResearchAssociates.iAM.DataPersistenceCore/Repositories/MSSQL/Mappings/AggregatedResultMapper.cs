@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     .Select(_ => (_.Attribute.ToDomain(), (_.Year, _.NumericValue ?? 0)));
 
                 aggregatedResults.Add(new AggregatedResult<double>(Guid.NewGuid(),
-                    entities.First().MaintainableAsset.ToDomain(), aggregatedData));
+                    entities.First().MaintainableAsset.ToDomain(), (IEnumerable<(DataMiner.Attributes.Attribute attribute, (int year, double value))>)aggregatedData));
             }
 
             if (entities.Any(_ => _.Discriminator == "TextAggregatedResult"))
@@ -68,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     .Select(_ => (_.Attribute.ToDomain(), (_.Year, _.TextValue ?? "")));
 
                 aggregatedResults.Add(new AggregatedResult<string>(Guid.NewGuid(),
-                    entities.First().MaintainableAsset.ToDomain(), aggregatedData));
+                    entities.First().MaintainableAsset.ToDomain(), (IEnumerable<(DataMiner.Attributes.Attribute attribute, (int year, string value))>)aggregatedData));
             }
 
             return aggregatedResults;

@@ -26,7 +26,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("GenerateSummaryReport")]
+        [Route("GenerateSummaryReport/{networkId}/{simulationId}")]
         public IActionResult GenerateSummaryReport(Guid networkId, Guid simulationId)
         {
             var result = _simulationOutputFileRepo.GetSimulationResults(networkId, simulationId);

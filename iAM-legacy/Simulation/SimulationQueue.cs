@@ -179,8 +179,6 @@ namespace Simulation
 
             var outputFile = $"Network {parameters.NetworkId} - Simulation {parameters.SimulationId}.json";
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis, outputFile);
-            //using var outputStream = File.Create(filePath);
-            //using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });
             var settings = new JsonSerializerSettings
             {
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor

@@ -1,5 +1,8 @@
 {
     "gotoSymbolStack.currentStackPosition": 0,
     "gotoSymbolStack.maxStackPosition": 0,
-    "gotoSymbolStack.filePositionInfo": []
+    "gotoSymbolStack.filePositionInfo": [],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false
 }

@@ -67,7 +67,7 @@ const actions = {
             if(http2XX.test(response.status.toString())){
                 dispatch('setSuccessMessage', {message: 'Data assignment started'});
             }
-        })
+        });
     },
     async socket_rollupStatus({dispatch, state, commit}: any, payload: any) {
         if (payload.operationType == 'update' || payload.operationType == 'replace') {

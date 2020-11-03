@@ -4,7 +4,7 @@ import { bridgecareCoreAxiosInstance } from './shared/utils/axios-instance';
 export default {
     install(Vue: any) {
         const connection = new HubConnectionBuilder()
-            .withUrl(`http://localhost:64469/bridgecarehub/`, {
+            .withUrl(`${process.env.VUE_APP_BRIDGECARE_CORE_URL}/bridgecarehub/`, {
                 //skipNegotiation: false,
                 transport: HttpTransportType.LongPolling
             })

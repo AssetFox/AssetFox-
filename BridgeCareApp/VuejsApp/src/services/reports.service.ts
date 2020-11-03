@@ -32,7 +32,7 @@ export default class ReportsService {
           return bridgecareCoreAxiosInstance.request({
               method: 'POST',
               url: '/api/SummaryReport/GenerateSummaryReport/E3E02FD0-6251-45AE-A5A4-7BE3E51F3B40/E3E02FD0-6251-45AE-A5A4-7BE3E51F3B40',
-              headers: {'Content-Type': "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+              headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
               responseType: 'arraybuffer'
           });
     }

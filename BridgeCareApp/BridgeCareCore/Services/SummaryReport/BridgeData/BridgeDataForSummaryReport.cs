@@ -23,9 +23,17 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             // Add data to excel.
             var headers = GetHeaders();
+
             var simulationYears = new List<int>();
             reportOutputData.Years.ForEach(_ => simulationYears.Add(_.Year));
+
             var currentCell = AddHeadersCells(worksheet, headers, simulationYears);
+
+            // Add row next to headers for filters and year numbers for dynamic data. Cover from top, left to right, and bottom set of data.
+            using (ExcelRange autoFilterCells = worksheet.Cells[3, 1, currentCell.Row, currentCell.Column - 1])
+            {
+                autoFilterCells.AutoFilter = true;
+            }
             return new WorkSummaryModel();
         }
 

@@ -41,7 +41,7 @@ const actions = {
                     var networkObj: NewNetwork = {
                         ...response.data,
                         name: payload.createNetworkData.name
-                    }
+                    };
                     commit('createdNetworkMutator', networkObj);
                     dispatch('setSuccessMessage', {message: 'Successfully created network'});
                 }

@@ -41,7 +41,6 @@ namespace BridgeCareCore.Services.SummaryReport
                 byte[] bin = excelPackage.GetAsByteArray();
                 File.WriteAllBytes(filePath, bin);
 
-                //byte[] summaryReportData = File.ReadAllBytes(filePath);
                 return bin;
             }
         }

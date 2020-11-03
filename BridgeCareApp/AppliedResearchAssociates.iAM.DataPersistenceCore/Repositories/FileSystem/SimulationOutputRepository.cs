@@ -11,8 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
     {
         public SimulationOutput GetSimulationResults(Guid networkId, Guid simulationId)
         {
-            var folderPathForNewAnalysis = $"DownloadedReports\\1191_NewAnalysis";
-            var outputFile = $"Network 13 - Simulation 1191.json";
+            var folderPathForNewAnalysis = $"DownloadedReports\\1189_NewAnalysis";
+            var outputFile = $"Network 13 - Simulation 1189.json";
             var filePath = Path.Combine(Environment.CurrentDirectory, folderPathForNewAnalysis, outputFile);
             // check that the file exists
             if (!File.Exists(filePath))

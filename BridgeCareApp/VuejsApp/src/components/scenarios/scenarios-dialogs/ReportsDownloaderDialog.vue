@@ -148,7 +148,7 @@
                                         } else {
                                             this.setSuccessMessageAction({message: 'Report has been downloaded'});
                                         }
-                                        FileDownload(response.data, 'SummaryReportRawData.json');
+                                        FileDownload(response.data, 'SummaryReportTestData.xlsx');
                                     });
                                 break;
                             }

@@ -3,6 +3,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces.SummaryReport;
+using BridgeCareCore.Services.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.BridgeData;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +32,9 @@ namespace BridgeCareCore
 
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
             services.AddScoped<ISimulationOutputRepository, SimulationOutputRepository>();
+            services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
+            services.AddScoped<IExcelHelper, ExcelHelper>();
+            services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
             services.AddSignalR();
 
 #if MsSqlDebug

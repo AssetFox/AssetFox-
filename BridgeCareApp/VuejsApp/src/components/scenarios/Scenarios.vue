@@ -599,6 +599,7 @@
          */
         onShowReportsDownloaderDialog(scenario: Scenario) {
             this.getSummaryReportMissingAttributesAction({
+                //[TODO]: fix the id issue
                     selectedScenarioId: 1181, selectedNetworkId: 13 // this.networks[0].networkId ..... scenario.simulationId
                 }
             ).then(() => {

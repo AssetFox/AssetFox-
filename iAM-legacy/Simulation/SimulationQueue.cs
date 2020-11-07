@@ -179,10 +179,8 @@ namespace Simulation
 
             var outputFile = $"Network {parameters.NetworkId} - Simulation {parameters.SimulationId}.json";
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis, outputFile);
-            var settings = new JsonSerializerSettings
-            {
-                ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
-            };
+            var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
+            
             var resultObject = JsonConvert.SerializeObject(newSimulation.Results, settings);
             File.WriteAllText(filePath, resultObject);
         }

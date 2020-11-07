@@ -2,6 +2,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport;
@@ -35,6 +36,7 @@ namespace BridgeCareCore
             services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
             services.AddScoped<IExcelHelper, ExcelHelper>();
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
+            services.AddScoped<IHighlightWorkDoneCells, HighlightWorkDoneCells>();
             services.AddSignalR();
 
 #if MsSqlDebug
@@ -46,6 +48,10 @@ namespace BridgeCareCore
             services.AddScoped<IAttributeRepository, AttributeRepository>();
             services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
             services.AddScoped<IAggregatedResultRepository, AggregatedResultRepository>();
+
+            // Repository for legacy database
+            services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
+            services.AddScoped<IPennDotReportARepository, PennDotReportARepository>();
 
 #elif LiteDbDebug
             // LITE DB SCOPINGS

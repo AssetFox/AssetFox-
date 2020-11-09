@@ -1,13 +1,13 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 {
     public static class AttributeMapper
     {
-        public static Attribute ToDomain(this AttributeEntity entity)
+        public static DataMinerAttribute ToDomain(this AttributeEntity entity)
         {
             if (entity == null)
             {
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
 
             if (entity.DataType == "TEXT")
             {
-                return new TextAttribute("",
+                return new DataMiner.Attributes.TextAttribute("",
                     entity.Id,
                     entity.Name,
                     entity.AggregationRuleType,
@@ -39,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
         }
 
-        public static AttributeEntity ToEntity(this Attribute domain)
+        public static AttributeEntity ToEntity(this DataMinerAttribute domain)
         {
             if (domain == null)
             {

@@ -6,7 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 using LiteDB;
 using MoreLinq;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
     {
         public AttributeDatumRepository(ILiteDbContext context) : base(context) { }
 
-        public IEnumerable<Attribute> GetAttributesFromNetwork(Guid networkId) =>
+        public IEnumerable<DataMinerAttribute> GetAttributesFromNetwork(Guid networkId) =>
             Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS")
                 .Include(_ => _.AttributeDatumEntities)
                 .Find(_ => _.NetworkId == networkId)

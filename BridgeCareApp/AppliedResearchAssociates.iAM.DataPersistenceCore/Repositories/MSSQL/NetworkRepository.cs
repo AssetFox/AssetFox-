@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public NetworkRepository(IAMContext context) : base(context) { }
 
-        public void CreateNetwork(Network network)
+        public void CreateNetwork(DataAssignment.Networking.Network network)
         {
             // prevent EF from attempting to create the network's child entities (create them
             // separately as part of a bulk insert)
@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             Context.SaveChanges();
         }
 
-        public IEnumerable<Network> GetAllNetworks()
+        public IEnumerable<DataAssignment.Networking.Network> GetAllNetworks()
         {
             if (Context.Networks.Count() == 0)
             {

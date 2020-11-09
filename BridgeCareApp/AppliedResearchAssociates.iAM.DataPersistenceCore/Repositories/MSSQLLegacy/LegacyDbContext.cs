@@ -18,11 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLe
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            //optionsBuilder.UseSqlServer(@"data source=localhost;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");
-        }
-
         public DbSet<PennDotReportAEntity> pennDotReportAResults { get; set; }
     }
 }

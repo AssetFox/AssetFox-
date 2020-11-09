@@ -19,6 +19,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         private readonly IHighlightWorkDoneCells _highlightWorkDoneCells;
         private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> valueForMinC;
         private readonly List<int> SimulationYears = new List<int>();
+        private readonly List<double> previousYearInitialMinC = new List<double>();
         public BridgeDataForSummaryReport(IExcelHelper excelHelper, IHighlightWorkDoneCells highlightWorkDoneCells)
         {
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
@@ -56,12 +57,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
             var workSummaryModel = new WorkSummaryModel
             {
-                //SimulationDataModels = simulationDataModels,
-                //BridgeDataModels = bridgeDataModels,
-                //Treatments = treatments,
-                //BudgetsPerBRKeys = budgetsPerBrKey,
-                //UnfundedRecommendations = unfundedRecommendations,
-                //ParametersModel = parametersModel
             };
 
             return workSummaryModel;
@@ -76,8 +71,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var row = 4; // Data starts here
             var startingRow = row;
             var column = currentCell.Column;
-            int totalColumn = 0;
-            int totalColumnValue = 0;
             var abbreviatedTreatmentNames = ShortNamesForTreatments.GetShortNamesForTreatments();
 
             // making dictionary to remove if else, which was used to enter value for MinC
@@ -88,15 +81,17 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             valueForMinC.Add(MinCValue.minOfCulvDeckSubSuper, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterMinDeckSuperSubCulv));
 
             var workDoneData = new List<int>();
+            var previousYearSectionMinC = new List<double>();
             if (outputResults.Years.Count > 0)
             {
                 workDoneData = new List<int>(new int[outputResults.Years[0].Sections.Count]);
-            }
+                previousYearSectionMinC = new List<double>(new double[outputResults.Years[0].Sections.Count]);
+            } 
+            var poorOnOffColumnStart = outputResults.Years.Count + column + 2;
+            var index = 1; // to track the initial section from rest of the years
             foreach (var yearlySectionData in outputResults.Years)
             {
-                //column = currentCell.Column;
                 row = initialRow;
-                var workDoneMoreThanOnce = 0;
 
                 // Add work done cells
                 yearlySectionData.Sections.Sort(
@@ -104,15 +99,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     );
 
                 var sectionsAndReportAData = yearlySectionData.Sections.Zip(pennDotReportAData, (n, w) => new { section = n, reportAData = w });
-                var index = 1;
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
+                var i = 0;
                 foreach (var data in sectionsAndReportAData)
                 {
+                    // Work done in a year
                     var range = worksheet.Cells[row, column];
                     setColor(data.reportAData.Parallel_Struct, data.section.TreatmentName, previousYearCause, data.section.TreatmentCause,
                         yearlySectionData.Year, index, data.section.TreatmentName, worksheet, row, column);
 
-                    previousYearCause = data.section.TreatmentCause;
                     if (abbreviatedTreatmentNames.ContainsKey(data.section.TreatmentName))
                     {
                         range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[data.section.TreatmentName]) ? "--" : abbreviatedTreatmentNames[data.section.TreatmentName];
@@ -123,28 +118,33 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     }
                     if (!range.Value.Equals("--"))
                     {
-                        workDoneData[index - 1]++;
+                        workDoneData[i]++;
                     }
-                    //workDoneMoreThanOnce = !range.Value.Equals("--") ? workDoneMoreThanOnce + 1 : workDoneMoreThanOnce;
-                    index++;
+
+                    // poor on off Rate
+                    var prevYrMinc = 0.0;
+                    if (index == 1)
+                    {
+                        prevYrMinc = previousYearInitialMinC[i];
+                    }
+                    else
+                    {
+                        prevYrMinc = previousYearSectionMinC[i];
+                    }
+
+                    var thisYrMinc = data.section.ValuePerNumericAttribute["MINCOND"];
+
+                    worksheet.Cells[row, poorOnOffColumnStart].Value = prevYrMinc < 5 ? (thisYrMinc >= 5 ? "Off" : "--") :
+                        (thisYrMinc < 5 ? "On" : "--");
+                    previousYearCause = data.section.TreatmentCause;
+                    previousYearSectionMinC[i] = thisYrMinc;
+                    i++;
                     row++;
                 }
-                //worksheet.Cells[row, ++column].Value = workDoneMoreThanOnce > 1 ? "Yes" : "--";
-                //totalColumnValue = workDoneMoreThanOnce > 1 ? totalColumnValue + 1 : totalColumnValue;
+                index++;
 
-                
+                poorOnOffColumnStart++;
                 column++;
-                // Add Total of count of Work done more than once column cells if "Yes"
-                totalColumn = column;
-
-                // Add Poor On/Off Rate column: Formula (prev yr MinC < 5 and  curr yr Minc >= 5 then "Off"), (prev yr MinC >= 5 and curr ye MinC < 5 then "On")   
-                //for (var index = 1; index < yearsData.Count(); index++)
-                //{
-                //    var prevYrMinc = yearsData[index - 1].MinC;
-                //    var thisYrMinc = yearsData[index].MinC;
-                //    worksheet.Cells[row, ++column].Value = prevYrMinc < 5 ? (thisYrMinc >= 5 ? "Off" : "--") : (thisYrMinc < 5 ? "On" : "--");
-                //    yearsData[index].PoorOnOffRate = worksheet.Cells[row, column].Value.ToString();
-                //}
             }
 
             // work done information
@@ -192,12 +192,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     row++;
                 }
             }
-            //if (totalColumn != 0)
-            //{
-            //    worksheet.Cells[3, totalColumn].Value = totalColumnValue;
-            //}
-            //currentCell.Row = row - 1;
-            //currentCell.Column = column - 1;
         }
         private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column,
             SectionSummaryDetail initialSection, SectionDetail section)
@@ -290,6 +284,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["ADTTOTAL"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISK_SCORE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["P3"] > 0 ? "Y" : "N";
+                previousYearInitialMinC.Add(sectionSummary.ValuePerNumericAttribute["MINCOND"]);
             }
             currentCell.Row = rowNo;
             currentCell.Column = columnNo;

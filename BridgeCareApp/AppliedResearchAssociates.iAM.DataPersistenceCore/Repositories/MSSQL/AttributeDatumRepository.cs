@@ -42,9 +42,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (attributeIdsToBeUpdatedWithAssignedData.Any())
             {
-                // use a raw sql query to delete AttributeData
+                // use a raw sql query to delete AssignedData
                 var query =
-                    $"DELETE FROM dbo.AttributeData WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAssets WHERE NetworkId = '{maintainableAssets.First().NetworkId}') AND AttributeId IN ('{string.Join("','", attributeIdsToBeUpdatedWithAssignedData)}')";
+                    $"DELETE FROM dbo.AttributeDatum WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAsset WHERE NetworkId = '{maintainableAssets.First().NetworkId}') AND AttributeId IN ('{string.Join("','", attributeIdsToBeUpdatedWithAssignedData)}')";
                 Context.Database.ExecuteSqlRaw(query);
             }
 

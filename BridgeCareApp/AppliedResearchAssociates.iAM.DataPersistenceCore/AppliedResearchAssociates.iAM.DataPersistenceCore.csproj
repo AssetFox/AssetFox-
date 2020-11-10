@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Repositories\MSSQL\Entities\TargetConditionGoalEntity.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EFCore.BulkExtensions" Version="3.2.5" />
     <PackageReference Include="LiteDB" Version="5.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
@@ -15,6 +19,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.8" />
     <PackageReference Include="morelinq" Version="3.3.2" />
@@ -23,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataAssignment\AppliedResearchAssociates.iAM.DataAssignment.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM\AppliedResearchAssociates.iAM.csproj" />
   </ItemGroup>
 
 </Project>

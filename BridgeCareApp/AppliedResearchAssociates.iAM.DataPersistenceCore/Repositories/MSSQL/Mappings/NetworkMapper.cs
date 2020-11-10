@@ -3,11 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.Domains;
+using IamNetwork = AppliedResearchAssociates.iAM.Domains.Network;
+using Network = AppliedResearchAssociates.iAM.DataAssignment.Networking.Network;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
     public static class NetworkMapper
     {
+        public static IamNetwork ToIamNetworkDomain(this Network network) =>
+            new IamNetwork(new Explorer())
+            {
+                Name = network.Name
+            };
+
         public static Network ToDomain(this NetworkEntity entity)
         {
             if (entity == null)

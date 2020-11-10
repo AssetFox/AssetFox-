@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Domains;
 using Humanizer;
 
 namespace AppliedResearchAssociates.iAM.DataAccess

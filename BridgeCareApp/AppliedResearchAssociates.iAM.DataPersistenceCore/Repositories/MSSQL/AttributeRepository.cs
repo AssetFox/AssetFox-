@@ -10,6 +10,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AttributeRepository : MSSQLRepository, IAttributeRepository
     {
+        public static readonly bool IsRunningFromNUnit = AppDomain.CurrentDomain.GetAssemblies()
+            .Any(a => a.FullName.ToLowerInvariant().StartsWith("nunit.framework"));
+
         private readonly IMaintainableAssetRepository _maintainableAssetRepo;
 
         public AttributeRepository(IMaintainableAssetRepository maintainableAssetRepo,
@@ -22,7 +25,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertAttributes(List<Attribute> attributes)
         {
-            Context.BulkInsertOrUpdate(attributes.Select(_ => _.ToEntity()).ToList());
+            if (IsRunningFromNUnit)
+            {
+                Context.Attribute.AddRange(attributes.Select(_ => _.ToEntity()).ToList());
+            }
+            else
+            {
+                Context.BulkInsertOrUpdate(attributes.Select(_ => _.ToEntity()).ToList());
+            }
 
             Context.SaveChanges();
         }

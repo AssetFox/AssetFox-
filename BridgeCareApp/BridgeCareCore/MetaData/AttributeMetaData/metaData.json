@@ -29,7 +29,7 @@
       "AggregationRule": "AVERAGE",
       "IsCalculated": false,
       "IsAscending": true
-    }/*,
+    },
     {
       "Id": "c65fcf7b-c5c7-476f-a9d7-84c3be162346",
       "Name": "ADTYEAR",
@@ -1394,6 +1394,6 @@
       "AggregationRule": "AVERAGE",
       "IsCalculated": false,
       "IsAscending": true
-    }*/
+    }
   ]
 }

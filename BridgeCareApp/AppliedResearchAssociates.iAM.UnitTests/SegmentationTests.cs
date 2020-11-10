@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.Segmentation;
+//using AppliedResearchAssociates.iAM.Segmentation;
 using NUnit.Framework;
 
 namespace AppliedResearchAssociates.iAM.UnitTests
@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.UnitTests
     [TestFixture]
     public class SegmentationTests
     {
-        [Test]
+        /*[Test]
         public void CreateNumericSegmentForLinearLocation()
         {
             // Arrange
@@ -85,6 +85,6 @@ namespace AppliedResearchAssociates.iAM.UnitTests
                 //Assert.That(item.SegmentationAttributeDatum.Value, Is.Not.Null);
                 //Assert.That(item.SegmentationAttributeDatum.Value, Is.TypeOf<string>());
             }
-        }
+        }*/
     }
 }

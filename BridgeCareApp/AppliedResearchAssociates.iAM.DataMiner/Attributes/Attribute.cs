@@ -10,7 +10,9 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
             string ruleType,
             string command,
             ConnectionType connectionType,
-            string connectionString)
+            string connectionString,
+            bool isCalculated,
+            bool isAscending)
         {
             Id = id;
             Name = name;
@@ -19,6 +21,8 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
             Command = command;
             ConnectionType = connectionType;
             ConnectionString = connectionString;
+            IsCalculated = isCalculated;
+            IsAscending = isAscending;
         }
 
         public Guid Id { get; }
@@ -28,5 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
         public string Command { get; }
         public ConnectionType ConnectionType { get; }
         public string ConnectionString { get; }
+        public bool IsCalculated { get; set; }
+        public bool IsAscending { get; set; }
     }
 }

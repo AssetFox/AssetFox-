@@ -24,7 +24,9 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
                         available.AggregationRule,
                         available.Command,
                         available.ConnectionType,
-                        available.ConnectionString);
+                        available.ConnectionString,
+                        available.IsCalculated,
+                        available.IsAscending);
 
                     break;
                 }
@@ -36,7 +38,9 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
                         available.AggregationRule,
                         available.Command,
                         available.ConnectionType,
-                        available.ConnectionString);
+                        available.ConnectionString,
+                        available.IsCalculated,
+                        available.IsAscending);
 
                     break;
                 }

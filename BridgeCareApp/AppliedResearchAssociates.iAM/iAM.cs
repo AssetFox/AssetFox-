@@ -1,4 +1,7 @@
-﻿namespace AppliedResearchAssociates.iAM
+﻿using AppliedResearchAssociates.iAM.DataAccess;
+using AppliedResearchAssociates.iAM.Domains;
+
+namespace AppliedResearchAssociates.iAM
 {
     public static class iAM
     {

@@ -19,7 +19,7 @@ using System.Collections.Specialized;
 namespace BridgeCare.Services
 {
     using CommittedProjectsGetMethod = Func<int, BridgeCareContext, UserInformationModel, List<CommittedEntity>>;
-    using CommittedProjectsSaveMethod = Action<List<CommittedProjectModel>, BridgeCareContext, UserInformationModel>;
+    using CommittedProjectsSaveMethod = Action<int, List<CommittedProjectModel>, BridgeCareContext, UserInformationModel>;
 
     public class CommittedProjects : ICommittedProjects
     {
@@ -37,15 +37,15 @@ namespace BridgeCare.Services
             this._committedRepositoryRepo = committedRepositoryRepo;
             this._sectionsRepository = sectionsRepository;
 
-            List<CommittedEntity> GetAnyProjects(int id, BridgeCareContext db, UserInformationModel userInformation) => 
+            List<CommittedEntity> GetAnyProjects(int id, BridgeCareContext db, UserInformationModel userInformation) =>
                 committedRepositoryRepo.GetCommittedProjects(id, db);
-            List<CommittedEntity> GetPermittedProjects(int id, BridgeCareContext db, UserInformationModel userInformation) => 
+            List<CommittedEntity> GetPermittedProjects(int id, BridgeCareContext db, UserInformationModel userInformation) =>
                 committedRepositoryRepo.GetPermittedCommittedProjects(id, db, userInformation.Name);
 
-            void SaveAnyProjects(List<CommittedProjectModel> models, BridgeCareContext db, UserInformationModel userInformation) => 
-                committedRepositoryRepo.SaveCommittedProjects(models, db);
-            void SavePermittedProjects(List<CommittedProjectModel> models, BridgeCareContext db, UserInformationModel userInformation) => 
-                committedRepositoryRepo.SavePermittedCommittedProjects(models, db, userInformation.Name);
+            void SaveAnyProjects(int simulationId, List<CommittedProjectModel> models, BridgeCareContext db, UserInformationModel userInformation) =>
+                committedRepositoryRepo.SaveCommittedProjects(simulationId, models, db);
+            void SavePermittedProjects(int simulationId, List<CommittedProjectModel> models, BridgeCareContext db, UserInformationModel userInformation) =>
+                committedRepositoryRepo.SavePermittedCommittedProjects(simulationId, models, db, userInformation.Name);
 
             CommittedProjectsGetMethods = new Dictionary<string, CommittedProjectsGetMethod>
             {
@@ -72,7 +72,7 @@ namespace BridgeCare.Services
         {
             if (httpRequest.Files.Count < 1)
                 throw new ConstraintException("Files Not Found");
-            
+
             var files = httpRequest.Files;
             List<ExcelPackage> packages = new List<ExcelPackage>();
 
@@ -93,8 +93,9 @@ namespace BridgeCare.Services
                     foreach (var package in packages)
                     {
                         GetCommittedProjectModels(package, simulationId, networkId, applyNoTreatment, committedProjectModels, db);
-                        CommittedProjectsSaveMethods[userInformation.Role](committedProjectModels, db, userInformation);
                     }
+
+                    CommittedProjectsSaveMethods[userInformation.Role](simulationId, committedProjectModels, db, userInformation);
 
                     SetAlertMessage(mail, simulationId);
                 }
@@ -104,10 +105,10 @@ namespace BridgeCare.Services
                     log.Error(exception);
                     throw exception;
                 }
-                finally
+                /*finally
                 {
                     SendAlertEmail(mail, userInformation);
-                }
+                }*/
             };
 
             SimulationQueue.Enqueue(saveCommittedProjectsAction);
@@ -279,7 +280,7 @@ namespace BridgeCare.Services
                 var brKey = Convert.ToInt32(GetCellValue(worksheet, row, 1));
                 var sectionId = _sectionsRepository.GetSectionId(networkId, brKey, db);
 
-                // BMSID till COST -> entry in COMMITTED_                    
+                // BMSID till COST -> entry in COMMITTED_
                 var committedProjectModel = new CommittedProjectModel
                 {
                     SectionId = sectionId,
@@ -342,6 +343,6 @@ namespace BridgeCare.Services
         private string GetCellValue(ExcelWorksheet worksheet, int row, int col)
         {
             return worksheet.Cells[row, col].Value.ToString().Trim();
-        }       
+        }
     }
 }

@@ -92,10 +92,12 @@
 
         <Alert :dialogData="alertData" @submit="onSubmitAlertResult" />
 
+        <Alert :dialogData="alertDataForDeletingCommittedProjects" @submit="onDeleteCommittedProjectsSubmit" />
+
         <CommittedProjectsFileUploaderDialog
             :showDialog="showFileUploader"
             @submit="onUploadCommittedProjectFiles"
-        />
+        @delete="onDeleteCommittedProjects"/>
     </v-layout>
 </template>
 
@@ -115,6 +117,8 @@ import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { CommittedProjectsDialogResult } from '@/shared/models/modals/committed-projects-dialog-result';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
+    import {hasValue} from '@/shared/utils/has-value-util';
+    import {http2XX} from '@/shared/utils/http-utils';
 
 @Component({
     components: { CommittedProjectsFileUploaderDialog, Alert },
@@ -204,6 +208,7 @@ export default class EditScenario extends Vue {
         },
     ];
     alertData: AlertData = clone(emptyAlertData);
+        alertDataForDeletingCommittedProjects: AlertData = {...emptyAlertData};
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -321,7 +326,7 @@ export default class EditScenario extends Vue {
                     if (!isNil(response)) {
                         this.setSuccessMessageAction({
                             message:
-                                'Successfully uploaded committed projects. You will receive an email when the projects have been fully processed.',
+                                'Successfully uploaded committed projects.',
                         });
                     }
                 });
@@ -337,7 +342,27 @@ export default class EditScenario extends Vue {
         }
     }
 
-    visibleNavigationTabs() {
+    onDeleteCommittedProjects() {
+            this.alertDataForDeletingCommittedProjects = {
+                showDialog: true,
+                heading: 'Are you sure?',
+                message: 'You are about to delete all of this scenario\'s committed projects.',
+                choice: true
+            };
+        }
+
+        onDeleteCommittedProjectsSubmit(doDelete: boolean) {
+            this.alertDataForDeletingCommittedProjects = {...emptyAlertData};
+
+            if (doDelete) {
+                CommittedProjectsService.DeleteCommittedProjects(this.selectedScenarioId)
+                    .then((response: AxiosResponse) => {
+                        if (hasValue(response) && http2XX.test(response.status.toString())) {
+                            this.setSuccessMessageAction({message: 'Committed projects have been deleted.'});
+                        }
+                    });
+            }
+        }visibleNavigationTabs() {
         return this.navigationTabs.filter(
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,

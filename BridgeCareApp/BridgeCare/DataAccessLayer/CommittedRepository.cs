@@ -6,7 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
+using Microsoft.SqlServer.Management.Dmf;
 
 namespace BridgeCare.DataAccessLayer
 {
@@ -17,24 +20,34 @@ namespace BridgeCare.DataAccessLayer
         /// </summary>
         /// <param name="committedProjectModels"></param>
         /// <param name="db"></param>
-        public void SaveCommittedProjects(List<CommittedProjectModel> committedProjectModels, BridgeCareContext db)
+        public void SaveCommittedProjects(int simulationId, List<CommittedProjectModel> committedProjectModels, BridgeCareContext db)
         {
-            var simulations = new HashSet<int>();
-            foreach (var committedProjectModel in committedProjectModels)
-            {
-                simulations.Add(committedProjectModel.SimulationId);
-            }
-
-            foreach (var simulationId in simulations)
-            {
-                db.CommittedProjects.RemoveRange(db.CommittedProjects.Where(project => project.SIMULATIONID == simulationId));
-                db.SaveChanges();
-            }
-
-            var projectEntities = committedProjectModels.Select(model => new CommittedEntity(model)).ToList();
-
-            db.CommittedProjects.AddRange(projectEntities);
+            DeleteCommittedProjects(simulationId, db);
+            db.CommittedProjects.AddRange(committedProjectModels.Select(model => new CommittedEntity(model)).ToList());
             db.SaveChanges();
+        }
+
+        /// <summary>
+        /// Runs a parameterized query string to delete the committed projects from the database with the given simulation id
+        /// </summary>
+        /// <param name="simulationId">Simulation id to use in the query 'where' clause</param>
+        /// <param name="db">Database context used to execute the query</param>
+        public void DeleteCommittedProjects(int simulationId, BridgeCareContext db)
+        {
+            var deleteCommittedProjectsQuery = @"DELETE FROM [dbo].[COMMITTED_] WHERE SIMULATIONID = @SimulationId";
+            db.Database.ExecuteSqlCommand(deleteCommittedProjectsQuery,
+                new SqlParameter("@SimulationId", simulationId));
+        }
+
+        public void DeletePermittedCommittedProjects(int simulationId, BridgeCareContext db, string username)
+        {
+            if (!db.Simulations.Any(s => s.SIMULATIONID == simulationId))
+                throw new RowNotInTableException($"No simulation found with id {simulationId}");
+
+            if (!db.Simulations.Include(s => s.USERS).First(s => s.SIMULATIONID == simulationId).UserCanModify(username))
+                throw new UnauthorizedAccessException("You are not authorized to modify this scenario's committed projects.");
+
+            DeleteCommittedProjects(simulationId, db);
         }
 
         /// <summary>
@@ -42,15 +55,21 @@ namespace BridgeCare.DataAccessLayer
         /// </summary>
         /// <param name="committedProjectModels"></param>
         /// <param name="db"></param>
-        public void SavePermittedCommittedProjects(List<CommittedProjectModel> committedProjectModels, BridgeCareContext db, string username)
+        public void SavePermittedCommittedProjects(int simulationId, List<CommittedProjectModel> committedProjectModels, BridgeCareContext db, string username)
         {
-            foreach (var committedProjectModel in committedProjectModels) {
-                if (!db.Simulations.Any(s => s.SIMULATIONID == committedProjectModel.SimulationId))
-                    throw new RowNotInTableException($"No simulation found with id {committedProjectModel.SimulationId}");
-                if (!db.Simulations.Include(s => s.USERS).First(s => s.SIMULATIONID == committedProjectModel.SimulationId).UserCanModify(username))
-                    throw new UnauthorizedAccessException("You are not authorized to modify this scenario's committed projects.");
+            if (!db.Simulations.Any(s => s.SIMULATIONID == simulationId))
+            {
+                if (simulationId == 0)
+                {
+                    throw new InvalidOperationException("Simulation id was not provided.");
+                }
+                throw new RowNotInTableException($"No simulation found with id {simulationId}");
             }
-            SaveCommittedProjects(committedProjectModels, db);
+
+            if (!db.Simulations.Include(s => s.USERS).Single(s => s.SIMULATIONID == simulationId).UserCanModify(username))
+                throw new UnauthorizedAccessException("You are not authorized to modify this scenario's committed projects.");
+
+            SaveCommittedProjects(simulationId, committedProjectModels, db);
         }
 
         /// <summary>

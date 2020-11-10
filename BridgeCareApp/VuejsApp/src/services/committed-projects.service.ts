@@ -34,6 +34,14 @@ export default class CommittedProjectsService {
     static ExportCommittedProjects(scenarioData: Scenario): AxiosPromise {
         return axiosInstance.post('/api/ExportCommittedProjects', scenarioData, {responseType: 'blob'});
     }
+
+    /**
+     * Deletes a scenario's committed projects
+     * @param selectedScenarioId The scenario id used to find the committed projects that will be deleted
+     */
+    static DeleteCommittedProjects(selectedScenarioId: number): AxiosPromise {
+        return axiosInstance.delete(`/api/DeleteCommittedProjects/${selectedScenarioId}`);
+    }
 }
     
 

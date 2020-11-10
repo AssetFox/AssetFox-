@@ -41,8 +41,13 @@ namespace BridgeCareCore.Services.SummaryReport
 
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx")))
             {
+                // Bridge Data TAB
                 var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
                 var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, pennDotReportAData);
+
+                // Unfunded Recommendations TAB
+                var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");
+                //unfundedRecommendations.Fill(unfundedRecommendationWorksheet, workSummaryModel.UnfundedRecommendations, workSummaryModel.BridgeDataModels, simulationYears);
 
                 var folderPathForSimulation = $"DownloadedNewReports\\{simulationId}";
                 string relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);

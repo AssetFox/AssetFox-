@@ -2,24 +2,25 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
+using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
 {
-    public class UnfundedRecommendations
+    public class UnfundedRecommendations : IUnfundedRecommendations
     {
-        private readonly ExcelHelper _excelHelper;
+        private readonly IExcelHelper _excelHelper;
         private readonly List<int> SimulationYears = new List<int>();
 
-        public UnfundedRecommendations(ExcelHelper excelHelper)
+        public UnfundedRecommendations(IExcelHelper excelHelper)
         {
             _excelHelper = excelHelper;
         }
 
-        internal void Fill(ExcelWorksheet unfundedRecommendationWorksheet, SimulationOutput simulationOutput)
+        public void Fill(ExcelWorksheet unfundedRecommendationWorksheet, SimulationOutput simulationOutput)
         {
             // Add excel headers to excel.
             var headers = GetHeaders();
@@ -41,15 +42,24 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
         {
             currentCell.Row = 4; // Data starts here
             currentCell.Column = 1;
+            foreach (var initialSection in simulationOutput.InitialSectionSummaries)
+            {
+                if (initialSection.ValuePerNumericAttribute["RISK_SCORE"] > 15000)
+                {
+                    currentCell.Column = 1;
+                    FillDataInWorkSheet(worksheet, currentCell, initialSection);
+                    currentCell.Row++;
+                }
+            }
+            currentCell.Row = 4; // Data starts here
+            currentCell.Column += 1; // feasible treatment starts here
             foreach (var item in simulationOutput.Years)
             {
                 foreach (var section in item.Sections)
                 {
-                    if(section.TreatmentName == "No Treatment" && section.TreatmentOptions.Count > 0
-                        && section.ValuePerNumericAttribute["RISK_SCORE"] > 1500)
+                    if (section.TreatmentName == "No Treatment" && section.TreatmentOptions.Count > 0
+                        && section.ValuePerNumericAttribute["RISK_SCORE"] > 15000)
                     {
-                        FillDataInWorkSheet(worksheet, currentCell, section);
-
                         var minValue = section.TreatmentOptions.Min(_ => _.Cost);
                         var options = section.TreatmentOptions.Where(t => t.Cost == minValue).FirstOrDefault();
 
@@ -57,9 +67,11 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
                         currentCell.Row++;
                     }
                 }
+                currentCell.Column++;
+                currentCell.Row = 4;
             }
         }
-        private void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, SectionDetail sectionSummary)
+        private void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, SectionSummaryDetail sectionSummary)
         {
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
@@ -77,13 +89,15 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
             worksheet.Cells[row, columnNo++].Value = int.Parse(sectionSummary.ValuePerTextAttribute["NHS_IND"]) > 0 ? "Y" : "N";
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["STRUCTURE_TYPE"];
+            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"]; 
             worksheet.Cells[row, columnNo++].Value = (int)sectionSummary.ValuePerNumericAttribute["YEAR_BUILT"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["AGE"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["ADTTOTAL"];
+            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["ADTTOTAL"] > 10000 ? "Y" : "N";
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISK_SCORE"];
-            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["P3"] > 0 ? "Y" : "N";
+            worksheet.Cells[row, columnNo].Value = sectionSummary.ValuePerNumericAttribute["P3"] > 0 ? "Y" : "N";
 
-            //currentCell.Column = columnNo;
+            currentCell.Column = columnNo;
         }
         private CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<string> headers, List<int> simulationYears)
         {

@@ -17,16 +17,19 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
         private readonly IPennDotReportARepository _pennDotReportARepository;
+        private readonly IUnfundedRecommendations _unfundedRecommendations;
 
         public SummaryReportGenerator(ISimulationOutputRepository simulationOutputFileRepo,
             IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
-            IPennDotReportARepository pennDotReportARepository)
+            IPennDotReportARepository pennDotReportARepository,
+            IUnfundedRecommendations unfundedRecommendations)
         {
             _simulationOutputFileRepo = simulationOutputFileRepo ?? throw new ArgumentNullException(nameof(simulationOutputFileRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _bridgeDataForSummaryReport = bridgeDataForSummaryReport ?? throw new ArgumentNullException(nameof(bridgeDataForSummaryReport));
             _pennDotReportARepository = pennDotReportARepository ?? throw new ArgumentNullException(nameof(pennDotReportARepository));
+            _unfundedRecommendations = unfundedRecommendations ?? throw new ArgumentNullException(nameof(unfundedRecommendations));
         }
 
         public byte[] GenerateReport(Guid networkId, Guid simulationId)
@@ -47,7 +50,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
                 // Unfunded Recommendations TAB
                 var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");
-                //unfundedRecommendations.Fill(unfundedRecommendationWorksheet, workSummaryModel.UnfundedRecommendations, workSummaryModel.BridgeDataModels, simulationYears);
+                _unfundedRecommendations.Fill(unfundedRecommendationWorksheet, reportOutputData);
 
                 var folderPathForSimulation = $"DownloadedNewReports\\{simulationId}";
                 string relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);

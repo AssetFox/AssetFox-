@@ -258,6 +258,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             var rowNo = currentCell.Row;
             var columnNo = currentCell.Column;
+            reportOutputData.InitialSectionSummaries.Sort(
+                    (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
+                    );
             foreach (var sectionSummary in reportOutputData.InitialSectionSummaries)
             {
                 rowNo++;

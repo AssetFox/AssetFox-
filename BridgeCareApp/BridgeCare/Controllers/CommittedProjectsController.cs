@@ -2,6 +2,7 @@
 using BridgeCare.Models;
 using BridgeCare.Security;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -11,15 +12,38 @@ using System.Web.Http.Filters;
 
 namespace BridgeCare.Controllers
 {
+    using CommittedProjectsDeleteMethod = Action<int, BridgeCareContext, UserInformationModel>;
+
     public class CommittedProjectsController : ApiController
     {
-        private readonly ICommittedProjects repo;
-        private readonly BridgeCareContext db;
+        private readonly ICommittedProjects _committedProjectRepo;
+        private readonly ICommitted _committedRepo;
+        private readonly BridgeCareContext _db;
+        private readonly IReadOnlyDictionary<string, CommittedProjectsDeleteMethod> _committedProjectsDeleteMethods;
 
-        public CommittedProjectsController(ICommittedProjects repo, BridgeCareContext db)
+        public CommittedProjectsController(ICommittedProjects committedProjectRepo, ICommitted committedRepo, BridgeCareContext db)
         {
-            this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
-            this.db = db ?? throw new ArgumentNullException(nameof(db));
+            _committedProjectRepo = committedProjectRepo ?? throw new ArgumentNullException(nameof(committedProjectRepo));
+            _committedRepo = committedRepo ?? throw new ArgumentNullException(nameof(committedRepo));
+            _db = db ?? throw new ArgumentNullException(nameof(db));
+
+            _committedProjectsDeleteMethods = CreateDeleteMethods();
+        }
+
+        private Dictionary<string, CommittedProjectsDeleteMethod> CreateDeleteMethods()
+        {
+            void DeleteAnyCommittedProjects(int simulationId, BridgeCareContext db, UserInformationModel userInformation) =>
+                _committedRepo.DeleteCommittedProjects(simulationId, db);
+            void DeletePermittedCommittedProjects(int simulationId, BridgeCareContext db, UserInformationModel userInformation) =>
+                _committedRepo.DeletePermittedCommittedProjects(simulationId, db, userInformation.Name);
+
+            return new Dictionary<string, CommittedProjectsDeleteMethod>
+            {
+                [Role.ADMINISTRATOR] = DeleteAnyCommittedProjects,
+                [Role.DISTRICT_ENGINEER] = DeletePermittedCommittedProjects,
+                [Role.CWOPA] = DeletePermittedCommittedProjects,
+                [Role.GENERAL_USERS] = DeletePermittedCommittedProjects
+            };
         }
 
         /// <summary>
@@ -35,7 +59,7 @@ namespace BridgeCare.Controllers
                 throw new ConstraintException("The data provided is not a valid MIME type.");
 
             UserInformationModel userInformation = ESECSecurity.GetUserInformation(Request);
-            repo.SaveCommittedProjectsFiles(HttpContext.Current.Request, db, userInformation);
+            _committedProjectRepo.SaveCommittedProjectsFiles(HttpContext.Current.Request, _db, userInformation);
             return Ok();
         }
 
@@ -52,7 +76,7 @@ namespace BridgeCare.Controllers
         {
             var response = Request.CreateResponse();
             var userInformation = ESECSecurity.GetUserInformation(Request);
-            byte[] byteArray = repo.ExportCommittedProjects(model.simulationId, model.networkId, db, userInformation);
+            byte[] byteArray = _committedProjectRepo.ExportCommittedProjects(model.simulationId, model.networkId, _db, userInformation);
             response.Content = new ByteArrayContent(byteArray);
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
             response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
@@ -62,6 +86,21 @@ namespace BridgeCare.Controllers
 
             return response;
             //return Ok(response);
+        }
+
+        /// <summary>
+        /// API endpoint for deleting committed projects
+        /// </summary>
+        /// <param name="simulationId"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("api/DeleteCommittedProjects/{simulationId}")]
+        [RestrictAccess]
+        public IHttpActionResult DeleteCommittedProjects(int simulationId)
+        {
+            var userInformation = ESECSecurity.GetUserInformation(Request);
+            _committedProjectsDeleteMethods[userInformation.Role](simulationId, _db, userInformation);
+            return Ok();
         }
     }
 }

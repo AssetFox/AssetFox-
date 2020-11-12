@@ -14,13 +14,13 @@ namespace BridgeCare.Controllers
 {
     public class SummaryReportController : ApiController
     {
-        private readonly IBridgeData repo;
+        private readonly IBridgeDataRepository repo;
         private readonly BridgeCareContext db;
         private readonly ISummaryReportGenerator summaryReportGenerator;
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(SummaryReportController));
 
-        public SummaryReportController(IBridgeData repo, BridgeCareContext db, ISummaryReportGenerator summaryReportGenerator)
+        public SummaryReportController(IBridgeDataRepository repo, BridgeCareContext db, ISummaryReportGenerator summaryReportGenerator)
         {
             this.repo = repo;
             this.db = db;

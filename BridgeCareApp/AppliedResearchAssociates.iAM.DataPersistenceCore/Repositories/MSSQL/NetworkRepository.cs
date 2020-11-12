@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -11,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public NetworkRepository(IAMContext context) : base(context) { }
 
-        public void CreateNetwork(Network network)
+        public void CreateNetwork(DataAssignment.Networking.Network network)
         {
             // prevent EF from attempting to create the network's child entities (create them
             // separately as part of a bulk insert)
@@ -31,6 +32,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             Context.BulkInsert(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
 
             Context.SaveChanges();
+        }
+
+        public IEnumerable<DataAssignment.Networking.Network> GetAllNetworks()
+        {
+            if (Context.Network.Count() == 0)
+            {
+                throw new RowNotInTableException($"Cannot find networks in the database");
+            }
+
+            // consumer of this call will only need the network information. Not the maintainable assest information
+            return Context.Network.Select(_ => _.ToDomain()).ToList();
         }
     }
 }

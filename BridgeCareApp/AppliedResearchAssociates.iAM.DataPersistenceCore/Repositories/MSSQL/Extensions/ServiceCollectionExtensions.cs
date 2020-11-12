@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions
@@ -8,6 +9,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public static void AddMSSQLServices(this IServiceCollection services, string connectionString)
         {
             services.AddDbContext<IAMContext>(options =>
+            {
+                options.UseSqlServer(connectionString)
+                .EnableSensitiveDataLogging();
+            });
+        }
+
+        public static void AddMSSQLLegacyServices(this IServiceCollection services, string connectionString)
+        {
+            services.AddDbContext<LegacyDbContext>(options =>
             {
                 options.UseSqlServer(connectionString)
                 .EnableSensitiveDataLogging();

@@ -5,8 +5,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeMetaDataRepository
     {
-        List<Attribute> GetAllAttributes();
+        List<DataMiner.Attributes.Attribute> GetAllAttributes();
 
-        Attribute GetNetworkDefinitionAttribute();
+        DataMiner.Attributes.Attribute GetNetworkDefinitionAttribute();
     }
 }

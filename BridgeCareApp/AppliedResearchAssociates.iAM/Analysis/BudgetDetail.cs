@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.Analysis
@@ -9,6 +10,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             BudgetName = budget?.Name ?? throw new ArgumentNullException(nameof(budget));
             AvailableFunding = availableFunding;
+        }
+
+        [JsonConstructor]
+        public BudgetDetail(decimal availableFunding, string budgetName)
+        {
+            AvailableFunding = availableFunding;
+            BudgetName = budgetName ?? throw new ArgumentNullException(nameof(budgetName));
         }
 
         public decimal AvailableFunding { get; }

@@ -9,10 +9,10 @@ namespace BridgeCare.Controllers
 {
     public class ValidationController : ApiController
     {
-        private readonly IValidation repo;
+        private readonly IValidationRepository repo;
         private readonly BridgeCareContext db;
 
-        public ValidationController(IValidation repo, BridgeCareContext db)
+        public ValidationController(IValidationRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

@@ -1,7 +1,12 @@
-﻿using System.Reflection.Metadata;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection.Metadata;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
+using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -11,8 +16,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public IAMContext(DbContextOptions<IAMContext> options) : base(options) { }
 
-        /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
-            optionsBuilder.UseSqlServer("data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework");*/
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Repositories\\MSSQL", "migrationConnection.json");
+            var migrationConnection = new MigrationConnection();
+            using (FileStream fs = File.Open(filePath, FileMode.Open))
+            {
+                using (StreamReader sr = new StreamReader(fs))
+                {
+                    string rawConnection = sr.ReadToEnd();
+                    migrationConnection = JsonConvert
+                                .DeserializeAnonymousType(rawConnection, new { ConnectionStrings = default(MigrationConnection) })
+                                .ConnectionStrings;
+                }
+            }
+
+            optionsBuilder.UseSqlServer(migrationConnection.BridgeCareConnex);
+        }
 
         public virtual DbSet<AggregatedResultEntity> AggregatedResult { get; set; }
 
@@ -135,6 +155,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<TreatmentSchedulingEntity> TreatmentScheduling { get; set; }
 
         public virtual DbSet<TreatmentSupersessionEntity> TreatmentSupersession { get; set; }
+
+        private class MigrationConnection
+        {
+            public string BridgeCareConnex { get; set; }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -705,7 +730,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.TreatmentSupersession)
                     .WithOne(p => p.CriterionLibraryTreatmentSupersessionJoin)
-                    .HasForeignKey<CriterionLibraryTreatmentCost>(d => d.TreatmentSupersessionId)
+                    .HasForeignKey<CriterionLibraryTreatmentSupersessionEntity>(d => d.TreatmentSupersessionId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 

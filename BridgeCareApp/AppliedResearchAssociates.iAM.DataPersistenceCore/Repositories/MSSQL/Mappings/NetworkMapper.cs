@@ -17,14 +17,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = network.Name
             };
 
-        public static Network ToDomain(this NetworkEntity entity)
+        public static DataAssignment.Networking.Network ToDomain(this NetworkEntity entity)
         {
             if (entity == null)
             {
                 throw new NullReferenceException("Cannot map null Network entity to Network domain");
             }
 
-            return new Network(
+            return new DataAssignment.Networking.Network(
                 entity.MaintainableAssets == null
                     ? new List<MaintainableAsset>()
                     : entity.MaintainableAssets.Select(e => e.ToDomain()).ToList(),
@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 entity.Name);
         }
 
-        public static NetworkEntity ToEntity(this Network domain)
+        public static NetworkEntity ToEntity(this DataAssignment.Networking.Network domain)
         {
             if (domain == null)
             {

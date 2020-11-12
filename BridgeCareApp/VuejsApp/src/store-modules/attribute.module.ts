@@ -45,20 +45,20 @@ const actions = {
                 if (hasValue(response, 'data')) {
                     const results: AttributeSelectValuesResult[] = response.data as AttributeSelectValuesResult[];
                     const attributesSelectValues: AttributeSelectValues[] = [];
-                    const errorMessages: string[] = [];
+                    const warningMessages: string[] = [];
 
                     results.forEach((result: AttributeSelectValuesResult) => {
                         attributesSelectValues.push({attribute: result.attribute, values: result.values});
 
-                        if (result.resultMessage.toLowerCase() !== 'success') {
-                            errorMessages.push(result.resultMessage);
+                        if (result.resultType.toLowerCase() === 'warning') {
+                            warningMessages.push(result.resultMessage);
                         }
                     });
 
                     commit('attributesSelectValuesMutator', attributesSelectValues);
 
-                    if (hasValue(errorMessages)) {
-                        dispatch('setErrorMessage', {message: errorMessages.length === 1 ? errorMessages[0] : errorMessages.join('<br>')});
+                    if (hasValue(warningMessages)) {
+                        dispatch('setWarningMessage', {message: warningMessages.length === 1 ? warningMessages[0] : warningMessages.join('<br>')});
                     }
                 }
             });

@@ -15,30 +15,30 @@ namespace BridgeCare.Services.SummaryReport
     public class SummaryReportParameters
     {
         private readonly BridgeCareContext db;
-        private readonly ISimulationAnalysis analysisData;
-        private readonly IInvestmentLibrary getInflationRate;
+        private readonly ISimulationAnalysisRepository _simulationAnalysisRepository;
+        private readonly IInvestmentLibraryRepository getInflationRate;
         private readonly ExcelHelper excelHelper;
-        private readonly IPriority getPriorities;
-        private readonly ICriteriaDrivenBudgets budgetCriteria;
+        private readonly IPriorityRepository _priorityRepository;
+        private readonly ICriteriaDrivenBudgetsRepository _criteriaDrivenBudgetsRepository;
 
-        public SummaryReportParameters(ISimulationAnalysis simulationAnalysis, IInvestmentLibrary inflationRate,
-            ExcelHelper excelHelper, IPriority priorities, ICriteriaDrivenBudgets budget,  BridgeCareContext db)
+        public SummaryReportParameters(ISimulationAnalysisRepository simulationAnalysisRepository, IInvestmentLibraryRepository inflationRate,
+            ExcelHelper excelHelper, IPriorityRepository priorityRepository, ICriteriaDrivenBudgetsRepository criteriaDrivenBudgetsRepository,  BridgeCareContext db)
         {
-            analysisData = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
+            _simulationAnalysisRepository = simulationAnalysisRepository ?? throw new ArgumentNullException(nameof(simulationAnalysisRepository));
             getInflationRate = inflationRate ?? throw new ArgumentNullException(nameof(inflationRate));
             this.excelHelper = excelHelper;
-            getPriorities = priorities ?? throw new ArgumentNullException(nameof(priorities));
-            budgetCriteria = budget ?? throw new ArgumentNullException(nameof(budget));
+            _priorityRepository = priorityRepository ?? throw new ArgumentNullException(nameof(priorityRepository));
+            _criteriaDrivenBudgetsRepository = criteriaDrivenBudgetsRepository ?? throw new ArgumentNullException(nameof(criteriaDrivenBudgetsRepository));
             this.db = db ?? throw new ArgumentNullException(nameof(db));
         }
 
         internal void Fill(ExcelWorksheet worksheet, SimulationModel simulationModel, int simulationYearsCount, ParametersModel parametersModel)
         {
             var simulationId = simulationModel.simulationId;
-            var investmentPeriod = analysisData.GetAnySimulationAnalysis(simulationId, db);
+            var investmentPeriod = _simulationAnalysisRepository.GetAnySimulationAnalysis(simulationId, db);
             var inflationAndInvestments = getInflationRate.GetAnySimulationInvestmentLibrary(simulationId, db);
-            var priorities = getPriorities.GetAnySimulationPriorityLibrary(simulationId, db).Priorities;
-            var criterias = budgetCriteria.GetAnyCriteriaDrivenBudgets(simulationId, db);
+            var priorities = _priorityRepository.GetAnySimulationPriorityLibrary(simulationId, db).Priorities;
+            var criterias = _criteriaDrivenBudgetsRepository.GetAnyCriteriaDrivenBudgets(simulationId, db);
 
             // Simulation Name format
             excelHelper.MergeCells(worksheet, 1, 1, 1, 2);

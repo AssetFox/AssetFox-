@@ -12,25 +12,25 @@ namespace BridgeCare.Services.SummaryReport.WorkSummaryByBudget
 {
     public class BridgeWorkSummaryByBudget
     {
-        private readonly IWorkSummaryByBudget workSummaryByBudgetData;
+        private readonly IWorkSummaryByBudgetRepository _workSummaryByBudgetRepository;
         private readonly ExcelHelper excelHelper;
         private readonly BridgeCareContext dbContext;
         private readonly BridgeWorkSummaryCommon bridgeWorkSummaryCommon;
-        private readonly IBridgeData bridgeData;
-        private readonly IBridgeWorkSummaryData bridgeWorkSummaryData;
+        private readonly IBridgeDataRepository _bridgeDataRepository;
+        private readonly IBridgeWorkSummaryDataRepository _bridgeWorkSummaryDataRepository;
         private readonly CulvertCost culvertCost;
         private readonly BridgeWorkCost bridgeWorkCost;
         private readonly CommittedProjectsCost committedProjectsCost;
 
-        public BridgeWorkSummaryByBudget(BridgeCareContext context, IWorkSummaryByBudget summaryByBudget,
-               ExcelHelper excelHelper, BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IBridgeData bridgeData, IBridgeWorkSummaryData bridgeWorkSummaryData,
+        public BridgeWorkSummaryByBudget(BridgeCareContext context, IWorkSummaryByBudgetRepository workSummaryByBudgetRepository,
+               ExcelHelper excelHelper, BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IBridgeDataRepository bridgeDataRepository, IBridgeWorkSummaryDataRepository bridgeWorkSummaryDataRepository,
                CulvertCost culvertCost, BridgeWorkCost bridgeWorkCost, CommittedProjectsCost committedProjectsCost)
         {
-            workSummaryByBudgetData = summaryByBudget;
+            _workSummaryByBudgetRepository = workSummaryByBudgetRepository;
             this.excelHelper = excelHelper;
             this.bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
-            this.bridgeData = bridgeData ?? throw new ArgumentNullException(nameof(bridgeData));
-            this.bridgeWorkSummaryData = bridgeWorkSummaryData ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryData));
+            this._bridgeDataRepository = bridgeDataRepository ?? throw new ArgumentNullException(nameof(bridgeDataRepository));
+            this._bridgeWorkSummaryDataRepository = bridgeWorkSummaryDataRepository ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryDataRepository));
 
             this.culvertCost = culvertCost ?? throw new ArgumentNullException(nameof(culvertCost));
             this.bridgeWorkCost = bridgeWorkCost ?? throw new ArgumentNullException(nameof(bridgeWorkCost));
@@ -45,12 +45,12 @@ namespace BridgeCare.Services.SummaryReport.WorkSummaryByBudget
         {
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
-            var budgetsPerYearPerTreatment = workSummaryByBudgetData.GetworkSummaryByBudgetsData(simulationModel, dbContext);
-            var yearlyBudgetModels = bridgeWorkSummaryData.GetYearlyBudgetModels(simulationModel.simulationId, dbContext);
+            var budgetsPerYearPerTreatment = _workSummaryByBudgetRepository.GetworkSummaryByBudgetsData(simulationModel, dbContext);
+            var yearlyBudgetModels = _bridgeWorkSummaryDataRepository.GetYearlyBudgetModels(simulationModel.simulationId, dbContext);
 
-            var budgets = bridgeData.GetBudgets(simulationModel.simulationId, dbContext);
+            var budgets = _bridgeDataRepository.GetBudgets(simulationModel.simulationId, dbContext);
 
-            var comittedProjectsData = workSummaryByBudgetData.GetCommittedProjectsBudget(simulationModel, dbContext);
+            var comittedProjectsData = _workSummaryByBudgetRepository.GetCommittedProjectsBudget(simulationModel, dbContext);
             var budgetForCommittedProjects = comittedProjectsData.Select(_ => _.BUDGET).Distinct().ToList();
             var budgetsOnlyForMPMS = budgetForCommittedProjects.Where(item => !budgets.Any(budget => budget.Equals(item))).ToList();
 

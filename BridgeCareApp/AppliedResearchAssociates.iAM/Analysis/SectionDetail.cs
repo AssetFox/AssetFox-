@@ -1,12 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Domains;
+using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class SectionDetail : SectionSummaryDetail
     {
         public SectionDetail(Section section) : base(section)
+        {
+        }
+
+        [JsonConstructor]
+        public SectionDetail(double area, string facilityName, string sectionName) : base(area, facilityName, sectionName)
         {
         }
 

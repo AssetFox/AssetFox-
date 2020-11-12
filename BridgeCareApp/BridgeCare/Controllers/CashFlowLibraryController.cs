@@ -9,10 +9,10 @@ namespace BridgeCare.Controllers
 {
     public class CashFlowLibraryController : ApiController
     {
-        private readonly ICashFlowLibrary repo;
+        private readonly ICashFlowLibraryRepository repo;
         private readonly BridgeCareContext db;
 
-        public CashFlowLibraryController(ICashFlowLibrary repo, BridgeCareContext db)
+        public CashFlowLibraryController(ICashFlowLibraryRepository repo, BridgeCareContext db)
         {
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
             this.db = db ?? throw new ArgumentNullException(nameof(db));

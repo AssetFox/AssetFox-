@@ -94,9 +94,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 row = initialRow;
 
                 // Add work done cells
-                yearlySectionData.Sections.Sort(
-                    (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
-                    );
+                //yearlySectionData.Sections.Sort(
+                //    (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
+                //    );
 
                 var sectionsAndReportAData = yearlySectionData.Sections.Zip(pennDotReportAData, (n, w) => new { section = n, reportAData = w });
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
@@ -179,13 +179,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     worksheet.Cells[row, ++column].Value = section.TreatmentCause; // Project Pick
                     // [TODO] this value is just a placeholder
                     worksheet.Cells[row, ++column].Value = section.ValuePerTextAttribute["STRUCTURE_TYPE"]; // Budget
-                    worksheet.Cells[row, ++column].Value = section.TreatmentName;
+                    worksheet.Cells[row, ++column].Value = section.TreatmentName; // Column name is "Project"
                     if (section.TreatmentCause == TreatmentCause.SelectedTreatment)
                     {
                         _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
                         _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
                     }
-                    worksheet.Cells[row, ++column].Value = 0;
+                    worksheet.Cells[row, ++column].Value = 0; // [TODO] it is just a placeholder for cost
                     _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
                     column = column+1;
@@ -258,9 +258,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             var rowNo = currentCell.Row;
             var columnNo = currentCell.Column;
-            reportOutputData.InitialSectionSummaries.Sort(
-                    (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
-                    );
+            //reportOutputData.InitialSectionSummaries.Sort(
+            //        (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
+            //        );
             foreach (var sectionSummary in reportOutputData.InitialSectionSummaries)
             {
                 rowNo++;

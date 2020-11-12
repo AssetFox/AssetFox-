@@ -51,14 +51,39 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
                     currentCell.Row++;
                 }
             }
+            // cache to store whether "No Treatment" is present for all of the years for a given section.
+            var treatmentDecisionPerSection = new Dictionary<int, bool>();
+            foreach (var year in simulationOutput.Years)
+            {
+                foreach (var section in year.Sections)
+                {
+                    if(section.ValuePerNumericAttribute["RISK_SCORE"] > 15000)
+                    {
+                        var facilityId = int.Parse(section.FacilityName);
+                        if (!treatmentDecisionPerSection.ContainsKey(facilityId))
+                        {
+                            treatmentDecisionPerSection.Add(facilityId, true);
+                        }
+                        if(section.TreatmentName == "No Treatment" && treatmentDecisionPerSection[facilityId] == true)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            treatmentDecisionPerSection[facilityId] = false;
+                        }
+                    }
+                }
+            }
             currentCell.Row = 4; // Data starts here
             currentCell.Column += 1; // feasible treatment starts here
             foreach (var item in simulationOutput.Years)
             {
                 foreach (var section in item.Sections)
                 {
-                    if (section.TreatmentName == "No Treatment" && section.TreatmentOptions.Count > 0
-                        && section.ValuePerNumericAttribute["RISK_SCORE"] > 15000)
+                    if (section.ValuePerNumericAttribute["RISK_SCORE"] > 15000 &&
+                        treatmentDecisionPerSection[int.Parse(section.FacilityName)] == true
+                        && section.TreatmentOptions.Count > 0)
                     {
                         var minValue = section.TreatmentOptions.Min(_ => _.Cost);
                         var options = section.TreatmentOptions.Where(t => t.Cost == minValue).FirstOrDefault();

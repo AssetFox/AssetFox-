@@ -35,6 +35,18 @@ namespace BridgeCareCore.Services.SummaryReport
         public byte[] GenerateReport(Guid networkId, Guid simulationId)
         {
             var reportOutputData = _simulationOutputFileRepo.GetSimulationResults(networkId, simulationId);
+
+            // sorting the sections based on facility name. This is helpful throught the report generation process
+            reportOutputData.InitialSectionSummaries.Sort(
+                    (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
+                    );
+
+            foreach (var yearlySectionData in reportOutputData.Years)
+            {
+                yearlySectionData.Sections.Sort(
+                    (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
+                    );
+            }
             var brKeys = new List<int>();
             foreach (var item in reportOutputData.Years)
             {

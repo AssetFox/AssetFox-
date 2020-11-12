@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class TreatmentLibraryEntity
+    public class TreatmentLibraryEntity : LibraryEntity
     {
         public TreatmentLibraryEntity()
         {
@@ -11,9 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             Treatments = new HashSet<SelectableTreatmentEntity>();
         }
 
-        public Guid Id { get; set; }
-
         public virtual ICollection<TreatmentLibrarySimulationEntity> TreatmentLibrarySimulationJoins { get; set; }
+
         public virtual ICollection<SelectableTreatmentEntity> Treatments { get; set; }
     }
 }

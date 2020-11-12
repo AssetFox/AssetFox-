@@ -5,10 +5,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class TreatmentConsequenceEntity
     {
         public Guid Id { get; set; }
+
         public Guid TreatmentId { get; set; }
 
+        public Guid AttributeId { get; set; }
+
+        public string ChangeValue { get; set; }
+
         public virtual SelectableTreatmentEntity SelectableTreatment { get; set; }
+
         public virtual CriterionLibraryTreatmentConsequence CriterionLibraryTreatmentConsequenceJoin { get; set; }
+
         public virtual TreatmentConsequenceEquationEntity TreatmentConsequenceEquationJoin { get; set; }
+
+        public virtual AttributeEntity Attribute { get; set; }
     }
 }

@@ -12,11 +12,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         }
 
         public Guid Id { get; set; }
+
         public Guid NetworkId { get; set; }
 
         public virtual NetworkEntity Network { get; set; }
+
         public virtual MaintainableAssetLocationEntity MaintainableAssetLocation { get; set; }
+
         public virtual ICollection<AggregatedResultEntity> AggregatedResults { get; set; }
+
         public virtual ICollection<AttributeDatumEntity> AssignedData { get; set; }
     }
 }

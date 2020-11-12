@@ -13,13 +13,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             LocationIdentifier = locationIdentifier;
         }
 
-        [Key]
         public Guid Id { get; set; }
 
-        [Required]
         public string Discriminator { get; set; }
 
-        [Required]
         public string LocationIdentifier { get; set; }
 
         public double? Start { get; set; }

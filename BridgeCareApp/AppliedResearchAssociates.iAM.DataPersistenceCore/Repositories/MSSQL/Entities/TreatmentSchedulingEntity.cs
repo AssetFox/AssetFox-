@@ -2,13 +2,13 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class CriterionLibraryTreatmentEntity
+    public class TreatmentSchedulingEntity
     {
-        public Guid CriterionLibraryId { get; set; }
+        public Guid Id { get; set; }
 
         public Guid TreatmentId { get; set; }
 
-        public virtual CriterionLibraryEntity CriterionLibrary { get; set; }
+        public int OffsetToFutureYear { get; set; }
 
         public virtual SelectableTreatmentEntity SelectableTreatment { get; set; }
     }

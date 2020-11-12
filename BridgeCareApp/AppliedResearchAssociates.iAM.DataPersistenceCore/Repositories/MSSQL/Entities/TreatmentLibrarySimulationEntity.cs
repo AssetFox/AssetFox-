@@ -5,9 +5,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class TreatmentLibrarySimulationEntity
     {
         public Guid TreatmentLibraryId { get; set; }
+
         public Guid SimulationId { get; set; }
 
         public virtual SimulationEntity Simulation { get; set; }
+
         public virtual TreatmentLibraryEntity TreatmentLibrary { get; set; }
     }
 }

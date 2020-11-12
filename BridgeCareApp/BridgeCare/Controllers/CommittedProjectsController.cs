@@ -17,11 +17,11 @@ namespace BridgeCare.Controllers
     public class CommittedProjectsController : ApiController
     {
         private readonly ICommittedProjects _committedProjectRepo;
-        private readonly ICommitted _committedRepo;
+        private readonly ICommittedRepository _committedRepo;
         private readonly BridgeCareContext _db;
         private readonly IReadOnlyDictionary<string, CommittedProjectsDeleteMethod> _committedProjectsDeleteMethods;
 
-        public CommittedProjectsController(ICommittedProjects committedProjectRepo, ICommitted committedRepo, BridgeCareContext db)
+        public CommittedProjectsController(ICommittedProjects committedProjectRepo, ICommittedRepository committedRepo, BridgeCareContext db)
         {
             _committedProjectRepo = committedProjectRepo ?? throw new ArgumentNullException(nameof(committedProjectRepo));
             _committedRepo = committedRepo ?? throw new ArgumentNullException(nameof(committedRepo));
@@ -42,7 +42,7 @@ namespace BridgeCare.Controllers
                 [Role.ADMINISTRATOR] = DeleteAnyCommittedProjects,
                 [Role.DISTRICT_ENGINEER] = DeletePermittedCommittedProjects,
                 [Role.CWOPA] = DeletePermittedCommittedProjects,
-                [Role.GENERAL_USERS] = DeletePermittedCommittedProjects
+                [Role.PLANNING_PARTNER] = DeletePermittedCommittedProjects
             };
         }
 

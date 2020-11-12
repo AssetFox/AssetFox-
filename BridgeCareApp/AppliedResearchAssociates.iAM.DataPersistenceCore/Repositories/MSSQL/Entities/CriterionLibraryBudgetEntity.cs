@@ -2,14 +2,14 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class CriterionLibraryPerformanceCurveEntity
+    public class CriterionLibraryBudgetEntity
     {
         public Guid CriterionLibraryId { get; set; }
 
-        public Guid PerformanceCurveId { get; set; }
+        public Guid BudgetId { get; set; }
 
         public virtual CriterionLibraryEntity CriterionLibrary { get; set; }
 
-        public virtual PerformanceCurveEntity PerformanceCurve { get; set; }
+        public virtual BudgetEntity Budget { get; set; }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -8,8 +6,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public Guid Id { get; set; }
 
+        public string Expression { get; set; }
+
         public virtual PerformanceCurveEquationEntity PerformanceCurveEquationJoin { get; set; }
+
         public virtual TreatmentConsequenceEquationEntity TreatmentConsequenceEquationJoin { get; set; }
+
         public virtual TreatmentCostEquationEntity TreatmentCostEquationJoin { get; set; }
     }
 }

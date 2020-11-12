@@ -11,10 +11,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         }
 
         public Guid Id { get; set; }
+
         public Guid BudgetPriorityLibraryId { get; set; }
 
+        public int PriorityLevel { get; set; }
+
+        public int? Year { get; set; }
+
         public virtual BudgetPriorityLibraryEntity BudgetPriorityLibrary { get; set; }
+
         public virtual CriterionLibraryBudgetPriorityEntity CriterionLibraryBudgetPriorityJoin { get; set; }
+
         public virtual ICollection<BudgetPercentagePairEntity> BudgetPercentagePairs { get; set; }
     }
 }

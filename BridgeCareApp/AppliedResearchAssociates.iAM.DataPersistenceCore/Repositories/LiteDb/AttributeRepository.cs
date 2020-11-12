@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using DataMiner = AppliedResearchAssociates.iAM.DataMiner;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
@@ -9,7 +9,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
         {
         }
 
-        public void UpsertAttributes(List<DataMinerAttribute> attributes)
+        public void UpsertAttributes(List<DataMiner.Attributes.Attribute> attributes)
+        {
+            // This is a do nothing case for LiteDb.
+            return;
+        }
+
+        public void AddAttribute(DataMiner.Attributes.Attribute attribute)
         {
             // This is a do nothing case for LiteDb.
             return;

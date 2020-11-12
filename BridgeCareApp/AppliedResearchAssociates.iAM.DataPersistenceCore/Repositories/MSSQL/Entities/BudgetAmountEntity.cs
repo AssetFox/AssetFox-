@@ -5,7 +5,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class BudgetAmountEntity
     {
         public Guid Id { get; set; }
+
         public Guid BudgetId { get; set; }
+
+        public int Year { get; set; }
+
+        public decimal Value { get; set; }
 
         public virtual BudgetEntity Budget { get; set; }
     }

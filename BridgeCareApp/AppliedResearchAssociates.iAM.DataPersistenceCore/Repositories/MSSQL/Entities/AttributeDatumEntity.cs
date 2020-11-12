@@ -1,33 +1,19 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
     public class AttributeDatumEntity
     {
-        [Key]
         public Guid Id { get; set; }
-
-        [Required]
         public string Discriminator { get; set; }
-
         public DateTime TimeStamp { get; set; }
-
         public double? NumericValue { get; set; }
-
         public string TextValue { get; set; }
-
         public Guid AttributeId { get; set; }
-
-        [ForeignKey("AttributeId")]
-        public virtual AttributeEntity Attribute { get; set; }
-
         public Guid MaintainableAssetId { get; set; }
 
-        [ForeignKey("MaintainableAssetId")]
+        public virtual AttributeEntity Attribute { get; set; }
         public virtual MaintainableAssetEntity MaintainableAsset { get; set; }
-
         public virtual AttributeDatumLocationEntity AttributeDatumLocation { get; set; }
     }
 }

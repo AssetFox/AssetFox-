@@ -10,8 +10,10 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
             string ruleType,
             string command,
             ConnectionType connectionType,
-            string connectionString)
-            : base(id, name, "TEXT", ruleType, command, connectionType, connectionString) =>
+            string connectionString,
+            bool isCalculated,
+            bool isAscending)
+            : base(id, name, "TEXT", ruleType, command, connectionType, connectionString, isCalculated, isAscending) =>
             DefaultValue = defaultValue;
 
         public string DefaultValue { get; }

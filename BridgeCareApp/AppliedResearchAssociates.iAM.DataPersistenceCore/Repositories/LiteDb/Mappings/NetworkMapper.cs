@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Mappings
 {
     public static class NetworkMapper
     {

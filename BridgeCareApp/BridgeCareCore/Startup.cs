@@ -29,6 +29,8 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(Configuration);
+
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
@@ -41,7 +43,9 @@ namespace BridgeCareCore
 
 #if MsSqlDebug
             // SQL SERVER SCOPINGS
-            services.AddMSSQLServices(Configuration.GetConnectionString("BridgeCareConnex"));
+            //services.AddMSSQLServices(Configuration.GetConnectionString("BridgeCareConnex"));
+            services.AddDbContext<IAMContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
 
             services.AddScoped<INetworkRepository, NetworkRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
@@ -53,6 +57,7 @@ namespace BridgeCareCore
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
             services.AddScoped<IPennDotReportARepository, PennDotReportARepository>();
 
+            services.AddScoped<ISimulationRepository, SimulationRepository>();
 #elif LiteDbDebug
             // LITE DB SCOPINGS
             services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));

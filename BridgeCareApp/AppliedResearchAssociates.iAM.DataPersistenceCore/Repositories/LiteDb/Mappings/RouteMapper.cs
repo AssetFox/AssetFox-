@@ -3,7 +3,7 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Mappings
 {
     public static class RouteMapper
     {

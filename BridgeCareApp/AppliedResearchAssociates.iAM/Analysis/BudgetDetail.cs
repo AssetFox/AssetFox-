@@ -1,5 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
+using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {

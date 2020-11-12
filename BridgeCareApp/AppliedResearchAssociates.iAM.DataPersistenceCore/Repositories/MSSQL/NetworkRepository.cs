@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             // prevent EF from attempting to create the network's child entities (create them
             // separately as part of a bulk insert)
-            Context.Networks.Add(new NetworkEntity
+            Context.Network.Add(new NetworkEntity
             {
                 Id = network.Id,
                 Name = network.Name

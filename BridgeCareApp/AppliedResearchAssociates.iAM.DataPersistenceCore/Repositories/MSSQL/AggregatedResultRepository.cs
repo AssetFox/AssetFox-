@@ -27,12 +27,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId)
         {
-            if (!Context.Networks.Any(_ => _.Id == networkId))
+            if (!Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssets = Context.MaintainableAssets
+            var maintainableAssets = Context.MaintainableAsset
                 .Include(_ => _.AggregatedResults)
                 .Where(_ => _.Id == networkId)
                 .ToList();
@@ -44,13 +44,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void DeleteAggregatedResults(Guid networkId)
         {
-            if (!Context.Networks.Any(_ => _.Id == networkId))
+            if (!Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
             Context.Database.ExecuteSqlRaw(
-                $"DELETE FROM dbo.AggregatedResults WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAssets WHERE NetworkId = '{networkId}')");
+                $"DELETE FROM dbo.AggregatedResult WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAsset WHERE NetworkId = '{networkId}')");
         }
     }
 }

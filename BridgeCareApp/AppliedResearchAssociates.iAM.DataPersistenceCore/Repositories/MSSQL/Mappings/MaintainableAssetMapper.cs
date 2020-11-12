@@ -21,20 +21,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             var maintainableAsset = new MaintainableAsset(entity.Id, entity.NetworkId, entity.MaintainableAssetLocation.ToDomain());
 
-            if (entity.AttributeData != null && entity.AttributeData.Any())
+            if (entity.AssignedData != null && entity.AssignedData.Any())
             {
-                if (entity.AttributeData.Any(a => a.Discriminator == "NumericAttributeDatum"))
+                if (entity.AssignedData.Any(a => a.Discriminator == "NumericAttributeDatum"))
                 {
-                    var numericAttributeData = entity.AttributeData
+                    var numericAttributeData = entity.AssignedData
                         .Where(e => e.Discriminator == "NumericAttributeDatum")
                         .Select(e => e.ToDomain());
 
                     maintainableAsset.AssignAttributeDataFromDataSource(numericAttributeData);
                 }
 
-                if (entity.AttributeData.Any(a => a.Discriminator == "TextAttributeDatum"))
+                if (entity.AssignedData.Any(a => a.Discriminator == "TextAttributeDatum"))
                 {
-                    var textAttributeData = entity.AttributeData
+                    var textAttributeData = entity.AssignedData
                         .Where(e => e.Discriminator == "TextAttributeDatum")
                         .Select(e => e.ToDomain());
 

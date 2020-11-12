@@ -14,16 +14,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public IEnumerable<MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId)
         {
-            if (!Context.Networks.Any(_ => _.Id == networkId))
+            if (!Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssets = Context.MaintainableAssets
+            var maintainableAssets = Context.MaintainableAsset
                 .Include(_ => _.MaintainableAssetLocation)
-                .Include(_ => _.AttributeData)
+                .Include(_ => _.AssignedData)
                 .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.AttributeData)
+                .Include(_ => _.AssignedData)
                 .ThenInclude(_ => _.AttributeDatumLocation)
                 .Where(_ => _.NetworkId == networkId)
                 .ToList();

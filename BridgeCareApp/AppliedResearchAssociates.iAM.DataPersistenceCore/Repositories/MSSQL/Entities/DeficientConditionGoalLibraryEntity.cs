@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class DeficientConditionGoalLibraryEntity
+    public class DeficientConditionGoalLibraryEntity : LibraryEntity
     {
         public DeficientConditionGoalLibraryEntity()
         {
@@ -11,9 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             DeficientConditionGoalLibrarySimulationJoins = new HashSet<DeficientConditionGoalLibrarySimulationEntity>();
         }
 
-        public Guid Id { get; set; }
-
         public virtual ICollection<DeficientConditionGoalEntity> DeficientConditionGoals { get; set; }
+
         public virtual ICollection<DeficientConditionGoalLibrarySimulationEntity> DeficientConditionGoalLibrarySimulationJoins { get; set; }
     }
 }

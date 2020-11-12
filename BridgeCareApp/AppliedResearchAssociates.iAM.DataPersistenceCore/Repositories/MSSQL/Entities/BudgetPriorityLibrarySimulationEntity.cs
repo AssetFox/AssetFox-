@@ -5,9 +5,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class BudgetPriorityLibrarySimulationEntity
     {
         public Guid BudgetPriorityLibraryId { get; set; }
+
         public Guid SimulationId { get; set; }
 
         public virtual BudgetPriorityLibraryEntity BudgetPriorityLibrary { get; set; }
+
         public virtual SimulationEntity Simulation { get; set; }
     }
 }

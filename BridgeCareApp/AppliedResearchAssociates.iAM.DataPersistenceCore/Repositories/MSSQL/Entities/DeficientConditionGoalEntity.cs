@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
@@ -8,7 +6,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class DeficientConditionGoalEntity : ConditionGoalEntity
     {
         public Guid DeficientConditionGoalLibraryId { get; set; }
+
         public double AllowedDeficientPercentage { get; set; }
+
         public double DeficientLimit { get; set; }
 
         public virtual DeficientConditionGoalLibraryEntity DeficientConditionGoalLibrary { get; set; }

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class BudgetPriorityLibraryEntity
+    public class BudgetPriorityLibraryEntity : LibraryEntity
     {
         public BudgetPriorityLibraryEntity()
         {
@@ -11,9 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             BudgetPriorityLibrarySimulationJoins = new HashSet<BudgetPriorityLibrarySimulationEntity>();
         }
 
-        public Guid Id { get; set; }
-
         public virtual ICollection<BudgetPriorityEntity> BudgetPriorities { get; set; }
+
         public virtual ICollection<BudgetPriorityLibrarySimulationEntity> BudgetPriorityLibrarySimulationJoins { get; set; }
     }
 }

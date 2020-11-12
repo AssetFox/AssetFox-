@@ -13,13 +13,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         }
 
         public Guid Id { get; set; }
+
         public Guid InvestmentPlanId { get; set; }
+        public string Name { get; set; }
 
         public virtual InvestmentPlanEntity InvestmentPlan { get; set; }
-        public virtual BudgetConditionEntity BudgetCondition { get; set; }
+
+        public virtual CriterionLibraryBudgetEntity CriterionLibraryBudgetJoin { get; set; }
+
         public virtual ICollection<BudgetAmountEntity> BudgetAmounts { get; set; }
+
         public virtual ICollection<BudgetPercentagePairEntity> BudgetPercentagePairs { get; set; }
+
         public virtual ICollection<TreatmentBudgetEntity> TreatmentBudgetJoins { get; set; }
+
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
     }
 }

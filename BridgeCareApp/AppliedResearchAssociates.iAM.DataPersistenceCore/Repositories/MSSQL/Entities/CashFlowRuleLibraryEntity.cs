@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class CashFlowRuleLibraryEntity
+    public class CashFlowRuleLibraryEntity : LibraryEntity
     {
         public CashFlowRuleLibraryEntity()
         {
             CashFlowRules = new HashSet<CashFlowRuleEntity>();
-            CashFlowRuleLibrarySimulations = new HashSet<CashFlowRuleLibrarySimulationEntity>();
+            CashFlowRuleLibrarySimulationJoins = new HashSet<CashFlowRuleLibrarySimulationEntity>();
         }
 
-        public Guid Id { get; set; }
-
         public virtual ICollection<CashFlowRuleEntity> CashFlowRules { get; set; }
-        public virtual ICollection<CashFlowRuleLibrarySimulationEntity> CashFlowRuleLibrarySimulations { get; set; }
+
+        public virtual ICollection<CashFlowRuleLibrarySimulationEntity> CashFlowRuleLibrarySimulationJoins { get; set; }
     }
 }

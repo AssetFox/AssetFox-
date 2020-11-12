@@ -5,9 +5,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class CriterionLibraryCashFlowRuleEntity
     {
         public Guid CriterionLibraryId { get; set; }
+
         public Guid CashFlowRuleId { get; set; }
 
         public virtual CashFlowRuleEntity CashFlowRule { get; set; }
+
         public virtual CriterionLibraryEntity CriterionLibrary { get; set; }
     }
 }

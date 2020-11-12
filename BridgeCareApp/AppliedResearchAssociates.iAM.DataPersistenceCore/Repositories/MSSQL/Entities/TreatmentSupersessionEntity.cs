@@ -2,14 +2,14 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class CriterionLibraryTreatmentEntity
+    public class TreatmentSupersessionEntity
     {
-        public Guid CriterionLibraryId { get; set; }
+        public Guid Id { get; set; }
 
         public Guid TreatmentId { get; set; }
 
-        public virtual CriterionLibraryEntity CriterionLibrary { get; set; }
-
         public virtual SelectableTreatmentEntity SelectableTreatment { get; set; }
+
+        public virtual CriterionLibraryTreatmentSupersessionEntity CriterionLibraryTreatmentSupersessionJoin { get; set; }
     }
 }

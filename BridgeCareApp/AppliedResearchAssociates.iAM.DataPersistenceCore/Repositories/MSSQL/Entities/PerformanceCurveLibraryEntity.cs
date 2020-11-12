@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class PerformanceCurveLibraryEntity
+    public class PerformanceCurveLibraryEntity : LibraryEntity
     {
         public PerformanceCurveLibraryEntity()
         {
@@ -11,10 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             PerformanceCurveLibrarySimulationJoins = new HashSet<PerformanceCurveLibrarySimulationEntity>();
         }
 
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-
         public virtual ICollection<PerformanceCurveEntity> PerformanceCurves { get; set; }
+
         public virtual ICollection<PerformanceCurveLibrarySimulationEntity> PerformanceCurveLibrarySimulationJoins { get; set; }
     }
 }

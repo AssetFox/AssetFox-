@@ -5,10 +5,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class TreatmentCostEntity
     {
         public Guid Id { get; set; }
+
         public Guid TreatmentId { get; set; }
 
         public virtual SelectableTreatmentEntity SelectableTreatment { get; set; }
+
         public virtual CriterionLibraryTreatmentCost CriterionLibraryTreatmentCostJoin { get; set; }
+
         public virtual TreatmentCostEquationEntity TreatmentCostEquationJoin { get; set; }
     }
 }

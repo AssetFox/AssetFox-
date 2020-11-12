@@ -13,10 +13,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         }
 
         public Guid Id { get; set; }
+
         public string Name { get; set; }
 
         public virtual ICollection<MaintainableAssetEntity> MaintainableAssets { get; set; }
+
         public virtual ICollection<SimulationEntity> Simulations { get; set; }
+
         public virtual ICollection<FacilityEntity> Facilities { get; set; }
     }
 }

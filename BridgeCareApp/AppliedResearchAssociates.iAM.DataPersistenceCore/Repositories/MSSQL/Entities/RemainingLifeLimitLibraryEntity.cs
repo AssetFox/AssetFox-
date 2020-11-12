@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class RemainingLifeLimitLibraryEntity
+    public class RemainingLifeLimitLibraryEntity : LibraryEntity
     {
         public RemainingLifeLimitLibraryEntity()
         {
@@ -11,9 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             RemainingLifeLimitLibrarySimulationJoins = new HashSet<RemainingLifeLimitLibrarySimulationEntity>();
         }
 
-        public Guid Id { get; set; }
-
         public virtual ICollection<RemainingLifeLimitEntity> RemainingLifeLimits { get; set; }
+
         public virtual ICollection<RemainingLifeLimitLibrarySimulationEntity> RemainingLifeLimitLibrarySimulationJoins { get; set; }
     }
 }

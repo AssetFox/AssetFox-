@@ -4,7 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class TargetConditionGoalLibraryEntity
+    public class TargetConditionGoalLibraryEntity : LibraryEntity
     {
         public TargetConditionGoalLibraryEntity()
         {
@@ -12,9 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             TargetConditionGoalLibrarySimulationJoins = new HashSet<TargetConditionGoalLibrarySimulationEntity>();
         }
 
-        public Guid Id { get; set; }
-
         public virtual ICollection<TargetConditionGoalEntity> TargetConditionGoals { get; set; }
+
         public virtual ICollection<TargetConditionGoalLibrarySimulationEntity> TargetConditionGoalLibrarySimulationJoins { get; set; }
     }
 }

@@ -12,15 +12,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             TreatmentConsequences = new HashSet<TreatmentConsequenceEntity>();
             TreatmentCosts = new HashSet<TreatmentCostEntity>();
             CommittedProjects = new HashSet<CommittedProjectEntity>();
+            TreatmentSchedulings = new HashSet<TreatmentSchedulingEntity>();
+            TreatmentSupersessions = new HashSet<TreatmentSupersessionEntity>();
         }
 
         public Guid TreatmentLibraryId { get; set; }
 
         public virtual TreatmentLibraryEntity TreatmentLibrary { get; set; }
+
         public virtual CriterionLibraryTreatmentEntity CriterionLibraryTreatmentJoin { get; set; }
+
         public virtual ICollection<TreatmentBudgetEntity> TreatmentBudgetJoins { get; set; }
+
         public virtual ICollection<TreatmentConsequenceEntity> TreatmentConsequences { get; set; }
+
         public virtual ICollection<TreatmentCostEntity> TreatmentCosts { get; set; }
+
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
+
+        public virtual ICollection<TreatmentSchedulingEntity> TreatmentSchedulings { get; set; }
+
+        public virtual ICollection<TreatmentSupersessionEntity> TreatmentSupersessions { get; set; }
     }
 }

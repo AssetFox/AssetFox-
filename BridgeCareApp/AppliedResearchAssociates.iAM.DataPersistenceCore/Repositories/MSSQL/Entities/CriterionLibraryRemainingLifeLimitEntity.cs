@@ -5,9 +5,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class CriterionLibraryRemainingLifeLimitEntity
     {
         public Guid CriterionLibraryId { get; set; }
+
         public Guid RemainingLifeLimitId { get; set; }
 
         public virtual CriterionLibraryEntity CriterionLibrary { get; set; }
+
         public virtual RemainingLifeLimitEntity RemainingLifeLimit { get; set; }
     }
 }

@@ -177,15 +177,24 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     column = AddSimulationYearData(worksheet, row, column, null, section);
 
                     worksheet.Cells[row, ++column].Value = section.TreatmentCause; // Project Pick
-                    // [TODO] this value is just a placeholder
-                    worksheet.Cells[row, ++column].Value = section.ValuePerTextAttribute["STRUCTURE_TYPE"]; // Budget
+
+                    var treatmentConsideration = section.TreatmentConsiderations.Find(_ => _.TreatmentName == section.TreatmentName);
+
+                    var budgetName = treatmentConsideration == null ? "" :
+                        treatmentConsideration.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull ||
+                    _.Status == BudgetUsageStatus.CostCoveredInPart).BudgetName;
+
+                    worksheet.Cells[row, ++column].Value = budgetName; // Budget
                     worksheet.Cells[row, ++column].Value = section.TreatmentName;
                     if (section.TreatmentCause == TreatmentCause.SelectedTreatment)
                     {
                         _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
                         _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
                     }
-                    worksheet.Cells[row, ++column].Value = 0;
+
+                    var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.TreatmentName);
+                    var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
+                    worksheet.Cells[row, ++column].Value = cost; // cost
                     _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
                     column = column+1;

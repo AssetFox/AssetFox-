@@ -18,16 +18,19 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
         private readonly IPennDotReportARepository _pennDotReportARepository;
+        private readonly IBridgeWorkSummary _bridgeWorkSummary;
 
         public SummaryReportGenerator(FileSystemRepository.ISimulationOutputRepository simulationOutputFileRepo,
             IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
-            IPennDotReportARepository pennDotReportARepository)
+            IPennDotReportARepository pennDotReportARepository,
+            IBridgeWorkSummary bridgeWorkSummary)
         {
             _simulationOutputFileRepo = simulationOutputFileRepo ?? throw new ArgumentNullException(nameof(simulationOutputFileRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _bridgeDataForSummaryReport = bridgeDataForSummaryReport ?? throw new ArgumentNullException(nameof(bridgeDataForSummaryReport));
             _pennDotReportARepository = pennDotReportARepository ?? throw new ArgumentNullException(nameof(pennDotReportARepository));
+            _bridgeWorkSummary = bridgeWorkSummary ?? throw new ArgumentNullException(nameof(bridgeWorkSummary));
         }
 
         public byte[] GenerateReport(Guid networkId, Guid simulationId)
@@ -44,6 +47,9 @@ namespace BridgeCareCore.Services.SummaryReport
             {
                 var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
                 var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, pennDotReportAData);
+
+                var bridgeWorkSummaryWOrksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
+                var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWOrksheet, reportOutputData);
 
                 var folderPathForSimulation = $"DownloadedNewReports\\{simulationId}";
                 string relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using AppliedResearchAssociates.iAM;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
+using MoreLinq;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
@@ -64,7 +66,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
                         {
                             treatmentDecisionPerSection.Add(facilityId, true);
                         }
-                        if(section.TreatmentName == "No Treatment" && treatmentDecisionPerSection[facilityId] == true)
+                        if(section.TreatmentCause == TreatmentCause.NoSelection && treatmentDecisionPerSection[facilityId] == true)
                         {
                             continue;
                         }
@@ -83,12 +85,15 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
                 {
                     if (section.ValuePerNumericAttribute["RISK_SCORE"] > 15000 &&
                         treatmentDecisionPerSection[int.Parse(section.FacilityName)] == true
-                        && section.TreatmentOptions.Count > 0)
+                        && section.TreatmentConsiderations.Count > 0)
                     {
-                        var minValue = section.TreatmentOptions.Min(_ => _.Cost);
-                        var options = section.TreatmentOptions.Where(t => t.Cost == minValue).FirstOrDefault();
+                        var filteredOptions = section.TreatmentOptions.
+                            Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
+                        filteredOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
 
-                        worksheet.Cells[currentCell.Row, currentCell.Column].Value = options.TreatmentName;
+                        var requiredTreatmentName = filteredOptions.FirstOrDefault().TreatmentName;
+
+                        worksheet.Cells[currentCell.Row, currentCell.Column].Value = requiredTreatmentName;
                         currentCell.Row++;
                     }
                 }

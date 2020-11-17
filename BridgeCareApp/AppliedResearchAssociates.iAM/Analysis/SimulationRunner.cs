@@ -370,10 +370,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 option.CandidateTreatment,
                                 year,
                                 context => context.CurrentPrioritizedAmount ?? context.CurrentAmount);
+                            var considerationDetail = workingContext.Detail.TreatmentConsiderations.Last();
+                            considerationDetail.BudgetPriorityLevel = priority.PriorityLevel;
 
-                            workingContext.Detail.TreatmentConsiderations.Last().BudgetPriorityLevel = priority.PriorityLevel;
-
-                            if (costCoverage != CostCoverage.None)
+                            if (costCoverage == CostCoverage.None)
+                            {
+                                option.Context.Detail.TreatmentConsiderations.Add(considerationDetail);
+                            }
+                            else
                             {
                                 _ = workingContextPerBaselineContext.Remove(option.Context);
 

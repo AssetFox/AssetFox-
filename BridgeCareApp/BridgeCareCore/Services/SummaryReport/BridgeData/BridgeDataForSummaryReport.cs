@@ -279,7 +279,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                 //worksheet.Cells[rowNo, columnNo++].Value = bridgeDataModel.PlanningPartner;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY_ID"];
-                worksheet.Cells[rowNo, columnNo++].Value = int.Parse(sectionSummary.ValuePerTextAttribute["NHS_IND"]) > 0 ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(sectionSummary.ValuePerTextAttribute["NHS_IND"],
+                    out var numericValue) && numericValue > 0 ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["STRUCTURE_TYPE"];
                 worksheet.Cells[rowNo, columnNo++].Value = (int)sectionSummary.ValuePerNumericAttribute["YEAR_BUILT"];

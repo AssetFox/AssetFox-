@@ -16,13 +16,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
         }
 
+        public string AppliedTreatment { get; set; }
+
         public TreatmentCause TreatmentCause { get; set; }
 
         public List<TreatmentConsiderationDetail> TreatmentConsiderations { get; } = new List<TreatmentConsiderationDetail>();
 
         public bool TreatmentFundingIgnoresSpendingLimit { get; set; }
-
-        public string TreatmentName { get; set; }
 
         public List<TreatmentOptionDetail> TreatmentOptions { get; } = new List<TreatmentOptionDetail>();
 
@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal SectionDetail(SectionDetail original) : base(original)
         {
-            TreatmentName = original.TreatmentName;
+            AppliedTreatment = original.AppliedTreatment;
             TreatmentCause = original.TreatmentCause;
             TreatmentStatus = original.TreatmentStatus;
             TreatmentFundingIgnoresSpendingLimit = original.TreatmentFundingIgnoresSpendingLimit;

@@ -100,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
             FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
 
-            Detail.TreatmentName = treatment.Name;
+            Detail.AppliedTreatment = treatment.Name;
             Detail.TreatmentStatus = TreatmentStatus.Applied;
         }
 
@@ -162,7 +162,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void MarkTreatmentProgress(Treatment treatment)
         {
-            Detail.TreatmentName = treatment.Name;
+            Detail.AppliedTreatment = treatment.Name;
             Detail.TreatmentStatus = TreatmentStatus.Progressed;
         }
 

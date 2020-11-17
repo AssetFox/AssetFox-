@@ -8,18 +8,19 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using BridgeCareCore.Interfaces.SummaryReport;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
+using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 
 namespace BridgeCareCore.Services.SummaryReport
 {
     public class SummaryReportGenerator : ISummaryReportGenerator
     {
-        private readonly ISimulationOutputRepository _simulationOutputFileRepo;
+        private readonly FileSystemRepository.ISimulationOutputRepository _simulationOutputFileRepo;
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
         private readonly IPennDotReportARepository _pennDotReportARepository;
         private readonly IUnfundedRecommendations _unfundedRecommendations;
 
-        public SummaryReportGenerator(ISimulationOutputRepository simulationOutputFileRepo,
+        public SummaryReportGenerator(FileSystemRepository.ISimulationOutputRepository simulationOutputFileRepo,
             IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
             IPennDotReportARepository pennDotReportARepository,

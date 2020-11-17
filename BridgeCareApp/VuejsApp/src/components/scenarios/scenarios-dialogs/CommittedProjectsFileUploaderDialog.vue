@@ -55,6 +55,12 @@
                     <v-btn @click="onUpload" class="ara-blue-bg white--text">Upload</v-btn>
                     <v-btn @click="onExport" class="ara-blue-bg white--text">Export</v-btn>
                     <v-btn @click="onCancel" class="ara-orange-bg white--text">Cancel</v-btn>
+                    <v-tooltip top>
+                        <template slot="activator">
+                            <v-btn @click="onDelete" class="ara-orange-bg white--text">Delete</v-btn>
+                        </template>
+                        <span>Delete scenario's current committed projects</span>
+                    </v-tooltip>
                 </v-layout>
             </v-card-actions>
         </v-card>
@@ -146,6 +152,7 @@
                 const oldFiles = this.files.filter((file: File) => !any(propEq('name', file.name), newFiles));
                 this.files = [...oldFiles, ...newFiles];
                 this.setIsBusyAction({isBusy: false});
+                this.fileSelect.value = '';
             }
         }
 
@@ -191,6 +198,13 @@
         onExport() {
             this.$emit('submit', null, true);
             this.files = [];
+        }
+
+        /**
+         * Emits the 'delete' event when 'Delete' button has been clicked
+         */
+        onDelete() {
+            this.$emit('delete');
         }
     }
 </script>

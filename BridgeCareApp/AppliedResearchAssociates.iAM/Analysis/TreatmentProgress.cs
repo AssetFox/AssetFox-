@@ -1,4 +1,5 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {

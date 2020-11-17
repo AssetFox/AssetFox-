@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.Domains;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Analysis

@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             // prevent EF from attempting to create the network's child entities (create them
             // separately as part of a bulk insert)
-            Context.Networks.Add(new NetworkEntity
+            Context.Network.Add(new NetworkEntity
             {
                 Id = network.Id,
                 Name = network.Name
@@ -36,13 +36,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public IEnumerable<DataAssignment.Networking.Network> GetAllNetworks()
         {
-            if (Context.Networks.Count() == 0)
+            if (Context.Network.Count() == 0)
             {
                 throw new RowNotInTableException($"Cannot find networks in the database");
             }
 
             // consumer of this call will only need the network information. Not the maintainable assest information
-            return Context.Networks.Select(_ => _.ToDomain()).ToList();
+            return Context.Network.Select(_ => _.ToDomain()).ToList();
         }
     }
 }

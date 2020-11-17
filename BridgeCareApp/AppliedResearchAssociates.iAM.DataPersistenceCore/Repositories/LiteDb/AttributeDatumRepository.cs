@@ -4,7 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
-using LiteDB;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Mappings;
 using MoreLinq;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 

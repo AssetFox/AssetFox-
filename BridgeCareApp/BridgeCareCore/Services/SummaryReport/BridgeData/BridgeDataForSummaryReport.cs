@@ -101,12 +101,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 {
                     // Work done in a year
                     var range = worksheet.Cells[row, column];
-                    setColor(data.reportAData.Parallel_Struct, data.section.TreatmentName, previousYearCause, data.section.TreatmentCause,
-                        yearlySectionData.Year, index, data.section.TreatmentName, worksheet, row, column);
+                    setColor(data.reportAData.Parallel_Struct, data.section.AppliedTreatment, previousYearCause, data.section.TreatmentCause,
+                        yearlySectionData.Year, index, data.section.AppliedTreatment, worksheet, row, column);
 
-                    if (abbreviatedTreatmentNames.ContainsKey(data.section.TreatmentName))
+                    if (abbreviatedTreatmentNames.ContainsKey(data.section.AppliedTreatment))
                     {
-                        range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[data.section.TreatmentName]) ? "--" : abbreviatedTreatmentNames[data.section.TreatmentName];
+                        range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[data.section.AppliedTreatment]) ? "--" : abbreviatedTreatmentNames[data.section.AppliedTreatment];
                     }
                     else
                     {
@@ -173,15 +173,24 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     column = AddSimulationYearData(worksheet, row, column, null, section);
 
                     worksheet.Cells[row, ++column].Value = section.TreatmentCause; // Project Pick
-                    // [TODO] this value is just a placeholder
-                    worksheet.Cells[row, ++column].Value = section.ValuePerTextAttribute["STRUCTURE_TYPE"]; // Budget
-                    worksheet.Cells[row, ++column].Value = section.TreatmentName; // Column name is "Project"
+
+                    var treatmentConsideration = section.TreatmentConsiderations.Find(_ => _.TreatmentName == section.AppliedTreatment);
+
+                    var budgetName = treatmentConsideration == null ? "" :
+                        treatmentConsideration.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull ||
+                    _.Status == BudgetUsageStatus.CostCoveredInPart).BudgetName;
+
+                    worksheet.Cells[row, ++column].Value = budgetName; // Budget
+                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment;
                     if (section.TreatmentCause == TreatmentCause.SelectedTreatment)
                     {
                         _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
                         _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
                     }
-                    worksheet.Cells[row, ++column].Value = 0; // [TODO] it is just a placeholder for cost
+
+                    var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
+                    var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
+                    worksheet.Cells[row, ++column].Value = cost; // cost
                     _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
                     column = column+1;

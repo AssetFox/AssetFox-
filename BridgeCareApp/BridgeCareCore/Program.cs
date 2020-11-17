@@ -13,11 +13,11 @@ namespace BridgeCareCore
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((hostcontext, config) =>
-            {
-                var env = hostcontext.HostingEnvironment;
-                config.AddJsonFile("coreConnection.json", optional: true, reloadOnChange: true);
-            })
+                .ConfigureAppConfiguration((hostcontext, config) =>
+                {
+                    var env = hostcontext.HostingEnvironment;
+                    config.AddJsonFile("coreConnection.json", optional: true, reloadOnChange: true);
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

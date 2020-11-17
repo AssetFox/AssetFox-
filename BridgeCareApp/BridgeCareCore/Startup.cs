@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using LiteDb = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb;
+using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 
 namespace BridgeCareCore
 {
@@ -30,10 +31,12 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(Configuration);
+
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
-            services.AddScoped<ISimulationOutputRepository, SimulationOutputRepository>();
+            services.AddScoped<FileSystemRepository.ISimulationOutputRepository, FileSystemRepository.SimulationOutputRepository>();
             services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
             services.AddScoped<IExcelHelper, ExcelHelper>();
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
@@ -50,6 +53,7 @@ namespace BridgeCareCore
             services.AddScoped<IAttributeRepository, AttributeRepository>();
             services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
             services.AddScoped<IAggregatedResultRepository, AggregatedResultRepository>();
+            services.AddScoped<ISimulationRepository, SimulationRepository>();
 
             // Repository for legacy database
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));

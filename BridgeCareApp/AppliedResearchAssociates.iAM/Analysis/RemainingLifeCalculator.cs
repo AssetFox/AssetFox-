@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {

@@ -116,7 +116,8 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
 
             //worksheet.Cells[rowNo, columnNo++].Value = bridgeDataModel.PlanningPartner;
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY_ID"];
-            worksheet.Cells[row, columnNo++].Value = int.Parse(sectionSummary.ValuePerTextAttribute["NHS_IND"]) > 0 ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = int.TryParse(sectionSummary.ValuePerTextAttribute["NHS_IND"],
+                    out var numericValue) && numericValue > 0 ? "Y" : "N";
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["STRUCTURE_TYPE"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"]; 

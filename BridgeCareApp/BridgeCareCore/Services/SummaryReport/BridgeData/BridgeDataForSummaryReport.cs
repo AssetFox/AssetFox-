@@ -94,10 +94,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 row = initialRow;
 
                 // Add work done cells
-                //yearlySectionData.Sections.Sort(
-                //    (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
-                //    );
-
                 var sectionsAndReportAData = yearlySectionData.Sections.Zip(pennDotReportAData, (n, w) => new { section = n, reportAData = w });
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
                 var i = 0;
@@ -258,9 +254,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             var rowNo = currentCell.Row;
             var columnNo = currentCell.Column;
-            //reportOutputData.InitialSectionSummaries.Sort(
-            //        (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
-            //        );
             foreach (var sectionSummary in reportOutputData.InitialSectionSummaries)
             {
                 rowNo++;

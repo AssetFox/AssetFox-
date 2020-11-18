@@ -94,10 +94,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 row = initialRow;
 
                 // Add work done cells
-                yearlySectionData.Sections.Sort(
-                    (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
-                    );
-
                 var sectionsAndReportAData = yearlySectionData.Sections.Zip(pennDotReportAData, (n, w) => new { section = n, reportAData = w });
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
                 var i = 0;
@@ -105,12 +101,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 {
                     // Work done in a year
                     var range = worksheet.Cells[row, column];
-                    setColor(data.reportAData.Parallel_Struct, data.section.TreatmentName, previousYearCause, data.section.TreatmentCause,
-                        yearlySectionData.Year, index, data.section.TreatmentName, worksheet, row, column);
+                    setColor(data.reportAData.Parallel_Struct, data.section.AppliedTreatment, previousYearCause, data.section.TreatmentCause,
+                        yearlySectionData.Year, index, data.section.AppliedTreatment, worksheet, row, column);
 
-                    if (abbreviatedTreatmentNames.ContainsKey(data.section.TreatmentName))
+                    if (abbreviatedTreatmentNames.ContainsKey(data.section.AppliedTreatment))
                     {
-                        range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[data.section.TreatmentName]) ? "--" : abbreviatedTreatmentNames[data.section.TreatmentName];
+                        range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[data.section.AppliedTreatment]) ? "--" : abbreviatedTreatmentNames[data.section.AppliedTreatment];
                     }
                     else
                     {
@@ -178,21 +174,21 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                     worksheet.Cells[row, ++column].Value = section.TreatmentCause; // Project Pick
 
-                    var treatmentConsideration = section.TreatmentConsiderations.Find(_ => _.TreatmentName == section.TreatmentName);
+                    var treatmentConsideration = section.TreatmentConsiderations.Find(_ => _.TreatmentName == section.AppliedTreatment);
 
                     var budgetName = treatmentConsideration == null ? "" :
                         treatmentConsideration.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull ||
                     _.Status == BudgetUsageStatus.CostCoveredInPart).BudgetName;
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
-                    worksheet.Cells[row, ++column].Value = section.TreatmentName;
+                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment;
                     if (section.TreatmentCause == TreatmentCause.SelectedTreatment)
                     {
                         _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
                         _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
                     }
 
-                    var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.TreatmentName);
+                    var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
                     var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
@@ -285,7 +281,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                 //worksheet.Cells[rowNo, columnNo++].Value = bridgeDataModel.PlanningPartner;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY_ID"];
-                worksheet.Cells[rowNo, columnNo++].Value = int.Parse(sectionSummary.ValuePerTextAttribute["NHS_IND"]) > 0 ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(sectionSummary.ValuePerTextAttribute["NHS_IND"],
+                    out var numericValue) && numericValue > 0 ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["STRUCTURE_TYPE"];
                 worksheet.Cells[rowNo, columnNo++].Value = (int)sectionSummary.ValuePerNumericAttribute["YEAR_BUILT"];

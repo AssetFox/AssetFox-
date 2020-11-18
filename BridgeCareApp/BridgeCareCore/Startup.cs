@@ -7,6 +7,7 @@ using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeData;
+using BridgeCareCore.Services.SummaryReport.UnfundedRecommendations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,7 @@ namespace BridgeCareCore
             services.AddScoped<IExcelHelper, ExcelHelper>();
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
             services.AddScoped<IHighlightWorkDoneCells, HighlightWorkDoneCells>();
+            services.AddScoped<IUnfundedRecommendations, UnfundedRecommendations>();
             services.AddSignalR();
 
 #if MsSqlDebug

@@ -102,7 +102,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     // Work done in a year
                     var range = worksheet.Cells[row, column];
                     setColor(data.reportAData.Parallel_Struct, data.section.AppliedTreatment, previousYearCause, data.section.TreatmentCause,
-                        yearlySectionData.Year, index, data.section.AppliedTreatment, worksheet, row, column);
+                        yearlySectionData.Year, index, worksheet, row, column);
 
                     if (abbreviatedTreatmentNames.ContainsKey(data.section.AppliedTreatment))
                     {
@@ -296,9 +296,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             currentCell.Column = columnNo;
         }
         private void setColor(int parallelBridge, string treatment, TreatmentCause previousYearCause,
-           TreatmentCause treatmentCause, int year, int index, string project, ExcelWorksheet worksheet, int row, int column)
+           TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
         {
-            _highlightWorkDoneCells.CheckConditions(parallelBridge, treatment, previousYearCause, treatmentCause, year, index, project, worksheet, row, column);
+            _highlightWorkDoneCells.CheckConditions(parallelBridge, treatment, previousYearCause, treatmentCause, year, index, worksheet, row, column);
         }
         private List<string> GetHeaders()
         {

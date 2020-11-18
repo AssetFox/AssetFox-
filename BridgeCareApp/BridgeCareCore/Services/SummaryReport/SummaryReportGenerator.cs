@@ -26,7 +26,7 @@ namespace BridgeCareCore.Services.SummaryReport
             ILogger<SummaryReportGenerator> logger,
             IPennDotReportARepository pennDotReportARepository,
             IUnfundedRecommendations unfundedRecommendations,
-            IBridgeWorkSummary bridgeWorkSummary)  
+            IBridgeWorkSummary bridgeWorkSummary)
         {
             _simulationOutputFileRepo = simulationOutputFileRepo ?? throw new ArgumentNullException(nameof(simulationOutputFileRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -52,9 +52,11 @@ namespace BridgeCareCore.Services.SummaryReport
                     );
             }
             var brKeys = new List<int>();
+            var simulationYears = new List<int>();
             foreach (var item in reportOutputData.Years)
             {
                 brKeys = item.Sections.Select(_ => Convert.ToInt32(_.FacilityName)).ToList();
+                simulationYears.Add(item.Year);
             }
             var pennDotReportAData = _pennDotReportARepository.GetPennDotReportAData(brKeys);
 
@@ -68,8 +70,9 @@ namespace BridgeCareCore.Services.SummaryReport
                 var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");
                 _unfundedRecommendations.Fill(unfundedRecommendationWorksheet, reportOutputData);
 
+                // Bridge work summary TAB
                 var bridgeWorkSummaryWOrksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
-                var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWOrksheet, reportOutputData);
+                var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWOrksheet, reportOutputData, simulationYears);
 
                 var folderPathForSimulation = $"DownloadedNewReports\\{simulationId}";
                 string relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);

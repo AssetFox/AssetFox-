@@ -8,6 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public SelectableTreatmentEntity()
         {
+            CriterionLibrarySelectableTreatmentJoins = new HashSet<CriterionLibrarySelectableTreatmentEntity>();
             TreatmentBudgetJoins = new HashSet<TreatmentBudgetEntity>();
             TreatmentConsequences = new HashSet<TreatmentConsequenceEntity>();
             TreatmentCosts = new HashSet<TreatmentCostEntity>();
@@ -20,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual TreatmentLibraryEntity TreatmentLibrary { get; set; }
 
-        public virtual CriterionLibraryTreatmentEntity CriterionLibraryTreatmentJoin { get; set; }
+        public virtual ICollection<CriterionLibrarySelectableTreatmentEntity> CriterionLibrarySelectableTreatmentJoins { get; set; }
 
         public virtual ICollection<TreatmentBudgetEntity> TreatmentBudgetJoins { get; set; }
 

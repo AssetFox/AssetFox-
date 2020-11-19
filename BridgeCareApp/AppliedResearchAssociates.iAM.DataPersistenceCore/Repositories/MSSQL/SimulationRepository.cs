@@ -13,38 +13,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public SimulationRepository(IAMContext context) : base(context) { }
 
-        public int CreateSimulations(List<Simulation> simulations, Guid networkId)
+        public void CreateSimulation(Simulation simulation)
         {
-            var entities = simulations.Select(_ => _.ToEntity(networkId)).ToList();
-
-            if (!entities.Any())
+            if (!Context.Network.Any(_ => _.Name == simulation.Network.Name))
             {
-                return 0;
+                throw new RowNotInTableException($"No network found having name {simulation.Network.Name}");
             }
 
-            Context.Simulation.AddRange(entities);
-            Context.SaveChanges();
+            var network = Context.Network.Single(_ => _.Name == simulation.Network.Name);
 
-            return entities.Count();
+            Context.Simulation.Add(simulation.ToEntity(network.Id));
+            Context.SaveChanges();
         }
 
-        public IEnumerable<Simulation> GetAllInNetwork(Guid networkId)
+        public List<Simulation> GetAllInNetwork(string networkName)
         {
-            if (!Context.Network.Any(_ => _.Id == networkId))
+            if (!Context.Network.Any(_ => _.Name == networkName))
             {
-                throw new RowNotInTableException($"No network found having id {networkId}");
+                throw new RowNotInTableException($"No network found having name {networkName}");
             }
 
-            var simulations = Context.Simulation.Include(_ => _.Network)
+            var simulations = Context.Simulation
+                .Include(_ => _.Network)
                 .Include(_ => _.AnalysisMethod)
-                .Include(_ => _.InvestmentPlan)
+                .Include(_ => _.InvestmentPlanSimulationJoin)
+                .ThenInclude(_ => _.InvestmentPlan)
                 .Include(_ => _.PerformanceCurveLibrarySimulationJoin)
                 .ThenInclude(_ => _.PerformanceCurveLibrary)
                 .ThenInclude(_ => _.PerformanceCurves)
-                .Where(_ => _.NetworkId == networkId)
+                .Where(_ => _.Network.Name == networkName)
                 .ToList();
 
-            return simulations.Select(_ => _.ToDomain());
+            return simulations.Select(_ => _.ToDomain()).ToList();
         }
     }
 }

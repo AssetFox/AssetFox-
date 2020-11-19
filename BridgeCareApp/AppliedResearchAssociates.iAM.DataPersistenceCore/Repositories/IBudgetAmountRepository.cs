@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
-    public interface ISimulationRepository
+    public interface IBudgetAmountRepository
     {
-        void CreateSimulation(Simulation simulation);
-        List<Simulation> GetAllInNetwork(string networkName);
+        void CreateBudgetAmounts(Dictionary<Guid, List<BudgetAmount>> budgetAmountsPerBudgetEntityId, Guid investmentPlanId);
     }
 }

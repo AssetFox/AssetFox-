@@ -4,15 +4,15 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
-using IamNetwork = AppliedResearchAssociates.iAM.Domains.Network;
-using Network = AppliedResearchAssociates.iAM.DataAssignment.Networking.Network;
+using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Domains;
+using DataAssignment = AppliedResearchAssociates.iAM.DataAssignment;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
     public static class NetworkMapper
     {
-        public static IamNetwork ToIamNetworkDomain(this Network network) =>
-            new IamNetwork(new Explorer())
+        public static SimulationAnalysisDomains.Network ToSimulationAnalysisNetworkDomain(this DataAssignment.Networking.Network network) =>
+            new SimulationAnalysisDomains.Network(new Explorer())
             {
                 Name = network.Name
             };

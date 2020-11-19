@@ -20,11 +20,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             // This is a do nothing case for LiteDb.
             return;
         }
-
-        public void AddAttribute(Attribute attribute)
-        {
-            // This is a do nothing case for LiteDb.
-            return;
-        }
     }
 }

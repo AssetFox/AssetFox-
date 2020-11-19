@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual SelectableTreatmentEntity SelectableTreatment { get; set; }
 
-        public virtual CriterionLibraryTreatmentConsequence CriterionLibraryTreatmentConsequenceJoin { get; set; }
+        public virtual CriterionLibraryTreatmentConsequenceEntity CriterionLibraryTreatmentConsequenceJoin { get; set; }
 
         public virtual TreatmentConsequenceEquationEntity TreatmentConsequenceEquationJoin { get; set; }
 

@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.Domains
     {
         public string Expression
         {
-            get => _Expression;
+            get => _Expression ?? string.Empty;
             set
             {
                 if (Expression != value)

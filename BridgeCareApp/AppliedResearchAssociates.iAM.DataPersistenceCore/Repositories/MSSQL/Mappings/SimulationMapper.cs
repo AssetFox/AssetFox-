@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static Simulation ToDomain(this SimulationEntity entity) =>
-            new Simulation(entity.Network.ToDomain().ToIamNetworkDomain())
+            new Simulation(entity.Network.ToDomain().ToSimulationAnalysisNetworkDomain())
             {
                 Name = entity.Name,
                 NumberOfYearsOfTreatmentOutlook = entity.NumberOfYearsOfTreatmentOutlook

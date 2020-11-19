@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
@@ -10,28 +11,53 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class NetworkRepository : MSSQLRepository, INetworkRepository
     {
+        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
+            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
+
         public NetworkRepository(IAMContext context) : base(context) { }
 
         public void CreateNetwork(DataAssignment.Networking.Network network)
         {
-            // prevent EF from attempting to create the network's child entities (create them
-            // separately as part of a bulk insert)
-            Context.Network.Add(new NetworkEntity
+            using (var contextTransaction = Context.Database.BeginTransaction())
             {
-                Id = network.Id,
-                Name = network.Name
-            });
+                try
+                {
+                    // prevent EF from attempting to create the network's child entities (create them
+                    // separately as part of a bulk insert)
+                    Context.Network.Add(new NetworkEntity
+                    {
+                        Id = network.Id,
+                        Name = network.Name
+                    });
 
-            // convert maintainable assets and all child domains to entities
-            var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity(network.Id)).ToList();
+                    // convert maintainable assets and all child domains to entities
+                    var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity(network.Id)).ToList();
 
-            // bulk insert maintainable assets
-            Context.BulkInsert(maintainableAssetEntities);
+                    if (IsRunningFromXUnit)
+                    {
+                        Context.MaintainableAsset.AddRange(maintainableAssetEntities);
+                        Context.MaintainableAssetLocation.AddRange(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
+                    }
+                    else
+                    {
+                        // bulk insert maintainable assets
+                        Context.BulkInsert(maintainableAssetEntities);
 
-            // bulk insert maintainable asset locations
-            Context.BulkInsert(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
+                        // bulk insert maintainable asset locations
+                        Context.BulkInsert(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
+                    }
 
-            Context.SaveChanges();
+                    Context.SaveChanges();
+
+                    contextTransaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    contextTransaction.Rollback();
+                    Console.WriteLine(e);
+                    throw;
+                }
+            }
         }
 
         public IEnumerable<DataAssignment.Networking.Network> GetAllNetworks()

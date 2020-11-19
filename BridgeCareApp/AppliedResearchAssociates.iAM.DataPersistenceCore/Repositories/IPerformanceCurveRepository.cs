@@ -6,9 +6,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IPerformanceCurveRepository
     {
-        void CreatePerformanceCurveLibrary(PerformanceCurveLibraryEntity entity,
-            string simulationName);
-        int CreatePerformanceCurves(List<PerformanceCurve> domains, string simulationName);
-        IEnumerable<PerformanceCurve> GetSimulationPerformanceCurves(string simulationName);
+        void CreatePerformanceCurveLibrary(string name, string simulationName);
+        void CreatePerformanceCurves(List<PerformanceCurve> performanceCurves, string simulationName);
+        List<PerformanceCurve> GetSimulationPerformanceCurves(string simulationName);
     }
 }

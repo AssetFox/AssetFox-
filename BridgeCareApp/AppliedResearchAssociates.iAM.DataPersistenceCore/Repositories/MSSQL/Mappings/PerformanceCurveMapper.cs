@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
+using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
@@ -18,13 +19,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Shift = domain.Shift
             };
 
-        public static PerformanceCurve ToDomain(this PerformanceCurveEntity domain)
+        public static PerformanceCurve ToDomain(this PerformanceCurveEntity entity)
         {
-            /*return new PerformanceCurve(new Explorer())
+            var domain = new PerformanceCurve(new Explorer())
             {
-                Attribute = new NumberAttribute()
-            };*/
-            return null;
+                Attribute = (NumberAttribute)Convert
+                    .ChangeType(entity.Attribute.ToDomain().ToSimulationAnalysisAttribute(), typeof(NumberAttribute)),
+                Name = entity.Name,
+                Shift = entity.Shift
+            };
+            domain.Equation.Expression = entity.PerformanceCurveEquationJoin?.Equation.Expression ?? string.Empty;
+            domain.Criterion.Expression =
+                entity.CriterionLibraryPerformanceCurveJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
+
+            return domain;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual DeficientConditionGoalLibrarySimulationEntity DeficientConditionGoalLibrarySimulationJoin { get; set; }
 
-        public virtual InvestmentPlanEntity InvestmentPlan { get; set; }
+        public virtual InvestmentPlanSimulationEntity InvestmentPlanSimulationJoin { get; set; }
 
         public virtual PerformanceCurveLibrarySimulationEntity PerformanceCurveLibrarySimulationJoin { get; set; }
 

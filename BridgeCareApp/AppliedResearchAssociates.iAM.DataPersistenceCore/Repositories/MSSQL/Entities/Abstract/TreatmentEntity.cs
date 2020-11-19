@@ -8,6 +8,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string Name { get; set; }
 
+        public string Description { get; set; }
+
         public int ShadowForAnyTreatment { get; set; }
 
         public int ShadowForSameTreatment { get; set; }

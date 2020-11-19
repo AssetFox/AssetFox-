@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
-    public interface ISimulationRepository
+    public interface ITreatmentCostRepository
     {
-        void CreateSimulation(Simulation simulation);
-        List<Simulation> GetAllInNetwork(string networkName);
+        void CreateTreatmentCosts(Dictionary<Guid, List<TreatmentCost>> treatmentCostsPerTreatmentId, string simulationName);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class CriterionLibraryTreatmentCost
+    public class CriterionLibraryTreatmentCostEntity
     {
         public Guid CriterionLibraryId { get; set; }
 

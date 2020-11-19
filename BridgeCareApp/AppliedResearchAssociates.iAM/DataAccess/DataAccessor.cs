@@ -28,6 +28,30 @@ namespace AppliedResearchAssociates.iAM.DataAccess
         /// </summary>
         public SortedDictionary<int, SortedSet<int>> RequestedSimulationsPerNetwork { get; set; }
 
+        /// <summary>
+        /// This function will create a unique name for any object created by this class
+        /// </summary>
+        /// <param name="usedNames">Hash set of used names</param>
+        /// <param name="currentName">Current name to check for uniqueness</param>
+        /// <returns>new string name</returns>
+        private string CreateUniqueObjectName(HashSet<string> usedNames, string currentName)
+        {
+            if (usedNames.Contains(currentName))
+            {
+                var versionNumber = 2;
+                while (usedNames.Contains($"{currentName} v{versionNumber}"))
+                {
+                    versionNumber++;
+                }
+
+                var newName = $"{currentName} v{versionNumber}";
+                usedNames.Add(newName);
+                return newName;
+            }
+
+            return currentName;
+        }
+
         public Explorer GetExplorer()
         {
             IdPerNetwork.Clear();
@@ -136,6 +160,8 @@ order by networkid
                     {
                         var networks = new SortedList<int, Network>();
 
+                        var usedNames = new HashSet<string>();
+
                         while (reader.Read())
                         {
                             var networkId = reader.GetInt32(0);
@@ -145,7 +171,8 @@ order by networkid
                                 networks.Add(networkId, network);
                                 IdPerNetwork.Add(network, networkId);
 
-                                network.Name = reader.GetNullableString(1);
+                                network.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                                usedNames.Add(network.Name);
                             }
                         }
 
@@ -324,6 +351,8 @@ order by simulationid
 
                         if (RequestedSimulationsPerNetwork?.TryGetValue(networkId, out requestedSimulations) ?? true)
                         {
+                            var usedNames = new HashSet<string>();
+
                             while (reader.Read())
                             {
                                 var simulationId = reader.GetInt32(0);
@@ -333,7 +362,8 @@ order by simulationid
                                     simulations.Add(simulationId, simulation);
                                     IdPerSimulation.Add(simulation, simulationId);
 
-                                    simulation.Name = reader.GetNullableString(1);
+                                    simulation.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                                    usedNames.Add(simulation.Name);
                                     simulation.AnalysisMethod.Filter.Expression = reader.GetNullableString(2);
 
                                     var optimizationStrategyLabel = reader.GetNullableString(3);
@@ -505,12 +535,15 @@ where simulationid = {simulationId}
 
                     void createPerformanceCurves()
                     {
+                        var usedNames = new HashSet<string>();
+
                         while (reader.Read())
                         {
                             var curve = simulation.AddPerformanceCurve();
                             var attributeName = reader.GetNullableString(0);
                             curve.Attribute = helper.NumberAttributePerName[attributeName];
-                            curve.Name = reader.GetNullableString(1);
+                            curve.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                            usedNames.Add(curve.Name);
                             curve.Criterion.Expression = reader.GetNullableString(2);
                             curve.Equation.Expression = reader.GetNullableString(3);
                             curve.Shift = reader.GetBoolean(4);
@@ -524,6 +557,8 @@ where simulationid = {simulationId}
 
                         var projectPerId = new Dictionary<int, CommittedProject>();
 
+                        var usedNames = new HashSet<string>();
+
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
@@ -533,7 +568,8 @@ where simulationid = {simulationId}
                                 var section = helper.SectionPerId[sectionId];
                                 var year = reader.GetInt32(2);
                                 project = simulation.CommittedProjects.GetAdd(new CommittedProject(section, year)); // maybe modify this so that the project is ignored if the budget name is not found.
-                                project.Name = reader.GetNullableString(3);
+                                project.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(3));
+                                usedNames.Add(project.Name);
                                 project.ShadowForSameTreatment = reader.GetInt32(4);
                                 project.ShadowForAnyTreatment = reader.GetInt32(5);
                                 var budgetName = reader.GetNullableString(6);
@@ -552,13 +588,16 @@ where simulationid = {simulationId}
 
                     void createTreatmentsWithConsequences()
                     {
+                        var usedNames = new HashSet<string>();
+
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
                             if (!treatmentPerId.TryGetValue(id, out var treatment))
                             {
                                 treatment = simulation.AddTreatment();
-                                treatment.Name = reader.GetNullableString(1);
+                                treatment.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                                usedNames.Add(treatment.Name);
                                 treatment.ShadowForAnyTreatment = reader.GetInt32(2);
                                 treatment.ShadowForSameTreatment = reader.GetInt32(3);
 
@@ -668,6 +707,8 @@ where simulationid = {simulationId}
 
                     void createTargetConditionGoals()
                     {
+                        var usedNames = new HashSet<string>();
+
                         while (reader.Read())
                         {
                             var goal = simulation.AnalysisMethod.AddTargetConditionGoal();
@@ -675,19 +716,23 @@ where simulationid = {simulationId}
                             goal.Attribute = helper.NumericAttributePerName[attributeName];
                             goal.Year = reader.GetNullableInt32(1);
                             goal.Target = reader.GetDouble(2);
-                            goal.Name = reader.GetNullableString(3);
+                            goal.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(3));
+                            usedNames.Add(goal.Name);
                             goal.Criterion.Expression = reader.GetNullableString(4);
                         }
                     }
 
                     void createDeficientConditionGoals()
                     {
+                        var usedNames = new HashSet<string>();
+
                         while (reader.Read())
                         {
                             var goal = simulation.AnalysisMethod.AddDeficientConditionGoal();
                             var attributeName = reader.GetNullableString(0);
                             goal.Attribute = helper.NumericAttributePerName[attributeName];
-                            goal.Name = reader.GetNullableString(1);
+                            goal.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                            usedNames.Add(goal.Name);
                             goal.DeficientLimit = reader.GetDouble(2);
                             goal.AllowedDeficientPercentage = reader.GetDouble(3);
                             goal.Criterion.Expression = reader.GetNullableString(4);
@@ -735,13 +780,16 @@ where simulationid = {simulationId}
                     {
                         var rulePerId = new Dictionary<int, CashFlowRule>();
 
+                        var usedNames = new HashSet<string>();
+
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
                             if (!rulePerId.TryGetValue(id, out var rule))
                             {
                                 rule = simulation.InvestmentPlan.AddCashFlowRule();
-                                rule.Name = reader.GetNullableString(1);
+                                rule.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                                usedNames.Add(rule.Name);
                                 rule.Criterion.Expression = reader.GetNullableString(2);
 
                                 rulePerId.Add(id, rule);

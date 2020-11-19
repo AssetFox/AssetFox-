@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IInvestmentPlanRepository
     {
-        void CreateInvestmentPlan(InvestmentPlan domain, string simulationName);
+        void CreateInvestmentPlan(InvestmentPlan investmentPlan, string simulationName);
         InvestmentPlan GetSimulationInvestmentPlan(string simulationName);
     }
 }

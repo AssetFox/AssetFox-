@@ -18,10 +18,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private static readonly Dictionary<string, string> NameConventionPerEntityType = new Dictionary<string, string>
         {
+            {"AnalysisMethodEntity", "Analysis Method"},
             {"BudgetEntity", "Budget"},
+            {"BudgetPriorityEntity", "Budget Priority"},
+            {"DeficientConditionGoalEntity", "Deficient Condition Goal"},
             {"PerformanceCurveEntity", "Performance Curve"},
             {"CashFlowRuleEntity", "Cash Flow Rule"},
             {"SelectableTreatmentEntity", "Feasibility"},
+            {"TargetConditionGoalEntity", "Target Condition Goal"},
             {"TreatmentConsequenceEntity", "Treatment Consequence"},
             {"TreatmentCostEntity", "Treatment Cost"},
             {"TreatmentSupersessionEntity", "Treatment Supersession"}
@@ -63,14 +67,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 switch (joinEntity)
                 {
+                case "AnalysisMethodEntity":
+                    CreateCriterionLibraryAnalysisMethodJoin(criterionLibraryEntity.Id, entityIdsPerExpression[expression].First());
+                    break;
                 case "BudgetEntity":
                     CreateCriterionLibraryBudgetJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
+                    break;
+                case "BudgetPriorityEntity":
+                    CreateCriterionLibraryBudgetPriorityJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
                 case "CashFlowRuleEntity":
                     CreateCriterionLibraryCashFlowRuleJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+                case "DeficientConditionGoalEntity":
+                    CreateCriterionLibraryDeficientConditionGoalJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
+                    break;
                 case "PerformanceCurveEntity":
                     CreateCriterionLibraryPerformanceCurveJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
+                    break;
+                case "TargetConditionGoalEntity":
+                    CreateCriterionLibraryTargetConditionGoalJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
                 case "TreatmentConsequenceEntity":
                     CreateCriterionLibraryTreatmentConsequenceJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
@@ -87,6 +103,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             Context.SaveChanges();
         }
 
+        private void CreateCriterionLibraryAnalysisMethodJoin(Guid criterionLibraryId, Guid analysisMethodId)
+        {
+            var joinEntity = new CriterionLibraryAnalysisMethodEntity
+            {
+                CriterionLibraryId = criterionLibraryId, AnalysisMethodId = analysisMethodId
+            };
+
+            Context.CriterionLibraryAnalysisMethod.Add(joinEntity);
+        }
+
         private void CreateCriterionLibraryBudgetJoins(Guid criterionLibraryId, List<Guid> budgetIds)
         {
             var joinEntities = budgetIds.Select(budgetId =>
@@ -100,6 +126,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (IsRunningFromXUnit)
             {
                 Context.CriterionLibraryBudget.AddRange(joinEntities);
+            }
+            else
+            {
+                Context.BulkInsert(joinEntities);
+            }
+        }
+
+        private void CreateCriterionLibraryBudgetPriorityJoins(Guid criterionLibraryId, List<Guid> budgetPriorityIds)
+        {
+            var joinEntities = budgetPriorityIds.Select(budgetPriorityId =>
+                    new CriterionLibraryBudgetPriorityEntity
+                    {
+                        CriterionLibraryId = criterionLibraryId,
+                        BudgetPriorityId = budgetPriorityId
+                    })
+                .ToList();
+
+            if (IsRunningFromXUnit)
+            {
+                Context.CriterionLibraryBudgetPriority.AddRange(joinEntities);
             }
             else
             {
@@ -127,6 +173,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        private void CreateCriterionLibraryDeficientConditionGoalJoins(Guid criterionLibraryId, List<Guid> deficientConditionGoalIds)
+        {
+            var joinEntities = deficientConditionGoalIds.Select(deficientConditionGoalId =>
+                    new CriterionLibraryDeficientConditionGoalEntity
+                    {
+                        CriterionLibraryId = criterionLibraryId,
+                        DeficientConditionGoalId = deficientConditionGoalId
+                    })
+                .ToList();
+
+            if (IsRunningFromXUnit)
+            {
+                Context.CriterionLibraryDeficientConditionGoal.AddRange(joinEntities);
+            }
+            else
+            {
+                Context.BulkInsert(joinEntities);
+            }
+        }
+
         private void CreateCriterionLibraryPerformanceCurveJoins(Guid criterionLibraryId, List<Guid> performanceCurveIds)
         {
             var joinEntities = performanceCurveIds.Select(performanceCurveId =>
@@ -139,6 +205,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (IsRunningFromXUnit)
             {
                 Context.CriterionLibraryPerformanceCurve.AddRange(joinEntities);
+            }
+            else
+            {
+                Context.BulkInsert(joinEntities);
+            }
+        }
+
+        private void CreateCriterionLibraryTargetConditionGoalJoins(Guid criterionLibraryId, List<Guid> targetConditionGoalIds)
+        {
+            var joinEntities = targetConditionGoalIds.Select(targetConditionGoalId =>
+                    new CriterionLibraryTargetConditionGoalEntity
+                    {
+                        CriterionLibraryId = criterionLibraryId,
+                        TargetConditionGoalId = targetConditionGoalId
+                    })
+                .ToList();
+
+            if (IsRunningFromXUnit)
+            {
+                Context.CriterionLibraryTargetConditionGoal.AddRange(joinEntities);
             }
             else
             {

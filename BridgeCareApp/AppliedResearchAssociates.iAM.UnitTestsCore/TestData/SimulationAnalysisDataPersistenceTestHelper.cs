@@ -39,6 +39,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         public ITreatmentSchedulingRepository TreatmentSchedulingRepo { get; set; }
         public ITreatmentSupersessionRepository TreatmentSupersessionRepo { get; set; }
         public ISelectableTreatmentRepository SelectableTreatmentRepo { get; set; }
+        public IBudgetPercentagePairRepository BudgetPercentagePairRepo { get; set; }
+        public IBudgetPriorityRepository BudgetPriorityRepo { get; set; }
+        public ITargetConditionGoalRepository TargetConditionGoalRepo { get; set; }
+        public IDeficientConditionGoalRepository DeficientConditionGoalRepo { get; set; }
         public IAnalysisMethodRepository AnalysisMethodRepo { get; set; }
 
         public SimulationAnalysisDataPersistenceTestHelper()
@@ -154,8 +158,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         {
             TestCreateInvestmentPlanEntitySetup(simulation);
             InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Name);
-            CreateAttributes(new List<string> { simulation.AnalysisMethod.Weighting.Name });
-            AnalysisMethodRepo = new AnalysisMethodRepository(_dbContext);
+            var attributeNames = simulation.AnalysisMethod.TargetConditionGoals
+                .Select(_ => _.Attribute.Name).ToList();
+            attributeNames.Add(simulation.AnalysisMethod.Weighting.Name);
+            CreateAttributes(attributeNames.Distinct().ToList());
+            BudgetPercentagePairRepo = new BudgetPercentagePairRepository(_dbContext);
+            BudgetPriorityRepo = new BudgetPriorityRepository(CriterionLibraryRepo, BudgetPercentagePairRepo, _dbContext);
+            TargetConditionGoalRepo = new TargetConditionGoalRepository(CriterionLibraryRepo, _dbContext);
+            DeficientConditionGoalRepo = new DeficientConditionGoalRepository(CriterionLibraryRepo, _dbContext);
+            AnalysisMethodRepo = new AnalysisMethodRepository(CriterionLibraryRepo,
+                BudgetPriorityRepo,
+                InvestmentPlanRepo,
+                TargetConditionGoalRepo,
+                DeficientConditionGoalRepo,
+                _dbContext);
         }
     }
 }

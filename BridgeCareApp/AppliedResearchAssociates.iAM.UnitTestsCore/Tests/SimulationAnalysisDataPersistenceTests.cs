@@ -14,6 +14,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
 using Xunit;
+using MoreEnumerable = MoreLinq.MoreEnumerable;
 
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -267,16 +268,77 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             testHelper.AnalysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Name);
 
             // Assert
+            var analysisMethod = simulation.AnalysisMethod;
             var dataSourceAnalysisMethod = testHelper.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation.Name);
             Assert.NotNull(dataSourceAnalysisMethod);
             Assert.IsType<AnalysisMethod>(dataSourceAnalysisMethod);
-            Assert.Equal(simulation.AnalysisMethod.Weighting.Name, dataSourceAnalysisMethod.Weighting.Name);
-            Assert.Equal(simulation.AnalysisMethod.OptimizationStrategy, dataSourceAnalysisMethod.OptimizationStrategy);
-            Assert.Equal(simulation.AnalysisMethod.SpendingStrategy, dataSourceAnalysisMethod.SpendingStrategy);
-            Assert.Equal(simulation.AnalysisMethod.Description, dataSourceAnalysisMethod.Description);
-            Assert.Equal(simulation.AnalysisMethod.ShouldDeteriorateDuringCashFlow, dataSourceAnalysisMethod.ShouldDeteriorateDuringCashFlow);
-            Assert.Equal(simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets, dataSourceAnalysisMethod.ShouldUseExtraFundsAcrossBudgets);
-            Assert.Equal(simulation.AnalysisMethod.ShouldApplyMultipleFeasibleCosts, dataSourceAnalysisMethod.ShouldApplyMultipleFeasibleCosts);
+            Assert.Equal(analysisMethod.Weighting.Name, dataSourceAnalysisMethod.Weighting.Name);
+            Assert.Equal(analysisMethod.Weighting.IsDecreasingWithDeterioration,
+                dataSourceAnalysisMethod.Weighting.IsDecreasingWithDeterioration);
+            Assert.Equal(analysisMethod.OptimizationStrategy, dataSourceAnalysisMethod.OptimizationStrategy);
+            Assert.Equal(analysisMethod.SpendingStrategy, dataSourceAnalysisMethod.SpendingStrategy);
+            Assert.Equal(analysisMethod.Description, dataSourceAnalysisMethod.Description);
+            Assert.Equal(analysisMethod.ShouldDeteriorateDuringCashFlow, dataSourceAnalysisMethod.ShouldDeteriorateDuringCashFlow);
+            Assert.Equal(analysisMethod.ShouldUseExtraFundsAcrossBudgets, dataSourceAnalysisMethod.ShouldUseExtraFundsAcrossBudgets);
+            Assert.Equal(analysisMethod.ShouldApplyMultipleFeasibleCosts, dataSourceAnalysisMethod.ShouldApplyMultipleFeasibleCosts);
+            Assert.Equal(analysisMethod.Filter.Expression, dataSourceAnalysisMethod.Filter.Expression);
+
+            var budgetPriorities = analysisMethod.BudgetPriorities.ToList();
+            var dataSourceBudgetPriorities = dataSourceAnalysisMethod.BudgetPriorities.ToList();
+            Assert.Equal(budgetPriorities.Count(), dataSourceBudgetPriorities.Count());
+            budgetPriorities.ForEach((priority, index) =>
+            {
+                var dataSourcePriority = dataSourceBudgetPriorities[index];
+                Assert.Equal(priority.Criterion.Expression, dataSourcePriority.Criterion.Expression);
+                Assert.Equal(priority.PriorityLevel, dataSourcePriority.PriorityLevel);
+                Assert.Equal(priority.Year, dataSourcePriority.Year);
+
+                var budgetPercentagePairs = priority.BudgetPercentagePairs.ToList();
+                var dataSourceBudgetPercentagePairs = dataSourcePriority.BudgetPercentagePairs.ToList();
+                Assert.Equal(budgetPercentagePairs.Count(), dataSourceBudgetPercentagePairs.Count());
+                budgetPercentagePairs.ForEach((budgetPercentagePair, subIndex) =>
+                {
+                    var dataSourceBudgetPercentagePair = dataSourceBudgetPercentagePairs[subIndex];
+                    Assert.Equal(budgetPercentagePair.Percentage, dataSourceBudgetPercentagePair.Percentage);
+                    Assert.Equal(budgetPercentagePair.Budget.Name, dataSourceBudgetPercentagePair.Budget.Name);
+                    var yearlyAmounts = budgetPercentagePair.Budget.YearlyAmounts.ToList();
+
+                    var dataSourceYearlyAmounts = dataSourceBudgetPercentagePair.Budget.YearlyAmounts.ToList();
+                    Assert.Equal(yearlyAmounts.Count(), dataSourceYearlyAmounts.Count());
+                    yearlyAmounts.ForEach((yearlyAmount, subSubIndex) =>
+                    {
+                        Assert.Equal(yearlyAmount.Value, dataSourceYearlyAmounts[subSubIndex].Value);
+                    });
+                });
+            });
+
+            var targetConditionGoals = analysisMethod.TargetConditionGoals.ToList();
+            var dataSourceTargetConditionGoals = dataSourceAnalysisMethod.TargetConditionGoals.ToList();
+            Assert.Equal(targetConditionGoals.Count(), dataSourceTargetConditionGoals.Count());
+            targetConditionGoals.ForEach(targetConditionGoal =>
+            {
+                var dataSourceTargetConditionGoal = dataSourceTargetConditionGoals
+                    .SingleOrDefault(_ => _.Name == targetConditionGoal.Name);
+                Assert.NotNull(dataSourceTargetConditionGoal);
+                Assert.Equal(targetConditionGoal.Attribute.Name, dataSourceTargetConditionGoal.Attribute.Name);
+                Assert.Equal(targetConditionGoal.Target, dataSourceTargetConditionGoal.Target);
+                Assert.Equal(targetConditionGoal.Year, dataSourceTargetConditionGoal.Year);
+                Assert.Equal(targetConditionGoal.Criterion.Expression, dataSourceTargetConditionGoal.Criterion.Expression);
+            });
+
+            var deficientConditionGoals = analysisMethod.DeficientConditionGoals.ToList();
+            var dataSourceDeficientConditionGoals = dataSourceAnalysisMethod.DeficientConditionGoals.ToList();
+            Assert.Equal(deficientConditionGoals.Count(), dataSourceDeficientConditionGoals.Count());
+            deficientConditionGoals.ForEach(deficientConditionGoal =>
+            {
+                var dataSourceDeficientConditionGoal = dataSourceDeficientConditionGoals
+                    .SingleOrDefault(_ => _.Name == deficientConditionGoal.Name);
+                Assert.NotNull(dataSourceDeficientConditionGoal);
+                Assert.Equal(deficientConditionGoal.Attribute.Name, dataSourceDeficientConditionGoal.Attribute.Name);
+                Assert.Equal(deficientConditionGoal.AllowedDeficientPercentage, dataSourceDeficientConditionGoal.AllowedDeficientPercentage);
+                Assert.Equal(deficientConditionGoal.DeficientLimit, dataSourceDeficientConditionGoal.DeficientLimit);
+                Assert.Equal(deficientConditionGoal.Criterion.Expression, dataSourceDeficientConditionGoal.Criterion.Expression);
+            });
 
             // CleanUp
             testHelper.CleanUp();

@@ -33,9 +33,12 @@ namespace AppliedResearchAssociates.iAM.DataAccess
         /// </summary>
         /// <param name="usedNames">Hash set of used names</param>
         /// <param name="currentName">Current name to check for uniqueness</param>
+        /// /// <param name="altName">Alternative name to use if currentName has no value</param>
         /// <returns>new string name</returns>
-        private string CreateUniqueObjectName(HashSet<string> usedNames, string currentName)
+        private string CreateUniqueObjectName(HashSet<string> usedNames, string currentName, string altName)
         {
+            currentName = string.IsNullOrEmpty(currentName) ? altName : currentName;
+
             if (usedNames.Contains(currentName))
             {
                 var versionNumber = 2;
@@ -171,7 +174,7 @@ order by networkid
                                 networks.Add(networkId, network);
                                 IdPerNetwork.Add(network, networkId);
 
-                                network.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                                network.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1), $"Network {networkId}");
                                 usedNames.Add(network.Name);
                             }
                         }
@@ -362,7 +365,7 @@ order by simulationid
                                     simulations.Add(simulationId, simulation);
                                     IdPerSimulation.Add(simulation, simulationId);
 
-                                    simulation.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                                    simulation.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1), $"Simulation {simulationId}");
                                     usedNames.Add(simulation.Name);
                                     simulation.AnalysisMethod.Filter.Expression = reader.GetNullableString(2);
 
@@ -542,7 +545,7 @@ where simulationid = {simulationId}
                             var curve = simulation.AddPerformanceCurve();
                             var attributeName = reader.GetNullableString(0);
                             curve.Attribute = helper.NumberAttributePerName[attributeName];
-                            curve.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                            curve.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1), $"{simulation.Name} {attributeName} Performance Curve");
                             usedNames.Add(curve.Name);
                             curve.Criterion.Expression = reader.GetNullableString(2);
                             curve.Equation.Expression = reader.GetNullableString(3);
@@ -568,7 +571,7 @@ where simulationid = {simulationId}
                                 var section = helper.SectionPerId[sectionId];
                                 var year = reader.GetInt32(2);
                                 project = simulation.CommittedProjects.GetAdd(new CommittedProject(section, year)); // maybe modify this so that the project is ignored if the budget name is not found.
-                                project.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(3));
+                                project.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(3), $"{simulation.Name} Section {section.Name} Committed Project");
                                 usedNames.Add(project.Name);
                                 project.ShadowForSameTreatment = reader.GetInt32(4);
                                 project.ShadowForAnyTreatment = reader.GetInt32(5);
@@ -596,7 +599,7 @@ where simulationid = {simulationId}
                             if (!treatmentPerId.TryGetValue(id, out var treatment))
                             {
                                 treatment = simulation.AddTreatment();
-                                treatment.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                                treatment.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1), $"{simulation.Name} Treatment {id}");
                                 usedNames.Add(treatment.Name);
                                 treatment.ShadowForAnyTreatment = reader.GetInt32(2);
                                 treatment.ShadowForSameTreatment = reader.GetInt32(3);
@@ -716,7 +719,7 @@ where simulationid = {simulationId}
                             goal.Attribute = helper.NumericAttributePerName[attributeName];
                             goal.Year = reader.GetNullableInt32(1);
                             goal.Target = reader.GetDouble(2);
-                            goal.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(3));
+                            goal.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(3), $"{simulation.Name} {attributeName} Target Condition Goal");
                             usedNames.Add(goal.Name);
                             goal.Criterion.Expression = reader.GetNullableString(4);
                         }
@@ -731,7 +734,7 @@ where simulationid = {simulationId}
                             var goal = simulation.AnalysisMethod.AddDeficientConditionGoal();
                             var attributeName = reader.GetNullableString(0);
                             goal.Attribute = helper.NumericAttributePerName[attributeName];
-                            goal.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                            goal.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1), $"{simulation.Name} {attributeName} Deficient Condition Goal");
                             usedNames.Add(goal.Name);
                             goal.DeficientLimit = reader.GetDouble(2);
                             goal.AllowedDeficientPercentage = reader.GetDouble(3);
@@ -788,7 +791,7 @@ where simulationid = {simulationId}
                             if (!rulePerId.TryGetValue(id, out var rule))
                             {
                                 rule = simulation.InvestmentPlan.AddCashFlowRule();
-                                rule.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1));
+                                rule.Name = CreateUniqueObjectName(usedNames, reader.GetNullableString(1), $"{simulation.Name} Cash Flow Rule {id}");
                                 usedNames.Add(rule.Name);
                                 rule.Criterion.Expression = reader.GetNullableString(2);
 

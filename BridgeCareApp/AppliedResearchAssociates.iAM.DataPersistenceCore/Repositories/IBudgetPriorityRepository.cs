@@ -6,6 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IBudgetPriorityRepository
     {
-        void CreateBudgetPriorities(List<BudgetPriority> budgetPriorities, Guid analysisMethodId);
+        void CreateBudgetPriorityLibrary(string name, string simulationName);
+        void CreateBudgetPriorities(List<BudgetPriority> budgetPriorities, string simulationName);
     }
 }

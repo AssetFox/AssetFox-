@@ -29,6 +29,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
             costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, reportOutputData, simulationYears, treatments);
 
+            worksheet.Calculate();
+            worksheet.Cells.AutoFitColumns();
+
             return new ChartRowsModel();
         }
     }

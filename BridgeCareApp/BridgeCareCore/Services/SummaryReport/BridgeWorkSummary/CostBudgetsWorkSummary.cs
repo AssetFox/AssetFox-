@@ -35,10 +35,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 costPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, double>());
                 foreach (var section in yearData.Sections)
                 {
-                    if (section.TreatmentCause == TreatmentCause.NoSelection || section.TreatmentOptions.Count == 0)
+                    if (section.TreatmentCause == TreatmentCause.NoSelection || section.TreatmentOptions.Count <= 0)
                     {
                         continue;
                     }
+                    //[TODO] - ask Jake regarding cash flow project. It won't have anything in the TreartmentOptions barring 1st year
                     var cost = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment).Cost;
                     if (!costPerTreatmentPerYear[yearData.Year].ContainsKey(section.AppliedTreatment))
                     {
@@ -51,54 +52,56 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 }
             }
 
-            var culvertTotalRow = FillCostOfCulvertWorkSection(worksheet, currentCell, reportOutputData,
+            var culvertTotalRow = FillCostOfCulvertWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
-            var bridgeTotalRow = FillCostOfBridgeWorkSection(worksheet, currentCell, reportOutputData,
+            var bridgeTotalRow = FillCostOfBridgeWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
-            //var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, reportOutputData);
-            //FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow);
+            var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears, costPerTreatmentPerYear);
+            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow);
         }
 
         #region Private methods
 
         private int FillCostOfCulvertWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
-            SimulationOutput reportOutputData, List<int> simulationYears, List<string> treatments,
+            List<int> simulationYears, List<string> treatments,
             Dictionary<int, Dictionary<string, double>> costPerTreatmentPerYear)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Culvert Work", "BAMS Culvert Work Type");
-            var culvertTotalRow = AddCostsOfCulvertWork(worksheet, reportOutputData, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
+            var culvertTotalRow = AddCostsOfCulvertWork(worksheet, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
             return culvertTotalRow;
         }
 
         private int FillCostOfBridgeWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
-            SimulationOutput reportOutputData, List<int> simulationYears, List<string> treatments,
+            List<int> simulationYears, List<string> treatments,
             Dictionary<int, Dictionary<string, double>> costPerTreatmentPerYear)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Bridge Work", "BAMS Bridge Work Type");
-            var bridgeTotalRow = AddCostsOfBridgeWork(worksheet, reportOutputData, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
+            var bridgeTotalRow = AddCostsOfBridgeWork(worksheet, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
             return bridgeTotalRow;
         }
 
-        private int FillTotalBudgetSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, Dictionary<int, List<double>> yearlyBudgetAmounts)
+        private int FillTotalBudgetSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+            Dictionary<int, Dictionary<string, double>> costPerTreatmentPerYear)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Totals");
             worksheet.Cells[currentCell.Row, simulationYears.Count + 3].Value = "Total Analysis Budget (all year)";
             _excelHelper.ApplyStyle(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
             _excelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
-            var budgetTotalRow = AddDetailsForTotalBudget(worksheet, simulationYears, currentCell, yearlyBudgetAmounts);
+            var budgetTotalRow = AddDetailsForTotalBudget(worksheet, simulationYears, currentCell, costPerTreatmentPerYear);
             return budgetTotalRow;
         }
 
-        private void FillRemainingBudgetSection(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell, int committedTotalRow, int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow)
+        private void FillRemainingBudgetSection(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
+            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");
             worksheet.Cells[currentCell.Row, simulationYears.Count + 3].Value = "Total Remaining Budget(all years)";
             _excelHelper.ApplyStyle(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
             _excelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
-            AddDetailsForRemainingBudget(worksheet, simulationYears, currentCell, committedTotalRow, culvertTotalRow, bridgeTotalRow, budgetTotalRow);
+            AddDetailsForRemainingBudget(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow);
         }
 
-        private int AddCostsOfCulvertWork(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
+        private int AddCostsOfCulvertWork(ExcelWorksheet worksheet,
             List<int> simulationYears, CurrentCell currentCell, List<string> treatments,
             Dictionary<int, Dictionary<string, double>> costPerTreatmentPerYear)
         {
@@ -152,7 +155,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
             return culvertTotalRow;
         }
-        private int AddCostsOfBridgeWork(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
+        private int AddCostsOfBridgeWork(ExcelWorksheet worksheet,
             List<int> simulationYears, CurrentCell currentCell, List<string> treatments,
             Dictionary<int, Dictionary<string, double>> costPerTreatmentPerYear)
         {
@@ -207,7 +210,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             return bridgeTotalRow;
         }
 
-        private int AddDetailsForTotalBudget(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell, Dictionary<int, List<double>> yearlyBudgetAmounts)
+        private int AddDetailsForTotalBudget(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
+            Dictionary<int, Dictionary<string, double>> costPerTreatmentPerYear)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
@@ -216,13 +220,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             worksheet.Cells[row++, column].Value = Properties.Resources.TotalBridgeCareBudget;
             column++;
             var fromColumn = column + 1;
-            foreach (var year in simulationYears)
+            foreach (var yearlyData in costPerTreatmentPerYear)
             {
                 row = startRow;
                 column = ++column;
 
-                worksheet.Cells[row++, column].Value = TotalCulvertSpent[year] + TotalBridgeSpent[year] + TotalCommittedSpent[year];
-                worksheet.Cells[row, column].Value = yearlyBudgetAmounts.ContainsKey(year) ? yearlyBudgetAmounts[year].Sum() : 0;
+                worksheet.Cells[row++, column].Value = TotalCulvertSpent[yearlyData.Key] + TotalBridgeSpent[yearlyData.Key]; // + TotalCommittedSpent[yearlyData.Key];
+                var totalCost = yearlyData.Value.Sum(_ => _.Value);
+                worksheet.Cells[row, column].Value = totalCost;
                 budgetTotalRow = row;
             }
             worksheet.Cells[row, column + 1].Formula = "SUM(" + worksheet.Cells[row, fromColumn, row, column] + ")";
@@ -235,7 +240,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             return budgetTotalRow;
         }
 
-        private void AddDetailsForRemainingBudget(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell, int committedTotalRow,
+        private void AddDetailsForRemainingBudget(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
             int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow)
         {
             int startRow, startColumn, row, column;
@@ -250,16 +255,20 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 row = startRow;
                 column = ++column;
                 var totalSpent = Convert.ToDouble(worksheet.Cells[culvertTotalRow, column].Value) +
-                    Convert.ToDouble(worksheet.Cells[bridgeTotalRow, column].Value) +
-                    Convert.ToDouble(worksheet.Cells[committedTotalRow, column].Value);
+                    Convert.ToDouble(worksheet.Cells[bridgeTotalRow, column].Value);
+                    //Convert.ToDouble(worksheet.Cells[committedTotalRow, column].Value);
 
                 worksheet.Cells[row, column].Value = Convert.ToDouble(worksheet.Cells[budgetTotalRow, column].Value) - totalSpent;
                 row++;
 
-                worksheet.Cells[row, column].Formula = worksheet.Cells[committedTotalRow, column] + "/" + totalSpent;
+                // [TODO] - right now, we are not entering committed project data in the excel file
+                //worksheet.Cells[row, column].Formula = worksheet.Cells[committedTotalRow, column] + "/" + totalSpent;
                 row++;
 
                 worksheet.Cells[row, column].Formula = 1 + "-" + worksheet.Cells[row - 1, column];
+
+                //[TODO] - Because we do not have anything for committed project. % for BAMS spent will always be 100
+                worksheet.Cells[row, column].Formula = 1 + "-" + 0;
             }
             worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column] + ")";
             worksheet.Cells[startRow, column + 2].Formula = worksheet.Cells[startRow, column + 1] + "/" + worksheet.Cells[budgetTotalRow, column + 1];

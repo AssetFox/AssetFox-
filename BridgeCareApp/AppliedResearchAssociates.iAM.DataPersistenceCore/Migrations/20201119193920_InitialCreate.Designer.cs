@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20201112190249_InitialCreate")]
+    [Migration("20201119193920_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

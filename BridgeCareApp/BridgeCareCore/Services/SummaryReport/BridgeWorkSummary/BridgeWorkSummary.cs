@@ -15,15 +15,21 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private readonly BridgesCulvertsWorkSummary _bridgesCulvertsWorkSummary;
         private readonly BridgeRateDeckAreaWorkSummary _bridgeRateDeckAreaWorkSummary;
         private readonly NHSBridgeDeckAreaWorkSummary _nhsBridgeDeckAreaWorkSummary;
+        private readonly DeckAreaBridgeWorkSummary _deckAreaBridgeWorkSummary;
+        private readonly PostedClosedBridgeWorkSummary _postedClosedBridgeWorkSummary;
 
         public BridgeWorkSummary(CostBudgetsWorkSummary costBudgetsWorkSummary,
             BridgesCulvertsWorkSummary bridgesCulvertsWorkSummary, BridgeRateDeckAreaWorkSummary bridgeRateDeckAreaWorkSummary,
-            NHSBridgeDeckAreaWorkSummary nhsBridgeDeckAreaWorkSummary)
+            NHSBridgeDeckAreaWorkSummary nhsBridgeDeckAreaWorkSummary,
+            DeckAreaBridgeWorkSummary deckAreaBridgeWorkSummary,
+            PostedClosedBridgeWorkSummary postedClosedBridgeWorkSummary)
         {
             _bridgesCulvertsWorkSummary = bridgesCulvertsWorkSummary ?? throw new ArgumentNullException(nameof(bridgesCulvertsWorkSummary));
             _costBudgetsWorkSummary = costBudgetsWorkSummary ?? throw new ArgumentNullException(nameof(costBudgetsWorkSummary));
             _bridgeRateDeckAreaWorkSummary = bridgeRateDeckAreaWorkSummary ?? throw new ArgumentNullException(nameof(bridgeRateDeckAreaWorkSummary));
             _nhsBridgeDeckAreaWorkSummary = nhsBridgeDeckAreaWorkSummary ?? throw new ArgumentNullException(nameof(nhsBridgeDeckAreaWorkSummary));
+            _deckAreaBridgeWorkSummary = deckAreaBridgeWorkSummary ?? throw new ArgumentNullException(nameof(deckAreaBridgeWorkSummary));
+            _postedClosedBridgeWorkSummary = postedClosedBridgeWorkSummary ?? throw new ArgumentNullException(nameof(postedClosedBridgeWorkSummary));
         }
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
             List<int> simulationYears, WorkSummaryModel workSummaryModel)
@@ -73,6 +79,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 simulationYears, workSummaryModel, reportOutputData);
 
             _nhsBridgeDeckAreaWorkSummary.FillNHSBridgeDeckAreaWorkSummarySections(worksheet, currentCell, simulationYears, reportOutputData, chartRowsModel);
+
+            chartRowsModel = _deckAreaBridgeWorkSummary.FillPoorDeckArea(worksheet, currentCell, simulationYears, reportOutputData, chartRowsModel);
+
+            chartRowsModel = _postedClosedBridgeWorkSummary.FillMoneyNeededByBPN(worksheet, currentCell, simulationYears, reportOutputData, chartRowsModel);
 
             worksheet.Calculate();
             worksheet.Cells.AutoFitColumns();

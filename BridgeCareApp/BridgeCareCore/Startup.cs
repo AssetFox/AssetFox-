@@ -47,6 +47,9 @@ namespace BridgeCareCore
             services.AddScoped<CostBudgetsWorkSummary>();
             services.AddScoped<BridgesCulvertsWorkSummary>();
             services.AddScoped<BridgeRateDeckAreaWorkSummary>();
+            services.AddScoped<NHSBridgeDeckAreaWorkSummary>();
+            services.AddScoped<DeckAreaBridgeWorkSummary>();
+            services.AddScoped<PostedClosedBridgeWorkSummary>();
             services.AddScoped<BridgeWorkSummaryCommon>();
             services.AddScoped<BridgeWorkSummaryComputationHelper>();
             services.AddSignalR();

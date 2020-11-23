@@ -80,6 +80,71 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             return goodCount;
         }
 
+        internal double CalculatePoorDeckAreaForBPN13(List<SectionDetail> sectionDetails, string bpn)
+        {
+            var postedBridges = sectionDetails.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
+            var selectedBridges = postedBridges.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] < 5);
+            return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+        internal double CalculatePoorDeckAreaForBPN2H(List<SectionDetail> sectionDetails)
+        {
+            var postedBridges = sectionDetails.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "2"
+            || b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "H");
+
+            var selectedBridges = postedBridges.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] < 5);
+            return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
+        internal double CalculateMoneyNeededByBPN13(List<SectionDetail> sectionDetails, string bpn)
+        {
+            var filteredBPNBridges = sectionDetails.FindAll(b =>
+            b.TreatmentCause != TreatmentCause.NoSelection &&
+            b.TreatmentOptions.Count > 0 &&
+            b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
+
+            var totalCost = filteredBPNBridges.Sum(_ => _.TreatmentOptions.FirstOrDefault(t =>
+            t.TreatmentName == _.AppliedTreatment).Cost);
+            return totalCost;
+        }
+
+        internal double CalculateMoneyNeededByBPN2H(List<SectionDetail> sectionDetails)
+        {
+            var filteredBPNBridges = sectionDetails.FindAll(
+                b => b.TreatmentCause != TreatmentCause.NoSelection && b.TreatmentOptions.Count > 0 && (
+                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "2" ||
+                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "H")
+                );
+            var totalCost = filteredBPNBridges.Sum(_ => _.TreatmentOptions.FirstOrDefault(t =>
+            t.TreatmentName == _.AppliedTreatment).Cost);
+
+            return totalCost;
+        }
+        internal double CalculateMoneyNeededByRemainingBPN(List<SectionDetail> sectionDetails)
+        {
+            var filteredBPNBridges = sectionDetails.FindAll(
+                b => b.TreatmentCause != TreatmentCause.NoSelection && b.TreatmentOptions.Count > 0 &&
+                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "2" &&
+                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "H" && b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "1" &&
+                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "3"
+            );
+            var totalCost = filteredBPNBridges.Sum(_ => _.TreatmentOptions.FirstOrDefault(t =>
+            t.TreatmentName == _.AppliedTreatment).Cost);
+
+            return totalCost;
+        }
+
+        internal double CalculatePoorDeckAreaForRemainingBPN(List<SectionDetail> sectionDetails)
+        {
+            var postedBridges = sectionDetails.FindAll(
+                b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "2" &&
+                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "H" && b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "1" &&
+                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "3"
+            );
+            var selectedBridges = postedBridges.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] < 5);
+
+            return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
         internal int CalculateTotalBridgePoorCount(SimulationYearDetail yearlyData)
         {
             var poorCount = 0;
@@ -135,6 +200,76 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             }
 
             return sum;
+        }
+
+        internal double SectionalNHSBridgeGoodCountOrArea(List<SectionDetail> sectionDetails, bool isCount)
+        {
+            var filteredSection = sectionDetails.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
+             && numericValue > 0);
+            var goodSections = filteredSection.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] >= 7);
+            if (isCount)
+            {
+               return goodSections.Count;
+            }
+            return goodSections.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
+        internal double TotalNHSBridgeCountOrArea(List<SectionSummaryDetail> initialSectionSummaries, List<SectionDetail> sectionDetails, bool isCount)
+        {
+            if(initialSectionSummaries != null)
+            {
+                var initialSections = initialSectionSummaries.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
+            && numericValue > 0);
+                if (isCount)
+                {
+                    return initialSections.Count;
+                }
+                return initialSections.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+            }
+
+            var secitons = sectionDetails.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
+            && numericValue > 0);
+            if (isCount)
+            {
+                return secitons.Count;
+            }
+            return secitons.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
+        internal double SectionalNHSBridgePoorCountOrArea(List<SectionDetail> sectionDetails, bool isCount)
+        {
+            var filteredSection = sectionDetails.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
+            && numericValue > 0);
+            var poorSections = filteredSection.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] < 5);
+            if (isCount)
+            {
+                return poorSections.Count;
+            }
+            return poorSections.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
+        internal double InitialNHSBridgePoorCountOrArea(List<SectionSummaryDetail> initialSectionSummaries, bool isCount)
+        {
+            var filteredSection = initialSectionSummaries.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
+            && numericValue > 0);
+            var poorSections = filteredSection.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] < 5);
+            if (isCount)
+            {
+                return poorSections.Count;
+            }
+            return poorSections.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
+        internal double InitialNHSBridgeGoodCountOrArea(List<SectionSummaryDetail> initialSectionSummaries, bool isCount)
+        {
+            var filteredSection = initialSectionSummaries.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
+            && numericValue > 0);
+            var goodSections = filteredSection.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] >= 7);
+            if (isCount)
+            {
+                return goodSections.Count;
+            }
+            return goodSections.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
         }
 
         internal double CalculateTotalPoorDeckArea(SimulationYearDetail yearlyData)

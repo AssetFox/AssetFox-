@@ -72,7 +72,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
                 // Bridge work summary TAB
                 var bridgeWorkSummaryWOrksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
-                var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWOrksheet, reportOutputData, simulationYears);
+                var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWOrksheet, reportOutputData, simulationYears, workSummaryModel);
 
                 var folderPathForSimulation = $"DownloadedNewReports\\{simulationId}";
                 string relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);

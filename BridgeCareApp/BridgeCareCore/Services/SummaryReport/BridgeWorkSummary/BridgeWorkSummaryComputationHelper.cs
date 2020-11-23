@@ -8,327 +8,156 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
     public class BridgeWorkSummaryComputationHelper
     {
-        const string NoTreatment = "No Treatment";
+        public int TotalInitialPoorBridgesCount(SimulationOutput reportOutputData)
+        {
+            var count = 0;
+            foreach (var initialSection in reportOutputData.InitialSectionSummaries)
+            {
+                count += initialSection.ValuePerNumericAttribute["MINCOND"] < 5 ? 1 : 0;
+            }
+            return count;
+        }
+        public int TotalSectionalPoorBridgesCount(SimulationYearDetail YearlyData)
+        {
+            var count = 0;
+            foreach (var section in YearlyData.Sections)
+            {
+                count += section.ValuePerNumericAttribute["MINCOND"] < 5 ? 1 : 0;
+            }
+            return count;
+        }
 
-        //public double CalculateCost(SimulationOutput reportOutputData, int year, string treatment)
-        //{
-        //    double cost = 0;
-        //    foreach (var simulationDataModel in simulationDataModels)
-        //    {
-        //        var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.Project == treatment);
-        //        cost += (yearData != null ? yearData.Cost : 0);
-        //    }
+        public double TotalInitialPoorBridgesDeckArea(SimulationOutput reportOutputData)
+        {
+            double sum = 0;
+            foreach (var initialSection in reportOutputData.InitialSectionSummaries)
+            {
+                var deckArea = initialSection.ValuePerNumericAttribute["MINCOND"] < 5 ? initialSection.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                sum += deckArea;
+            }
 
-        //    return cost;
-        //}
+            return sum;
+        }
+        public double CalculateTotalPoorBridgesDeckArea(SimulationYearDetail yearlyData)
+        {
+            double sum = 0;
+            foreach (var section in yearlyData.Sections)
+            {
+                var deckArea = section.ValuePerNumericAttribute["MINCOND"] < 5 ? section.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                sum += deckArea;
+            }
 
-        // [TODO] - code commented for now, because we will implement counts in next user story
+            return sum;
+        }
 
-        //public int CalculateCountByProject(List<SimulationDataModel> simulationDataModels, int year, string project)
-        //{
-        //    return simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.Project == project)).Count;
-        //}
+        internal int TotalInitialBridgeGoodCount(SimulationOutput reportOutputData)
+        {
+            var initialGoodCount = 0;
+            foreach (var intialSection in reportOutputData.InitialSectionSummaries)
+            {
+                initialGoodCount += intialSection.ValuePerNumericAttribute["MINCOND"] >= 7 ? 1 : 0;
+            }
+            return initialGoodCount;
+        }
 
-        //public int CalculatePoorBridgeCount(List<SimulationDataModel> simulationDataModels, int year, string type)
-        //{
-        //    return simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.PoorOnOffRate == type)).Count;
-        //}
+        internal int TotalInitialBridgePoorCount(SimulationOutput reportOutputData)
+        {
+            var initialPoorCount = 0;
+            foreach (var intialSection in reportOutputData.InitialSectionSummaries)
+            {
+                initialPoorCount += intialSection.ValuePerNumericAttribute["MINCOND"] < 5 ? 1 : 0;
+            }
+            return initialPoorCount;
+        }
 
-        //public int CalculateTotalPoorBridgesCount(List<SimulationDataModel> simulationDataModels, int year)
-        //{
-        //    return simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.SD == "Y")).Count;
-        //}
+        internal int CalculateTotalBridgeGoodCount(SimulationYearDetail yearlyData)
+        {
+            var goodCount = 0;
+            foreach (var section in yearlyData.Sections)
+            {
+                goodCount += section.ValuePerNumericAttribute["MINCOND"] >= 7 ? 1 : 0;
+            }
+            return goodCount;
+        }
 
-        //public double CalculateTotalPoorBridgesDeckArea(List<SimulationDataModel> simulationDataModels, int year)
-        //{
-        //    double sum = 0;
-        //    foreach (var simulationDataModel in simulationDataModels)
-        //    {
-        //        var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.SD == "Y");
-        //        sum += (yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0);
-        //    }
+        internal int CalculateTotalBridgePoorCount(SimulationYearDetail yearlyData)
+        {
+            var poorCount = 0;
+            foreach (var section in yearlyData.Sections)
+            {
+                poorCount += section.ValuePerNumericAttribute["MINCOND"] < 5 ? 1 : 0;
+            }
+            return poorCount;
+        }
 
-        //    return sum;
-        //}
+        internal double TotalInitialGoodDeckArea(SimulationOutput reportOutputData)
+        {
+            double sum = 0;
+            foreach (var initialSection in reportOutputData.InitialSectionSummaries)
+            {
+                var area = initialSection.ValuePerNumericAttribute["MINCOND"] >= 7 ? initialSection.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                sum += area;
+            }
 
-        //public int CalculateTotalBridgeGoodCount(List<SimulationDataModel> simulationDataModels, int year)
-        //{
-        //    return simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.MinC >= 7)).Count;
-        //}
+            return sum;
+        }
 
-        //public int CalculateTotalBridgePoorCount(List<SimulationDataModel> simulationDataModels, int year)
-        //{
-        //    return simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.MinC < 5)).Count;
-        //}
+        internal double TotalInitialPoorDeckArea(SimulationOutput reportOutputData)
+        {
+            double sum = 0;
+            foreach (var initialSection in reportOutputData.InitialSectionSummaries)
+            {
+                var area = initialSection.ValuePerNumericAttribute["MINCOND"] < 5 ? initialSection.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                sum += area;
+            }
 
-        //public double CalculateTotalGoodDeckArea(List<SimulationDataModel> simulationDataModels, int year)
-        //{
-        //    double sum = 0;
-        //    foreach (var simulationDataModel in simulationDataModels)
-        //    {
-        //        var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.MinC >= 7);
-        //        sum += (yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0);
-        //    }
+            return sum;
+        }
 
-        //    return sum;
-        //}
+        internal double InitialTotalDeckArea(SimulationOutput reportOutputData)
+        {
+            double sum = 0;
+            foreach (var initialSection in reportOutputData.InitialSectionSummaries)
+            {
+                sum += initialSection.ValuePerNumericAttribute["DECK_AREA"];
+            }
 
-        //public double CalculateTotalPoorDeckArea(List<SimulationDataModel> simulationDataModels, int year)
-        //{
-        //    double sum = 0;
-        //    foreach (var simulationDataModel in simulationDataModels)
-        //    {
-        //        var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.MinC < 5);
-        //        sum += (yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0);
-        //    }
+            return sum;
+        }
 
-        //    return sum;
-        //}
+        internal double CalculateTotalGoodDeckArea(SimulationYearDetail yearlyData)
+        {
+            double sum = 0;
+            foreach (var section in yearlyData.Sections)
+            {
+                var area = section.ValuePerNumericAttribute["MINCOND"] >= 7 ? section.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                sum += area;
+            }
 
-        //public double CalculateTotalDeckArea(List<SimulationDataModel> simulationDataModels)
-        //{
-        //    double sum = 0;
-        //    foreach (var simulationDataModel in simulationDataModels)
-        //    {
-        //        sum += Convert.ToDouble(simulationDataModel.DeckArea);
-        //    }
+            return sum;
+        }
 
-        //    return sum;
-        //}
+        internal double CalculateTotalPoorDeckArea(SimulationYearDetail yearlyData)
+        {
+            double sum = 0;
+            foreach (var section in yearlyData.Sections)
+            {
+                var area = section.ValuePerNumericAttribute["MINCOND"] < 5 ? section.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                sum += area;
+            }
 
-        //public double CalculateNHSBridgePoorDeckArea(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year)
-        //{
-        //    double sum = 0;
-        //    var filteredBridgeDataModels = bridgeDataModels.FindAll(b => b.NHS == "Y");
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => filteredBridgeDataModels.Exists(b => b.BRKey == s.BRKey));
-        //    foreach (var simulationDataModel in filteredSimulationDataModels)
-        //    {
-        //        var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.MinC < 5);
-        //        sum += (yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0);
-        //    }
-        //    return sum;
-        //}
+            return sum;
+        }
 
-        //public double CalculateNHSBridgeGoodDeckArea(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year)
-        //{
-        //    double sum = 0;
-        //    var filteredBridgeDataModels = bridgeDataModels.FindAll(b => b.NHS == "Y");
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => filteredBridgeDataModels.Exists(b => b.BRKey == s.BRKey));
-        //    foreach (var simulationDataModel in filteredSimulationDataModels)
-        //    {
-        //        var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.MinC >= 7);
-        //        sum += (yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0);
-        //    }
-        //    return sum;
-        //}
+        internal double CalculateTotalDeckArea(SimulationYearDetail yearlyData)
+        {
+            double sum = 0;
+            foreach (var section in yearlyData.Sections)
+            {
+                sum += section.ValuePerNumericAttribute["DECK_AREA"];
+            }
 
-        //public int CalculateNHSBridgeGoodCount(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year)
-        //{
-        //    var filteredBridgeDataModels = bridgeDataModels.FindAll(b => b.NHS == "Y");
-        //    var goodCount = simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.MinC >= 7) && filteredBridgeDataModels.Exists(b => b.BRKey == s.BRKey)).Count;
-        //    return goodCount;
-        //}
-
-        //public int CalculateNHSBridgePoorCount(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year)
-        //{
-        //    var filteredBridgeDataModels = bridgeDataModels.FindAll(b => b.NHS == "Y");
-        //    var poorCount = simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.MinC < 5) && filteredBridgeDataModels.Exists(b => b.BRKey == s.BRKey)).Count;
-        //    return poorCount;
-        //}
-
-        //#region posted and closed bridge count functions
-        //internal int CalculatePostedAndClosedBridgeCountForBPN13(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year, string bpn, string posted)
-        //{
-        //    var postedCount = 0;
-        //    var postedBridges = bridgeDataModels.FindAll(b => b.BPN == bpn);
-        //    if (posted == "Y")
-        //    {
-        //        postedCount = simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.MinC <= 4.75 && y.MinC > 3.25) && postedBridges.Exists(b => b.BRKey == s.BRKey)).Count;
-        //    }
-        //    else
-        //    {
-        //        postedCount = simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.MinC <= 3.25) && postedBridges.Exists(b => b.BRKey == s.BRKey)).Count;
-        //    }
-        //    return postedCount;
-        //}
-        //internal int CalculatePostedAndClosedBridgeCountForBPN2H(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year, string posted)
-        //{
-        //    var postedCount = 0;
-        //    var postedBridges = bridgeDataModels.FindAll(b => b.BPN == "2" || b.BPN == "H");
-        //    if (posted == "Y")
-        //    {
-        //        postedCount = simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.MinC <= 4.75 && y.MinC > 3.25) && postedBridges.Exists(b => b.BRKey == s.BRKey)).Count;
-        //    }
-        //    else
-        //    {
-        //        postedCount = simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.MinC <= 3.25) && postedBridges.Exists(b => b.BRKey == s.BRKey)).Count;
-        //    }
-        //    return postedCount;
-        //}
-        //internal int CalculatePostedAndClosedBridgeCountForRemaining(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year, string posted)
-        //{
-        //    var postedCount = 0;
-        //    var postedBridges = bridgeDataModels.FindAll(b => b.BPN != "2" && b.BPN != "H" && b.BPN != "1" && b.BPN != "3");
-        //    if (posted == "Y")
-        //    {
-        //        postedCount = simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.MinC <= 4.75 && y.MinC > 3.25) && postedBridges.Exists(b => b.BRKey == s.BRKey)).Count;
-        //    }
-        //    else
-        //    {
-        //        postedCount = simulationDataModels.FindAll(s => s.YearsData.Exists(y => y.Year == year && y.MinC <= 3.25) && postedBridges.Exists(b => b.BRKey == s.BRKey)).Count;
-        //    }
-        //    return postedCount;
-        //}
-        //#endregion
-
-        //#region posted and closed deck area functions
-        //internal double CalculatePostedAndClosedDeckAreaForBPN13(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year, string bpn, string postStatus)
-        //{
-        //    var sum = 0.0;
-        //    var postedBridges = bridgeDataModels.FindAll(b => b.BPN == bpn);
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => postedBridges.Exists(b => b.BRKey == s.BRKey));
-        //    if (postStatus == "Y")
-        //    {
-        //        foreach (var simulationDataModel in filteredSimulationDataModels)
-        //        {
-        //            var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.MinC <= 4.75 && y.MinC > 3.25);
-        //            sum += yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        foreach (var simulationDataModel in filteredSimulationDataModels)
-        //        {
-        //            var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.MinC <= 3.25);
-        //            sum += yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0;
-        //        }
-        //    }
-        //    return sum;
-        //}
-        //internal double CalculatePostedAndClosedDeckAreaForBPN2H(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year, string postStatus)
-        //{
-        //    var sum = 0.0;
-        //    var postedBridges = bridgeDataModels.FindAll(b => b.BPN == "2" || b.BPN == "H");
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => postedBridges.Exists(b => b.BRKey == s.BRKey));
-        //    if (postStatus == "Y")
-        //    {
-        //        foreach (var simulationDataModel in filteredSimulationDataModels)
-        //        {
-        //            var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.MinC <= 4.75 && Convert.ToDouble(y.MinC) > 3.25);
-        //            sum += yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        foreach (var simulationDataModel in filteredSimulationDataModels)
-        //        {
-        //            var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.MinC <= 3.25);
-        //            sum += yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0;
-        //        }
-        //    }
-        //    return sum;
-        //}
-        //internal double CalculatePostedAndClosedDeckAreaForRemainingBPN(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year, string postStatus)
-        //{
-        //    var sum = 0.0;
-        //    var postedBridges = bridgeDataModels.FindAll(b => b.BPN != "2" && b.BPN != "H" && b.BPN != "1" && b.BPN != "3");
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => postedBridges.Exists(b => b.BRKey == s.BRKey));
-        //    if (postStatus == "Y")
-        //    {
-        //        foreach (var simulationDataModel in filteredSimulationDataModels)
-        //        {
-        //            var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.MinC <= 4.75 && Convert.ToDouble(y.MinC) > 3.25);
-        //            sum += yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        foreach (var simulationDataModel in filteredSimulationDataModels)
-        //        {
-        //            var yearData = simulationDataModel.YearsData.Find(y => y.Year == year && y.MinC <= 3.25);
-        //            sum += yearData != null ? Convert.ToDouble(simulationDataModel.DeckArea) : 0;
-        //        }
-        //    }
-        //    return sum;
-        //}
-        //#endregion
-
-        //internal double CalculateMoneyNeededByBPN13(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year, string bpn)
-        //{
-        //    var sum = 0.0;
-        //    var filteredBPNBridges = bridgeDataModels.FindAll(b => b.BPN == bpn);
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => filteredBPNBridges.Exists(b => b.BRKey == s.BRKey));
-        //    foreach (var simulationDataModel in filteredSimulationDataModels)
-        //    {
-        //        var yearData = simulationDataModel.YearsData.Find(y => y.Year == year);
-        //        sum += yearData != null ? yearData.Cost : 0;
-        //    }
-        //    return sum;
-        //}
-        //internal double CalculateMoneyNeededByBPN2H(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year)
-        //{
-        //    var sum = 0.0;
-        //    var filteredBPNBridges = bridgeDataModels.FindAll(b => b.BPN == "2" || b.BPN == "H");
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => filteredBPNBridges.Exists(b => b.BRKey == s.BRKey));
-        //    foreach (var simulationDataModel in filteredSimulationDataModels)
-        //    {
-        //        var yearData = simulationDataModel.YearsData.Find(y => y.Year == year);
-        //        sum += yearData != null ? yearData.Cost : 0;
-        //    }
-        //    return sum;
-        //}
-        //internal double CalculateMoneyNeededByRemainingBPN(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year)
-        //{
-        //    var sum = 0.0;
-        //    var filteredBPNBridges = bridgeDataModels.FindAll(b => b.BPN != "2" && b.BPN != "H" && b.BPN != "1" && b.BPN != "3");
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => filteredBPNBridges.Exists(b => b.BRKey == s.BRKey));
-        //    foreach (var simulationDataModel in filteredSimulationDataModels)
-        //    {
-        //        var yearData = simulationDataModel.YearsData.Find(y => y.Year == year);
-        //        sum += yearData != null ? yearData.Cost : 0;
-        //    }
-        //    return sum;
-        //}
-
-        //#region poor deck area functions
-        //internal double CalculatePoorDeckAreaForBPN13(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year, string bpn)
-        //{
-        //    var sum = 0.0;
-        //    var postedBridges = bridgeDataModels.FindAll(b => b.BPN == bpn);
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => postedBridges.Exists(b => b.BRKey == s.BRKey));
-        //    foreach (var model in filteredSimulationDataModels)
-        //    {
-        //        var yearData = model.YearsData.Find(y => y.Year == year && y.MinC < 5);
-        //        sum += yearData != null ? Convert.ToDouble(model.DeckArea) : 0;
-        //    }
-        //    return sum;
-        //}
-
-        //internal double CalculatePoorDeckAreaForBPN2H(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year)
-        //{
-        //    var sum = 0.0;
-        //    var postedBridges = bridgeDataModels.FindAll(b => b.BPN == "2" || b.BPN == "H");
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => postedBridges.Exists(b => b.BRKey == s.BRKey));
-        //    foreach (var model in filteredSimulationDataModels)
-        //    {
-        //        var yearData = model.YearsData.Find(y => y.Year == year && y.MinC < 5);
-        //        sum += yearData != null ? Convert.ToDouble(model.DeckArea) : 0;
-        //    }
-        //    return sum;
-        //}
-
-        //internal double CalculatePoorDeckAreaForRemainingBPN(List<SimulationDataModel> simulationDataModels, List<BridgeDataModel> bridgeDataModels, int year)
-        //{
-        //    var sum = 0.0;
-        //    var postedBridges = bridgeDataModels.FindAll(b => b.BPN != "2" && b.BPN != "H" && b.BPN != "1" && b.BPN != "3");
-        //    var filteredSimulationDataModels = simulationDataModels.FindAll(s => postedBridges.Exists(b => b.BRKey == s.BRKey));
-        //    foreach (var model in filteredSimulationDataModels)
-        //    {
-        //        var yearData = model.YearsData.Find(y => y.Year == year && y.MinC < 5);
-        //        sum += yearData != null ? Convert.ToDouble(model.DeckArea) : 0;
-        //    }
-        //    return sum;
-        //}
-        //#endregion
+            return sum;
+        }
     }
 }

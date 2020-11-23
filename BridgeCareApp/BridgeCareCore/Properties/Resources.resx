@@ -133,6 +133,9 @@
     <value>BPN 4</value>
     <comment>Bus plan network Label for Summary TABs</comment>
   </data>
+  <data name="BridgeCare" xml:space="preserve">
+    <value>Bridge Care</value>
+  </data>
   <data name="BridgeTotal" xml:space="preserve">
     <value>Bridge Total</value>
   </data>
@@ -159,6 +162,10 @@
   </data>
   <data name="RemainingBudget" xml:space="preserve">
     <value>Remaining Budget</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+    <comment>Total number of Bridges (Culvert or non-culvert) in Work Summary TAB.</comment>
   </data>
   <data name="TotalBridgeCareBudget" xml:space="preserve">
     <value>Total Bridge Care Budget</value>

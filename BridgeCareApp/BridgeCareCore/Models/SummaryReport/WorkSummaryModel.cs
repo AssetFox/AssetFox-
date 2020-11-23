@@ -7,6 +7,8 @@ namespace BridgeCareCore.Models.SummaryReport
 {
     public class WorkSummaryModel
     {
+        public List<double> PreviousYearInitialMinC { get; set; }
+        public Dictionary<int, (int on, int off)> PoorOnOffCount { get; set; }
         //public List<SimulationDataModel> SimulationDataModels { get; set; }
 
         //public List<BridgeDataModel> BridgeDataModels { get; set; }

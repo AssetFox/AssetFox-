@@ -45,7 +45,10 @@ namespace BridgeCareCore
             services.AddScoped<IUnfundedRecommendations, UnfundedRecommendations>();
             services.AddScoped<IBridgeWorkSummary, BridgeWorkSummary>();
             services.AddScoped<CostBudgetsWorkSummary>();
+            services.AddScoped<BridgesCulvertsWorkSummary>();
+            services.AddScoped<BridgeRateDeckAreaWorkSummary>();
             services.AddScoped<BridgeWorkSummaryCommon>();
+            services.AddScoped<BridgeWorkSummaryComputationHelper>();
             services.AddSignalR();
 
 #if MsSqlDebug

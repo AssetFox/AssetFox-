@@ -22,21 +22,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             return benefitEntity;
         }
-
-        public static Benefit ToDomain(this BenefitEntity entity)
-        {
-            var benefit = new Benefit
-            {
-                Limit = entity.Limit
-            };
-
-            if (entity.Attribute != null)
-            {
-                benefit.Attribute = (NumberAttribute)Convert
-                    .ChangeType(entity.Attribute.ToDomain().ToSimulationAnalysisAttribute(), typeof(NumberAttribute));
-            }
-
-            return benefit;
-        }
     }
 }

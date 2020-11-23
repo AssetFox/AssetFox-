@@ -59,26 +59,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 };
             }
 
+            if (entity.Benefit != null)
+            {
+                analysisMethod.Benefit.Limit = entity.Benefit.Limit;
+                if (entity.Benefit.Attribute != null)
+                {
+                    analysisMethod.Benefit.Attribute = (NumberAttribute)Convert
+                        .ChangeType(entity.Benefit.Attribute.ToDomain().ToSimulationAnalysisAttribute(), typeof(NumberAttribute));
+                }
+            }
+
             analysisMethod.Filter.Expression =
                 entity.CriterionLibraryAnalysisMethodJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
 
-            entity.Simulation.BudgetPriorityLibrarySimulationJoin?.BudgetPriorityLibrary.BudgetPriorities.ForEach(
-                _ =>
-                {
-                    _.ToSimulationAnalysisDomain(analysisMethod, simulation.InvestmentPlan);
-                });
+            entity.Simulation.BudgetPriorityLibrarySimulationJoin?.BudgetPriorityLibrary.BudgetPriorities
+                .ForEach(_ => _.ToSimulationAnalysisDomain(analysisMethod, simulation.InvestmentPlan));
 
-            entity.Simulation.TargetConditionGoalLibrarySimulationJoin?.TargetConditionGoalLibrary.TargetConditionGoals.ForEach(
-                _ =>
-                {
-                    _.ToSimulationAnalysisDomain(analysisMethod);
-                });
+            entity.Simulation.TargetConditionGoalLibrarySimulationJoin?.TargetConditionGoalLibrary.TargetConditionGoals
+                .ForEach(_ => _.ToSimulationAnalysisDomain(analysisMethod));
 
-            entity.Simulation.DeficientConditionGoalLibrarySimulationJoin?.DeficientConditionGoalLibrary.DeficientConditionGoals.ForEach(
-                _ =>
-                {
-                    _.ToSimulationAnalysisDomain(analysisMethod);
-                });
+            entity.Simulation.DeficientConditionGoalLibrarySimulationJoin?.DeficientConditionGoalLibrary.DeficientConditionGoals
+                .ForEach(_ => _.ToSimulationAnalysisDomain(analysisMethod));
+
+            entity.Simulation.RemainingLifeLimitLibrarySimulationJoin?.RemainingLifeLimitLibrary.RemainingLifeLimits
+                .ForEach(_ => _.ToSimulationAnalysisDomain(analysisMethod));
 
             return analysisMethod;
         }

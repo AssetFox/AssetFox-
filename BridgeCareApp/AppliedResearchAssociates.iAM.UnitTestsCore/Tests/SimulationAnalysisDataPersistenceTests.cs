@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataAccess;
 using DA = AppliedResearchAssociates.iAM.DataAssignment;
 using DM = AppliedResearchAssociates.iAM.DataMiner;
@@ -13,7 +15,10 @@ using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
+using Newtonsoft.Json;
 using Xunit;
+using Xunit.Abstractions;
+using Xunit.Sdk;
 using MoreEnumerable = MoreLinq.MoreEnumerable;
 
 
@@ -22,15 +27,99 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public class SimulationAnalysisDataPersistenceTests
     {
         [Fact]
+        public void TestCreateNetwork()
+        {
+            // Arrange
+            var testHelper = new SimulationAnalysisDataPersistenceTestHelper();
+            testHelper.TestCreateNetworkSetup();
+            var simulation = testHelper.GetStandAloneSimulation();
+
+            // Act
+            testHelper.CreateNetwork(simulation);
+            testHelper.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Name);
+
+            // Assert
+            var dataSourceNetwork = testHelper.NetworkRepo.GetSimulationAnalysisNetwork(simulation.Network.Name);
+            Assert.NotNull(dataSourceNetwork);
+
+            var facilities = simulation.Network.Facilities.ToList();
+            var dataSourceFacilities = dataSourceNetwork.Facilities.ToList();
+            Assert.Equal(facilities.Count(), dataSourceFacilities.Count());
+            facilities.ForEach(facility =>
+            {
+                var dataSourceFacility = dataSourceFacilities.SingleOrDefault(_ => _.Name == facility.Name);
+                Assert.NotNull(dataSourceFacility);
+                var sections = facility.Sections.ToList();
+                var dataSourceSections = dataSourceFacility.Sections.ToList();
+                Assert.Equal(sections.Count(), dataSourceSections.Count());
+                sections.ForEach(section =>
+                {
+                    var dataSourceSection = dataSourceSections.SingleOrDefault(_ => _.Name == section.Name);
+                    Assert.NotNull(dataSourceSection);
+                    Assert.Equal(section.Area, dataSourceSection.Area);
+                    Assert.Equal(section.AreaUnit, dataSourceSection.AreaUnit);
+                });
+            });
+        }
+
+        [Fact]
         public void TestCreateLiteSimulationEntity()
         {
             // Arrange
             var testHelper = new SimulationAnalysisDataPersistenceTestHelper();
             var simulation = testHelper.GetStandAloneSimulation();
-            testHelper.CreateNetwork(simulation.Network.Name);
-            testHelper.TestCreateSimulationEntitySetup();
+            testHelper.TestCreateSimulationEntitySetup(simulation);
 
             // Act
+            testHelper.SimulationRepo.CreateSimulation(simulation);
+
+            // Assert
+            var dataSourceSimulations = testHelper.SimulationRepo
+                .GetAllInNetwork(simulation.Network.Name).ToList();
+            Assert.Single(dataSourceSimulations);
+            Assert.Equal(simulation.Name, dataSourceSimulations[0].Name);
+            Assert.Equal(simulation.NumberOfYearsOfTreatmentOutlook, dataSourceSimulations[0].NumberOfYearsOfTreatmentOutlook);
+
+            // CleanUp
+            testHelper.CleanUp();
+        }
+
+        [Fact]
+        public void TestCreateSimulationOutput()
+        {
+            // Arrange
+            var testHelper = new SimulationAnalysisDataPersistenceTestHelper();
+            var simulation = testHelper.GetStandAloneSimulation();
+            testHelper.TestCreateSimulationEntitySetup(simulation);
+            var runner = new SimulationRunner(simulation);
+            var simulationIsRunning = true;
+            runner.Information += (sender, eventArgs) => {
+                if (eventArgs.Message == "Simulation complete.")
+                {
+                    simulationIsRunning = false;
+                }
+            };
+            runner.Run();
+
+            while (simulationIsRunning)
+            {
+                ITestOutputHelper outputHelper = new TestOutputHelper();
+                outputHelper.WriteLine("Simulation is running...");
+            }
+
+            var folderPathForNewAnalysis = $"DownloadedReports\\{simulation.Name}_NewAnalysis";
+            var relativeFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis);
+            Directory.CreateDirectory(relativeFolderPath);
+
+            var outputFile = $"Network {simulation.Network.Name} - Simulation {simulation.Name}.json";
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis, outputFile);
+            var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
+
+            var resultObject = JsonConvert.SerializeObject(simulation.Results, settings);
+            File.WriteAllText(filePath, resultObject);
+
+            // Act
+            byte[] bytes = System.IO.File.ReadAllBytes(filePath);
             testHelper.SimulationRepo.CreateSimulation(simulation);
 
             // Assert
@@ -273,8 +362,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotNull(dataSourceAnalysisMethod);
             Assert.IsType<AnalysisMethod>(dataSourceAnalysisMethod);
             Assert.Equal(analysisMethod.Weighting.Name, dataSourceAnalysisMethod.Weighting.Name);
-            Assert.Equal(analysisMethod.Weighting.IsDecreasingWithDeterioration,
-                dataSourceAnalysisMethod.Weighting.IsDecreasingWithDeterioration);
+            Assert.Equal(analysisMethod.Weighting.IsDecreasingWithDeterioration, dataSourceAnalysisMethod.Weighting.IsDecreasingWithDeterioration);
             Assert.Equal(analysisMethod.OptimizationStrategy, dataSourceAnalysisMethod.OptimizationStrategy);
             Assert.Equal(analysisMethod.SpendingStrategy, dataSourceAnalysisMethod.SpendingStrategy);
             Assert.Equal(analysisMethod.Description, dataSourceAnalysisMethod.Description);
@@ -282,6 +370,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(analysisMethod.ShouldUseExtraFundsAcrossBudgets, dataSourceAnalysisMethod.ShouldUseExtraFundsAcrossBudgets);
             Assert.Equal(analysisMethod.ShouldApplyMultipleFeasibleCosts, dataSourceAnalysisMethod.ShouldApplyMultipleFeasibleCosts);
             Assert.Equal(analysisMethod.Filter.Expression, dataSourceAnalysisMethod.Filter.Expression);
+
+            Assert.Equal(analysisMethod.Benefit.Attribute.Name, dataSourceAnalysisMethod.Benefit.Attribute.Name);
+            Assert.Equal(analysisMethod.Benefit.Attribute.IsDecreasingWithDeterioration, dataSourceAnalysisMethod.Benefit.Attribute.IsDecreasingWithDeterioration);
+            Assert.Equal(analysisMethod.Benefit.Limit, dataSourceAnalysisMethod.Benefit.Limit);
 
             var budgetPriorities = analysisMethod.BudgetPriorities.ToList();
             var dataSourceBudgetPriorities = dataSourceAnalysisMethod.BudgetPriorities.ToList();
@@ -338,6 +430,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Assert.Equal(deficientConditionGoal.AllowedDeficientPercentage, dataSourceDeficientConditionGoal.AllowedDeficientPercentage);
                 Assert.Equal(deficientConditionGoal.DeficientLimit, dataSourceDeficientConditionGoal.DeficientLimit);
                 Assert.Equal(deficientConditionGoal.Criterion.Expression, dataSourceDeficientConditionGoal.Criterion.Expression);
+            });
+
+            var remainingLifeLimits = analysisMethod.RemainingLifeLimits.ToList();
+            var dataSourceRemainingLifeLimits = dataSourceAnalysisMethod.RemainingLifeLimits.ToList();
+            Assert.Equal(remainingLifeLimits.Count(), dataSourceRemainingLifeLimits.Count());
+            remainingLifeLimits.ForEach((remainingLifeLimit, index) =>
+            {
+                var dataSourceRemainingLifeLimit = dataSourceRemainingLifeLimits[index];
+                Assert.Equal(remainingLifeLimit.Attribute.Name, dataSourceRemainingLifeLimit.Attribute.Name);
+                Assert.Equal(remainingLifeLimit.Attribute.IsDecreasingWithDeterioration, dataSourceRemainingLifeLimit.Attribute.IsDecreasingWithDeterioration);
+                Assert.Equal(remainingLifeLimit.Value, dataSourceRemainingLifeLimit.Value);
+                Assert.Equal(remainingLifeLimit.Criterion.Expression, dataSourceRemainingLifeLimit.Criterion.Expression);
             });
 
             // CleanUp

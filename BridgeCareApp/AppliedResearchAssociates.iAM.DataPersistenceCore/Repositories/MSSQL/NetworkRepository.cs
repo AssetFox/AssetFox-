@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -69,6 +70,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // consumer of this call will only need the network information. Not the maintainable assest information
             return Context.Network.Select(_ => _.ToDomain()).ToList();
+        }
+
+        public Domains.Network GetSimulationAnalysisNetwork(string networkName)
+        {
+            if (!Context.Network.Any(_ => _.Name == networkName))
+            {
+                throw new RowNotInTableException($"No network found having name {networkName}");
+            }
+
+            return Context.Network
+                .Include(_ => _.Facilities)
+                .ThenInclude(_ => _.Sections)
+                .Single(_ => _.Name == networkName)
+                .ToSimulationAnalysisNetworkDomain();
         }
     }
 }

@@ -32,7 +32,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 try
                 {
-
                     if (!Context.Simulation.Any(_ => _.Name == simulationName))
                     {
                         throw new RowNotInTableException($"No simulation found having name {simulationName}");

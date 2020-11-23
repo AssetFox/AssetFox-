@@ -24,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {"DeficientConditionGoalEntity", "Deficient Condition Goal"},
             {"PerformanceCurveEntity", "Performance Curve"},
             {"CashFlowRuleEntity", "Cash Flow Rule"},
+            {"RemainingLifeLimitEntity", "Remaining Life Limit"},
             {"SelectableTreatmentEntity", "Feasibility"},
             {"TargetConditionGoalEntity", "Target Condition Goal"},
             {"TreatmentConsequenceEntity", "Treatment Consequence"},
@@ -84,6 +85,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     break;
                 case "PerformanceCurveEntity":
                     CreateCriterionLibraryPerformanceCurveJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
+                    break;
+                case "RemainingLifeLimitEntity":
+                    CreateCriterionLibraryRemainingLifeLimitJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
                 case "TargetConditionGoalEntity":
                     CreateCriterionLibraryTargetConditionGoalJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
@@ -205,6 +209,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (IsRunningFromXUnit)
             {
                 Context.CriterionLibraryPerformanceCurve.AddRange(joinEntities);
+            }
+            else
+            {
+                Context.BulkInsert(joinEntities);
+            }
+        }
+
+        private void CreateCriterionLibraryRemainingLifeLimitJoins(Guid criterionLibraryId, List<Guid> remainingLifeLimitIds)
+        {
+            var joinEntities = remainingLifeLimitIds.Select(remainingLifeLimitId =>
+                    new CriterionLibraryRemainingLifeLimitEntity
+                    {
+                        CriterionLibraryId = criterionLibraryId,
+                        RemainingLifeLimitId = remainingLifeLimitId
+                    })
+                .ToList();
+
+            if (IsRunningFromXUnit)
+            {
+                Context.CriterionLibraryRemainingLifeLimit.AddRange(joinEntities);
             }
             else
             {

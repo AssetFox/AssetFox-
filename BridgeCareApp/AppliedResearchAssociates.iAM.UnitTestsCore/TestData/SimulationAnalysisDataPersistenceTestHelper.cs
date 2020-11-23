@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataAccess;
+using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -25,6 +26,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         private readonly DataAccessor _dataAccessor;
         private readonly IAMContext _dbContext;
 
+        public INetworkRepository NetworkRepo { get; set; }
+        public ISectionRepository SectionRepo { get; set; }
+        public IFacilityRepository FacilityRepo { get; set; }
         public ISimulationRepository SimulationRepo { get; set; }
         public IBudgetAmountRepository BudgetAmountRepo { get; set; }
         public IBudgetRepository BudgetRepo { get; set; }
@@ -43,6 +47,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         public IBudgetPriorityRepository BudgetPriorityRepo { get; set; }
         public ITargetConditionGoalRepository TargetConditionGoalRepo { get; set; }
         public IDeficientConditionGoalRepository DeficientConditionGoalRepo { get; set; }
+        public IBenefitRepository BenefitRepo { get; set; }
+        public IRemainingLifeLimitRepository RemainingLifeLimitRepo { get; set; }
         public IAnalysisMethodRepository AnalysisMethodRepo { get; set; }
 
         public SimulationAnalysisDataPersistenceTestHelper()
@@ -64,14 +70,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public Simulation GetStandAloneSimulation() => _dataAccessor.GetStandAloneSimulation(NetworkId, SimulationId);
 
-        public void CreateNetwork(string networkName)
-        {
-            var network = new DA.Networking.Network(new List<DA.Networking.MaintainableAsset>(), Guid.NewGuid(), networkName);
-
-            var networkRepo = new NetworkRepository(_dbContext);
-
-            networkRepo.CreateNetwork(network);
-        }
+        public void CreateNetwork(Simulation simulation) =>
+            NetworkRepo.CreateNetwork(new DataAssignment.Networking
+                .Network(new List<MaintainableAsset>(), Guid.NewGuid(), simulation.Network.Name));
 
         public void CreateAttributes(List<string> attributeNames)
         {
@@ -82,12 +83,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             attributeRepo.UpsertAttributes(attributes.Where(_ => attributeNames.Contains(_.Name)).ToList());
         }
 
-        public void TestCreateSimulationEntitySetup() => SimulationRepo = new SimulationRepository(_dbContext);
+        public void TestCreateNetworkSetup()
+        {
+            NetworkRepo = new NetworkRepository(_dbContext);
+            SectionRepo = new SectionRepository(_dbContext);
+            FacilityRepo = new FacilityRepository(SectionRepo, _dbContext);
+        }
+
+        public void TestCreateSimulationEntitySetup(Simulation simulation)
+        {
+            TestCreateNetworkSetup();
+            CreateNetwork(simulation);
+            SimulationRepo = new SimulationRepository(_dbContext);
+        }
 
         public void TestCreateInvestmentPlanEntitySetup(Simulation simulation)
         {
-            CreateNetwork(simulation.Network.Name);
-            SimulationRepo = new SimulationRepository(_dbContext);
+            TestCreateSimulationEntitySetup(simulation);
             SimulationRepo.CreateSimulation(simulation);
             BudgetAmountRepo = new BudgetAmountRepository(_dbContext);
             BudgetRepo = new BudgetRepository(BudgetAmountRepo, _dbContext);
@@ -99,8 +111,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public void TestCreatePerformanceCurveEntitiesSetup(Simulation simulation)
         {
-            CreateNetwork(simulation.Network.Name);
-            SimulationRepo = new SimulationRepository(_dbContext);
+            TestCreateSimulationEntitySetup(simulation);
             SimulationRepo.CreateSimulation(simulation);
             var attributeNames = simulation.PerformanceCurves.Select(_ => _.Attribute.Name).Distinct().ToList();
             CreateAttributes(attributeNames);
@@ -161,16 +172,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             var attributeNames = simulation.AnalysisMethod.TargetConditionGoals
                 .Select(_ => _.Attribute.Name).ToList();
             attributeNames.Add(simulation.AnalysisMethod.Weighting.Name);
+            if (simulation.AnalysisMethod.Benefit.Attribute != null)
+            {
+                attributeNames.Add(simulation.AnalysisMethod.Benefit.Attribute.Name);
+            }
             CreateAttributes(attributeNames.Distinct().ToList());
             BudgetPercentagePairRepo = new BudgetPercentagePairRepository(_dbContext);
             BudgetPriorityRepo = new BudgetPriorityRepository(CriterionLibraryRepo, BudgetPercentagePairRepo, _dbContext);
             TargetConditionGoalRepo = new TargetConditionGoalRepository(CriterionLibraryRepo, _dbContext);
             DeficientConditionGoalRepo = new DeficientConditionGoalRepository(CriterionLibraryRepo, _dbContext);
+            BenefitRepo = new BenefitRepository(_dbContext);
+            RemainingLifeLimitRepo = new RemainingLifeLimitRepository(CriterionLibraryRepo, _dbContext);
             AnalysisMethodRepo = new AnalysisMethodRepository(CriterionLibraryRepo,
                 BudgetPriorityRepo,
                 InvestmentPlanRepo,
                 TargetConditionGoalRepo,
                 DeficientConditionGoalRepo,
+                BenefitRepo,
+                RemainingLifeLimitRepo,
                 _dbContext);
         }
     }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -8,5 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateNetwork(DataAssignment.Networking.Network network);
 
         IEnumerable<DataAssignment.Networking.Network> GetAllNetworks();
+
+        Domains.Network GetSimulationAnalysisNetwork(string networkName);
     }
 }

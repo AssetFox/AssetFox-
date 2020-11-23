@@ -4,6 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
+using MoreLinq;
 using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Domains;
 using DataAssignment = AppliedResearchAssociates.iAM.DataAssignment;
 
@@ -11,12 +12,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class NetworkMapper
     {
-        public static SimulationAnalysisDomains.Network ToSimulationAnalysisNetworkDomain(this DataAssignment.Networking.Network network) =>
-            new SimulationAnalysisDomains.Network(new Explorer())
-            {
-                Name = network.Name
-            };
-
         public static DataAssignment.Networking.Network ToDomain(this NetworkEntity entity)
         {
             if (entity == null)
@@ -47,6 +42,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? domain.MaintainableAssets.Select(d => d.ToEntity(domain.Id)).ToList()
                     : new List<MaintainableAssetEntity>()
             };
+        }
+
+        public static SimulationAnalysisDomains.Network ToSimulationAnalysisNetworkDomain(this NetworkEntity entity)
+        {
+            var network = new SimulationAnalysisDomains.Network(new Explorer()) { Name = entity.Name, };
+
+            if (entity.Facilities.Any())
+            {
+                entity.Facilities.ForEach(_ => _.ToSimulationAnalysisDomain(network));
+            }
+
+            return network;
         }
     }
 }

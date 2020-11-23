@@ -33,8 +33,8 @@
                     <v-layout justify-center>
                         <v-flex xs3>
                             <v-text-field :disabled="!hasSelectedInvestmentLibrary" :mask="'##########'" outline
-                                          label="Inflation Rate (%)"
-                                          v-model.number="selectedInvestmentLibrary.inflationRate"
+                                          label="Inflation Rate (%)" :value="selectedInvestmentLibrary.inflationRate"
+                                          @change="selectedInvestmentLibrary = {...selectedInvestmentLibrary, inflationRate: $event}"
                                           :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                         </v-flex>
                     </v-layout>

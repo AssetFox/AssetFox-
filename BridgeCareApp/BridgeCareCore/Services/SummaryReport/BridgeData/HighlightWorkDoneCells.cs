@@ -17,7 +17,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         public void CheckConditions(int parallelBridge, string treatment, TreatmentCause previousYearCause,
             TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
         {
-            if (treatment != null && treatment.ToLower() != "no treatment")
+            if (treatment != null && treatment.ToLower() != Properties.Resources.NoTreatment)
             {
                 var range = worksheet.Cells[row, column];
                 ParallelBridgeBAMs(parallelBridge, treatmentCause, range);

@@ -142,6 +142,15 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to no treatment.
+        /// </summary>
+        internal static string NoTreatment {
+            get {
+                return ResourceManager.GetString("NoTreatment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Percent Budget Spent BAMS.
         /// </summary>
         internal static string PercentBudgetSpentBAMS {

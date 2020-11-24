@@ -150,6 +150,9 @@
     <value>Good</value>
     <comment>Label for Summary TABs</comment>
   </data>
+  <data name="NoTreatment" xml:space="preserve">
+    <value>no treatment</value>
+  </data>
   <data name="PercentBudgetSpentBAMS" xml:space="preserve">
     <value>Percent Budget Spent BAMS</value>
   </data>

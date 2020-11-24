@@ -142,7 +142,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             foreach (var item in treatments)
             {
                 if (!item.Contains("culvert", StringComparison.OrdinalIgnoreCase) &&
-                    !item.Contains("no treatment", StringComparison.OrdinalIgnoreCase))
+                    !item.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                 {
                     worksheet.Cells[row++, column].Value = item;
                 }
@@ -160,10 +160,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 foreach (var treatment in treatments)
                 {
                     if (!treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) &&
-                    !treatment.Contains("no treatment", StringComparison.OrdinalIgnoreCase))
+                    !treatment.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
                         yearlyValues.Value.TryGetValue(treatment, out var nonCulvertCostAndCount);
-                        //var nonCulvertCost = _bridgeWorkSummaryComputationHelper.CalculateCost(simulationDataModels, year, item);
                         worksheet.Cells[row++, column].Value = nonCulvertCostAndCount.treatmentCost;
                         nonCulvertTotalCost += nonCulvertCostAndCount.treatmentCost;
                     }

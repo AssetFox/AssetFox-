@@ -100,7 +100,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             foreach (var item in treatments)
             {
                 if (!item.Contains("culvert", StringComparison.OrdinalIgnoreCase) &&
-                    !item.Contains("no treatment", StringComparison.OrdinalIgnoreCase))
+                    !item.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                 {
                     worksheet.Cells[row++, column].Value = item;
                 }
@@ -117,7 +117,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 foreach (var treatment in treatments)
                 {
                     if (!treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) &&
-                        !treatment.Contains("no treatment", StringComparison.OrdinalIgnoreCase))
+                        !treatment.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
                         yearlyValues.Value.TryGetValue(treatment, out var nonCulvertCostAndCount);
                         worksheet.Cells[row, column].Value = nonCulvertCostAndCount.bridgeCount;
@@ -140,7 +140,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
             foreach (var item in treatments)
             {
-                if (!item.Contains("no treatment", StringComparison.OrdinalIgnoreCase))
+                if (!item.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                 {
                     worksheet.Cells[row++, column].Value = item;
                 }
@@ -157,7 +157,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 foreach (var treatment in treatments)
                 {
                     var count = 0;
-                    if (!treatment.Contains("no treatment", StringComparison.OrdinalIgnoreCase))
+                    if (!treatment.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
                         count = Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[treatment + "_" + year], column].Value);
                         worksheet.Cells[row++, column].Value = count;

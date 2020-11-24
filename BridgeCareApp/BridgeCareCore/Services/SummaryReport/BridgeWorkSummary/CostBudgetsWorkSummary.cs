@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
@@ -159,7 +157,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
                 foreach (var treatment in treatments)
                 {
-                    if (!treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) &&
+                    if (!treatment.Contains(Properties.Resources.Culvert, StringComparison.OrdinalIgnoreCase) &&
                     !treatment.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
                         yearlyValues.Value.TryGetValue(treatment, out var nonCulvertCostAndCount);

@@ -18,13 +18,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper = excelHelper;
         }
 
-        /// <summary>
-        /// Add headers for sections
-        /// </summary>
-        /// <param name="worksheet"></param>
-        /// <param name="currentCell"></param>
-        /// <param name="simulationYears"></param>
-        /// <param name="sectionName"></param>
         public void AddHeaders(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, string sectionName, string workTypeName)
         {
             AddWorkTypeHeader(worksheet, currentCell, workTypeName);
@@ -32,26 +25,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             AddYearsHeaderRow(worksheet, simulationYears, currentCell);
         }
 
-        /// <summary>
-        /// Update current cell object
-        /// </summary>
-        /// <param name="currentCell"></param>
-        /// <param name="row"></param>
-        /// <param name="column"></param>
         public void UpdateCurrentCell(CurrentCell currentCell, int row, int column)
         {
             currentCell.Row = row;
             currentCell.Column = column;
         }
 
-        /// <summary>
-        /// Common piece of code for work summary tab
-        /// </summary>
-        /// <param name="currentCell"></param>
-        /// <param name="startRow"></param>
-        /// <param name="startColumn"></param>
-        /// <param name="row"></param>
-        /// <param name="column"></param>
         public void SetRowColumns(CurrentCell currentCell, out int startRow, out int startColumn, out int row, out int column)
         {
             startRow = ++currentCell.Row;
@@ -59,29 +38,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             row = startRow;
             column = startColumn;
         }
-        /// <summary>
-        /// Add bridge headers for sections
-        /// </summary>
-        /// <param name="worksheet"></param>
-        /// <param name="currentCell"></param>
-        /// <param name="simulationYears"></param>
-        /// <param name="sectionName"></param>
-        /// <param name="showPrevYearHeader"></param>
+
         public void AddBridgeHeaders(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, string sectionName, bool showPrevYearHeader)
         {
             AddMergeBridgeSectionHeader(worksheet, sectionName, simulationYears.Count + 1, currentCell);
             AddBridgeYearsHeaderRow(worksheet, simulationYears, currentCell, showPrevYearHeader);
         }
 
-        /// <summary>
-        /// Initialize Good, Fair, Poor label cells (common to some sections.)
-        /// </summary>
-        /// <param name="worksheet"></param>
-        /// <param name="currentCell"></param>
-        /// <param name="startRow"></param>
-        /// <param name="startColumn"></param>
-        /// <param name="row"></param>
-        /// <param name="column"></param>
         public void InitializeLabelCells(ExcelWorksheet worksheet, CurrentCell currentCell, out int startRow, out int startColumn, out int row, out int column)
         {
             SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);

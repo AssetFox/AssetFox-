@@ -139,6 +139,9 @@
   <data name="BridgeTotal" xml:space="preserve">
     <value>Bridge Total</value>
   </data>
+  <data name="Culvert" xml:space="preserve">
+    <value />
+  </data>
   <data name="CulvertTotal" xml:space="preserve">
     <value>Culvert Total</value>
   </data>

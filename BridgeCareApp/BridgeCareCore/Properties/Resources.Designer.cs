@@ -115,6 +115,15 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Culvert {
+            get {
+                return ResourceManager.GetString("Culvert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Culvert Total.
         /// </summary>
         internal static string CulvertTotal {

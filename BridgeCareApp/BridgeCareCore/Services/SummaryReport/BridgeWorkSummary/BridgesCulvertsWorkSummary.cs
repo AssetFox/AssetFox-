@@ -116,9 +116,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
                 foreach (var treatment in treatments)
                 {
-                    if (!treatment.ToLower().Contains("culvert") && !treatment.ToLower().Contains("no treatment"))
+                    if (!treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) &&
+                        !treatment.Contains("no treatment", StringComparison.OrdinalIgnoreCase))
                     {
-                        //var nonCulvertCount = bridgeWorkSummaryComputationHelper.CalculateCountByProject(simulationDataModels, year, item);
                         yearlyValues.Value.TryGetValue(treatment, out var nonCulvertCostAndCount);
                         worksheet.Cells[row, column].Value = nonCulvertCostAndCount.bridgeCount;
                         projectRowNumberModel.TreatmentsCount.Add(treatment + "_" + yearlyValues.Key, row);

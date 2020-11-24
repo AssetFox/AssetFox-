@@ -170,7 +170,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var goodCount = _bridgeWorkSummaryComputationHelper.TotalInitialBridgeGoodCount(reportOutputData);
             worksheet.Cells[row, column].Value = goodCount;
 
-            var poorCount = _bridgeWorkSummaryComputationHelper.TotalInitialBridgePoorCount(reportOutputData);
+            var poorCount = _bridgeWorkSummaryComputationHelper.TotalInitialPoorBridgesCount(reportOutputData);
             worksheet.Cells[row + 2, column].Value = poorCount;
 
             worksheet.Cells[row + 1, column].Value = totalSimulationDataModelCount - (goodCount + poorCount);

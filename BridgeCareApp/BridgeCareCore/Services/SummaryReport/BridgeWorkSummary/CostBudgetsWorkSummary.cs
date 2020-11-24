@@ -14,7 +14,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
     {
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
         private readonly IExcelHelper _excelHelper;
-        //private readonly BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
         private Dictionary<int, double> TotalCulvertSpent = new Dictionary<int, double>();
         private Dictionary<int, double> TotalBridgeSpent = new Dictionary<int, double>();
         private Dictionary<int, double> TotalCommittedSpent = new Dictionary<int, double>();
@@ -23,7 +22,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         {
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon;
             _excelHelper = excelHelper;
-            //_bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper;
         }
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear, List<int> simulationYears, List<string> treatments)
@@ -113,7 +111,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                     if (treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase))
                     {
                         yearlyValues.Value.TryGetValue(treatment, out var culvertCostAndCount);
-                        //var culvertCost = _bridgeWorkSummaryComputationHelper.CalculateCost(simulationDataModels, yearlyValues.Key, item);
                         worksheet.Cells[row++, column].Value = culvertCostAndCount.treatmentCost;
                         culvertTotalCost += culvertCostAndCount.treatmentCost;
                     }

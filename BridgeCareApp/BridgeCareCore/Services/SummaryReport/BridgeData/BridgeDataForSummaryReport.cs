@@ -20,7 +20,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> valueForMinC;
         private readonly List<int> SimulationYears = new List<int>();
 
-        // it is also used in Bridge Work Summary TAB
+        // This is also used in Bridge Work Summary TAB
         private readonly List<double> previousYearInitialMinC = new List<double>();
         private List<double> previousYearSectionMinC = new List<double>();
         private Dictionary<int, (int on, int off)> PoorOnOffCount = new Dictionary<int, (int on, int off)>();

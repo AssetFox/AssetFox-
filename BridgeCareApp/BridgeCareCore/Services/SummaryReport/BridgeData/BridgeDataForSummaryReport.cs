@@ -19,7 +19,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         private readonly IHighlightWorkDoneCells _highlightWorkDoneCells;
         private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> valueForMinC;
         private readonly List<int> SimulationYears = new List<int>();
+
+        // This is also used in Bridge Work Summary TAB
         private readonly List<double> previousYearInitialMinC = new List<double>();
+        private List<double> previousYearSectionMinC = new List<double>();
+        private Dictionary<int, (int on, int off)> PoorOnOffCount = new Dictionary<int, (int on, int off)>();
         public BridgeDataForSummaryReport(IExcelHelper excelHelper, IHighlightWorkDoneCells highlightWorkDoneCells)
         {
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
@@ -57,6 +61,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
             var workSummaryModel = new WorkSummaryModel
             {
+                PreviousYearInitialMinC = previousYearInitialMinC,
+                PoorOnOffCount = PoorOnOffCount
             };
 
             return workSummaryModel;
@@ -81,7 +87,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             valueForMinC.Add(MinCValue.minOfCulvDeckSubSuper, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterMinDeckSuperSubCulv));
 
             var workDoneData = new List<int>();
-            var previousYearSectionMinC = new List<double>();
             if (outputResults.Years.Count > 0)
             {
                 workDoneData = new List<int>(new int[outputResults.Years[0].Sections.Count]);
@@ -91,6 +96,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var index = 1; // to track the initial section from rest of the years
             foreach (var yearlySectionData in outputResults.Years)
             {
+                PoorOnOffCount.Add(yearlySectionData.Year, (on : 0, off : 0));
                 row = initialRow;
 
                 // Add work done cells
@@ -102,7 +108,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     // Work done in a year
                     var range = worksheet.Cells[row, column];
                     setColor(data.reportAData.Parallel_Struct, data.section.AppliedTreatment, previousYearCause, data.section.TreatmentCause,
-                        yearlySectionData.Year, index, data.section.AppliedTreatment, worksheet, row, column);
+                        yearlySectionData.Year, index, worksheet, row, column);
 
                     if (abbreviatedTreatmentNames.ContainsKey(data.section.AppliedTreatment))
                     {
@@ -132,6 +138,17 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                     worksheet.Cells[row, poorOnOffColumnStart].Value = prevYrMinc < 5 ? (thisYrMinc >= 5 ? "Off" : "--") :
                         (thisYrMinc < 5 ? "On" : "--");
+
+                    var onOffCount = PoorOnOffCount[yearlySectionData.Year];
+                    if (worksheet.Cells[row, poorOnOffColumnStart].Value.ToString() == "On")
+                    {
+                        onOffCount.on += 1;
+                    }
+                    else
+                    {
+                        onOffCount.off += 1;
+                    }
+                    PoorOnOffCount[yearlySectionData.Year] = onOffCount;
                     previousYearCause = data.section.TreatmentCause;
                     previousYearSectionMinC[i] = thisYrMinc;
                     i++;
@@ -296,9 +313,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             currentCell.Column = columnNo;
         }
         private void setColor(int parallelBridge, string treatment, TreatmentCause previousYearCause,
-           TreatmentCause treatmentCause, int year, int index, string project, ExcelWorksheet worksheet, int row, int column)
+           TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
         {
-            _highlightWorkDoneCells.CheckConditions(parallelBridge, treatment, previousYearCause, treatmentCause, year, index, project, worksheet, row, column);
+            _highlightWorkDoneCells.CheckConditions(parallelBridge, treatment, previousYearCause, treatmentCause, year, index, worksheet, row, column);
         }
         private List<string> GetHeaders()
         {

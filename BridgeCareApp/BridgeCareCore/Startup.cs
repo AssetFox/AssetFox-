@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using LiteDb = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb;
 using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
+using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
 
 namespace BridgeCareCore
 {
@@ -42,6 +43,15 @@ namespace BridgeCareCore
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
             services.AddScoped<IHighlightWorkDoneCells, HighlightWorkDoneCells>();
             services.AddScoped<IUnfundedRecommendations, UnfundedRecommendations>();
+            services.AddScoped<IBridgeWorkSummary, BridgeWorkSummary>();
+            services.AddScoped<CostBudgetsWorkSummary>();
+            services.AddScoped<BridgesCulvertsWorkSummary>();
+            services.AddScoped<BridgeRateDeckAreaWorkSummary>();
+            services.AddScoped<NHSBridgeDeckAreaWorkSummary>();
+            services.AddScoped<DeckAreaBridgeWorkSummary>();
+            services.AddScoped<PostedClosedBridgeWorkSummary>();
+            services.AddScoped<BridgeWorkSummaryCommon>();
+            services.AddScoped<BridgeWorkSummaryComputationHelper>();
             services.AddSignalR();
 
 #if MsSqlDebug

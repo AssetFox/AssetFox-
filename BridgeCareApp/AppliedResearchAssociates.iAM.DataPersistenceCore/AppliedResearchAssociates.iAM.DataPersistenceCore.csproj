@@ -45,6 +45,7 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+    <Folder Include="Repositories\MSSQLLegacy\Mappings\" />
   </ItemGroup>
 
 </Project>

@@ -46,6 +46,7 @@ namespace BridgeCareCore
             services.AddScoped<IUnfundedRecommendations, UnfundedRecommendations>();
             services.AddScoped<IBridgeWorkSummary, BridgeWorkSummary>();
             services.AddScoped<IBridgeWorkSummaryByBudget, BridgeWorkSummaryByBudget>();
+
             services.AddScoped<CostBudgetsWorkSummary>();
             services.AddScoped<BridgesCulvertsWorkSummary>();
             services.AddScoped<BridgeRateDeckAreaWorkSummary>();
@@ -54,6 +55,9 @@ namespace BridgeCareCore
             services.AddScoped<PostedClosedBridgeWorkSummary>();
             services.AddScoped<BridgeWorkSummaryCommon>();
             services.AddScoped<BridgeWorkSummaryComputationHelper>();
+
+            services.AddScoped<CulvertCost>();
+            services.AddScoped<BridgeWorkCost>();
             services.AddSignalR();
 
 #if MsSqlDebug
@@ -70,6 +74,7 @@ namespace BridgeCareCore
             // Repository for legacy database
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
             services.AddScoped<IPennDotReportARepository, PennDotReportARepository>();
+            services.AddScoped<IYearlyInvestmentRepository, YearlyInvestmentRepository>();
 
 #elif LiteDbDebug
             // LITE DB SCOPINGS

@@ -19,5 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLe
         }
 
         public DbSet<PennDotReportAEntity> pennDotReportAResults { get; set; }
+
+        public DbSet<YearlyInvestmentEntity> yearlyInvestmentResults { get; set; }
     }
 }

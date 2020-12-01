@@ -139,9 +139,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     Color.FromArgb(84, 130, 53));
                 _excelHelper.SetTextColor(worksheet.Cells[startOfTotalBudget, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
 
-                //[TODO: Rest of the code is dummy to fill up Total Bridge care budget. The actual data will come from an input obj]
-                //var totalBridgeCareBudget = yearlyBudgetModels.FindAll(_ => _.BudgetName.Equals(budget.Replace("'", "")))
-                //    .OrderBy(_ => _.Year).ToList();
                 currentCell.Row += 2;
                 currentCell.Column = 1;
                 worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.TotalBridgeCareBudget;

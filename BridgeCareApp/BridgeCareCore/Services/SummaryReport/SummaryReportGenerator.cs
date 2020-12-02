@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using BridgeCareCore.Interfaces.SummaryReport;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
@@ -15,18 +13,21 @@ namespace BridgeCareCore.Services.SummaryReport
     public class SummaryReportGenerator : ISummaryReportGenerator
     {
         private readonly FileSystemRepository.ISimulationOutputRepository _simulationOutputFileRepo;
+        private readonly IYearlyInvestmentRepository _yearlyInvestmentRepository;
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
         private readonly IPennDotReportARepository _pennDotReportARepository;
         private readonly IUnfundedRecommendations _unfundedRecommendations;
         private readonly IBridgeWorkSummary _bridgeWorkSummary;
+        private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
 
         public SummaryReportGenerator(FileSystemRepository.ISimulationOutputRepository simulationOutputFileRepo,
             IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
             IPennDotReportARepository pennDotReportARepository,
             IUnfundedRecommendations unfundedRecommendations,
-            IBridgeWorkSummary bridgeWorkSummary)
+            IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
+            IYearlyInvestmentRepository yearlyInvestmentRepository)
         {
             _simulationOutputFileRepo = simulationOutputFileRepo ?? throw new ArgumentNullException(nameof(simulationOutputFileRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -34,6 +35,8 @@ namespace BridgeCareCore.Services.SummaryReport
             _pennDotReportARepository = pennDotReportARepository ?? throw new ArgumentNullException(nameof(pennDotReportARepository));
             _unfundedRecommendations = unfundedRecommendations ?? throw new ArgumentNullException(nameof(unfundedRecommendations));
             _bridgeWorkSummary = bridgeWorkSummary ?? throw new ArgumentNullException(nameof(bridgeWorkSummary));
+            _bridgeWorkSummaryByBudget = workSummaryByBudget ?? throw new ArgumentNullException(nameof(workSummaryByBudget));
+            _yearlyInvestmentRepository = yearlyInvestmentRepository ?? throw new ArgumentNullException(nameof(yearlyInvestmentRepository));
         }
 
         public byte[] GenerateReport(Guid networkId, Guid simulationId)
@@ -60,6 +63,9 @@ namespace BridgeCareCore.Services.SummaryReport
             }
             var pennDotReportAData = _pennDotReportARepository.GetPennDotReportAData(brKeys);
 
+            // In this function, the simulation id is hard coded to 1189 (district 11)
+            var yearlyBudgetAmount = _yearlyInvestmentRepository.GetYearlyBudgetAmount(simulationId, simulationYears[0], simulationYears.Count);
+
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx")))
             {
                 // Bridge Data TAB
@@ -73,6 +79,10 @@ namespace BridgeCareCore.Services.SummaryReport
                 // Bridge work summary TAB
                 var bridgeWorkSummaryWOrksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
                 var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWOrksheet, reportOutputData, simulationYears, workSummaryModel);
+
+                // Bridge work summary by Budget TAB
+                var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
+                _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
 
                 var folderPathForSimulation = $"DownloadedNewReports\\{simulationId}";
                 string relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);

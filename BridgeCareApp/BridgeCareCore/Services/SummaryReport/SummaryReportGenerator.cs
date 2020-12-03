@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using BridgeCareCore.Interfaces.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
 using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
@@ -20,6 +21,7 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly IUnfundedRecommendations _unfundedRecommendations;
         private readonly IBridgeWorkSummary _bridgeWorkSummary;
         private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
+        private readonly SummaryReportGlossary _summaryReportGlossary;
 
         public SummaryReportGenerator(FileSystemRepository.ISimulationOutputRepository simulationOutputFileRepo,
             IBridgeDataForSummaryReport bridgeDataForSummaryReport,
@@ -27,7 +29,8 @@ namespace BridgeCareCore.Services.SummaryReport
             IPennDotReportARepository pennDotReportARepository,
             IUnfundedRecommendations unfundedRecommendations,
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
-            IYearlyInvestmentRepository yearlyInvestmentRepository)
+            IYearlyInvestmentRepository yearlyInvestmentRepository,
+            SummaryReportGlossary summaryReportGlossary)
         {
             _simulationOutputFileRepo = simulationOutputFileRepo ?? throw new ArgumentNullException(nameof(simulationOutputFileRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -37,6 +40,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _bridgeWorkSummary = bridgeWorkSummary ?? throw new ArgumentNullException(nameof(bridgeWorkSummary));
             _bridgeWorkSummaryByBudget = workSummaryByBudget ?? throw new ArgumentNullException(nameof(workSummaryByBudget));
             _yearlyInvestmentRepository = yearlyInvestmentRepository ?? throw new ArgumentNullException(nameof(yearlyInvestmentRepository));
+            _summaryReportGlossary = summaryReportGlossary ?? throw new ArgumentNullException(nameof(summaryReportGlossary));
         }
 
         public byte[] GenerateReport(Guid networkId, Guid simulationId)
@@ -75,6 +79,10 @@ namespace BridgeCareCore.Services.SummaryReport
                 // Unfunded Recommendations TAB
                 var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");
                 _unfundedRecommendations.Fill(unfundedRecommendationWorksheet, reportOutputData);
+
+                // Simulation Legend TAB
+                var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add("Legend");
+                _summaryReportGlossary.Fill(shortNameWorksheet);
 
                 // Bridge work summary TAB
                 var bridgeWorkSummaryWOrksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");

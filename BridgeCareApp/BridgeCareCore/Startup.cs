@@ -18,6 +18,7 @@ using LiteDb = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Li
 using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget;
+using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 
 namespace BridgeCareCore
 {
@@ -46,6 +47,7 @@ namespace BridgeCareCore
             services.AddScoped<IUnfundedRecommendations, UnfundedRecommendations>();
             services.AddScoped<IBridgeWorkSummary, BridgeWorkSummary>();
             services.AddScoped<IBridgeWorkSummaryByBudget, BridgeWorkSummaryByBudget>();
+            services.AddScoped<SummaryReportGlossary>();
 
             services.AddScoped<CostBudgetsWorkSummary>();
             services.AddScoped<BridgesCulvertsWorkSummary>();

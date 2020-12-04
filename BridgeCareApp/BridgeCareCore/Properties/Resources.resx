@@ -153,6 +153,14 @@
     <value>Good</value>
     <comment>Label for Summary TABs</comment>
   </data>
+  <data name="NHSConditionByBridgeCountLLCC" xml:space="preserve">
+    <value>NHS Condition By Bridge Count</value>
+    <comment>NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="NHSConditionByDeckAreaLLCC" xml:space="preserve">
+    <value>NHS Condition By Deck Area</value>
+    <comment>NHS Condition By Deck Area TAB</comment>
+  </data>
   <data name="NoTreatment" xml:space="preserve">
     <value>no treatment</value>
   </data>

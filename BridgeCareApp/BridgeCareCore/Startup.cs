@@ -19,6 +19,8 @@ using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.R
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
+using BridgeCareCore.Services.SummaryReport.GraphTabs;
+using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
 
 namespace BridgeCareCore
 {
@@ -60,6 +62,10 @@ namespace BridgeCareCore
 
             services.AddScoped<CulvertCost>();
             services.AddScoped<BridgeWorkCost>();
+
+            services.AddScoped<IAddGraphsInTabs, AddGraphsInTabs>();
+            services.AddScoped<NHSConditionChart>();
+            services.AddScoped<StackedColumnChartCommon>();
             services.AddSignalR();
 
 #if MsSqlDebug

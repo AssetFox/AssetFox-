@@ -63,8 +63,17 @@ namespace BridgeCareCore
             services.AddScoped<CulvertCost>();
             services.AddScoped<BridgeWorkCost>();
 
+            // Summary report Graph TABS
             services.AddScoped<IAddGraphsInTabs, AddGraphsInTabs>();
             services.AddScoped<NHSConditionChart>();
+            services.AddScoped<NonNHSConditionBridgeCount>();
+            services.AddScoped<NonNHSConditionDeckArea>();
+            services.AddScoped<ConditionBridgeCount>();
+            services.AddScoped<ConditionDeckArea>();
+            services.AddScoped<PoorBridgeCount>();
+            services.AddScoped<PoorBridgeDeckArea>();
+            services.AddScoped<PoorBridgeDeckAreaByBPN>();
+
             services.AddScoped<StackedColumnChartCommon>();
             services.AddSignalR();
 

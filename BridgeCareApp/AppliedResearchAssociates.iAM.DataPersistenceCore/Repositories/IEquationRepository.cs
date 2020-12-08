@@ -8,5 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public interface IEquationRepository
     {
         void CreateEquations(Dictionary<Guid, EquationEntity> equationEntitiesPerEntityId, string joinEntity);
+        void CreateEquations(List<EquationEntity> equationEntities);
     }
 }

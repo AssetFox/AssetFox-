@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public interface ISimulationRepository
     {
         void CreateSimulation(Simulation simulation);
-        List<Simulation> GetAllInNetwork(string networkName);
+        void GetAllInNetwork(Network network);
     }
 }

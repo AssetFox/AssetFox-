@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.Domains;
 using DataMiner = AppliedResearchAssociates.iAM.DataMiner;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
@@ -13,6 +14,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
         {
             // This is a do nothing case for LiteDb.
             return;
+        }
+
+        public void JoinAttributesWithEquationsAndCriteria(Explorer explorer)
+        {
+            // This is a do nothing case for LiteDb.
+            return;
+        }
+
+        public Explorer GetExplorer()
+        {
+            // This is a do nothing case for LiteDb.
+            return new Explorer();
         }
 
         public void AddAttribute(DataMiner.Attributes.Attribute attribute)

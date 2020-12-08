@@ -42,6 +42,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             Context.SaveChanges();
         }
 
+        public void CreateEquations(List<EquationEntity> equationEntities)
+        {
+            if (IsRunningFromXUnit)
+            {
+                Context.Equation.AddRange(equationEntities);
+            }
+            else
+            {
+                Context.BulkInsert(equationEntities);
+            }
+
+            Context.SaveChanges();
+        }
+
         private void JoinEquationsWithPerformanceCurves(Dictionary<Guid, EquationEntity> equationEntityPerEntityId)
         {
             var performanceCurveEquationJoinEntities = equationEntityPerEntityId
@@ -61,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private void JoinEquationsWithTreatmentConsequences(Dictionary<Guid, EquationEntity> equationEntityPerEntityId)
         {
             var treatmentConsequenceEquationJoinEntities = equationEntityPerEntityId
-                .Select(_ => new TreatmentConsequenceEquationEntity { EquationId = _.Value.Id, TreatmentConsequenceId = _.Key })
+                .Select(_ => new ConditionalTreatmentConsequenceEquationEntity { EquationId = _.Value.Id, ConditionalTreatmentConsequenceId = _.Key })
                 .ToList();
 
             if (IsRunningFromXUnit)

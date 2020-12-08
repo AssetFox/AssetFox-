@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 
@@ -16,19 +17,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Value = domain.Value
             };
 
-        public static void ToSimulationAnalysisDomain(this RemainingLifeLimitEntity entity,
-            AnalysisMethod analysisMethod)
+        public static void CreateRemainingLifeLimit(this RemainingLifeLimitEntity entity, Simulation simulation)
         {
-            var limit = analysisMethod.AddRemainingLifeLimit();
+            var limit = simulation.AnalysisMethod.AddRemainingLifeLimit();
             limit.Value = entity.Value;
             limit.Criterion.Expression =
                 entity.CriterionLibraryRemainingLifeLimitJoin?.CriterionLibrary.MergedCriteriaExpression ??
                 string.Empty;
             if (entity.Attribute != null)
             {
-                limit.Attribute =
-                    (NumberAttribute)Convert.ChangeType(entity.Attribute.ToDomain().ToSimulationAnalysisAttribute(),
-                        typeof(NumberAttribute));
+                limit.Attribute = simulation.Network.Explorer.NumberAttributes
+                    .Single(_ => _.Name == entity.Attribute.Name);
             }
         }
     }

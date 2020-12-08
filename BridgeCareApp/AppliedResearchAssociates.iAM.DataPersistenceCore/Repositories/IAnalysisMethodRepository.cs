@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public interface IAnalysisMethodRepository
     {
         void CreateAnalysisMethod(AnalysisMethod analysisMethod, string simulationName);
-        AnalysisMethod GetSimulationAnalysisMethod(string simulationName);
+        void GetSimulationAnalysisMethod(Simulation simulation);
     }
 }

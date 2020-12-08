@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -33,5 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual TargetConditionGoalLibrarySimulationEntity TargetConditionGoalLibrarySimulationJoin { get; set; }
 
         public virtual TreatmentLibrarySimulationEntity TreatmentLibrarySimulationJoin { get; set; }
+
+        public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
     }
 }

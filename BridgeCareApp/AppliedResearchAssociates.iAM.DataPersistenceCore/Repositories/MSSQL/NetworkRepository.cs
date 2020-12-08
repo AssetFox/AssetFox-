@@ -7,6 +7,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappi
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM;
+using AppliedResearchAssociates.iAM.Domains;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -72,18 +74,94 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return Context.Network.Select(_ => _.ToDomain()).ToList();
         }
 
-        public Domains.Network GetSimulationAnalysisNetwork(string networkName)
+        public Domains.Network GetSimulationAnalysisNetwork(string networkName, Explorer explorer)
         {
             if (!Context.Network.Any(_ => _.Name == networkName))
             {
                 throw new RowNotInTableException($"No network found having name {networkName}");
             }
 
-            return Context.Network
+            var networkEntity = Context.Network
                 .Include(_ => _.Facilities)
                 .ThenInclude(_ => _.Sections)
+                .Single(_ => _.Name == networkName);
+
+            if (networkEntity.Facilities.Any(_ => _.Sections.Any()))
+            {
+                var sectionsIds = networkEntity.Facilities.SelectMany(_ => _.Sections.Select(__ => __.Id)).ToList();
+
+                var numericAttributeValueHistoryEntities = Context.NumericAttributeValueHistory
+                    .Include(_ => _.Attribute)
+                    .Where(_ => sectionsIds.Contains(_.SectionId)).ToList()
+                    .GroupBy(_ => _.SectionId, _ => _)
+                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());
+
+                var numericAttributeValueHistoryMostRecentValueEntities = Context.NumericAttributeValueHistoryMostRecentValue
+                    .Include(_ => _.Attribute)
+                    .Where(_ => sectionsIds.Contains(_.SectionId)).ToList()
+                    .GroupBy(_ => _.SectionId, _ => _)
+                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());
+
+                var textAttributeValueHistoryEntities = Context.TextAttributeValueHistory
+                    .Include(_ => _.Attribute)
+                    .Where(_ => sectionsIds.Contains(_.SectionId)).ToList()
+                    .GroupBy(_ => _.SectionId, _ => _)
+                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());
+
+                var textAttributeValueHistoryMostRecentValueEntities = Context.TextAttributeValueHistoryMostRecentValue
+                    .Include(_ => _.Attribute)
+                    .Where(_ => sectionsIds.Contains(_.SectionId)).ToList()
+                    .GroupBy(_ => _.SectionId, _ => _)
+                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());
+
+                networkEntity.Facilities.ForEach(facility =>
+                {
+                    facility.Sections.ForEach(section =>
+                    {
+                        if (numericAttributeValueHistoryEntities.ContainsKey(section.Id))
+                        {
+                            section.NumericAttributeValueHistories = numericAttributeValueHistoryEntities[section.Id];
+                        }
+
+                        if (numericAttributeValueHistoryMostRecentValueEntities.ContainsKey(section.Id))
+                        {
+                            section.NumericAttributeValueHistoryMostRecentValues = numericAttributeValueHistoryMostRecentValueEntities[section.Id];
+                        }
+
+                        if (textAttributeValueHistoryEntities.ContainsKey(section.Id))
+                        {
+                            section.TextAttributeValueHistories = textAttributeValueHistoryEntities[section.Id];
+                        }
+
+                        if (textAttributeValueHistoryMostRecentValueEntities.ContainsKey(section.Id))
+                        {
+                            section.TextAttributeValueHistoryMostRecentValues = textAttributeValueHistoryMostRecentValueEntities[section.Id];
+                        }
+                    });
+                });
+            }
+
+            return networkEntity.ToSimulationAnalysisDomain(explorer);
+
+            /*return Context.Network
+                .Include(_ => _.Facilities)
+                .ThenInclude(_ => _.Sections)
+                .ThenInclude(_ => _.NumericAttributeValueHistories)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.Facilities)
+                .ThenInclude(_ => _.Sections)
+                .ThenInclude(_ => _.TextAttributeValueHistories)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.Facilities)
+                .ThenInclude(_ => _.Sections)
+                .ThenInclude(_ => _.NumericAttributeValueHistoryMostRecentValues)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.Facilities)
+                .ThenInclude(_ => _.Sections)
+                .ThenInclude(_ => _.TextAttributeValueHistoryMostRecentValues)
+                .ThenInclude(_ => _.Attribute)
                 .Single(_ => _.Name == networkName)
-                .ToSimulationAnalysisNetworkDomain();
+                .ToSimulationAnalysisDomain(explorer);*/
         }
     }
 }

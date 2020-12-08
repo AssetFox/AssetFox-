@@ -14,7 +14,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private readonly ICriterionLibraryRepository _criterionLibraryRepo;
         private readonly IBudgetPriorityRepository _budgetPriorityRepo;
-        private readonly IInvestmentPlanRepository _investmentPlanRepo;
         private readonly ITargetConditionGoalRepository _targetConditionGoalRepo;
         private readonly IDeficientConditionGoalRepository _deficientConditionGoalRepo;
         private readonly IBenefitRepository _benefitRepo;
@@ -22,7 +21,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public AnalysisMethodRepository(ICriterionLibraryRepository criterionLibraryRepo,
             IBudgetPriorityRepository budgetPriorityRepo,
-            IInvestmentPlanRepository investmentPlanRepo,
             ITargetConditionGoalRepository targetConditionGoalRepo,
             IDeficientConditionGoalRepository deficientConditionGoalRepo,
             IBenefitRepository benefitRepo,
@@ -31,7 +29,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             _criterionLibraryRepo = criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
             _budgetPriorityRepo = budgetPriorityRepo ?? throw new ArgumentNullException(nameof(budgetPriorityRepo));
-            _investmentPlanRepo = investmentPlanRepo ?? throw new ArgumentNullException(nameof(investmentPlanRepo));
             _targetConditionGoalRepo = targetConditionGoalRepo ?? throw new ArgumentNullException(nameof(targetConditionGoalRepo));
             _deficientConditionGoalRepo = deficientConditionGoalRepo ?? throw new ArgumentNullException(nameof(deficientConditionGoalRepo));
             _benefitRepo = benefitRepo ?? throw new ArgumentNullException(nameof(benefitRepo));
@@ -133,16 +130,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _remainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationName);
         }
 
-        public AnalysisMethod GetSimulationAnalysisMethod(string simulationName)
+        public void GetSimulationAnalysisMethod(Simulation simulation)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulationName))
+            if (!Context.Simulation.Any(_ => _.Name == simulation.Name))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                throw new RowNotInTableException($"No simulation found having name {simulation.Name}");
             }
 
-            var investmentPlan = _investmentPlanRepo.GetSimulationInvestmentPlan(simulationName);
-
-            return Context.AnalysisMethod.Include(_ => _.Simulation)
+            Context.AnalysisMethod.Include(_ => _.Simulation)
                 .ThenInclude(_ => _.Network)
                 .Include(_ => _.Attribute)
                 .Include(_ => _.Benefit)
@@ -169,8 +164,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.RemainingLifeLimitLibrary)
                 .ThenInclude(_ => _.RemainingLifeLimits)
                 .ThenInclude(_ => _.Attribute)
-                .Single(_ => _.Simulation.Name == simulationName)
-                .ToDomain(investmentPlan);
+                .Single(_ => _.Simulation.Name == simulation.Name)
+                .FillSimulationAnalysisMethod(simulation);
         }
     }
 }

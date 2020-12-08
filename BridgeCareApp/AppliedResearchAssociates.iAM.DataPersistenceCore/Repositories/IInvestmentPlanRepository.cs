@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public interface IInvestmentPlanRepository
     {
         void CreateInvestmentPlan(InvestmentPlan investmentPlan, string simulationName);
-        InvestmentPlan GetSimulationInvestmentPlan(string simulationName);
+        void GetSimulationInvestmentPlan(Simulation simulation);
     }
 }

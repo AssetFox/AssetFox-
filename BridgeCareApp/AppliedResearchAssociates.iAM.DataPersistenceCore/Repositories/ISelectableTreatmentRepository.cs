@@ -7,6 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void CreateTreatmentLibrary(string name, string simulationName);
         void CreateSelectableTreatments(List<SelectableTreatment> selectableTreatments, string simulationName);
-        List<SelectableTreatment> GetSimulationTreatments(string simulationName);
+        void GetSimulationTreatments(Simulation simulation);
     }
 }

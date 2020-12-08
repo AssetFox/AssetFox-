@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void CreatePerformanceCurveLibrary(string name, string simulationName);
         void CreatePerformanceCurves(List<PerformanceCurve> performanceCurves, string simulationName);
-        List<PerformanceCurve> GetSimulationPerformanceCurves(string simulationName);
+        void GetSimulationPerformanceCurves(Simulation simulation);
     }
 }

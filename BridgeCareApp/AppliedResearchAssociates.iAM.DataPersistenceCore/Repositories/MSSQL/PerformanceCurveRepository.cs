@@ -152,14 +152,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public List<PerformanceCurve> GetSimulationPerformanceCurves(string simulationName)
+        public void GetSimulationPerformanceCurves(Simulation simulation)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulationName))
+            if (!Context.Simulation.Any(_ => _.Name == simulation.Name))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                throw new RowNotInTableException($"No simulation found having name {simulation.Name}");
             }
 
-            var performanceCurveEntities = Context.PerformanceCurve
+            Context.PerformanceCurve
                 .Include(_ => _.Attribute)
                 .Include(_ => _.CriterionLibraryPerformanceCurveJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
@@ -167,11 +167,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.PerformanceCurveLibrary)
                 .ThenInclude(_ => _.PerformanceCurveLibrarySimulationJoins)
-                .ThenInclude(_ => _.Simulation)
                 .Where(_ => _.PerformanceCurveLibrary.PerformanceCurveLibrarySimulationJoins
-                    .SingleOrDefault(__ => __.Simulation.Name == simulationName) != null);
-
-            return performanceCurveEntities.Select(_ => _.ToDomain()).ToList();
+                    .SingleOrDefault(__ => __.Simulation.Name == simulation.Name) != null)
+                .ForEach(_ => _.CreatePerformanceCurve(simulation));
         }
     }
 }

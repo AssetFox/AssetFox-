@@ -103,14 +103,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _cashFlowRuleRepo.CreateCashFlowRules(cashFlowRules, simulationName);
         }
 
-        public InvestmentPlan GetSimulationInvestmentPlan(string simulationName)
+        public void GetSimulationInvestmentPlan(Simulation simulation)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulationName))
+            if (!Context.Simulation.Any(_ => _.Name == simulation.Name))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                throw new RowNotInTableException($"No simulation found having name {simulation.Name}");
             }
 
-            return Context.InvestmentPlan
+            Context.InvestmentPlan
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.BudgetAmounts)
                 .Include(_ => _.Budgets)
@@ -118,7 +118,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.InvestmentPlanSimulationJoins)
                 .ThenInclude(_ => _.Simulation)
-                .ThenInclude(_ => _.Network)
                 .Include(_ => _.InvestmentPlanSimulationJoins)
                 .ThenInclude(_ => _.Simulation)
                 .ThenInclude(_ => _.CashFlowRuleLibrarySimulationJoin)
@@ -133,8 +132,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CashFlowRules)
                 .ThenInclude(_ => _.CashFlowDistributionRules)
                 .Single(_ =>
-                    _.InvestmentPlanSimulationJoins.SingleOrDefault(__ => __.Simulation.Name == simulationName) != null)
-                .ToDomain();
+                    _.InvestmentPlanSimulationJoins.SingleOrDefault(__ => __.Simulation.Name == simulation.Name) != null)
+                .FillSimulationInvestmentPlan(simulation);
         }
     }
 }

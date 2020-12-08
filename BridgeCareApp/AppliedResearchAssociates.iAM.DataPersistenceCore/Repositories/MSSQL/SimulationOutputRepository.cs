@@ -3,6 +3,10 @@ using System.Data;
 using System.IO;
 using AppliedResearchAssociates.iAM.Analysis;
 using System.Linq;
+using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.Domains;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -11,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public SimulationOutputRepository(IAMContext context) : base(context) { }
 
-        public void CreateSimulationOutput(string fileName, string simulationName)
+        public void CreateSimulationOutput(string simulationName, SimulationOutput simulationOutput)
         {
             using (var contextTransaction = Context.Database.BeginTransaction())
             {
@@ -22,44 +26,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         throw new RowNotInTableException($"No simulation found having name {simulationName}");
                     }
 
-                    var simulationOutputFileData = System.IO.File.ReadAllBytes(fileName);
+                    var simulationEntity = Context.Simulation.Single(_ => _.Name == simulationName);
 
-                    if (!simulationOutputFileData.Any())
+                    if (simulationOutput == null)
                     {
-                        throw new FileNotFoundException();
+                        throw new InvalidOperationException($"No results found for simulation {simulationName}. Please ensure that the simulation analysis has been run.");
                     }
+
+                    var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
+                    var simulationOutputString = JsonConvert.SerializeObject(simulationOutput, settings);
+
+                    Context.SimulationOutput.Add(new SimulationOutputEntity
+                    {
+                        Id = Guid.NewGuid(), SimulationId = simulationEntity.Id, Output = simulationOutputString
+                    });
+
+                    Context.SaveChanges();
+
+                    contextTransaction.Commit();
                 }
                 catch (Exception e)
                 {
+                    contextTransaction.Rollback();
                     Console.WriteLine(e);
                     throw;
                 }
-                
             }
         }
 
-        
-
-        public SimulationOutput GetSimulationResults(Guid networkId, Guid simulationId)
+        public void GetSimulationOutput(Simulation simulation)
         {
-            var folderPathForNewAnalysis = $"DownloadedReports\\1189_NewAnalysis";
-            var outputFile = $"Network 13 - Simulation 1189.json";
-            var filePath = Path.Combine(Environment.CurrentDirectory, folderPathForNewAnalysis, outputFile);
-            // check that the file exists
-            if (!File.Exists(filePath))
+            if (!Context.Simulation.Any(_ => _.Name == simulation.Name))
             {
-                throw new FileNotFoundException($"{filePath} does not exist");
+                throw new RowNotInTableException($"Found no simulation having name {simulation.Name}");
             }
-            var simulationOutput = new SimulationOutput();
-            using (StreamReader reader = new StreamReader(filePath))
-            {
-                var rawResult = reader.ReadToEnd();
-                simulationOutput = JsonConvert.DeserializeObject<SimulationOutput>(rawResult, new JsonSerializerSettings
-                {
-                    ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
-                });
-            }
-            return simulationOutput;
+
+            Context.SimulationOutput.Single(_ => _.Simulation.Name == simulation.Name)
+                .FillSimulationResults(simulation);
         }
     }
 }

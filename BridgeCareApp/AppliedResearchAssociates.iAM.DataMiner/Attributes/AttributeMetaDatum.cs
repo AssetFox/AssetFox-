@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AppliedResearchAssociates.iAM.DataMiner
+namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
     public class AttributeMetaDatum
     {
@@ -10,9 +10,9 @@ namespace AppliedResearchAssociates.iAM.DataMiner
 
         public string DefaultValue { get; set; }
 
-        public double Minimum { get; set; }
+        public double? Minimum { get; set; }
 
-        public double Maximum { get; set; }
+        public double? Maximum { get; set; }
 
         public string ConnectionString { get; set; }
 

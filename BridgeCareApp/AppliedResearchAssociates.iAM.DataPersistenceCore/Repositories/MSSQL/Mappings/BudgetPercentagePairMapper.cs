@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Percentage = domain.Percentage
             };
 
-        public static void ToSimulationAnalysisDomain(this BudgetPercentagePairEntity entity, InvestmentPlan investmentPlan,
+        public static void FillBudgetPercentagePair(this BudgetPercentagePairEntity entity, InvestmentPlan investmentPlan,
             BudgetPriority budgetPriority)
         {
             var budget = investmentPlan.Budgets.ToList()

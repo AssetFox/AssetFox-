@@ -35,7 +35,7 @@ namespace BridgeCareCore
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
-            services.AddScoped<FileSystemRepository.ISimulationOutputRepository, FileSystemRepository.SimulationOutputRepository>();
+            services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
             services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
             services.AddScoped<IExcelHelper, ExcelHelper>();
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();

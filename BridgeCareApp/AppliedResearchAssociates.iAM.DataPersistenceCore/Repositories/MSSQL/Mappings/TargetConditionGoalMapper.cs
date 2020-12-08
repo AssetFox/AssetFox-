@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 
@@ -17,12 +18,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Year = domain.Year
             };
 
-        public static void ToSimulationAnalysisDomain(this TargetConditionGoalEntity entity,
-            AnalysisMethod analysisMethod)
+        public static void CreateTargetConditionGoal(this TargetConditionGoalEntity entity, Simulation simulation)
         {
-            var targetConditionGoal = analysisMethod.AddTargetConditionGoal();
-            targetConditionGoal.Attribute = (NumberAttribute)Convert
-                .ChangeType(entity.Attribute.ToDomain().ToSimulationAnalysisAttribute(), typeof(NumberAttribute));
+            var targetConditionGoal = simulation.AnalysisMethod.AddTargetConditionGoal();
+            targetConditionGoal.Attribute = simulation.Network.Explorer.NumberAttributes
+                .Single(_ => _.Name == entity.Attribute.Name);
             targetConditionGoal.Target = entity.Target;
             targetConditionGoal.Year = entity.Year;
             targetConditionGoal.Name = entity.Name;

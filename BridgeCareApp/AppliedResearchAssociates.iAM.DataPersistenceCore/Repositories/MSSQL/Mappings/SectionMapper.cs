@@ -1,6 +1,8 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
+using Microsoft.EntityFrameworkCore.Internal;
+using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
@@ -16,12 +18,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AreaUnit = domain.AreaUnit
             };
 
-        public static void ToSimulationAnalysisDomain(this SectionEntity entity, Facility facility)
+        public static void CreateSection(this SectionEntity entity, Facility facility)
         {
             var section = facility.AddSection();
             section.Name = entity.Name;
             section.Area = entity.Area;
             section.AreaUnit = entity.AreaUnit;
+
+            if (entity.NumericAttributeValueHistories.Any())
+            {
+                entity.NumericAttributeValueHistories.ToList().SetAttributeValueHistoryValues(section);
+            }
+
+            if (entity.NumericAttributeValueHistoryMostRecentValues.Any())
+            {
+                entity.NumericAttributeValueHistoryMostRecentValues.ToList().SetAttributeValueHistoryMostRecentValue(section);
+            }
+
+            if (entity.TextAttributeValueHistories.Any())
+            {
+                entity.TextAttributeValueHistories.ToList().SetAttributeValueHistoryValues(section);
+            }
+
+            if (entity.TextAttributeValueHistoryMostRecentValues.Any())
+            {
+                entity.TextAttributeValueHistoryMostRecentValues.ToList().SetAttributeValueHistoryMostRecentValue(section);
+            }
         }
     }
 }

@@ -14,12 +14,12 @@ namespace BridgeCareCore.Services.SummaryReport
 {
     public class SummaryReportGenerator : ISummaryReportGenerator
     {
-        private readonly FileSystemRepository.ISimulationOutputRepository _simulationOutputFileRepo;
+        private readonly ISimulationOutputFileRepository _simulationOutputFileRepo;
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
         private readonly IPennDotReportARepository _pennDotReportARepository;
 
-        public SummaryReportGenerator(FileSystemRepository.ISimulationOutputRepository simulationOutputFileRepo,
+        public SummaryReportGenerator(ISimulationOutputFileRepository simulationOutputFileRepo,
             IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
             IPennDotReportARepository pennDotReportARepository)

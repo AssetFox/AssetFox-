@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Description = domain.Description
             };
 
-        public static void ToDomain(this SelectableTreatmentEntity entity, Simulation simulation, InvestmentPlan investmentPlan)
+        public static void CreateSelectableTreatment(this SelectableTreatmentEntity entity, Simulation simulation)
         {
             var selectableTreatment = simulation.AddTreatment();
             selectableTreatment.Name = entity.Name;
@@ -33,7 +33,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 entity.TreatmentBudgetJoins.ForEach(_ =>
                 {
-                    selectableTreatment.Budgets.Add(_.Budget.ToSimulationAnalysisDomain(investmentPlan));
+                    var budgetNames = entity.TreatmentBudgetJoins.Select(_ => _.Budget.Name).Distinct().ToList();
+                    simulation.InvestmentPlan.Budgets.Where(_ => budgetNames.Contains(_.Name)).ToList()
+                        .ForEach(budget => selectableTreatment.Budgets.Add(budget));
                 });
             }
 
@@ -69,6 +71,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (entity.TreatmentSupersessions.Any())
             {
                 entity.TreatmentSupersessions.ForEach(_ => _.ToSimulationAnalysisDomain(selectableTreatment));
+            }
+
+            if (selectableTreatment.Name == "No Treatment")
+            {
+                selectableTreatment.DesignateAsPassiveForSimulation();
             }
         }
     }

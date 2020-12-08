@@ -7,6 +7,8 @@ using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         private readonly IAMContext _dbContext;
 
         public INetworkRepository NetworkRepo { get; set; }
+        public IAttributeValueHistoryRepository AttributeValueHistoryRepo { get; set; }
         public ISectionRepository SectionRepo { get; set; }
         public IFacilityRepository FacilityRepo { get; set; }
         public ISimulationRepository SimulationRepo { get; set; }
@@ -37,6 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         public ICashFlowRuleRepository CashFlowRuleRepo { get; set; }
         public IInvestmentPlanRepository InvestmentPlanRepo { get; set; }
         public IEquationRepository EquationRepo { get; set; }
+        public IAttributeRepository AttributeRepo { get; set; }
         public IPerformanceCurveRepository PerformanceCurveRepo { get; set; }
         public ITreatmentConsequenceRepository TreatmentConsequenceRepo { get; set; }
         public ITreatmentCostRepository TreatmentCostRepo { get; set; }
@@ -50,6 +54,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         public IBenefitRepository BenefitRepo { get; set; }
         public IRemainingLifeLimitRepository RemainingLifeLimitRepo { get; set; }
         public IAnalysisMethodRepository AnalysisMethodRepo { get; set; }
+        public ISimulationOutputRepository SimulationOutputRepo { get; set; }
+        public ICommittedProjectConsequenceRepository CommittedProjectConsequenceRepo { get; set; }
+        public ICommittedProjectRepository CommittedProjectRepo { get; set; }
+
+        public Simulation StandAloneSimulation { get; set; }
 
         public SimulationAnalysisDataPersistenceTestHelper()
         {
@@ -62,121 +71,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 .Options);
         }
 
-        public void CleanUp()
-        {
-            _sqlConnection.Close();
-            _dbContext.Database.EnsureDeleted();
-        }
-
         public Simulation GetStandAloneSimulation() => _dataAccessor.GetStandAloneSimulation(NetworkId, SimulationId);
 
-        public void CreateNetwork(Simulation simulation) =>
-            NetworkRepo.CreateNetwork(new DataAssignment.Networking
-                .Network(new List<MaintainableAsset>(), Guid.NewGuid(), simulation.Network.Name));
-
-        public void CreateAttributes(List<string> attributeNames)
-        {
-            var attributeMetaDataRepo = new AttributeMetaDataRepository();
-            var attributes = attributeMetaDataRepo.GetAllAttributes();
-
-            var attributeRepo = new AttributeRepository(_dbContext);
-            attributeRepo.UpsertAttributes(attributes.Where(_ => attributeNames.Contains(_.Name)).ToList());
-        }
-
-        public void TestCreateNetworkSetup()
+            public void InitializeNetworkRepos()
         {
             NetworkRepo = new NetworkRepository(_dbContext);
-            SectionRepo = new SectionRepository(_dbContext);
+            AttributeValueHistoryRepo = new AttributeValueHistoryRepository(_dbContext);
+            SectionRepo = new SectionRepository(AttributeValueHistoryRepo, _dbContext);
             FacilityRepo = new FacilityRepository(SectionRepo, _dbContext);
         }
 
-        public void TestCreateSimulationEntitySetup(Simulation simulation)
+        public void InitializeEquationAndCriterionRepos()
         {
-            TestCreateNetworkSetup();
-            CreateNetwork(simulation);
-            SimulationRepo = new SimulationRepository(_dbContext);
-        }
-
-        public void TestCreateInvestmentPlanEntitySetup(Simulation simulation)
-        {
-            TestCreateSimulationEntitySetup(simulation);
-            SimulationRepo.CreateSimulation(simulation);
-            BudgetAmountRepo = new BudgetAmountRepository(_dbContext);
-            BudgetRepo = new BudgetRepository(BudgetAmountRepo, _dbContext);
-            CriterionLibraryRepo = new CriterionLibraryRepository(_dbContext);
-            CashFlowDistributionRuleRepo = new CashFlowDistributionRuleRepository(_dbContext);
-            CashFlowRuleRepo = new CashFlowRuleRepository(CashFlowDistributionRuleRepo, CriterionLibraryRepo, _dbContext);
-            InvestmentPlanRepo = new InvestmentPlanRepository(BudgetRepo, CriterionLibraryRepo, CashFlowRuleRepo, _dbContext);
-        }
-
-        public void TestCreatePerformanceCurveEntitiesSetup(Simulation simulation)
-        {
-            TestCreateSimulationEntitySetup(simulation);
-            SimulationRepo.CreateSimulation(simulation);
-            var attributeNames = simulation.PerformanceCurves.Select(_ => _.Attribute.Name).Distinct().ToList();
-            CreateAttributes(attributeNames);
             EquationRepo = new EquationRepository(_dbContext);
             CriterionLibraryRepo = new CriterionLibraryRepository(_dbContext);
-            PerformanceCurveRepo = new PerformanceCurveRepository(EquationRepo, CriterionLibraryRepo, _dbContext);
         }
 
-        public void TestCreateSelectableTreatmentEntitiesSetup(Simulation simulation)
-        {
-            TestCreateInvestmentPlanEntitySetup(simulation);
-            InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Name);
-            var attributeNames = simulation.Treatments
-                .SelectMany(_ => _.Consequences.Select(__ => __.Attribute.Name).Distinct().ToList())
-                .ToList();
-            CreateAttributes(attributeNames);
-            EquationRepo = new EquationRepository(_dbContext);
-            TreatmentConsequenceRepo = new TreatmentConsequenceRepository(EquationRepo, CriterionLibraryRepo, _dbContext);
-            TreatmentCostRepo = new TreatmentCostRepository(EquationRepo, CriterionLibraryRepo, _dbContext);
-            TreatmentSchedulingRepo = new TreatmentSchedulingRepository(_dbContext);
-            TreatmentSupersessionRepo = new TreatmentSupersessionRepository(CriterionLibraryRepo, _dbContext);
-            SelectableTreatmentRepo = new SelectableTreatmentRepository(InvestmentPlanRepo,
-                TreatmentConsequenceRepo,
-                TreatmentCostRepo,
-                CriterionLibraryRepo,
-                TreatmentSchedulingRepo,
-                TreatmentSupersessionRepo,
-                _dbContext);
-            // add treatment schedulings since there aren't any for our test simulation treatments
-            var year = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod + 1;
-            simulation.Treatments.ForEach(_ =>
-            {
-                var scheduling = _.Schedulings.GetAdd(new TreatmentScheduling());
-                scheduling.OffsetToFutureYear = year;
-                scheduling.Treatment = _;
-                if (year <= simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
-                {
-                    year++;
-                }
-            });
-            // add treatment supersessions since there aren't any for our test simulation treatments
-            var treatmentsList = simulation.Treatments.ToList();
-            simulation.Treatments.ForEach((_, index) =>
-            {
-                var supersession = _.AddSupersession();
-                supersession.Criterion.Expression = _.FeasibilityCriteria.FirstOrDefault().Expression;
-                var nextIndex = index + 1;
-                supersession.Treatment = nextIndex > simulation.Treatments.Count() - 1
-                    ? treatmentsList[0]
-                    : treatmentsList[nextIndex];
-            });
-        }
+        public void InitializeAttributeRepo() => AttributeRepo = new AttributeRepository(EquationRepo, CriterionLibraryRepo, _dbContext);
 
-        public void TestCreateAnalysisMethodEntitySetup(Simulation simulation)
+        public void InitializeAnalysisMethodRepos()
         {
-            TestCreateInvestmentPlanEntitySetup(simulation);
-            InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Name);
-            var attributeNames = simulation.AnalysisMethod.TargetConditionGoals
-                .Select(_ => _.Attribute.Name).ToList();
-            attributeNames.Add(simulation.AnalysisMethod.Weighting.Name);
-            if (simulation.AnalysisMethod.Benefit.Attribute != null)
-            {
-                attributeNames.Add(simulation.AnalysisMethod.Benefit.Attribute.Name);
-            }
-            CreateAttributes(attributeNames.Distinct().ToList());
             BudgetPercentagePairRepo = new BudgetPercentagePairRepository(_dbContext);
             BudgetPriorityRepo = new BudgetPriorityRepository(CriterionLibraryRepo, BudgetPercentagePairRepo, _dbContext);
             TargetConditionGoalRepo = new TargetConditionGoalRepository(CriterionLibraryRepo, _dbContext);
@@ -185,12 +99,233 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             RemainingLifeLimitRepo = new RemainingLifeLimitRepository(CriterionLibraryRepo, _dbContext);
             AnalysisMethodRepo = new AnalysisMethodRepository(CriterionLibraryRepo,
                 BudgetPriorityRepo,
-                InvestmentPlanRepo,
                 TargetConditionGoalRepo,
                 DeficientConditionGoalRepo,
                 BenefitRepo,
                 RemainingLifeLimitRepo,
                 _dbContext);
+        }
+
+        public void InitializeCommittedProjectRepos()
+        {
+            CommittedProjectConsequenceRepo = new CommittedProjectConsequenceRepository(_dbContext);
+            CommittedProjectRepo = new CommittedProjectRepository(CommittedProjectConsequenceRepo, _dbContext);
+        }
+
+        public void InitializeInvestmentPlanRepos()
+        {
+            BudgetAmountRepo = new BudgetAmountRepository(_dbContext);
+            BudgetRepo = new BudgetRepository(BudgetAmountRepo, _dbContext);
+            CashFlowDistributionRuleRepo = new CashFlowDistributionRuleRepository(_dbContext);
+            CashFlowRuleRepo = new CashFlowRuleRepository(CashFlowDistributionRuleRepo, CriterionLibraryRepo, _dbContext);
+            InvestmentPlanRepo = new InvestmentPlanRepository(BudgetRepo, CriterionLibraryRepo, CashFlowRuleRepo, _dbContext);
+        }
+
+        public void InitializePerformanceCurveRepo() => PerformanceCurveRepo = new PerformanceCurveRepository(EquationRepo, CriterionLibraryRepo, _dbContext);
+
+        public void InitializeSelectableTreatmentRepos()
+        {
+            TreatmentConsequenceRepo = new TreatmentConsequenceRepository(EquationRepo, CriterionLibraryRepo, _dbContext);
+            TreatmentCostRepo = new TreatmentCostRepository(EquationRepo, CriterionLibraryRepo, _dbContext);
+            TreatmentSchedulingRepo = new TreatmentSchedulingRepository(_dbContext);
+            TreatmentSupersessionRepo = new TreatmentSupersessionRepository(CriterionLibraryRepo, _dbContext);
+            SelectableTreatmentRepo = new SelectableTreatmentRepository(TreatmentConsequenceRepo,
+                TreatmentCostRepo,
+                CriterionLibraryRepo,
+                TreatmentSchedulingRepo,
+                TreatmentSupersessionRepo,
+                _dbContext);
+        }
+
+        public void InitializeSimulationRepo() => SimulationRepo = new SimulationRepository(_dbContext);
+
+        public void InitializeSimulationOutputRepo() => SimulationOutputRepo = new SimulationOutputRepository(_dbContext);
+
+        public void CreateNetwork()
+        {
+            NetworkRepo.CreateNetwork(new DataAssignment.Networking.Network(new List<MaintainableAsset>(),
+                Guid.NewGuid(), StandAloneSimulation.Network.Name));
+
+            FacilityRepo.CreateFacilities(StandAloneSimulation.Network.Facilities.ToList(), StandAloneSimulation.Network.Name);
+        }
+
+        public void CreateAttributes()
+        {
+            var attributeMetaDataRepo = new AttributeMetaDataRepository();
+            var attributes = attributeMetaDataRepo.GetAllAttributes();
+
+            AttributeRepo.UpsertAttributes(attributes.ToList());
+        }
+
+        public void CreateAttributeCriteriaAndEquationJoins() => AttributeRepo.JoinAttributesWithEquationsAndCriteria(StandAloneSimulation.Network.Explorer);
+
+        public void AddTreatmentSchedulings()
+        {
+            var year = StandAloneSimulation.InvestmentPlan.FirstYearOfAnalysisPeriod + 1;
+            StandAloneSimulation.Treatments.ForEach(_ =>
+            {
+                var scheduling = _.Schedulings.GetAdd(new TreatmentScheduling());
+                scheduling.OffsetToFutureYear = year;
+                scheduling.Treatment = _;
+                if (year <= StandAloneSimulation.InvestmentPlan.LastYearOfAnalysisPeriod)
+                {
+                    year++;
+                }
+            });
+        }
+
+        public void AddTreatmentSupersessions()
+        {
+            var treatmentsList = StandAloneSimulation.Treatments.ToList();
+            StandAloneSimulation.Treatments.ForEach((_, index) =>
+            {
+                var supersession = _.AddSupersession();
+                supersession.Criterion.Expression = _.FeasibilityCriteria.FirstOrDefault()?.Expression;
+                var nextIndex = index + 1;
+                supersession.Treatment = nextIndex > StandAloneSimulation.Treatments.Count() - 1
+                    ? treatmentsList[0]
+                    : treatmentsList[nextIndex];
+            });
+        }
+
+        public void AddCommittedProjects()
+        {
+            var selectableTreatment = StandAloneSimulation.Treatments.First();
+
+            var budget = StandAloneSimulation.InvestmentPlan.Budgets
+                .Single(_ => _.Name == selectableTreatment.Budgets.First().Name);
+
+            var committedProject = StandAloneSimulation.CommittedProjects
+                .GetAdd(new CommittedProject(StandAloneSimulation.Network.Sections.First(), StandAloneSimulation.InvestmentPlan.FirstYearOfAnalysisPeriod));
+            committedProject.Name = $"Committed Project Test";
+            committedProject.Budget = budget;
+            selectableTreatment.Consequences.DistinctBy(_ => _.Attribute).ForEach(_ =>
+            {
+
+                var consequence = committedProject.Consequences.GetAdd(new TreatmentConsequence());
+                consequence.Attribute = _.Attribute;
+                consequence.Change.Expression = _.Change.Expression;
+            });
+            committedProject.ShadowForAnyTreatment = selectableTreatment.ShadowForAnyTreatment;
+            committedProject.ShadowForSameTreatment = selectableTreatment.ShadowForSameTreatment;
+            committedProject.Cost = Convert.ToDouble(budget.YearlyAmounts.First().Value);
+        }
+
+        public void SetupAll()
+        {
+            StandAloneSimulation = GetStandAloneSimulation();
+            InitializeEquationAndCriterionRepos();
+            InitializeAttributeRepo();
+            CreateAttributes();
+        }
+
+        public void SetupForNetwork()
+        {
+            SetupAll();
+            InitializeNetworkRepos();
+        }
+
+        public void SetupForSimulation()
+        {
+            SetupAll();
+            InitializeNetworkRepos();
+            InitializeSimulationRepo();
+            CreateNetwork();
+        }
+
+        public void SetupForAnalysisMethod()
+        {
+            SetupAll();
+            InitializeNetworkRepos();
+            InitializeSimulationRepo();
+            InitializeEquationAndCriterionRepos();
+            InitializeInvestmentPlanRepos();
+            InitializeAnalysisMethodRepos();
+            CreateNetwork();
+            SimulationRepo.CreateSimulation(StandAloneSimulation);
+            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Name);
+        }
+
+        public void SetupForPerformanceCurves()
+        {
+
+            SetupAll();
+            InitializeNetworkRepos();
+            InitializeSimulationRepo();
+            InitializeEquationAndCriterionRepos();
+            InitializePerformanceCurveRepo();
+            CreateNetwork();
+            SimulationRepo.CreateSimulation(StandAloneSimulation);
+        }
+
+        public void SetupForSimulationOutput()
+        {
+            SetupAll();
+            InitializeNetworkRepos();
+            InitializeSimulationRepo();
+            InitializeSimulationOutputRepo();
+            CreateNetwork();
+            SimulationRepo.CreateSimulation(StandAloneSimulation);
+        }
+
+        public void SetupForInvestmentPlan()
+        {
+            SetupAll();
+            InitializeNetworkRepos();
+            InitializeSimulationRepo();
+            InitializeEquationAndCriterionRepos();
+            InitializeInvestmentPlanRepos();
+            CreateNetwork();
+            SimulationRepo.CreateSimulation(StandAloneSimulation);
+        }
+
+        public void SetupForCommittedProjects()
+        {
+            SetupAll();
+            InitializeNetworkRepos();
+            InitializeSimulationRepo();
+            InitializeEquationAndCriterionRepos();
+            InitializeInvestmentPlanRepos();
+            InitializeCommittedProjectRepos();
+            CreateNetwork();
+            SimulationRepo.CreateSimulation(StandAloneSimulation);
+            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Name);
+            AddCommittedProjects();
+        }
+
+        public void SetupForSelectableTreatments()
+        {
+            SetupAll();
+            InitializeNetworkRepos();
+            InitializeSimulationRepo();
+            InitializeEquationAndCriterionRepos();
+            InitializeInvestmentPlanRepos();
+            InitializeSelectableTreatmentRepos();
+            CreateNetwork();
+            SimulationRepo.CreateSimulation(StandAloneSimulation);
+            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Name);
+            AddTreatmentSchedulings();
+            AddTreatmentSupersessions();
+        }
+
+        public void SetupForFullSimulationAnalysisIntegration()
+        {
+            SetupAll();
+            InitializeNetworkRepos();
+            InitializeSimulationRepo();
+            InitializeEquationAndCriterionRepos();
+            InitializeInvestmentPlanRepos();
+            InitializeAnalysisMethodRepos();
+            InitializePerformanceCurveRepo();
+            InitializeCommittedProjectRepos();
+            InitializeSelectableTreatmentRepos();
+            InitializeSimulationOutputRepo();
+        }
+
+        public void CleanUp()
+        {
+            _sqlConnection.Close();
+            _dbContext.Database.EnsureDeleted();
         }
     }
 }

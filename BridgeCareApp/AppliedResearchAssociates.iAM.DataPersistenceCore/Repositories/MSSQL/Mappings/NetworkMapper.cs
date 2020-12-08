@@ -6,7 +6,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
 using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Domains;
-using DataAssignment = AppliedResearchAssociates.iAM.DataAssignment;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
@@ -44,13 +43,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
-        public static SimulationAnalysisDomains.Network ToSimulationAnalysisNetworkDomain(this NetworkEntity entity)
+        public static SimulationAnalysisDomains.Network ToSimulationAnalysisDomain(this NetworkEntity entity, Explorer explorer)
         {
-            var network = new SimulationAnalysisDomains.Network(new Explorer()) { Name = entity.Name, };
+            var network = explorer.AddNetwork();
+            network.Name = entity.Name;
 
             if (entity.Facilities.Any())
             {
-                entity.Facilities.ForEach(_ => _.ToSimulationAnalysisDomain(network));
+                entity.Facilities.ForEach(_ => _.CreateFacility(network));
             }
 
             return network;

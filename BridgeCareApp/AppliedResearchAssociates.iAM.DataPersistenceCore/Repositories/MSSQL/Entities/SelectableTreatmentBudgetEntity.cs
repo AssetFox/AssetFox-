@@ -2,9 +2,9 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class TreatmentBudgetEntity
+    public class SelectableTreatmentBudgetEntity
     {
-        public Guid TreatmentId { get; set; }
+        public Guid SelectableTreatmentId { get; set; }
 
         public Guid BudgetId { get; set; }
 

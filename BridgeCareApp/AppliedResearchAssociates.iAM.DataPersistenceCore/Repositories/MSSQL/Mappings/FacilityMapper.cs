@@ -16,13 +16,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = domain.Name
             };
 
-        public static void ToSimulationAnalysisDomain(this FacilityEntity entity, Network network)
+        public static void CreateFacility(this FacilityEntity entity, Network network)
         {
             var facility = network.AddFacility();
             facility.Name = entity.Name;
+
             if (entity.Sections.Any())
             {
-                entity.Sections.ForEach(_ => _.ToSimulationAnalysisDomain(facility));
+                entity.Sections.ForEach(_ => _.CreateSection(facility));
             }
         }
     }

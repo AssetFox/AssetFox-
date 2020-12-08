@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateTreatmentConsequences(Dictionary<Guid, List<ConditionalTreatmentConsequence>> consequencesPerTreatmentId, string simulationName)
         {
-            var consequenceEntities = new List<TreatmentConsequenceEntity>();
+            var consequenceEntities = new List<ConditionalTreatmentConsequenceEntity>();
             var equationEntityPerConsequenceEntityId = new Dictionary<Guid, EquationEntity>();
             var consequenceEntityIdsPerExpression = new Dictionary<string, List<Guid>>();
 

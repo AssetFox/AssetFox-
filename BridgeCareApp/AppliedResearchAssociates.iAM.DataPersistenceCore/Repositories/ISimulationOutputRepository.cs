@@ -1,11 +1,12 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ISimulationOutputRepository
     {
-        SimulationOutput GetSimulationResults(Guid networkId, Guid simulationId);
-        void CreateSimulationOutput(string fileName, string simulationName);
+        void CreateSimulationOutput(string simulationName, SimulationOutput simulationOutput);
+        void GetSimulationOutput(Simulation simulation);
     }
 }

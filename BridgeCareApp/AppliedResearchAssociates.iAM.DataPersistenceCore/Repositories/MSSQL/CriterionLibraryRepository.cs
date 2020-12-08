@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         };
         public CriterionLibraryRepository(IAMContext context) : base(context) { }
 
-        public void JoinEntitiesWithCriteria(Dictionary<string, List<Guid>> entityIdsPerExpression, string joinEntity, string simulationName)
+        public void JoinEntitiesWithCriteria(Dictionary<string, List<Guid>> entityIdsPerExpression, string joinEntity, string prependName)
         {
             entityIdsPerExpression.Keys.ForEach(expression =>
             {
@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .Where(_ => _.Name.Contains(NameConventionPerEntityType[joinEntity]))
                         .Select(_ => _.Name).ToList();
 
-                    var newCriterionLibraryName = $"{simulationName} Simulation {NameConventionPerEntityType[joinEntity]} Criterion Library";
+                    var newCriterionLibraryName = $"{prependName} {NameConventionPerEntityType[joinEntity]} Criterion Library";
                     if (criterionLibraryNames.Contains(newCriterionLibraryName))
                     {
                         var version = 2;
@@ -104,6 +104,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             });
             
+            Context.SaveChanges();
+        }
+
+        public void CreateCriterionLibraries(List<CriterionLibraryEntity> criterionLibraryEntities)
+        {
+            if (IsRunningFromXUnit)
+            {
+                Context.CriterionLibrary.AddRange(criterionLibraryEntities);
+            }
+            else
+            {
+                Context.BulkInsert(criterionLibraryEntities);
+            }
+
             Context.SaveChanges();
         }
 
@@ -259,10 +273,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private void CreateCriterionLibraryTreatmentConsequenceJoins(Guid criterionLibraryId, List<Guid> consequenceIds)
         {
             var joinEntities = consequenceIds.Select(consequenceId =>
-                    new CriterionLibraryTreatmentConsequenceEntity
+                    new CriterionLibraryConditionalTreatmentConsequenceEntity
                     {
                         CriterionLibraryId = criterionLibraryId,
-                        TreatmentConsequenceId = consequenceId
+                        ConditionalTreatmentConsequenceId = consequenceId
                     })
                 .ToList();
 

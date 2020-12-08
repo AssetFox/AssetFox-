@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem
 {
-    public class SimulationOutputRepository : ISimulationOutputRepository
+    public class SimulationOutputFileRepository : ISimulationOutputFileRepository
     {
         public SimulationOutput GetSimulationResults(Guid networkId, Guid simulationId)
         {

@@ -24,36 +24,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldUseExtraFundsAcrossBudgets = domain.ShouldUseExtraFundsAcrossBudgets
             };
 
-        public static AnalysisMethod ToDomain(this AnalysisMethodEntity entity, InvestmentPlan investmentPlan)
+        public static void FillSimulationAnalysisMethod(this AnalysisMethodEntity entity, Simulation simulation)
         {
-            var simulation = entity.Simulation.ToDomain();
-            simulation.InvestmentPlan.FirstYearOfAnalysisPeriod = investmentPlan.FirstYearOfAnalysisPeriod;
-            simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod = investmentPlan.NumberOfYearsInAnalysisPeriod;
-            investmentPlan.Budgets.ToList().ForEach(_ =>
-            {
-                var budget = simulation.InvestmentPlan.AddBudget();
-                budget.Name = _.Name;
-                var index = 0;
-                _.YearlyAmounts.ToList().ForEach(__ =>
-                {
-                    budget.YearlyAmounts[index].Value = __.Value;
-                    index++;
-                });
-            });
-
-            var analysisMethod = new AnalysisMethod(simulation)
-            {
-                Description = entity.Description,
-                OptimizationStrategy = entity.OptimizationStrategy,
-                SpendingStrategy = entity.SpendingStrategy,
-                ShouldApplyMultipleFeasibleCosts = entity.ShouldApplyMultipleFeasibleCosts,
-                ShouldDeteriorateDuringCashFlow = entity.ShouldDeteriorateDuringCashFlow,
-                ShouldUseExtraFundsAcrossBudgets = entity.ShouldUseExtraFundsAcrossBudgets
-            };
+            simulation.AnalysisMethod.Description = entity.Description;
+            simulation.AnalysisMethod.OptimizationStrategy = entity.OptimizationStrategy;
+            simulation.AnalysisMethod.SpendingStrategy = entity.SpendingStrategy;
+            simulation.AnalysisMethod.ShouldApplyMultipleFeasibleCosts = entity.ShouldApplyMultipleFeasibleCosts;
+            simulation.AnalysisMethod.ShouldDeteriorateDuringCashFlow = entity.ShouldDeteriorateDuringCashFlow;
+            simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets = entity.ShouldUseExtraFundsAcrossBudgets;
+            simulation.AnalysisMethod.Filter.Expression =
+                entity.CriterionLibraryAnalysisMethodJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
 
             if (entity.Attribute != null)
             {
-                analysisMethod.Weighting = new NumberAttribute(entity.Attribute.Name)
+                simulation.AnalysisMethod.Weighting = new NumberAttribute(entity.Attribute.Name)
                 {
                     IsDecreasingWithDeterioration = entity.Attribute.IsAscending
                 };
@@ -61,30 +45,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.Benefit != null)
             {
-                analysisMethod.Benefit.Limit = entity.Benefit.Limit;
+                simulation.AnalysisMethod.Benefit.Limit = entity.Benefit.Limit;
                 if (entity.Benefit.Attribute != null)
                 {
-                    analysisMethod.Benefit.Attribute = (NumberAttribute)Convert
-                        .ChangeType(entity.Benefit.Attribute.ToDomain().ToSimulationAnalysisAttribute(), typeof(NumberAttribute));
+                    simulation.AnalysisMethod.Benefit.Attribute = simulation.Network.Explorer.NumberAttributes
+                        .Single(_ => _.Name == entity.Benefit.Attribute.Name);
                 }
             }
 
-            analysisMethod.Filter.Expression =
-                entity.CriterionLibraryAnalysisMethodJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
-
             entity.Simulation.BudgetPriorityLibrarySimulationJoin?.BudgetPriorityLibrary.BudgetPriorities
-                .ForEach(_ => _.ToSimulationAnalysisDomain(analysisMethod, simulation.InvestmentPlan));
+                .ForEach(_ => _.CreateBudgetPriority(simulation));
 
             entity.Simulation.TargetConditionGoalLibrarySimulationJoin?.TargetConditionGoalLibrary.TargetConditionGoals
-                .ForEach(_ => _.ToSimulationAnalysisDomain(analysisMethod));
+                .ForEach(_ => _.CreateTargetConditionGoal(simulation));
 
             entity.Simulation.DeficientConditionGoalLibrarySimulationJoin?.DeficientConditionGoalLibrary.DeficientConditionGoals
-                .ForEach(_ => _.ToSimulationAnalysisDomain(analysisMethod));
+                .ForEach(_ => _.CreateDeficientConditionGoal(simulation));
 
             entity.Simulation.RemainingLifeLimitLibrarySimulationJoin?.RemainingLifeLimitLibrary.RemainingLifeLimits
-                .ForEach(_ => _.ToSimulationAnalysisDomain(analysisMethod));
-
-            return analysisMethod;
+                .ForEach(_ => _.CreateRemainingLifeLimit(simulation));
         }
     }
 }

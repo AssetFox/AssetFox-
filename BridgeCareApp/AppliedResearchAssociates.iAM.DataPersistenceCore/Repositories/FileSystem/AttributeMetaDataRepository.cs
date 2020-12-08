@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using Newtonsoft.Json;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
@@ -11,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
 {
     public class AttributeMetaDataRepository : IAttributeMetaDataRepository
     {
-        public List<DataMiner.Attributes.Attribute> GetAllAttributes()
+        public List<Attribute> GetAllAttributes()
         {
             // set the attribute meta data json file path
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
@@ -57,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             return attributes;
         }
 
-        public DataMiner.Attributes.Attribute GetNetworkDefinitionAttribute()
+        public Attribute GetNetworkDefinitionAttribute()
         {
             // get the network definition rules file path
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,

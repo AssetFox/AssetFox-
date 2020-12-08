@@ -16,22 +16,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly IInvestmentPlanRepository _investmentPlanRepo;
         private readonly ITreatmentConsequenceRepository _treatmentConsequenceRepo;
         private readonly ITreatmentCostRepository _treatmentCostRepo;
         private readonly ICriterionLibraryRepository _criterionLibraryRepo;
         private readonly ITreatmentSchedulingRepository _treatmentSchedulingRepo;
         private readonly ITreatmentSupersessionRepository _treatmentSupersessionRepo;
 
-        public SelectableTreatmentRepository(IInvestmentPlanRepository investmentPlanRepo,
-            ITreatmentConsequenceRepository treatmentConsequenceRepo,
+        public SelectableTreatmentRepository(ITreatmentConsequenceRepository treatmentConsequenceRepo,
             ITreatmentCostRepository treatmentCostRepo,
             ICriterionLibraryRepository criterionLibraryRepo,
             ITreatmentSchedulingRepository treatmentSchedulingRepo,
             ITreatmentSupersessionRepository treatmentSupersessionRepo,
             IAMContext context) : base(context)
         {
-            _investmentPlanRepo = investmentPlanRepo ?? throw new ArgumentNullException(nameof(investmentPlanRepo));
             _treatmentConsequenceRepo = treatmentConsequenceRepo ??
                                         throw new ArgumentNullException(nameof(treatmentConsequenceRepo));
             _treatmentCostRepo = treatmentCostRepo ?? throw new ArgumentNullException(nameof(treatmentCostRepo));
@@ -194,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void JoinTreatmentsWithBudgets(Dictionary<Guid, List<string>> budgetNamesPerTreatmentId, string simulationName)
         {
-            var treatmentBudgetJoins = new List<TreatmentBudgetEntity>();
+            var treatmentBudgetJoins = new List<SelectableTreatmentBudgetEntity>();
 
             budgetNamesPerTreatmentId.Keys.ForEach(treatmentId =>
             {
@@ -224,9 +221,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     throw new RowNotInTableException($"No budgets found having names: {string.Join(", ", budgetNamesNotFound)}");
                 }
 
-                treatmentBudgetJoins.AddRange(budgetEntities.Select(_ => new TreatmentBudgetEntity
+                treatmentBudgetJoins.AddRange(budgetEntities.Select(_ => new SelectableTreatmentBudgetEntity
                 {
-                    TreatmentId = treatmentId,
+                    SelectableTreatmentId = treatmentId,
                     BudgetId = _.Id
                 }));
             });
@@ -243,29 +240,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             Context.SaveChanges();
         }
 
-        public List<SelectableTreatment> GetSimulationTreatments(string simulationName)
+        public void GetSimulationTreatments(Simulation simulation)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulationName))
+            if (!Context.Simulation.Any(_ => _.Name == simulation.Name))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulationName}.");
+                throw new RowNotInTableException($"No simulation found having name {simulation.Name}.");
             }
 
-            var simulation = Context.Simulation.Include(_ => _.Network)
-                .Single(_ => _.Name == simulationName).ToDomain();
-
-            var investmentPlan = _investmentPlanRepo.GetSimulationInvestmentPlan(simulationName);
-
-            var treatmentEntities = Context.SelectableTreatment
+            Context.SelectableTreatment
                 .Include(_ => _.TreatmentBudgetJoins)
                 .ThenInclude(_ => _.Budget)
                 .ThenInclude(_ => _.BudgetAmounts)
                 .Include(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.TreatmentConsequences)
-                .ThenInclude(_ => _.TreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.TreatmentConsequences)
-                .ThenInclude(_ => _.CriterionLibraryTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)
@@ -278,11 +270,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.TreatmentSchedulings)
                 .Include(_ => _.TreatmentSupersessions)
                 .Where(_ => _.TreatmentLibrary.TreatmentLibrarySimulationJoins.SingleOrDefault(__ =>
-                    __.Simulation.Name == simulationName) != null);
-
-            treatmentEntities.ForEach(_ => _.ToDomain(simulation, investmentPlan));
-
-            return simulation.Treatments.ToList();
+                    __.Simulation.Name == simulation.Name) != null)
+                .ForEach(_ => _.CreateSelectableTreatment(simulation));
         }
     }
 }

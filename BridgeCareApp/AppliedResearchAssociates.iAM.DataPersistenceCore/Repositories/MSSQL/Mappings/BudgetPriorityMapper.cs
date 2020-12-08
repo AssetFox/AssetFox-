@@ -17,10 +17,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Year = domain.Year
             };
 
-        public static void ToSimulationAnalysisDomain(this BudgetPriorityEntity entity, AnalysisMethod analysisMethod,
-            InvestmentPlan investmentPlan)
+        public static void CreateBudgetPriority(this BudgetPriorityEntity entity, Simulation simulation)
         {
-            var priority = analysisMethod.AddBudgetPriority();
+            var priority = simulation.AnalysisMethod.AddBudgetPriority();
             priority.PriorityLevel = entity.PriorityLevel;
             priority.Year = entity.Year;
             priority.Criterion.Expression =
@@ -30,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 entity.BudgetPercentagePairs.ForEach(_ =>
                 {
-                    _.ToSimulationAnalysisDomain(investmentPlan, priority);
+                    _.FillBudgetPercentagePair(simulation.InvestmentPlan, priority);
                 });
             }
         }

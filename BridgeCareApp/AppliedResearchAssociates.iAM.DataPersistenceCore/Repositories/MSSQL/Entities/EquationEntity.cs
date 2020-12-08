@@ -10,8 +10,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual PerformanceCurveEquationEntity PerformanceCurveEquationJoin { get; set; }
 
-        public virtual TreatmentConsequenceEquationEntity TreatmentConsequenceEquationJoin { get; set; }
+        public virtual ConditionalTreatmentConsequenceEquationEntity ConditionalTreatmentConsequenceEquationJoin { get; set; }
 
         public virtual TreatmentCostEquationEntity TreatmentCostEquationJoin { get; set; }
+
+        public virtual AttributeEquationCriterionLibraryEntity AttributeEquationCriterionLibraryJoin { get; set; }
     }
 }

@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
     public class CommittedProjectEntity : TreatmentEntity
     {
-        public Guid BudgetId { get; set; }
+        public Guid SimulationId { get; set; }
 
-        public Guid SelectableTreatmentId { get; set; }
+        public Guid BudgetId { get; set; }
 
         public Guid SectionId { get; set; }
 
@@ -15,10 +16,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public int Year { get; set; }
 
+        public virtual SimulationEntity Simulation { get; set; }
+
         public virtual BudgetEntity Budget { get; set; }
 
-        public virtual SelectableTreatmentEntity SelectableTreatment { get; set; }
-
         public virtual SectionEntity Section { get; set; }
+
+        public virtual ICollection<CommittedProjectConsequenceEntity> CommittedProjectConsequences { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 
@@ -17,12 +18,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 DeficientLimit = domain.DeficientLimit
             };
 
-        public static void ToSimulationAnalysisDomain(this DeficientConditionGoalEntity entity,
-            AnalysisMethod analysisMethod)
+        public static void CreateDeficientConditionGoal(this DeficientConditionGoalEntity entity, Simulation simulation)
         {
-            var deficientConditionGoal = analysisMethod.AddDeficientConditionGoal();
-            deficientConditionGoal.Attribute = (NumberAttribute)Convert
-                .ChangeType(entity.Attribute.ToDomain().ToSimulationAnalysisAttribute(), typeof(NumberAttribute));
+            var deficientConditionGoal = simulation.AnalysisMethod.AddDeficientConditionGoal();
+            deficientConditionGoal.Attribute = simulation.Network.Explorer.NumberAttributes
+                .Single(_ => _.Name == entity.Attribute.Name);
             deficientConditionGoal.AllowedDeficientPercentage = entity.AllowedDeficientPercentage;
             deficientConditionGoal.DeficientLimit = entity.DeficientLimit;
             deficientConditionGoal.Name = entity.Name;

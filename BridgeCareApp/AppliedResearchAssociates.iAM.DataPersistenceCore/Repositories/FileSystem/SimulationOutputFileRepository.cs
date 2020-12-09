@@ -11,8 +11,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
     {
         public SimulationOutput GetSimulationResults(Guid networkId, Guid simulationId)
         {
-            var folderPathForNewAnalysis = $"DownloadedReports\\1189_NewAnalysis";
-            var outputFile = $"Network 13 - Simulation 1189.json";
+            var TempfilePath = Path.Combine(Environment.CurrentDirectory, "tempIds.json");
+            var tempIds = new TempIds();
+            using (FileStream fs = File.Open(TempfilePath, FileMode.Open))
+            {
+                using (StreamReader sr = new StreamReader(fs))
+                {
+                    string rawConnection = sr.ReadToEnd();
+                    tempIds = JsonConvert
+                                .DeserializeAnonymousType(rawConnection, new { SimulationIds = default(TempIds) })
+                                .SimulationIds;
+                }
+            }
+            var folderPathForNewAnalysis = $"DownloadedReports\\{tempIds.DistrictId}_NewAnalysis";
+            var outputFile = $"Network 13 - Simulation {tempIds.DistrictId}.json";
             var filePath = Path.Combine(Environment.CurrentDirectory, folderPathForNewAnalysis, outputFile);
             // check that the file exists
             if (!File.Exists(filePath))
@@ -29,6 +41,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
                 });
             }
             return simulationOutput;
+        }
+
+        private class TempIds
+        {
+            public string DistrictId { get; set; }
         }
     }
 }

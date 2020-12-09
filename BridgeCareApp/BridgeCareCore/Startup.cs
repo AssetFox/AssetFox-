@@ -7,6 +7,7 @@ using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeData;
+using BridgeCareCore.Services.SummaryReport.UnfundedRecommendations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using LiteDb = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb;
 using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
+using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
+using BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget;
+using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
+using BridgeCareCore.Services.SummaryReport.GraphTabs;
+using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
 
 namespace BridgeCareCore
 {
@@ -40,6 +46,35 @@ namespace BridgeCareCore
             services.AddScoped<IExcelHelper, ExcelHelper>();
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
             services.AddScoped<IHighlightWorkDoneCells, HighlightWorkDoneCells>();
+            services.AddScoped<IUnfundedRecommendations, UnfundedRecommendations>();
+            services.AddScoped<IBridgeWorkSummary, BridgeWorkSummary>();
+            services.AddScoped<IBridgeWorkSummaryByBudget, BridgeWorkSummaryByBudget>();
+            services.AddScoped<SummaryReportGlossary>();
+
+            services.AddScoped<CostBudgetsWorkSummary>();
+            services.AddScoped<BridgesCulvertsWorkSummary>();
+            services.AddScoped<BridgeRateDeckAreaWorkSummary>();
+            services.AddScoped<NHSBridgeDeckAreaWorkSummary>();
+            services.AddScoped<DeckAreaBridgeWorkSummary>();
+            services.AddScoped<PostedClosedBridgeWorkSummary>();
+            services.AddScoped<BridgeWorkSummaryCommon>();
+            services.AddScoped<BridgeWorkSummaryComputationHelper>();
+
+            services.AddScoped<CulvertCost>();
+            services.AddScoped<BridgeWorkCost>();
+
+            // Summary report Graph TABS
+            services.AddScoped<IAddGraphsInTabs, AddGraphsInTabs>();
+            services.AddScoped<NHSConditionChart>();
+            services.AddScoped<NonNHSConditionBridgeCount>();
+            services.AddScoped<NonNHSConditionDeckArea>();
+            services.AddScoped<ConditionBridgeCount>();
+            services.AddScoped<ConditionDeckArea>();
+            services.AddScoped<PoorBridgeCount>();
+            services.AddScoped<PoorBridgeDeckArea>();
+            services.AddScoped<PoorBridgeDeckAreaByBPN>();
+
+            services.AddScoped<StackedColumnChartCommon>();
             services.AddSignalR();
 
 #if MsSqlDebug
@@ -58,6 +93,7 @@ namespace BridgeCareCore
             // Repository for legacy database
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
             services.AddScoped<IPennDotReportARepository, PennDotReportARepository>();
+            services.AddScoped<IYearlyInvestmentRepository, YearlyInvestmentRepository>();
 
             services.AddScoped<ISimulationRepository, SimulationRepository>();
 #elif LiteDbDebug

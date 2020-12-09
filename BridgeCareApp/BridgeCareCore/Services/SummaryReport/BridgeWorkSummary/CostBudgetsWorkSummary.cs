@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
@@ -22,13 +23,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper = excelHelper;
         }
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear, List<int> simulationYears, List<string> treatments)
+            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            List<int> simulationYears, List<string> treatments, Dictionary<string, Budget> yearlyBudgetAmount)
         {
             var culvertTotalRow = FillCostOfCulvertWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
             var bridgeTotalRow = FillCostOfBridgeWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
-            var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears, costPerTreatmentPerYear);
+            var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears,
+                costPerTreatmentPerYear, yearlyBudgetAmount);
             FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow);
         }
 
@@ -53,13 +56,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private int FillTotalBudgetSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
+            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            Dictionary<string, Budget> yearlyBudgetAmount)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Totals");
             worksheet.Cells[currentCell.Row, simulationYears.Count + 3].Value = "Total Analysis Budget (all year)";
             _excelHelper.ApplyStyle(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
             _excelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
-            var budgetTotalRow = AddDetailsForTotalBudget(worksheet, simulationYears, currentCell, costPerTreatmentPerYear);
+            var budgetTotalRow = AddDetailsForTotalBudget(worksheet, simulationYears[0], currentCell,
+                costPerTreatmentPerYear, yearlyBudgetAmount);
             return budgetTotalRow;
         }
 
@@ -180,13 +185,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             return bridgeTotalRow;
         }
 
-        private int AddDetailsForTotalBudget(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
+        private int AddDetailsForTotalBudget(ExcelWorksheet worksheet, int initialYear, CurrentCell currentCell,
+            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            Dictionary<string, Budget> yearlyBudgetAmount)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
             int budgetTotalRow = 0;
             worksheet.Cells[row++, column].Value = Properties.Resources.TotalSpent;
+            row++; // for committed project
             worksheet.Cells[row++, column].Value = Properties.Resources.TotalBridgeCareBudget;
             column++;
             var fromColumn = column + 1;
@@ -196,7 +203,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column = ++column;
 
                 worksheet.Cells[row++, column].Value = TotalCulvertSpent[yearlyData.Key] + TotalBridgeSpent[yearlyData.Key]; // + TotalCommittedSpent[yearlyData.Key];
-                var totalCost = yearlyData.Value.Sum(_ => _.Value.treatmentCost);
+                row++; // for committed project
+                var totalCost = yearlyBudgetAmount.Values.Sum(_ => _.YearlyAmounts[yearlyData.Key - initialYear].Value);
                 worksheet.Cells[row, column].Value = totalCost;
                 budgetTotalRow = row;
             }

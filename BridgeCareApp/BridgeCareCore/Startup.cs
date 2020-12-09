@@ -21,6 +21,7 @@ using BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 using BridgeCareCore.Services.SummaryReport.GraphTabs;
 using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
+using BridgeCareCore.Services.SummaryReport.Parameters;
 
 namespace BridgeCareCore
 {
@@ -50,6 +51,7 @@ namespace BridgeCareCore
             services.AddScoped<IBridgeWorkSummary, BridgeWorkSummary>();
             services.AddScoped<IBridgeWorkSummaryByBudget, BridgeWorkSummaryByBudget>();
             services.AddScoped<SummaryReportGlossary>();
+            services.AddScoped<SummaryReportParameters>();
 
             services.AddScoped<CostBudgetsWorkSummary>();
             services.AddScoped<BridgesCulvertsWorkSummary>();

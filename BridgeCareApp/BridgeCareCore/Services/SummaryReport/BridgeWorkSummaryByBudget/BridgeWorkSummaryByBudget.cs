@@ -34,11 +34,19 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
             // setting up model to store data. This will be used to fill up Bridge Work Summary By Budget TAB
             var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();
-            foreach (var item in reportOutputData.Years[0].Budgets)
+            var budgets = new HashSet<string>();
+            foreach(var yearData in reportOutputData.Years)
+            {
+                foreach(var item in yearData.Budgets)
+                {
+                    budgets.Add(item.BudgetName);
+                }
+            }
+            foreach (var item in budgets)
             {
                 workSummaryByBudgetData.Add(new WorkSummaryByBudgetModel
                 {
-                    Budget = item.BudgetName,
+                    Budget = item,
                     YearlyData = new List<YearsData>()
                 });
             }
@@ -49,7 +57,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 {
                     foreach (var section in yearData.Sections)
                     {
-                        if(section.TreatmentCause != TreatmentCause.NoSelection && section.TreatmentOptions.Count > 0)
+                        if(section.TreatmentCause != TreatmentCause.NoSelection)
                         {
                             var treatmentConsideration = section.TreatmentConsiderations.
                                 Where(_ => _.TreatmentName == section.AppliedTreatment).FirstOrDefault();
@@ -73,20 +81,20 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             {
                 //Filtering treatments for the given budget
                 var totalCostPerYear = summaryData.YearlyData.Sum(_ => _.Amount);
-                if(totalCostPerYear == 0)
-                {
-                    continue;
-                }
+                //if(totalCostPerYear == 0)
+                //{
+                //    continue;
+                //}
                 var costForCulvertBudget = summaryData.YearlyData
                                              .FindAll(_ => _.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase));
 
                 var costForBridgeBudgets = summaryData.YearlyData
                                              .FindAll(_ => !_.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase));
 
-                if (costForCulvertBudget.Count == 0 && costForBridgeBudgets.Count == 0)
-                {
-                    continue;
-                }
+                //if (costForCulvertBudget.Count == 0 && costForBridgeBudgets.Count == 0)
+                //{
+                //    continue;
+                //}
 
                 var totalBudgetPerYearForCulvert = new Dictionary<int, double>();
                 var totalBudgetPerYearForBridgeWork = new Dictionary<int, double>();
@@ -119,9 +127,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 _excelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count + 2], Color.Gray);
                 currentCell.Row += 1;
 
-                _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget, totalBudgetPerYearForCulvert, simulationYears);
+                var amount = totalSpent.Sum(_ => _.amount);
+                if (amount > 0)
+                {
+                    _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget, totalBudgetPerYearForCulvert, simulationYears);
 
-                _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, totalBudgetPerYearForBridgeWork);
+                    _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, totalBudgetPerYearForBridgeWork);
+                }
 
                 currentCell.Row += 1;
                 _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Totals");
@@ -148,7 +160,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 foreach (var item in budgetDetails.YearlyAmounts)
                 {
                     var cellFortotalBudget = yearTracker;
-                    worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value = item.Value;
+                    var currValue = worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value;
+                    decimal totalCost = 0;
+                    if (currValue != null)
+                    {
+                        totalCost = (decimal)worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value;
+                    }
+                    totalCost += item.Value;
+                    worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value = totalCost;
                     yearTracker++;
                 }
                 _excelHelper.ApplyBorder(worksheet.Cells[startOfTotalBudget, currentCell.Column, currentCell.Row, simulationYears.Count + 2]);

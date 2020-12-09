@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
@@ -32,7 +33,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _postedClosedBridgeWorkSummary = postedClosedBridgeWorkSummary ?? throw new ArgumentNullException(nameof(postedClosedBridgeWorkSummary));
         }
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
-            List<int> simulationYears, WorkSummaryModel workSummaryModel)
+            List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
@@ -71,7 +72,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             }
             #endregion
 
-            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costPerTreatmentPerYear, simulationYears, treatments);
+            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costPerTreatmentPerYear,
+                simulationYears, treatments, yearlyBudgetAmount);
 
             _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costPerTreatmentPerYear, simulationYears, treatments);
 

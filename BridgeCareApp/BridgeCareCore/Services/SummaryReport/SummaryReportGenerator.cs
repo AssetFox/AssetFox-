@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using BridgeCareCore.Interfaces.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
@@ -22,6 +23,7 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly IBridgeWorkSummary _bridgeWorkSummary;
         private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
         private readonly SummaryReportGlossary _summaryReportGlossary;
+        private readonly SummaryReportParameters _summaryReportParameters;
 
         private readonly IAddGraphsInTabs _addGraphsInTabs;
 
@@ -32,7 +34,7 @@ namespace BridgeCareCore.Services.SummaryReport
             IUnfundedRecommendations unfundedRecommendations,
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
             IYearlyInvestmentRepository yearlyInvestmentRepository,
-            SummaryReportGlossary summaryReportGlossary,
+            SummaryReportGlossary summaryReportGlossary, SummaryReportParameters summaryReportParameters,
 
             IAddGraphsInTabs addGraphsInTabs)
         {
@@ -45,6 +47,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _bridgeWorkSummaryByBudget = workSummaryByBudget ?? throw new ArgumentNullException(nameof(workSummaryByBudget));
             _yearlyInvestmentRepository = yearlyInvestmentRepository ?? throw new ArgumentNullException(nameof(yearlyInvestmentRepository));
             _summaryReportGlossary = summaryReportGlossary ?? throw new ArgumentNullException(nameof(summaryReportGlossary));
+            _summaryReportParameters = summaryReportParameters ?? throw new ArgumentNullException(nameof(summaryReportParameters));
 
             _addGraphsInTabs = addGraphsInTabs ?? throw new ArgumentNullException(nameof(addGraphsInTabs));
         }
@@ -79,9 +82,15 @@ namespace BridgeCareCore.Services.SummaryReport
 
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx")))
             {
+                // Simulation parameters TAB
+                var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
+
                 // Bridge Data TAB
                 var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
                 var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, pennDotReportAData);
+
+                // Filling up parameters tab
+                _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount);
 
                 // Unfunded Recommendations TAB
                 var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");

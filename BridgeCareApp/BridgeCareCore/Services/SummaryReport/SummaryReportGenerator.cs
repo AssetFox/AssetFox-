@@ -23,6 +23,8 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
         private readonly SummaryReportGlossary _summaryReportGlossary;
 
+        private readonly IAddGraphsInTabs _addGraphsInTabs;
+
         public SummaryReportGenerator(FileSystemRepository.ISimulationOutputRepository simulationOutputFileRepo,
             IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
@@ -30,7 +32,9 @@ namespace BridgeCareCore.Services.SummaryReport
             IUnfundedRecommendations unfundedRecommendations,
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
             IYearlyInvestmentRepository yearlyInvestmentRepository,
-            SummaryReportGlossary summaryReportGlossary)
+            SummaryReportGlossary summaryReportGlossary,
+
+            IAddGraphsInTabs addGraphsInTabs)
         {
             _simulationOutputFileRepo = simulationOutputFileRepo ?? throw new ArgumentNullException(nameof(simulationOutputFileRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -41,6 +45,8 @@ namespace BridgeCareCore.Services.SummaryReport
             _bridgeWorkSummaryByBudget = workSummaryByBudget ?? throw new ArgumentNullException(nameof(workSummaryByBudget));
             _yearlyInvestmentRepository = yearlyInvestmentRepository ?? throw new ArgumentNullException(nameof(yearlyInvestmentRepository));
             _summaryReportGlossary = summaryReportGlossary ?? throw new ArgumentNullException(nameof(summaryReportGlossary));
+
+            _addGraphsInTabs = addGraphsInTabs ?? throw new ArgumentNullException(nameof(addGraphsInTabs));
         }
 
         public byte[] GenerateReport(Guid networkId, Guid simulationId)
@@ -69,6 +75,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
             // In this function, the simulation id is hard coded to 1189 (district 11)
             var yearlyBudgetAmount = _yearlyInvestmentRepository.GetYearlyBudgetAmount(simulationId, simulationYears[0], simulationYears.Count);
+            var simulationYearsCount = simulationYears.Count;
 
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx")))
             {
@@ -85,13 +92,16 @@ namespace BridgeCareCore.Services.SummaryReport
                 _summaryReportGlossary.Fill(shortNameWorksheet);
 
                 // Bridge work summary TAB
-                var bridgeWorkSummaryWOrksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
-                var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWOrksheet, reportOutputData, simulationYears, workSummaryModel);
+                var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
+                var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel);
 
                 // Bridge work summary by Budget TAB
                 var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
                 _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
 
+
+                _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
+                
                 var folderPathForSimulation = $"DownloadedNewReports\\{simulationId}";
                 string relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
                 Directory.CreateDirectory(relativeFolderPath);

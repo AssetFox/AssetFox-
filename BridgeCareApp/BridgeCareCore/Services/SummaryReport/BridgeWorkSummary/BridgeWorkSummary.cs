@@ -87,7 +87,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             worksheet.Calculate();
             worksheet.Cells.AutoFitColumns();
 
-            return new ChartRowsModel();
+            return chartRowsModel;
         }
     }
 }

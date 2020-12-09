@@ -115,6 +115,26 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Combine NHS and Non-NHS Condition By Bridge Count.
+        /// </summary>
+        internal static string CombineNHSNonNHSConditionByBridgeCount {
+            get {
+                return ResourceManager.GetString("CombineNHSNonNHSConditionByBridgeCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combine NHS and Non-NHS Without Committed Projects
+        ///Combine NHS and Non-NHS Without Committed Projects
+        ///Condition By Deck Area.
+        /// </summary>
+        internal static string CombineNHSNonNHSConditionByDeckArea {
+            get {
+                return ResourceManager.GetString("CombineNHSNonNHSConditionByDeckArea", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to .
         /// </summary>
         internal static string Culvert {
@@ -151,6 +171,42 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to NHS Condition By Bridge Count.
+        /// </summary>
+        internal static string NHSConditionByBridgeCountLLCC {
+            get {
+                return ResourceManager.GetString("NHSConditionByBridgeCountLLCC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NHS Condition By Deck Area.
+        /// </summary>
+        internal static string NHSConditionByDeckAreaLLCC {
+            get {
+                return ResourceManager.GetString("NHSConditionByDeckAreaLLCC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Non-NHS Condition By Bridge Count.
+        /// </summary>
+        internal static string NonNHSConditionByBridgeCount {
+            get {
+                return ResourceManager.GetString("NonNHSConditionByBridgeCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Non-NHS Condition By Deck Area.
+        /// </summary>
+        internal static string NonNHSConditionByDeckArea {
+            get {
+                return ResourceManager.GetString("NonNHSConditionByDeckArea", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to no treatment.
         /// </summary>
         internal static string NoTreatment {
@@ -183,6 +239,33 @@ namespace BridgeCareCore.Properties {
         internal static string Poor {
             get {
                 return ResourceManager.GetString("Poor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Poor Bridge Compare Bridge Count.
+        /// </summary>
+        internal static string PoorBridgeCompareBridgeCount {
+            get {
+                return ResourceManager.GetString("PoorBridgeCompareBridgeCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Poor Bridge Compare Deck Area.
+        /// </summary>
+        internal static string PoorBridgeCompareDeckArea {
+            get {
+                return ResourceManager.GetString("PoorBridgeCompareDeckArea", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Poor Deck Area By BPN.
+        /// </summary>
+        internal static string PoorDeckAreaByBPN {
+            get {
+                return ResourceManager.GetString("PoorDeckAreaByBPN", resourceCulture);
             }
         }
         

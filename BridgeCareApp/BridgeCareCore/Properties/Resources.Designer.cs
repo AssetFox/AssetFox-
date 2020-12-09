@@ -135,7 +135,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to culvert.
         /// </summary>
         internal static string Culvert {
             get {

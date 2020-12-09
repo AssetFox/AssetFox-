@@ -148,7 +148,7 @@ Combine NHS and Non-NHS Without Committed Projects
 Condition By Deck Area</value>
   </data>
   <data name="Culvert" xml:space="preserve">
-    <value />
+    <value>culvert</value>
   </data>
   <data name="CulvertTotal" xml:space="preserve">
     <value>Culvert Total</value>

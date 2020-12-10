@@ -484,7 +484,7 @@ import {
     NewNetwork,
     NetworkCreationData,
 } from '@/shared/models/iAM/newNetwork';
-import { any, clone } from 'ramda';
+import { any, clone, isNil } from 'ramda';
 import { Simulation } from '@/shared/models/iAM/simulation';
 import { emptyRollup, Rollup } from '@/shared/models/iAM/rollup';
 import { getUserName } from '@/shared/utils/get-user-info';
@@ -591,6 +591,8 @@ export default class Scenarios extends Vue {
     newNetworkId: string = '';
     assignDataStatusUpdate: string = '';
     percentage = 0;
+    summaryReportStatusUpdate: string = '';
+    scenarioIdForStatusUpdate: string = '';
 
     @Watch('stateScenarios')
     onStateScenariosChanged() {
@@ -648,6 +650,19 @@ export default class Scenarios extends Vue {
         }
     }
 
+    @Watch('summaryReportStatusUpdate')
+    onSummaryReportStatusUpdate(){
+        var scenarioObj = this.scenarios.find(_ => _.id == '5f5a44eaf6d7e440782835cb'); // TODO : use this.scenarioIdForStatusUpdate
+
+        if(isNil(scenarioObj)){
+            scenarioObj = this.userScenarios.find(_ => _.id == '5f5a44eaf6d7e440782835cb'); // TODO : use this.scenarioIdForStatusUpdate
+        }
+
+        if(!isNil(scenarioObj)){
+            scenarioObj.status = this.summaryReportStatusUpdate;
+        }
+    }
+
     /**
      * Component has been mounted
      */
@@ -658,6 +673,7 @@ export default class Scenarios extends Vue {
             this.getNetworksAction();
         }
         this.$statusHub.$on('assignedData-status-event', this.getStatusUpdate);
+        this.$statusHub.$on('summaryReportGeneration-status-event', this.getSummaryReportStatusUpdate);
     }
 
     onUpdateScenarioList() {
@@ -798,6 +814,11 @@ export default class Scenarios extends Vue {
         this.percentage = data.percentage;
     }
 
+    getSummaryReportStatusUpdate(data: any) {
+        this.summaryReportStatusUpdate = data.status;
+        this.scenarioIdForStatusUpdate = data.scenarioId;
+    }
+
     onSubmitAssignDataDecision(response: boolean) {
         this.alertBeforeAssignData = clone(emptyAlertData);
 
@@ -935,6 +956,7 @@ export default class Scenarios extends Vue {
 
     beforeDestroy() {
         this.$statusHub.$off('assignedData-status-event', this.getStatusUpdate);
+        this.$statusHub.$off('summaryReportGeneration-status-event', this.getSummaryReportStatusUpdate);
     }
 }
 </script>

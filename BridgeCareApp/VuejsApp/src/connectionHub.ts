@@ -18,6 +18,10 @@ export default {
                 statusHub.$emit('assignedData-status-event', {status, percentage});
             });
 
+            connection.on('BroadcastSummaryReportGenerationStatus', (status, scenarioId) => {
+                statusHub.$emit('summaryReportGeneration-status-event', {status, scenarioId});
+            });
+
         let startedPromise = null;
         function start() {
             startedPromise = connection.start().catch(err => {

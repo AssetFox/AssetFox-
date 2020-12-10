@@ -10,28 +10,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class CommittedProjectMapper
     {
-        public static CommittedProjectEntity ToEntity(this CommittedProject domain, Guid simulationId, Guid budgetId, Guid sectionId)
-        {
-            return new CommittedProjectEntity
+        public static CommittedProjectEntity ToEntity(this CommittedProject domain, Guid simulationId) =>
+            new CommittedProjectEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 SimulationId = simulationId,
-                BudgetId = budgetId,
-                SectionId = sectionId,
+                BudgetId = domain.Budget.Id,
+                SectionId = domain.Section.Id,
                 Name = domain.Name,
                 ShadowForAnyTreatment = domain.ShadowForAnyTreatment,
                 ShadowForSameTreatment = domain.ShadowForSameTreatment,
                 Cost = domain.Cost,
                 Year = domain.Year
             };
-        }
 
         public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation)
         {
-            var facility = simulation.Network.Facilities.Single(_ => _.Name == entity.Section.Facility.Name);
-            var section = facility.Sections.Single(_ => _.Name == entity.Section.Name);
+            var facility = simulation.Network.Facilities.Single(_ => _.Id == entity.Section.Facility.Id);
+            var section = facility.Sections.Single(_ => _.Id == entity.Section.Id);
 
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(section, entity.Year));
+            committedProject.Id = entity.Id;
             committedProject.Name = entity.Name;
             committedProject.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
             committedProject.ShadowForSameTreatment = entity.ShadowForSameTreatment;

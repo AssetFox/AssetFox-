@@ -5,7 +5,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class InvestmentPlan : IValidator
+    public sealed class InvestmentPlan : WeakEntity, IValidator
     {
         public InvestmentPlan(Simulation simulation)
         {

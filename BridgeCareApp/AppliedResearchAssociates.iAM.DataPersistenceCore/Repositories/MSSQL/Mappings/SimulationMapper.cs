@@ -13,11 +13,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class SimulationMapper
     {
-        public static SimulationEntity ToEntity(this Simulation domain, Guid networkId) =>
+        public static SimulationEntity ToEntity(this Simulation domain) =>
             new SimulationEntity
             {
-                Id = Guid.NewGuid(),
-                NetworkId = networkId,
+                Id = domain.Id,
+                NetworkId = domain.Network.Id,
                 Name = domain.Name,
                 NumberOfYearsOfTreatmentOutlook = domain.NumberOfYearsOfTreatmentOutlook
             };
@@ -25,43 +25,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreateSimulation(this SimulationEntity entity, Network network)
         {
             var simulation = network.AddSimulation();
+            simulation.Id = entity.Id;
             simulation.Name = entity.Name;
             simulation.NumberOfYearsOfTreatmentOutlook = entity.NumberOfYearsOfTreatmentOutlook;
         }
-
-        /*public static Simulation ToSimulationAnalysisDomain(this SimulationEntity entity,
-            AnalysisMethod analysisMethod,
-            List<CommittedProject> committedProjects,
-            InvestmentPlan investmentPlan,
-            List<PerformanceCurve> performanceCurves,
-            List<SelectableTreatment> selectableTreatments)
-            {
-            var simulation = new Simulation(entity.Network.CreateNetwork())
-            {
-                Name = entity.Name,
-                NumberOfYearsOfTreatmentOutlook = entity.NumberOfYearsOfTreatmentOutlook,
-            };
-
-            if (entity.SimulationOutput != null)
-            {
-                var simulationOutputObject = JsonConvert.DeserializeObject<SimulationOutput>(entity.SimulationOutput.Output, new JsonSerializerSettings
-                {
-                    ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
-                });
-
-                simulation.ClearResults();
-
-                simulation.Results.InitialConditionOfNetwork = simulationOutputObject.InitialConditionOfNetwork;
-                simulation.Results.InitialSectionSummaries.AddRange(simulationOutputObject.InitialSectionSummaries);
-                simulation.Results.Years.AddRange(simulationOutputObject.Years);
-            }
-
-            if (entity.CommittedProjects.Any())
-            {
-                
-            }
-
-            return simulation;
-        }*/
     }
 }

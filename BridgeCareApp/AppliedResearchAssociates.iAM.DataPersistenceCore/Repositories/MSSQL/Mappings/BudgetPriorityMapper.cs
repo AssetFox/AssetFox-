@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static BudgetPriorityEntity ToEntity(this BudgetPriority domain, Guid budgetPriorityLibraryId) =>
             new BudgetPriorityEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 BudgetPriorityLibraryId = budgetPriorityLibraryId,
                 PriorityLevel = domain.PriorityLevel,
                 Year = domain.Year
@@ -20,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreateBudgetPriority(this BudgetPriorityEntity entity, Simulation simulation)
         {
             var priority = simulation.AnalysisMethod.AddBudgetPriority();
+            priority.Id = entity.Id;
             priority.PriorityLevel = entity.PriorityLevel;
             priority.Year = entity.Year;
             priority.Criterion.Expression =

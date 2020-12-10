@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ISimulationOutputRepository
     {
-        void CreateSimulationOutput(string simulationName, SimulationOutput simulationOutput);
+        void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput);
         void GetSimulationOutput(Simulation simulation);
     }
 }

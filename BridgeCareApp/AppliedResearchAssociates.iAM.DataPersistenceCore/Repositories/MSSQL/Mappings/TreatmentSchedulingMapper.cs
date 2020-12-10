@@ -6,17 +6,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class TreatmentSchedulingMapper
     {
-        public static TreatmentSchedulingEntity ToEntity(this TreatmentScheduling domain, Guid treatmentId)
-        {
-            return new TreatmentSchedulingEntity
+        public static TreatmentSchedulingEntity ToEntity(this TreatmentScheduling domain, Guid treatmentId) =>
+            new TreatmentSchedulingEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 TreatmentId = treatmentId,
                 OffsetToFutureYear = domain.OffsetToFutureYear
             };
-        }
 
-        public static void ToSimulationAnalysisDomain(this TreatmentSchedulingEntity entity,
+        public static void CreateTreatmentScheduling(this TreatmentSchedulingEntity entity,
             SelectableTreatment selectableTreatment)
         {
             var scheduling = selectableTreatment.Schedulings.GetAdd(new TreatmentScheduling());

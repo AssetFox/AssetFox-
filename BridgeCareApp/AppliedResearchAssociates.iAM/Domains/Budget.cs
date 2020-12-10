@@ -4,7 +4,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class Budget : IValidator
+    public sealed class Budget : WeakEntity, IValidator
     {
         public string Name { get; set; }
 

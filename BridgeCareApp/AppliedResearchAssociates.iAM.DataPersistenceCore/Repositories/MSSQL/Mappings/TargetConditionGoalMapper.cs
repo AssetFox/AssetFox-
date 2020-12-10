@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static TargetConditionGoalEntity ToEntity(this TargetConditionGoal domain, Guid targetConditionGoalLibraryId, Guid attributeId) =>
             new TargetConditionGoalEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 TargetConditionGoalLibraryId = targetConditionGoalLibraryId,
                 AttributeId = attributeId,
                 Name = domain.Name,
@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreateTargetConditionGoal(this TargetConditionGoalEntity entity, Simulation simulation)
         {
             var targetConditionGoal = simulation.AnalysisMethod.AddTargetConditionGoal();
+            targetConditionGoal.Id = entity.Id;
             targetConditionGoal.Attribute = simulation.Network.Explorer.NumberAttributes
                 .Single(_ => _.Name == entity.Attribute.Name);
             targetConditionGoal.Target = entity.Target;

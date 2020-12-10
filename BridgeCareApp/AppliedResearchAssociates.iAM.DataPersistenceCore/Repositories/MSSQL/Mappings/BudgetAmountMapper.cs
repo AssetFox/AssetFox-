@@ -9,16 +9,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static BudgetAmountEntity ToEntity(this BudgetAmount domain, Guid budgetId, int year) =>
             new BudgetAmountEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 BudgetId = budgetId,
                 Value = domain.Value,
                 Year = year
-            };
-
-        public static BudgetAmount ToDomain(this BudgetAmountEntity entity) =>
-            new BudgetAmount
-            {
-                Value = entity.Value
             };
     }
 }

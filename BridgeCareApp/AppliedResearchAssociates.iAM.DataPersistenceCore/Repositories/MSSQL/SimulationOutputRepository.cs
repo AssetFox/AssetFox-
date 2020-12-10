@@ -15,22 +15,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public SimulationOutputRepository(IAMContext context) : base(context) { }
 
-        public void CreateSimulationOutput(string simulationName, SimulationOutput simulationOutput)
+        public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput)
         {
             using (var contextTransaction = Context.Database.BeginTransaction())
             {
                 try
                 {
-                    if (!Context.Simulation.Any(_ => _.Name == simulationName))
+                    if (!Context.Simulation.Any(_ => _.Id == simulationId))
                     {
-                        throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                        throw new RowNotInTableException($"No simulation found having id {simulationId}");
                     }
 
-                    var simulationEntity = Context.Simulation.Single(_ => _.Name == simulationName);
+                    var simulationEntity = Context.Simulation.Single(_ => _.Id == simulationId);
 
                     if (simulationOutput == null)
                     {
-                        throw new InvalidOperationException($"No results found for simulation {simulationName}. Please ensure that the simulation analysis has been run.");
+                        throw new InvalidOperationException($"No results found for simulation {simulationEntity.Name}. Please ensure that the simulation analysis has been run.");
                     }
 
                     var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     Context.SimulationOutput.Add(new SimulationOutputEntity
                     {
-                        Id = Guid.NewGuid(), SimulationId = simulationEntity.Id, Output = simulationOutputString
+                        SimulationId = simulationId, Output = simulationOutputString
                     });
 
                     Context.SaveChanges();
@@ -56,13 +56,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetSimulationOutput(Simulation simulation)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulation.Name))
+            if (!Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
-                throw new RowNotInTableException($"Found no simulation having name {simulation.Name}");
+                throw new RowNotInTableException($"Found no simulation having id {simulation.Id}");
             }
 
-            Context.SimulationOutput.Single(_ => _.Simulation.Name == simulation.Name)
-                .FillSimulationResults(simulation);
+            if (Context.SimulationOutput.Any(_ => _.SimulationId == simulation.Id))
+            {
+                Context.SimulationOutput.Single(_ => _.SimulationId == simulation.Id)
+                    .FillSimulationResults(simulation);
+            }
         }
     }
 }

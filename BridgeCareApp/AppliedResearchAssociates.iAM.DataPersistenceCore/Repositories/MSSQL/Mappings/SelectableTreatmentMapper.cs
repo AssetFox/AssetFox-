@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static SelectableTreatmentEntity ToEntity(this SelectableTreatment domain, Guid treatmentLibraryId) =>
             new SelectableTreatmentEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 TreatmentLibraryId = treatmentLibraryId,
                 Name = domain.Name,
                 ShadowForAnyTreatment = domain.ShadowForAnyTreatment,
@@ -24,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreateSelectableTreatment(this SelectableTreatmentEntity entity, Simulation simulation)
         {
             var selectableTreatment = simulation.AddTreatment();
+            selectableTreatment.Id = entity.Id;
             selectableTreatment.Name = entity.Name;
             selectableTreatment.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
             selectableTreatment.ShadowForSameTreatment = entity.ShadowForSameTreatment;
@@ -31,22 +32,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.TreatmentBudgetJoins.Any())
             {
-                entity.TreatmentBudgetJoins.ForEach(_ =>
-                {
-                    var budgetNames = entity.TreatmentBudgetJoins.Select(_ => _.Budget.Name).Distinct().ToList();
-                    simulation.InvestmentPlan.Budgets.Where(_ => budgetNames.Contains(_.Name)).ToList()
-                        .ForEach(budget => selectableTreatment.Budgets.Add(budget));
-                });
+                var budgetIds = entity.TreatmentBudgetJoins.Select(_ => _.Budget.Id).ToList();
+                simulation.InvestmentPlan.Budgets.Where(_ => budgetIds.Contains(_.Id)).ToList()
+                    .ForEach(budget => selectableTreatment.Budgets.Add(budget));
             }
 
             if (entity.TreatmentConsequences.Any())
             {
-                entity.TreatmentConsequences.ForEach(_ => _.ToSimulationAnalysisDomain(selectableTreatment));
+                entity.TreatmentConsequences.ForEach(_ => _.CreateConditionalTreatmentConsequence(selectableTreatment));
             }
 
             if (entity.TreatmentCosts.Any())
             {
-                entity.TreatmentCosts.ForEach(_ => _.ToSimulationAnalysisDomain(selectableTreatment));
+                entity.TreatmentCosts.ForEach(_ => _.CreateTreatmentCost(selectableTreatment));
             }
 
             if (entity.CriterionLibrarySelectableTreatmentJoins.Any())
@@ -65,12 +63,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.TreatmentSchedulings.Any())
             {
-                entity.TreatmentSchedulings.ForEach(_ => _.ToSimulationAnalysisDomain(selectableTreatment));
+                entity.TreatmentSchedulings.ForEach(_ => _.CreateTreatmentScheduling(selectableTreatment));
             }
 
             if (entity.TreatmentSupersessions.Any())
             {
-                entity.TreatmentSupersessions.ForEach(_ => _.ToSimulationAnalysisDomain(selectableTreatment));
+                entity.TreatmentSupersessions.ForEach(_ => _.CreateTreatmentSupersession(selectableTreatment));
             }
 
             if (selectableTreatment.Name == "No Treatment")

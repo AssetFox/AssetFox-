@@ -32,57 +32,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _cashFlowRuleRepo = cashFlowRuleRepo ?? throw new ArgumentNullException(nameof(cashFlowRuleRepo));
         }
 
-        public void CreateInvestmentPlan(InvestmentPlan investmentPlan, string simulationName)
+        public void CreateInvestmentPlan(InvestmentPlan investmentPlan, Guid simulationId)
         {
             using (var contextTransaction = Context.Database.BeginTransaction())
             {
                 try
                 {
-                    if (!Context.Simulation.Any(_ => _.Name == simulationName))
+                    if (!Context.Simulation.Any(_ => _.Id == simulationId))
                     {
-                        throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                        throw new RowNotInTableException($"No simulation found having id {simulationId}");
                     }
 
-                    var simulation = Context.Simulation.Single(_ => _.Name == simulationName);
+                    var simulationEntity = Context.Simulation.Single(_ => _.Id == simulationId);
 
-                    var investmentPlanEntity = investmentPlan.ToEntity();
+                    var investmentPlanEntity = investmentPlan.ToEntity(simulationEntity.Id);
 
                     Context.InvestmentPlan.Add(investmentPlanEntity);
-
-                    Context.InvestmentPlanSimulation.Add(new InvestmentPlanSimulationEntity
-                    {
-                        InvestmentPlanId = investmentPlanEntity.Id, SimulationId = simulation.Id
-                    });
 
                     Context.SaveChanges();
 
                     if (investmentPlan.Budgets.Any())
                     {
-                        _budgetRepo.CreateBudgets(investmentPlan.Budgets.ToList(), investmentPlanEntity.Id);
+                        CreateInvestmentPlanBudgets(simulationEntity, investmentPlan.Budgets.ToList());
                     }
 
                     if (investmentPlan.BudgetConditions.Any())
                     {
-                        var budgetEntities = Context.Budget
-                            .Where(_ => _.InvestmentPlanId == investmentPlanEntity.Id)
-                            .ToList();
-
                         var budgetEntityIdsPerExpression = investmentPlan.BudgetConditions
                             .Where(_ => !_.Criterion.ExpressionIsBlank)
-                            .GroupBy(_ => _.Criterion.Expression, _ => _)
-                            .ToDictionary(_ => _.Key, _ =>
-                            {
-                                var budgetNames = _.Select(__ => __.Budget.Name).Distinct().ToList();
-                                return budgetEntities.Where(__ => budgetNames.Contains(__.Name))
-                                    .Select(__ => __.Id).ToList();
-                            });
+                            .GroupBy(_ => _.Criterion.Expression, _ => _.Budget.Id)
+                            .ToDictionary(_ => _.Key, _ => _.ToList());
 
-                        _criterionLibraryRepo.JoinEntitiesWithCriteria(budgetEntityIdsPerExpression, "BudgetEntity", simulationName);
+                        _criterionLibraryRepo.JoinEntitiesWithCriteria(budgetEntityIdsPerExpression, "BudgetEntity", simulationEntity.Name);
                     }
 
                     if (investmentPlan.CashFlowRules.Any())
                     {
-                        CreateInvestmentPlanCashFlowRules(simulationName, investmentPlan.CashFlowRules.ToList());
+                        CreateInvestmentPlanCashFlowRules(simulationEntity, investmentPlan.CashFlowRules.ToList());
                     }
 
                     contextTransaction.Commit();
@@ -96,11 +82,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        private void CreateInvestmentPlanCashFlowRules(string simulationName, List<CashFlowRule> cashFlowRules)
+        private void CreateInvestmentPlanBudgets(SimulationEntity simulationEntity, List<Budget> budgets)
         {
-            _cashFlowRuleRepo.CreateCashFlowRuleLibrary($"{simulationName} Simulation Cash Flow Rule Library", simulationName);
+            _budgetRepo.CreateBudgetLibrary($"{simulationEntity.Name} Simulation Investment Plan Budget Library", simulationEntity.Id);
 
-            _cashFlowRuleRepo.CreateCashFlowRules(cashFlowRules, simulationName);
+            _budgetRepo.CreateBudgets(budgets, simulationEntity.Id);
+        }
+
+        private void CreateInvestmentPlanCashFlowRules(SimulationEntity simulationEntity, List<CashFlowRule> cashFlowRules)
+        {
+            _cashFlowRuleRepo.CreateCashFlowRuleLibrary($"{simulationEntity.Name} Simulation Cash Flow Rule Library", simulationEntity.Id);
+
+            _cashFlowRuleRepo.CreateCashFlowRules(cashFlowRules, simulationEntity.Id);
         }
 
         public void GetSimulationInvestmentPlan(Simulation simulation)
@@ -111,28 +104,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             Context.InvestmentPlan
-                .Include(_ => _.Budgets)
+                .Include(_ => _.Simulation)
+                .ThenInclude(_ => _.BudgetLibrarySimulationJoin)
+                .ThenInclude(_ => _.BudgetLibrary)
+                .ThenInclude(_ => _.Budgets)
                 .ThenInclude(_ => _.BudgetAmounts)
-                .Include(_ => _.Budgets)
+                .Include(_ => _.Simulation)
+                .ThenInclude(_ => _.BudgetLibrarySimulationJoin)
+                .ThenInclude(_ => _.BudgetLibrary)
+                .ThenInclude(_ => _.Budgets)
                 .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.InvestmentPlanSimulationJoins)
-                .ThenInclude(_ => _.Simulation)
-                .Include(_ => _.InvestmentPlanSimulationJoins)
-                .ThenInclude(_ => _.Simulation)
+                .Include(_ => _.Simulation)
                 .ThenInclude(_ => _.CashFlowRuleLibrarySimulationJoin)
                 .ThenInclude(_ => _.CashFlowRuleLibrary)
                 .ThenInclude(_ => _.CashFlowRules)
                 .ThenInclude(_ => _.CriterionLibraryCashFlowRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.InvestmentPlanSimulationJoins)
-                .ThenInclude(_ => _.Simulation)
+                .Include(_ => _.Simulation)
                 .ThenInclude(_ => _.CashFlowRuleLibrarySimulationJoin)
                 .ThenInclude(_ => _.CashFlowRuleLibrary)
                 .ThenInclude(_ => _.CashFlowRules)
                 .ThenInclude(_ => _.CashFlowDistributionRules)
-                .Single(_ =>
-                    _.InvestmentPlanSimulationJoins.SingleOrDefault(__ => __.Simulation.Name == simulation.Name) != null)
+                .Single(_ => _.Simulation.Name == simulation.Name)
                 .FillSimulationInvestmentPlan(simulation);
         }
     }

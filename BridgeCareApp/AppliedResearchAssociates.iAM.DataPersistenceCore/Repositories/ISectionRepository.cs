@@ -6,6 +6,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ISectionRepository
     {
-        void CreateSections(Dictionary<Guid, List<Section>> sectionsPerFacilityId);
+        void CreateSections(List<Section> sections);
     }
 }

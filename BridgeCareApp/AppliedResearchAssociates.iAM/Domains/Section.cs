@@ -4,7 +4,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class Section : IValidator
+    public sealed class Section : WeakEntity, IValidator
     {
         public Section(Facility facility) => Facility = facility ?? throw new ArgumentNullException(nameof(facility));
 

@@ -9,15 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static CriterionLibraryEntity ToEntity(this Criterion domain, string name) =>
             new CriterionLibraryEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 Name = name,
                 MergedCriteriaExpression = domain.Expression
-            };
-
-        public static Criterion ToDomain(this CriterionLibraryEntity entity) =>
-            new Criterion(new Explorer())
-            {
-                Expression = entity.MergedCriteriaExpression
             };
     }
 }

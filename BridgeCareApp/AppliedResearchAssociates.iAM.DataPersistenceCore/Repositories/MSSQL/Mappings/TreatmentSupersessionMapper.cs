@@ -6,16 +6,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class TreatmentSupersessionMapper
     {
-        public static TreatmentSupersessionEntity ToEntity(this TreatmentSupersession domain, Guid treatmentId)
-        {
-            return new TreatmentSupersessionEntity
+        public static TreatmentSupersessionEntity ToEntity(this TreatmentSupersession domain, Guid treatmentId) =>
+            new TreatmentSupersessionEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 TreatmentId = treatmentId
             };
-        }
 
-        public static void ToSimulationAnalysisDomain(this TreatmentSupersessionEntity entity,
+        public static void CreateTreatmentSupersession(this TreatmentSupersessionEntity entity,
             SelectableTreatment selectableTreatment)
         {
             var supersession = selectableTreatment.AddSupersession();

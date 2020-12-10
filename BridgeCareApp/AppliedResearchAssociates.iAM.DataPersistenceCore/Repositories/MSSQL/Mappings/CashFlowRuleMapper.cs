@@ -9,22 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static CashFlowRuleEntity ToEntity(this CashFlowRule domain, Guid cashFlowRuleLibraryId) =>
             new CashFlowRuleEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 Name = domain.Name,
                 CashFlowRuleLibraryId = cashFlowRuleLibraryId
             };
-
-        public static CashFlowRule ToDomain(this CashFlowRuleEntity entity)
-        {
-            var cashFlowRule = new CashFlowRule(new Explorer()) {Name = entity.Name};
-
-            if (entity.CriterionLibraryCashFlowRuleJoin != null)
-            {
-                cashFlowRule.Criterion.Expression =
-                    entity.CriterionLibraryCashFlowRuleJoin.CriterionLibrary.MergedCriteriaExpression;
-            }
-
-            return cashFlowRule;
-        }
     }
 }

@@ -20,14 +20,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public DeficientConditionGoalRepository(ICriterionLibraryRepository criterionLibraryRepo, IAMContext context) : base(context) =>
             _criterionLibraryRepo = criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
 
-        public void CreateDeficientConditionGoalLibrary(string name, string simulationName)
+        public void CreateDeficientConditionGoalLibrary(string name, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulationName))
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
-
-            var simulationEntity = Context.Simulation.Single(_ => _.Name == simulationName);
 
             var deficientConditionGoalLibraryEntity = new DeficientConditionGoalLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
@@ -35,23 +33,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             Context.DeficientConditionGoalLibrarySimulation.Add(new DeficientConditionGoalLibrarySimulationEntity
             {
-                DeficientConditionGoalLibraryId = deficientConditionGoalLibraryEntity.Id,
-                SimulationId = simulationEntity.Id
+                DeficientConditionGoalLibraryId = deficientConditionGoalLibraryEntity.Id, SimulationId = simulationId
             });
 
             Context.SaveChanges();
         }
 
-        public void CreateDeficientConditionGoals(List<DeficientConditionGoal> deficientConditionGoals, string simulationName)
+        public void CreateDeficientConditionGoals(List<DeficientConditionGoal> deficientConditionGoals, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulationName))
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             var simulationEntity = Context.Simulation
                 .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
-                .Single(_ => _.Name == simulationName);
+                .Single(_ => _.Id == simulationId);
 
             var attributeNames = deficientConditionGoals.Select(_ => _.Attribute.Name).Distinct().ToList();
             var attributeEntities = Context.Attribute.Where(_ => attributeNames.Contains(_.Name)).ToList();
@@ -92,18 +89,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (deficientConditionGoals.Any(_ => !_.Criterion.ExpressionIsBlank))
             {
-                var deficientConditionGoalEntityIdsPerExpression = deficientConditionGoals
+                var deficientIdsPerExpression = deficientConditionGoals
                     .Where(_ => !_.Criterion.ExpressionIsBlank)
                     .GroupBy(_ => _.Criterion.Expression, _ => _)
-                    .ToDictionary(_ => _.Key, _ =>
-                    {
-                        var deficientConditionGoalNames = _.Select(__ => __.Name).ToList();
-                        return deficientConditionGoalEntities.Where(__ => deficientConditionGoalNames.Contains(__.Name))
-                            .Select(__ => __.Id).ToList();
-                    });
+                    .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
 
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(deficientConditionGoalEntityIdsPerExpression,
-                    "DeficientConditionGoalEntity", simulationName);
+                _criterionLibraryRepo.JoinEntitiesWithCriteria(deficientIdsPerExpression,
+                    "DeficientConditionGoalEntity", simulationEntity.Name);
             }
         }
     }

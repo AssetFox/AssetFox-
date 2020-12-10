@@ -6,8 +6,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IBudgetPercentagePairRepository
     {
-        void CreateBudgetPercentagePairs(
-            List<((Guid priorityId, Guid budgetId) priorityIdBudgetIdTuple, BudgetPercentagePair budgetPercentagePair
-                )> budgetPercentagePairPriorityIdBudgetIdTupleTuple);
+        void CreateBudgetPercentagePairs(Dictionary<Guid, List<(Guid budgetId, BudgetPercentagePair percentagePair)>> percentagePairPerBudgetIdPerPriorityId);
     }
 }

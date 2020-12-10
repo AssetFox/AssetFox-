@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAnalysisMethodRepository
     {
-        void CreateAnalysisMethod(AnalysisMethod analysisMethod, string simulationName);
+        void CreateAnalysisMethod(AnalysisMethod analysisMethod, Guid simulationId);
         void GetSimulationAnalysisMethod(Simulation simulation);
     }
 }

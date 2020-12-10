@@ -9,17 +9,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static TreatmentCostEntity ToEntity(this TreatmentCost domain, Guid treatmentId) =>
             new TreatmentCostEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 TreatmentId = treatmentId
             };
 
-        public static TreatmentCost ToSimulationAnalysisDomain(this TreatmentCostEntity entity, SelectableTreatment selectableTreatment)
+        public static void CreateTreatmentCost(this TreatmentCostEntity entity, SelectableTreatment selectableTreatment)
         {
             var treatmentCost = selectableTreatment.AddCost();
+            treatmentCost.Id = entity.Id;
             treatmentCost.Equation.Expression = entity.TreatmentCostEquationJoin?.Equation.Expression ?? string.Empty;
             treatmentCost.Criterion.Expression =
                 entity.CriterionLibraryTreatmentCostJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
-            return treatmentCost;
         }
     }
 }

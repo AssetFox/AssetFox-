@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using SQLitePCL;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -26,28 +27,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _criterionLibraryRepo = criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
         }
 
-        public void CreatePerformanceCurveLibrary(string name, string simulationName)
+        public void CreatePerformanceCurveLibrary(string name, Guid simulationId)
         {
             using (var contextTransaction = Context.Database.BeginTransaction())
             {
                 try
                 {
-                    if (!Context.Simulation.Any(_ => _.Name == simulationName))
+                    if (!Context.Simulation.Any(_ => _.Id == simulationId))
                     {
-                        throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                        throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                     }
 
-                    var simulationEntity = Context.Simulation.Single(_ => _.Name == simulationName);
-
-                    var performanceCurveLibraryEntity =
-                        new PerformanceCurveLibraryEntity {Id = Guid.NewGuid(), Name = name};
+                    var performanceCurveLibraryEntity = new PerformanceCurveLibraryEntity {Id = Guid.NewGuid(), Name = name};
 
                     Context.PerformanceCurveLibrary.Add(performanceCurveLibraryEntity);
 
                     Context.PerformanceCurveLibrarySimulation.Add(new PerformanceCurveLibrarySimulationEntity
                     {
-                        PerformanceCurveLibraryId = performanceCurveLibraryEntity.Id,
-                        SimulationId = simulationEntity.Id
+                        PerformanceCurveLibraryId = performanceCurveLibraryEntity.Id, SimulationId = simulationId
                     });
 
                     Context.SaveChanges();
@@ -63,20 +60,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void CreatePerformanceCurves(List<PerformanceCurve> performanceCurves, string simulationName)
+        public void CreatePerformanceCurves(List<PerformanceCurve> performanceCurves, Guid simulationId)
         {
             using (var contextTransaction = Context.Database.BeginTransaction())
             {
                 try
                 {
-                    if (!Context.Simulation.Any(_ => _.Name == simulationName))
+                    if (!Context.Simulation.Any(_ => _.Id == simulationId))
                     {
-                        throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                        throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                     }
 
                     var simulationEntity = Context.Simulation
                         .Include(_ => _.PerformanceCurveLibrarySimulationJoin)
-                        .Single(_ => _.Name == simulationName);
+                        .Single(_ => _.Id == simulationId);
+
+                    if (simulationEntity.PerformanceCurveLibrarySimulationJoin == null)
+                    {
+                        throw new RowNotInTableException($"No performance curve library found for simulation having id {simulationId}.");
+                    }
 
                     var attributeNames = performanceCurves.Select(_ => _.Attribute.Name).Distinct().ToList();
                     var attributeEntities = Context.Attribute
@@ -120,25 +122,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         var equationEntityPerPerformanceCurveEntityId = performanceCurves
                             .Where(_ => !_.Equation.ExpressionIsBlank)
-                            .ToDictionary(_ => performanceCurveEntities.Single(__ => __.Name == _.Name).Id,
-                                _ => _.Equation.ToEntity());
+                            .ToDictionary(_ => _.Id, _ => _.Equation.ToEntity());
 
                         _equationRepo.CreateEquations(equationEntityPerPerformanceCurveEntityId, "PerformanceCurveEntity");
                     }
 
                     if (performanceCurves.Any(_ => !_.Criterion.ExpressionIsBlank))
                     {
-                        var performanceCurveEntityIdsPerExpression = performanceCurves
+                        var curveIdsPerExpression = performanceCurves
                             .Where(_ => !_.Criterion.ExpressionIsBlank)
                             .GroupBy(_ => _.Criterion.Expression, _ => _)
-                            .ToDictionary(_ => _.Key, _ =>
-                            {
-                                var performanceCurveNames = _.Select(__ => __.Name).ToList();
-                                return performanceCurveEntities.Where(__ => performanceCurveNames.Contains(__.Name))
-                                    .Select(__ => __.Id).ToList();
-                            });
+                            .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
 
-                        _criterionLibraryRepo.JoinEntitiesWithCriteria(performanceCurveEntityIdsPerExpression, "PerformanceCurveEntity", simulationName);
+                        _criterionLibraryRepo.JoinEntitiesWithCriteria(curveIdsPerExpression, "PerformanceCurveEntity", simulationEntity.Name);
                     }
 
                     contextTransaction.Commit();

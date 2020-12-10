@@ -14,11 +14,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid Id { get; set; }
 
-        public Guid InvestmentPlanId { get; set; }
+        public Guid BudgetLibraryId { get; set; }
 
         public string Name { get; set; }
 
-        public virtual InvestmentPlanEntity InvestmentPlan { get; set; }
+        public virtual BudgetLibraryEntity BudgetLibrary { get; set; }
 
         public virtual CriterionLibraryBudgetEntity CriterionLibraryBudgetJoin { get; set; }
 

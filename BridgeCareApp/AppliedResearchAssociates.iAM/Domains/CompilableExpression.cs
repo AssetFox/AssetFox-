@@ -3,7 +3,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public abstract class CompilableExpression : IValidator
+    public abstract class CompilableExpression : WeakEntity, IValidator
     {
         public string Expression
         {

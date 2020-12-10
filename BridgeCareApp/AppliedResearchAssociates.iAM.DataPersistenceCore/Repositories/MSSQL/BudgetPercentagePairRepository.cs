@@ -14,13 +14,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public BudgetPercentagePairRepository(IAMContext context) : base(context) { }
 
-        public void CreateBudgetPercentagePairs(
-            List<((Guid priorityId, Guid budgetId) priorityIdBudgetIdTuple, BudgetPercentagePair budgetPercentagePair
-                )> budgetPercentagePairPriorityIdBudgetIdTupleTuple)
+        public void CreateBudgetPercentagePairs(Dictionary<Guid, List<(Guid budgetId, BudgetPercentagePair percentagePair)>> percentagePairPerBudgetIdPerPriorityId)
         {
-            var budgetPercentagePairEntities = budgetPercentagePairPriorityIdBudgetIdTupleTuple.Select(_ =>
-                _.budgetPercentagePair.ToEntity(_.priorityIdBudgetIdTuple.priorityId,
-                    _.priorityIdBudgetIdTuple.budgetId))
+            var budgetPercentagePairEntities = percentagePairPerBudgetIdPerPriorityId
+                .SelectMany(_ => _.Value.Select(__ => __.percentagePair.ToEntity(_.Key, __.budgetId)))
                 .ToList();
 
             if (IsRunningFromXUnit)

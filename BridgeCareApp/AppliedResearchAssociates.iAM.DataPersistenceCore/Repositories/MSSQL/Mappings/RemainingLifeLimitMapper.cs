@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             Guid remainingLifeLimitLibraryId, Guid attributeId) =>
             new RemainingLifeLimitEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 RemainingLifeLimitLibraryId = remainingLifeLimitLibraryId,
                 AttributeId = attributeId,
                 Value = domain.Value
@@ -20,10 +20,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreateRemainingLifeLimit(this RemainingLifeLimitEntity entity, Simulation simulation)
         {
             var limit = simulation.AnalysisMethod.AddRemainingLifeLimit();
+            limit.Id = entity.Id;
             limit.Value = entity.Value;
             limit.Criterion.Expression =
                 entity.CriterionLibraryRemainingLifeLimitJoin?.CriterionLibrary.MergedCriteriaExpression ??
                 string.Empty;
+
             if (entity.Attribute != null)
             {
                 limit.Attribute = simulation.Network.Explorer.NumberAttributes

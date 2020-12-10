@@ -9,14 +9,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static EquationEntity ToEntity(this Equation domain) =>
             new EquationEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 Expression = domain.Expression
-            };
-
-        public static Equation ToDomain(this EquationEntity entity) =>
-            new Equation(new Explorer())
-            {
-                Expression = entity.Expression
             };
     }
 }

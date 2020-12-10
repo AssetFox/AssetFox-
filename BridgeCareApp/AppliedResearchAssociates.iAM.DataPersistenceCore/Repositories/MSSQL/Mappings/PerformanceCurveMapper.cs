@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static PerformanceCurveEntity ToEntity(this PerformanceCurve domain, Guid performanceCurveLibraryId, Guid attributeId) =>
             new PerformanceCurveEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 PerformanceCurveLibraryId = performanceCurveLibraryId,
                 AttributeId = attributeId,
                 Name = domain.Name,
@@ -23,6 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreatePerformanceCurve(this PerformanceCurveEntity entity, Simulation simulation)
         {
             var performanceCurve = simulation.AddPerformanceCurve();
+            performanceCurve.Id = entity.Id;
             performanceCurve.Attribute = simulation.Network.Explorer.NumberAttributes
                 .Single(_ => _.Name == entity.Attribute.Name);
             performanceCurve.Name = entity.Name;

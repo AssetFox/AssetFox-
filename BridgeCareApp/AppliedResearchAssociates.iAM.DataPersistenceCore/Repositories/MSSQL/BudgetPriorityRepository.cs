@@ -28,14 +28,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                         throw new ArgumentNullException(nameof(budgetPercentagePairRepo));
         }
 
-        public void CreateBudgetPriorityLibrary(string name, string simulationName)
+        public void CreateBudgetPriorityLibrary(string name, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulationName))
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
-
-            var simulationEntity = Context.Simulation.Single(_ => _.Name == simulationName);
 
             var budgetPriorityLibraryEntity = new BudgetPriorityLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
@@ -43,63 +41,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             Context.BudgetPriorityLibrarySimulation.Add(new BudgetPriorityLibrarySimulationEntity
             {
-                BudgetPriorityLibraryId = budgetPriorityLibraryEntity.Id,
-                SimulationId = simulationEntity.Id
+                BudgetPriorityLibraryId = budgetPriorityLibraryEntity.Id, SimulationId = simulationId
             });
 
             Context.SaveChanges();
         }
 
-        public void CreateBudgetPriorities(List<BudgetPriority> budgetPriorities, string simulationName)
+        public void CreateBudgetPriorities(List<BudgetPriority> budgetPriorities, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulationName))
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             var simulationEntity = Context.Simulation
                 .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
-                .Include(_ => _.InvestmentPlanSimulationJoin)
-                .ThenInclude(_ => _.InvestmentPlan)
-                .ThenInclude(_ => _.Budgets)
-                .Single(_ => _.Name == simulationName);
+                .Single(_ => _.Id == simulationId);
 
-            var budgetPriorityEntityIdsPerExpression = new Dictionary<string, List<Guid>>();
-            var budgetPercentagePairPriorityIdBudgetIdTupleTuple =
-                new List<((Guid priorityId, Guid budgetId) priorityIdBudgetIdTuple, BudgetPercentagePair
-                    budgetPercentagePair)>();
+            if (simulationEntity.BudgetPriorityLibrarySimulationJoin == null)
+            {
+                throw new RowNotInTableException($"No budget priority library found for simulation having id {simulationId}");
+            }
 
             var budgetPriorityEntities = budgetPriorities
-                .Select(_ =>
-                {
-                    var budgetPriorityEntity = _.ToEntity(simulationEntity.BudgetPriorityLibrarySimulationJoin.BudgetPriorityLibraryId);
-
-                    if (!_.Criterion.ExpressionIsBlank)
-                    {
-                        if (budgetPriorityEntityIdsPerExpression.ContainsKey(_.Criterion.Expression))
-                        {
-                            budgetPriorityEntityIdsPerExpression[_.Criterion.Expression].Add(budgetPriorityEntity.Id);
-                        }
-                        else
-                        {
-                            budgetPriorityEntityIdsPerExpression.Add(_.Criterion.Expression, new List<Guid>{ budgetPriorityEntity.Id });
-                        }
-                    }
-
-                    if (_.BudgetPercentagePairs.Any())
-                    {
-                        var budgetEntities = simulationEntity.InvestmentPlanSimulationJoin
-                            .InvestmentPlan.Budgets.ToList();
-
-                        _.BudgetPercentagePairs.ToList().ForEach(_ =>
-                        {
-                            var budgetEntity = budgetEntities.Single(__ => __.Name == _.Budget.Name);
-                            budgetPercentagePairPriorityIdBudgetIdTupleTuple.Add(((budgetPriorityEntity.Id, budgetEntity.Id), _));
-                        });
-                    }
-
-                    return budgetPriorityEntity;
-                })
+                .Select(_ => _.ToEntity(simulationEntity.BudgetPriorityLibrarySimulationJoin.BudgetPriorityLibraryId))
                 .ToList();
 
             if (IsRunningFromXUnit)
@@ -113,14 +78,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             Context.SaveChanges();
 
-            if (budgetPriorityEntityIdsPerExpression.Values.Any())
+            if (budgetPriorities.Any(_ => !_.Criterion.ExpressionIsBlank))
             {
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(budgetPriorityEntityIdsPerExpression, "BudgetPriorityEntity", simulationName);
+                var priorityIdsPerExpression = budgetPriorities
+                    .Where(_ => !_.Criterion.ExpressionIsBlank)
+                    .GroupBy(_ => _.Criterion.Expression, _ => _)
+                    .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
+
+                _criterionLibraryRepo.JoinEntitiesWithCriteria(priorityIdsPerExpression, "BudgetPriorityEntity", simulationEntity.Name);
             }
 
-            if (budgetPercentagePairPriorityIdBudgetIdTupleTuple.Any())
+            if (budgetPriorities.Any(_ => _.BudgetPercentagePairs.Any()))
             {
-                _budgetPercentagePairRepo.CreateBudgetPercentagePairs(budgetPercentagePairPriorityIdBudgetIdTupleTuple);
+                var percentagePairPerBudgetIdPerPriorityId = budgetPriorities
+                    .Where(_ => _.BudgetPercentagePairs.Any())
+                    .ToDictionary(_ => _.Id, _ => _.BudgetPercentagePairs.Select(__ => (__.Budget.Id, __)).ToList());
+
+                _budgetPercentagePairRepo.CreateBudgetPercentagePairs(percentagePairPerBudgetIdPerPriorityId);
             }
         }
     }

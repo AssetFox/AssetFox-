@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             var benefitEntity = new BenefitEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 AnalysisMethodId = analysisMethodId,
                 Limit = domain.Limit
             };

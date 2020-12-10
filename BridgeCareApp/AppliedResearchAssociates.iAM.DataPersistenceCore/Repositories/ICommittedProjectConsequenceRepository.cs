@@ -6,8 +6,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ICommittedProjectConsequenceRepository
     {
-        void CreateCommittedProjectConsequences(
-            List<((Guid committedProjectId, Guid attributeId) committedProjectIdAttributeIdTuple, TreatmentConsequence
-                committedProjectConsequence)> committedProjectConsequenceCommittedProjectIdAttributeIdTupleTuple);
+        void CreateCommittedProjectConsequences(Dictionary<Guid, List<(Guid attributeId, TreatmentConsequence consequence)>> consequencePerAttributeIdPerProjectId);
     }
 }

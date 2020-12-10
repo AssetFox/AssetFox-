@@ -7,7 +7,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class AnalysisMethod : IValidator
+    public sealed class AnalysisMethod : WeakEntity, IValidator
     {
         public AnalysisMethod(Simulation simulation)
         {

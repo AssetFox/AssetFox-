@@ -4,8 +4,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class SimulationOutputEntity
     {
-        public Guid Id { get; set; }
-
         public string Output { get; set; }
 
         public Guid SimulationId { get; set; }

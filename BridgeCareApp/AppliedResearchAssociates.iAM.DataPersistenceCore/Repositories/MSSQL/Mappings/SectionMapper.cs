@@ -8,11 +8,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class SectionMapper
     {
-        public static SectionEntity ToEntity(this Section domain, Guid facilityId) =>
+        public static SectionEntity ToEntity(this Section domain) =>
             new SectionEntity
             {
-                Id = Guid.NewGuid(),
-                FacilityId = facilityId,
+                Id = domain.Id,
+                FacilityId = domain.Facility.Id,
                 Name = domain.Name,
                 Area = domain.Area,
                 AreaUnit = domain.AreaUnit
@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreateSection(this SectionEntity entity, Facility facility)
         {
             var section = facility.AddSection();
+            section.Id = entity.Id;
             section.Name = entity.Name;
             section.Area = entity.Area;
             section.AreaUnit = entity.AreaUnit;

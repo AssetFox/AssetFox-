@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static AnalysisMethodEntity ToEntity(this AnalysisMethod domain, Guid simulationId, Guid attributeId) =>
             new AnalysisMethodEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 SimulationId = simulationId,
                 AttributeId = attributeId,
                 Description = domain.Description,
@@ -26,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static void FillSimulationAnalysisMethod(this AnalysisMethodEntity entity, Simulation simulation)
         {
+            simulation.AnalysisMethod.Id = entity.Id;
             simulation.AnalysisMethod.Description = entity.Description;
             simulation.AnalysisMethod.OptimizationStrategy = entity.OptimizationStrategy;
             simulation.AnalysisMethod.SpendingStrategy = entity.SpendingStrategy;
@@ -37,18 +38,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.Attribute != null)
             {
-                simulation.AnalysisMethod.Weighting = new NumberAttribute(entity.Attribute.Name)
-                {
-                    IsDecreasingWithDeterioration = entity.Attribute.IsAscending
-                };
+                simulation.AnalysisMethod.Weighting = simulation.Network.Explorer.NumberAttributes
+                    .Single(_ => _.Name == entity.Attribute.Name);
             }
 
             if (entity.Benefit != null)
             {
+                simulation.AnalysisMethod.Benefit.Id = entity.Benefit.Id;
                 simulation.AnalysisMethod.Benefit.Limit = entity.Benefit.Limit;
                 if (entity.Benefit.Attribute != null)
                 {
-                    simulation.AnalysisMethod.Benefit.Attribute = simulation.Network.Explorer.NumberAttributes
+                    simulation.AnalysisMethod.Benefit.Attribute = simulation.Network.Explorer.NumericAttributes
                         .Single(_ => _.Name == entity.Benefit.Attribute.Name);
                 }
             }

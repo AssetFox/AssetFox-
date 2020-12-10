@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static CommittedProjectConsequenceEntity ToEntity(this TreatmentConsequence domain, Guid committedProjectId, Guid attributeId) =>
             new CommittedProjectConsequenceEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 CommittedProjectId = committedProjectId,
                 AttributeId = attributeId,
                 ChangeValue = domain.Change.Expression
@@ -20,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreateCommittedProjectConsequence(this CommittedProjectConsequenceEntity entity, CommittedProject committedProject)
         {
             var consequence = committedProject.Consequences.GetAdd(new TreatmentConsequence());
+            consequence.Id = entity.Id;
             consequence.Change.Expression = entity.ChangeValue;
             consequence.Attribute = committedProject.Section.Facility.Network.Explorer.NumberAttributes
                 .Single(_ => _.Name == entity.Attribute.Name);

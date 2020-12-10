@@ -6,7 +6,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore.Internal;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -18,20 +19,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public BudgetAmountRepository(IAMContext context) : base(context) { }
 
-        public void CreateBudgetAmounts(Dictionary<Guid, List<BudgetAmount>> budgetAmountsPerBudgetEntityId, Guid investmentPlanId)
+        public void CreateBudgetAmounts(Dictionary<Guid, List<BudgetAmount>> budgetAmountsPerBudgetEntityId, Guid simulationId)
         {
-            if (!Context.InvestmentPlan.Any(_ => _.Id == investmentPlanId))
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No investment plan found having id {investmentPlanId}.");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            var investmentPlanEntity = Context.InvestmentPlan.Single(_ => _.Id == investmentPlanId);
+            var simulationEntity = Context.Simulation
+                .Include(_ => _.InvestmentPlan)
+                .Single(_ => _.Id == simulationId);
+
+            if (simulationEntity.InvestmentPlan == null)
+            {
+                throw new RowNotInTableException($"No investment plan found for simulation having id {simulationId}.");
+            }
 
             var budgetAmountEntities = new List<BudgetAmountEntity>();
 
             budgetAmountsPerBudgetEntityId.Keys.ForEach(budgetEntityId =>
             {
-                var year = investmentPlanEntity.FirstYearOfAnalysisPeriod;
+                var year = simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod;
                 budgetAmountsPerBudgetEntityId[budgetEntityId].ForEach(_ =>
                 {
                     budgetAmountEntities.Add(_.ToEntity(budgetEntityId, year));

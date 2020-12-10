@@ -8,30 +8,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class BudgetMapper
     {
-        public static BudgetEntity ToEntity(this Budget domain, Guid investmentPlanId) =>
+        public static BudgetEntity ToEntity(this Budget domain, Guid budgetLibraryId) =>
             new BudgetEntity
             {
-                Id = Guid.NewGuid(),
-                InvestmentPlanId = investmentPlanId,
+                Id = domain.Id,
+                BudgetLibraryId = budgetLibraryId,
                 Name = domain.Name
             };
-
-        public static Budget ToSimulationAnalysisDomain(this BudgetEntity entity, InvestmentPlan investmentPlan)
-        {
-            var budget = investmentPlan.AddBudget();
-            budget.Name = entity.Name;
-            if (entity.BudgetAmounts.Any())
-            {
-                var sortedBudgetAmountEntities = entity.BudgetAmounts.OrderBy(_ => _.Year);
-                sortedBudgetAmountEntities.ForEach(_ =>
-                {
-                    var year = _.Year;
-                    var yearOffset = year - investmentPlan.FirstYearOfAnalysisPeriod;
-                    budget.YearlyAmounts[yearOffset].Value = _.Value;
-                });
-            }
-
-            return budget;
-        }
     }
 }

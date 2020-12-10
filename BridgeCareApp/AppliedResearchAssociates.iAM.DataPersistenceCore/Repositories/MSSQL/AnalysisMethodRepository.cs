@@ -35,15 +35,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _remainingLifeLimitRepo = remainingLifeLimitRepo ?? throw new ArgumentNullException(nameof(remainingLifeLimitRepo));
         }
 
-        public void CreateAnalysisMethod(AnalysisMethod analysisMethod, string simulationName)
+        public void CreateAnalysisMethod(AnalysisMethod analysisMethod, Guid simulationId)
         {
             using (var contextTransaction = Context.Database.BeginTransaction())
             {
                 try
                 {
-                    if (!Context.Simulation.Any(_ => _.Name == simulationName))
+                    if (!Context.Simulation.Any(_ => _.Id == simulationId))
                     {
-                        throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                        throw new RowNotInTableException($"No simulation found having id {simulationId}");
                     }
 
                     if (!Context.Attribute.Any(_ => _.Name == analysisMethod.Weighting.Name))
@@ -51,10 +51,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         throw new RowNotInTableException($"No attribute found having name {analysisMethod.Weighting.Name}");
                     }
 
-                    var simulation = Context.Simulation.Single(_ => _.Name == simulationName);
-                    var attribute = Context.Attribute.Single(_ => _.Name == analysisMethod.Weighting.Name);
+                    var simulationEntity = Context.Simulation.Single(_ => _.Id == simulationId);
+                    var attributeEntity = Context.Attribute.Single(_ => _.Name == analysisMethod.Weighting.Name);
 
-                    var analysisMethodEntity = analysisMethod.ToEntity(simulation.Id, attribute.Id);
+                    var analysisMethodEntity = analysisMethod.ToEntity(simulationEntity.Id, attributeEntity.Id);
                     Context.AnalysisMethod.Add(analysisMethodEntity);
                     Context.SaveChanges();
 
@@ -67,27 +67,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             {analysisMethod.Filter.Expression, new List<Guid> {analysisMethodEntity.Id}}
                         };
                         _criterionLibraryRepo.JoinEntitiesWithCriteria(analysisMethodEntityIdPerExpression,
-                            "AnalysisMethodEntity", simulationName);
+                            "AnalysisMethodEntity", simulationEntity.Name);
                     }
 
                     if (analysisMethod.BudgetPriorities.Any())
                     {
-                        CreateAnalysisMethodBudgetPriorities(simulationName, analysisMethod.BudgetPriorities.ToList());
+                        CreateAnalysisMethodBudgetPriorities(simulationEntity, analysisMethod.BudgetPriorities.ToList());
                     }
 
                     if (analysisMethod.TargetConditionGoals.Any())
                     {
-                        CreateAnalysisMethodTargetConditionGoals(simulationName, analysisMethod.TargetConditionGoals.ToList());
+                        CreateAnalysisMethodTargetConditionGoals(simulationEntity, analysisMethod.TargetConditionGoals.ToList());
                     }
 
                     if (analysisMethod.DeficientConditionGoals.Any())
                     {
-                        CreateAnalysisMethodDeficientConditionGoals(simulationName, analysisMethod.DeficientConditionGoals.ToList());
+                        CreateAnalysisMethodDeficientConditionGoals(simulationEntity, analysisMethod.DeficientConditionGoals.ToList());
                     }
 
                     if (analysisMethod.RemainingLifeLimits.Any())
                     {
-                        CreateAnalysisMethodRemainingLifeLimits(simulationName, analysisMethod.RemainingLifeLimits.ToList());
+                        CreateAnalysisMethodRemainingLifeLimits(simulationEntity, analysisMethod.RemainingLifeLimits.ToList());
                     }
 
                     contextTransaction.Commit();
@@ -101,33 +101,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        private void CreateAnalysisMethodBudgetPriorities(string simulationName, List<BudgetPriority> budgetPriorities)
+        private void CreateAnalysisMethodBudgetPriorities(SimulationEntity simulationEntity, List<BudgetPriority> budgetPriorities)
         {
-            _budgetPriorityRepo.CreateBudgetPriorityLibrary($"{simulationName} Simulation Budget Priority Library", simulationName);
+            _budgetPriorityRepo.CreateBudgetPriorityLibrary($"{simulationEntity.Name} Simulation Budget Priority Library", simulationEntity.Id);
 
-            _budgetPriorityRepo.CreateBudgetPriorities(budgetPriorities, simulationName);
+            _budgetPriorityRepo.CreateBudgetPriorities(budgetPriorities, simulationEntity.Id);
         }
 
-        private void CreateAnalysisMethodTargetConditionGoals(string simulationName, List<TargetConditionGoal> targetConditionGoals)
+        private void CreateAnalysisMethodTargetConditionGoals(SimulationEntity simulationEntity, List<TargetConditionGoal> targetConditionGoals)
         {
-            _targetConditionGoalRepo.CreateTargetConditionGoalLibrary($"{simulationName} Simulation Target Condition Goal Library", simulationName);
+            _targetConditionGoalRepo.CreateTargetConditionGoalLibrary($"{simulationEntity.Name} Simulation Target Condition Goal Library", simulationEntity.Id);
 
-            _targetConditionGoalRepo.CreateTargetConditionGoals(targetConditionGoals, simulationName);
+            _targetConditionGoalRepo.CreateTargetConditionGoals(targetConditionGoals, simulationEntity.Id);
         }
 
-        private void CreateAnalysisMethodDeficientConditionGoals(string simulationName, List<DeficientConditionGoal> deficientConditionGoals)
+        private void CreateAnalysisMethodDeficientConditionGoals(SimulationEntity simulationEntity, List<DeficientConditionGoal> deficientConditionGoals)
         {
-            _deficientConditionGoalRepo.CreateDeficientConditionGoalLibrary($"{simulationName} Simulation Deficient Condition Goal Library", simulationName);
+            _deficientConditionGoalRepo.CreateDeficientConditionGoalLibrary($"{simulationEntity.Name} Simulation Deficient Condition Goal Library", simulationEntity.Id);
 
-            _deficientConditionGoalRepo.CreateDeficientConditionGoals(deficientConditionGoals, simulationName);
+            _deficientConditionGoalRepo.CreateDeficientConditionGoals(deficientConditionGoals, simulationEntity.Id);
         }
 
-        private void CreateAnalysisMethodRemainingLifeLimits(string simulationName,
+        private void CreateAnalysisMethodRemainingLifeLimits(SimulationEntity simulationEntity,
             List<RemainingLifeLimit> remainingLifeLimits)
         {
-            _remainingLifeLimitRepo.CreateRemainingLifeLimitLibrary($"{simulationName} Simulation Remaining Life Limit Library", simulationName);
+            _remainingLifeLimitRepo.CreateRemainingLifeLimitLibrary($"{simulationEntity.Name} Simulation Remaining Life Limit Library", simulationEntity.Id);
 
-            _remainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationName);
+            _remainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationEntity.Id);
         }
 
         public void GetSimulationAnalysisMethod(Simulation simulation)

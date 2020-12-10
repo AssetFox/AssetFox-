@@ -29,14 +29,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                     throw new ArgumentNullException(nameof(criterionLibraryRepo));
         }
 
-        public void CreateCashFlowRuleLibrary(string name, string simulationName)
+        public void CreateCashFlowRuleLibrary(string name, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulationName))
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
-
-            var simulationEntity = Context.Simulation.Single(_ => _.Name == simulationName);
 
             var cashFlowRuleLibraryEntity = new CashFlowRuleLibraryEntity {Id = Guid.NewGuid(), Name = name};
 
@@ -44,28 +42,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             Context.CashFlowRuleLibrarySimulation.Add(new CashFlowRuleLibrarySimulationEntity
             {
-                CashFlowRuleLibraryId = cashFlowRuleLibraryEntity.Id, SimulationId = simulationEntity.Id
+                CashFlowRuleLibraryId = cashFlowRuleLibraryEntity.Id, SimulationId = simulationId
             });
 
             Context.SaveChanges();
         }
 
-        public void CreateCashFlowRules(List<CashFlowRule> cashFlowRules, string simulationName)
+        public void CreateCashFlowRules(List<CashFlowRule> cashFlowRules, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Name == simulationName))
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulationName}");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
             var simulationEntity = Context.Simulation
                 .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
-                .Single(_ => _.Name == simulationName);
+                .Single(_ => _.Id == simulationId);
+
+            if (simulationEntity.CashFlowRuleLibrarySimulationJoin == null)
+            {
+                throw new RowNotInTableException($"No cash flow rule library found for simulation having id {simulationId}.");
+            }
 
             var cashFlowRuleEntities = cashFlowRules
                 .Select(_ => _.ToEntity(simulationEntity.CashFlowRuleLibrarySimulationJoin.CashFlowRuleLibraryId))
                 .ToList();
 
-            // save the data models in the data source
             if (IsRunningFromXUnit)
             {
                 Context.CashFlowRule.AddRange(cashFlowRuleEntities);
@@ -79,27 +81,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (cashFlowRules.Any(_ => _.DistributionRules.Any()))
             {
-                var distributionRulesPerCashFlowRuleEntityId = cashFlowRules
-                    .Where(_ => _.DistributionRules.Any()).ToList()
-                    .ToDictionary(_ => cashFlowRuleEntities.Single(__ => __.Name == _.Name).Id,
-                        _ => _.DistributionRules.ToList());
+                var distributionRulesPerCashFlowRuleId = cashFlowRules
+                    .Where(_ => _.DistributionRules.Any())
+                    .ToDictionary(_ => _.Id, _ => _.DistributionRules.ToList());
 
-                _cashFlowDistributionRuleRepo.CreateCashFlowDistributionRules(distributionRulesPerCashFlowRuleEntityId);
+                _cashFlowDistributionRuleRepo.CreateCashFlowDistributionRules(distributionRulesPerCashFlowRuleId);
             }
 
             if (cashFlowRules.Any(_ => !_.Criterion.ExpressionIsBlank))
             {
                 var cashFlowRuleEntityIdsPerExpression = cashFlowRules
                     .Where(_ => !_.Criterion.ExpressionIsBlank)
-                    .GroupBy(_ => _.Criterion.Expression, _ => _)
-                    .ToDictionary(_ => _.Key, _ =>
-                    {
-                        var cashFlowRuleNames = _.Select(__ => __.Name).ToList();
-                        return cashFlowRuleEntities.Where(__ => cashFlowRuleNames.Contains(__.Name))
-                            .Select(__ => __.Id).ToList();
-                    });
+                    .GroupBy(_ => _.Criterion.Expression, _ => _.Id)
+                    .ToDictionary(_ => _.Key, _ => _.ToList());
 
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(cashFlowRuleEntityIdsPerExpression, "CashFlowRuleEntity", simulationName);
+                _criterionLibraryRepo.JoinEntitiesWithCriteria(cashFlowRuleEntityIdsPerExpression, "CashFlowRuleEntity", simulationEntity.Name);
             }
         }
     }

@@ -14,13 +14,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public CommittedProjectConsequenceRepository(IAMContext context) : base(context) { }
 
-        public void CreateCommittedProjectConsequences(
-            List<((Guid committedProjectId, Guid attributeId) committedProjectIdAttributeIdTuple, TreatmentConsequence
-                committedProjectConsequence)> committedProjectConsequenceCommittedProjectIdAttributeIdTupleTuple)
+        public void CreateCommittedProjectConsequences(Dictionary<Guid, List<(Guid attributeId, TreatmentConsequence consequence)>> consequencePerAttributeIdPerProjectId)
         {
-            var committedProjectConsequenceEntities = committedProjectConsequenceCommittedProjectIdAttributeIdTupleTuple
-                .Select(_ => _.committedProjectConsequence
-                    .ToEntity(_.committedProjectIdAttributeIdTuple.committedProjectId, _.committedProjectIdAttributeIdTuple.attributeId))
+            var committedProjectConsequenceEntities = consequencePerAttributeIdPerProjectId
+                .SelectMany(_ => _.Value.Select(__ => __.consequence.ToEntity(_.Key, __.attributeId)))
                 .ToList();
 
             if (IsRunningFromXUnit)

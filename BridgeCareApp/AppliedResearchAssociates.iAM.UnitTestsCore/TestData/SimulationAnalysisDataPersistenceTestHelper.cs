@@ -143,10 +143,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public void CreateNetwork()
         {
-            NetworkRepo.CreateNetwork(new DataAssignment.Networking.Network(new List<MaintainableAsset>(),
-                Guid.NewGuid(), StandAloneSimulation.Network.Name));
+            NetworkRepo.CreateNetwork(StandAloneSimulation.Network);
 
-            FacilityRepo.CreateFacilities(StandAloneSimulation.Network.Facilities.ToList(), StandAloneSimulation.Network.Name);
+            FacilityRepo.CreateFacilities(StandAloneSimulation.Network.Facilities.ToList(), StandAloneSimulation.Network.Id);
         }
 
         public void CreateAttributes()
@@ -243,7 +242,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             InitializeAnalysisMethodRepos();
             CreateNetwork();
             SimulationRepo.CreateSimulation(StandAloneSimulation);
-            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Name);
+            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Id);
         }
 
         public void SetupForPerformanceCurves()
@@ -289,7 +288,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             InitializeCommittedProjectRepos();
             CreateNetwork();
             SimulationRepo.CreateSimulation(StandAloneSimulation);
-            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Name);
+            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Id);
             AddCommittedProjects();
         }
 
@@ -303,7 +302,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             InitializeSelectableTreatmentRepos();
             CreateNetwork();
             SimulationRepo.CreateSimulation(StandAloneSimulation);
-            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Name);
+            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Id);
             AddTreatmentSchedulings();
             AddTreatmentSupersessions();
         }

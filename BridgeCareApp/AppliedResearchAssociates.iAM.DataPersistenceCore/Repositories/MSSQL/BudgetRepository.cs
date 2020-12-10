@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -16,33 +17,54 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public BudgetRepository(IBudgetAmountRepository budgetAmountRepo, IAMContext context) : base(context) =>
             _budgetAmountRepo = budgetAmountRepo ?? throw new ArgumentNullException(nameof(budgetAmountRepo));
 
-        public void CreateBudgets(List<Budget> budgets, Guid investmentPlanId)
+        public void CreateBudgetLibrary(string name, Guid simulationId)
         {
-            if (!Context.InvestmentPlan.Any(_ => _.Id == investmentPlanId))
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No investment plan found having id {investmentPlanId}.");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            var budgetAmountsPerBudgetId = new Dictionary<Guid, List<BudgetAmount>>();
+            var budgetLibraryEntity = new BudgetLibraryEntity {Id = Guid.NewGuid(), Name = name};
 
-            var budgetEntities = budgets.Select(_ =>
+            Context.BudgetLibrary.Add(budgetLibraryEntity);
+
+            Context.BudgetLibrarySimulation.Add(new BudgetLibrarySimulationEntity
             {
-                var budgetEntity = _.ToEntity(investmentPlanId);
+                BudgetLibraryId = budgetLibraryEntity.Id, SimulationId = simulationId
+            });
+        }
 
-                if (_.YearlyAmounts.Any())
-                {
-                    budgetAmountsPerBudgetId.Add(budgetEntity.Id, _.YearlyAmounts.ToList());
-                }
+        public void CreateBudgets(List<Budget> budgets, Guid simulationId)
+        {
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+            }
 
-                return budgetEntity;
-            }).ToList();
+            var simulationEntity = Context.Simulation
+                .Include(_ => _.BudgetLibrarySimulationJoin)
+                .Single(_ => _.Id == simulationId);
+
+            if (simulationEntity.BudgetLibrarySimulationJoin == null)
+            {
+                throw new RowNotInTableException($"No budget library found for simulation having id {simulationId}");
+            }
+
+            var budgetEntities = budgets
+                .Select(_ => _.ToEntity(simulationEntity.BudgetLibrarySimulationJoin.BudgetLibraryId))
+                .ToList();
 
             Context.Budget.AddRange(budgetEntities);
+
             Context.SaveChanges();
+
+            var budgetAmountsPerBudgetId = budgets
+                .Where(_ => _.YearlyAmounts.Any())
+                .ToDictionary(_ => _.Id, _ => _.YearlyAmounts.ToList());
 
             if (budgetAmountsPerBudgetId.Values.Any())
             {
-                _budgetAmountRepo.CreateBudgetAmounts(budgetAmountsPerBudgetId, investmentPlanId);
+                _budgetAmountRepo.CreateBudgetAmounts(budgetAmountsPerBudgetId, simulationId);
             }
         }
     }

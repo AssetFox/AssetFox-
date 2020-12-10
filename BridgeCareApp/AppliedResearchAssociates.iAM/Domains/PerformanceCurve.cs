@@ -3,7 +3,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class PerformanceCurve : IValidator
+    public sealed class PerformanceCurve : WeakEntity, IValidator
     {
         public PerformanceCurve(Explorer explorer)
         {

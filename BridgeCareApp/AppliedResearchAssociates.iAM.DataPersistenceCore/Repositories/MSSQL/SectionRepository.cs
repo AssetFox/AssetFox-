@@ -19,11 +19,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public SectionRepository(IAttributeValueHistoryRepository attributeValueHistoryRepo, IAMContext context) : base(context) =>
             _attributeValueHistoryRepo = attributeValueHistoryRepo ?? throw new ArgumentNullException(nameof(attributeValueHistoryRepo));
 
-        public void CreateSections(Dictionary<Guid, List<Section>> sectionsPerFacilityId)
+        public void CreateSections(List<Section> sections)
         {
-            var attributeNames = sectionsPerFacilityId.SelectMany(_ => _.Value
-                    .SelectMany(__ => __.HistoricalAttributes
-                        .Select(___ => ___.Name)))
+            var attributeNames = sections
+                .SelectMany(_ => _.HistoricalAttributes.Select(__ => __.Name))
                 .Distinct().ToList();
 
             var attributeEntities = Context.Attribute
@@ -51,35 +50,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var numericAttributeValueHistoryPerSectionIdAttributeIdTuple = new Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<double>>();
             var textAttributeValueHistoryPerSectionIdAttributeIdTuple = new Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<string>>();
 
-            var sectionEntities = sectionsPerFacilityId.SelectMany(_ =>
+            var sectionEntities = sections.Select(_ =>
             {
-                var (facilityId, sections) = _;
-                return sections.Select(section =>
+                var entity = _.ToEntity();
+
+                if (_.HistoricalAttributes.Any())
+                {
+                    _.HistoricalAttributes.ForEach(attribute =>
                     {
-                        var entity = section.ToEntity(facilityId);
-
-                        if (section.HistoricalAttributes.Any())
+                        if (attribute is NumberAttribute numberAttribute)
                         {
-                            section.HistoricalAttributes.ForEach(attribute =>
-                            {
-                                if (attribute is NumberAttribute numberAttribute)
-                                {
-                                    numericAttributeValueHistoryPerSectionIdAttributeIdTuple.Add(
-                                        (entity.Id, attributeIdPerName[numberAttribute.Name]), section.GetHistory(numberAttribute)
-                                    );
-                                }
-
-                                if (attribute is TextAttribute textAttribute)
-                                {
-                                    textAttributeValueHistoryPerSectionIdAttributeIdTuple.Add(
-                                        (entity.Id, attributeIdPerName[textAttribute.Name]), section.GetHistory(textAttribute)
-                                    );
-                                }
-                            });
+                            numericAttributeValueHistoryPerSectionIdAttributeIdTuple.Add(
+                                (_.Id, attributeIdPerName[numberAttribute.Name]), _.GetHistory(numberAttribute)
+                            );
                         }
 
-                        return entity;
+                        if (attribute is TextAttribute textAttribute)
+                        {
+                            textAttributeValueHistoryPerSectionIdAttributeIdTuple.Add(
+                                (_.Id, attributeIdPerName[textAttribute.Name]), _.GetHistory(textAttribute)
+                            );
+                        }
                     });
+                }
+
+                return entity;
             }).ToList();
 
             if (IsRunningFromXUnit)

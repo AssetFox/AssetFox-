@@ -43,9 +43,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
+        public static NetworkEntity ToEntity(this SimulationAnalysisDomains.Network domain) =>
+            new NetworkEntity
+            {
+                Id = domain.Id,
+                Name = domain.Name
+            };
+
         public static SimulationAnalysisDomains.Network ToSimulationAnalysisDomain(this NetworkEntity entity, Explorer explorer)
         {
             var network = explorer.AddNetwork();
+            network.Id = entity.Id;
             network.Name = entity.Name;
 
             if (entity.Facilities.Any())

@@ -11,10 +11,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class InvestmentPlanMapper
     {
-        public static InvestmentPlanEntity ToEntity(this InvestmentPlan domain) =>
+        public static InvestmentPlanEntity ToEntity(this InvestmentPlan domain, Guid simulationId) =>
             new InvestmentPlanEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
+                SimulationId = simulationId,
                 FirstYearOfAnalysisPeriod = domain.FirstYearOfAnalysisPeriod,
                 InflationRatePercentage = domain.InflationRatePercentage,
                 MinimumProjectCostLimit = domain.MinimumProjectCostLimit,
@@ -23,39 +24,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static void FillSimulationInvestmentPlan(this InvestmentPlanEntity entity, Simulation simulation)
         {
+            simulation.InvestmentPlan.Id = entity.Id;
             simulation.InvestmentPlan.FirstYearOfAnalysisPeriod = entity.FirstYearOfAnalysisPeriod;
             simulation.InvestmentPlan.InflationRatePercentage = entity.InflationRatePercentage;
             simulation.InvestmentPlan.MinimumProjectCostLimit = entity.MinimumProjectCostLimit;
             simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod = entity.NumberOfYearsInAnalysisPeriod;
 
-            if (entity.Budgets.Any())
+            entity.Simulation.BudgetLibrarySimulationJoin?.BudgetLibrary.Budgets.ForEach(_ =>
             {
-                entity.Budgets.ForEach(_ =>
+                var budget = simulation.InvestmentPlan.AddBudget();
+                budget.Id = _.Id;
+                budget.Name = _.Name;
+
+                if (_.BudgetAmounts.Any())
                 {
-                    var budget = simulation.InvestmentPlan.AddBudget();
-                    budget.Name = _.Name;
-
-                    if (_.BudgetAmounts.Any())
+                    var sortedBudgetAmountEntities = _.BudgetAmounts.OrderBy(__ => __.Year);
+                    sortedBudgetAmountEntities.ForEach(__ =>
                     {
-                        var sortedBudgetAmountEntities = _.BudgetAmounts.OrderBy(__ => __.Year);
-                        sortedBudgetAmountEntities.ForEach(__ =>
-                        {
-                            var year = __.Year;
-                            var yearOffset = year - simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
-                            budget.YearlyAmounts[yearOffset].Value = __.Value;
-                        });
-                    }
+                        var year = __.Year;
+                        var yearOffset = year - simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
+                        budget.YearlyAmounts[yearOffset].Id = __.Id;
+                        budget.YearlyAmounts[yearOffset].Value = __.Value;
+                    });
+                }
 
-                    var budgetCondition = simulation.InvestmentPlan.AddBudgetCondition();
-                    budgetCondition.Budget = budget;
-                    budgetCondition.Criterion.Expression = _.CriterionLibraryBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
-                });
-            }
+                var budgetCondition = simulation.InvestmentPlan.AddBudgetCondition();
+                budgetCondition.Budget = budget;
+                budgetCondition.Criterion.Expression = _.CriterionLibraryBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
+            });
 
-            var simulationEntity = entity.InvestmentPlanSimulationJoins.First().Simulation;
-            simulationEntity.CashFlowRuleLibrarySimulationJoin?.CashFlowRuleLibrary.CashFlowRules.ForEach(_ =>
+
+            entity.Simulation.CashFlowRuleLibrarySimulationJoin?.CashFlowRuleLibrary.CashFlowRules.ForEach(_ =>
             {
                 var cashFlowRule = simulation.InvestmentPlan.AddCashFlowRule();
+                cashFlowRule.Id = _.Id;
                 cashFlowRule.Name = _.Name;
                 cashFlowRule.Criterion.Expression = _.CriterionLibraryCashFlowRuleJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
 

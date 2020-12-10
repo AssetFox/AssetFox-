@@ -10,15 +10,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static ConditionalTreatmentConsequenceEntity ToEntity(this ConditionalTreatmentConsequence domain, Guid treatmentId, Guid attributeId) =>
             new ConditionalTreatmentConsequenceEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 SelectableTreatmentId = treatmentId,
                 AttributeId = attributeId,
                 ChangeValue = domain.Change.Expression
             };
 
-        public static void ToSimulationAnalysisDomain(this ConditionalTreatmentConsequenceEntity entity, SelectableTreatment treatment)
+        public static void CreateConditionalTreatmentConsequence(this ConditionalTreatmentConsequenceEntity entity, SelectableTreatment treatment)
         {
             var consequence = treatment.AddConsequence();
+            consequence.Id = entity.Id;
             consequence.Attribute = entity.Attribute.ToSimulationAnalysisDomain();
             consequence.Change.Expression = entity.ChangeValue;
             consequence.Criterion.Expression = entity.CriterionLibraryConditionalTreatmentConsequenceJoin?.CriterionLibrary

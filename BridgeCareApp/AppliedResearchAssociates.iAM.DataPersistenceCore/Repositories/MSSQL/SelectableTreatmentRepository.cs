@@ -39,31 +39,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                          throw new ArgumentNullException(nameof(treatmentSupersessionRepo));
         }
 
-        public void CreateTreatmentLibrary(string name, string simulationName)
+        public void CreateTreatmentLibrary(string name, Guid simulationId)
         {
             using (var contextTransaction = Context.Database.BeginTransaction())
             {
                 try
                 {
-                    if (!Context.Simulation.Any(_ => _.Name == simulationName))
+                    if (!Context.Simulation.Any(_ => _.Id == simulationId))
                     {
-                        throw new RowNotInTableException($"No simulation found having name {simulationName}.");
+                        throw new RowNotInTableException($"No simulation found having name {simulationId}.");
                     }
 
-                    var simulationEntity = Context.Simulation.Single(_ => _.Name == simulationName);
-
-                    var treatmentLibraryEntity = new TreatmentLibraryEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = name
-                    };
+                    var treatmentLibraryEntity = new TreatmentLibraryEntity {Id = Guid.NewGuid(), Name = name};
 
                     Context.TreatmentLibrary.Add(treatmentLibraryEntity);
 
                     Context.TreatmentLibrarySimulation.Add(new TreatmentLibrarySimulationEntity
                     {
-                        TreatmentLibraryId = treatmentLibraryEntity.Id,
-                        SimulationId = simulationEntity.Id
+                        TreatmentLibraryId = treatmentLibraryEntity.Id, SimulationId = simulationId
                     });
 
                     Context.SaveChanges();
@@ -79,38 +72,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void CreateSelectableTreatments(List<SelectableTreatment> selectableTreatments, string simulationName)
+        public void CreateSelectableTreatments(List<SelectableTreatment> selectableTreatments, Guid simulationId)
         {
             using (var contextTransaction = Context.Database.BeginTransaction())
             {
                 try
                 {
-                    if (!Context.Simulation.Any(_ => _.Name == simulationName))
+                    if (!Context.Simulation.Any(_ => _.Id == simulationId))
                     {
-                        throw new RowNotInTableException($"No simulation found having name {simulationName}.");
+                        throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                     }
 
                     var simulationEntity = Context.Simulation
                         .Include(_ => _.TreatmentLibrarySimulationJoin)
-                        .Single(_ => _.Name == simulationName);
+                        .Single(_ => _.Id == simulationId);
 
-                    var expressionsPerSelectableTreatmentEntityId = new Dictionary<Guid, List<string>>();
+                    if (simulationEntity.TreatmentLibrarySimulationJoin == null)
+                    {
+                        throw new RowNotInTableException($"No treatment library found for simulation having id {simulationId}.");
+                    }
 
                     var treatmentEntities = selectableTreatments
-                        .Select(_ =>
-                        {
-                            var selectableTreatmentEntity = _.ToEntity(simulationEntity.TreatmentLibrarySimulationJoin.TreatmentLibraryId);
-
-                            if (_.FeasibilityCriteria.Any(__ => !__.ExpressionIsBlank))
-                            {
-                                var expressions = _.FeasibilityCriteria.Where(__ => !__.ExpressionIsBlank)
-                                    .Select(__ => __.Expression).ToList();
-
-                                expressionsPerSelectableTreatmentEntityId.Add(selectableTreatmentEntity.Id, expressions);
-                            }
-
-                            return selectableTreatmentEntity;
-                        })
+                        .Select(_ => _.ToEntity(simulationEntity.TreatmentLibrarySimulationJoin.TreatmentLibraryId))
                         .ToList();
 
                     if (IsRunningFromXUnit)
@@ -126,44 +109,46 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (selectableTreatments.Any(_ => _.Budgets.Any()))
                     {
-                        var budgetNamesPerTreatmentId = selectableTreatments
+                        var budgetIdsPerTreatmentId = selectableTreatments
                             .Where(_ => _.Budgets.Any())
-                            .ToDictionary(_ => treatmentEntities.Single(__ => __.Name == _.Name).Id,
-                                _ => _.Budgets.Select(__ => __.Name).ToList());
-                        JoinTreatmentsWithBudgets(budgetNamesPerTreatmentId, simulationName);
+                            .ToDictionary(_ => _.Id, _ => _.Budgets.Select(__ => __.Id).ToList());
+
+                        JoinTreatmentsWithBudgets(budgetIdsPerTreatmentId);
                     }
 
                     if (selectableTreatments.Any(_ => _.Consequences.Any()))
                     {
                         var consequencesPerTreatmentId = selectableTreatments
                             .Where(_ => _.Consequences.Any())
-                            .ToDictionary(_ => treatmentEntities.Single(__ => __.Name == _.Name).Id,
-                                _ => _.Consequences.ToList());
+                            .ToDictionary(_ => _.Id, _ => _.Consequences.ToList());
 
-                        _treatmentConsequenceRepo.CreateTreatmentConsequences(consequencesPerTreatmentId, simulationName);
+                        _treatmentConsequenceRepo.CreateTreatmentConsequences(consequencesPerTreatmentId, simulationEntity.Name);
                     }
 
                     if (selectableTreatments.Any(_ => _.Costs.Any()))
                     {
                         var costsPerTreatmentId = selectableTreatments
                             .Where(_ => _.Costs.Any())
-                            .ToDictionary(_ => treatmentEntities.Single(__ => __.Name == _.Name).Id,
-                                _ => _.Costs.ToList());
+                            .ToDictionary(_ => _.Id, _ => _.Costs.ToList());
 
-                        _treatmentCostRepo.CreateTreatmentCosts(costsPerTreatmentId, simulationName);
+                        _treatmentCostRepo.CreateTreatmentCosts(costsPerTreatmentId, simulationEntity.Name);
                     }
 
-                    if (expressionsPerSelectableTreatmentEntityId.Values.Any())
+                    if (selectableTreatments.Any(_ => _.FeasibilityCriteria.Any(__ => !__.ExpressionIsBlank)))
                     {
-                        _criterionLibraryRepo.JoinSelectableTreatmentEntitiesWithCriteria(expressionsPerSelectableTreatmentEntityId, simulationName);
+                        var expressionsPerTreatmentId = selectableTreatments
+                            .Where(_ => _.FeasibilityCriteria.Any(__ => !__.ExpressionIsBlank))
+                            .ToDictionary(_ => _.Id, _ => _.FeasibilityCriteria
+                                .Where(__ => !__.ExpressionIsBlank).Select(__ => __.Expression).ToList());
+
+                        _criterionLibraryRepo.JoinSelectableTreatmentEntitiesWithCriteria(expressionsPerTreatmentId, simulationEntity.Name);
                     }
 
                     if (selectableTreatments.Any(_ => _.Schedulings.Any()))
                     {
                         var schedulingsPerTreatmentId = selectableTreatments
                             .Where(_ => _.Schedulings.Any())
-                            .ToDictionary(_ => treatmentEntities.Single(__ => __.Name == _.Name).Id,
-                                _ => _.Schedulings.ToList());
+                            .ToDictionary(_ => _.Id, _ => _.Schedulings.ToList());
 
                         _treatmentSchedulingRepo.CreateTreatmentSchedulings(schedulingsPerTreatmentId);
                     }
@@ -172,10 +157,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         var supersessionsPerTreatmentId = selectableTreatments
                             .Where(_ => _.Supersessions.Any())
-                            .ToDictionary(_ => treatmentEntities.Single(__ => __.Name == _.Name).Id,
-                                _ => _.Supersessions.ToList());
+                            .ToDictionary(_ => _.Id, _ => _.Supersessions.ToList());
 
-                        _treatmentSupersessionRepo.CreateTreatmentSupersessions(supersessionsPerTreatmentId, simulationName);
+                        _treatmentSupersessionRepo.CreateTreatmentSupersessions(supersessionsPerTreatmentId, simulationEntity.Name);
                     }
 
                     contextTransaction.Commit();
@@ -189,42 +173,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        private void JoinTreatmentsWithBudgets(Dictionary<Guid, List<string>> budgetNamesPerTreatmentId, string simulationName)
+        private void JoinTreatmentsWithBudgets(Dictionary<Guid, List<Guid>> budgetIdsPerTreatmentId)
         {
             var treatmentBudgetJoins = new List<SelectableTreatmentBudgetEntity>();
 
-            budgetNamesPerTreatmentId.Keys.ForEach(treatmentId =>
+            budgetIdsPerTreatmentId.Keys.ForEach(treatmentId =>
             {
-                var budgetNames = budgetNamesPerTreatmentId[treatmentId];
+                var budgetIds = budgetIdsPerTreatmentId[treatmentId];
                 var budgetEntities = Context.Budget
-                    .Include(_ => _.InvestmentPlan)
-                    .ThenInclude(_ => _.InvestmentPlanSimulationJoins)
-                    .ThenInclude(_ => _.Simulation)
-                    .Where(_ => budgetNames.Contains(_.Name) &&
-                                _.InvestmentPlan.InvestmentPlanSimulationJoins.SingleOrDefault(__ =>
-                                    __.Simulation.Name == simulationName) != null);
+                    .Where(_ => budgetIds.Contains(_.Id))
+                    .ToList();
 
                 if (!budgetEntities.Any())
                 {
                     throw new RowNotInTableException("No budgets for treatments were found.");
                 }
 
-                var budgetNamesFromDataSource = budgetEntities.Select(_ => _.Name).ToList();
-                if (!budgetNames.All(budgetName => budgetNamesFromDataSource.Contains(budgetName)))
+                treatmentBudgetJoins.AddRange(budgetIds.Select(budgetId => new SelectableTreatmentBudgetEntity
                 {
-                    var budgetNamesNotFound = budgetNames.Except(budgetNamesFromDataSource).ToList();
-                    if (budgetNamesNotFound.Count() == 1)
-                    {
-                        throw new RowNotInTableException($"No budget found having name {budgetNamesNotFound[0]}.");
-                    }
-
-                    throw new RowNotInTableException($"No budgets found having names: {string.Join(", ", budgetNamesNotFound)}");
-                }
-
-                treatmentBudgetJoins.AddRange(budgetEntities.Select(_ => new SelectableTreatmentBudgetEntity
-                {
-                    SelectableTreatmentId = treatmentId,
-                    BudgetId = _.Id
+                    SelectableTreatmentId = treatmentId, BudgetId = budgetId
                 }));
             });
 

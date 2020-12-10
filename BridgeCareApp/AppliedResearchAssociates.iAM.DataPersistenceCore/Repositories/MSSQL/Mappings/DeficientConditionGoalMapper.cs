@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static DeficientConditionGoalEntity ToEntity(this DeficientConditionGoal domain, Guid deficientConditionGoalLibraryId, Guid attributeId) =>
             new DeficientConditionGoalEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 DeficientConditionGoalLibraryId = deficientConditionGoalLibraryId,
                 AttributeId = attributeId,
                 Name = domain.Name,
@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void CreateDeficientConditionGoal(this DeficientConditionGoalEntity entity, Simulation simulation)
         {
             var deficientConditionGoal = simulation.AnalysisMethod.AddDeficientConditionGoal();
+            deficientConditionGoal.Id = entity.Id;
             deficientConditionGoal.Attribute = simulation.Network.Explorer.NumberAttributes
                 .Single(_ => _.Name == entity.Attribute.Name);
             deficientConditionGoal.AllowedDeficientPercentage = entity.AllowedDeficientPercentage;

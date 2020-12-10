@@ -3,7 +3,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class BudgetCondition : IValidator
+    public sealed class BudgetCondition : WeakEntity, IValidator
     {
         public BudgetCondition(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
 

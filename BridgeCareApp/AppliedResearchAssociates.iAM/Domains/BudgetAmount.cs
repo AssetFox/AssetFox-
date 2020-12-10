@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class BudgetAmount : IValidator
+    public sealed class BudgetAmount : WeakEntity, IValidator
     {
         public ValidatorBag Subvalidators => new ValidatorBag();
 

@@ -12,25 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class SimulationRepository : MSSQLRepository, ISimulationRepository
     {
-        /*private readonly IAnalysisMethodRepository _analysisMethodRepo;
-        private readonly ICommittedProjectRepository _committedProjectRepo;
-        private readonly IInvestmentPlanRepository _investmentPlanRepo;
-        private readonly IPerformanceCurveRepository _performanceCurveRepo;
-        private readonly ISelectableTreatmentRepository _selectableTreatmentRepo;*/
-        
-        public SimulationRepository(/*IAnalysisMethodRepository analysisMethodRepo,
-            ICommittedProjectRepository committedProjetRepo,
-            IInvestmentPlanRepository investmentPlanRepo,
-            IPerformanceCurveRepository performanceCurveRepo,
-            ISelectableTreatmentRepository selectableTreatmentRepo,*/
-            IAMContext context) : base(context)
-        {
-            /*_analysisMethodRepo = analysisMethodRepo ?? throw new ArgumentNullException(nameof(analysisMethodRepo));
-            _committedProjectRepo = committedProjetRepo ?? throw new ArgumentNullException(nameof(committedProjetRepo));
-            _investmentPlanRepo = investmentPlanRepo ?? throw new ArgumentNullException(nameof(investmentPlanRepo));
-            _performanceCurveRepo = performanceCurveRepo ?? throw new ArgumentNullException(nameof(performanceCurveRepo));
-            _selectableTreatmentRepo = selectableTreatmentRepo ?? throw new ArgumentNullException(nameof(selectableTreatmentRepo));*/
-        }
+        public SimulationRepository(IAMContext context) : base(context) { }
 
         public void CreateSimulation(Simulation simulation)
         {
@@ -38,14 +20,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 try
                 {
-                    if (!Context.Network.Any(_ => _.Name == simulation.Network.Name))
+                    if (!Context.Network.Any(_ => _.Id == simulation.Network.Id))
                     {
-                        throw new RowNotInTableException($"No network found having name {simulation.Network.Name}");
+                        throw new RowNotInTableException($"No network found having id {simulation.Network.Id}");
                     }
 
-                    var network = Context.Network.Single(_ => _.Name == simulation.Network.Name);
-
-                    Context.Simulation.Add(simulation.ToEntity(network.Id));
+                    Context.Simulation.Add(simulation.ToEntity());
                     Context.SaveChanges();
 
                     contextTransaction.Commit();
@@ -61,12 +41,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetAllInNetwork(Network network)
         {
-            if (!Context.Network.Any(_ => _.Name == network.Name))
+            if (!Context.Network.Any(_ => _.Id == network.Id))
             {
-                throw new RowNotInTableException($"No network found having name {network.Name}");
+                throw new RowNotInTableException($"No network found having id {network.Id}");
             }
 
-            var entities = Context.Simulation.Where(_ => _.Network.Name == network.Name).ToList();
+            var entities = Context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
 
             entities.ForEach(_ => _.CreateSimulation(network));
         }

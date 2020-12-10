@@ -17,20 +17,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public FacilityRepository(ISectionRepository sectionRepository, IAMContext context) : base(context) => _sectionRepository = sectionRepository ?? throw new ArgumentNullException(nameof(sectionRepository));
 
-        public void CreateFacilities(List<Facility> facilities, string networkName)
+        public void CreateFacilities(List<Facility> facilities, Guid networkId)
         {
             using (var contextTransaction = Context.Database.BeginTransaction())
             {
                 try
                 {
-                    if (!Context.Network.Any(_ => _.Name == networkName))
+                    if (!Context.Network.Any(_ => _.Id == networkId))
                     {
-                        throw new RowNotInTableException($"No network found having name {networkName}");
+                        throw new RowNotInTableException($"No network found having id {networkId}");
                     }
 
-                    var networkEntity = Context.Network.Single(_ => _.Name == networkName);
+                    var networkEntity = Context.Network.Single(_ => _.Id == networkId);
 
-                    var facilityEntities = facilities.Select(_ => _.ToEntity(networkEntity.Id)).ToList();
+                    var facilityEntities = facilities.Select(_ => _.ToEntity()).ToList();
 
                     if (IsRunningFromXUnit)
                     {
@@ -45,11 +45,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (facilities.Any(_ => _.Sections.Any()))
                     {
-                        var sectionsPerFacilityId = facilities.Where(_ => _.Sections.Any())
-                            .ToDictionary(_ => facilityEntities.Single(__ => __.Name == _.Name).Id,
-                                _ => _.Sections.ToList());
+                        var sections = facilities.Where(_ => _.Sections.Any())
+                            .SelectMany(_ => _.Sections).ToList();
 
-                        _sectionRepository.CreateSections(sectionsPerFacilityId);
+                        _sectionRepository.CreateSections(sections);
                     }
 
                     contextTransaction.Commit();

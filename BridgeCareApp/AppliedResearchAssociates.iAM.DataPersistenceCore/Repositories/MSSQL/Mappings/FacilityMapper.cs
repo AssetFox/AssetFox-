@@ -8,17 +8,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class FacilityMapper
     {
-        public static FacilityEntity ToEntity(this Facility domain, Guid networkId) =>
+        public static FacilityEntity ToEntity(this Facility domain) =>
             new FacilityEntity
             {
-                Id = Guid.NewGuid(),
-                NetworkId = networkId,
+                Id = domain.Id,
+                NetworkId = domain.Network.Id,
                 Name = domain.Name
             };
 
         public static void CreateFacility(this FacilityEntity entity, Network network)
         {
             var facility = network.AddFacility();
+            facility.Id = entity.Id;
             facility.Name = entity.Name;
 
             if (entity.Sections.Any())

@@ -11,18 +11,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static CashFlowDistributionRuleEntity ToEntity(this CashFlowDistributionRule domain, Guid cashFlowRuleId, int durationInYears) =>
             new CashFlowDistributionRuleEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 CashFlowRuleId = cashFlowRuleId,
                 DurationInYears = durationInYears,
                 YearlyPercentages = string.Join('/', domain.YearlyPercentages),
                 CostCeiling = domain.CostCeiling ?? 0
-            };
-
-        public static CashFlowDistributionRule ToDomain(this CashFlowDistributionRuleEntity entity) =>
-            new CashFlowDistributionRule
-            {
-                CostCeiling = entity.CostCeiling,
-                Expression = entity.YearlyPercentages
             };
     }
 }

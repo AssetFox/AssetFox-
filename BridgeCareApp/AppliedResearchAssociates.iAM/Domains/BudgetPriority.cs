@@ -5,7 +5,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class BudgetPriority : IValidator
+    public sealed class BudgetPriority : WeakEntity, IValidator
     {
         public BudgetPriority(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
 

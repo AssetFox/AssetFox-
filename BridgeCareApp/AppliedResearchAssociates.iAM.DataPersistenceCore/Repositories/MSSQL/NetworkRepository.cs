@@ -63,6 +63,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        public void CreateNetwork(Network network)
+        {
+            using (var contextTransaction = Context.Database.BeginTransaction())
+            {
+                try
+                {
+                    Context.Network.Add(network.ToEntity());
+
+                    Context.SaveChanges();
+
+                    contextTransaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    contextTransaction.Rollback();
+                    Console.WriteLine(e);
+                    throw;
+                }
+            }
+        }
+
         public IEnumerable<DataAssignment.Networking.Network> GetAllNetworks()
         {
             if (Context.Network.Count() == 0)
@@ -74,17 +95,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return Context.Network.Select(_ => _.ToDomain()).ToList();
         }
 
-        public Domains.Network GetSimulationAnalysisNetwork(string networkName, Explorer explorer)
+        public Domains.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer)
         {
-            if (!Context.Network.Any(_ => _.Name == networkName))
+            if (!Context.Network.Any(_ => _.Id == networkId))
             {
-                throw new RowNotInTableException($"No network found having name {networkName}");
+                throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
             var networkEntity = Context.Network
                 .Include(_ => _.Facilities)
                 .ThenInclude(_ => _.Sections)
-                .Single(_ => _.Name == networkName);
+                .Single(_ => _.Id == networkId);
 
             if (networkEntity.Facilities.Any(_ => _.Sections.Any()))
             {

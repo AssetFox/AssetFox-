@@ -5,9 +5,11 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace BridgeCareCore.Controllers
@@ -18,29 +20,57 @@ namespace BridgeCareCore.Controllers
     {
         private readonly ILogger<SummaryReportController> _logger;
         private readonly ISummaryReportGenerator _summaryReportGenerator;
+        private readonly IHubContext<BridgeCareHub> HubContext;
 
         public SummaryReportController(ISummaryReportGenerator summaryReportGenerator,
-            ILogger<SummaryReportController> logger)
+            ILogger<SummaryReportController> logger, IHubContext<BridgeCareHub> hub)
         {
             _summaryReportGenerator = summaryReportGenerator ?? throw new ArgumentNullException(nameof(summaryReportGenerator));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
         }
 
         [HttpPost]
         [Route("GenerateSummaryReport/{networkId}/{simulationId}")]
-        public FileResult GenerateSummaryReport(Guid networkId, Guid simulationId)
+        public async Task<FileResult> GenerateSummaryReport(Guid networkId, Guid simulationId)
         {
-            var response = _summaryReportGenerator.GenerateReport(networkId, simulationId);
+            var broadcastingMessage = "Starting report generation";
 
-            const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            HttpContext.Response.ContentType = contentType;
-            HttpContext.Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
-
-            var fileContentResult = new FileContentResult(response, contentType)
+            try
             {
-                FileDownloadName = "SummaryReportTestData.xlsx"
-            };
-            return fileContentResult;
+                await HubContext
+                    .Clients
+                    .All
+                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+
+                var response = _summaryReportGenerator.GenerateReport(networkId, simulationId);
+
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                HttpContext.Response.ContentType = contentType;
+                HttpContext.Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
+
+                var fileContentResult = new FileContentResult(response, contentType)
+                {
+                    FileDownloadName = "SummaryReportTestData.xlsx"
+                };
+
+                broadcastingMessage = "Finished generating the summary report.";
+                await HubContext
+                            .Clients
+                            .All
+                            .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+
+                return fileContentResult;
+            }
+            catch (Exception e)
+            {
+                broadcastingMessage = "An error has occured while generating the summary report";
+                await HubContext
+                            .Clients
+                            .All
+                            .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+                return null;
+            }
         }
     }
 }

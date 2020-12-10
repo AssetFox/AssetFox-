@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
 using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
@@ -24,6 +26,7 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
         private readonly SummaryReportGlossary _summaryReportGlossary;
         private readonly SummaryReportParameters _summaryReportParameters;
+        private readonly IHubContext<BridgeCareHub> HubContext;
 
         private readonly IAddGraphsInTabs _addGraphsInTabs;
 
@@ -35,6 +38,7 @@ namespace BridgeCareCore.Services.SummaryReport
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
             IYearlyInvestmentRepository yearlyInvestmentRepository,
             SummaryReportGlossary summaryReportGlossary, SummaryReportParameters summaryReportParameters,
+            IHubContext<BridgeCareHub> hub,
 
             IAddGraphsInTabs addGraphsInTabs)
         {
@@ -48,6 +52,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _yearlyInvestmentRepository = yearlyInvestmentRepository ?? throw new ArgumentNullException(nameof(yearlyInvestmentRepository));
             _summaryReportGlossary = summaryReportGlossary ?? throw new ArgumentNullException(nameof(summaryReportGlossary));
             _summaryReportParameters = summaryReportParameters ?? throw new ArgumentNullException(nameof(summaryReportParameters));
+            HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
 
             _addGraphsInTabs = addGraphsInTabs ?? throw new ArgumentNullException(nameof(addGraphsInTabs));
         }
@@ -85,6 +90,13 @@ namespace BridgeCareCore.Services.SummaryReport
                 // Simulation parameters TAB
                 var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
 
+
+                var broadcastingMessage = $"Creating Bridge Data TAB";
+                HubContext
+                    .Clients
+                    .All
+                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+
                 // Bridge Data TAB
                 var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
                 var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, pennDotReportAData);
@@ -92,6 +104,11 @@ namespace BridgeCareCore.Services.SummaryReport
                 // Filling up parameters tab
                 _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount);
 
+                broadcastingMessage = $"Creating Unfunded recommendations TAB";
+                HubContext
+                    .Clients
+                    .All
+                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
                 // Unfunded Recommendations TAB
                 var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");
                 _unfundedRecommendations.Fill(unfundedRecommendationWorksheet, reportOutputData);
@@ -100,15 +117,33 @@ namespace BridgeCareCore.Services.SummaryReport
                 var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add("Legend");
                 _summaryReportGlossary.Fill(shortNameWorksheet);
 
+
+                broadcastingMessage = $"Creating Bridge work summary TAB";
+                HubContext
+                    .Clients
+                    .All
+                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
                 // Bridge work summary TAB
                 var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
                 var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
                     simulationYears, workSummaryModel, yearlyBudgetAmount);
 
+
+                broadcastingMessage = $"Creating Bridge work summary By Budget TAB";
+                HubContext
+                    .Clients
+                    .All
+                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
                 // Bridge work summary by Budget TAB
                 var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
                 _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
 
+
+                broadcastingMessage = $"Creating Graph TABs";
+                HubContext
+                    .Clients
+                    .All
+                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
 
                 _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
                 

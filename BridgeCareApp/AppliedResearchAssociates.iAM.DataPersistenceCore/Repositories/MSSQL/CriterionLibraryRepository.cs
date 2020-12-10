@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     CreateCriterionLibraryTreatmentSupersessionJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
                 default:
-                    throw new InvalidOperationException("Unable to determine criterion library join entity type.";
+                    throw new InvalidOperationException("Unable to determine criterion library join entity type.");
                 }
             });
             

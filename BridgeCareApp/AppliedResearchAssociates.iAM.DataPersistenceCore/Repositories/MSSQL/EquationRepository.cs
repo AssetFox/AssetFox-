@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 JoinEquationsWithTreatmentCosts(equationEntityPerEntityId);
                 break;
             default:
-                throw new InvalidOperationException("Unable to determine equation join entity type.")
+                throw new InvalidOperationException("Unable to determine equation join entity type.");
             }
 
             Context.SaveChanges();

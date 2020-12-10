@@ -101,6 +101,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 case "TreatmentSupersessionEntity":
                     CreateCriterionLibraryTreatmentSupersessionJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+                default:
+                    throw new InvalidOperationException("Unable to determine criterion library join entity type.";
                 }
             });
             

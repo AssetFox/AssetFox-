@@ -2,7 +2,6 @@
 using System.Linq;
 using AppliedResearchAssociates.iAM.Domains;
 using Newtonsoft.Json;
-using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {

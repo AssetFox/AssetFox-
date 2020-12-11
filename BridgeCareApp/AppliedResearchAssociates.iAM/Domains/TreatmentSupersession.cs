@@ -3,7 +3,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class TreatmentSupersession : IValidator
+    public sealed class TreatmentSupersession : WeakEntity, IValidator
     {
         public TreatmentSupersession(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
 

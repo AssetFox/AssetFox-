@@ -3,7 +3,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public abstract class ConditionGoal : IValidator
+    public abstract class ConditionGoal : WeakEntity, IValidator
     {
         public virtual INumericAttribute Attribute { get; set; }
 

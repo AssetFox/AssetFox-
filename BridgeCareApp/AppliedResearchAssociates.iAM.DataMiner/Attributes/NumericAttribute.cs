@@ -5,8 +5,8 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
     public class NumericAttribute : Attribute
     {
         public NumericAttribute(double defaultValue,
-            double maximum,
-            double minimum,
+            double? maximum,
+            double? minimum,
             Guid id,
             string name,
             string ruleType,
@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
             string connectionString,
             bool isCalculated,
             bool isAscending)
-            : base(id, name, "NUMERIC", ruleType, command, connectionType, connectionString, isCalculated, isAscending)
+            : base(id, name, "NUMBER", ruleType, command, connectionType, connectionString, isCalculated, isAscending)
         {
             DefaultValue = defaultValue;
             Maximum = maximum;
@@ -24,8 +24,8 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 
         public double DefaultValue { get; }
 
-        public double Maximum { get; }
+        public double? Maximum { get; }
 
-        public double Minimum { get; }
+        public double? Minimum { get; }
     }
 }

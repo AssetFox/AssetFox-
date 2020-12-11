@@ -5,7 +5,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public abstract class Treatment : IValidator
+    public abstract class Treatment : WeakEntity, IValidator
     {
         public string Name { get; set; }
 

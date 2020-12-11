@@ -3,7 +3,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class RemainingLifeLimit : IValidator
+    public sealed class RemainingLifeLimit : WeakEntity, IValidator
     {
         public RemainingLifeLimit(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
 

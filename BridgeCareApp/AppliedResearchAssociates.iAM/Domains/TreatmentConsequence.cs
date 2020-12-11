@@ -4,7 +4,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public class TreatmentConsequence : IValidator
+    public class TreatmentConsequence : WeakEntity, IValidator
     {
         public Attribute Attribute { get; set; }
 

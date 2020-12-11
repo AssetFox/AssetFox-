@@ -14,7 +14,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             AnalysisMethods = new HashSet<AnalysisMethodEntity>();
             PerformanceCurves = new HashSet<PerformanceCurveEntity>();
             RemainingLifeLimits = new HashSet<RemainingLifeLimitEntity>();
-            TreatmentConsequences = new HashSet<TreatmentConsequenceEntity>();
+            TreatmentConsequences = new HashSet<ConditionalTreatmentConsequenceEntity>();
+            NumericAttributeValueHistories = new HashSet<NumericAttributeValueHistoryEntity>();
+            TextAttributeValueHistories = new HashSet<TextAttributeValueHistoryEntity>();
+            NumericAttributeValueHistoryMostRecentValues = new HashSet<NumericAttributeValueHistoryMostRecentValueEntity>();
+            TextAttributeValueHistoryMostRecentValues = new HashSet<TextAttributeValueHistoryMostRecentValueEntity>();
+            AttributeEquationCriterionLibraryJoins = new HashSet<AttributeEquationCriterionLibraryEntity>();
         }
 
         public Guid Id { get; set; }
@@ -39,6 +44,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public bool IsAscending { get; set; }
 
+        public virtual ICollection<AttributeEquationCriterionLibraryEntity> AttributeEquationCriterionLibraryJoins
+        {
+            get; set;
+        }
+
         public virtual ICollection<BenefitEntity> Benefits { get; set; }
 
         public virtual ICollection<AggregatedResultEntity> AggregatedResults { get; set; }
@@ -51,8 +61,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<RemainingLifeLimitEntity> RemainingLifeLimits { get; set; }
 
-        public virtual ICollection<TreatmentConsequenceEntity> TreatmentConsequences { get; set; }
+        public virtual ICollection<ConditionalTreatmentConsequenceEntity> TreatmentConsequences { get; set; }
 
         public virtual ICollection<DeficientConditionGoalEntity> DeficientConditionGoals { get; set; }
+
+        public virtual ICollection<NumericAttributeValueHistoryEntity> NumericAttributeValueHistories { get; set; }
+
+        public virtual ICollection<TextAttributeValueHistoryEntity> TextAttributeValueHistories { get; set; }
+
+        public virtual ICollection<NumericAttributeValueHistoryMostRecentValueEntity> NumericAttributeValueHistoryMostRecentValues { get; set; }
+
+        public virtual ICollection<TextAttributeValueHistoryMostRecentValueEntity> TextAttributeValueHistoryMostRecentValues { get; set; }
     }
 }

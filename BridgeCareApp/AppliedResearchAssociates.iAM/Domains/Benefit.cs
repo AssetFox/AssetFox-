@@ -6,7 +6,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class Benefit : IValidator
+    public sealed class Benefit : WeakEntity, IValidator
     {
         public INumericAttribute Attribute
         {

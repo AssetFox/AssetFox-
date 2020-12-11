@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class TreatmentScheduling : IValidator
+    public sealed class TreatmentScheduling : WeakEntity, IValidator
     {
         public int OffsetToFutureYear { get; set; }
 

@@ -1,24 +1,26 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using DataminerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.Domains;
+using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using TextAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.TextAttribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
     public static class AttributeMapper
     {
-        public static DataminerAttribute ToDomain(this AttributeEntity entity)
+        public static Attribute ToDomain(this AttributeEntity entity)
         {
             if (entity == null)
             {
                 throw new NullReferenceException("Cannot map null Attribute entity to Attribute domain");
             }
 
-            if (entity.DataType == "NUMERIC")
+            if (entity.DataType == "NUMBER")
             {
                 return new NumericAttribute(Convert.ToDouble(entity.DefaultValue),
-                    entity.Maximum ?? 0,
-                    entity.Minimum ?? 0,
+                    entity.Maximum,
+                    entity.Minimum,
                     entity.Id,
                     entity.Name,
                     entity.AggregationRuleType,
@@ -29,9 +31,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     entity.IsAscending);
             }
 
-            if (entity.DataType == "TEXT")
+            if (entity.DataType == "STRING")
             {
-                return new DataMiner.Attributes.TextAttribute(entity.DefaultValue,
+                return new TextAttribute(entity.DefaultValue,
                     entity.Id,
                     entity.Name,
                     entity.AggregationRuleType,
@@ -45,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
         }
 
-        public static AttributeEntity ToEntity(this DataminerAttribute domain)
+        public static AttributeEntity ToEntity(this Attribute domain)
         {
             if (domain == null)
             {
@@ -77,6 +79,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
 
             return entity;
+        }
+
+        public static Domains.Attribute ToSimulationAnalysisDomain(this AttributeEntity entity)
+        {
+            if (entity.DataType == "NUMBER")
+            {
+                return new Domains.NumberAttribute(entity.Name)
+                {
+                    IsDecreasingWithDeterioration = entity.IsAscending,
+                    DefaultValue = Convert.ToDouble(entity.DefaultValue),
+                    Maximum = entity.Maximum,
+                    Minimum = entity.Minimum
+                };
+            }
+
+            if (entity.DataType == "STRING")
+            {
+                return new Domains.TextAttribute(entity.Name)
+                {
+                    DefaultValue = entity.DefaultValue
+                };
+            }
+
+            throw new InvalidOperationException("Cannot determine Attribute entity data type");
         }
     }
 }

@@ -6,7 +6,7 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
-    public sealed class Simulation : IValidator
+    public sealed class Simulation : WeakEntity, IValidator
     {
         public Simulation(Network network)
         {

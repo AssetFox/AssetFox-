@@ -82,10 +82,10 @@ namespace AppliedResearchAssociates.iAM.DataAccess
                 {
                     switch (attribute.DataType)
                     {
-                    case "NUMERIC":
+                    case "NUMBER":
                         
                         break;
-                    case "TEXT":
+                    case "STRING":
                         aggregatedTextResults.AddRange(segment.GetAggregatedValuesByYear(attribute, AggregationRuleFactory.CreateTextRule(attribute)));
                         break;
                     }

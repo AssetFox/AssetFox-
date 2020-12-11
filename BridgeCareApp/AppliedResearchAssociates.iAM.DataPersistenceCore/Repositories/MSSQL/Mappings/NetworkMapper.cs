@@ -4,19 +4,13 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
-using IamNetwork = AppliedResearchAssociates.iAM.Domains.Network;
-using Network = AppliedResearchAssociates.iAM.DataAssignment.Networking.Network;
+using MoreLinq;
+using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
     public static class NetworkMapper
     {
-        public static IamNetwork ToIamNetworkDomain(this Network network) =>
-            new IamNetwork(new Explorer())
-            {
-                Name = network.Name
-            };
-
         public static DataAssignment.Networking.Network ToDomain(this NetworkEntity entity)
         {
             if (entity == null)
@@ -47,6 +41,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? domain.MaintainableAssets.Select(d => d.ToEntity(domain.Id)).ToList()
                     : new List<MaintainableAssetEntity>()
             };
+        }
+
+        public static NetworkEntity ToEntity(this SimulationAnalysisDomains.Network domain) =>
+            new NetworkEntity
+            {
+                Id = domain.Id,
+                Name = domain.Name
+            };
+
+        public static SimulationAnalysisDomains.Network ToSimulationAnalysisDomain(this NetworkEntity entity, Explorer explorer)
+        {
+            var network = explorer.AddNetwork();
+            network.Id = entity.Id;
+            network.Name = entity.Name;
+
+            if (entity.Facilities.Any())
+            {
+                entity.Facilities.ForEach(_ => _.CreateFacility(network));
+            }
+
+            return network;
         }
     }
 }

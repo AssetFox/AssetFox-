@@ -204,6 +204,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("Attribute");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEquationCriterionLibraryEntity", b =>
+                {
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EquationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CriterionLibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("AttributeId", "EquationId");
+
+                    b.HasIndex("AttributeId");
+
+                    b.HasIndex("CriterionLibraryId");
+
+                    b.HasIndex("EquationId")
+                        .IsUnique();
+
+                    b.ToTable("Attribute_Equation_CriterionLibrary");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -254,21 +277,50 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("InvestmentPlanId")
+                    b.Property<Guid>("BudgetLibraryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InvestmentPlanId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("BudgetLibraryId");
 
                     b.ToTable("Budget");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibraryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BudgetLibrary");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibrarySimulationEntity", b =>
+                {
+                    b.Property<Guid>("BudgetLibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SimulationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("BudgetLibraryId", "SimulationId");
+
+                    b.HasIndex("BudgetLibraryId");
+
+                    b.HasIndex("SimulationId")
+                        .IsUnique();
+
+                    b.ToTable("BudgetLibrary_Simulation");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPercentagePairEntity", b =>
@@ -381,14 +433,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CashFlowRuleLibraryId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("CashFlowRule");
                 });
@@ -400,12 +449,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("CashFlowRuleLibrary");
                 });
@@ -428,6 +474,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("CashFlowRuleLibrary_Simulation");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectConsequenceEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChangeValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CommittedProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeId");
+
+                    b.HasIndex("CommittedProjectId");
+
+                    b.ToTable("CommittedProjectConsequence");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -441,12 +511,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SectionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SelectableTreatmentId")
+                    b.Property<Guid?>("SelectableTreatmentEntityId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ShadowForAnyTreatment")
@@ -455,6 +525,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<int>("ShadowForSameTreatment")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("SimulationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Year")
                         .HasColumnType("int");
 
@@ -462,14 +535,55 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("BudgetId");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("SectionId");
+
+                    b.HasIndex("SelectableTreatmentEntityId");
+
+                    b.HasIndex("SimulationId");
+
+                    b.ToTable("CommittedProject");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChangeValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SelectableTreatmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeId");
 
                     b.HasIndex("SelectableTreatmentId");
 
-                    b.ToTable("CommittedProject");
+                    b.ToTable("TreatmentConsequence");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEquationEntity", b =>
+                {
+                    b.Property<Guid>("ConditionalTreatmentConsequenceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EquationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ConditionalTreatmentConsequenceId", "EquationId");
+
+                    b.HasIndex("ConditionalTreatmentConsequenceId")
+                        .IsUnique();
+
+                    b.HasIndex("EquationId")
+                        .IsUnique();
+
+                    b.ToTable("TreatmentConsequence_Equation");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryAnalysisMethodEntity", b =>
@@ -544,6 +658,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("CriterionLibrary_CashFlowRule");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryConditionalTreatmentConsequenceEntity", b =>
+                {
+                    b.Property<Guid>("CriterionLibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ConditionalTreatmentConsequenceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("CriterionLibraryId", "ConditionalTreatmentConsequenceId");
+
+                    b.HasIndex("ConditionalTreatmentConsequenceId")
+                        .IsUnique();
+
+                    b.HasIndex("CriterionLibraryId");
+
+                    b.ToTable("CriterionLibrary_TreatmentConsequence");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryDeficientConditionGoalEntity", b =>
                 {
                     b.Property<Guid>("CriterionLibraryId")
@@ -573,12 +705,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("CriterionLibrary");
                 });
@@ -619,6 +748,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("CriterionLibrary_RemainingLifeLimit");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibrarySelectableTreatmentEntity", b =>
+                {
+                    b.Property<Guid>("CriterionLibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SelectableTreatmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("CriterionLibraryId", "SelectableTreatmentId");
+
+                    b.HasIndex("CriterionLibraryId");
+
+                    b.HasIndex("SelectableTreatmentId");
+
+                    b.ToTable("CriterionLibrary_Treatment");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTargetConditionGoalEntity", b =>
                 {
                     b.Property<Guid>("CriterionLibraryId")
@@ -637,25 +783,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("CriterionLibrary_TargetConditionGoal");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentConsequence", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TreatmentConsequenceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("CriterionLibraryId", "TreatmentConsequenceId");
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.HasIndex("TreatmentConsequenceId")
-                        .IsUnique();
-
-                    b.ToTable("CriterionLibrary_TreatmentConsequence");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentCost", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentCostEntity", b =>
                 {
                     b.Property<Guid>("CriterionLibraryId")
                         .HasColumnType("uniqueidentifier");
@@ -671,24 +799,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsUnique();
 
                     b.ToTable("CriterionLibrary_TreatmentCost");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("CriterionLibraryId", "TreatmentId");
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.HasIndex("TreatmentId")
-                        .IsUnique();
-
-                    b.ToTable("CriterionLibrary_Treatment");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentSupersessionEntity", b =>
@@ -728,16 +838,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AttributeId");
 
                     b.HasIndex("DeficientConditionGoalLibraryId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("DeficientConditionGoal");
                 });
@@ -749,12 +856,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("DeficientConditionGoalLibrary");
                 });
@@ -798,15 +902,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("NetworkId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.HasIndex("NetworkId");
 
@@ -896,14 +997,60 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("Network");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NumericAttributeValueHistoryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Value")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeId");
+
+                    b.HasIndex("SectionId");
+
+                    b.ToTable("NumericAttributeValueHistory");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NumericAttributeValueHistoryMostRecentValueEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("MostRecentValue")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("SectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeId");
+
+                    b.HasIndex("SectionId");
+
+                    b.ToTable("NumericAttributeValueHistoryMostRecentValue");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEntity", b =>
@@ -916,7 +1063,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("PerformanceCurveLibraryId")
                         .HasColumnType("uniqueidentifier");
@@ -927,9 +1074,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AttributeId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.HasIndex("PerformanceCurveLibraryId");
 
@@ -962,12 +1106,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("PerformanceCurveLibrary");
                 });
@@ -1020,12 +1161,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("RemainingLifeLimitLibrary");
                 });
@@ -1064,16 +1202,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("FacilityId");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("Section");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentBudgetEntity", b =>
+                {
+                    b.Property<Guid>("SelectableTreatmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BudgetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("SelectableTreatmentId", "BudgetId");
+
+                    b.HasIndex("BudgetId");
+
+                    b.HasIndex("SelectableTreatmentId");
+
+                    b.ToTable("Treatment_Budget");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", b =>
@@ -1081,9 +1233,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ShadowForAnyTreatment")
                         .HasColumnType("int");
@@ -1095,9 +1250,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.HasIndex("TreatmentLibraryId");
 
@@ -1111,7 +1263,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("NetworkId")
                         .HasColumnType("uniqueidentifier");
@@ -1121,9 +1273,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("NetworkId");
 
                     b.ToTable("Simulation");
@@ -1131,16 +1280,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputEntity", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("Output")
-                        .HasColumnType("varbinary(max)");
-
                     b.Property<Guid>("SimulationId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Output")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SimulationId");
 
                     b.HasIndex("SimulationId")
                         .IsUnique();
@@ -1158,7 +1304,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Target")
                         .HasColumnType("float");
@@ -1173,9 +1319,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("AttributeId");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("TargetConditionGoalLibraryId");
 
                     b.ToTable("TargetConditionGoal");
@@ -1188,12 +1331,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("TargetConditionGoalLibrary");
                 });
@@ -1216,24 +1356,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("TargetConditionGoalLibrary_Simulation");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentBudgetEntity", b =>
-                {
-                    b.Property<Guid>("TreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BudgetId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TreatmentId", "BudgetId");
-
-                    b.HasIndex("BudgetId");
-
-                    b.HasIndex("TreatmentId");
-
-                    b.ToTable("Treatment_Budget");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentConsequenceEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TextAttributeValueHistoryEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -1241,38 +1364,47 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid>("AttributeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ChangeValue")
+                    b.Property<Guid>("SectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("TreatmentId")
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeId");
+
+                    b.HasIndex("SectionId");
+
+                    b.ToTable("TextAttributeValueHistory");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TextAttributeValueHistoryMostRecentValueEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MostRecentValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SectionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AttributeId");
 
-                    b.HasIndex("TreatmentId");
+                    b.HasIndex("SectionId");
 
-                    b.ToTable("TreatmentConsequence");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentConsequenceEquationEntity", b =>
-                {
-                    b.Property<Guid>("TreatmentConsequenceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("EquationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TreatmentConsequenceId", "EquationId");
-
-                    b.HasIndex("EquationId")
-                        .IsUnique();
-
-                    b.HasIndex("TreatmentConsequenceId")
-                        .IsUnique();
-
-                    b.ToTable("TreatmentConsequence_Equation");
+                    b.ToTable("TextAttributeValueHistoryMostRecentValue");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentCostEntity", b =>
@@ -1316,12 +1448,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("TreatmentLibrary");
                 });
@@ -1430,6 +1559,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEquationCriterionLibraryEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                        .WithMany("AttributeEquationCriterionLibraryJoins")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                        .WithMany("AttributeEquationCriterionLibraryJoins")
+                        .HasForeignKey("CriterionLibraryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                        .WithOne("AttributeEquationCriterionLibraryJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEquationCriterionLibraryEntity", "EquationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", "AnalysisMethod")
@@ -1455,9 +1604,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", b =>
                 {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.InvestmentPlanEntity", "InvestmentPlan")
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibraryEntity", "BudgetLibrary")
                         .WithMany("Budgets")
-                        .HasForeignKey("InvestmentPlanId")
+                        .HasForeignKey("BudgetLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibrarySimulationEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibraryEntity", "BudgetLibrary")
+                        .WithMany("BudgetLibrarySimulationJoins")
+                        .HasForeignKey("BudgetLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                        .WithOne("BudgetLibrarySimulationJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibrarySimulationEntity", "SimulationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1534,6 +1698,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectConsequenceEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                        .WithMany()
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", "CommittedProject")
+                        .WithMany("CommittedProjectConsequences")
+                        .HasForeignKey("CommittedProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", "Budget")
@@ -1548,9 +1727,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", null)
                         .WithMany("CommittedProjects")
+                        .HasForeignKey("SelectableTreatmentEntityId");
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                        .WithMany("CommittedProjects")
+                        .HasForeignKey("SimulationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                        .WithMany("TreatmentConsequences")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
+                        .WithMany("TreatmentConsequences")
                         .HasForeignKey("SelectableTreatmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEquationEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEntity", "ConditionalTreatmentConsequence")
+                        .WithOne("ConditionalTreatmentConsequenceEquationJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEquationEntity", "ConditionalTreatmentConsequenceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                        .WithOne("ConditionalTreatmentConsequenceEquationJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEquationEntity", "EquationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1615,6 +1828,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryConditionalTreatmentConsequenceEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEntity", "ConditionalTreatmentConsequence")
+                        .WithOne("CriterionLibraryConditionalTreatmentConsequenceJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryConditionalTreatmentConsequenceEntity", "ConditionalTreatmentConsequenceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                        .WithMany("CriterionLibraryTreatmentConsequenceJoins")
+                        .HasForeignKey("CriterionLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryDeficientConditionGoalEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
@@ -1660,6 +1888,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibrarySelectableTreatmentEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                        .WithMany("CriterionLibrarySelectableTreatmentJoins")
+                        .HasForeignKey("CriterionLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
+                        .WithMany("CriterionLibrarySelectableTreatmentJoins")
+                        .HasForeignKey("SelectableTreatmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTargetConditionGoalEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
@@ -1675,22 +1918,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentConsequence", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryTreatmentConsequenceJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentConsequenceEntity", "TreatmentConsequence")
-                        .WithOne("CriterionLibraryTreatmentConsequenceJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentConsequence", "TreatmentConsequenceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentCost", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentCostEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
                         .WithMany("CriterionLibraryTreatmentCostJoins")
@@ -1700,22 +1928,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentCostEntity", "TreatmentCost")
                         .WithOne("CriterionLibraryTreatmentCostJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentCost", "TreatmentCostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryTreatmentJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithOne("CriterionLibraryTreatmentJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentEntity", "TreatmentId")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentCostEntity", "TreatmentCostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1797,6 +2010,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
                         .WithOne("MaintainableAssetLocation")
                         .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetLocationEntity", "MaintainableAssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NumericAttributeValueHistoryEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                        .WithMany("NumericAttributeValueHistories")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", "Section")
+                        .WithMany("NumericAttributeValueHistories")
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NumericAttributeValueHistoryMostRecentValueEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                        .WithMany("NumericAttributeValueHistoryMostRecentValues")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", "Section")
+                        .WithMany("NumericAttributeValueHistoryMostRecentValues")
+                        .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1885,6 +2128,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentBudgetEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", "Budget")
+                        .WithMany("TreatmentBudgetJoins")
+                        .HasForeignKey("BudgetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
+                        .WithMany("TreatmentBudgetJoins")
+                        .HasForeignKey("SelectableTreatmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentLibraryEntity", "TreatmentLibrary")
@@ -1942,47 +2200,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentBudgetEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", "Budget")
-                        .WithMany("TreatmentBudgetJoins")
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithMany("TreatmentBudgetJoins")
-                        .HasForeignKey("TreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentConsequenceEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TextAttributeValueHistoryEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("TreatmentConsequences")
+                        .WithMany("TextAttributeValueHistories")
                         .HasForeignKey("AttributeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithMany("TreatmentConsequences")
-                        .HasForeignKey("TreatmentId")
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", "Section")
+                        .WithMany("TextAttributeValueHistories")
+                        .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentConsequenceEquationEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TextAttributeValueHistoryMostRecentValueEntity", b =>
                 {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
-                        .WithOne("TreatmentConsequenceEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentConsequenceEquationEntity", "EquationId")
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                        .WithMany("TextAttributeValueHistoryMostRecentValues")
+                        .HasForeignKey("AttributeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentConsequenceEntity", "TreatmentConsequence")
-                        .WithOne("TreatmentConsequenceEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentConsequenceEquationEntity", "TreatmentConsequenceId")
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", "Section")
+                        .WithMany("TextAttributeValueHistoryMostRecentValues")
+                        .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

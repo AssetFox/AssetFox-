@@ -7,8 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ISimulationRepository
     {
-        int CreateSimulations(List<Simulation> simulations, Guid networkId);
-
-        IEnumerable<Simulation> GetAllInNetwork(Guid networkId);
+        void CreateSimulation(Simulation simulation);
+        void GetAllInNetwork(Network network);
     }
 }

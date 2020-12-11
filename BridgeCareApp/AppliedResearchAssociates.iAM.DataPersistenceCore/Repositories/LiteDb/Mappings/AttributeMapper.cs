@@ -14,11 +14,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
                 throw new NullReferenceException("Cannot map null Attribute entity to Attribute domain");
             }
 
-            if (entity.DataType == "NUMERIC")
+            if (entity.DataType == "NUMBER")
             {
                 return new NumericAttribute(Convert.ToDouble(entity.DefaultValue),
-                    entity.Maximum ?? 0,
-                    entity.Minimum ?? 0,
+                    entity.Maximum,
+                    entity.Minimum,
                     entity.Id,
                     entity.Name,
                     entity.AggregationRuleType,
@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
                     entity.IsAscending);
             }
 
-            if (entity.DataType == "TEXT")
+            if (entity.DataType == "STRING")
             {
                 return new DataMiner.Attributes.TextAttribute(entity.DefaultValue,
                     entity.Id,

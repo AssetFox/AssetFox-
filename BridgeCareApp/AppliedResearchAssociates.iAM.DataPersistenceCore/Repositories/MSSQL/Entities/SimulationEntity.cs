@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -16,13 +17,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual AnalysisMethodEntity AnalysisMethod { get; set; }
 
+        public virtual InvestmentPlanEntity InvestmentPlan { get; set; }
+
+        public virtual BudgetLibrarySimulationEntity BudgetLibrarySimulationJoin { get; set; }
+
         public virtual BudgetPriorityLibrarySimulationEntity BudgetPriorityLibrarySimulationJoin { get; set; }
 
         public virtual CashFlowRuleLibrarySimulationEntity CashFlowRuleLibrarySimulationJoin { get; set; }
 
         public virtual DeficientConditionGoalLibrarySimulationEntity DeficientConditionGoalLibrarySimulationJoin { get; set; }
-
-        public virtual InvestmentPlanEntity InvestmentPlan { get; set; }
 
         public virtual PerformanceCurveLibrarySimulationEntity PerformanceCurveLibrarySimulationJoin { get; set; }
 
@@ -33,5 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual TargetConditionGoalLibrarySimulationEntity TargetConditionGoalLibrarySimulationJoin { get; set; }
 
         public virtual TreatmentLibrarySimulationEntity TreatmentLibrarySimulationJoin { get; set; }
+
+        public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
     }
 }

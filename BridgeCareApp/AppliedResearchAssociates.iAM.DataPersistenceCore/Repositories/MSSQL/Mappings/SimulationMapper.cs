@@ -1,27 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
+using Microsoft.EntityFrameworkCore.Internal;
+using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
     public static class SimulationMapper
     {
-        public static SimulationEntity ToEntity(this Simulation domain, Guid networkId) =>
+        public static SimulationEntity ToEntity(this Simulation domain) =>
             new SimulationEntity
             {
-                Id = Guid.NewGuid(),
-                NetworkId = networkId,
+                Id = domain.Id,
+                NetworkId = domain.Network.Id,
                 Name = domain.Name,
                 NumberOfYearsOfTreatmentOutlook = domain.NumberOfYearsOfTreatmentOutlook
             };
 
-        public static Simulation ToDomain(this SimulationEntity entity) =>
-            new Simulation(entity.Network.ToDomain().ToIamNetworkDomain())
-            {
-                Name = entity.Name,
-                NumberOfYearsOfTreatmentOutlook = entity.NumberOfYearsOfTreatmentOutlook
-            };
+        public static void CreateSimulation(this SimulationEntity entity, Network network)
+        {
+            var simulation = network.AddSimulation();
+            simulation.Id = entity.Id;
+            simulation.Name = entity.Name;
+            simulation.NumberOfYearsOfTreatmentOutlook = entity.NumberOfYearsOfTreatmentOutlook;
+        }
     }
 }

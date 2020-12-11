@@ -14,12 +14,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             CriterionLibraryDeficientConditionGoalJoins = new HashSet<CriterionLibraryDeficientConditionGoalEntity>();
             CriterionLibraryPerformanceCurveJoins = new HashSet<CriterionLibraryPerformanceCurveEntity>();
             CriterionLibraryRemainingLifeLimitJoins = new HashSet<CriterionLibraryRemainingLifeLimitEntity>();
-            CriterionLibraryTreatmentJoins = new HashSet<CriterionLibraryTreatmentEntity>();
-            CriterionLibraryTreatmentConsequenceJoins = new HashSet<CriterionLibraryTreatmentConsequence>();
-            CriterionLibraryTreatmentCostJoins = new HashSet<CriterionLibraryTreatmentCost>();
+            CriterionLibrarySelectableTreatmentJoins = new HashSet<CriterionLibrarySelectableTreatmentEntity>();
+            CriterionLibraryTreatmentConsequenceJoins = new HashSet<CriterionLibraryConditionalTreatmentConsequenceEntity>();
+            CriterionLibraryTreatmentCostJoins = new HashSet<CriterionLibraryTreatmentCostEntity>();
             CriterionLibraryTreatmentSupersessionJoins = new HashSet<CriterionLibraryTreatmentSupersessionEntity>();
+            AttributeEquationCriterionLibraryJoins = new HashSet<AttributeEquationCriterionLibraryEntity>();
         }
-
+        
         public Guid Id { get; set; }
 
         public string Name { get; set; }
@@ -42,12 +43,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<CriterionLibraryTargetConditionGoalEntity> CriterionLibraryTargetConditionGoalJoins { get; set; }
 
-        public virtual ICollection<CriterionLibraryTreatmentEntity> CriterionLibraryTreatmentJoins { get; set; }
+        public virtual ICollection<CriterionLibrarySelectableTreatmentEntity> CriterionLibrarySelectableTreatmentJoins { get; set; }
 
-        public virtual ICollection<CriterionLibraryTreatmentConsequence> CriterionLibraryTreatmentConsequenceJoins { get; set; }
+        public virtual ICollection<CriterionLibraryConditionalTreatmentConsequenceEntity> CriterionLibraryTreatmentConsequenceJoins { get; set; }
 
-        public virtual ICollection<CriterionLibraryTreatmentCost> CriterionLibraryTreatmentCostJoins { get; set; }
+        public virtual ICollection<CriterionLibraryTreatmentCostEntity> CriterionLibraryTreatmentCostJoins { get; set; }
 
         public virtual ICollection<CriterionLibraryTreatmentSupersessionEntity> CriterionLibraryTreatmentSupersessionJoins { get; set; }
+
+        public virtual ICollection<AttributeEquationCriterionLibraryEntity> AttributeEquationCriterionLibraryJoins { get; set; }
     }
 }

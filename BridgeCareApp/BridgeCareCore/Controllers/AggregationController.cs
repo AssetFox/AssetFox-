@@ -150,20 +150,20 @@ namespace BridgeCareCore.Controllers
                     }
                     i++;
                     // aggregate numeric data
-                    if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "NUMERIC"))
+                    if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "NUMBER"))
                     {
                         aggregatedResults.AddRange(maintainableAsset.AssignedData
-                            .Where(_ => _.Attribute.DataType == "NUMERIC")
+                            .Where(_ => _.Attribute.DataType == "NUMBER")
                             .Select(_ => _.Attribute)
                             .Select(_ => maintainableAsset.GetAggregatedValuesByYear(_, AggregationRuleFactory.CreateNumericRule(_)))
                             .ToList());
                     }
 
                     //aggregate text data
-                    if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "TEXT"))
+                    if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "STRING"))
                     {
                         aggregatedResults.AddRange(maintainableAsset.AssignedData
-                            .Where(_ => _.Attribute.DataType == "TEXT")
+                            .Where(_ => _.Attribute.DataType == "STRING")
                             .Select(_ => _.Attribute)
                             .Select(_ => maintainableAsset.GetAggregatedValuesByYear(_, AggregationRuleFactory.CreateTextRule(_)))
                             .ToList());

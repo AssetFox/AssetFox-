@@ -9,10 +9,10 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
         {
             switch (connection.Attribute.DataType)
             {
-            case "NUMERIC":
+            case "NUMBER":
                 return connection.GetData<double>();
 
-            case "TEXT":
+            case "STRING":
                 return connection.GetData<string>();
 
             default:

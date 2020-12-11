@@ -1,0 +1,151 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
+using AppliedResearchAssociates.iAM.Domains;
+using MoreLinq;
+using TextAttribute = AppliedResearchAssociates.iAM.Domains.TextAttribute;
+
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
+{
+    public static class AttributeValueHistoryMapper
+    {
+        public static void ToEntity(this AttributeValueHistory<double> domain, Guid sectionId, Guid attributeId,
+            List<NumericAttributeValueHistoryMostRecentValueEntity> mostRecentValueList,
+            List<NumericAttributeValueHistoryEntity> valueList)
+        {
+            using var historyEnumerator = domain.GetEnumerator();
+            historyEnumerator.Reset();
+
+            mostRecentValueList.Add(new NumericAttributeValueHistoryMostRecentValueEntity
+            {
+                Id = Guid.NewGuid(),
+                SectionId = sectionId,
+                AttributeId = attributeId,
+                MostRecentValue = Convert.ToDouble(domain.MostRecentValue)
+            });
+
+            while (historyEnumerator.MoveNext())
+            {
+                valueList.Add(new NumericAttributeValueHistoryEntity
+                {
+                    Id = Guid.NewGuid(),
+                    SectionId = sectionId,
+                    AttributeId = attributeId,
+                    Year = historyEnumerator.Current.Key,
+                    Value = Convert.ToDouble(historyEnumerator.Current.Value)
+                });
+            }
+        }
+
+        public static void ToEntity(this AttributeValueHistory<string> domain, Guid sectionId, Guid attributeId,
+            List<TextAttributeValueHistoryMostRecentValueEntity> mostRecentValueList,
+            List<TextAttributeValueHistoryEntity> valueList)
+        {
+            using var historyEnumerator = domain.GetEnumerator();
+            historyEnumerator.Reset();
+
+            mostRecentValueList.Add(new TextAttributeValueHistoryMostRecentValueEntity
+            {
+                Id = Guid.NewGuid(),
+                SectionId = sectionId,
+                AttributeId = attributeId,
+                MostRecentValue = domain.MostRecentValue
+            });
+
+            while (historyEnumerator.MoveNext())
+            {
+                valueList.Add(new TextAttributeValueHistoryEntity
+                {
+                    Id = Guid.NewGuid(),
+                    SectionId = sectionId,
+                    AttributeId = attributeId,
+                    Year = historyEnumerator.Current.Key,
+                    Value = historyEnumerator.Current.Value
+                });
+            }
+        }
+
+        public static void SetAttributeValueHistoryValues(this List<NumericAttributeValueHistoryEntity> entities,
+            Section section)
+        {
+            var entitiesPerAttributeName = entities
+                .GroupBy(_ => _.Attribute.Name, _ => _)
+                .ToDictionary(_ => _.Key, _ => _.OrderBy(__ => __.Year).ToList());
+
+            entitiesPerAttributeName.Keys.ForEach(attributeName =>
+            {
+                var numberAttribute = section.Facility.Network.Explorer.NumberAttributes
+                    .Single(_ => _.Name == attributeName);
+
+                var history = section.GetHistory(numberAttribute);
+
+                var attributeValueHistories = entitiesPerAttributeName[attributeName];
+
+                attributeValueHistories.ForEach(_ => history.Add(_.Year, _.Value));
+            });
+        }
+
+        public static void SetAttributeValueHistoryMostRecentValue(this List<NumericAttributeValueHistoryMostRecentValueEntity> entities,
+            Section section)
+        {
+            var entitiesPerAttributeName = entities
+                .GroupBy(_ => _.Attribute.Name, _ => _)
+                .ToDictionary(_ => _.Key, _ => _.ToList());
+
+            entitiesPerAttributeName.Keys.ForEach(attributeName =>
+            {
+                var numberAttribute = section.Facility.Network.Explorer.NumberAttributes
+                    .Single(_ => _.Name == attributeName);
+
+                var history = section.GetHistory(numberAttribute);
+
+                var attributeValueHistoryMostRecentValues = entitiesPerAttributeName[attributeName];
+
+                history.MostRecentValue = attributeValueHistoryMostRecentValues.First().MostRecentValue;
+            });
+        }
+
+        public static void SetAttributeValueHistoryValues(this List<TextAttributeValueHistoryEntity> entities,
+            Section section)
+        {
+            var entitiesPerAttributeName = entities
+                .GroupBy(_ => _.Attribute.Name, _ => _)
+                .ToDictionary(_ => _.Key, _ => _.OrderBy(__ => __.Year).ToList());
+
+            entitiesPerAttributeName.Keys.ForEach(attributeName =>
+            {
+                var textAttribute = section.Facility.Network.Explorer.TextAttributes
+                    .Single(_ => _.Name == attributeName);
+
+                var history = section.GetHistory(textAttribute);
+
+                var attributeValueHistories = entitiesPerAttributeName[attributeName];
+
+                attributeValueHistories.ForEach(_ => history.Add(_.Year, _.Value));
+            });
+        }
+
+        public static void SetAttributeValueHistoryMostRecentValue(this List<TextAttributeValueHistoryMostRecentValueEntity> entities,
+            Section section)
+        {
+            var entitiesPerAttributeName = entities
+                .GroupBy(_ => _.Attribute.Name, _ => _)
+                .ToDictionary(_ => _.Key, _ => _.ToList());
+
+            entitiesPerAttributeName.Keys.ForEach(attributeName =>
+            {
+                var textAttribute = section.Facility.Network.Explorer.TextAttributes
+                    .Single(_ => _.Name == attributeName);
+
+                var history = section.GetHistory(textAttribute);
+
+                var attributeValueHistoryMostRecentValues = entitiesPerAttributeName[attributeName];
+
+                history.MostRecentValue = attributeValueHistoryMostRecentValues.First().MostRecentValue;
+            });
+        }
+    }
+}

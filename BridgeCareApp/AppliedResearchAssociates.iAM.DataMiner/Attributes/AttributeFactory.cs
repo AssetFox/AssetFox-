@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
             Attribute attribute;
             switch (available.Type)
             {
-            case "NUMERIC":
+            case "NUMBER":
                 {
                     if (!double.TryParse(available.DefaultValue, out var defaultValue))
                     {
@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 
                     break;
                 }
-            case "TEXT":
+            case "STRING":
                 {
                     attribute = new TextAttribute(available.DefaultValue,
                         available.Id,

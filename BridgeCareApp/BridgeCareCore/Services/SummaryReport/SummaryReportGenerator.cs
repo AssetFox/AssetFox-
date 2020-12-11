@@ -16,7 +16,7 @@ namespace BridgeCareCore.Services.SummaryReport
 {
     public class SummaryReportGenerator : ISummaryReportGenerator
     {
-        private readonly FileSystemRepository.ISimulationOutputRepository _simulationOutputFileRepo;
+        private readonly ISimulationOutputFileRepository _simulationOutputFileRepo;
         private readonly IYearlyInvestmentRepository _yearlyInvestmentRepository;
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
@@ -30,7 +30,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
         private readonly IAddGraphsInTabs _addGraphsInTabs;
 
-        public SummaryReportGenerator(FileSystemRepository.ISimulationOutputRepository simulationOutputFileRepo,
+        public SummaryReportGenerator(ISimulationOutputFileRepository simulationOutputFileRepo,
             IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
             IPennDotReportARepository pennDotReportARepository,
@@ -146,7 +146,7 @@ namespace BridgeCareCore.Services.SummaryReport
                     .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
 
                 _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
-                
+
                 var folderPathForSimulation = $"DownloadedNewReports\\{simulationId}";
                 string relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
                 Directory.CreateDirectory(relativeFolderPath);

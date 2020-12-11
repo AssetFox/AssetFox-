@@ -8,23 +8,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public SelectableTreatmentEntity()
         {
-            TreatmentBudgetJoins = new HashSet<TreatmentBudgetEntity>();
-            TreatmentConsequences = new HashSet<TreatmentConsequenceEntity>();
+            CriterionLibrarySelectableTreatmentJoins = new HashSet<CriterionLibrarySelectableTreatmentEntity>();
+            TreatmentBudgetJoins = new HashSet<SelectableTreatmentBudgetEntity>();
+            TreatmentConsequences = new HashSet<ConditionalTreatmentConsequenceEntity>();
             TreatmentCosts = new HashSet<TreatmentCostEntity>();
             CommittedProjects = new HashSet<CommittedProjectEntity>();
             TreatmentSchedulings = new HashSet<TreatmentSchedulingEntity>();
             TreatmentSupersessions = new HashSet<TreatmentSupersessionEntity>();
         }
 
+        public string Description { get; set; }
+
         public Guid TreatmentLibraryId { get; set; }
 
         public virtual TreatmentLibraryEntity TreatmentLibrary { get; set; }
 
-        public virtual CriterionLibraryTreatmentEntity CriterionLibraryTreatmentJoin { get; set; }
+        public virtual ICollection<CriterionLibrarySelectableTreatmentEntity> CriterionLibrarySelectableTreatmentJoins { get; set; }
 
-        public virtual ICollection<TreatmentBudgetEntity> TreatmentBudgetJoins { get; set; }
+        public virtual ICollection<SelectableTreatmentBudgetEntity> TreatmentBudgetJoins { get; set; }
 
-        public virtual ICollection<TreatmentConsequenceEntity> TreatmentConsequences { get; set; }
+        public virtual ICollection<ConditionalTreatmentConsequenceEntity> TreatmentConsequences { get; set; }
 
         public virtual ICollection<TreatmentCostEntity> TreatmentCosts { get; set; }
 

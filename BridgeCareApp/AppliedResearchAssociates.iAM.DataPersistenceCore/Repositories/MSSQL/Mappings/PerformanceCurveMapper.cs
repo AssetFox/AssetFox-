@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
+using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
@@ -11,20 +13,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static PerformanceCurveEntity ToEntity(this PerformanceCurve domain, Guid performanceCurveLibraryId, Guid attributeId) =>
             new PerformanceCurveEntity
             {
-                Id = Guid.NewGuid(),
+                Id = domain.Id,
                 PerformanceCurveLibraryId = performanceCurveLibraryId,
                 AttributeId = attributeId,
                 Name = domain.Name,
                 Shift = domain.Shift
             };
 
-        public static PerformanceCurve ToDomain(this PerformanceCurveEntity domain)
+        public static void CreatePerformanceCurve(this PerformanceCurveEntity entity, Simulation simulation)
         {
-            /*return new PerformanceCurve(new Explorer())
-            {
-                Attribute = new NumberAttribute()
-            };*/
-            return null;
+            var performanceCurve = simulation.AddPerformanceCurve();
+            performanceCurve.Id = entity.Id;
+            performanceCurve.Attribute = simulation.Network.Explorer.NumberAttributes
+                .Single(_ => _.Name == entity.Attribute.Name);
+            performanceCurve.Name = entity.Name;
+            performanceCurve.Shift = entity.Shift;
+            performanceCurve.Equation.Expression = entity.PerformanceCurveEquationJoin?.Equation.Expression ?? string.Empty;
+            performanceCurve.Criterion.Expression =
+                entity.CriterionLibraryPerformanceCurveJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
         }
     }
 }

@@ -9,15 +9,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         {
             BudgetAmounts = new HashSet<BudgetAmountEntity>();
             BudgetPercentagePairs = new HashSet<BudgetPercentagePairEntity>();
-            TreatmentBudgetJoins = new HashSet<TreatmentBudgetEntity>();
+            TreatmentBudgetJoins = new HashSet<SelectableTreatmentBudgetEntity>();
         }
 
         public Guid Id { get; set; }
 
-        public Guid InvestmentPlanId { get; set; }
+        public Guid BudgetLibraryId { get; set; }
+
         public string Name { get; set; }
 
-        public virtual InvestmentPlanEntity InvestmentPlan { get; set; }
+        public virtual BudgetLibraryEntity BudgetLibrary { get; set; }
 
         public virtual CriterionLibraryBudgetEntity CriterionLibraryBudgetJoin { get; set; }
 
@@ -25,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<BudgetPercentagePairEntity> BudgetPercentagePairs { get; set; }
 
-        public virtual ICollection<TreatmentBudgetEntity> TreatmentBudgetJoins { get; set; }
+        public virtual ICollection<SelectableTreatmentBudgetEntity> TreatmentBudgetJoins { get; set; }
 
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
     }

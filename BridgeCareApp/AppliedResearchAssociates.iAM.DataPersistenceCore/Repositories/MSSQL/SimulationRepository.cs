@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
@@ -13,38 +14,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         public SimulationRepository(IAMContext context) : base(context) { }
 
-        public int CreateSimulations(List<Simulation> simulations, Guid networkId)
+        public void CreateSimulation(Simulation simulation)
         {
-            var entities = simulations.Select(_ => _.ToEntity(networkId)).ToList();
-
-            if (!entities.Any())
+            using (var contextTransaction = Context.Database.BeginTransaction())
             {
-                return 0;
+                try
+                {
+                    if (!Context.Network.Any(_ => _.Id == simulation.Network.Id))
+                    {
+                        throw new RowNotInTableException($"No network found having id {simulation.Network.Id}");
+                    }
+
+                    Context.Simulation.Add(simulation.ToEntity());
+                    Context.SaveChanges();
+
+                    contextTransaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    contextTransaction.Rollback();
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
-
-            Context.Simulation.AddRange(entities);
-            Context.SaveChanges();
-
-            return entities.Count();
         }
 
-        public IEnumerable<Simulation> GetAllInNetwork(Guid networkId)
+        public void GetAllInNetwork(Network network)
         {
-            if (!Context.Network.Any(_ => _.Id == networkId))
+            if (!Context.Network.Any(_ => _.Id == network.Id))
             {
-                throw new RowNotInTableException($"No network found having id {networkId}");
+                throw new RowNotInTableException($"No network found having id {network.Id}");
             }
 
-            var simulations = Context.Simulation.Include(_ => _.Network)
-                .Include(_ => _.AnalysisMethod)
-                .Include(_ => _.InvestmentPlan)
-                .Include(_ => _.PerformanceCurveLibrarySimulationJoin)
-                .ThenInclude(_ => _.PerformanceCurveLibrary)
-                .ThenInclude(_ => _.PerformanceCurves)
-                .Where(_ => _.NetworkId == networkId)
-                .ToList();
+            var entities = Context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
 
-            return simulations.Select(_ => _.ToDomain());
+            entities.ForEach(_ => _.CreateSimulation(network));
         }
     }
 }

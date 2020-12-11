@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.Parameters;
@@ -26,6 +27,10 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
         private readonly SummaryReportGlossary _summaryReportGlossary;
         private readonly SummaryReportParameters _summaryReportParameters;
+
+        private readonly IAnalysisMethodRepository _analysisMethodRepository;
+        private readonly IInvestmentPlanRepository _investmentPlanRepository;
+
         private readonly IHubContext<BridgeCareHub> HubContext;
 
         private readonly IAddGraphsInTabs _addGraphsInTabs;
@@ -38,7 +43,8 @@ namespace BridgeCareCore.Services.SummaryReport
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
             IYearlyInvestmentRepository yearlyInvestmentRepository,
             SummaryReportGlossary summaryReportGlossary, SummaryReportParameters summaryReportParameters,
-            IHubContext<BridgeCareHub> hub,
+            IHubContext<BridgeCareHub> hub, IAnalysisMethodRepository analysisMethodRepository,
+            IInvestmentPlanRepository investmentPlanRepository,
 
             IAddGraphsInTabs addGraphsInTabs)
         {
@@ -53,6 +59,9 @@ namespace BridgeCareCore.Services.SummaryReport
             _summaryReportGlossary = summaryReportGlossary ?? throw new ArgumentNullException(nameof(summaryReportGlossary));
             _summaryReportParameters = summaryReportParameters ?? throw new ArgumentNullException(nameof(summaryReportParameters));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
+
+            _analysisMethodRepository = analysisMethodRepository ?? throw new ArgumentNullException(nameof(analysisMethodRepository));
+            _investmentPlanRepository = investmentPlanRepository ?? throw new ArgumentNullException(nameof(investmentPlanRepository));
 
             _addGraphsInTabs = addGraphsInTabs ?? throw new ArgumentNullException(nameof(addGraphsInTabs));
         }
@@ -102,7 +111,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, pennDotReportAData);
 
                 // Filling up parameters tab
-                _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount);
+                _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel);
 
                 broadcastingMessage = $"Creating Unfunded recommendations TAB";
                 HubContext

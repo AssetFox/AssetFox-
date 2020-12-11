@@ -25,7 +25,7 @@ namespace BridgeCareCore.Controllers
             _legacySimulationSynchronizer = legacySimulationSynchronizer ?? throw new ArgumentNullException(nameof(legacySimulationSynchronizer));
         }
         [HttpPost]
-        [Route("SynchronizLegacyData/{legacySimulationId}")]
+        [Route("SynchronizeLegacyData/{legacySimulationId}")]
         public async Task<IActionResult> SynchronizLegacyData(int legacySimulationId)
         {
             // maybe hardcode the legacySimulationId for now?

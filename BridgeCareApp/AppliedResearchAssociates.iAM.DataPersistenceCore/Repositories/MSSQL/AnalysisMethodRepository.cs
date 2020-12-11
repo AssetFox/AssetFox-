@@ -137,9 +137,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having name {simulation.Name}");
             }
 
-            Context.AnalysisMethod.Include(_ => _.Simulation)
-                .ThenInclude(_ => _.Network)
-                .Include(_ => _.Attribute)
+            Context.AnalysisMethod.Include(_ => _.Attribute)
                 .Include(_ => _.Benefit)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CriterionLibraryAnalysisMethodJoin)

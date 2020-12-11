@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
@@ -34,7 +35,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (IsRunningFromXUnit)
             {
-                Context.Attribute.AddRange(attributes.Select(_ => _.ToEntity()).ToList());
+                attributes.ForEach(_ =>
+                {
+                    var entity = _.ToEntity();
+                    Context.AddOrUpdate(entity, entity.Id);
+                });
+                //Context.Attribute.AddRange(attributes.Select(_ => _.ToEntity()).ToList());
             }
             else
             {
@@ -144,9 +150,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Name = newCriterionLibraryName,
                     MergedCriteriaExpression = expression
                 };
-            }
 
-            criterionLibraryEntities.Add(criterionLibraryEntity);
+                criterionLibraryEntities.Add(criterionLibraryEntity);
+            }
 
             return criterionLibraryEntity;
         }

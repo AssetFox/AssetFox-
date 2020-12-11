@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.Domains;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -23,6 +24,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 try
                 {
+                    Context.Database.SetCommandTimeout(900);
+
                     if (!Context.Network.Any(_ => _.Id == networkId))
                     {
                         throw new RowNotInTableException($"No network found having id {networkId}");

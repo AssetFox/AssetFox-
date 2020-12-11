@@ -94,6 +94,20 @@ namespace BridgeCareCore
             services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
             services.AddScoped<IAggregatedResultRepository, AggregatedResultRepository>();
             services.AddScoped<ISimulationRepository, SimulationRepository>();
+            services.AddScoped<IEquationRepository, EquationRepository>();
+            services.AddScoped<ICriterionLibraryRepository, CriterionLibraryRepository>();
+            services.AddScoped<IAnalysisMethodRepository, AnalysisMethodRepository>();
+            services.AddScoped<IInvestmentPlanRepository, InvestmentPlanRepository>();
+            services.AddScoped<IBudgetPriorityRepository, BudgetPriorityRepository>();
+            services.AddScoped<IBudgetRepository, BudgetRepository>();
+            services.AddScoped<IBudgetPercentagePairRepository, BudgetPercentagePairRepository>();
+            services.AddScoped<IBudgetAmountRepository, BudgetAmountRepository>();
+            services.AddScoped<ICashFlowRuleRepository, CashFlowRuleRepository>();
+            services.AddScoped<ICashFlowDistributionRuleRepository, CashFlowDistributionRuleRepository>();
+            services.AddScoped<ITargetConditionGoalRepository, TargetConditionGoalRepository>();
+            services.AddScoped<IDeficientConditionGoalRepository, DeficientConditionGoalRepository>();
+            services.AddScoped<IRemainingLifeLimitRepository, RemainingLifeLimitRepository>();
+            services.AddScoped<IBenefitRepository, BenefitRepository>();
 
             services.AddScoped<IAttributeValueHistoryRepository, AttributeValueHistoryRepository>();
             services.AddScoped<ISectionRepository, SectionRepository>();

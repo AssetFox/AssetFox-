@@ -21,5 +21,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLe
         public DbSet<PennDotReportAEntity> pennDotReportAResults { get; set; }
 
         public DbSet<YearlyInvestmentEntity> yearlyInvestmentResults { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PennDotReportAEntity>()
+                .Property(p => p.StructureLength)
+                .HasColumnName("LENGTH");
+        }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using BridgeCareCore.Interfaces.SummaryReport;
+using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.Parameters
@@ -15,7 +16,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
         }
 
-        internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount)
+        internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel)
         {
             //var simulationId = simulationModel.simulationId;
             //var investmentPeriod = _simulationAnalysisRepository.GetAnySimulationAnalysis(simulationId, db);
@@ -34,7 +35,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             _excelHelper.ApplyBorder(worksheet.Cells[1, 1, 1, 10]);
             // End of Simulation Name format
 
-            FillData(worksheet);
+            FillData(worksheet, parametersModel);
 
             FillSimulationDetails(worksheet, simulationYearsCount);
             FillAnalysisDetails(worksheet);
@@ -45,7 +46,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
         }
 
         #region
-        private void FillData(ExcelWorksheet worksheet)
+        private void FillData(ExcelWorksheet worksheet, ParametersModel parametersModel)
         {
             var bpnValueCellTracker = new Dictionary<string, string>();
             var statusValueCellTracker = new Dictionary<string, string>();
@@ -62,8 +63,8 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells["A7"].Value = "NHS";
             worksheet.Cells["A8"].Value = "Non-NHS";
 
-            worksheet.Cells["B7"].Value = "Y dummy val"; //parametersModel.nHSModel.NHS; //"Y";
-            worksheet.Cells["B8"].Value = "Y dummy val"; //parametersModel.nHSModel.NonNHS;// "Y";
+            worksheet.Cells["B7"].Value = parametersModel.nHSModel.NHS; //"Y dummy val";
+            worksheet.Cells["B8"].Value = parametersModel.nHSModel.NonNHS;// "Y dummy val";
             _excelHelper.ApplyBorder(worksheet.Cells[6, 1, 8, 2]);
 
             _excelHelper.MergeCells(worksheet, 10, 1, 10, 2);
@@ -89,15 +90,15 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             foreach (var item in bpnValueCellTracker)
             {
-                worksheet.Cells[item.Value].Value = "Y dummy val";
-                //if (parametersModel.BPNValues.Contains(item.Key))
-                //{
-                //    worksheet.Cells[item.Value].Value = "Y";
-                //}
-                //else
-                //{
-                //    worksheet.Cells[item.Value].Value = "N";
-                //}
+                //worksheet.Cells[item.Value].Value = "Y dummy val";
+                if (parametersModel.BPNValues.Contains(item.Key))
+                {
+                    worksheet.Cells[item.Value].Value = "Y";
+                }
+                else
+                {
+                    worksheet.Cells[item.Value].Value = "N";
+                }
             }
             worksheet.Cells["B16"].Value = "Y";
             worksheet.Cells["B17"].Value = "Y";
@@ -112,8 +113,8 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells["A24"].Value = "8-20";
             worksheet.Cells["A25"].Value = "NBIS Length";
 
-            worksheet.Cells["B24"].Value = "dummy val"; //parametersModel.LengthBetween8and20;
-            worksheet.Cells["B25"].Value = "dummy val"; //parametersModel.LengthGreaterThan20;
+            worksheet.Cells["B24"].Value = parametersModel.LengthBetween8and20; // "dummy val";
+            worksheet.Cells["B25"].Value = parametersModel.LengthGreaterThan20; //"dummy val";
 
             _excelHelper.MergeCells(worksheet, 27, 1, 27, 2);
             _excelHelper.ApplyColor(worksheet.Cells[27, 1, 27, 2], Color.Gray);
@@ -129,17 +130,17 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             foreach (var item in statusValueCellTracker)
             {
-                worksheet.Cells[item.Value].Value = "Y dummy val";
-                //if (parametersModel.Status.Contains(item.Key))
-                //{
-                //    worksheet.Cells[item.Value].Value = "Y";
-                //}
-                //else
-                //{
-                //    worksheet.Cells[item.Value].Value = "N";
-                //}
+                //worksheet.Cells[item.Value].Value = "Y dummy val";
+                if (parametersModel.Status.Contains(item.Key))
+                {
+                    worksheet.Cells[item.Value].Value = "Y";
+                }
+                else
+                {
+                    worksheet.Cells[item.Value].Value = "N";
+                }
             }
-            worksheet.Cells["B30"].Value = "Y dummy val"; //parametersModel.P3 > 0 ? "Y" : "N";
+            worksheet.Cells["B30"].Value = parametersModel.P3 > 0 ? "Y" : "N"; // "Y dummy val";
             _excelHelper.ApplyBorder(worksheet.Cells[23, 1, 31, 2]);
 
             _excelHelper.MergeCells(worksheet, 14, 4, 14, 6);
@@ -195,15 +196,15 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             foreach (var item in ownerCodeValueTracker)
             {
-                worksheet.Cells[item.Value].Value = "Y dummy val";
-                //if (parametersModel.OwnerCode.Contains(item.Key))
-                //{
-                //    worksheet.Cells[item.Value].Value = "Y";
-                //}
-                //else
-                //{
-                //    worksheet.Cells[item.Value].Value = "N";
-                //}
+                //worksheet.Cells[item.Value].Value = "Y dummy val";
+                if (parametersModel.OwnerCode.Contains(item.Key))
+                {
+                    worksheet.Cells[item.Value].Value = "Y";
+                }
+                else
+                {
+                    worksheet.Cells[item.Value].Value = "N";
+                }
             }
             _excelHelper.ApplyBorder(worksheet.Cells[14, 4, 35, 6]);
 
@@ -255,15 +256,15 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             foreach (var item in functionalClassValueTracker)
             {
-                worksheet.Cells[item.Value].Value = "Y dummy val";
-                //if (parametersModel.FunctionalClass.Contains(item.Key))
-                //{
-                //    worksheet.Cells[item.Value].Value = "Y";
-                //}
-                //else
-                //{
-                //    worksheet.Cells[item.Value].Value = "N";
-                //}
+                //worksheet.Cells[item.Value].Value = "Y dummy val";
+                if (parametersModel.FunctionalClass.Contains(item.Key))
+                {
+                    worksheet.Cells[item.Value].Value = "Y";
+                }
+                else
+                {
+                    worksheet.Cells[item.Value].Value = "N";
+                }
             }
             worksheet.Cells["J30"].Value = worksheet.Cells["J22"].Value;
             _excelHelper.ApplyBorder(worksheet.Cells[14, 8, 31, 10]);

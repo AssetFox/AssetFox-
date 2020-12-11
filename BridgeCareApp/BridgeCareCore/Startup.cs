@@ -22,6 +22,7 @@ using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 using BridgeCareCore.Services.SummaryReport.GraphTabs;
 using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
 using BridgeCareCore.Services.SummaryReport.Parameters;
+using BridgeCareCore.Services.LegacySimulationSynchronization;
 
 namespace BridgeCareCore
 {
@@ -40,6 +41,8 @@ namespace BridgeCareCore
             services.AddSingleton(Configuration);
 
             services.AddControllers().AddNewtonsoftJson();
+
+            services.AddScoped<LegacySimulationSynchronizer>();
 
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
             services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();

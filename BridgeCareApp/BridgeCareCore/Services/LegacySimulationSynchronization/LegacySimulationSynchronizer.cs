@@ -41,7 +41,7 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
 
         public void SynchronizeLegacySimulation(int legacySimulationId)
         {
-            using (var sqlConnection = new SqlConnection(_config.GetConnectionString("LegacyConnex")))
+            using (var sqlConnection = new SqlConnection(_config.GetConnectionString("BridgeCareLegacyConnex")))
             {
                 try
                 {

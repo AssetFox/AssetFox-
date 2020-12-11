@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLe
 
         public Dictionary<string, Budget> GetYearlyBudgetAmount(Guid simulationId, int firstYearOfAnalysisPeriod, int numberOfYears)
         {
-            // It is hardcoded value for district 11
+            // It is hardcoded value for district 8
             var yearlyBudgetEntity = Context.yearlyInvestmentResults.Where(_ => _.SIMULATIONID == 1171);
 
             var explorer = new Explorer();

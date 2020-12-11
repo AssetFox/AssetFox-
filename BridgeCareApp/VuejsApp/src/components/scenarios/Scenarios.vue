@@ -652,10 +652,10 @@ export default class Scenarios extends Vue {
 
     @Watch('summaryReportStatusUpdate')
     onSummaryReportStatusUpdate(){
-        var scenarioObj = this.scenarios.find(_ => _.id == '5f5a44eaf6d7e440782835cb'); // TODO : use this.scenarioIdForStatusUpdate
+        var scenarioObj = this.scenarios.find(_ => _.id == '5e9f476c283e2e1ffc1d6cb9'); // TODO : use this.scenarioIdForStatusUpdate
 
         if(isNil(scenarioObj)){
-            scenarioObj = this.userScenarios.find(_ => _.id == '5f5a44eaf6d7e440782835cb'); // TODO : use this.scenarioIdForStatusUpdate
+            scenarioObj = this.userScenarios.find(_ => _.id == '5e9f476c283e2e1ffc1d6cb9'); // TODO : use this.scenarioIdForStatusUpdate
         }
 
         if(!isNil(scenarioObj)){

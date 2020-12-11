@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 
         public void CreateNetwork(Network network) => throw new NotImplementedException();
 
-        public IEnumerable<DataAssignment.Networking.Network> GetAllNetworks() => throw new NotImplementedException();
+        public List<DataAssignment.Networking.Network> GetAllNetworks() => throw new NotImplementedException();
         public Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer) => throw new NotImplementedException();
     }
 }

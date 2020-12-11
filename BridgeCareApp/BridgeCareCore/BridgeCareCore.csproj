@@ -17,6 +17,10 @@
     <DefineConstants>TRACE;MsSqlDebug</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE;Release</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Remove="tempIds.json" />
   </ItemGroup>

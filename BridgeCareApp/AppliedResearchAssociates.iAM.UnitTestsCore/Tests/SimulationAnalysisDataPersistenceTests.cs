@@ -1012,8 +1012,83 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 // CleanUp
                 testHelper.CleanUp();
             }
+        }
 
-            
+        [Fact]
+        public void TestLegacySimulationSynchronization()
+        {
+            var testHelper = new SimulationAnalysisDataPersistenceTestHelper();
+            var testOutputHelper = new TestOutputHelper();
+
+            try
+            {
+                // Arrange
+                testHelper.SetupForLegacySimulationSynchronization();
+
+                // Act
+                testHelper.SynchronizeLegacySimulation();
+
+                // Assert
+                var explorer = testHelper.AttributeRepo.GetExplorer();
+                var networks = testHelper.NetworkRepo.GetAllNetworks();
+                testHelper.StandAloneSimulation.Network.Id = networks.First().Id;
+                var network = testHelper.NetworkRepo
+                    .GetSimulationAnalysisNetwork(testHelper.StandAloneSimulation.Network.Id, explorer);
+                testHelper.SimulationRepo.GetAllInNetwork(network);
+                network.Simulations.ForEach(simulation =>
+                {
+                    testHelper.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+                    testHelper.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+                    testHelper.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+                    testHelper.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+                });
+
+                // Assert
+                var dataSourceSimulation = network.Simulations.ToList().First();
+
+                var simulation = testHelper.StandAloneSimulation;
+                simulation.ClearResults();
+                var runner = new SimulationRunner(simulation);
+                var simulationIsRunning = true;
+                runner.Information += (sender, eventArgs) => {
+                    if (eventArgs.Message == "Simulation complete.")
+                    {
+                        simulationIsRunning = false;
+                    }
+                };
+                runner.Run();
+
+                while (simulationIsRunning)
+                {
+                    testOutputHelper.WriteLine("Simulation is running...");
+                }
+
+                dataSourceSimulation.ClearResults();
+                var dataSourceRunner = new SimulationRunner(dataSourceSimulation);
+                var dataSourceSimulationIsRunning = true;
+                dataSourceRunner.Information += (sender, eventArgs) => {
+                    if (eventArgs.Message == "Simulation complete.")
+                    {
+                        dataSourceSimulationIsRunning = false;
+                    }
+                };
+                dataSourceRunner.Run();
+
+                while (dataSourceSimulationIsRunning)
+                {
+                    testOutputHelper.WriteLine("Data source simulation is running...");
+                }
+
+                var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
+                var simulationOutputString = JsonConvert.SerializeObject(simulation.Results, settings);
+                var dataSourceSimulationOutput = JsonConvert.SerializeObject(dataSourceSimulation.Results, settings);
+                Assert.Equal(simulationOutputString, dataSourceSimulationOutput);
+            }
+            finally
+            {
+                // CleanUp
+                testHelper.CleanUp();
+            }
         }
     }
 }

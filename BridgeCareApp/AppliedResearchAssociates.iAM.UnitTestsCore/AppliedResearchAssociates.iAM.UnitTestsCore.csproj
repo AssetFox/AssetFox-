@@ -19,4 +19,10 @@
     <ProjectReference Include="..\BridgeCareCore\BridgeCareCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="testConnections.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

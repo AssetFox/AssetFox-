@@ -79,7 +79,7 @@ namespace BridgeCareCore
             services.AddScoped<StackedColumnChartCommon>();
             services.AddSignalR();
 
-#if MsSqlDebug
+#if MsSqlDebug || Release
             // SQL SERVER SCOPINGS
             //services.AddMSSQLServices(Configuration.GetConnectionString("BridgeCareConnex"));
             services.AddDbContext<IAMContext>(options =>
@@ -91,6 +91,35 @@ namespace BridgeCareCore
             services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
             services.AddScoped<IAggregatedResultRepository, AggregatedResultRepository>();
             services.AddScoped<ISimulationRepository, SimulationRepository>();
+
+            services.AddScoped<IAttributeValueHistoryRepository, AttributeValueHistoryRepository>();
+            services.AddScoped<ISectionRepository, SectionRepository>();
+            services.AddScoped<IFacilityRepository, FacilityRepository>();
+            services.AddScoped<ISimulationRepository, SimulationRepository>();
+            services.AddScoped<IBudgetAmountRepository, BudgetAmountRepository>();
+            services.AddScoped<IBudgetRepository, BudgetRepository>();
+            services.AddScoped<ICriterionLibraryRepository, CriterionLibraryRepository>();
+            services.AddScoped<ICashFlowDistributionRuleRepository, CashFlowDistributionRuleRepository>();
+            services.AddScoped<ICashFlowRuleRepository, CashFlowRuleRepository>();
+            services.AddScoped<IInvestmentPlanRepository, InvestmentPlanRepository>();
+            services.AddScoped<IEquationRepository, EquationRepository>();
+            services.AddScoped<IAttributeRepository, AttributeRepository>();
+            services.AddScoped<IPerformanceCurveRepository, PerformanceCurveRepository>();
+            services.AddScoped<ITreatmentConsequenceRepository, TreatmentConsequenceRepository>();
+            services.AddScoped<ITreatmentCostRepository, TreatmentCostRepository>();
+            services.AddScoped<ITreatmentSchedulingRepository, TreatmentSchedulingRepository>();
+            services.AddScoped<ITreatmentSupersessionRepository, TreatmentSupersessionRepository>();
+            services.AddScoped<ISelectableTreatmentRepository, SelectableTreatmentRepository>();
+            services.AddScoped<IBudgetPercentagePairRepository, BudgetPercentagePairRepository>();
+            services.AddScoped<IBudgetPriorityRepository, BudgetPriorityRepository>();
+            services.AddScoped<ITargetConditionGoalRepository, TargetConditionGoalRepository>();
+            services.AddScoped<IDeficientConditionGoalRepository, DeficientConditionGoalRepository>();
+            services.AddScoped<IBenefitRepository, BenefitRepository>();
+            services.AddScoped<IRemainingLifeLimitRepository, RemainingLifeLimitRepository>();
+            services.AddScoped<IAnalysisMethodRepository, AnalysisMethodRepository>();
+            services.AddScoped<ISimulationOutputRepository, SimulationOutputRepository>();
+            services.AddScoped<ICommittedProjectConsequenceRepository, CommittedProjectConsequenceRepository>();
+            services.AddScoped<ICommittedProjectRepository, CommittedProjectRepository>();
 
             // Repository for legacy database
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));

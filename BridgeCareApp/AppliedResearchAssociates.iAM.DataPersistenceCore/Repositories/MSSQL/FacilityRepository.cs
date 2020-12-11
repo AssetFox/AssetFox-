@@ -28,8 +28,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         throw new RowNotInTableException($"No network found having id {networkId}");
                     }
 
-                    var networkEntity = Context.Network.Single(_ => _.Id == networkId);
-
                     var facilityEntities = facilities.Select(_ => _.ToEntity()).ToList();
 
                     if (IsRunningFromXUnit)

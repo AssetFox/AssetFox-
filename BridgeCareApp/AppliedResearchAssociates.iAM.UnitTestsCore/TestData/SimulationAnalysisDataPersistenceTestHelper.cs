@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataAccess;
@@ -10,10 +11,13 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
+using BridgeCareCore.Services.LegacySimulationSynchronization;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using MoreLinq;
+using Attribute = AppliedResearchAssociates.iAM.Domains.Attribute;
 using DA = AppliedResearchAssociates.iAM.DataAssignment;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
@@ -22,12 +26,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
     {
         private const int NetworkId = 13;
         private const int SimulationId = 1171;
-        private const string SqlConnectionString = "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework";
 
         private readonly SqlConnection _sqlConnection;
         private readonly DataAccessor _dataAccessor;
         private readonly IAMContext _dbContext;
 
+        public IConfiguration Config { get; set; }
+        public IAttributeMetaDataRepository AttributeMetaDataRepo { get; set; }
         public INetworkRepository NetworkRepo { get; set; }
         public IAttributeValueHistoryRepository AttributeValueHistoryRepo { get; set; }
         public ISectionRepository SectionRepo { get; set; }
@@ -62,7 +67,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public SimulationAnalysisDataPersistenceTestHelper()
         {
-            _sqlConnection = new SqlConnection(SqlConnectionString);
+            Config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("testConnections.json")
+                .Build();
+
+            _sqlConnection = new SqlConnection(Config.GetConnectionString("LegacyConnex"));
             _sqlConnection.Open();
             _dataAccessor = new DataAccessor(_sqlConnection, null);
             _dbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
@@ -87,7 +97,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             CriterionLibraryRepo = new CriterionLibraryRepository(_dbContext);
         }
 
-        public void InitializeAttributeRepo() => AttributeRepo = new AttributeRepository(EquationRepo, CriterionLibraryRepo, _dbContext);
+        public void InitializeAttributeRepos()
+        {
+            AttributeMetaDataRepo = new AttributeMetaDataRepository();
+            AttributeRepo = new AttributeRepository(EquationRepo, CriterionLibraryRepo, _dbContext);
+        }
 
         public void InitializeAnalysisMethodRepos()
         {
@@ -148,13 +162,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             FacilityRepo.CreateFacilities(StandAloneSimulation.Network.Facilities.ToList(), StandAloneSimulation.Network.Id);
         }
 
-        public void CreateAttributes()
-        {
-            var attributeMetaDataRepo = new AttributeMetaDataRepository();
-            var attributes = attributeMetaDataRepo.GetAllAttributes();
-
-            AttributeRepo.UpsertAttributes(attributes.ToList());
-        }
+        public void CreateAttributes() => AttributeRepo.UpsertAttributes(AttributeMetaDataRepo.GetAllAttributes().ToList());
 
         public void CreateAttributeCriteriaAndEquationJoins() => AttributeRepo.JoinAttributesWithEquationsAndCriteria(StandAloneSimulation.Network.Explorer);
 
@@ -171,6 +179,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                     year++;
                 }
             });
+        }
+
+        public void SynchronizeLegacySimulation()
+        {
+            var legacySimulationSynchronizer = new LegacySimulationSynchronizer(AttributeMetaDataRepo,
+                AttributeRepo,
+                NetworkRepo,
+                FacilityRepo,
+                SimulationRepo,
+                InvestmentPlanRepo,
+                AnalysisMethodRepo,
+                PerformanceCurveRepo,
+                SelectableTreatmentRepo,
+                Config);
+
+            legacySimulationSynchronizer.SynchronizeLegacySimulation(SimulationId);
         }
 
         public void AddTreatmentSupersessions()
@@ -200,7 +224,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             committedProject.Budget = budget;
             selectableTreatment.Consequences.DistinctBy(_ => _.Attribute).ForEach(_ =>
             {
-
                 var consequence = committedProject.Consequences.GetAdd(new TreatmentConsequence());
                 consequence.Attribute = _.Attribute;
                 consequence.Change.Expression = _.Change.Expression;
@@ -214,7 +237,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         {
             StandAloneSimulation = GetStandAloneSimulation();
             InitializeEquationAndCriterionRepos();
-            InitializeAttributeRepo();
+            InitializeAttributeRepos();
             CreateAttributes();
         }
 
@@ -237,7 +260,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             SetupAll();
             InitializeNetworkRepos();
             InitializeSimulationRepo();
-            InitializeEquationAndCriterionRepos();
             InitializeInvestmentPlanRepos();
             InitializeAnalysisMethodRepos();
             CreateNetwork();
@@ -251,7 +273,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             SetupAll();
             InitializeNetworkRepos();
             InitializeSimulationRepo();
-            InitializeEquationAndCriterionRepos();
             InitializePerformanceCurveRepo();
             CreateNetwork();
             SimulationRepo.CreateSimulation(StandAloneSimulation);
@@ -272,7 +293,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             SetupAll();
             InitializeNetworkRepos();
             InitializeSimulationRepo();
-            InitializeEquationAndCriterionRepos();
             InitializeInvestmentPlanRepos();
             CreateNetwork();
             SimulationRepo.CreateSimulation(StandAloneSimulation);
@@ -283,7 +303,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             SetupAll();
             InitializeNetworkRepos();
             InitializeSimulationRepo();
-            InitializeEquationAndCriterionRepos();
             InitializeInvestmentPlanRepos();
             InitializeCommittedProjectRepos();
             CreateNetwork();
@@ -297,7 +316,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             SetupAll();
             InitializeNetworkRepos();
             InitializeSimulationRepo();
-            InitializeEquationAndCriterionRepos();
             InitializeInvestmentPlanRepos();
             InitializeSelectableTreatmentRepos();
             CreateNetwork();
@@ -312,13 +330,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             SetupAll();
             InitializeNetworkRepos();
             InitializeSimulationRepo();
-            InitializeEquationAndCriterionRepos();
             InitializeInvestmentPlanRepos();
             InitializeAnalysisMethodRepos();
             InitializePerformanceCurveRepo();
             InitializeCommittedProjectRepos();
             InitializeSelectableTreatmentRepos();
             InitializeSimulationOutputRepo();
+        }
+
+        public void SetupForLegacySimulationSynchronization()
+        {
+            StandAloneSimulation = GetStandAloneSimulation();
+            InitializeEquationAndCriterionRepos();
+            InitializeAttributeRepos();
+            InitializeNetworkRepos();
+            InitializeSimulationRepo();
+            InitializeInvestmentPlanRepos();
+            InitializeAnalysisMethodRepos();
+            InitializePerformanceCurveRepo();
+            InitializeSelectableTreatmentRepos();
         }
 
         public void CleanUp()

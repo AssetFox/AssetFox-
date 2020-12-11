@@ -102,7 +102,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, pennDotReportAData);
 
                 // Filling up parameters tab
-                _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount);
+                _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel);
 
                 broadcastingMessage = $"Creating Unfunded recommendations TAB";
                 HubContext

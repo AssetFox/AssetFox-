@@ -91,6 +91,8 @@ namespace BridgeCareCore
             services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
             services.AddScoped<IAggregatedResultRepository, AggregatedResultRepository>();
             services.AddScoped<ISimulationRepository, SimulationRepository>();
+            services.AddScoped<IEquationRepository, EquationRepository>();
+            services.AddScoped<ICriterionLibraryRepository, CriterionLibraryRepository>();
 
             // Repository for legacy database
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));

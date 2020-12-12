@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
@@ -48,11 +49,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (IsRunningFromXUnit)
             {
-                Context.Equation.AddRange(equationEntities);
+                equationEntities.ForEach(entity => Context.AddOrUpdate(entity, entity.Id));
             }
             else
             {
-                Context.BulkInsert(equationEntities);
+                Context.BulkInsertOrUpdate(equationEntities);
             }
 
             Context.SaveChanges();

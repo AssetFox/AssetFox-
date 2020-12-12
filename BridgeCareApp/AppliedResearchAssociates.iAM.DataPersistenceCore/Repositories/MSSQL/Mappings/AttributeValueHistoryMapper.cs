@@ -6,30 +6,31 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
+using SQLitePCL;
 using TextAttribute = AppliedResearchAssociates.iAM.Domains.TextAttribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
     public static class AttributeValueHistoryMapper
     {
-        public static void ToEntity(this AttributeValueHistory<double> domain, Guid sectionId, Guid attributeId,
-            List<NumericAttributeValueHistoryMostRecentValueEntity> mostRecentValueList,
-            List<NumericAttributeValueHistoryEntity> valueList)
+        public static List<NumericAttributeValueHistoryEntity> ToEntity(this AttributeValueHistory<double> domain, Guid sectionId, Guid attributeId)
         {
             using var historyEnumerator = domain.GetEnumerator();
             historyEnumerator.Reset();
 
-            mostRecentValueList.Add(new NumericAttributeValueHistoryMostRecentValueEntity
+            var entities = new List<NumericAttributeValueHistoryEntity>();
+
+            /*mostRecentValueList.Add(new NumericAttributeValueHistoryMostRecentValueEntity
             {
                 Id = Guid.NewGuid(),
                 SectionId = sectionId,
                 AttributeId = attributeId,
                 MostRecentValue = Convert.ToDouble(domain.MostRecentValue)
-            });
+            });*/
 
             while (historyEnumerator.MoveNext())
             {
-                valueList.Add(new NumericAttributeValueHistoryEntity
+                entities.Add(new NumericAttributeValueHistoryEntity
                 {
                     Id = Guid.NewGuid(),
                     SectionId = sectionId,
@@ -38,26 +39,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     Value = Convert.ToDouble(historyEnumerator.Current.Value)
                 });
             }
+
+            if (!entities.Any())
+            {
+                entities.Add(new NumericAttributeValueHistoryEntity
+                {
+                    Id = Guid.NewGuid(),
+                    SectionId = sectionId,
+                    AttributeId = attributeId,
+                    Year = 0,
+                    Value = domain.MostRecentValue
+                });
+            }
+
+            return entities;
         }
 
-        public static void ToEntity(this AttributeValueHistory<string> domain, Guid sectionId, Guid attributeId,
-            List<TextAttributeValueHistoryMostRecentValueEntity> mostRecentValueList,
-            List<TextAttributeValueHistoryEntity> valueList)
+        public static List<TextAttributeValueHistoryEntity> ToEntity(this AttributeValueHistory<string> domain, Guid sectionId, Guid attributeId)
         {
             using var historyEnumerator = domain.GetEnumerator();
             historyEnumerator.Reset();
 
-            mostRecentValueList.Add(new TextAttributeValueHistoryMostRecentValueEntity
+            var entities = new List<TextAttributeValueHistoryEntity>();
+
+            /*mostRecentValueList.Add(new TextAttributeValueHistoryMostRecentValueEntity
             {
                 Id = Guid.NewGuid(),
                 SectionId = sectionId,
                 AttributeId = attributeId,
                 MostRecentValue = domain.MostRecentValue
-            });
+            });*/
 
             while (historyEnumerator.MoveNext())
             {
-                valueList.Add(new TextAttributeValueHistoryEntity
+                entities.Add(new TextAttributeValueHistoryEntity
                 {
                     Id = Guid.NewGuid(),
                     SectionId = sectionId,
@@ -66,6 +81,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     Value = historyEnumerator.Current.Value
                 });
             }
+
+            if (!entities.Any())
+            {
+                entities.Add(new TextAttributeValueHistoryEntity
+                {
+                    Id = Guid.NewGuid(),
+                    SectionId = sectionId,
+                    AttributeId = attributeId,
+                    Year = 0,
+                    Value = domain.MostRecentValue
+                });
+            }
+
+            return entities;
         }
 
         public static void SetAttributeValueHistoryValues(this List<NumericAttributeValueHistoryEntity> entities,
@@ -82,13 +111,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 var history = section.GetHistory(numberAttribute);
 
-                var attributeValueHistories = entitiesPerAttributeName[attributeName];
+                var attributeValueHistories = entitiesPerAttributeName[attributeName]
+                    .Where(_ => _.Year != 0).ToList();
 
-                attributeValueHistories.ForEach(_ => history.Add(_.Year, _.Value));
+                if (attributeValueHistories.Any())
+                {
+                    attributeValueHistories.ForEach(_ => history.Add(_.Year, _.Value));
+                    history.MostRecentValue = attributeValueHistories.Last().Value;
+                }
+                else
+                {
+                    history.MostRecentValue = entitiesPerAttributeName[attributeName].Single(_ => _.Year ==0).Value;
+                }
             });
         }
 
-        public static void SetAttributeValueHistoryMostRecentValue(this List<NumericAttributeValueHistoryMostRecentValueEntity> entities,
+        /*public static void SetAttributeValueHistoryMostRecentValue(this List<NumericAttributeValueHistoryMostRecentValueEntity> entities,
             Section section)
         {
             var entitiesPerAttributeName = entities
@@ -106,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 history.MostRecentValue = attributeValueHistoryMostRecentValues.First().MostRecentValue;
             });
-        }
+        }*/
 
         public static void SetAttributeValueHistoryValues(this List<TextAttributeValueHistoryEntity> entities,
             Section section)
@@ -122,13 +160,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 var history = section.GetHistory(textAttribute);
 
-                var attributeValueHistories = entitiesPerAttributeName[attributeName];
+                var attributeValueHistories = entitiesPerAttributeName[attributeName]
+                    .Where(_ => _.Year != 0).ToList();
 
-                attributeValueHistories.ForEach(_ => history.Add(_.Year, _.Value));
+                if (attributeValueHistories.Any())
+                {
+                    attributeValueHistories.ForEach(_ => history.Add(_.Year, _.Value));
+                    history.MostRecentValue = attributeValueHistories.Last().Value;
+                }
+                else
+                {
+                    history.MostRecentValue = entitiesPerAttributeName[attributeName].Single(_ => _.Year == 0).Value;
+                }
             });
         }
 
-        public static void SetAttributeValueHistoryMostRecentValue(this List<TextAttributeValueHistoryMostRecentValueEntity> entities,
+        /*public static void SetAttributeValueHistoryMostRecentValue(this List<TextAttributeValueHistoryMostRecentValueEntity> entities,
             Section section)
         {
             var entitiesPerAttributeName = entities
@@ -146,6 +193,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 history.MostRecentValue = attributeValueHistoryMostRecentValues.First().MostRecentValue;
             });
-        }
+        }*/
     }
 }

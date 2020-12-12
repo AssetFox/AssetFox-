@@ -10,8 +10,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             CommittedProjects = new HashSet<CommittedProjectEntity>();
             NumericAttributeValueHistories = new HashSet<NumericAttributeValueHistoryEntity>();
             TextAttributeValueHistories = new HashSet<TextAttributeValueHistoryEntity>();
-            NumericAttributeValueHistoryMostRecentValues = new HashSet<NumericAttributeValueHistoryMostRecentValueEntity>();
-            TextAttributeValueHistoryMostRecentValues = new HashSet<TextAttributeValueHistoryMostRecentValueEntity>();
+            /*NumericAttributeValueHistoryMostRecentValues = new HashSet<NumericAttributeValueHistoryMostRecentValueEntity>();
+            TextAttributeValueHistoryMostRecentValues = new HashSet<TextAttributeValueHistoryMostRecentValueEntity>();*/
         }
 
         public Guid Id { get; set; }
@@ -32,8 +32,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<TextAttributeValueHistoryEntity> TextAttributeValueHistories { get; set; }
 
-        public virtual ICollection<NumericAttributeValueHistoryMostRecentValueEntity> NumericAttributeValueHistoryMostRecentValues { get; set; }
+        /*public virtual ICollection<NumericAttributeValueHistoryMostRecentValueEntity> NumericAttributeValueHistoryMostRecentValues { get; set; }
 
-        public virtual ICollection<TextAttributeValueHistoryMostRecentValueEntity> TextAttributeValueHistoryMostRecentValues { get; set; }
+        public virtual ICollection<TextAttributeValueHistoryMostRecentValueEntity> TextAttributeValueHistoryMostRecentValues { get; set; }*/
     }
 }

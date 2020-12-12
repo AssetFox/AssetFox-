@@ -1263,7 +1263,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "NumericAttributeValueHistoryMostRecentValue",
+                name: "NumericAttributeValueHistoryMostRecentValueEntity",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
@@ -1273,15 +1273,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_NumericAttributeValueHistoryMostRecentValue", x => x.Id);
+                    table.PrimaryKey("PK_NumericAttributeValueHistoryMostRecentValueEntity", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_NumericAttributeValueHistoryMostRecentValue_Attribute_AttributeId",
+                        name: "FK_NumericAttributeValueHistoryMostRecentValueEntity_Attribute_AttributeId",
                         column: x => x.AttributeId,
                         principalTable: "Attribute",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_NumericAttributeValueHistoryMostRecentValue_Section_SectionId",
+                        name: "FK_NumericAttributeValueHistoryMostRecentValueEntity_Section_SectionId",
                         column: x => x.SectionId,
                         principalTable: "Section",
                         principalColumn: "Id",
@@ -1296,7 +1296,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     SectionId = table.Column<Guid>(nullable: false),
                     AttributeId = table.Column<Guid>(nullable: false),
                     Year = table.Column<int>(nullable: false),
-                    Value = table.Column<string>(nullable: false)
+                    Value = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1316,25 +1316,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TextAttributeValueHistoryMostRecentValue",
+                name: "TextAttributeValueHistoryMostRecentValueEntity",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
                     SectionId = table.Column<Guid>(nullable: false),
                     AttributeId = table.Column<Guid>(nullable: false),
-                    MostRecentValue = table.Column<string>(nullable: false)
+                    MostRecentValue = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TextAttributeValueHistoryMostRecentValue", x => x.Id);
+                    table.PrimaryKey("PK_TextAttributeValueHistoryMostRecentValueEntity", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TextAttributeValueHistoryMostRecentValue_Attribute_AttributeId",
+                        name: "FK_TextAttributeValueHistoryMostRecentValueEntity_Attribute_AttributeId",
                         column: x => x.AttributeId,
                         principalTable: "Attribute",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TextAttributeValueHistoryMostRecentValue_Section_SectionId",
+                        name: "FK_TextAttributeValueHistoryMostRecentValueEntity_Section_SectionId",
                         column: x => x.SectionId,
                         principalTable: "Section",
                         principalColumn: "Id",
@@ -1913,13 +1913,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 column: "SectionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NumericAttributeValueHistoryMostRecentValue_AttributeId",
-                table: "NumericAttributeValueHistoryMostRecentValue",
+                name: "IX_NumericAttributeValueHistoryMostRecentValueEntity_AttributeId",
+                table: "NumericAttributeValueHistoryMostRecentValueEntity",
                 column: "AttributeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NumericAttributeValueHistoryMostRecentValue_SectionId",
-                table: "NumericAttributeValueHistoryMostRecentValue",
+                name: "IX_NumericAttributeValueHistoryMostRecentValueEntity_SectionId",
+                table: "NumericAttributeValueHistoryMostRecentValueEntity",
                 column: "SectionId");
 
             migrationBuilder.CreateIndex(
@@ -2029,13 +2029,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 column: "SectionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TextAttributeValueHistoryMostRecentValue_AttributeId",
-                table: "TextAttributeValueHistoryMostRecentValue",
+                name: "IX_TextAttributeValueHistoryMostRecentValueEntity_AttributeId",
+                table: "TextAttributeValueHistoryMostRecentValueEntity",
                 column: "AttributeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TextAttributeValueHistoryMostRecentValue_SectionId",
-                table: "TextAttributeValueHistoryMostRecentValue",
+                name: "IX_TextAttributeValueHistoryMostRecentValueEntity_SectionId",
+                table: "TextAttributeValueHistoryMostRecentValueEntity",
                 column: "SectionId");
 
             migrationBuilder.CreateIndex(
@@ -2193,7 +2193,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "NumericAttributeValueHistory");
 
             migrationBuilder.DropTable(
-                name: "NumericAttributeValueHistoryMostRecentValue");
+                name: "NumericAttributeValueHistoryMostRecentValueEntity");
 
             migrationBuilder.DropTable(
                 name: "PerformanceCurve_Equation");
@@ -2214,7 +2214,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TextAttributeValueHistory");
 
             migrationBuilder.DropTable(
-                name: "TextAttributeValueHistoryMostRecentValue");
+                name: "TextAttributeValueHistoryMostRecentValueEntity");
 
             migrationBuilder.DropTable(
                 name: "Treatment_Budget");

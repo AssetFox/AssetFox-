@@ -22,25 +22,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<double>>
                 numericAttributeValueHistoryPerSectionIdAttributeIdTuple)
         {
-            var numericAttributeValueHistoryMostRecentValueEntities = new List<NumericAttributeValueHistoryMostRecentValueEntity>();
+            //var numericAttributeValueHistoryMostRecentValueEntities = new List<NumericAttributeValueHistoryMostRecentValueEntity>();
             var numericAttributeValueHistoryEntities = new List<NumericAttributeValueHistoryEntity>();
 
             numericAttributeValueHistoryPerSectionIdAttributeIdTuple.Keys.ForEach(tuple =>
             {
                 var numericAttributeValueHistory = numericAttributeValueHistoryPerSectionIdAttributeIdTuple[tuple];
-                numericAttributeValueHistory
-                    .ToEntity(tuple.sectionId, tuple.attributeId, numericAttributeValueHistoryMostRecentValueEntities, numericAttributeValueHistoryEntities);
+                numericAttributeValueHistoryEntities.AddRange(numericAttributeValueHistory.ToEntity(tuple.sectionId, tuple.attributeId));
             });
 
             if (IsRunningFromXUnit)
             {
-                Context.NumericAttributeValueHistoryMostRecentValue.AddRange(
-                    numericAttributeValueHistoryMostRecentValueEntities);
+                /*Context.NumericAttributeValueHistoryMostRecentValue.AddRange(
+                    numericAttributeValueHistoryMostRecentValueEntities);*/
                 Context.NumericAttributeValueHistory.AddRange(numericAttributeValueHistoryEntities);
             }
             else
             {
-                Context.BulkInsert(numericAttributeValueHistoryMostRecentValueEntities);
+                //Context.BulkInsert(numericAttributeValueHistoryMostRecentValueEntities);
                 Context.BulkInsert(numericAttributeValueHistoryEntities);
             }
 
@@ -51,25 +50,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<string>>
                 textAttributeValueHistoryPerSectionIdAttributeIdTuple)
         {
-            var textAttributeValueHistoryMostRecentValueEntities = new List<TextAttributeValueHistoryMostRecentValueEntity>();
+            //var textAttributeValueHistoryMostRecentValueEntities = new List<TextAttributeValueHistoryMostRecentValueEntity>();
             var textAttributeValueHistoryEntities = new List<TextAttributeValueHistoryEntity>();
 
             textAttributeValueHistoryPerSectionIdAttributeIdTuple.Keys.ForEach(key =>
             {
                 var textAttributeValueHistory = textAttributeValueHistoryPerSectionIdAttributeIdTuple[key];
-                textAttributeValueHistory
-                    .ToEntity(key.sectionId, key.attributeId, textAttributeValueHistoryMostRecentValueEntities, textAttributeValueHistoryEntities);
+                textAttributeValueHistoryEntities.AddRange(textAttributeValueHistory.ToEntity(key.sectionId, key.attributeId));
             });
 
             if (IsRunningFromXUnit)
             {
-                Context.TextAttributeValueHistoryMostRecentValue.AddRange(
-                    textAttributeValueHistoryMostRecentValueEntities);
+                /*Context.TextAttributeValueHistoryMostRecentValue.AddRange(
+                    textAttributeValueHistoryMostRecentValueEntities);*/
                 Context.TextAttributeValueHistory.AddRange(textAttributeValueHistoryEntities);
             }
             else
             {
-                Context.BulkInsert(textAttributeValueHistoryMostRecentValueEntities);
+                //Context.BulkInsert(textAttributeValueHistoryMostRecentValueEntities);
                 Context.BulkInsert(textAttributeValueHistoryEntities);
             }
 

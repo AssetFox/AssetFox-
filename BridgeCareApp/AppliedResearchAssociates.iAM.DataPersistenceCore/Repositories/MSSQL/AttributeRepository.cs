@@ -81,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             {
                                 var criterionLibraryEntity = criterionLibraryEntities.Any(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
                                     ? criterionLibraryEntities.Single(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
-                                    : CreateCriterionLibraryEntity(valueSource.Criterion.Expression, criterionLibraryEntities);
+                                    : GetCriterionLibraryEntity(valueSource.Criterion.Expression, criterionLibraryEntities);
 
                                 joinEntity.CriterionLibraryId = criterionLibraryEntity.Id;
                             }
@@ -102,11 +102,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (IsRunningFromXUnit)
                     {
+                        joinEntities.ForEach(entity => Context.AddOrUpdate(entity));
                         Context.AttributeEquationCriterionLibrary.AddRange(joinEntities);
                     }
                     else
                     {
-                        Context.BulkInsert(joinEntities);
+                        Context.BulkInsertOrUpdate(joinEntities);
                     }
 
                     Context.SaveChanges();
@@ -122,7 +123,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        private CriterionLibraryEntity CreateCriterionLibraryEntity(string expression, List<CriterionLibraryEntity> criterionLibraryEntities)
+        private CriterionLibraryEntity GetCriterionLibraryEntity(string expression, List<CriterionLibraryEntity> criterionLibraryEntities)
         {
             var criterionLibraryEntity = Context.CriterionLibrary
                 .SingleOrDefault(_ => _.MergedCriteriaExpression == expression && _.Name.Contains("Attribute"));
@@ -150,9 +151,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Name = newCriterionLibraryName,
                     MergedCriteriaExpression = expression
                 };
-
-                criterionLibraryEntities.Add(criterionLibraryEntity);
             }
+
+            criterionLibraryEntities.Add(criterionLibraryEntity);
 
             return criterionLibraryEntity;
         }

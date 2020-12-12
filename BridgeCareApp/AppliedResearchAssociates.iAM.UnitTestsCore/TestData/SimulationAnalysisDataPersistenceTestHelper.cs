@@ -72,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 .AddJsonFile("testConnections.json")
                 .Build();
 
-            _sqlConnection = new SqlConnection(Config.GetConnectionString("LegacyConnex"));
+            _sqlConnection = new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
             _sqlConnection.Open();
             _dataAccessor = new DataAccessor(_sqlConnection, null);
             _dbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()

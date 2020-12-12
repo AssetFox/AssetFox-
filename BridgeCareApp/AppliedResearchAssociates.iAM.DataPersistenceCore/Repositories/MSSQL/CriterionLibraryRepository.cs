@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
@@ -113,11 +114,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (IsRunningFromXUnit)
             {
-                Context.CriterionLibrary.AddRange(criterionLibraryEntities);
+                criterionLibraryEntities.ForEach(entity => Context.AddOrUpdate(entity, entity.Id));
             }
             else
             {
-                Context.BulkInsert(criterionLibraryEntities);
+                Context.BulkInsertOrUpdate(criterionLibraryEntities);
             }
 
             Context.SaveChanges();

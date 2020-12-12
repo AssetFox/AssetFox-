@@ -177,9 +177,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<TextAttributeValueHistoryEntity> TextAttributeValueHistory { get; set; }
 
-        public virtual DbSet<NumericAttributeValueHistoryMostRecentValueEntity> NumericAttributeValueHistoryMostRecentValue { get; set; }
+        /*public virtual DbSet<NumericAttributeValueHistoryMostRecentValueEntity> NumericAttributeValueHistoryMostRecentValue { get; set; }
 
-        public virtual DbSet<TextAttributeValueHistoryMostRecentValueEntity> TextAttributeValueHistoryMostRecentValue { get; set; }
+        public virtual DbSet<TextAttributeValueHistoryMostRecentValueEntity> TextAttributeValueHistoryMostRecentValue { get; set; }*/
 
         private class MigrationConnection
         {
@@ -1352,8 +1352,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Year).IsRequired();
 
-                entity.Property(e => e.Value).IsRequired();
-
                 entity.HasOne(d => d.Section)
                     .WithMany(p => p.TextAttributeValueHistories)
                     .HasForeignKey(d => d.SectionId)
@@ -1365,7 +1363,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<NumericAttributeValueHistoryMostRecentValueEntity>(entity =>
+            /*modelBuilder.Entity<NumericAttributeValueHistoryMostRecentValueEntity>(entity =>
             {
                 entity.HasIndex(e => e.SectionId);
 
@@ -1384,9 +1382,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithMany(p => p.NumericAttributeValueHistoryMostRecentValues)
                     .HasForeignKey(d => d.AttributeId)
                     .OnDelete(DeleteBehavior.Cascade);
-            });
+            });*/
 
-            modelBuilder.Entity<TextAttributeValueHistoryMostRecentValueEntity>(entity =>
+            /*modelBuilder.Entity<TextAttributeValueHistoryMostRecentValueEntity>(entity =>
             {
                 entity.HasIndex(e => e.SectionId);
 
@@ -1394,7 +1392,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.MostRecentValue).IsRequired();
+                /*entity.Property(e => e.MostRecentValue).IsRequired();#1#
 
                 entity.HasOne(d => d.Section)
                     .WithMany(p => p.TextAttributeValueHistoryMostRecentValues)
@@ -1405,7 +1403,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithMany(p => p.TextAttributeValueHistoryMostRecentValues)
                     .HasForeignKey(d => d.AttributeId)
                     .OnDelete(DeleteBehavior.Cascade);
-            });
+            });*/
         }
     }
 }

@@ -31,20 +31,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 entity.NumericAttributeValueHistories.ToList().SetAttributeValueHistoryValues(section);
             }
 
-            if (entity.NumericAttributeValueHistoryMostRecentValues.Any())
+            /*if (entity.NumericAttributeValueHistoryMostRecentValues.Any())
             {
                 entity.NumericAttributeValueHistoryMostRecentValues.ToList().SetAttributeValueHistoryMostRecentValue(section);
-            }
+            }*/
 
             if (entity.TextAttributeValueHistories.Any())
             {
                 entity.TextAttributeValueHistories.ToList().SetAttributeValueHistoryValues(section);
             }
 
-            if (entity.TextAttributeValueHistoryMostRecentValues.Any())
+            /*if (entity.TextAttributeValueHistoryMostRecentValues.Any())
             {
                 entity.TextAttributeValueHistoryMostRecentValues.ToList().SetAttributeValueHistoryMostRecentValue(section);
-            }
+            }*/
         }
     }
 }

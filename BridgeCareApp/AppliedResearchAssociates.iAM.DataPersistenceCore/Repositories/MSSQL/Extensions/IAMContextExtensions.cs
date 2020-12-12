@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions
@@ -22,6 +23,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             else
             {
                 context.Set<T>().Add(entity);
+            }
+        }
+
+        public static void AddOrUpdate(this IAMContext context, AttributeEquationCriterionLibraryEntity entity)
+        {
+            if (entity == null)
+            {
+                return;
+            }
+
+            var existing = context.Set<AttributeEquationCriterionLibraryEntity>()
+                .SingleOrDefault(_ => _.AttributeId == entity.AttributeId && _.EquationId == entity.EquationId);
+
+            if (existing != null)
+            {
+                context.Entry(existing).CurrentValues.SetValues(entity);
+            }
+            else
+            {
+                context.Set<AttributeEquationCriterionLibraryEntity>().Add(entity);
             }
         }
     }

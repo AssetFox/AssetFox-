@@ -117,11 +117,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.SectionId, _ => _)
                     .ToDictionary(_ => _.Key, _ => _.ToHashSet());
 
-                var numericAttributeValueHistoryMostRecentValueEntities = Context.NumericAttributeValueHistoryMostRecentValue
+                /*var numericAttributeValueHistoryMostRecentValueEntities = Context.NumericAttributeValueHistoryMostRecentValue
                     .Include(_ => _.Attribute)
                     .Where(_ => sectionsIds.Contains(_.SectionId)).ToList()
                     .GroupBy(_ => _.SectionId, _ => _)
-                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());
+                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());*/
 
                 var textAttributeValueHistoryEntities = Context.TextAttributeValueHistory
                     .Include(_ => _.Attribute)
@@ -129,11 +129,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.SectionId, _ => _)
                     .ToDictionary(_ => _.Key, _ => _.ToHashSet());
 
-                var textAttributeValueHistoryMostRecentValueEntities = Context.TextAttributeValueHistoryMostRecentValue
+                /*var textAttributeValueHistoryMostRecentValueEntities = Context.TextAttributeValueHistoryMostRecentValue
                     .Include(_ => _.Attribute)
                     .Where(_ => sectionsIds.Contains(_.SectionId)).ToList()
                     .GroupBy(_ => _.SectionId, _ => _)
-                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());
+                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());*/
 
                 networkEntity.Facilities.ForEach(facility =>
                 {
@@ -144,20 +144,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             section.NumericAttributeValueHistories = numericAttributeValueHistoryEntities[section.Id];
                         }
 
-                        if (numericAttributeValueHistoryMostRecentValueEntities.ContainsKey(section.Id))
+                        /*if (numericAttributeValueHistoryMostRecentValueEntities.ContainsKey(section.Id))
                         {
                             section.NumericAttributeValueHistoryMostRecentValues = numericAttributeValueHistoryMostRecentValueEntities[section.Id];
-                        }
+                        }*/
 
                         if (textAttributeValueHistoryEntities.ContainsKey(section.Id))
                         {
                             section.TextAttributeValueHistories = textAttributeValueHistoryEntities[section.Id];
                         }
 
-                        if (textAttributeValueHistoryMostRecentValueEntities.ContainsKey(section.Id))
+                        /*if (textAttributeValueHistoryMostRecentValueEntities.ContainsKey(section.Id))
                         {
                             section.TextAttributeValueHistoryMostRecentValues = textAttributeValueHistoryMostRecentValueEntities[section.Id];
-                        }
+                        }*/
                     });
                 });
             }

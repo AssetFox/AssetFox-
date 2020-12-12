@@ -24,8 +24,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 try
                 {
-                    Context.Database.SetCommandTimeout(900);
-
                     if (!Context.Network.Any(_ => _.Id == networkId))
                     {
                         throw new RowNotInTableException($"No network found having id {networkId}");

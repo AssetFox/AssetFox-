@@ -330,6 +330,17 @@
                                 <v-flex>
                                     <v-btn
                                         @click="
+                                            onStartDataMigration(props.item)
+                                        "
+                                        icon
+                                        flat
+                                        color="deep-orange"
+                                        title="Migrate"
+                                    >
+                                        <v-icon>fas fa-play</v-icon>
+                                    </v-btn>
+                                    <v-btn
+                                        @click="
                                             onShowRunSimulationAlert(props.item)
                                         "
                                         class="ara-blue"
@@ -531,6 +542,7 @@ export default class Scenarios extends Vue {
     deleteDuplicateMongoScenarioAction: any;
     @Action('createNetwork') createNetworkAction: any;
     @Action('getNetworks') getNetworksAction: any;
+    @Action('migrateLegacyData') migrateLegacyDataAction: any;
 
     alertData: AlertData = clone(emptyAlertData);
     alertBeforeDelete: AlertData = clone(emptyAlertData);
@@ -560,6 +572,7 @@ export default class Scenarios extends Vue {
         { text: 'Date Last Run', sortable: true, value: 'lastRun' },
         { text: 'Status', sortable: false, value: 'status' },
         { text: 'Run Time', sortable: false, value: 'runTime' },
+        {text: 'Migrate', sortable: false, value: 'migrate'},
         { text: '', sortable: false, value: 'actions' },
     ];
     rollupGridHeader: object[] = [
@@ -593,6 +606,9 @@ export default class Scenarios extends Vue {
     percentage = 0;
     summaryReportStatusUpdate: string = '';
     scenarioIdForStatusUpdate: string = '';
+
+    DataMigrationStatusUpdate: string = '';
+    legacySimulationIdForStatusUpdate: number = 0;
 
     @Watch('stateScenarios')
     onStateScenariosChanged() {
@@ -663,6 +679,19 @@ export default class Scenarios extends Vue {
         }
     }
 
+    @Watch('DataMigrationStatusUpdate')
+    onDataMigrationStatusUpdate(){
+        var scenarioObj = this.scenarios.find(_ => _.id == '5e9f476c283e2e1ffc1d6cb9'); // TODO : use this.scenarioIdForStatusUpdate
+
+        if(isNil(scenarioObj)){
+            scenarioObj = this.userScenarios.find(_ => _.id == '5e9f476c283e2e1ffc1d6cb9'); // TODO : use this.scenarioIdForStatusUpdate
+        }
+
+        if(!isNil(scenarioObj)){
+            scenarioObj.status = this.DataMigrationStatusUpdate;
+        }
+    }
+
     /**
      * Component has been mounted
      */
@@ -674,6 +703,7 @@ export default class Scenarios extends Vue {
         }
         this.$statusHub.$on('assignedData-status-event', this.getStatusUpdate);
         this.$statusHub.$on('summaryReportGeneration-status-event', this.getSummaryReportStatusUpdate);
+        this.$statusHub.$on('DataMigration-status-event', this.getDataMigrationStatusUpdate);
     }
 
     onUpdateScenarioList() {
@@ -766,6 +796,10 @@ export default class Scenarios extends Vue {
         });
     }
 
+    onStartDataMigration(scenario: Scenario){
+        this.migrateLegacyDataAction({simulationId: scenario.simulationId})
+    }
+
     /**
      * Shows the Alert
      */
@@ -817,6 +851,11 @@ export default class Scenarios extends Vue {
     getSummaryReportStatusUpdate(data: any) {
         this.summaryReportStatusUpdate = data.status;
         this.scenarioIdForStatusUpdate = data.scenarioId;
+    }
+
+    getDataMigrationStatusUpdate(data: any){
+        this.DataMigrationStatusUpdate = data.status;
+        this.legacySimulationIdForStatusUpdate = data.legacySimulationId;
     }
 
     onSubmitAssignDataDecision(response: boolean) {
@@ -957,6 +996,7 @@ export default class Scenarios extends Vue {
     beforeDestroy() {
         this.$statusHub.$off('assignedData-status-event', this.getStatusUpdate);
         this.$statusHub.$off('summaryReportGeneration-status-event', this.getSummaryReportStatusUpdate);
+        this.$statusHub.$off('DataMigration-status-event', this.getDataMigrationStatusUpdate);
     }
 }
 </script>

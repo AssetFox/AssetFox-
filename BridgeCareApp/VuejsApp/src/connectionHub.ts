@@ -22,6 +22,10 @@ export default {
                 statusHub.$emit('summaryReportGeneration-status-event', {status, scenarioId});
             });
 
+            connection.on('BroadcastDataMigration', (status, legacySimulationId) => {
+                statusHub.$emit('DataMigration-status-event', {status, legacySimulationId});
+            });
+
         let startedPromise = null;
         function start() {
             startedPromise = connection.start().catch(err => {

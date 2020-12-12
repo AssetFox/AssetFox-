@@ -26,6 +26,10 @@ export default {
                 statusHub.$emit('DataMigration-status-event', {status, legacySimulationId});
             });
 
+            connection.on('BroadcastScanarioStatusUpdate', (status, scenarioId) => {
+                statusHub.$emit('ScenarioStatusUpdate-status-event', {status, scenarioId});
+            });
+
         let startedPromise = null;
         function start() {
             startedPromise = connection.start().catch(err => {

@@ -23,6 +23,8 @@ using BridgeCareCore.Services.SummaryReport.GraphTabs;
 using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
 using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.LegacySimulationSynchronization;
+using BridgeCareCore.Interfaces.Simulation;
+using BridgeCareCore.Services.SimulationAnalysis;
 
 namespace BridgeCareCore
 {
@@ -80,6 +82,8 @@ namespace BridgeCareCore
             services.AddScoped<PoorBridgeDeckAreaByBPN>();
 
             services.AddScoped<StackedColumnChartCommon>();
+
+            services.AddScoped<ISimulationAnalysis, SimulationAnalysis>();
             services.AddSignalR();
 
 #if MsSqlDebug || Release

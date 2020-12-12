@@ -228,6 +228,11 @@ export default class ScenarioService {
         return axiosInstance.post('/api/RunSimulation', selectedScenario);
     }
 
+    static runNewScenarioSimulation(networkId: string, scenarioId: string | undefined): AxiosPromise {
+        scenarioId = process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL; // hardcoded it for JML district 8
+        return bridgecareCoreAxiosInstance.post(`/api/Simulation/RunSimulation/${networkId}/${scenarioId}`);
+    }
+
     static migrateLegacyData(legacySimulationId: number): AxiosPromise{
         return bridgecareCoreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacyData/${legacySimulationId}`);
     }

@@ -79,6 +79,15 @@ const actions = {
             });
     },
 
+    async runNewSimulation({dispatch, commit}: any, payload: any){
+        await ScenarioService.runNewScenarioSimulation(payload.networkId, payload.selectedScenarioId)
+        .then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                dispatch('setSuccessMessage', {message: 'Simulation queued'});
+            }
+        });
+    },
+
     async migrateLegacyData({dispatch, commit}: any, payload: any) {
         await ScenarioService.migrateLegacyData(payload.simulationId)
         .then((response: AxiosResponse) => {

@@ -526,7 +526,9 @@ export default class Scenarios extends Vue {
     @State(state => state.network.newNetworks) newNetworks: NewNetwork[];
     @Action('getMongoScenarios') getMongoScenariosAction: any;
     @Action('getLegacyScenarios') getLegacyScenariosAction: any;
-    @Action('runSimulation') runSimulationAction: any;
+    @Action('runSimulation') runSimulationAction: any; // Obselete
+    @Action('runNewSimulation') runNewSimulationAction: any;
+
     @Action('createScenario') createScenarioAction: any;
     @Action('deleteScenario') deleteScenarioAction: any;
     @Action('updateScenario') updateScenarioAction: any;
@@ -610,6 +612,8 @@ export default class Scenarios extends Vue {
     DataMigrationStatusUpdate: string = '';
     legacySimulationIdForStatusUpdate: number = 0;
 
+    scenarioStatusUpdate: string = '';
+
     @Watch('stateScenarios')
     onStateScenariosChanged() {
         this.scenarios = clone(this.stateScenarios);
@@ -668,10 +672,10 @@ export default class Scenarios extends Vue {
 
     @Watch('summaryReportStatusUpdate')
     onSummaryReportStatusUpdate(){
-        var scenarioObj = this.scenarios.find(_ => _.id == '5e9f476c283e2e1ffc1d6cb9'); // TODO : use this.scenarioIdForStatusUpdate
+        var scenarioObj = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
 
         if(isNil(scenarioObj)){
-            scenarioObj = this.userScenarios.find(_ => _.id == '5e9f476c283e2e1ffc1d6cb9'); // TODO : use this.scenarioIdForStatusUpdate
+            scenarioObj = this.userScenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
         }
 
         if(!isNil(scenarioObj)){
@@ -681,14 +685,27 @@ export default class Scenarios extends Vue {
 
     @Watch('DataMigrationStatusUpdate')
     onDataMigrationStatusUpdate(){
-        var scenarioObj = this.scenarios.find(_ => _.id == '5e9f476c283e2e1ffc1d6cb9'); // TODO : use this.scenarioIdForStatusUpdate
+        var scenarioObj = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
 
         if(isNil(scenarioObj)){
-            scenarioObj = this.userScenarios.find(_ => _.id == '5e9f476c283e2e1ffc1d6cb9'); // TODO : use this.scenarioIdForStatusUpdate
+            scenarioObj = this.userScenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
         }
 
         if(!isNil(scenarioObj)){
             scenarioObj.status = this.DataMigrationStatusUpdate;
+        }
+    }
+
+    @Watch('scenarioStatusUpdate')
+    onScenarioStatusUpdate(){
+        var scenarioObj = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
+
+        if(isNil(scenarioObj)){
+            scenarioObj = this.userScenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
+        }
+
+        if(!isNil(scenarioObj)){
+            scenarioObj.status = this.scenarioStatusUpdate;
         }
     }
 
@@ -704,6 +721,7 @@ export default class Scenarios extends Vue {
         this.$statusHub.$on('assignedData-status-event', this.getStatusUpdate);
         this.$statusHub.$on('summaryReportGeneration-status-event', this.getSummaryReportStatusUpdate);
         this.$statusHub.$on('DataMigration-status-event', this.getDataMigrationStatusUpdate);
+        this.$statusHub.$on('ScenarioStatusUpdate-status-event', this.getDataScenarioStatusUpdate);
     }
 
     onUpdateScenarioList() {
@@ -858,6 +876,11 @@ export default class Scenarios extends Vue {
         this.legacySimulationIdForStatusUpdate = data.legacySimulationId;
     }
 
+    getDataScenarioStatusUpdate(data: any){
+        this.scenarioStatusUpdate = data.status;
+        this.scenarioIdForStatusUpdate = data.scenarioId;
+    }
+
     onSubmitAssignDataDecision(response: boolean) {
         this.alertBeforeAssignData = clone(emptyAlertData);
 
@@ -890,9 +913,13 @@ export default class Scenarios extends Vue {
      * Dispatches an action with the currentScenario object's data in order to run a simulation on the server
      */
     runScenarioSimulation() {
-        this.runSimulationAction({
-            selectedScenario: this.currentScenario,
-            userId: this.userId,
+        // this.runSimulationAction({
+        //     selectedScenario: this.currentScenario,
+        //     userId: this.userId,
+        // });
+        this.runNewSimulationAction({
+            selectedScenarioId: this.scenarioId,
+            networkId: this.newNetworkId
         });
     }
 
@@ -997,6 +1024,7 @@ export default class Scenarios extends Vue {
         this.$statusHub.$off('assignedData-status-event', this.getStatusUpdate);
         this.$statusHub.$off('summaryReportGeneration-status-event', this.getSummaryReportStatusUpdate);
         this.$statusHub.$off('DataMigration-status-event', this.getDataMigrationStatusUpdate);
+        this.$statusHub.$off('ScenarioStatusUpdate-status-event', this.getDataScenarioStatusUpdate);
     }
 }
 </script>

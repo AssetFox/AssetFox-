@@ -31,7 +31,7 @@ export default class ReportsService {
     static downloadTempSummaryReport(selectedScenarioData: Scenario): AxiosPromise {
           return bridgecareCoreAxiosInstance.request({
               method: 'POST',
-              url: '/api/SummaryReport/GenerateSummaryReport/EAE31810-2687-4951-8786-51AC3D02F378/E707CEF3-41E5-4DA3-845D-CBEDCDBA0D6A',
+              url: `/api/SummaryReport/GenerateSummaryReport/${process.env.VUE_APP_HARDCODED_NETWORKID_FROM_MSSQL}/${process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL}`,
               headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
               responseType: 'arraybuffer'
           });

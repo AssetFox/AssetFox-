@@ -101,10 +101,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
 
                 var broadcastingMessage = $"Creating Bridge Data TAB";
-                HubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+                sendRealTimeMessage(broadcastingMessage, simulationId);
 
                 // Bridge Data TAB
                 var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
@@ -114,10 +111,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel);
 
                 broadcastingMessage = $"Creating Unfunded recommendations TAB";
-                HubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+                sendRealTimeMessage(broadcastingMessage, simulationId);
                 // Unfunded Recommendations TAB
                 var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");
                 _unfundedRecommendations.Fill(unfundedRecommendationWorksheet, reportOutputData);
@@ -128,10 +122,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
 
                 broadcastingMessage = $"Creating Bridge work summary TAB";
-                HubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+                sendRealTimeMessage(broadcastingMessage, simulationId);
                 // Bridge work summary TAB
                 var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
                 var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
@@ -139,20 +130,14 @@ namespace BridgeCareCore.Services.SummaryReport
 
 
                 broadcastingMessage = $"Creating Bridge work summary By Budget TAB";
-                HubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+                sendRealTimeMessage(broadcastingMessage, simulationId);
                 // Bridge work summary by Budget TAB
                 var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
                 _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
 
 
                 broadcastingMessage = $"Creating Graph TABs";
-                HubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+                sendRealTimeMessage(broadcastingMessage, simulationId);
 
                 _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
@@ -165,6 +150,14 @@ namespace BridgeCareCore.Services.SummaryReport
 
                 return bin;
             }
+        }
+
+        private void sendRealTimeMessage(string message, Guid simulationId)
+        {
+            HubContext
+                        .Clients
+                        .All
+                        .SendAsync("BroadcastSummaryReportGenerationStatus", message, simulationId);
         }
     }
 }

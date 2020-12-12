@@ -78,6 +78,16 @@ const actions = {
                 }
             });
     },
+
+    async migrateLegacyData({dispatch, commit}: any, payload: any) {
+        await ScenarioService.migrateLegacyData(payload.simulationId)
+        .then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                dispatch('setSuccessMessage', {message: 'migration started'});
+            }
+        });
+    },
+
     async createScenario({dispatch, commit}: any, payload: any) {
         return await ScenarioService.createScenario(payload.createScenarioData, payload.userId)
             .then((response: AxiosResponse) => {

@@ -2,6 +2,8 @@
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using BridgeCareCore.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
@@ -21,11 +23,12 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
         private readonly IPerformanceCurveRepository _performanceCurveRepo;
         private readonly ISelectableTreatmentRepository _selectableTreatmentRepo;
         private readonly IConfiguration _config;
+        private readonly IHubContext<BridgeCareHub> HubContext;
 
         public LegacySimulationSynchronizer(IAttributeMetaDataRepository attributeMetaDataRepo, IAttributeRepository attributeRepo, INetworkRepository networkRepo,
             IFacilityRepository facilityRepo, ISimulationRepository simulationRepo, IInvestmentPlanRepository investmentPlanRepo,
             IAnalysisMethodRepository analysisMethodRepo, IPerformanceCurveRepository performanceCurveRepo, ISelectableTreatmentRepository selectableTreatmentRepo,
-            IConfiguration config)
+            IConfiguration config, IHubContext<BridgeCareHub> hub)
         {
             _attributeMetaDataRepo = attributeMetaDataRepo;
             _attributeRepo = attributeRepo;
@@ -37,6 +40,7 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
             _performanceCurveRepo = performanceCurveRepo;
             _selectableTreatmentRepo = selectableTreatmentRepo;
             _config = config;
+            HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
         }
 
         public void SynchronizeLegacySimulation(int legacySimulationId)
@@ -49,12 +53,17 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
                     sqlConnection.Open();
                     var dataAccessor = new DataAccessor(sqlConnection, null);
 
+                    var broadcastingMessage = "upserting attributes";
+                    sendRealTimeMessage(broadcastingMessage, legacySimulationId);
+
                     // ensure all attributes have been created
                     _attributeRepo.UpsertAttributes(_attributeMetaDataRepo.GetAllAttributes().ToList());
 
+                    sendRealTimeMessage("getting stand alone simulation", legacySimulationId);
                     // get the stand alone simulation
                     var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, legacySimulationId);
 
+                    sendRealTimeMessage("joining attributes with equations and criteria", legacySimulationId);
                     // join attributes with equations and criteria per the explorer object
                     var explorer = simulation.Network.Explorer;
                     _attributeRepo.JoinAttributesWithEquationsAndCriteria(explorer);
@@ -70,9 +79,11 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
                         _networkRepo.CreateNetwork(explorer.Networks.First());
                     }
 
+                    sendRealTimeMessage("creating the network's facilities and sections", legacySimulationId);
                     // create the network's facilities and sections
                     _facilityRepo.CreateFacilities(explorer.Networks.First().Facilities.ToList(), explorer.Networks.First().Id);
 
+                    sendRealTimeMessage("insert simulation data into the new data source", legacySimulationId);
                     // insert simulation data into our new data source
                     _simulationRepo.CreateSimulation(simulation);
                     _investmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
@@ -92,6 +103,14 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
                     sqlConnection.Close();
                 }
             }
+        }
+
+        private void sendRealTimeMessage(string message, int legacySimulationId)
+        {
+            HubContext
+                        .Clients
+                        .All
+                        .SendAsync("BroadcastDataMigration", message, legacySimulationId);
         }
     }
 }

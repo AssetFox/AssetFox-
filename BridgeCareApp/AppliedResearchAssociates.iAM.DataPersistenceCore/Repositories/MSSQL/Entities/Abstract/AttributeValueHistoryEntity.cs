@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract
 {
-    public abstract class AttributeValueHistoryEntity
+    public abstract class AttributeValueHistoryEntity : BaseEntity
     {
         public Guid Id { get; set; }
 

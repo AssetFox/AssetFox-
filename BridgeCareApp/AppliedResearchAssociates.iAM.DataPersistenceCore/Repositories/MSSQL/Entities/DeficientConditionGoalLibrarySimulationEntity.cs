@@ -1,8 +1,9 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class DeficientConditionGoalLibrarySimulationEntity
+    public class DeficientConditionGoalLibrarySimulationEntity : BaseEntity
     {
         public Guid DeficientConditionGoalLibraryId { get; set; }
 

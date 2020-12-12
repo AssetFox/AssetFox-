@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using BridgeCareCore.Interfaces.Simulation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,11 +13,17 @@ namespace BridgeCareCore.Controllers
     public class SimulationController : Controller
     {
         private readonly ISimulationAnalysis _simulationAnalysis;
+        private readonly ISimulationRepository _simulationRepo;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis)
+        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationRepository simulationRepo)
         {
-            _simulationAnalysis = simulationAnalysis;
+            _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
+            _simulationRepo = simulationRepo ?? throw new ArgumentNullException(nameof(simulationRepo));
         }
+
+        [HttpGet]
+        [Route("GetScenario/{simulationId}")]
+        public IActionResult GetSimulation(Guid simulationId) => Ok(_simulationRepo.GetSimulation(simulationId));
 
         [HttpGet]
         [Route("GetScenarios/{networkId}")]

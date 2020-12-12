@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
             if (existing != null)
             {
+                var createdDatePropertyInfo = typeof(T).GetProperty("CreatedDate");
+                createdDatePropertyInfo.SetValue(entity, createdDatePropertyInfo.GetValue(existing));
+                var lastModifiedDatePropertyInfo = typeof(T).GetProperty("LastModifiedDate");
+                lastModifiedDatePropertyInfo.SetValue(entity, DateTime.Now);
                 context.Entry(existing).CurrentValues.SetValues(entity);
             }
             else
@@ -38,6 +43,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
             if (existing != null)
             {
+                entity.CreatedDate = existing.CreatedDate;
+                entity.LastModifiedDate = DateTime.Now;
                 context.Entry(existing).CurrentValues.SetValues(entity);
             }
             else

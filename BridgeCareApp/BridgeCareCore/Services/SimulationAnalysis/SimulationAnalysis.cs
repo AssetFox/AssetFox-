@@ -43,9 +43,9 @@ namespace BridgeCareCore.Services.SimulationAnalysis
         {
             var explorer = _attributeRepo.GetExplorer();
             var network = _networkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
-            _simulationRepo.GetAllInNetwork(network);
+            _simulationRepo.GetSimulationInNetwork(simulationId, network);
 
-            var simulation = network.Simulations.Where(_ => _.Id == simulationId).FirstOrDefault();
+            var simulation = network.Simulations.First();
             _investmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _analysisMethodRepo.GetSimulationAnalysisMethod(simulation);
             _performanceCurveRepo.GetSimulationPerformanceCurves(simulation);
@@ -57,6 +57,10 @@ namespace BridgeCareCore.Services.SimulationAnalysis
                 sendRealTimeMessage(eventArgs.Message, simulationId);
             };
             runner.Information += (sender, eventArgs) => {
+                if (eventArgs.Message == "Simulation complete.")
+                {
+                    _simulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
+                }
                 sendRealTimeMessage(eventArgs.Message, simulationId);
             };
             runner.Warning += (sender, eventArgs) => {
@@ -64,8 +68,6 @@ namespace BridgeCareCore.Services.SimulationAnalysis
             };
 
             runner.Run();
-
-            _simulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
         }
 
         public void CreateSimulation(string simulationName)
@@ -83,9 +85,9 @@ namespace BridgeCareCore.Services.SimulationAnalysis
         private void sendRealTimeMessage(string message, Guid simulationId)
         {
             HubContext
-                        .Clients
-                        .All
-                        .SendAsync("BroadcastScanarioStatusUpdate", message, simulationId);
+                .Clients
+                .All
+                .SendAsync("BroadcastScanarioStatusUpdate", message, simulationId);
         }
     }
 }

@@ -4,7 +4,7 @@ using AppliedResearchAssociates.iAM.DataMiner;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract
 {
-    public abstract class LocationEntity
+    public abstract class LocationEntity : BaseEntity
     {
         protected LocationEntity(Guid id, string discriminator, string locationIdentifier)
         {

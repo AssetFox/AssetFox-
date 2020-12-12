@@ -7,8 +7,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappi
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.Domains;
+using System.Linq;
 using MoreLinq;
+using MoreLinq.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -27,11 +30,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     // prevent EF from attempting to create the network's child entities (create them
                     // separately as part of a bulk insert)
-                    Context.Network.Add(new NetworkEntity
+                    var networkEntity = new NetworkEntity
                     {
-                        Id = network.Id,
-                        Name = network.Name
-                    });
+                        Id = new Guid(DataPersistenceConstants.PennDotNetworkId), Name = network.Name
+                    };
+                    Context.AddOrUpdate(networkEntity, networkEntity.Id);
 
                     // convert maintainable assets and all child domains to entities
                     var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity(network.Id)).ToList();
@@ -103,86 +106,68 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var networkEntity = Context.Network
-                .Include(_ => _.Facilities)
-                .ThenInclude(_ => _.Sections)
                 .Single(_ => _.Id == networkId);
 
-            if (networkEntity.Facilities.Any(_ => _.Sections.Any()))
+            var facilityEntities = Context.Facility
+                .Where(_ => _.Network.Id == networkId).ToList();
+
+            if (facilityEntities.Any())
             {
-                var sectionsIds = networkEntity.Facilities.SelectMany(_ => _.Sections.Select(__ => __.Id)).ToList();
+                networkEntity.Facilities = ToHashSetExtension.ToHashSet(facilityEntities);
 
-                var numericAttributeValueHistoryEntities = Context.NumericAttributeValueHistory
-                    .Include(_ => _.Attribute)
-                    .Where(_ => sectionsIds.Contains(_.SectionId)).ToList()
-                    .GroupBy(_ => _.SectionId, _ => _)
-                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());
+                var sectionEntities = Context.Section
+                    .Where(_ => _.Facility.Network.Id == networkId).ToList();
 
-                /*var numericAttributeValueHistoryMostRecentValueEntities = Context.NumericAttributeValueHistoryMostRecentValue
-                    .Include(_ => _.Attribute)
-                    .Where(_ => sectionsIds.Contains(_.SectionId)).ToList()
-                    .GroupBy(_ => _.SectionId, _ => _)
-                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());*/
-
-                var textAttributeValueHistoryEntities = Context.TextAttributeValueHistory
-                    .Include(_ => _.Attribute)
-                    .Where(_ => sectionsIds.Contains(_.SectionId)).ToList()
-                    .GroupBy(_ => _.SectionId, _ => _)
-                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());
-
-                /*var textAttributeValueHistoryMostRecentValueEntities = Context.TextAttributeValueHistoryMostRecentValue
-                    .Include(_ => _.Attribute)
-                    .Where(_ => sectionsIds.Contains(_.SectionId)).ToList()
-                    .GroupBy(_ => _.SectionId, _ => _)
-                    .ToDictionary(_ => _.Key, _ => _.ToHashSet());*/
-
-                networkEntity.Facilities.ForEach(facility =>
+                if (sectionEntities.Any())
                 {
-                    facility.Sections.ForEach(section =>
+                    var numericAttributeValueHistoryEntities = Context.NumericAttributeValueHistory
+                        .Where(_ => _.Section.Facility.Network.Id == networkId).ToList();
+
+                    var textAttributeValueHistoryEntities = Context.TextAttributeValueHistory
+                        .Where(_ => _.Section.Facility.Network.Id == networkId).ToList();
+
+                    if (numericAttributeValueHistoryEntities.Any() || textAttributeValueHistoryEntities.Any())
                     {
-                        if (numericAttributeValueHistoryEntities.ContainsKey(section.Id))
-                        {
-                            section.NumericAttributeValueHistories = numericAttributeValueHistoryEntities[section.Id];
-                        }
+                        var numericValueHistoryAttributeIds = numericAttributeValueHistoryEntities.Select(_ => _.AttributeId).Distinct();
+                        var textValueHistoryAttributeIds = textAttributeValueHistoryEntities.Select(_ => _.AttributeId).Distinct();
+                        var attributeIds = numericValueHistoryAttributeIds.Union(textValueHistoryAttributeIds);
 
-                        /*if (numericAttributeValueHistoryMostRecentValueEntities.ContainsKey(section.Id))
-                        {
-                            section.NumericAttributeValueHistoryMostRecentValues = numericAttributeValueHistoryMostRecentValueEntities[section.Id];
-                        }*/
+                        var attributeEntities = Context.Attribute.Where(_ => attributeIds.Contains(_.Id)).ToList();
 
-                        if (textAttributeValueHistoryEntities.ContainsKey(section.Id))
-                        {
-                            section.TextAttributeValueHistories = textAttributeValueHistoryEntities[section.Id];
-                        }
+                        ForEachExtension.ForEach(numericAttributeValueHistoryEntities,
+                            entity => entity.Attribute = attributeEntities.Single(_ => _.Id == entity.AttributeId));
 
-                        /*if (textAttributeValueHistoryMostRecentValueEntities.ContainsKey(section.Id))
+                        ForEachExtension.ForEach(textAttributeValueHistoryEntities,
+                            entity => entity.Attribute = attributeEntities.Single(_ => _.Id == entity.AttributeId));
+
+                        var numericAttributeValueHistoriesDict = numericAttributeValueHistoryEntities.GroupBy(_ => _.SectionId, _ => _)
+                            .ToDictionary(_ => _.Key, ToHashSetExtension.ToHashSet);
+
+                        var textAttributeValueHistoriesDict = textAttributeValueHistoryEntities.GroupBy(_ => _.SectionId, _ => _)
+                            .ToDictionary(_ => _.Key, ToHashSetExtension.ToHashSet);
+
+                        ForEachExtension.ForEach(sectionEntities, section =>
                         {
-                            section.TextAttributeValueHistoryMostRecentValues = textAttributeValueHistoryMostRecentValueEntities[section.Id];
-                        }*/
-                    });
-                });
+                            if (numericAttributeValueHistoriesDict.ContainsKey(section.Id))
+                            {
+                                section.NumericAttributeValueHistories = numericAttributeValueHistoriesDict[section.Id];
+                            }
+
+                            if (textAttributeValueHistoriesDict.ContainsKey(section.Id))
+                            {
+                                section.TextAttributeValueHistories = textAttributeValueHistoriesDict[section.Id];
+                            }
+                        });
+                    }
+                }
+
+                var sectionsDict = sectionEntities.GroupBy(_ => _.FacilityId, _ => _)
+                    .ToDictionary(_ => _.Key, ToHashSetExtension.ToHashSet);
+
+                ForEachExtension.ForEach(networkEntity.Facilities, facility => facility.Sections = sectionsDict[facility.Id]);
             }
 
             return networkEntity.ToSimulationAnalysisDomain(explorer);
-
-            /*return Context.Network
-                .Include(_ => _.Facilities)
-                .ThenInclude(_ => _.Sections)
-                .ThenInclude(_ => _.NumericAttributeValueHistories)
-                .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.Facilities)
-                .ThenInclude(_ => _.Sections)
-                .ThenInclude(_ => _.TextAttributeValueHistories)
-                .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.Facilities)
-                .ThenInclude(_ => _.Sections)
-                .ThenInclude(_ => _.NumericAttributeValueHistoryMostRecentValues)
-                .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.Facilities)
-                .ThenInclude(_ => _.Sections)
-                .ThenInclude(_ => _.TextAttributeValueHistoryMostRecentValues)
-                .ThenInclude(_ => _.Attribute)
-                .Single(_ => _.Name == networkName)
-                .ToSimulationAnalysisDomain(explorer);*/
         }
     }
 }

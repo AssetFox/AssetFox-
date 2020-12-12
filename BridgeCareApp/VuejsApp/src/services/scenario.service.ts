@@ -237,6 +237,14 @@ export default class ScenarioService {
         return bridgecareCoreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacyData/${legacySimulationId}`);
     }
 
+    static getMigratedData(simulationId: string): AxiosPromise {
+        return bridgecareCoreAxiosInstance.get(`/api/Simulation/GetScenario/${simulationId}`);
+    }
+
+    static runMigratedScenarioSimulation(networkId: string, simulationId: string): AxiosPromise {
+        return bridgecareCoreAxiosInstance.post(`/api/Simulation/RunSimulation/${networkId}/${simulationId}`)
+    }
+
     static setScenarioUsers(scenarioId: number, scenarioUsers: ScenarioUser[]): AxiosPromise {
         return axiosInstance.post(`/api/SetScenarioUsers/${scenarioId}`, scenarioUsers);
     }

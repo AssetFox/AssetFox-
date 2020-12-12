@@ -1,9 +1,10 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataAccess;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class AnalysisMethodEntity
+    public class AnalysisMethodEntity : BaseEntity
     {
         public Guid Id { get; set; }
 

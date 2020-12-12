@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAccess;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -65,6 +66,9 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
                     sendRealTimeMessage("getting stand alone simulation", legacySimulationId);
                     // get the stand alone simulation
                     var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, legacySimulationId);
+                    // TODO: hard-coding simulation id for alpha 1
+                    simulation.Id = new Guid(DataPersistenceConstants.TestSimulationId);
+                    simulation.Name = $"{simulation.Name} Alpha 1";
 
                     // delete all existing simulation data before migrating
                     // TODO: this is for alpha 1 only; will have a clean database when doing the full migration
@@ -83,6 +87,7 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
                     }
                     else
                     {
+                        explorer.Networks.First().Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
                         _networkRepo.CreateNetwork(explorer.Networks.First());
                     }
 

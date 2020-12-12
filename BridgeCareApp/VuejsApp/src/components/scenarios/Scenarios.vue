@@ -102,6 +102,11 @@
                         >
                             Delete duplicate scenarios
                         </v-btn>
+                      <v-btn @click="onStartDataMigration()"
+                             class="ara-light-gray-bg"
+                             round>
+                            Migrate Alpha 1 Test Scenario
+                      </v-btn>
                     </v-flex>
                 </v-card-title>
                 <v-data-table
@@ -545,6 +550,7 @@ export default class Scenarios extends Vue {
     @Action('createNetwork') createNetworkAction: any;
     @Action('getNetworks') getNetworksAction: any;
     @Action('migrateLegacyData') migrateLegacyDataAction: any;
+    @Action('getMigratedData') getMigratedDataAction: any;
 
     alertData: AlertData = clone(emptyAlertData);
     alertBeforeDelete: AlertData = clone(emptyAlertData);
@@ -814,8 +820,9 @@ export default class Scenarios extends Vue {
         });
     }
 
-    onStartDataMigration(scenario: Scenario){
-        this.migrateLegacyDataAction({simulationId: scenario.simulationId})
+    onStartDataMigration(){
+        // the legacy scenario id is hardcoded to our test scenario "JML Run District 8"
+        this.migrateLegacyDataAction({simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY});
     }
 
     /**
@@ -917,10 +924,17 @@ export default class Scenarios extends Vue {
         //     selectedScenario: this.currentScenario,
         //     userId: this.userId,
         // });
+      if (this.currentScenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()) {
         this.runNewSimulationAction({
-            selectedScenarioId: this.scenarioId,
-            networkId: this.newNetworkId
+          networkId: process.env.VUE_APP_HARDCODED_NETWORKID_FROM_MSSQL,
+          selectedScenarioId: this.currentScenario.id
+        })
+      } else {
+        this.runSimulationAction({
+          selectedScenario: this.currentScenario,
+          userId: this.userId,
         });
+      }
     }
 
     aggregateNetworkData() {

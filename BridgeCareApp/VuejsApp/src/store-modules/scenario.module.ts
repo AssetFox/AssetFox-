@@ -1,14 +1,14 @@
 import {Analysis, emptyAnalysis, emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
 import ScenarioService from '@/services/scenario.service';
 import {AxiosResponse} from 'axios';
-import {any, clone, findIndex, propEq, remove, find, update, reject} from 'ramda';
+import {any, clone, findIndex, propEq, remove, find, update, reject, prepend} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
-import prepend from 'ramda/es/prepend';
 import AnalysisEditorService from '@/services/analysis-editor.service';
 import ReportsService from '@/services/reports.service';
 import {convertFromMongoToVue} from '@/shared/utils/mongo-model-conversion-utils';
 import moment from 'moment';
+import {getUserName} from '@/shared/utils/get-user-info';
 
 const state = {
     scenarios: [] as Scenario[],
@@ -32,6 +32,17 @@ const mutations = {
                 updatedScenario,
                 state.scenarios
             );
+        }
+    },
+    addMigratedScenarioMutator(state: any, migratedScenario: Scenario) {
+        if (any(propEq('id', migratedScenario.id), state.scenarios)) {
+            state.scenarios = update(
+                findIndex(propEq('id', migratedScenario.id), state.scenarios),
+                migratedScenario,
+                state.scenarios
+            );
+        } else {
+            state.scenarios = prepend(migratedScenario, state.scenarios);
         }
     },
     removeScenarioMutator(state: any, simulationId: number) {
@@ -58,12 +69,15 @@ const actions = {
     selectScenario({commit}: any, payload: any) {
         commit('selectedScenarioMutator', payload.simulationId);
     },
-    async getMongoScenarios({commit}: any) {
+    async getMongoScenarios({dispatch, commit}: any) {
         return await ScenarioService.getMongoScenarios()
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('scenariosMutator', response.data.map((data: any) => convertFromMongoToVue(data)));
                 }
+            })
+            .then(() => {
+                dispatch('getMigratedData', {simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL});
             });
     },
     async getLegacyScenarios() {
@@ -89,12 +103,32 @@ const actions = {
     },
 
     async migrateLegacyData({dispatch, commit}: any, payload: any) {
+        dispatch('setIsBusy', {isBusy: true});
         await ScenarioService.migrateLegacyData(payload.simulationId)
-        .then((response: AxiosResponse) => {
-            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                dispatch('setSuccessMessage', {message: 'migration started'});
-            }
-        });
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    dispatch('setSuccessMessage', {message: 'migration started'});
+                    dispatch('getMigratedData', {simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL});
+                } else {
+                    dispatch('setIsBusy', {isBusy: true});
+                }
+            });
+    },
+
+    async getMigratedData({dispatch, commit}: any, payload: any) {
+        await ScenarioService.getMigratedData(payload.simulationId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const scenario: Scenario = {
+                        ...response.data,
+                        owner: getUserName()
+                    };
+                    commit('addMigratedScenarioMutator', scenario);
+                }
+            })
+            .then(() => {
+                dispatch('setIsBusy', {isBusy: false});
+            });
     },
 
     async createScenario({dispatch, commit}: any, payload: any) {

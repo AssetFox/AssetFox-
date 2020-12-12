@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
@@ -53,6 +54,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var entities = Context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
 
             entities.ForEach(_ => _.CreateSimulation(network));
+        }
+
+        public void GetSimulationInNetwork(Guid simulationId, Network network)
+        {
+            if (!Context.Network.Any(_ => _.Id == network.Id))
+            {
+                throw new RowNotInTableException($"No network found having id {network.Id}");
+            }
+
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+            }
+
+            var simulationEntity = Context.Simulation.Single(_ => _.Id == simulationId);
+
+            simulationEntity.CreateSimulation(network);
+        }
+
+        public SimulationDTO GetSimulation(Guid simulationId)
+        {
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+            }
+
+            return Context.Simulation
+                .Include(_ => _.SimulationOutput)
+                .Single(_ => _.Id == simulationId)
+                .ToDto();
         }
 
         public void DeleteSimulationAndAllRelatedData()

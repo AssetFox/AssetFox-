@@ -1,8 +1,9 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class CriterionLibraryAnalysisMethodEntity
+    public class CriterionLibraryAnalysisMethodEntity : BaseEntity
     {
         public Guid CriterionLibraryId { get; set; }
 

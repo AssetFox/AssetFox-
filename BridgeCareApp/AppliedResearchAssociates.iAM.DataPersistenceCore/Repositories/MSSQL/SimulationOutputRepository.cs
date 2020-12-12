@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using Newtonsoft.Json;
@@ -36,10 +37,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
                     var simulationOutputString = JsonConvert.SerializeObject(simulationOutput, settings);
 
-                    Context.SimulationOutput.Add(new SimulationOutputEntity
-                    {
-                        SimulationId = simulationId, Output = simulationOutputString
-                    });
+                    Context.AddOrUpdate(new SimulationOutputEntity {SimulationId = simulationId, Output = simulationOutputString}, simulationId);
 
                     Context.SaveChanges();
 

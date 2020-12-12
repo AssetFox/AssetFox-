@@ -1,8 +1,9 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class RemainingLifeLimitLibrarySimulationEntity
+    public class RemainingLifeLimitLibrarySimulationEntity : BaseEntity
     {
         public Guid RemainingLifeLimitLibraryId { get; set; }
 

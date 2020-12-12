@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract
 {
-    public abstract class TreatmentConsequenceEntity
+    public abstract class TreatmentConsequenceEntity : BaseEntity
     {
         public Guid Id { get; set; }
 

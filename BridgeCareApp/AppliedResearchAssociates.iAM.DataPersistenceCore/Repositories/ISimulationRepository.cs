@@ -9,5 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void CreateSimulation(Simulation simulation);
         void GetAllInNetwork(Network network);
+        void DeleteSimulationAndAllRelatedData();
     }
 }

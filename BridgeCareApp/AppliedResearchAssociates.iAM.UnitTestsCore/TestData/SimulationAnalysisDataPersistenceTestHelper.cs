@@ -11,11 +11,14 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
+using BridgeCareCore.Hubs;
 using BridgeCareCore.Services.LegacySimulationSynchronization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using MoreLinq;
 using Attribute = AppliedResearchAssociates.iAM.Domains.Attribute;
 using DA = AppliedResearchAssociates.iAM.DataAssignment;
@@ -62,6 +65,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         public ISimulationOutputRepository SimulationOutputRepo { get; set; }
         public ICommittedProjectConsequenceRepository CommittedProjectConsequenceRepo { get; set; }
         public ICommittedProjectRepository CommittedProjectRepo { get; set; }
+        public IHubContext<BridgeCareHub> HubContext { get; set; }
 
         public Simulation StandAloneSimulation { get; set; }
 
@@ -192,7 +196,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 AnalysisMethodRepo,
                 PerformanceCurveRepo,
                 SelectableTreatmentRepo,
-                Config);
+                Config,
+                HubContext);
 
             legacySimulationSynchronizer.SynchronizeLegacySimulation(SimulationId);
         }

@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = domain.Id,
                 TargetConditionGoalLibraryId = targetConditionGoalLibraryId,
                 AttributeId = attributeId,
-                Name = domain.Name ?? $"{domain.Attribute.Name} Target Condition Goal",
+                Name = domain.Name,
                 Target = domain.Target,
                 Year = domain.Year
             };

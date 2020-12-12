@@ -11,6 +11,9 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
 {
     public class LegacySimulationSynchronizer
     {
+        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
+            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
+
         private const int NetworkId = 13;
 
         private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
@@ -30,17 +33,17 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
             IAnalysisMethodRepository analysisMethodRepo, IPerformanceCurveRepository performanceCurveRepo, ISelectableTreatmentRepository selectableTreatmentRepo,
             IConfiguration config, IHubContext<BridgeCareHub> hub)
         {
-            _attributeMetaDataRepo = attributeMetaDataRepo;
-            _attributeRepo = attributeRepo;
-            _networkRepo = networkRepo;
-            _facilityRepo = facilityRepo;
-            _simulationRepo = simulationRepo;
-            _investmentPlanRepo = investmentPlanRepo;
-            _analysisMethodRepo = analysisMethodRepo;
-            _performanceCurveRepo = performanceCurveRepo;
-            _selectableTreatmentRepo = selectableTreatmentRepo;
-            _config = config;
-            HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
+            _attributeMetaDataRepo = attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
+            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
+            _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
+            _facilityRepo = facilityRepo ?? throw new ArgumentNullException(nameof(facilityRepo));
+            _simulationRepo = simulationRepo ?? throw new ArgumentNullException(nameof(simulationRepo));
+            _investmentPlanRepo = investmentPlanRepo ?? throw new ArgumentNullException(nameof(investmentPlanRepo));
+            _analysisMethodRepo = analysisMethodRepo ?? throw new ArgumentNullException(nameof(analysisMethodRepo));
+            _performanceCurveRepo = performanceCurveRepo ?? throw new ArgumentNullException(nameof(performanceCurveRepo));
+            _selectableTreatmentRepo = selectableTreatmentRepo ?? throw new ArgumentNullException(nameof(selectableTreatmentRepo));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            HubContext = hub;
         }
 
         public void SynchronizeLegacySimulation(int legacySimulationId)
@@ -62,6 +65,10 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
                     sendRealTimeMessage("getting stand alone simulation", legacySimulationId);
                     // get the stand alone simulation
                     var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, legacySimulationId);
+
+                    // delete all existing simulation data before migrating
+                    // TODO: this is for alpha 1 only; will have a clean database when doing the full migration
+                    _simulationRepo.DeleteSimulationAndAllRelatedData();
 
                     sendRealTimeMessage("joining attributes with equations and criteria", legacySimulationId);
                     // join attributes with equations and criteria per the explorer object
@@ -107,10 +114,13 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
 
         private void sendRealTimeMessage(string message, int legacySimulationId)
         {
-            HubContext
-                        .Clients
-                        .All
-                        .SendAsync("BroadcastDataMigration", message, legacySimulationId);
+            if (!IsRunningFromXUnit)
+            {
+                HubContext
+                    .Clients
+                    .All
+                    .SendAsync("BroadcastDataMigration", message, legacySimulationId);
+            }
         }
     }
 }

@@ -68,7 +68,7 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
                     var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, legacySimulationId);
                     // TODO: hard-coding simulation id for alpha 1
                     simulation.Id = new Guid(DataPersistenceConstants.TestSimulationId);
-                    simulation.Name = $"{simulation.Name} Alpha 1";
+                    simulation.Name = $"*{simulation.Name} Alpha 1";
 
                     // delete all existing simulation data before migrating
                     // TODO: this is for alpha 1 only; will have a clean database when doing the full migration

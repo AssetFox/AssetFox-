@@ -17,7 +17,7 @@ namespace BridgeCareCore.Services.SummaryReport
 {
     public class SummaryReportGenerator : ISummaryReportGenerator
     {
-        private readonly ISimulationOutputFileRepository _simulationOutputFileRepo;
+        private readonly ISimulationOutputRepository _simulationOutputRepo;
         private readonly IYearlyInvestmentRepository _yearlyInvestmentRepository;
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
@@ -35,7 +35,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
         private readonly IAddGraphsInTabs _addGraphsInTabs;
 
-        public SummaryReportGenerator(ISimulationOutputFileRepository simulationOutputFileRepo,
+        public SummaryReportGenerator(ISimulationOutputRepository simulationOutputRepo,
             IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
             IPennDotReportARepository pennDotReportARepository,
@@ -48,7 +48,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
             IAddGraphsInTabs addGraphsInTabs)
         {
-            _simulationOutputFileRepo = simulationOutputFileRepo ?? throw new ArgumentNullException(nameof(simulationOutputFileRepo));
+            _simulationOutputRepo = simulationOutputRepo ?? throw new ArgumentNullException(nameof(simulationOutputRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _bridgeDataForSummaryReport = bridgeDataForSummaryReport ?? throw new ArgumentNullException(nameof(bridgeDataForSummaryReport));
             _pennDotReportARepository = pennDotReportARepository ?? throw new ArgumentNullException(nameof(pennDotReportARepository));
@@ -66,9 +66,9 @@ namespace BridgeCareCore.Services.SummaryReport
             _addGraphsInTabs = addGraphsInTabs ?? throw new ArgumentNullException(nameof(addGraphsInTabs));
         }
 
-        public byte[] GenerateReport(Guid networkId, Guid simulationId)
+        public byte[] GenerateReport(Guid simulationId)
         {
-            var reportOutputData = _simulationOutputFileRepo.GetSimulationResults(networkId, simulationId);
+            var reportOutputData = _simulationOutputRepo.GetSimulationOutput(simulationId);
 
             // sorting the sections based on facility name. This is helpful throught the report generation process
             reportOutputData.InitialSectionSummaries.Sort(

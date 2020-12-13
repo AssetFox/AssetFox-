@@ -24,7 +24,7 @@
                                             striped
                                         >
                                             <strong
-                                                >{{
+                                            >{{
                                                     Math.ceil(percentage)
                                                 }}%</strong
                                             >
@@ -102,11 +102,11 @@
                         >
                             Delete duplicate scenarios
                         </v-btn>
-                      <v-btn @click="onStartDataMigration()"
-                             class="ara-light-gray-bg"
-                             round>
+                        <v-btn @click="onStartDataMigration()"
+                               class="ara-light-gray-bg"
+                               round>
                             Migrate Alpha 1 Test Scenario
-                      </v-btn>
+                        </v-btn>
                     </v-flex>
                 </v-card-title>
                 <v-data-table
@@ -252,11 +252,12 @@
                     </v-alert>
                 </v-data-table>
                 <v-card-actions color="white">
-                    <div style="width:2em" />
+                    <div style="width:2em"/>
                     <v-btn
                         @click="onCreateScenario"
                         color="green darken-2 white--text"
-                        >Create new scenario</v-btn
+                    >Create new scenario
+                    </v-btn
                     >
                 </v-card-actions>
             </v-card>
@@ -271,7 +272,7 @@
                             <v-icon right>share</v-icon>
                         </v-chip>
                     </v-flex>
-                    <v-spacer />
+                    <v-spacer/>
                     <v-flex xs6>
                         <v-text-field
                             append-icon="fas fa-search"
@@ -333,17 +334,6 @@
                         <td>
                             <v-layout nowrap row>
                                 <v-flex>
-                                    <v-btn
-                                        @click="
-                                            onStartDataMigration(props.item)
-                                        "
-                                        icon
-                                        flat
-                                        color="deep-orange"
-                                        title="Migrate"
-                                    >
-                                        <v-icon>fas fa-play</v-icon>
-                                    </v-btn>
                                     <v-btn
                                         @click="
                                             onShowRunSimulationAlert(props.item)
@@ -443,9 +433,9 @@
             </v-card>
         </v-flex>
 
-        <Alert :dialogData="alertData" @submit="onSubmitAlertResult" />
+        <Alert :dialogData="alertData" @submit="onSubmitAlertResult"/>
 
-        <Alert :dialogData="alertBeforeDelete" @submit="onSubmitResponse" />
+        <Alert :dialogData="alertBeforeDelete" @submit="onSubmitResponse"/>
         <Alert
             :dialogData="alertBeforeRunRollup"
             @submit="onSubmitRollupDecision"
@@ -464,7 +454,7 @@
             @submit="onSubmitNewNetwork"
         />
 
-        <ReportsDownloaderDialog :dialogData="reportsDownloaderDialogData" />
+        <ReportsDownloaderDialog :dialogData="reportsDownloaderDialogData"/>
 
         <ShareScenarioDialog
             :scenario="sharingScenario"
@@ -476,34 +466,34 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { Component, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+import {Component, Watch} from 'vue-property-decorator';
+import {Action, State} from 'vuex-class';
 import moment from 'moment';
 import {
     emptyScenario,
     Scenario,
     ScenarioUser,
 } from '@/shared/models/iAM/scenario';
-import { hasValue } from '@/shared/utils/has-value-util';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import {hasValue} from '@/shared/utils/has-value-util';
+import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import ReportsDownloaderDialog from '@/components/scenarios/scenarios-dialogs/ReportsDownloaderDialog.vue';
 import {
     emptyReportsDownloadDialogData,
     ReportsDownloaderDialogData,
 } from '@/shared/models/modals/reports-downloader-dialog-data';
-import { ScenarioCreationData } from '@/shared/models/modals/scenario-creation-data';
+import {ScenarioCreationData} from '@/shared/models/modals/scenario-creation-data';
 import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
 import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
-import { Network } from '@/shared/models/iAM/network';
+import {Network} from '@/shared/models/iAM/network';
 import {
     NewNetwork,
     NetworkCreationData,
 } from '@/shared/models/iAM/newNetwork';
-import { any, clone, isNil } from 'ramda';
-import { Simulation } from '@/shared/models/iAM/simulation';
-import { emptyRollup, Rollup } from '@/shared/models/iAM/rollup';
-import { getUserName } from '@/shared/utils/get-user-info';
+import {any, clone, isNil} from 'ramda';
+import {Simulation} from '@/shared/models/iAM/simulation';
+import {emptyRollup, Rollup} from '@/shared/models/iAM/rollup';
+import {getUserName} from '@/shared/utils/get-user-info';
 import {
     rules,
     InputValidationRules,
@@ -569,19 +559,19 @@ export default class Scenarios extends Vue {
             sortable: true,
             value: 'simulationName',
         },
-        { text: 'Creator', sortable: false, value: 'creator' },
-        { text: 'Owner', sortable: false, value: 'owner' },
-        { text: 'Date Created', sortable: true, value: 'createdDate' },
+        {text: 'Creator', sortable: false, value: 'creator'},
+        {text: 'Owner', sortable: false, value: 'owner'},
+        {text: 'Date Created', sortable: true, value: 'createdDate'},
         {
             text: 'Date Last Modified',
             sortable: true,
             value: 'lastModifiedDate',
         },
-        { text: 'Date Last Run', sortable: true, value: 'lastRun' },
-        { text: 'Status', sortable: false, value: 'status' },
-        { text: 'Run Time', sortable: false, value: 'runTime' },
+        {text: 'Date Last Run', sortable: true, value: 'lastRun'},
+        {text: 'Status', sortable: false, value: 'status'},
+        {text: 'Run Time', sortable: false, value: 'runTime'},
         {text: 'Migrate', sortable: false, value: 'migrate'},
-        { text: '', sortable: false, value: 'actions' },
+        {text: '', sortable: false, value: 'actions'},
     ];
     rollupGridHeader: object[] = [
         {
@@ -590,9 +580,9 @@ export default class Scenarios extends Vue {
             sortable: false,
             value: 'rollupName',
         },
-        { text: 'Date Created', sortable: false, value: 'createdDate' },
-        { text: 'Status', sortable: false, value: 'assignmentStatus' },
-        { text: 'Aggregate Data', sortable: false, value: 'actions' },
+        {text: 'Date Created', sortable: false, value: 'createdDate'},
+        {text: 'Status', sortable: false, value: 'assignmentStatus'},
+        {text: 'Aggregate Data', sortable: false, value: 'actions'},
     ];
     scenarios: Scenario[] = [];
     userScenarios: Scenario[] = [];
@@ -608,7 +598,7 @@ export default class Scenarios extends Vue {
     currentScenario: Scenario = clone(emptyScenario);
     currentRollup: Rollup = clone(emptyRollup);
     sharingScenario: Scenario = clone(emptyScenario);
-    rules: InputValidationRules = { ...rules };
+    rules: InputValidationRules = {...rules};
     newNetworkId: string = '';
     assignDataStatusUpdate: string = '';
     percentage = 0;
@@ -670,47 +660,47 @@ export default class Scenarios extends Vue {
     @Watch('authenticated')
     onAuthenticated() {
         if (this.authenticated) {
-            this.getMongoScenariosAction({ userId: this.userId });
+            this.getMongoScenariosAction({userId: this.userId});
             //this.getMongoRollupsAction({});
             this.getNetworksAction();
         }
     }
 
     @Watch('summaryReportStatusUpdate')
-    onSummaryReportStatusUpdate(){
+    onSummaryReportStatusUpdate() {
         var scenarioObj = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
 
-        if(isNil(scenarioObj)){
+        if (isNil(scenarioObj)) {
             scenarioObj = this.userScenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
         }
 
-        if(!isNil(scenarioObj)){
+        if (!isNil(scenarioObj)) {
             scenarioObj.status = this.summaryReportStatusUpdate;
         }
     }
 
     @Watch('DataMigrationStatusUpdate')
-    onDataMigrationStatusUpdate(){
+    onDataMigrationStatusUpdate() {
         var scenarioObj = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
 
-        if(isNil(scenarioObj)){
+        if (isNil(scenarioObj)) {
             scenarioObj = this.userScenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
         }
 
-        if(!isNil(scenarioObj)){
+        if (!isNil(scenarioObj)) {
             scenarioObj.status = this.DataMigrationStatusUpdate;
         }
     }
 
     @Watch('scenarioStatusUpdate')
-    onScenarioStatusUpdate(){
+    onScenarioStatusUpdate() {
         var scenarioObj = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
 
-        if(isNil(scenarioObj)){
+        if (isNil(scenarioObj)) {
             scenarioObj = this.userScenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
         }
 
-        if(!isNil(scenarioObj)){
+        if (!isNil(scenarioObj)) {
             scenarioObj.status = this.scenarioStatusUpdate;
         }
     }
@@ -720,7 +710,7 @@ export default class Scenarios extends Vue {
      */
     mounted() {
         if (this.authenticated) {
-            this.getMongoScenariosAction({ userId: this.userId });
+            this.getMongoScenariosAction({userId: this.userId});
             //this.getMongoRollupsAction({});
             this.getNetworksAction();
         }
@@ -735,11 +725,11 @@ export default class Scenarios extends Vue {
     }
 
     onDeleteScenarioList() {
-        this.deleteDuplicateMongoScenarioAction({ scenarios: this.scenarios });
+        this.deleteDuplicateMongoScenarioAction({scenarios: this.scenarios});
     }
 
     onLoadNetworks() {
-        this.getLegacyNetworksAction({ networks: this.adminRollup });
+        this.getLegacyNetworksAction({networks: this.adminRollup});
     }
 
     onCreateNetwork() {
@@ -803,7 +793,7 @@ export default class Scenarios extends Vue {
     }
 
     onCloneScenario(scenarioId: number) {
-        this.cloneScenarioAction({ scenarioId });
+        this.cloneScenarioAction({scenarioId});
     }
 
     /**
@@ -820,7 +810,7 @@ export default class Scenarios extends Vue {
         });
     }
 
-    onStartDataMigration(){
+    onStartDataMigration() {
         // the legacy scenario id is hardcoded to our test scenario "JML Run District 8"
         this.migrateLegacyDataAction({simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY});
     }
@@ -878,12 +868,12 @@ export default class Scenarios extends Vue {
         this.scenarioIdForStatusUpdate = data.scenarioId;
     }
 
-    getDataMigrationStatusUpdate(data: any){
+    getDataMigrationStatusUpdate(data: any) {
         this.DataMigrationStatusUpdate = data.status;
         this.legacySimulationIdForStatusUpdate = data.legacySimulationId;
     }
 
-    getDataScenarioStatusUpdate(data: any){
+    getDataScenarioStatusUpdate(data: any) {
         this.scenarioStatusUpdate = data.status;
         this.scenarioIdForStatusUpdate = data.scenarioId;
     }
@@ -924,17 +914,17 @@ export default class Scenarios extends Vue {
         //     selectedScenario: this.currentScenario,
         //     userId: this.userId,
         // });
-      if (this.currentScenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()) {
-        this.runNewSimulationAction({
-          networkId: process.env.VUE_APP_HARDCODED_NETWORKID_FROM_MSSQL,
-          selectedScenarioId: this.currentScenario.id
-        })
-      } else {
-        this.runSimulationAction({
-          selectedScenario: this.currentScenario,
-          userId: this.userId,
-        });
-      }
+        if (this.currentScenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()) {
+            this.runNewSimulationAction({
+                networkId: process.env.VUE_APP_HARDCODED_NETWORKID_FROM_MSSQL,
+                selectedScenarioId: this.currentScenario.id
+            });
+        } else {
+            this.runSimulationAction({
+                selectedScenario: this.currentScenario,
+                userId: this.userId,
+            });
+        }
     }
 
     aggregateNetworkData() {
@@ -956,7 +946,7 @@ export default class Scenarios extends Vue {
     onShowReportsDownloaderDialog(scenario: Scenario) {
         this.getSummaryReportMissingAttributesAction({
             //[TODO]: fix the id issue
-            selectedScenarioId: 1189,
+            selectedScenarioId: scenario.simulationId,
             selectedNetworkId: 13, // this.networks[0].networkId ..... scenario.simulationId
         }).then(() => {
             setTimeout(() => {
@@ -1015,7 +1005,7 @@ export default class Scenarios extends Vue {
         var name = createNetworkData.name;
         if (hasValue(createNetworkData)) {
             this.createNetworkAction({
-                networkName: { name: name },
+                networkName: {name: name},
             });
         }
     }
@@ -1047,9 +1037,11 @@ export default class Scenarios extends Vue {
 .pad-button {
     padding-top: 33px;
 }
+
 .network-min-width {
     min-width: 1000px;
 }
+
 .status-min-width {
     min-width: 300px;
 }

@@ -10,9 +10,9 @@
                 <v-layout column>
                     <v-flex>
                         <v-layout justify-center
-                            ><h3 class="grey--text">
-                                Available Reports
-                            </h3></v-layout
+                        ><h3 class="grey--text">
+                            Available Reports
+                        </h3></v-layout
                         >
                     </v-flex>
                     <v-progress-linear
@@ -21,16 +21,15 @@
                     ></v-progress-linear>
                     <v-flex>
                         <span class="grey--text" v-if="isBusy"
-                            >Downloading...</span
+                        >Downloading...</span
                         >
                     </v-flex>
                 </v-layout>
             </v-card-title>
             <v-divider></v-divider>
             <v-card-text>
-                <v-flex>
+                <v-flex v-if="!isMigratedScenario">
                     <v-btn
-                        :disabled="true"
                         @click="generateSummaryReport()"
                         class="green darken-2 white--text"
                     >
@@ -69,8 +68,9 @@
                                     >
                                         <v-list>
                                             <v-subheader
-                                                >MISSING SCENARIO
-                                                ATTRIBUTES</v-subheader
+                                            >MISSING SCENARIO
+                                                ATTRIBUTES
+                                            </v-subheader
                                             >
                                             <v-list-tile
                                                 :key="attribute"
@@ -78,8 +78,9 @@
                                             >
                                                 <v-list-tile-content>
                                                     <v-list-tile-title>{{
-                                                        attribute
-                                                    }}</v-list-tile-title>
+                                                            attribute
+                                                        }}
+                                                    </v-list-tile-title>
                                                 </v-list-tile-content>
                                             </v-list-tile>
                                         </v-list>
@@ -104,7 +105,8 @@
                     color="error"
                     icon="warning"
                     outline
-                    >{{ errorMessage }}</v-alert
+                >{{ errorMessage }}
+                </v-alert
                 >
             </v-card-text>
             <v-divider></v-divider>
@@ -132,15 +134,15 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { Component, Prop, Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
-import { ReportsDownloaderDialogData } from '@/shared/models/modals/reports-downloader-dialog-data';
+import {Component, Prop, Watch} from 'vue-property-decorator';
+import {Action, State} from 'vuex-class';
+import {ReportsDownloaderDialogData} from '@/shared/models/modals/reports-downloader-dialog-data';
 import FileDownload from 'js-file-download';
 import ReportsService from '@/services/reports.service';
-import { AxiosResponse } from 'axios';
-import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
-import { clone } from 'ramda';
-import { hasValue } from '@/shared/utils/has-value-util';
+import {AxiosResponse} from 'axios';
+import {emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
+import {clone} from 'ramda';
+import {hasValue} from '@/shared/utils/has-value-util';
 
 @Component({})
 export default class ReportsDownloaderDialog extends Vue {
@@ -161,15 +163,23 @@ export default class ReportsDownloaderDialog extends Vue {
     errorMessage: string = '';
     showError: boolean = false;
     showMissingAttributesMessage: boolean = false;
+    isMigratedScenario: boolean = false;
 
     @Watch('dialogData.showModal')
     onshowModalChanged(showModal: boolean) {
         if (showModal) {
+            this.isMigratedScenario = this.dialogData.scenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase();
             this.errorMessage = '';
             this.showError = false;
-            this.selectedScenarioData.networkId = this.dialogData.scenario.networkId;
-            this.selectedScenarioData.simulationId = this.dialogData.scenario.simulationId;
-            this.selectedScenarioData.simulationName = this.dialogData.scenario.simulationName;
+            /*this.selectedScenarioData.networkId = this.dialogData.scenario.networkId;
+            this.selectedScenarioData.simulationId = this.isMigratedScenario
+                ? this.dialogData.scenario.id
+                : this.dialogData.scenario.simulationId;
+            this.selectedScenarioData.simulationName = this.dialogData.scenario.simulationName;*/
+            this.selectedScenarioData = {...this.dialogData.scenario};
+            this.reports = this.isMigratedScenario
+                ? ['Summary Report']
+                : ['Detailed Report', 'Summary Report'];
         }
         if (!this.isBusy) {
             this.selectedReports = [];
@@ -204,24 +214,37 @@ export default class ReportsDownloaderDialog extends Vue {
                             break;
                         }
                         case 'Summary Report': {
-                            await ReportsService.downloadTempSummaryReport(
-                                this.selectedScenarioData,
-                            ).then((response: AxiosResponse<any>) => {
-                                if (response == undefined) {
-                                    this.setErrorMessageAction({
-                                        message:
-                                            'Summary report does not exists on the target path. Please generate the report before downloading',
-                                    });
-                                } else {
-                                    this.setSuccessMessageAction({
-                                        message: 'Report has been downloaded',
-                                    });
-                                }
-                                FileDownload(
-                                    response.data,
-                                    'SummaryReportTestData.xlsx',
-                                );
-                            });
+                            if (this.isMigratedScenario) {
+                                await ReportsService.downloadTempSummaryReport(
+                                    this.selectedScenarioData,
+                                ).then((response: AxiosResponse<any>) => {
+                                    if (response == undefined) {
+                                        this.setErrorMessageAction({
+                                            message: 'Summary report does not exists on the target path. Please generate the report before downloading',
+                                        });
+                                    } else {
+                                        this.setSuccessMessageAction({
+                                            message: 'Report has been downloaded',
+                                        });
+                                    }
+                                    FileDownload(response.data, 'SummaryReportTestData.xlsx',);
+                                });
+                            } else {
+                                await ReportsService.downloadSummaryReport(
+                                    this.selectedScenarioData,
+                                ).then((response: AxiosResponse<any>) => {
+                                    if (response == undefined) {
+                                        this.setErrorMessageAction({
+                                            message: 'Summary report does not exists on the target path. Please generate the report before downloading',
+                                        });
+                                    } else {
+                                        this.setSuccessMessageAction({
+                                            message: 'Report has been downloaded',
+                                        });
+                                    }
+                                    FileDownload(response.data, 'SummaryReportTestData.xlsx',);
+                                });
+                            }
                             break;
                         }
                     }

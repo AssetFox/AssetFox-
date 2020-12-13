@@ -139,7 +139,7 @@
     import iziToast from 'izitoast';
     import {hasValue} from '@/shared/utils/has-value-util';
     import {AxiosError, AxiosRequestConfig, AxiosResponse} from 'axios';
-    import {axiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
+    import {axiosInstance, bridgecareCoreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
     import {getErrorMessage, setAuthHeader, setContentTypeCharset} from '@/shared/utils/http-utils';
     import ReportsService from './services/reports.service';
     import Alert from '@/shared/modals/Alert.vue';
@@ -309,6 +309,10 @@
             nodejsAxiosInstance.interceptors.request.use(
                 (request: any) => requestHandler(this, request)
             );
+            // set bridge care core axios request interceptor to use request handler
+            bridgecareCoreAxiosInstance.interceptors.request.use(
+                (request: any) => requestHandler(this, request)
+            );
             // create a success & error handler
             const successHandler = (response: AxiosResponse) => {
                 response.headers = setContentTypeCharset(response.headers);
@@ -332,6 +336,11 @@
             );
             // set nodejs axios response handler to user success & error handlers
             nodejsAxiosInstance.interceptors.response.use(
+                (response: any) => successHandler(response),
+                (error: any) => errorHandler(error)
+            );
+            // set bridge care core axios response handler to use success & error handlers
+            bridgecareCoreAxiosInstance.interceptors.response.use(
                 (response: any) => successHandler(response),
                 (error: any) => errorHandler(error)
             );

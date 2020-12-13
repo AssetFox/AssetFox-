@@ -36,14 +36,9 @@ const mutations = {
     },
     addMigratedScenarioMutator(state: any, migratedScenario: Scenario) {
         if (any(propEq('id', migratedScenario.id), state.scenarios)) {
-            state.scenarios = update(
-                findIndex(propEq('id', migratedScenario.id), state.scenarios),
-                migratedScenario,
-                state.scenarios
-            );
-        } else {
-            state.scenarios = prepend(migratedScenario, state.scenarios);
+            state.scenarios = reject(propEq('id', migratedScenario.id), state.scenarios);
         }
+        state.scenarios = prepend(migratedScenario, state.scenarios);
     },
     removeScenarioMutator(state: any, simulationId: number) {
         if (any(propEq('simulationId', simulationId), state.scenarios)) {
@@ -103,14 +98,11 @@ const actions = {
     },
 
     async migrateLegacyData({dispatch, commit}: any, payload: any) {
-        dispatch('setIsBusy', {isBusy: true});
         await ScenarioService.migrateLegacyData(payload.simulationId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     dispatch('setSuccessMessage', {message: 'migration started'});
                     dispatch('getMigratedData', {simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL});
-                } else {
-                    dispatch('setIsBusy', {isBusy: true});
                 }
             });
     },
@@ -121,13 +113,11 @@ const actions = {
                 if (hasValue(response, 'data')) {
                     const scenario: Scenario = {
                         ...response.data,
-                        owner: getUserName()
+                        owner: getUserName(),
+                        creator: getUserName()
                     };
                     commit('addMigratedScenarioMutator', scenario);
                 }
-            })
-            .then(() => {
-                dispatch('setIsBusy', {isBusy: false});
             });
     },
 

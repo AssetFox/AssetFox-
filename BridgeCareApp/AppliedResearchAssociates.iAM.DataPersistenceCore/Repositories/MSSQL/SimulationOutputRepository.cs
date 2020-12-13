@@ -65,5 +65,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .FillSimulationResults(simulation);
             }
         }
+
+        public SimulationOutput GetSimulationOutput(Guid simulationId)
+        {
+            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"Found no simulation having id {simulationId}");
+            }
+
+            if (!Context.SimulationOutput.Any(_ => _.SimulationId == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation analysis results were found for simulation having id {simulationId}. Please ensure that the simulation analysis has been run.");
+            }
+
+            var simulationOutputString = Context.SimulationOutput.Single(_ => _.SimulationId == simulationId).Output;
+
+            return JsonConvert.DeserializeObject<SimulationOutput>(simulationOutputString, new JsonSerializerSettings
+            {
+                ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+            });
+        }
     }
 }

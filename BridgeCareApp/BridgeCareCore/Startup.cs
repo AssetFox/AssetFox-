@@ -25,6 +25,7 @@ using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.LegacySimulationSynchronization;
 using BridgeCareCore.Interfaces.Simulation;
 using BridgeCareCore.Services.SimulationAnalysis;
+using Microsoft.Extensions.Logging;
 
 namespace BridgeCareCore
 {
@@ -169,7 +170,7 @@ namespace BridgeCareCore
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -189,6 +190,8 @@ namespace BridgeCareCore
                 endpoints.MapControllers();
                 endpoints.MapHub<BridgeCareHub>("/bridgecarehub");
             });
+
+            loggerFactory.AddFile("Logs/myapp-{Date}.txt");
         }
 
         private static void UpdateDatabase(IApplicationBuilder app)

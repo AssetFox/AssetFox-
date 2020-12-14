@@ -5,7 +5,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
-using System.Linq;
 using MoreLinq;
 using Attribute = AppliedResearchAssociates.iAM.Domains.Attribute;
 

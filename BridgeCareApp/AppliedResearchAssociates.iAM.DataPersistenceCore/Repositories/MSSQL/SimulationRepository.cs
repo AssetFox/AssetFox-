@@ -8,7 +8,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -17,7 +19,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public SimulationRepository(IAMContext context) : base(context) { }
+        private readonly ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;
+        private readonly IConfiguration _config;
+
+        public SimulationRepository(ISimulationAnalysisDetailRepository simulationAnalysisDetailRepo, IAMContext context, IConfiguration config) : base(context)
+        {
+            _simulationAnalysisDetailRepo = simulationAnalysisDetailRepo ??
+                                            throw new ArgumentNullException(nameof(simulationAnalysisDetailRepo));
+            _config = config;
+        }
 
         public void CreateSimulation(Simulation simulation)
         {
@@ -139,6 +149,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
                 else
                 {
+                    using (var conn = new SqlConnection(_config.GetConnectionString("BridgeCareConnex")))
+                    {
+                        conn.Open();
+                        var cmd = new SqlCommand("DeleteAllForAlphaMigration", conn);
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    /*Context.Database.SetCommandTimeout(60);
+
                     Context.Database.ExecuteSqlRaw("DELETE FROM dbo.Simulation");
 
                     Context.Database.ExecuteSqlRaw("DELETE FROM dbo.Equation");
@@ -161,13 +181,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     Context.Database.ExecuteSqlRaw("DELETE FROM dbo.TreatmentLibrary");
 
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.TextAttributeValueHistory");
+                    Context.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.TextAttributeValueHistory");
 
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.NumericAttributeValueHistory");
+                    Context.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.NumericAttributeValueHistory");
 
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.Section");
+                    Context.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.Section");
 
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.Facility");
+                    Context.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.Facility");*/
                 }
 
                 Context.SaveChanges();

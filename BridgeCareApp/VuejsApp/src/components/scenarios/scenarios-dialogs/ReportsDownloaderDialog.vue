@@ -168,7 +168,9 @@ export default class ReportsDownloaderDialog extends Vue {
     @Watch('dialogData.showModal')
     onshowModalChanged(showModal: boolean) {
         if (showModal) {
-            this.isMigratedScenario = this.dialogData.scenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase();
+            if(process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL != undefined){
+                this.isMigratedScenario = this.dialogData.scenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase();
+            }
             this.errorMessage = '';
             this.showError = false;
             /*this.selectedScenarioData.networkId = this.dialogData.scenario.networkId;

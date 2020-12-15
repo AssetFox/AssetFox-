@@ -921,17 +921,20 @@ export default class Scenarios extends Vue {
         //     selectedScenario: this.currentScenario,
         //     userId: this.userId,
         // });
-        if (this.currentScenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()) {
-            this.runNewSimulationAction({
-                networkId: process.env.VUE_APP_HARDCODED_NETWORKID_FROM_MSSQL,
-                selectedScenarioId: this.currentScenario.id
-            });
-        } else {
-            this.runSimulationAction({
-                selectedScenario: this.currentScenario,
-                userId: this.userId,
-            });
+        if(process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL != undefined){
+            if (this.currentScenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()) {
+                        this.runNewSimulationAction({
+                            networkId: process.env.VUE_APP_HARDCODED_NETWORKID_FROM_MSSQL,
+                            selectedScenarioId: this.currentScenario.id
+                        });
+                    } else {
+                        this.runSimulationAction({
+                            selectedScenario: this.currentScenario,
+                            userId: this.userId,
+                        });
+                    }
         }
+        
     }
 
     aggregateNetworkData() {

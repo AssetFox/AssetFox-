@@ -499,6 +499,7 @@ import {
     InputValidationRules,
 } from '@/shared/utils/input-validation-rules';
 import CreateNetworkDialog from '@/components/scenarios/scenarios-dialogs/CreateNetworkDialog.vue';
+import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
 
 @Component({
     components: {
@@ -541,6 +542,7 @@ export default class Scenarios extends Vue {
     @Action('getNetworks') getNetworksAction: any;
     @Action('migrateLegacyData') migrateLegacyDataAction: any;
     @Action('getMigratedData') getMigratedDataAction: any;
+    @Action('updateSimulationAnalysisDetail') updateSimulationAnalysisDetailAction: any;
 
     alertData: AlertData = clone(emptyAlertData);
     alertBeforeDelete: AlertData = clone(emptyAlertData);
@@ -718,6 +720,7 @@ export default class Scenarios extends Vue {
         this.$statusHub.$on('summaryReportGeneration-status-event', this.getSummaryReportStatusUpdate);
         this.$statusHub.$on('DataMigration-status-event', this.getDataMigrationStatusUpdate);
         this.$statusHub.$on('ScenarioStatusUpdate-status-event', this.getDataScenarioStatusUpdate);
+        this.$statusHub.$on('SimulationAnalysisDetail-status-event', this.updateSimulationAnalysisDetail);
     }
 
     onUpdateScenarioList() {
@@ -876,6 +879,10 @@ export default class Scenarios extends Vue {
     getDataScenarioStatusUpdate(data: any) {
         this.scenarioStatusUpdate = data.status;
         this.scenarioIdForStatusUpdate = data.scenarioId;
+    }
+
+    updateSimulationAnalysisDetail(data: SimulationAnalysisDetail) {
+        this.updateSimulationAnalysisDetailAction({simulationAnalysisDetail: data});
     }
 
     onSubmitAssignDataDecision(response: boolean) {

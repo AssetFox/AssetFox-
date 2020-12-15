@@ -144,7 +144,7 @@ namespace BridgeCareCore
             services.AddScoped<ISimulationOutputRepository, SimulationOutputRepository>();
             services.AddScoped<ICommittedProjectConsequenceRepository, CommittedProjectConsequenceRepository>();
             services.AddScoped<ICommittedProjectRepository, CommittedProjectRepository>();
-            //services.AddScoped<ISimulationAnalysisDetailRepository, SimulationAnalysisDetailRepository>();
+            services.AddScoped<ISimulationAnalysisDetailRepository, SimulationAnalysisDetailRepository>();
 
             // Repository for legacy database
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));

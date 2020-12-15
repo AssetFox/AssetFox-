@@ -8,13 +8,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class SimulationDTO
     {
         [Required]
-        public int simulationId { get; set; }
-        public string simulationName { get; set; }
-        public string networkName { get; set; }
+        public int SimulationId { get; set; }
+        public string SimulationName { get; set; }
+        public string NetworkName { get; set; }
         public string Owner { get; set; }
         public string Creator { get; set; }
         [Required]
-        public int networkId { get; set; }
+        public int NetworkId { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? LastModifiedDate { get; set; }
         public DateTime? LastRun { get; set; }
@@ -22,7 +22,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
         public List<SimulationUserDTO> Users { get; set; } = new List<SimulationUserDTO>();
         // TODO: will replace int simulationId after alpha 1
         public Guid Id { get; set; }
-        public string status { get; set; }
+        public string Status { get; set; }
+        public string RunTime { get; set; }
 
         public SimulationDTO() { }
 
@@ -30,14 +31,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
         {
             Owner = "[ Unknown ]";
             Creator = "[ Unknown ]";
-            simulationId = 1171;
+            SimulationId = 1171;
             Id = entity.Id;
-            simulationName = entity.Name;
-            networkId = 13;
+            SimulationName = entity.Name;
+            NetworkId = 13;
             CreatedDate = entity.CreatedDate;
             LastModifiedDate = entity.LastModifiedDate;
             LastRun = entity.SimulationOutput?.LastModifiedDate;
-            networkName = "PENNDOT";
+            NetworkName = "PENNDOT";
         }
     }
 }

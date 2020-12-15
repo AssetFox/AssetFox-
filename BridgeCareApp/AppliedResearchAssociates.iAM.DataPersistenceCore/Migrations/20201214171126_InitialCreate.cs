@@ -1073,6 +1073,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SimulationAnalysisDetail",
+                columns: table => new
+                {
+                    SimulationId = table.Column<Guid>(nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(nullable: false),
+                    CreatedBy = table.Column<Guid>(nullable: false),
+                    LastModifiedBy = table.Column<Guid>(nullable: false),
+                    LastRun = table.Column<DateTime>(nullable: false),
+                    Status = table.Column<string>(nullable: true),
+                    RunTime = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SimulationAnalysisDetail", x => x.SimulationId);
+                    table.ForeignKey(
+                        name: "FK_SimulationAnalysisDetail_Simulation_SimulationId",
+                        column: x => x.SimulationId,
+                        principalTable: "Simulation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SimulationOutput",
                 columns: table => new
                 {
@@ -2202,6 +2226,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 column: "NetworkId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SimulationAnalysisDetail_SimulationId",
+                table: "SimulationAnalysisDetail",
+                column: "SimulationId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SimulationOutput_SimulationId",
                 table: "SimulationOutput",
                 column: "SimulationId",
@@ -2400,6 +2430,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             migrationBuilder.DropTable(
                 name: "RemainingLifeLimitLibrary_Simulation");
+
+            migrationBuilder.DropTable(
+                name: "SimulationAnalysisDetail");
 
             migrationBuilder.DropTable(
                 name: "SimulationOutput");

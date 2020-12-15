@@ -90,10 +90,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            return Context.Simulation
+            var simulationDTO = Context.Simulation
                 .Include(_ => _.SimulationOutput)
                 .Single(_ => _.Id == simulationId)
                 .ToDto();
+
+            var simulationAnalysisDetail = _simulationAnalysisDetailRepo.GetSimulationAnalysisDetail(simulationId);
+
+            simulationDTO.LastRun = simulationAnalysisDetail.LastRun;
+            simulationDTO.Status = simulationAnalysisDetail.Status;
+            simulationDTO.RunTime = simulationAnalysisDetail.RunTime;
+
+            return simulationDTO;
         }
 
         public void DeleteSimulationAndAllRelatedData()

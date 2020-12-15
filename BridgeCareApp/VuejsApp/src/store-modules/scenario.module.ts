@@ -9,6 +9,8 @@ import ReportsService from '@/services/reports.service';
 import {convertFromMongoToVue} from '@/shared/utils/mongo-model-conversion-utils';
 import moment from 'moment';
 import {getUserName} from '@/shared/utils/get-user-info';
+import {Simulation} from '@/shared/models/iAM/simulation';
+import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
 
 const state = {
     scenarios: [] as Scenario[],
@@ -57,12 +59,29 @@ const mutations = {
     },
     missingSummaryReportAttributesMutator(state: any, missingAttributes: string[]) {
         state.missingSummaryReportAttributes = clone(missingAttributes);
+    },
+    simulationAnalysisDetailMutator(state: any, simulationAnalysisDetail: SimulationAnalysisDetail) {
+        if (any(propEq('id', simulationAnalysisDetail.simulationId))) {
+            const updatedScenario: Scenario = find(propEq('id', simulationAnalysisDetail.simulationId)) as Scenario;
+            updatedScenario.lastRun = simulationAnalysisDetail.lastRun;
+            updatedScenario.status = simulationAnalysisDetail.status;
+            updatedScenario.runTime = simulationAnalysisDetail.runTime;
+
+            state.scenarios = update(
+                findIndex(propEq('simulationId', updatedScenario.simulationId), state.scenarios),
+                updatedScenario,
+                state.scenarios
+            );
+        }
     }
 };
 
 const actions = {
     selectScenario({commit}: any, payload: any) {
         commit('selectedScenarioMutator', payload.simulationId);
+    },
+    updateSimulationAnalysisDetail({commit}: any, payload: any) {
+        commit('simulationAnalysisDetailMutator', payload.simulationAnalysisDetail);
     },
     async getMongoScenarios({dispatch, commit}: any) {
         return await ScenarioService.getMongoScenarios()

@@ -40,6 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         public IAttributeValueHistoryRepository AttributeValueHistoryRepo { get; set; }
         public ISectionRepository SectionRepo { get; set; }
         public IFacilityRepository FacilityRepo { get; set; }
+        public ISimulationAnalysisDetailRepository SimulationAnalysisDetailRepo { get; set; }
         public ISimulationRepository SimulationRepo { get; set; }
         public IBudgetAmountRepository BudgetAmountRepo { get; set; }
         public IBudgetRepository BudgetRepo { get; set; }
@@ -155,7 +156,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 _dbContext);
         }
 
-        public void InitializeSimulationRepo() => SimulationRepo = new SimulationRepository(_dbContext);
+        public void InitializeSimulationRepo()
+        {
+            SimulationAnalysisDetailRepo = new SimulationAnalysisDetailRepository(_dbContext);
+            SimulationRepo = new SimulationRepository(SimulationAnalysisDetailRepo, _dbContext);
+        }
 
         public void InitializeSimulationOutputRepo() => SimulationOutputRepo = new SimulationOutputRepository(_dbContext);
 

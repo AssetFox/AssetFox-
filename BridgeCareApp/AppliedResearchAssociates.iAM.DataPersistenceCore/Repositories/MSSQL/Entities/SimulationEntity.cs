@@ -38,6 +38,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual TreatmentLibrarySimulationEntity TreatmentLibrarySimulationJoin { get; set; }
 
+        public virtual SimulationAnalysisDetailEntity SimulationAnalysisDetail { get; set; }
+
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
     }
 }

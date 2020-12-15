@@ -112,7 +112,6 @@ namespace BridgeCareCore
             services.AddScoped<IDeficientConditionGoalRepository, DeficientConditionGoalRepository>();
             services.AddScoped<IRemainingLifeLimitRepository, RemainingLifeLimitRepository>();
             services.AddScoped<IBenefitRepository, BenefitRepository>();
-
             services.AddScoped<IAttributeValueHistoryRepository, AttributeValueHistoryRepository>();
             services.AddScoped<ISectionRepository, SectionRepository>();
             services.AddScoped<IFacilityRepository, FacilityRepository>();
@@ -141,6 +140,7 @@ namespace BridgeCareCore
             services.AddScoped<ISimulationOutputRepository, SimulationOutputRepository>();
             services.AddScoped<ICommittedProjectConsequenceRepository, CommittedProjectConsequenceRepository>();
             services.AddScoped<ICommittedProjectRepository, CommittedProjectRepository>();
+            //services.AddScoped<ISimulationAnalysisDetailRepository, SimulationAnalysisDetailRepository>();
 
             // Repository for legacy database
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));

@@ -164,6 +164,7 @@ export default class ReportsDownloaderDialog extends Vue {
     showError: boolean = false;
     showMissingAttributesMessage: boolean = false;
     isMigratedScenario: boolean = false;
+    newNetworkId: string = '';
 
     @Watch('dialogData.showModal')
     onshowModalChanged(showModal: boolean) {
@@ -179,6 +180,7 @@ export default class ReportsDownloaderDialog extends Vue {
                 : this.dialogData.scenario.simulationId;
             this.selectedScenarioData.simulationName = this.dialogData.scenario.simulationName;*/
             this.selectedScenarioData = {...this.dialogData.scenario};
+            this.newNetworkId = this.dialogData.newNetworkId;
             this.reports = this.isMigratedScenario
                 ? ['Summary Report']
                 : ['Detailed Report', 'Summary Report'];
@@ -219,6 +221,7 @@ export default class ReportsDownloaderDialog extends Vue {
                             if (this.isMigratedScenario) {
                                 await ReportsService.downloadTempSummaryReport(
                                     this.selectedScenarioData,
+                                    this.newNetworkId
                                 ).then((response: AxiosResponse<any>) => {
                                     if (response == undefined) {
                                         this.setErrorMessageAction({

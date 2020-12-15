@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
@@ -11,13 +13,49 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
     {
         private readonly IExcelHelper _excelHelper;
 
-        public SummaryReportParameters(IExcelHelper excelHelper)
+        private readonly IAttributeRepository _attributeRepo;
+        private readonly INetworkRepository _networkRepo;
+        private readonly IInvestmentPlanRepository _investmentPlanRepo;
+        private readonly IAnalysisMethodRepository _analysisMethodRepo;
+        private readonly IPerformanceCurveRepository _performanceCurveRepo;
+        private readonly ISelectableTreatmentRepository _selectableTreatmentRepo;
+        private readonly ISimulationRepository _simulationRepo;
+        private readonly ISimulationOutputRepository _simulationOutputRepo;
+        private readonly ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;
+
+        public SummaryReportParameters(IAttributeRepository attributeRepo, INetworkRepository networkRepo,
+            IInvestmentPlanRepository investmentPlanRepo, IAnalysisMethodRepository analysisMethodRepo,
+            IPerformanceCurveRepository performanceCurveRepo, ISelectableTreatmentRepository selectableTreatmentRepo,
+            ISimulationRepository simulationRepo, ISimulationOutputRepository simulationOutputRepo,
+            ISimulationAnalysisDetailRepository simulationAnalysisDetailRepo,
+            IExcelHelper excelHelper)
         {
+            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
+            _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
+            _investmentPlanRepo = investmentPlanRepo ?? throw new ArgumentNullException(nameof(investmentPlanRepo));
+            _analysisMethodRepo = analysisMethodRepo ?? throw new ArgumentNullException(nameof(analysisMethodRepo));
+            _performanceCurveRepo = performanceCurveRepo ?? throw new ArgumentNullException(nameof(performanceCurveRepo));
+            _selectableTreatmentRepo = selectableTreatmentRepo ?? throw new ArgumentNullException(nameof(selectableTreatmentRepo));
+            _simulationRepo = simulationRepo ?? throw new ArgumentNullException(nameof(simulationRepo));
+            _simulationOutputRepo = simulationOutputRepo ?? throw new ArgumentNullException(nameof(simulationOutputRepo));
+            _simulationAnalysisDetailRepo = simulationAnalysisDetailRepo ?? throw new ArgumentNullException(nameof(simulationAnalysisDetailRepo));
+
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
         }
 
-        internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel)
+        internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel,
+            Guid simulationId, Guid networkId)
         {
+            var explorer = _attributeRepo.GetExplorer();
+            var network = _networkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
+            _simulationRepo.GetSimulationInNetwork(simulationId, network);
+
+            var simulation = network.Simulations.First();
+            _investmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _analysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+            _performanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+            _selectableTreatmentRepo.GetSimulationTreatments(simulation);
+
             //var simulationId = simulationModel.simulationId;
             //var investmentPeriod = _simulationAnalysisRepository.GetAnySimulationAnalysis(simulationId, db);
             //var inflationAndInvestments = getInflationRate.GetAnySimulationInvestmentLibrary(simulationId, db);

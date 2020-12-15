@@ -66,7 +66,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _addGraphsInTabs = addGraphsInTabs ?? throw new ArgumentNullException(nameof(addGraphsInTabs));
         }
 
-        public byte[] GenerateReport(Guid simulationId)
+        public byte[] GenerateReport(Guid simulationId, Guid networkId)
         {
             var reportOutputData = _simulationOutputRepo.GetSimulationOutput(simulationId);
 
@@ -108,7 +108,8 @@ namespace BridgeCareCore.Services.SummaryReport
                 var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, pennDotReportAData);
 
                 // Filling up parameters tab
-                _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel);
+                _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel,
+                    simulationId, networkId);
 
                 broadcastingMessage = $"Creating Unfunded recommendations TAB";
                 sendRealTimeMessage(broadcastingMessage, simulationId);

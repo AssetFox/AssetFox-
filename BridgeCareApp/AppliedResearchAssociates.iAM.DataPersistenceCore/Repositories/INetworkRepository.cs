@@ -12,6 +12,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<DataAssignment.Networking.Network> GetAllNetworks();
 
-        Domains.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer);
+        Domains.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true);
     }
 }

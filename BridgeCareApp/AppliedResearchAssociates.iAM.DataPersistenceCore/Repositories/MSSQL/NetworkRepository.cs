@@ -98,7 +98,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return Context.Network.Select(_ => _.ToDomain()).ToList();
         }
 
-        public Domains.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer)
+        public Domains.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true)
         {
             if (!Context.Network.Any(_ => _.Id == networkId))
             {
@@ -107,66 +107,69 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var networkEntity = Context.Network
                 .Single(_ => _.Id == networkId);
-
-            var facilityEntities = Context.Facility
-                .Where(_ => _.Network.Id == networkId).ToList();
-
-            if (facilityEntities.Any())
+            if (areFacilitiesRequired)
             {
-                networkEntity.Facilities = ToHashSetExtension.ToHashSet(facilityEntities);
 
-                var sectionEntities = Context.Section
-                    .Where(_ => _.Facility.Network.Id == networkId).ToList();
 
-                if (sectionEntities.Any())
+                var facilityEntities = Context.Facility
+                    .Where(_ => _.Network.Id == networkId).ToList();
+
+                if (facilityEntities.Any())
                 {
-                    var numericAttributeValueHistoryEntities = Context.NumericAttributeValueHistory
-                        .Where(_ => _.Section.Facility.Network.Id == networkId).ToList();
+                    networkEntity.Facilities = ToHashSetExtension.ToHashSet(facilityEntities);
 
-                    var textAttributeValueHistoryEntities = Context.TextAttributeValueHistory
-                        .Where(_ => _.Section.Facility.Network.Id == networkId).ToList();
+                    var sectionEntities = Context.Section
+                        .Where(_ => _.Facility.Network.Id == networkId).ToList();
 
-                    if (numericAttributeValueHistoryEntities.Any() || textAttributeValueHistoryEntities.Any())
+                    if (sectionEntities.Any())
                     {
-                        var numericValueHistoryAttributeIds = numericAttributeValueHistoryEntities.Select(_ => _.AttributeId).Distinct();
-                        var textValueHistoryAttributeIds = textAttributeValueHistoryEntities.Select(_ => _.AttributeId).Distinct();
-                        var attributeIds = numericValueHistoryAttributeIds.Union(textValueHistoryAttributeIds);
+                        var numericAttributeValueHistoryEntities = Context.NumericAttributeValueHistory
+                            .Where(_ => _.Section.Facility.Network.Id == networkId).ToList();
 
-                        var attributeEntities = Context.Attribute.Where(_ => attributeIds.Contains(_.Id)).ToList();
+                        var textAttributeValueHistoryEntities = Context.TextAttributeValueHistory
+                            .Where(_ => _.Section.Facility.Network.Id == networkId).ToList();
 
-                        ForEachExtension.ForEach(numericAttributeValueHistoryEntities,
-                            entity => entity.Attribute = attributeEntities.Single(_ => _.Id == entity.AttributeId));
-
-                        ForEachExtension.ForEach(textAttributeValueHistoryEntities,
-                            entity => entity.Attribute = attributeEntities.Single(_ => _.Id == entity.AttributeId));
-
-                        var numericAttributeValueHistoriesDict = numericAttributeValueHistoryEntities.GroupBy(_ => _.SectionId, _ => _)
-                            .ToDictionary(_ => _.Key, ToHashSetExtension.ToHashSet);
-
-                        var textAttributeValueHistoriesDict = textAttributeValueHistoryEntities.GroupBy(_ => _.SectionId, _ => _)
-                            .ToDictionary(_ => _.Key, ToHashSetExtension.ToHashSet);
-
-                        ForEachExtension.ForEach(sectionEntities, section =>
+                        if (numericAttributeValueHistoryEntities.Any() || textAttributeValueHistoryEntities.Any())
                         {
-                            if (numericAttributeValueHistoriesDict.ContainsKey(section.Id))
-                            {
-                                section.NumericAttributeValueHistories = numericAttributeValueHistoriesDict[section.Id];
-                            }
+                            var numericValueHistoryAttributeIds = numericAttributeValueHistoryEntities.Select(_ => _.AttributeId).Distinct();
+                            var textValueHistoryAttributeIds = textAttributeValueHistoryEntities.Select(_ => _.AttributeId).Distinct();
+                            var attributeIds = numericValueHistoryAttributeIds.Union(textValueHistoryAttributeIds);
 
-                            if (textAttributeValueHistoriesDict.ContainsKey(section.Id))
+                            var attributeEntities = Context.Attribute.Where(_ => attributeIds.Contains(_.Id)).ToList();
+
+                            ForEachExtension.ForEach(numericAttributeValueHistoryEntities,
+                                entity => entity.Attribute = attributeEntities.Single(_ => _.Id == entity.AttributeId));
+
+                            ForEachExtension.ForEach(textAttributeValueHistoryEntities,
+                                entity => entity.Attribute = attributeEntities.Single(_ => _.Id == entity.AttributeId));
+
+                            var numericAttributeValueHistoriesDict = numericAttributeValueHistoryEntities.GroupBy(_ => _.SectionId, _ => _)
+                                .ToDictionary(_ => _.Key, ToHashSetExtension.ToHashSet);
+
+                            var textAttributeValueHistoriesDict = textAttributeValueHistoryEntities.GroupBy(_ => _.SectionId, _ => _)
+                                .ToDictionary(_ => _.Key, ToHashSetExtension.ToHashSet);
+
+                            ForEachExtension.ForEach(sectionEntities, section =>
                             {
-                                section.TextAttributeValueHistories = textAttributeValueHistoriesDict[section.Id];
-                            }
-                        });
+                                if (numericAttributeValueHistoriesDict.ContainsKey(section.Id))
+                                {
+                                    section.NumericAttributeValueHistories = numericAttributeValueHistoriesDict[section.Id];
+                                }
+
+                                if (textAttributeValueHistoriesDict.ContainsKey(section.Id))
+                                {
+                                    section.TextAttributeValueHistories = textAttributeValueHistoriesDict[section.Id];
+                                }
+                            });
+                        }
                     }
+
+                    var sectionsDict = sectionEntities.GroupBy(_ => _.FacilityId, _ => _)
+                        .ToDictionary(_ => _.Key, ToHashSetExtension.ToHashSet);
+
+                    ForEachExtension.ForEach(networkEntity.Facilities, facility => facility.Sections = sectionsDict[facility.Id]);
                 }
-
-                var sectionsDict = sectionEntities.GroupBy(_ => _.FacilityId, _ => _)
-                    .ToDictionary(_ => _.Key, ToHashSetExtension.ToHashSet);
-
-                ForEachExtension.ForEach(networkEntity.Facilities, facility => facility.Sections = sectionsDict[facility.Id]);
             }
-
             return networkEntity.ToSimulationAnalysisDomain(explorer);
         }
     }

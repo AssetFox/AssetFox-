@@ -25,6 +25,8 @@ using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.LegacySimulationSynchronization;
 using BridgeCareCore.Interfaces.Simulation;
 using BridgeCareCore.Services.SimulationAnalysis;
+using Microsoft.Extensions.Logging;
+using BridgeCareCore.Logging;
 
 namespace BridgeCareCore
 {
@@ -43,6 +45,8 @@ namespace BridgeCareCore
             services.AddSingleton(Configuration);
 
             services.AddControllers().AddNewtonsoftJson();
+
+            services.AddSingleton<ILog, LogNLog>();
 
             services.AddScoped<LegacySimulationSynchronizer>();
 
@@ -169,12 +173,14 @@ namespace BridgeCareCore
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILog logger)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.ConfigureExceptionHandler(logger);
 
             app.UseCors("CorsPolicy");
 

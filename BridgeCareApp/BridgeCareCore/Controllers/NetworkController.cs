@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using BridgeCareCore.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -17,15 +18,14 @@ namespace BridgeCareCore.Controllers
     {
         private readonly IAttributeMetaDataRepository _attributeMetaDataFileRepo;
         private readonly INetworkRepository _networkRepo;
-        private readonly ILogger<NetworkController> _logger;
+        private readonly ILog _log;
 
         public NetworkController(IAttributeMetaDataRepository attributeMetaDataFileRepo,
-            INetworkRepository networkRepo,
-            ILogger<NetworkController> logger)
+            INetworkRepository networkRepo, ILog log)
         {
             _attributeMetaDataFileRepo = attributeMetaDataFileRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataFileRepo));
             _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
         [HttpGet]
@@ -34,6 +34,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                _log.Information("Entered GetAllNetWorks call");
                 var networks = _networkRepo.GetAllNetworks();
                 // Sending the first network because PennDOT will always have only 1 network
                 var filteredNetworks = new List<Network> { networks.FirstOrDefault() };
@@ -41,6 +42,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
+                _log.Error($"error while fetching networks {e.Message}");
                 return StatusCode(500, e);
             }
         }
@@ -67,8 +69,6 @@ namespace BridgeCareCore.Controllers
 
                 // insert network domain data into the data source
                 _networkRepo.CreateNetwork(network);
-
-                _logger.LogInformation($"A network with name : {network.Name} has been created.");
 
                 // [TODO] Create DTO to return network information necessary to be stored in the UI
                 // for future reference.

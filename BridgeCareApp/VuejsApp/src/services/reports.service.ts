@@ -28,10 +28,10 @@ export default class ReportsService {
         return axiosInstance.post('/api/DownloadSummaryReport', selectedScenarioData, { responseType: 'blob' });
     }
 
-    static downloadTempSummaryReport(selectedScenarioData: Scenario, networkId: string): AxiosPromise {
+    static downloadTempSummaryReport(scenarioId: string, networkId: string): AxiosPromise {
           return bridgecareCoreAxiosInstance.request({
               method: 'POST',
-              url: `/api/SummaryReport/GenerateSummaryReport/${networkId}/${selectedScenarioData.id}`,
+              url: `/api/SummaryReport/GenerateSummaryReport/${networkId}/${scenarioId}`,
               headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
               responseType: 'arraybuffer'
           });

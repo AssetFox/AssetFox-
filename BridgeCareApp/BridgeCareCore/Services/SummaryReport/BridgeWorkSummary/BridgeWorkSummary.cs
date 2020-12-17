@@ -51,12 +51,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 costPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (double treatmentCost, int bridgeCount)>());
                 foreach (var section in yearData.Sections)
                 {
-                    if (section.TreatmentCause == TreatmentCause.NoSelection || section.TreatmentOptions.Count <= 0)
+                    if (section.TreatmentCause == TreatmentCause.NoSelection) //|| section.TreatmentOptions.Count <= 0
                     {
                         continue;
                     }
                     //[TODO] - ask Jake regarding cash flow project. It won't have anything in the TreartmentOptions barring 1st year
-                    var cost = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment).Cost;
+                    var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
+                    var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
                     if (!costPerTreatmentPerYear[yearData.Year].ContainsKey(section.AppliedTreatment))
                     {
                         costPerTreatmentPerYear[yearData.Year].Add(section.AppliedTreatment, (cost, 1));

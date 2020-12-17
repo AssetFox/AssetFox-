@@ -112,6 +112,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     TrackDataForParametersTAB(data.reportAData);
                     // Work done in a year
                     var range = worksheet.Cells[row, column];
+                    if(data.section.FacilityName == "14142")
+                    {
+                        var test = 0;
+                    }
                     setColor(data.reportAData.Parallel_Struct, data.section.AppliedTreatment, previousYearCause, data.section.TreatmentCause,
                         yearlySectionData.Year, index, worksheet, row, column);
 
@@ -205,10 +209,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
                     worksheet.Cells[row, ++column].Value = section.AppliedTreatment;
-                    if (section.TreatmentCause == TreatmentCause.SelectedTreatment)
+                    if (section.TreatmentCause == TreatmentCause.CashFlowProject)
                     {
                         _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
                         _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
+
+                        // Color the previous year project also
+                        _excelHelper.ApplyColor(worksheet.Cells[row, column - 16], Color.FromArgb(0, 255, 0));
+                        _excelHelper.SetTextColor(worksheet.Cells[row, column - 16], Color.Black);
                     }
 
                     var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);

@@ -43,7 +43,8 @@ namespace BridgeCareCore.Controllers
                     .All
                     .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
 
-                var response = _summaryReportGenerator.GenerateReport(simulationId, networkId);
+                var response = await Task.Factory.StartNew(() => _summaryReportGenerator.GenerateReport(simulationId, networkId));
+                //var response = _summaryReportGenerator.GenerateReport(simulationId, networkId);
 
                 const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 HttpContext.Response.ContentType = contentType;

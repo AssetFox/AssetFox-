@@ -218,14 +218,18 @@ export default class ReportsDownloaderDialog extends Vue {
                             break;
                         }
                         case 'Summary Report': {
-                            if (this.isMigratedScenario) {
+                            if (true) { //this.isMigratedScenario
+                            var scenarioId = '';
+                            if(process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL != undefined){
+                                scenarioId = process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase();
+                            }
                                 await ReportsService.downloadTempSummaryReport(
-                                    this.selectedScenarioData,
+                                    scenarioId,
                                     this.newNetworkId
                                 ).then((response: AxiosResponse<any>) => {
                                     if (response == undefined) {
                                         this.setErrorMessageAction({
-                                            message: 'Summary report does not exists on the target path. Please generate the report before downloading',
+                                            message: 'Error in new summary generation. Please generate the report before downloading',
                                         });
                                     } else {
                                         this.setSuccessMessageAction({

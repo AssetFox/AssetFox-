@@ -111,19 +111,19 @@ namespace AppliedResearchAssociates.iAM.Domains
 
             var committedProjectsPerBudget = CommittedProjects.ToLookup(committedProject => committedProject.Budget);
 
-            Func<decimal, BudgetContext, bool> costCanBeAllocated;
+            Func<decimal, BudgetContext, int, bool> costCanBeAllocated;
             switch (AnalysisMethod.SpendingLimit)
             {
             case SpendingLimit.Zero:
-                costCanBeAllocated = (cost, context) => cost == 0;
+                costCanBeAllocated = (cost, context, year) => cost == 0;
                 break;
 
             case SpendingLimit.Budget:
-                costCanBeAllocated = (cost, context) => cost <= context.CurrentAmount;
+                costCanBeAllocated = (cost, context, year) => cost <= context.GetAmount(year);
                 break;
 
             case SpendingLimit.NoLimit:
-                costCanBeAllocated = (cost, context) => true;
+                costCanBeAllocated = (cost, context, year) => true;
                 break;
 
             default:
@@ -138,21 +138,17 @@ namespace AppliedResearchAssociates.iAM.Domains
                 {
                     foreach (var year in Static.RangeFromBounds(committedProjectPerYear.Last().Value.Year, InvestmentPlan.FirstYearOfAnalysisPeriod, -1))
                     {
-                        context.SetYear(year);
-
                         if (committedProjectPerYear.TryGetValue(year, out var committedProject))
                         {
                             var cost = (decimal)committedProject.Cost;
 
-                            if (!costCanBeAllocated(cost, context))
+                            if (!costCanBeAllocated(cost, context, year))
                             {
                                 throw new SimulationException($"Committed project \"{committedProject.Name}\" cannot be funded.");
                             }
 
-                            context.AllocateCost(cost);
+                            context.AllocateCost(cost, year);
                         }
-
-                        context.LimitPreviousAmountToCurrentAmount();
                     }
                 }
             }

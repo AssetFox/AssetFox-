@@ -21,35 +21,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public decimal? CurrentPrioritizedAmount { get; private set; }
 
-        public BudgetPriority Priority
-        {
-            set
-            {
-                var prioritizedFraction = value?.GetBudgetPercentagePair(Budget).Percentage / 100;
-                CurrentPrioritizedAmount = CurrentAmount * prioritizedFraction;
-            }
-        }
+        public void AllocateCost(decimal cost) => _AllocateCost(cost, CurrentYearIndex);
 
-        public void AllocateCost(decimal cost)
-        {
-            for (var yearIndex = CurrentYearIndex; yearIndex < CumulativeAmountPerYear.Length; ++yearIndex)
-            {
-                CumulativeAmountPerYear[yearIndex] -= cost;
-            }
+        public void AllocateCost(decimal cost, int targetYear) => _AllocateCost(cost, targetYear - FirstYearOfAnalysisPeriod);
 
-            CurrentPrioritizedAmount -= cost;
-        }
-
-        public void LimitPreviousAmountToCurrentAmount()
-        {
-            if (CurrentYearIndex > 0)
-            {
-                var previousYearIndex = CurrentYearIndex - 1;
-                CumulativeAmountPerYear[previousYearIndex] = Math.Min(CumulativeAmountPerYear[previousYearIndex], CumulativeAmountPerYear[CurrentYearIndex]);
-            }
-        }
+        public decimal GetAmount(int year) => CumulativeAmountPerYear[year - FirstYearOfAnalysisPeriod];
 
         public void MoveToNextYear() => SetYearIndex(CurrentYearIndex + 1);
+
+        public void SetPriority(BudgetPriority budgetPriority)
+        {
+            var prioritizedFraction = budgetPriority?.GetBudgetPercentagePair(Budget).Percentage / 100;
+            CurrentPrioritizedAmount = CurrentAmount * prioritizedFraction;
+        }
 
         public void SetYear(int year) => SetYearIndex(year - FirstYearOfAnalysisPeriod);
 
@@ -70,10 +54,26 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private int CurrentYearIndex = 0;
 
+        private void _AllocateCost(decimal cost, int targetYearIndex)
+        {
+            for (var yearIndex = targetYearIndex; yearIndex < CumulativeAmountPerYear.Length; ++yearIndex)
+            {
+                CumulativeAmountPerYear[yearIndex] -= cost;
+            }
+
+            CurrentPrioritizedAmount -= cost;
+
+            for (var yearIndex = targetYearIndex; yearIndex > 0; --yearIndex)
+            {
+                var previousYearIndex = yearIndex - 1;
+                CumulativeAmountPerYear[previousYearIndex] = Math.Min(CumulativeAmountPerYear[previousYearIndex], CumulativeAmountPerYear[yearIndex]);
+            }
+        }
+
         private void SetYearIndex(int yearIndex)
         {
             CurrentYearIndex = yearIndex;
-            CurrentPrioritizedAmount = null;
+            SetPriority(null);
         }
     }
 }

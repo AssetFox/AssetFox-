@@ -19,7 +19,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper = excelHelper;
         }
         public void FillBridgesCulvertsWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             List<int> simulationYears, List<string> treatments)
         {
             var projectRowNumberModel = new ProjectRowNumberModel();
@@ -30,14 +30,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         #region Private methods
         private void FillNumberOfCulvertsWorkedOnSection(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel, List<string> treatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Culverts Worked on", "Culvert Work Type");
             AddCountsOfCulvertsWorkedOn(worksheet, currentCell, countPerTreatmentPerYear, projectRowNumberModel, treatments);
         }
         private void FillNumberOfBridgesWorkedOnSection(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel, List<string> treatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Bridges Worked on", "Bridge Work Type");
@@ -50,7 +50,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             AddDetailsForNumberOfBridgesCulvertsWorkedOn(worksheet, currentCell, simulationYears, projectRowNumberModel, treatments);
         }
         private void AddCountsOfCulvertsWorkedOn(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             ProjectRowNumberModel projectRowNumberModel, List<string> treatments)
         {
             int startRow, startColumn, row, column;
@@ -91,7 +91,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private void AddCountsOfBridgesWorkedOn(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             ProjectRowNumberModel projectRowNumberModel, List<string> treatments)
         {
             int startRow, startColumn, row, column;

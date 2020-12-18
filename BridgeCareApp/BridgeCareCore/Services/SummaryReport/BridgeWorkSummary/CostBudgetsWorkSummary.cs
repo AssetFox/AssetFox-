@@ -13,9 +13,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
     {
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
         private readonly IExcelHelper _excelHelper;
-        private Dictionary<int, double> TotalCulvertSpent = new Dictionary<int, double>();
-        private Dictionary<int, double> TotalBridgeSpent = new Dictionary<int, double>();
-        private Dictionary<int, double> TotalCommittedSpent = new Dictionary<int, double>();
+        private Dictionary<int, decimal> TotalCulvertSpent = new Dictionary<int, decimal>();
+        private Dictionary<int, decimal> TotalBridgeSpent = new Dictionary<int, decimal>();
+        private Dictionary<int, decimal> TotalCommittedSpent = new Dictionary<int, decimal>();
 
         public CostBudgetsWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IExcelHelper excelHelper)
         {
@@ -23,7 +23,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper = excelHelper;
         }
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
             List<int> simulationYears, List<string> treatments, Dictionary<string, Budget> yearlyBudgetAmount)
         {
             var culvertTotalRow = FillCostOfCulvertWorkSection(worksheet, currentCell,
@@ -39,7 +39,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         private int FillCostOfCulvertWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, List<string> treatments,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Culvert Work", "BAMS Culvert Work Type");
             var culvertTotalRow = AddCostsOfCulvertWork(worksheet, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
@@ -48,7 +48,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         private int FillCostOfBridgeWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, List<string> treatments,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Bridge Work", "BAMS Bridge Work Type");
             var bridgeTotalRow = AddCostsOfBridgeWork(worksheet, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
@@ -56,7 +56,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private int FillTotalBudgetSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
             Dictionary<string, Budget> yearlyBudgetAmount)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Totals");
@@ -80,7 +80,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         private int AddCostsOfCulvertWork(ExcelWorksheet worksheet,
             List<int> simulationYears, CurrentCell currentCell, List<string> treatments,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
         {
             if(simulationYears.Count <= 0)
             {
@@ -105,7 +105,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             // Filling in the cost per treatment per year in the excel TAB
             foreach (var yearlyValues in costPerTreatmentPerYear)
             {
-                double culvertTotalCost = 0;
+                decimal culvertTotalCost = 0;
                 row = startRow;
                 column = ++column;
 
@@ -133,7 +133,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
         private int AddCostsOfBridgeWork(ExcelWorksheet worksheet,
             List<int> simulationYears, CurrentCell currentCell, List<string> treatments,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
         {
             if (simulationYears.Count <= 0)
             {
@@ -158,7 +158,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             {
                 row = startRow;
                 column = ++column;
-                double nonCulvertTotalCost = 0;
+                decimal nonCulvertTotalCost = 0;
 
                 foreach (var treatment in treatments)
                 {
@@ -186,7 +186,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private int AddDetailsForTotalBudget(ExcelWorksheet worksheet, int initialYear, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
             Dictionary<string, Budget> yearlyBudgetAmount)
         {
             int startRow, startColumn, row, column;

@@ -32,6 +32,20 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
+            var culvertTreatments = new List<string>();
+            var nonCulvertTreatments = new List<string>();
+
+            var singleSection = reportOutputData.Years[0].Sections[0];
+            culvertTreatments = singleSection.TreatmentOptions.Select(_ => _.TreatmentName)
+                .Union(singleSection.TreatmentRejections.Select(r => r.TreatmentName)).ToList()
+                .FindAll(_ => _.Contains("culvert", StringComparison.OrdinalIgnoreCase));
+            culvertTreatments.Sort();
+
+            nonCulvertTreatments = singleSection.TreatmentOptions.Select(_ => _.TreatmentName)
+                .Union(singleSection.TreatmentRejections.Select(r => r.TreatmentName)).ToList()
+                .FindAll(_ => !_.Contains("culvert", StringComparison.OrdinalIgnoreCase));
+            nonCulvertTreatments.Sort();
+
             // setting up model to store data. This will be used to fill up Bridge Work Summary By Budget TAB
             var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();
             var budgets = new HashSet<string>();
@@ -59,10 +73,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     {
                         if(section.TreatmentCause != TreatmentCause.NoSelection)
                         {
-                            var treatmentConsideration = section.TreatmentConsiderations.
-                                Where(_ => _.TreatmentName == section.AppliedTreatment).FirstOrDefault();
-                            var budgetAmount = (double)treatmentConsideration.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget)
-                                .Sum(_ => _.CoveredCost);
+                            var treatmentConsideration = section.TreatmentConsiderations;
+                            var budgetAmount = (double)treatmentConsideration.Sum(_ =>
+                            _.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget).Sum(bu => bu.CoveredCost));
 
                             summaryData.YearlyData.Add(new YearsData
                             {
@@ -76,25 +89,17 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             }
             // Model setup complete. [TODO]: Make it efficient
 
-
             foreach (var summaryData in workSummaryByBudgetData)
             {
                 //Filtering treatments for the given budget
-                var totalCostPerYear = summaryData.YearlyData.Sum(_ => _.Amount);
-                //if(totalCostPerYear == 0)
-                //{
-                //    continue;
-                //}
+                //var totalCostPerYear = summaryData.YearlyData.Sum(_ => _.Amount);
+
                 var costForCulvertBudget = summaryData.YearlyData
                                              .FindAll(_ => _.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase));
 
                 var costForBridgeBudgets = summaryData.YearlyData
                                              .FindAll(_ => !_.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase));
 
-                //if (costForCulvertBudget.Count == 0 && costForBridgeBudgets.Count == 0)
-                //{
-                //    continue;
-                //}
 
                 var totalBudgetPerYearForCulvert = new Dictionary<int, double>();
                 var totalBudgetPerYearForBridgeWork = new Dictionary<int, double>();
@@ -130,9 +135,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 var amount = totalSpent.Sum(_ => _.amount);
                 if (amount > 0)
                 {
-                    _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget, totalBudgetPerYearForCulvert, simulationYears);
+                    _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget, totalBudgetPerYearForCulvert,
+                        culvertTreatments, simulationYears);
 
-                    _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, totalBudgetPerYearForBridgeWork);
+                    _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, nonCulvertTreatments,
+                        totalBudgetPerYearForBridgeWork);
                 }
 
                 currentCell.Row += 1;

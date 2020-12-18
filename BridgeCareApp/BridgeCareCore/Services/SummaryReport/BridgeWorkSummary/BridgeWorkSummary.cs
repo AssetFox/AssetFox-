@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Interfaces.SummaryReport;
@@ -43,12 +42,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var singleSection = reportOutputData.Years[0].Sections[0];
             treatments = singleSection.TreatmentOptions.Select(_ => _.TreatmentName)
                 .Union(singleSection.TreatmentRejections.Select(r => r.TreatmentName)).ToList();
+            treatments.Sort();
 
             // cache to store total cost per treatment for a given year along with count of culvert and non-culvert bridges
-            var costPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (double treatmentCost, int bridgeCount)>>();
+            var costPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
             foreach (var yearData in reportOutputData.Years)
             {
-                costPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (double treatmentCost, int bridgeCount)>());
+                costPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int bridgeCount)>());
                 foreach (var section in yearData.Sections)
                 {
                     if (section.TreatmentCause == TreatmentCause.NoSelection) //|| section.TreatmentOptions.Count <= 0
@@ -56,8 +56,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                         continue;
                     }
                     //[TODO] - ask Jake regarding cash flow project. It won't have anything in the TreartmentOptions barring 1st year
-                    var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
-                    var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
+                    //var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
+                    //var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
+                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
                     if (!costPerTreatmentPerYear[yearData.Year].ContainsKey(section.AppliedTreatment))
                     {
                         costPerTreatmentPerYear[yearData.Year].Add(section.AppliedTreatment, (cost, 1));

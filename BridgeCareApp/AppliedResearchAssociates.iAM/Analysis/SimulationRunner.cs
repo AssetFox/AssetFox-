@@ -629,7 +629,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             // This variable is updated as payment for the treatment is arranged.
             var remainingCost = (decimal)(treatmentCost * GetInflationFactor(year));
 
-            var treatmentConsideration = sectionContext.Detail.TreatmentConsiderations.GetAdd(new TreatmentConsiderationDetail(treatment.Name));
+            var treatmentConsideration = new TreatmentConsiderationDetail(treatment.Name);
 
             treatmentConsideration.BudgetUsages.AddRange(BudgetContexts.Select(budgetContext => new BudgetUsageDetail(budgetContext.Budget.Name)
             {
@@ -664,6 +664,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 return true;
             }
 
+            var cashFlowConsiderations = new List<CashFlowConsiderationDetail>();
+
             if (remainingCost > 0)
             {
                 // First, attempt any applicable cash flows.
@@ -673,7 +675,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var applicableCashFlowRules = Simulation.InvestmentPlan.CashFlowRules.Where(rule => rule.Criterion.EvaluateOrDefault(sectionContext));
                 foreach (var cashFlowRule in applicableCashFlowRules)
                 {
-                    var cashFlowConsideration = treatmentConsideration.CashFlowConsiderations.GetAdd(new CashFlowConsiderationDetail(cashFlowRule.Name));
+                    var cashFlowConsideration = cashFlowConsiderations.GetAdd(new CashFlowConsiderationDetail(cashFlowRule.Name));
 
                     cashFlowConsideration.ReasonAgainstCashFlow = scheduleCashFlowEvents is null
                         ? handleCashFlowRule()
@@ -707,8 +709,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                         }
 
                         var futureCostAllocators = new List<Action>();
-                        var considerationPerYear = new List<TreatmentConsiderationDetail> { treatmentConsideration };
-                        considerationPerYear.AddRange(costPerYear.Skip(1).Select(_ => new TreatmentConsiderationDetail(treatmentConsideration)));
+                        var considerationPerYear = costPerYear.Select(_ => new TreatmentConsiderationDetail(treatmentConsideration)).ToList();
 
                         var workingBudgetContexts = applicableBudgets.Select(_ => new BudgetContext(_.Item1)).ToArray();
                         var applicableBudgetNames = applicableBudgets.Select(_ => _.Item2.BudgetName).ToHashSet();
@@ -719,6 +720,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                             originalBudgetContextPerWorkingBudgetContext[working] = original;
                         }
 
+                        BudgetContext firstYearBudget = null;
+
                         foreach (var (futureYearConsideration, futureYearCost, futureYear) in Zip.Short(considerationPerYear, costPerYear, Static.Count(year)))
                         {
                             foreach (var budgetContext in workingBudgetContexts)
@@ -727,7 +730,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
                             }
 
                             var workingBudgetDetails = futureYearConsideration.BudgetUsages.Where(detail => applicableBudgetNames.Contains(detail.BudgetName));
-                            var workingBudgets = Zip.Strict(workingBudgetContexts, workingBudgetDetails);
+                            var workingBudgets = Zip.Strict(workingBudgetContexts, workingBudgetDetails).ToList();
+
+                            if (firstYearBudget is object)
+                            {
+                                _ = workingBudgets.RemoveAll(pair => pair.Item1 != firstYearBudget);
+                            }
 
                             var remainingYearCost = futureYearCost;
 
@@ -742,18 +750,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                             tryToAllocateCost(workingBudgets, ref remainingYearCost, addFutureCostAllocator);
 
+                            if (futureYear == year && Simulation.AnalysisMethod.ShouldRestrictCashFlowToFirstYearBudget)
+                            {
+                                firstYearBudget = workingBudgets.SingleOrDefault(pair => pair.Item2.Status == BudgetUsageStatus.CostCoveredInFull).Item1;
+                            }
+
                             if (remainingYearCost > 0)
                             {
                                 return ReasonAgainstCashFlow.FundingIsNotAvailable;
                             }
                         }
 
-                        // Clear out any copied cash flow consideration data for future years. That
-                        // data only applied to the first year, not the future years.
-                        foreach (var consideration in considerationPerYear.Skip(1))
-                        {
-                            consideration.CashFlowConsiderations.Clear();
-                        }
+                        considerationPerYear[0].CashFlowConsiderations.AddRange(cashFlowConsiderations);
+                        sectionContext.Detail.TreatmentConsiderations.Add(considerationPerYear[0]);
 
                         var progression = costPerYear.Zip(considerationPerYear, (cost, consideration) => new TreatmentProgress(treatment, consideration)).ToArray();
                         progression.Last().IsComplete = true;
@@ -783,6 +792,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
 
             // At this point, no cash flow could be used. So try to pay the normal way.
+
+            treatmentConsideration.CashFlowConsiderations.AddRange(cashFlowConsiderations);
+            sectionContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
 
             var costAllocators = new List<Action>();
             void addCostAllocator(decimal cost, BudgetContext budgetContext)

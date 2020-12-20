@@ -17,10 +17,10 @@
                     </v-flex>
                     <v-progress-linear
                         :indeterminate="true"
-                        v-if="isBusy"
+                        v-if="isDownloading"
                     ></v-progress-linear>
                     <v-flex>
-                        <span class="grey--text" v-if="isBusy"
+                        <span class="grey--text" v-if="isDownloading"
                         >Downloading...</span
                         >
                     </v-flex>
@@ -164,6 +164,7 @@ export default class ReportsDownloaderDialog extends Vue {
     showError: boolean = false;
     showMissingAttributesMessage: boolean = false;
     isMigratedScenario: boolean = false;
+    isDownloading: boolean = false;
 
     @Watch('dialogData.showModal')
     onshowModalChanged(showModal: boolean) {
@@ -203,9 +204,11 @@ export default class ReportsDownloaderDialog extends Vue {
                 for (let report of this.selectedReports) {
                     switch (report) {
                         case 'Detailed Report': {
+                            this.isDownloading = true;
                             await ReportsService.getDetailedReport(
                                 this.selectedScenarioData,
                             ).then((response: AxiosResponse<any>) => {
+                                this.isDownloading = false;
                                 FileDownload(
                                     response.data,
                                     'DetailedReport.xlsx',
@@ -215,10 +218,12 @@ export default class ReportsDownloaderDialog extends Vue {
                         }
                         case 'Summary Report': {
                             if (this.isMigratedScenario) {
+                                this.isDownloading = true;
                                 await ReportsService.downloadTempSummaryReport(
                                     this.selectedScenarioData,
                                 ).then((response: AxiosResponse<any>) => {
-                                    if (response == undefined) {
+                                    this.isDownloading = false;
+                                    if (response === undefined) {
                                         this.setErrorMessageAction({
                                             message: 'Summary report does not exists on the target path. Please generate the report before downloading',
                                         });
@@ -230,10 +235,12 @@ export default class ReportsDownloaderDialog extends Vue {
                                     FileDownload(response.data, 'SummaryReportTestData.xlsx',);
                                 });
                             } else {
+                                this.isDownloading = true;
                                 await ReportsService.downloadSummaryReport(
                                     this.selectedScenarioData,
                                 ).then((response: AxiosResponse<any>) => {
-                                    if (response == undefined) {
+                                    this.isDownloading = false;
+                                    if (response === undefined) {
                                         this.setErrorMessageAction({
                                             message: 'Summary report does not exists on the target path. Please generate the report before downloading',
                                         });

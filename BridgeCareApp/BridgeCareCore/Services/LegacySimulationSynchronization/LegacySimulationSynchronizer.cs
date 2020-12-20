@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace BridgeCareCore.Services.LegacySimulationSynchronization
 {
@@ -17,7 +21,7 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
 
         private const int NetworkId = 13;
 
-        private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
+        /*private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
         private readonly IAttributeRepository _attributeRepo;
         private readonly INetworkRepository _networkRepo;
         private readonly IFacilityRepository _facilityRepo;
@@ -25,16 +29,17 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
         private readonly IInvestmentPlanRepository _investmentPlanRepo;
         private readonly IAnalysisMethodRepository _analysisMethodRepo;
         private readonly IPerformanceCurveRepository _performanceCurveRepo;
-        private readonly ISelectableTreatmentRepository _selectableTreatmentRepo;
+        private readonly ISelectableTreatmentRepository _selectableTreatmentRepo;*/
         private readonly IConfiguration _config;
-        private readonly IHubContext<BridgeCareHub> HubContext;
+        private readonly IHubContext<BridgeCareHub> _hubContext;
+        private readonly UnitOfWork _unitOfWork;
 
-        public LegacySimulationSynchronizer(IAttributeMetaDataRepository attributeMetaDataRepo, IAttributeRepository attributeRepo, INetworkRepository networkRepo,
+        public LegacySimulationSynchronizer(/*IAttributeMetaDataRepository attributeMetaDataRepo, IAttributeRepository attributeRepo, INetworkRepository networkRepo,
             IFacilityRepository facilityRepo, ISimulationRepository simulationRepo, IInvestmentPlanRepository investmentPlanRepo,
-            IAnalysisMethodRepository analysisMethodRepo, IPerformanceCurveRepository performanceCurveRepo, ISelectableTreatmentRepository selectableTreatmentRepo,
-            IConfiguration config, IHubContext<BridgeCareHub> hub)
+            IAnalysisMethodRepository analysisMethodRepo, IPerformanceCurveRepository performanceCurveRepo, ISelectableTreatmentRepository selectableTreatmentRepo,*/
+            IConfiguration config, IHubContext<BridgeCareHub> hub, UnitOfWork unitOfWork)
         {
-            _attributeMetaDataRepo = attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
+            /*_attributeMetaDataRepo = attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
             _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
             _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
             _facilityRepo = facilityRepo ?? throw new ArgumentNullException(nameof(facilityRepo));
@@ -42,78 +47,84 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
             _investmentPlanRepo = investmentPlanRepo ?? throw new ArgumentNullException(nameof(investmentPlanRepo));
             _analysisMethodRepo = analysisMethodRepo ?? throw new ArgumentNullException(nameof(analysisMethodRepo));
             _performanceCurveRepo = performanceCurveRepo ?? throw new ArgumentNullException(nameof(performanceCurveRepo));
-            _selectableTreatmentRepo = selectableTreatmentRepo ?? throw new ArgumentNullException(nameof(selectableTreatmentRepo));
+            _selectableTreatmentRepo = selectableTreatmentRepo ?? throw new ArgumentNullException(nameof(selectableTreatmentRepo));*/
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            HubContext = hub;
+            _hubContext = hub;
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public void SynchronizeLegacySimulation(int legacySimulationId)
+        public Task SynchronizeLegacySimulation(int legacySimulationId)
         {
-            using (var sqlConnection = new SqlConnection(_config.GetConnectionString("BridgeCareLegacyConnex")))
+            using var connection = new SqlConnection(_config.GetConnectionString("BridgeCareLegacyConnex"));
+            using var transaction = _unitOfWork.DbContextTransaction;
+
+            try
             {
-                try
+                // delete all existing simulation data before migrating
+                // TODO: this is for alpha 1 only; will have a clean database when doing the full migration
+                _unitOfWork.SimulationRepo.DeleteSimulationAndAllRelatedData();
+
+                // open the sql connection and create new instance of data accessor
+                connection.Open();
+                var dataAccessor = new DataAccessor(connection, null);
+
+                var broadcastingMessage = "Upserting attributes...";
+                sendRealTimeMessage(broadcastingMessage, legacySimulationId);
+
+                // ensure all attributes have been created
+                _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
+
+                sendRealTimeMessage("Getting stand alone simulation...", legacySimulationId);
+                // get the stand alone simulation
+                var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, legacySimulationId);
+                // TODO: hard-coding simulation id for alpha 1
+                simulation.Id = new Guid(DataPersistenceConstants.TestSimulationId);
+                simulation.Name = $"*{simulation.Name} Alpha 1";
+
+                sendRealTimeMessage("Joining attributes with equations and criteria...", legacySimulationId);
+                // join attributes with equations and criteria per the explorer object
+                var explorer = simulation.Network.Explorer;
+                _unitOfWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(explorer);
+
+                // create network unless penndot network already exists
+                var networks = _unitOfWork.NetworkRepo.GetAllNetworks().ToList();
+                if (networks.Any())
                 {
-                    // open the sql connection and create new instance of data accessor
-                    sqlConnection.Open();
-                    var dataAccessor = new DataAccessor(sqlConnection, null);
-
-                    var broadcastingMessage = "upserting attributes";
-                    sendRealTimeMessage(broadcastingMessage, legacySimulationId);
-
-                    // ensure all attributes have been created
-                    _attributeRepo.UpsertAttributes(_attributeMetaDataRepo.GetAllAttributes().ToList());
-
-                    sendRealTimeMessage("getting stand alone simulation", legacySimulationId);
-                    // get the stand alone simulation
-                    var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, legacySimulationId);
-                    // TODO: hard-coding simulation id for alpha 1
-                    simulation.Id = new Guid(DataPersistenceConstants.TestSimulationId);
-                    simulation.Name = $"*{simulation.Name} Alpha 1";
-
-                    // delete all existing simulation data before migrating
-                    // TODO: this is for alpha 1 only; will have a clean database when doing the full migration
-                    _simulationRepo.DeleteSimulationAndAllRelatedData();
-
-                    sendRealTimeMessage("joining attributes with equations and criteria", legacySimulationId);
-                    // join attributes with equations and criteria per the explorer object
-                    var explorer = simulation.Network.Explorer;
-                    _attributeRepo.JoinAttributesWithEquationsAndCriteria(explorer);
-
-                    // create network unless penndot network already exists
-                    var networks = _networkRepo.GetAllNetworks().ToList();
-                    if (networks.Any())
-                    {
-                        explorer.Networks.First().Id = networks.First().Id;
-                    }
-                    else
-                    {
-                        explorer.Networks.First().Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
-                        _networkRepo.CreateNetwork(explorer.Networks.First());
-                    }
-
-                    sendRealTimeMessage("creating the network's facilities and sections", legacySimulationId);
-                    // create the network's facilities and sections
-                    _facilityRepo.CreateFacilities(explorer.Networks.First().Facilities.ToList(), explorer.Networks.First().Id);
-
-                    sendRealTimeMessage("insert simulation data into the new data source", legacySimulationId);
-                    // insert simulation data into our new data source
-                    _simulationRepo.CreateSimulation(simulation);
-                    _investmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
-                    _analysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Id);
-                    _performanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
-                    _performanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
-                    _selectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
-                    _selectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
+                    explorer.Networks.First().Id = networks.First().Id;
                 }
-                catch (Exception e)
+                else
                 {
-                    Console.WriteLine(e);
-                    throw;
+                    explorer.Networks.First().Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
+                    _unitOfWork.NetworkRepo.CreateNetwork(explorer.Networks.First());
                 }
-                finally
-                {
-                    sqlConnection.Close();
-                }
+
+                sendRealTimeMessage("Creating the network's facilities and sections...", legacySimulationId);
+                // create the network's facilities and sections
+                _unitOfWork.FacilityRepo.CreateFacilities(explorer.Networks.First().Facilities.ToList(), explorer.Networks.First().Id);
+
+                sendRealTimeMessage("Inserting simulation data...", legacySimulationId);
+                // insert simulation data into our new data source
+                _unitOfWork.SimulationRepo.CreateSimulation(simulation);
+                _unitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
+                _unitOfWork.AnalysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Id);
+                _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
+                _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
+                _unitOfWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
+                _unitOfWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
+
+                _unitOfWork.Commit();
+
+                return Task.CompletedTask;
+            }
+            catch (Exception e)
+            {
+                _unitOfWork.Rollback();
+                Console.WriteLine(e);
+                throw;
+            }
+            finally
+            {
+                connection.Close();
             }
         }
 
@@ -121,7 +132,7 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
         {
             if (!IsRunningFromXUnit)
             {
-                HubContext
+                _hubContext
                     .Clients
                     .All
                     .SendAsync("BroadcastDataMigration", message, legacySimulationId);

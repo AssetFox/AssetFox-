@@ -18,7 +18,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class SummaryReportController : ControllerBase
     {
-        private readonly ILogger<SummaryReportController> _logger;
+        /*private readonly ILogger<SummaryReportController> _logger;
         private readonly ISummaryReportGenerator _summaryReportGenerator;
         private readonly IHubContext<BridgeCareHub> HubContext;
 
@@ -43,7 +43,7 @@ namespace BridgeCareCore.Controllers
                     .All
                     .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
 
-                var response = _summaryReportGenerator.GenerateReport(simulationId);
+                var response = await Task.Factory.StartNew(() => _summaryReportGenerator.GenerateReport(simulationId));
 
                 const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 HttpContext.Response.ContentType = contentType;
@@ -70,9 +70,9 @@ namespace BridgeCareCore.Controllers
         private void sendRealTimeMessage(string message, Guid simulationId)
         {
             HubContext
-                        .Clients
-                        .All
-                        .SendAsync("BroadcastSummaryReportGenerationStatus", message, simulationId);
-        }
+                .Clients
+                .All
+                .SendAsync("BroadcastSummaryReportGenerationStatus", message, simulationId);
+        }*/
     }
 }

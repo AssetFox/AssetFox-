@@ -7,12 +7,14 @@ using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class BudgetPercentagePairRepository : MSSQLRepository, IBudgetPercentagePairRepository
+    public class BudgetPercentagePairRepository : IBudgetPercentagePairRepository
     {
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public BudgetPercentagePairRepository(IAMContext context) : base(context) { }
+        private readonly IAMContext _context;
+
+        public BudgetPercentagePairRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
 
         public void CreateBudgetPercentagePairs(Dictionary<Guid, List<(Guid budgetId, BudgetPercentagePair percentagePair)>> percentagePairPerBudgetIdPerPriorityId)
         {
@@ -22,14 +24,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.BudgetPercentagePair.AddRange(budgetPercentagePairEntities);
+                _context.BudgetPercentagePair.AddRange(budgetPercentagePairEntities);
             }
             else
             {
-                Context.BulkInsert(budgetPercentagePairEntities);
+                _context.BulkInsert(budgetPercentagePairEntities);
             }
-
-            Context.SaveChanges();
         }
     }
 }

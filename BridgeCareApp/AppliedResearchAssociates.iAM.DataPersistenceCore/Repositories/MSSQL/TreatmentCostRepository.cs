@@ -9,20 +9,22 @@ using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class TreatmentCostRepository : MSSQLRepository, ITreatmentCostRepository
+    public class TreatmentCostRepository : ITreatmentCostRepository
     {
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
         private readonly IEquationRepository _equationRepo;
         private readonly ICriterionLibraryRepository _criterionLibraryRepo;
+        private readonly IAMContext _context;
 
         public TreatmentCostRepository(IEquationRepository equationRepo,
             ICriterionLibraryRepository criterionLibraryRepo,
-            IAMContext context) : base(context)
+            IAMContext context)
         {
             _equationRepo = equationRepo ?? throw new ArgumentNullException(nameof(equationRepo));
             _criterionLibraryRepo = criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public void CreateTreatmentCosts(Dictionary<Guid, List<TreatmentCost>> treatmentCostsPerTreatmentId, string simulationName)
@@ -66,11 +68,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.TreatmentCost.AddRange(costEntities);
+                _context.TreatmentCost.AddRange(costEntities);
             }
             else
             {
-                Context.BulkInsert(costEntities);
+                _context.BulkInsert(costEntities);
             }
 
             if (equationEntityPerCostEntityId.Values.Any())

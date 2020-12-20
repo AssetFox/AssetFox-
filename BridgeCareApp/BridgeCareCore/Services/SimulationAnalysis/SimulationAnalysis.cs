@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.Simulation;
 using Microsoft.AspNetCore.SignalR;
@@ -14,9 +15,9 @@ using MoreLinq;
 
 namespace BridgeCareCore.Services.SimulationAnalysis
 {
-    public class SimulationAnalysis : ISimulationAnalysis
+    public class SimulationAnalysis //: ISimulationAnalysis
     {
-        private readonly IAttributeRepository _attributeRepo;
+        /*/*private readonly IAttributeRepository _attributeRepo;
         private readonly INetworkRepository _networkRepo;
         private readonly IInvestmentPlanRepository _investmentPlanRepo;
         private readonly IAnalysisMethodRepository _analysisMethodRepo;
@@ -24,16 +25,17 @@ namespace BridgeCareCore.Services.SimulationAnalysis
         private readonly ISelectableTreatmentRepository _selectableTreatmentRepo;
         private readonly ISimulationRepository _simulationRepo;
         private readonly ISimulationOutputRepository _simulationOutputRepo;
-        private readonly ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;
+        private readonly ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;#1#
+        private readonly UnitOfWork _unitOfWork;
         private readonly IHubContext<BridgeCareHub> HubContext;
 
-        public SimulationAnalysis(IAttributeRepository attributeRepo, INetworkRepository networkRepo,
+        public SimulationAnalysis(/*IAttributeRepository attributeRepo, INetworkRepository networkRepo,
             IInvestmentPlanRepository investmentPlanRepo, IAnalysisMethodRepository analysisMethodRepo,
             IPerformanceCurveRepository performanceCurveRepo, ISelectableTreatmentRepository selectableTreatmentRepo,
             ISimulationRepository simulationRepo, ISimulationOutputRepository simulationOutputRepo,
-            ISimulationAnalysisDetailRepository simulationAnalysisDetailRepo, IHubContext<BridgeCareHub> hub)
+            ISimulationAnalysisDetailRepository simulationAnalysisDetailRepo, #1#UnitOfWork unitOfWork, IHubContext<BridgeCareHub> hub)
         {
-            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
+            /*_attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
             _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
             _investmentPlanRepo = investmentPlanRepo ?? throw new ArgumentNullException(nameof(investmentPlanRepo));
             _analysisMethodRepo = analysisMethodRepo ?? throw new ArgumentNullException(nameof(analysisMethodRepo));
@@ -41,29 +43,31 @@ namespace BridgeCareCore.Services.SimulationAnalysis
             _selectableTreatmentRepo = selectableTreatmentRepo ?? throw new ArgumentNullException(nameof(selectableTreatmentRepo));
             _simulationRepo = simulationRepo ?? throw new ArgumentNullException(nameof(simulationRepo));
             _simulationOutputRepo = simulationOutputRepo ?? throw new ArgumentNullException(nameof(simulationOutputRepo));
-            _simulationAnalysisDetailRepo = simulationAnalysisDetailRepo ?? throw new ArgumentNullException(nameof(simulationAnalysisDetailRepo));
+            _simulationAnalysisDetailRepo = simulationAnalysisDetailRepo ?? throw new ArgumentNullException(nameof(simulationAnalysisDetailRepo));#1#
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
         }
 
-        public void CreateAndRun(Guid networkId, Guid simulationId)
+        public Task CreateAndRun(Guid networkId, Guid simulationId)
         {
-            var explorer = _attributeRepo.GetExplorer();
-            var network = _networkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
-            _simulationRepo.GetSimulationInNetwork(simulationId, network);
-
-            var simulation = network.Simulations.First();
-            _investmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _analysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _performanceCurveRepo.GetSimulationPerformanceCurves(simulation);
-            _selectableTreatmentRepo.GetSimulationTreatments(simulation);
-
             var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
             {
-                SimulationId = simulation.Id,
+                SimulationId = simulationId,
                 LastRun = DateTime.Now,
                 Status = "Starting analysis..."
             };
-            _simulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+            _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+            sendSimulationAnalysisDetail(simulationAnalysisDetail);
+
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
+            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+
+            var simulation = network.Simulations.First();
+            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+            _unitOfWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+            _unitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
 
             var runner = new SimulationRunner(simulation);
 
@@ -80,7 +84,7 @@ namespace BridgeCareCore.Services.SimulationAnalysis
                 {
                     simulationAnalysisDetail.Status = eventArgs.Message;
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _simulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
+                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
                 }
                 else
                 {
@@ -97,18 +101,8 @@ namespace BridgeCareCore.Services.SimulationAnalysis
             };
 
             runner.Run();
-        }
 
-        public void CreateSimulation(string simulationName)
-        {
-
-        }
-
-        public void GetAllSimulations(Guid networkId)
-        {
-            var explorer = _attributeRepo.GetExplorer();
-            var network = _networkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
-            _simulationRepo.GetAllInNetwork(network);
+            return Task.CompletedTask;
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationAnalysisDetailDTO simulationAnalysisDetail, DateTime? stopDateTime)
@@ -118,7 +112,7 @@ namespace BridgeCareCore.Services.SimulationAnalysis
                 var interval = stopDateTime - simulationAnalysisDetail.LastRun;
                 simulationAnalysisDetail.RunTime = interval.Value.ToString(@"hh\:mm\:ss");
             }
-            _simulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+            _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
         }
 
         private void sendRealTimeMessage(string message, Guid simulationId)
@@ -135,6 +129,6 @@ namespace BridgeCareCore.Services.SimulationAnalysis
                 .Clients
                 .All
                 .SendAsync("BroadcastSimulationAnalysisDetail", simulationAnalysisDetail);
-        }
+        }*/
     }
 }

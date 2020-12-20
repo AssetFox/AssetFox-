@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
@@ -15,9 +16,9 @@ using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.R
 
 namespace BridgeCareCore.Services.SummaryReport
 {
-    public class SummaryReportGenerator : ISummaryReportGenerator
+    public class SummaryReportGenerator //: ISummaryReportGenerator
     {
-        private readonly ISimulationOutputRepository _simulationOutputRepo;
+        /*//private readonly ISimulationOutputRepository _simulationOutputRepo;
         private readonly IYearlyInvestmentRepository _yearlyInvestmentRepository;
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
@@ -28,14 +29,16 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly SummaryReportGlossary _summaryReportGlossary;
         private readonly SummaryReportParameters _summaryReportParameters;
 
-        private readonly IAnalysisMethodRepository _analysisMethodRepository;
-        private readonly IInvestmentPlanRepository _investmentPlanRepository;
+        /*private readonly IAnalysisMethodRepository _analysisMethodRepository;
+        private readonly IInvestmentPlanRepository _investmentPlanRepository;#1#
 
         private readonly IHubContext<BridgeCareHub> HubContext;
 
         private readonly IAddGraphsInTabs _addGraphsInTabs;
 
-        public SummaryReportGenerator(ISimulationOutputRepository simulationOutputRepo,
+        private readonly UnitOfWork _unitOfWork;
+
+        public SummaryReportGenerator(//ISimulationOutputRepository simulationOutputRepo,
             IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
             IPennDotReportARepository pennDotReportARepository,
@@ -43,12 +46,13 @@ namespace BridgeCareCore.Services.SummaryReport
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
             IYearlyInvestmentRepository yearlyInvestmentRepository,
             SummaryReportGlossary summaryReportGlossary, SummaryReportParameters summaryReportParameters,
-            IHubContext<BridgeCareHub> hub, IAnalysisMethodRepository analysisMethodRepository,
-            IInvestmentPlanRepository investmentPlanRepository,
+            IHubContext<BridgeCareHub> hub, /*IAnalysisMethodRepository analysisMethodRepository,
+            IInvestmentPlanRepository investmentPlanRepository,#1#
 
-            IAddGraphsInTabs addGraphsInTabs)
+            IAddGraphsInTabs addGraphsInTabs,
+            UnitOfWork unitOfWork)
         {
-            _simulationOutputRepo = simulationOutputRepo ?? throw new ArgumentNullException(nameof(simulationOutputRepo));
+            //_simulationOutputRepo = simulationOutputRepo ?? throw new ArgumentNullException(nameof(simulationOutputRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _bridgeDataForSummaryReport = bridgeDataForSummaryReport ?? throw new ArgumentNullException(nameof(bridgeDataForSummaryReport));
             _pennDotReportARepository = pennDotReportARepository ?? throw new ArgumentNullException(nameof(pennDotReportARepository));
@@ -60,15 +64,16 @@ namespace BridgeCareCore.Services.SummaryReport
             _summaryReportParameters = summaryReportParameters ?? throw new ArgumentNullException(nameof(summaryReportParameters));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
 
-            _analysisMethodRepository = analysisMethodRepository ?? throw new ArgumentNullException(nameof(analysisMethodRepository));
-            _investmentPlanRepository = investmentPlanRepository ?? throw new ArgumentNullException(nameof(investmentPlanRepository));
+            /*_analysisMethodRepository = analysisMethodRepository ?? throw new ArgumentNullException(nameof(analysisMethodRepository));
+            _investmentPlanRepository = investmentPlanRepository ?? throw new ArgumentNullException(nameof(investmentPlanRepository));#1#
 
             _addGraphsInTabs = addGraphsInTabs ?? throw new ArgumentNullException(nameof(addGraphsInTabs));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public byte[] GenerateReport(Guid simulationId)
         {
-            var reportOutputData = _simulationOutputRepo.GetSimulationOutput(simulationId);
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
 
             // sorting the sections based on facility name. This is helpful throught the report generation process
             reportOutputData.InitialSectionSummaries.Sort(
@@ -158,6 +163,6 @@ namespace BridgeCareCore.Services.SummaryReport
                         .Clients
                         .All
                         .SendAsync("BroadcastSummaryReportGenerationStatus", message, simulationId);
-        }
+        }*/
     }
 }

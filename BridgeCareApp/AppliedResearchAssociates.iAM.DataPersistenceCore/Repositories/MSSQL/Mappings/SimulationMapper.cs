@@ -31,6 +31,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             simulation.NumberOfYearsOfTreatmentOutlook = entity.NumberOfYearsOfTreatmentOutlook;
         }
 
-        public static SimulationDTO ToDto(this SimulationEntity entity) => new SimulationDTO(entity);
+        public static SimulationDTO ToDto(this SimulationEntity entity)
+        {
+            var dto = new SimulationDTO(entity);
+            if (entity.SimulationAnalysisDetail != null)
+            {
+                dto.LastRun = entity.SimulationAnalysisDetail.LastRun;
+                dto.RunTime = entity.SimulationAnalysisDetail.RunTime;
+                dto.Status = entity.SimulationAnalysisDetail.Status;
+            }
+            return dto;
+        }
     }
 }

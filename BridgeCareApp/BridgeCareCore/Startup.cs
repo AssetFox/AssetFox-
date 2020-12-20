@@ -3,6 +3,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport;
@@ -14,7 +15,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using LiteDb = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb;
 using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget;
@@ -25,7 +25,6 @@ using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.LegacySimulationSynchronization;
 using BridgeCareCore.Interfaces.Simulation;
 using BridgeCareCore.Services.SimulationAnalysis;
-using Microsoft.Extensions.Logging;
 using BridgeCareCore.Logging;
 
 namespace BridgeCareCore
@@ -95,6 +94,7 @@ namespace BridgeCareCore
             //services.AddMSSQLServices(Configuration.GetConnectionString("BridgeCareConnex"));
             services.AddDbContext<IAMContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
+            services.AddScoped<UnitOfWork>();
 
             services.AddScoped<INetworkRepository, NetworkRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();

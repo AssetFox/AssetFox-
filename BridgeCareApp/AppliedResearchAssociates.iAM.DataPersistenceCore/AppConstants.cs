@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BridgeCareCore
+﻿namespace AppliedResearchAssociates.iAM.DataPersistenceCore
 {
     public static class BridgeCareCoreConstants
     {

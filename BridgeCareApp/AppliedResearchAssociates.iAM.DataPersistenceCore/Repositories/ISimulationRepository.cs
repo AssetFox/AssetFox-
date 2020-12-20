@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void CreateSimulation(Simulation simulation);
         void GetAllInNetwork(Network network);
+        List<SimulationDTO> GetAllInNetwork(Guid networkId);
         void GetSimulationInNetwork(Guid simulationId, Network network);
         SimulationDTO GetSimulation(Guid simulationId);
         void DeleteSimulationAndAllRelatedData();

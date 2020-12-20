@@ -7,17 +7,20 @@ using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class TreatmentSupersessionRepository : MSSQLRepository, ITreatmentSupersessionRepository
+    public class TreatmentSupersessionRepository : ITreatmentSupersessionRepository
     {
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private ICriterionLibraryRepository _criterionLibraryRepo;
+        private readonly ICriterionLibraryRepository _criterionLibraryRepo;
+        private readonly IAMContext _context;
 
-        public TreatmentSupersessionRepository(ICriterionLibraryRepository criterionLibraryRepo, IAMContext context) :
-            base(context) =>
+        public TreatmentSupersessionRepository(ICriterionLibraryRepository criterionLibraryRepo, IAMContext context)
+        {
             _criterionLibraryRepo =
                 criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
 
         public void CreateTreatmentSupersessions(Dictionary<Guid, List<TreatmentSupersession>> treatmentSupersessionsPerTreatmentId,
             string simulationName)
@@ -47,11 +50,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.TreatmentSupersession.AddRange(supersessionEntities);
+                _context.TreatmentSupersession.AddRange(supersessionEntities);
             }
             else
             {
-                Context.BulkInsert(supersessionEntities);
+                _context.BulkInsert(supersessionEntities);
             }
 
             if (supersessionEntityIdsPerExpression.Values.Any())

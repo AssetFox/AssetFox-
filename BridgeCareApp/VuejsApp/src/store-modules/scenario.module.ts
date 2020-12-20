@@ -36,11 +36,13 @@ const mutations = {
             );
         }
     },
-    addMigratedScenarioMutator(state: any, migratedScenario: Scenario) {
-        if (any(propEq('id', migratedScenario.id), state.scenarios)) {
-            state.scenarios = reject(propEq('id', migratedScenario.id), state.scenarios);
-        }
-        state.scenarios = prepend(migratedScenario, state.scenarios);
+    addMigratedScenariosMutator(state: any, migratedScenarios: Scenario[]) {
+        migratedScenarios.forEach((migratedScenario: Scenario) => {
+            if (any(propEq('id', migratedScenario.id), state.scenarios)) {
+                state.scenarios = reject(propEq('id', migratedScenario.id), state.scenarios);
+            }
+            state.scenarios = prepend(migratedScenario, state.scenarios);
+        });
     },
     removeScenarioMutator(state: any, simulationId: number) {
         if (any(propEq('simulationId', simulationId), state.scenarios)) {
@@ -61,8 +63,8 @@ const mutations = {
         state.missingSummaryReportAttributes = clone(missingAttributes);
     },
     simulationAnalysisDetailMutator(state: any, simulationAnalysisDetail: SimulationAnalysisDetail) {
-        if (any(propEq('id', simulationAnalysisDetail.simulationId))) {
-            const updatedScenario: Scenario = find(propEq('id', simulationAnalysisDetail.simulationId)) as Scenario;
+        if (any(propEq('id', simulationAnalysisDetail.simulationId), state.scenarios)) {
+            const updatedScenario: Scenario = find(propEq('id', simulationAnalysisDetail.simulationId), state.scenarios) as Scenario;
             updatedScenario.lastRun = simulationAnalysisDetail.lastRun;
             updatedScenario.status = simulationAnalysisDetail.status;
             updatedScenario.runTime = simulationAnalysisDetail.runTime;
@@ -120,7 +122,6 @@ const actions = {
         await ScenarioService.migrateLegacyData(payload.simulationId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    dispatch('setSuccessMessage', {message: 'migration started'});
                     dispatch('getMigratedData', {simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL});
                 }
             });
@@ -130,12 +131,12 @@ const actions = {
         await ScenarioService.getMigratedData(payload.simulationId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    const scenario: Scenario = {
-                        ...response.data,
+                    const scenarios: Scenario[] = response.data.map((scenario: Scenario) => ({
+                        ...scenario,
                         owner: getUserName(),
                         creator: getUserName()
-                    };
-                    commit('addMigratedScenarioMutator', scenario);
+                    })) as Scenario[];
+                    commit('addMigratedScenariosMutator', scenarios);
                 }
             });
     },

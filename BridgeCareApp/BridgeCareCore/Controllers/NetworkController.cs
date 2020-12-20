@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -16,15 +17,17 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class NetworkController : ControllerBase
     {
-        private readonly IAttributeMetaDataRepository _attributeMetaDataFileRepo;
-        private readonly INetworkRepository _networkRepo;
+        /*private readonly IAttributeMetaDataRepository _attributeMetaDataFileRepo;
+        private readonly INetworkRepository _networkRepo;*/
+        private readonly UnitOfWork _unitOfWork;
         private readonly ILog _log;
 
-        public NetworkController(IAttributeMetaDataRepository attributeMetaDataFileRepo,
-            INetworkRepository networkRepo, ILog log)
+        public NetworkController(/*IAttributeMetaDataRepository attributeMetaDataFileRepo,
+            INetworkRepository networkRepo, */UnitOfWork unitOfWork, ILog log)
         {
-            _attributeMetaDataFileRepo = attributeMetaDataFileRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataFileRepo));
-            _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
+            /*_attributeMetaDataFileRepo = attributeMetaDataFileRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataFileRepo));
+            _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));*/
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
@@ -35,15 +38,15 @@ namespace BridgeCareCore.Controllers
             try
             {
                 _log.Information("Entered GetAllNetWorks call");
-                var networks = _networkRepo.GetAllNetworks();
+                var networks = _unitOfWork.NetworkRepo.GetAllNetworks();
                 // Sending the first network because PennDOT will always have only 1 network
                 var filteredNetworks = new List<Network> { networks.FirstOrDefault() };
                 return Ok(filteredNetworks);
             }
             catch (Exception e)
             {
-                _log.Error($"error while fetching networks {e.Message}");
-                return StatusCode(500, e);
+                _log.Error($"GetAllNetworks Error => {e.Message}::{e.StackTrace}");
+                return StatusCode(500, $"{e.Message}::{e.StackTrace}");
             }
         }
 
@@ -54,7 +57,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 // get network definition attribute from json file
-                var attribute = _attributeMetaDataFileRepo.GetNetworkDefinitionAttribute();
+                var attribute = _unitOfWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
 
                 // throw an exception if not network definition attribute is present
                 if (attribute == null)
@@ -68,7 +71,7 @@ namespace BridgeCareCore.Controllers
                 network.Name = networkName;
 
                 // insert network domain data into the data source
-                _networkRepo.CreateNetwork(network);
+                _unitOfWork.NetworkRepo.CreateNetwork(network);
 
                 // [TODO] Create DTO to return network information necessary to be stored in the UI
                 // for future reference.
@@ -76,7 +79,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                return StatusCode(500, e);
+                _log.Error($"CreateNetwork Error => { e.Message}::{ e.StackTrace}");
+                return StatusCode(500, $"{e.Message}::{e.StackTrace}");
             }
         }
         public class NetworkName

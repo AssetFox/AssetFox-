@@ -187,6 +187,11 @@
         selectedScenario: Scenario = clone(emptyScenario);
         hasSelectedScenario: boolean = false;
         selectedScenarioHasStatus: boolean = false;
+        ignoredAPIs: string[] = [
+            'SynchronizeLegacyData',
+            'RunSimulation',
+            'GenerateSummaryReport'
+        ]
 
         get container() {
             const container: any = {};
@@ -298,7 +303,7 @@
                     await new Promise(_ => setTimeout(_, 5000));
                 }
                 request.headers = setAuthHeader(request.headers);
-                app.setIsBusyAction({isBusy: true});
+                app.setIsBusyAction({isBusy: app.ignoredAPIs.every((ignored: string) => request.url!.indexOf(ignored) === -1)});
                 return request;
             }
             // set axios request interceptor to use request handler

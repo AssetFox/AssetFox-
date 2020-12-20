@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Logging;
 using BridgeCareCore.Services.LegacySimulationSynchronization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -15,47 +14,41 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class LegacySimulationSynchronizationController : ControllerBase
     {
-        private readonly IHubContext<BridgeCareHub> HubContext;
+        private readonly IHubContext<BridgeCareHub> _hubContext;
         private readonly LegacySimulationSynchronizer _legacySimulationSynchronizer;
+        private readonly ILog _logger;
 
         public LegacySimulationSynchronizationController(IHubContext<BridgeCareHub> hub,
-            LegacySimulationSynchronizer legacySimulationSynchronizer)
+            LegacySimulationSynchronizer legacySimulationSynchronizer, ILog logger)
         {
-            HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
+            _hubContext = hub ?? throw new ArgumentNullException(nameof(hub));
             _legacySimulationSynchronizer = legacySimulationSynchronizer ?? throw new ArgumentNullException(nameof(legacySimulationSynchronizer));
+            _logger = logger;
         }
         [HttpPost]
         [Route("SynchronizeLegacyData/{legacySimulationId}")]
-        public async Task<IActionResult> SynchronizLegacyData(int legacySimulationId)
+        public async Task<IActionResult> SynchronizeLegacyData(int legacySimulationId)
         {
-            // maybe hardcode the legacySimulationId for now?
-            var broadcastingMessage = "Started data migration";
             try
             {
-                await HubContext
+                await _hubContext
                     .Clients
                     .All
-                    .SendAsync("BroadcastDataMigration", broadcastingMessage);
-                // for this message, check out connectionHub.ts , over there we need to listen on "BroadcastDataMigration"
+                    .SendAsync("BroadcastDataMigration", "Starting data migration...");
 
-                _legacySimulationSynchronizer.SynchronizeLegacySimulation(legacySimulationId);
+                await _legacySimulationSynchronizer.SynchronizeLegacySimulation(legacySimulationId);
 
-                broadcastingMessage = "Finished data migration";
-                await HubContext
-                            .Clients
-                            .All
-                            .SendAsync("BroadcastDataMigration", broadcastingMessage);
+                await _hubContext
+                    .Clients
+                    .All
+                    .SendAsync("BroadcastDataMigration", "Finished data migration");
 
-                return Ok("Data migrated successfully");
+                return Ok();
             }
             catch(Exception e)
             {
-                broadcastingMessage = "An error has occured during data migration";
-                await HubContext
-                            .Clients
-                            .All
-                            .SendAsync("BroadcastDataMigration", broadcastingMessage);
-                return StatusCode(500, e);
+                _logger.Error($"{e.Message}::{e.StackTrace}");
+                return StatusCode(500, $"Error => {e.Message}::{e.StackTrace}");
             }
         }
     }

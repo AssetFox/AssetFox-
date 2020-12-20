@@ -9,17 +9,19 @@ using MoreLinq.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AttributeDatumRepository : MSSQLRepository, IAttributeDatumRepository
+    public class AttributeDatumRepository : IAttributeDatumRepository
     {
         private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
         private readonly IAttributeRepository _attributeRepo;
+        private readonly IAMContext _context;
 
         public AttributeDatumRepository(IAttributeMetaDataRepository attributeMetaDataRepo,
-            IAttributeRepository attributeRepo, IAMContext context) : base(context)
+            IAttributeRepository attributeRepo, IAMContext context)
         {
             _attributeMetaDataRepo =
                 attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
             _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public int UpdateAssignedData(List<MaintainableAsset> maintainableAssets)
@@ -45,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 // use a raw sql query to delete AssignedData
                 var query =
                     $"DELETE FROM dbo.AttributeDatum WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAsset WHERE NetworkId = '{maintainableAssets.First().NetworkId}') AND AttributeId IN ('{string.Join("','", attributeIdsToBeUpdatedWithAssignedData)}')";
-                Context.Database.ExecuteSqlRaw(query);
+                _context.Database.ExecuteSqlRaw(query);
             }
 
             // convert any assigned data to their equivalent entity object types
@@ -59,9 +61,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return 0;
             }
 
-            Context.BulkInsertOrUpdate(assignedData);
-            Context.BulkInsertOrUpdate(assignedData.Select(_ => _.AttributeDatumLocation).ToList());
-            Context.SaveChanges();
+            _context.BulkInsertOrUpdate(assignedData);
+            _context.BulkInsertOrUpdate(assignedData.Select(_ => _.AttributeDatumLocation).ToList());
 
             return assignedData.Count();
         }

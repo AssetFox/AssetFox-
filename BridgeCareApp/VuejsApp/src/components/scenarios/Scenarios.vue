@@ -543,6 +543,10 @@ export default class Scenarios extends Vue {
     @Action('migrateLegacyData') migrateLegacyDataAction: any;
     @Action('getMigratedData') getMigratedDataAction: any;
     @Action('updateSimulationAnalysisDetail') updateSimulationAnalysisDetailAction: any;
+    @Action('setSuccessMessage') setSuccessMessageAction: any;
+    @Action('setWarningMessage') setWarningMessageAction: any;
+    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('setInfoMessage') setInfoMessageAction: any;
 
     alertData: AlertData = clone(emptyAlertData);
     alertBeforeDelete: AlertData = clone(emptyAlertData);
@@ -683,10 +687,10 @@ export default class Scenarios extends Vue {
 
     @Watch('DataMigrationStatusUpdate')
     onDataMigrationStatusUpdate() {
-        var scenarioObj = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
+        var scenarioObj = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()); // TODO : use this.scenarioIdForStatusUpdate
 
         if (isNil(scenarioObj)) {
-            scenarioObj = this.userScenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
+            scenarioObj = this.userScenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()); // TODO : use this.scenarioIdForStatusUpdate
         }
 
         if (!isNil(scenarioObj)) {
@@ -720,7 +724,7 @@ export default class Scenarios extends Vue {
         this.$statusHub.$on('summaryReportGeneration-status-event', this.getSummaryReportStatusUpdate);
         this.$statusHub.$on('DataMigration-status-event', this.getDataMigrationStatusUpdate);
         this.$statusHub.$on('ScenarioStatusUpdate-status-event', this.getDataScenarioStatusUpdate);
-        this.$statusHub.$on('SimulationAnalysisDetail-status-event', this.updateSimulationAnalysisDetail);
+        this.$statusHub.$on('SimulationAnalysisDetail-status-event', this.getSimulationAnalysisDetail);
     }
 
     onUpdateScenarioList() {
@@ -872,8 +876,14 @@ export default class Scenarios extends Vue {
     }
 
     getDataMigrationStatusUpdate(data: any) {
-        this.DataMigrationStatusUpdate = data.status;
-        this.legacySimulationIdForStatusUpdate = data.legacySimulationId;
+        /*this.DataMigrationStatusUpdate = data.status;
+        this.legacySimulationIdForStatusUpdate = data.legacySimulationId;*/
+        const status: any = data.status;
+        if (status.indexOf('Error') !== -1) {
+            this.setErrorMessageAction({message: data.status});
+        } else {
+            this.setInfoMessageAction({message: data.status});
+        }
     }
 
     getDataScenarioStatusUpdate(data: any) {
@@ -881,8 +891,8 @@ export default class Scenarios extends Vue {
         this.scenarioIdForStatusUpdate = data.scenarioId;
     }
 
-    updateSimulationAnalysisDetail(data: SimulationAnalysisDetail) {
-        this.updateSimulationAnalysisDetailAction({simulationAnalysisDetail: data});
+    getSimulationAnalysisDetail(data: any) {
+        this.updateSimulationAnalysisDetailAction({simulationAnalysisDetail: data.simulationAnalysisDetail});
     }
 
     onSubmitAssignDataDecision(response: boolean) {

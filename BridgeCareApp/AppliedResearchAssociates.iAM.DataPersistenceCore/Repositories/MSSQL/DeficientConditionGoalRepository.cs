@@ -10,48 +10,51 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class DeficientConditionGoalRepository : MSSQLRepository, IDeficientConditionGoalRepository
+    public class DeficientConditionGoalRepository : IDeficientConditionGoalRepository
     {
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
         private readonly ICriterionLibraryRepository _criterionLibraryRepo;
+        private readonly IAMContext _context;
 
-        public DeficientConditionGoalRepository(ICriterionLibraryRepository criterionLibraryRepo, IAMContext context) : base(context) =>
-            _criterionLibraryRepo = criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
+        public DeficientConditionGoalRepository(ICriterionLibraryRepository criterionLibraryRepo, IAMContext context)
+        {
+            _criterionLibraryRepo =
+                criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
 
         public void CreateDeficientConditionGoalLibrary(string name, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             var deficientConditionGoalLibraryEntity = new DeficientConditionGoalLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
-            Context.DeficientConditionGoalLibrary.Add(deficientConditionGoalLibraryEntity);
+            _context.DeficientConditionGoalLibrary.Add(deficientConditionGoalLibraryEntity);
 
-            Context.DeficientConditionGoalLibrarySimulation.Add(new DeficientConditionGoalLibrarySimulationEntity
+            _context.DeficientConditionGoalLibrarySimulation.Add(new DeficientConditionGoalLibrarySimulationEntity
             {
                 DeficientConditionGoalLibraryId = deficientConditionGoalLibraryEntity.Id, SimulationId = simulationId
             });
-
-            Context.SaveChanges();
         }
 
         public void CreateDeficientConditionGoals(List<DeficientConditionGoal> deficientConditionGoals, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = Context.Simulation
+            var simulationEntity = _context.Simulation
                 .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
                 .Single(_ => _.Id == simulationId);
 
             var attributeNames = deficientConditionGoals.Select(_ => _.Attribute.Name).Distinct().ToList();
-            var attributeEntities = Context.Attribute.Where(_ => attributeNames.Contains(_.Name)).ToList();
+            var attributeEntities = _context.Attribute.Where(_ => attributeNames.Contains(_.Name)).ToList();
 
             if (!attributeEntities.Any())
             {
@@ -78,14 +81,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.DeficientConditionGoal.AddRange(deficientConditionGoalEntities);
+                _context.DeficientConditionGoal.AddRange(deficientConditionGoalEntities);
             }
             else
             {
-                Context.BulkInsert(deficientConditionGoalEntities);
+                _context.BulkInsert(deficientConditionGoalEntities);
             }
-
-            Context.SaveChanges();
 
             if (deficientConditionGoals.Any(_ => !_.Criterion.ExpressionIsBlank))
             {

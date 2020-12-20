@@ -9,9 +9,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AggregatedResultRepository : MSSQLRepository, IAggregatedResultRepository
+    public class AggregatedResultRepository : IAggregatedResultRepository
     {
-        public AggregatedResultRepository(IAMContext context) : base(context) { }
+        private readonly IAMContext _context;
+
+        public AggregatedResultRepository(IAMContext context) =>
+            _context = context ?? throw new ArgumentNullException(nameof(context));
 
         public int CreateAggregatedResults(List<IAggregatedResult> aggregatedResults)
         {
@@ -19,20 +22,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entities = aggregatedResults.SelectMany(_ => _.ToEntity()).ToList();
 
-            Context.BulkInsert(entities);
-            Context.SaveChanges();
+            _context.BulkInsert(entities);
 
             return entities.Count();
         }
 
         public IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId)
         {
-            if (!Context.Network.Any(_ => _.Id == networkId))
+            if (!_context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssets = Context.MaintainableAsset
+            var maintainableAssets = _context.MaintainableAsset
                 .Include(_ => _.AggregatedResults)
                 .Where(_ => _.Id == networkId)
                 .ToList();
@@ -44,12 +46,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void DeleteAggregatedResults(Guid networkId)
         {
-            if (!Context.Network.Any(_ => _.Id == networkId))
+            if (!_context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            Context.Database.ExecuteSqlRaw(
+            _context.Database.ExecuteSqlRaw(
                 $"DELETE FROM dbo.AggregatedResult WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAsset WHERE NetworkId = '{networkId}')");
         }
     }

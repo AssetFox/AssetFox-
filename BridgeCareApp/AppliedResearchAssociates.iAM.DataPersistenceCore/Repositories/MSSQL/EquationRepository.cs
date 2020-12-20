@@ -9,22 +9,24 @@ using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class EquationRepository : MSSQLRepository, IEquationRepository
+    public class EquationRepository : IEquationRepository
     {
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public EquationRepository(IAMContext context) : base(context) { }
+        private readonly IAMContext _context;
+
+        public EquationRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
 
         public void CreateEquations(Dictionary<Guid, EquationEntity> equationEntityPerEntityId, string joinEntity)
         {
             if (IsRunningFromXUnit)
             {
-                Context.Equation.AddRange(equationEntityPerEntityId.Values.ToList());
+                _context.Equation.AddRange(equationEntityPerEntityId.Values.ToList());
             }
             else
             {
-                Context.BulkInsert(equationEntityPerEntityId.Values.ToList());
+                _context.BulkInsert(equationEntityPerEntityId.Values.ToList());
             }
 
             switch (joinEntity)
@@ -41,22 +43,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             default:
                 throw new InvalidOperationException("Unable to determine equation join entity type.");
             }
-
-            Context.SaveChanges();
         }
 
         public void CreateEquations(List<EquationEntity> equationEntities)
         {
             if (IsRunningFromXUnit)
             {
-                equationEntities.ForEach(entity => Context.AddOrUpdate(entity, entity.Id));
+                equationEntities.ForEach(entity => _context.AddOrUpdate(entity, entity.Id));
             }
             else
             {
-                Context.BulkInsertOrUpdate(equationEntities);
+                _context.BulkInsertOrUpdate(equationEntities);
             }
-
-            Context.SaveChanges();
         }
 
         private void JoinEquationsWithPerformanceCurves(Dictionary<Guid, EquationEntity> equationEntityPerEntityId)
@@ -67,11 +65,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.PerformanceCurveEquation.AddRange(performanceCurveEquationJoinEntities);
+                _context.PerformanceCurveEquation.AddRange(performanceCurveEquationJoinEntities);
             }
             else
             {
-                Context.BulkInsert(performanceCurveEquationJoinEntities);
+                _context.BulkInsert(performanceCurveEquationJoinEntities);
             }
         }
 
@@ -83,11 +81,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.TreatmentConsequenceEquation.AddRange(treatmentConsequenceEquationJoinEntities);
+                _context.TreatmentConsequenceEquation.AddRange(treatmentConsequenceEquationJoinEntities);
             }
             else
             {
-                Context.BulkInsert(treatmentConsequenceEquationJoinEntities);
+                _context.BulkInsert(treatmentConsequenceEquationJoinEntities);
             }
         }
 
@@ -99,11 +97,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.TreatmentCostEquation.AddRange(treatmentCostEquationJoinEntities);
+                _context.TreatmentCostEquation.AddRange(treatmentCostEquationJoinEntities);
             }
             else
             {
-                Context.BulkInsert(treatmentCostEquationJoinEntities);
+                _context.BulkInsert(treatmentCostEquationJoinEntities);
             }
         }
     }

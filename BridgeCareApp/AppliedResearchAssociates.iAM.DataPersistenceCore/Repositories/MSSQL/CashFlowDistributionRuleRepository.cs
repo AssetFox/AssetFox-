@@ -11,12 +11,14 @@ using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class CashFlowDistributionRuleRepository : MSSQLRepository, ICashFlowDistributionRuleRepository
+    public class CashFlowDistributionRuleRepository : ICashFlowDistributionRuleRepository
     {
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public CashFlowDistributionRuleRepository(IAMContext context) : base(context) { }
+        private readonly IAMContext _context;
+
+        public CashFlowDistributionRuleRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
 
         public void CreateCashFlowDistributionRules(Dictionary<Guid, List<CashFlowDistributionRule>> distributionRulesPerCashFlowRuleEntityId)
         {
@@ -26,14 +28,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.CashFlowDistributionRule.AddRange(cashFlowDistributionRuleEntities);
+                _context.CashFlowDistributionRule.AddRange(cashFlowDistributionRuleEntities);
             }
             else
             {
-                Context.BulkInsert(cashFlowDistributionRuleEntities);
+                _context.BulkInsert(cashFlowDistributionRuleEntities);
             }
-
-            Context.SaveChanges();
         }
     }
 }

@@ -159,7 +159,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         public void InitializeSimulationRepo()
         {
             SimulationAnalysisDetailRepo = new SimulationAnalysisDetailRepository(_dbContext);
-            SimulationRepo = new SimulationRepository(SimulationAnalysisDetailRepo, _dbContext);
+            SimulationRepo = new SimulationRepository(SimulationAnalysisDetailRepo, Config, _dbContext);
         }
 
         public void InitializeSimulationOutputRepo() => SimulationOutputRepo = new SimulationOutputRepository(_dbContext);

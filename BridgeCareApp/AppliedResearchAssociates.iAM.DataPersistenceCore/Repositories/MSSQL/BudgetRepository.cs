@@ -10,25 +10,29 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class BudgetRepository : MSSQLRepository, IBudgetRepository
+    public class BudgetRepository : IBudgetRepository
     {
         private readonly IBudgetAmountRepository _budgetAmountRepo;
+        private readonly IAMContext _context;
 
-        public BudgetRepository(IBudgetAmountRepository budgetAmountRepo, IAMContext context) : base(context) =>
+        public BudgetRepository(IBudgetAmountRepository budgetAmountRepo, IAMContext context)
+        {
             _budgetAmountRepo = budgetAmountRepo ?? throw new ArgumentNullException(nameof(budgetAmountRepo));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
 
         public void CreateBudgetLibrary(string name, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
             var budgetLibraryEntity = new BudgetLibraryEntity {Id = Guid.NewGuid(), Name = name};
 
-            Context.BudgetLibrary.Add(budgetLibraryEntity);
+            _context.BudgetLibrary.Add(budgetLibraryEntity);
 
-            Context.BudgetLibrarySimulation.Add(new BudgetLibrarySimulationEntity
+            _context.BudgetLibrarySimulation.Add(new BudgetLibrarySimulationEntity
             {
                 BudgetLibraryId = budgetLibraryEntity.Id, SimulationId = simulationId
             });
@@ -36,12 +40,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateBudgets(List<Budget> budgets, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            var simulationEntity = Context.Simulation
+            var simulationEntity = _context.Simulation
                 .Include(_ => _.BudgetLibrarySimulationJoin)
                 .Single(_ => _.Id == simulationId);
 
@@ -54,9 +58,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToEntity(simulationEntity.BudgetLibrarySimulationJoin.BudgetLibraryId))
                 .ToList();
 
-            Context.Budget.AddRange(budgetEntities);
-
-            Context.SaveChanges();
+            _context.Budget.AddRange(budgetEntities);
 
             var budgetAmountsPerBudgetId = budgets
                 .Where(_ => _.YearlyAmounts.Any())

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
@@ -14,34 +15,36 @@ using Microsoft.Extensions.Configuration;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class SimulationRepository : MSSQLRepository, ISimulationRepository
+    public class SimulationRepository : ISimulationRepository
     {
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
         private readonly ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;
         private readonly IConfiguration _config;
+        private readonly IAMContext _context;
 
-        public SimulationRepository(ISimulationAnalysisDetailRepository simulationAnalysisDetailRepo, IAMContext context, IConfiguration config) : base(context)
+        public SimulationRepository(ISimulationAnalysisDetailRepository simulationAnalysisDetailRepo, IConfiguration config, IAMContext context)
         {
             _simulationAnalysisDetailRepo = simulationAnalysisDetailRepo ??
                                             throw new ArgumentNullException(nameof(simulationAnalysisDetailRepo));
-            _config = config;
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public void CreateSimulation(Simulation simulation)
         {
-            using (var contextTransaction = Context.Database.BeginTransaction())
+            using (var contextTransaction = _context.Database.BeginTransaction())
             {
                 try
                 {
-                    if (!Context.Network.Any(_ => _.Id == simulation.Network.Id))
+                    if (!_context.Network.Any(_ => _.Id == simulation.Network.Id))
                     {
                         throw new RowNotInTableException($"No network found having id {simulation.Network.Id}");
                     }
 
-                    Context.Simulation.Add(simulation.ToEntity());
-                    Context.SaveChanges();
+                    _context.Simulation.Add(simulation.ToEntity());
+                    _context.SaveChanges();
 
                     contextTransaction.Commit();
                 }
@@ -56,41 +59,56 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetAllInNetwork(Network network)
         {
-            if (!Context.Network.Any(_ => _.Id == network.Id))
+            if (!_context.Network.Any(_ => _.Id == network.Id))
             {
                 throw new RowNotInTableException($"No network found having id {network.Id}");
             }
 
-            var entities = Context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
+            var entities = _context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
 
             entities.ForEach(_ => _.CreateSimulation(network));
         }
 
+        public List<SimulationDTO> GetAllInNetwork(Guid networkId)
+        {
+            if (!_context.Network.Any(_ => _.Id == networkId))
+            {
+                //throw new RowNotInTableException($"No network found having id {networkId}");
+                return null;
+            }
+
+            var entities = _context.Simulation
+                .Include(_ => _.SimulationAnalysisDetail)
+                .Where(_ => _.NetworkId == networkId);
+
+            return entities.Select(_ => _.ToDto()).ToList();
+        }
+
         public void GetSimulationInNetwork(Guid simulationId, Network network)
         {
-            if (!Context.Network.Any(_ => _.Id == network.Id))
+            if (!_context.Network.Any(_ => _.Id == network.Id))
             {
                 throw new RowNotInTableException($"No network found having id {network.Id}");
             }
 
-            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = Context.Simulation.Single(_ => _.Id == simulationId);
+            var simulationEntity = _context.Simulation.Single(_ => _.Id == simulationId);
 
             simulationEntity.CreateSimulation(network);
         }
 
         public SimulationDTO GetSimulation(Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationDTO = Context.Simulation
+            var simulationDTO = _context.Simulation
                 .Include(_ => _.SimulationOutput)
                 .Single(_ => _.Id == simulationId)
                 .ToDto();
@@ -106,101 +124,62 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteSimulationAndAllRelatedData()
         {
-            using (var contextTransaction = Context.Database.BeginTransaction())
+            if (IsRunningFromXUnit)
             {
-                if (IsRunningFromXUnit)
+                _context.Simulation.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.Equation.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.CriterionLibrary.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.BudgetLibrary.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.BudgetPriorityLibrary.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.CashFlowRuleLibrary.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.DeficientConditionGoalLibrary.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.PerformanceCurveLibrary.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.RemainingLifeLimitLibrary.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.TargetConditionGoalLibrary.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.TreatmentLibrary.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.TextAttributeValueHistory.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.NumericAttributeValueHistory.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.Section.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+
+                _context.Facility.ToList()
+                    .ForEach(_ => _context.Entry(_).State = EntityState.Deleted);
+            }
+            else
+            {
+                using var connection = new SqlConnection(_config.GetConnectionString("BridgeCareConnex"));
+                connection.Open();
+                var command = new SqlCommand("DeleteAllForAlphaMigration", connection)
                 {
-                    Context.Simulation.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.Equation.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.CriterionLibrary.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.BudgetLibrary.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.BudgetPriorityLibrary.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.CashFlowRuleLibrary.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.DeficientConditionGoalLibrary.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.PerformanceCurveLibrary.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.RemainingLifeLimitLibrary.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.TargetConditionGoalLibrary.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.TreatmentLibrary.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.TextAttributeValueHistory.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.NumericAttributeValueHistory.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.Section.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-
-                    Context.Facility.ToList()
-                        .ForEach(_ => Context.Entry(_).State = EntityState.Deleted);
-                }
-                else
-                {
-                    using (var conn = new SqlConnection(_config.GetConnectionString("BridgeCareConnex")))
-                    {
-                        conn.Open();
-                        var cmd = new SqlCommand("DeleteAllForAlphaMigration", conn);
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    /*Context.Database.SetCommandTimeout(60);
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.Simulation");
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.Equation");
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.CriterionLibrary");
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.BudgetLibrary");
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.BudgetPriorityLibrary");
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.CashFlowRuleLibrary");
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.DeficientConditionGoalLibrary");
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.PerformanceCurveLibrary");
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.RemainingLifeLimitLibrary");
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.TargetConditionGoalLibrary");
-
-                    Context.Database.ExecuteSqlRaw("DELETE FROM dbo.TreatmentLibrary");
-
-                    Context.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.TextAttributeValueHistory");
-
-                    Context.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.NumericAttributeValueHistory");
-
-                    Context.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.Section");
-
-                    Context.Database.ExecuteSqlRaw("TRUNCATE TABLE dbo.Facility");*/
-                }
-
-                Context.SaveChanges();
-
-                contextTransaction.Commit();
+                    CommandTimeout = 1800, CommandType = CommandType.StoredProcedure
+                };
+                command.ExecuteNonQuery();
             }
         }
     }

@@ -11,51 +11,51 @@ using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class CashFlowRuleRepository : MSSQLRepository, ICashFlowRuleRepository
+    public class CashFlowRuleRepository : ICashFlowRuleRepository
     {
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
         private readonly ICashFlowDistributionRuleRepository _cashFlowDistributionRuleRepo;
         private readonly ICriterionLibraryRepository _criterionLibraryRepo;
+        private readonly IAMContext _context;
 
         public CashFlowRuleRepository(ICashFlowDistributionRuleRepository cashFlowDistributionRuleRepo,
             ICriterionLibraryRepository criterionLibraryRepo,
-            IAMContext context) : base(context)
+            IAMContext context)
         {
             _cashFlowDistributionRuleRepo = cashFlowDistributionRuleRepo ??
                                             throw new ArgumentNullException(nameof(cashFlowDistributionRuleRepo));
             _criterionLibraryRepo = criterionLibraryRepo ??
                                     throw new ArgumentNullException(nameof(criterionLibraryRepo));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public void CreateCashFlowRuleLibrary(string name, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
             var cashFlowRuleLibraryEntity = new CashFlowRuleLibraryEntity {Id = Guid.NewGuid(), Name = name};
 
-            Context.CashFlowRuleLibrary.Add(cashFlowRuleLibraryEntity);
+            _context.CashFlowRuleLibrary.Add(cashFlowRuleLibraryEntity);
 
-            Context.CashFlowRuleLibrarySimulation.Add(new CashFlowRuleLibrarySimulationEntity
+            _context.CashFlowRuleLibrarySimulation.Add(new CashFlowRuleLibrarySimulationEntity
             {
                 CashFlowRuleLibraryId = cashFlowRuleLibraryEntity.Id, SimulationId = simulationId
             });
-
-            Context.SaveChanges();
         }
 
         public void CreateCashFlowRules(List<CashFlowRule> cashFlowRules, Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            var simulationEntity = Context.Simulation
+            var simulationEntity = _context.Simulation
                 .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
                 .Single(_ => _.Id == simulationId);
 
@@ -70,14 +70,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.CashFlowRule.AddRange(cashFlowRuleEntities);
+                _context.CashFlowRule.AddRange(cashFlowRuleEntities);
             }
             else
             {
-                Context.BulkInsert(cashFlowRuleEntities);
+                _context.BulkInsert(cashFlowRuleEntities);
             }
-
-            Context.SaveChanges();
 
             if (cashFlowRules.Any(_ => _.DistributionRules.Any()))
             {

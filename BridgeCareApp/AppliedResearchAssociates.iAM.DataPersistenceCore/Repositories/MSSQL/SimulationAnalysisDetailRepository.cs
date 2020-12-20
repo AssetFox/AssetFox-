@@ -8,37 +8,35 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappi
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class SimulationAnalysisDetailRepository : MSSQLRepository, ISimulationAnalysisDetailRepository
+    public class SimulationAnalysisDetailRepository : ISimulationAnalysisDetailRepository
     {
-        public SimulationAnalysisDetailRepository(IAMContext context) : base(context)
-        {
-        }
+        private readonly IAMContext _context;
+
+        public SimulationAnalysisDetailRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
 
         public void UpsertSimulationAnalysisDetail(SimulationAnalysisDetailDTO dto)
         {
-            if (!Context.Simulation.Any(_ => _.Id == dto.SimulationId))
+            if (!_context.Simulation.Any(_ => _.Id == dto.SimulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {dto.SimulationId}.");
             }
 
-            Context.AddOrUpdate(dto.ToEntity(), dto.SimulationId);
-
-            Context.SaveChanges();
+            _context.AddOrUpdate(dto.ToEntity(), dto.SimulationId);
         }
 
         public SimulationAnalysisDetailDTO GetSimulationAnalysisDetail(Guid simulationId)
         {
-            if (!Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            if (!Context.SimulationAnalysisDetail.Any(_ => _.SimulationId == simulationId))
+            if (!_context.SimulationAnalysisDetail.Any(_ => _.SimulationId == simulationId))
             {
                 return new SimulationAnalysisDetailDTO();
             }
 
-            return Context.SimulationAnalysisDetail.Single(_ => _.SimulationId == simulationId).ToDto();
+            return _context.SimulationAnalysisDetail.Single(_ => _.SimulationId == simulationId).ToDto();
         }
     }
 }

@@ -15,115 +15,83 @@ using MoreLinq.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class NetworkRepository : MSSQLRepository, INetworkRepository
+    public class NetworkRepository : INetworkRepository
     {
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public NetworkRepository(IAMContext context) : base(context) { }
+        private readonly IAMContext _context;
+
+        public NetworkRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
 
         public void CreateNetwork(DataAssignment.Networking.Network network)
         {
-            using (var contextTransaction = Context.Database.BeginTransaction())
+            // prevent EF from attempting to create the network's child entities (create them
+            // separately as part of a bulk insert)
+            var networkEntity = new NetworkEntity
             {
-                try
-                {
-                    // prevent EF from attempting to create the network's child entities (create them
-                    // separately as part of a bulk insert)
-                    var networkEntity = new NetworkEntity
-                    {
-                        Id = new Guid(DataPersistenceConstants.PennDotNetworkId), Name = network.Name
-                    };
-                    Context.AddOrUpdate(networkEntity, networkEntity.Id);
+                Id = new Guid(DataPersistenceConstants.PennDotNetworkId),
+                Name = network.Name
+            };
+            _context.AddOrUpdate(networkEntity, networkEntity.Id);
 
-                    // convert maintainable assets and all child domains to entities
-                    var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity(network.Id)).ToList();
+            // convert maintainable assets and all child domains to entities
+            var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity(network.Id)).ToList();
 
-                    if (IsRunningFromXUnit)
-                    {
-                        Context.MaintainableAsset.AddRange(maintainableAssetEntities);
-                        Context.MaintainableAssetLocation.AddRange(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
-                    }
-                    else
-                    {
-                        // bulk insert maintainable assets
-                        Context.BulkInsert(maintainableAssetEntities);
+            if (IsRunningFromXUnit)
+            {
+                _context.MaintainableAsset.AddRange(maintainableAssetEntities);
+                _context.MaintainableAssetLocation.AddRange(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
+            }
+            else
+            {
+                // bulk insert maintainable assets
+                _context.BulkInsert(maintainableAssetEntities);
 
-                        // bulk insert maintainable asset locations
-                        Context.BulkInsert(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
-                    }
-
-                    Context.SaveChanges();
-
-                    contextTransaction.Commit();
-                }
-                catch (Exception e)
-                {
-                    contextTransaction.Rollback();
-                    Console.WriteLine(e);
-                    throw;
-                }
+                // bulk insert maintainable asset locations
+                _context.BulkInsert(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
             }
         }
 
-        public void CreateNetwork(Network network)
-        {
-            using (var contextTransaction = Context.Database.BeginTransaction())
-            {
-                try
-                {
-                    Context.Network.Add(network.ToEntity());
-
-                    Context.SaveChanges();
-
-                    contextTransaction.Commit();
-                }
-                catch (Exception e)
-                {
-                    contextTransaction.Rollback();
-                    Console.WriteLine(e);
-                    throw;
-                }
-            }
-        }
+        public void CreateNetwork(Network network) =>_context.Network.Add(network.ToEntity());
 
         public List<DataAssignment.Networking.Network> GetAllNetworks()
         {
-            /*if (Context.Network.Count() == 0)
+            /*if (_context.Network.Count() == 0)
             {
                 throw new RowNotInTableException($"Cannot find networks in the database");
             }*/
 
             // consumer of this call will only need the network information. Not the maintainable assest information
-            return Context.Network.Select(_ => _.ToDomain()).ToList();
+            return _context.Network.Select(_ => _.ToDomain()).ToList();
         }
 
         public Domains.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer)
         {
-            if (!Context.Network.Any(_ => _.Id == networkId))
+            if (!_context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var networkEntity = Context.Network
+            var networkEntity = _context.Network
                 .Single(_ => _.Id == networkId);
 
-            var facilityEntities = Context.Facility
+            var facilityEntities = _context.Facility
                 .Where(_ => _.Network.Id == networkId).ToList();
 
             if (facilityEntities.Any())
             {
                 networkEntity.Facilities = ToHashSetExtension.ToHashSet(facilityEntities);
 
-                var sectionEntities = Context.Section
+                var sectionEntities = _context.Section
                     .Where(_ => _.Facility.Network.Id == networkId).ToList();
 
                 if (sectionEntities.Any())
                 {
-                    var numericAttributeValueHistoryEntities = Context.NumericAttributeValueHistory
+                    var numericAttributeValueHistoryEntities = _context.NumericAttributeValueHistory
                         .Where(_ => _.Section.Facility.Network.Id == networkId).ToList();
 
-                    var textAttributeValueHistoryEntities = Context.TextAttributeValueHistory
+                    var textAttributeValueHistoryEntities = _context.TextAttributeValueHistory
                         .Where(_ => _.Section.Facility.Network.Id == networkId).ToList();
 
                     if (numericAttributeValueHistoryEntities.Any() || textAttributeValueHistoryEntities.Any())
@@ -132,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var textValueHistoryAttributeIds = textAttributeValueHistoryEntities.Select(_ => _.AttributeId).Distinct();
                         var attributeIds = numericValueHistoryAttributeIds.Union(textValueHistoryAttributeIds);
 
-                        var attributeEntities = Context.Attribute.Where(_ => attributeIds.Contains(_.Id)).ToList();
+                        var attributeEntities = _context.Attribute.Where(_ => attributeIds.Contains(_.Id)).ToList();
 
                         ForEachExtension.ForEach(numericAttributeValueHistoryEntities,
                             entity => entity.Attribute = attributeEntities.Single(_ => _.Id == entity.AttributeId));

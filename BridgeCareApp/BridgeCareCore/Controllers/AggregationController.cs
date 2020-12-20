@@ -18,7 +18,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : ControllerBase
     {
-        private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
+        /*private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
         private readonly IMaintainableAssetRepository _maintainableAssetRepo;
         private readonly IAggregatedResultRepository _aggregatedResultRepo;
         private readonly IAttributeDatumRepository _attributeDatumRepo;
@@ -192,6 +192,6 @@ namespace BridgeCareCore.Controllers
                             .All
                             .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
             }
-        }
+        }*/
     }
 }

@@ -18,29 +18,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly IEquationRepository _equationRepo;
-        private readonly ICriterionLibraryRepository _criterionLibraryRepo;
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public PerformanceCurveRepository(IEquationRepository equationRepo, ICriterionLibraryRepository criterionLibraryRepo, IAMContext context)
+        public PerformanceCurveRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _equationRepo = equationRepo ?? throw new ArgumentNullException(nameof(equationRepo));
-            _criterionLibraryRepo = criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreatePerformanceCurveLibrary(string name, Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
             var performanceCurveLibraryEntity = new PerformanceCurveLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
-            _context.PerformanceCurveLibrary.Add(performanceCurveLibraryEntity);
+            _unitOfWork.Context.PerformanceCurveLibrary.Add(performanceCurveLibraryEntity);
 
-            _context.PerformanceCurveLibrarySimulation.Add(new PerformanceCurveLibrarySimulationEntity
+            _unitOfWork.Context.PerformanceCurveLibrarySimulation.Add(new PerformanceCurveLibrarySimulationEntity
             {
                 PerformanceCurveLibraryId = performanceCurveLibraryEntity.Id,
                 SimulationId = simulationId
@@ -49,12 +45,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreatePerformanceCurves(List<PerformanceCurve> performanceCurves, Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            var simulationEntity = _context.Simulation
+            var simulationEntity = _unitOfWork.Context.Simulation
                 .Include(_ => _.PerformanceCurveLibrarySimulationJoin)
                 .Single(_ => _.Id == simulationId);
 
@@ -64,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var attributeNames = performanceCurves.Select(_ => _.Attribute.Name).Distinct().ToList();
-            var attributeEntities = _context.Attribute
+            var attributeEntities = _unitOfWork.Context.Attribute
                 .Where(_ => attributeNames.Contains(_.Name)).ToList();
 
             if (!attributeEntities.Any())
@@ -92,11 +88,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.PerformanceCurve.AddRange(performanceCurveEntities);
+                _unitOfWork.Context.PerformanceCurve.AddRange(performanceCurveEntities);
             }
             else
             {
-                _context.BulkInsert(performanceCurveEntities);
+                _unitOfWork.Context.BulkInsert(performanceCurveEntities);
             }
 
             if (performanceCurves.Any(_ => !_.Equation.ExpressionIsBlank))
@@ -105,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Where(_ => !_.Equation.ExpressionIsBlank)
                     .ToDictionary(_ => _.Id, _ => _.Equation.ToEntity());
 
-                _equationRepo.CreateEquations(equationEntityPerPerformanceCurveEntityId, "PerformanceCurveEntity");
+                _unitOfWork.EquationRepo.CreateEquations(equationEntityPerPerformanceCurveEntityId, "PerformanceCurveEntity");
             }
 
             if (performanceCurves.Any(_ => !_.Criterion.ExpressionIsBlank))
@@ -115,18 +111,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.Criterion.Expression, _ => _)
                     .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
 
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(curveIdsPerExpression, "PerformanceCurveEntity", simulationEntity.Name);
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(curveIdsPerExpression, "PerformanceCurveEntity", simulationEntity.Name);
             }
         }
 
         public void GetSimulationPerformanceCurves(Simulation simulation)
         {
-            if (!_context.Simulation.Any(_ => _.Name == simulation.Name))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Name == simulation.Name))
             {
                 throw new RowNotInTableException($"No simulation found having name {simulation.Name}");
             }
 
-            _context.PerformanceCurve
+            _unitOfWork.Context.PerformanceCurve
                 .Include(_ => _.Attribute)
                 .Include(_ => _.CriterionLibraryPerformanceCurveJoin)
                 .ThenInclude(_ => _.CriterionLibrary)

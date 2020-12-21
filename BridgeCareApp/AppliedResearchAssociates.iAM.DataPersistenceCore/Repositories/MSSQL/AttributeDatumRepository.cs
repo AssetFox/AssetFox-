@@ -11,26 +11,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AttributeDatumRepository : IAttributeDatumRepository
     {
-        private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
-        private readonly IAttributeRepository _attributeRepo;
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public AttributeDatumRepository(IAttributeMetaDataRepository attributeMetaDataRepo,
-            IAttributeRepository attributeRepo, IAMContext context)
+        public AttributeDatumRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _attributeMetaDataRepo =
-                attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
-            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public int UpdateAssignedData(List<MaintainableAsset> maintainableAssets)
         {
             // get all the configurable attributes
-            var configurableAttributes = _attributeMetaDataRepo.GetAllAttributes();
+            var configurableAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes();
 
             // insert/update configurable attributes
-            _attributeRepo.UpsertAttributes(configurableAttributes);
+            _unitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
 
             // get the attribute ids off of the assigned data on the maintainable assets that have
             // not been modified yet
@@ -47,7 +41,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 // use a raw sql query to delete AssignedData
                 var query =
                     $"DELETE FROM dbo.AttributeDatum WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAsset WHERE NetworkId = '{maintainableAssets.First().NetworkId}') AND AttributeId IN ('{string.Join("','", attributeIdsToBeUpdatedWithAssignedData)}')";
-                _context.Database.ExecuteSqlRaw(query);
+                _unitOfWork.Context.Database.ExecuteSqlRaw(query);
+                _unitOfWork.Context.SaveChanges();
             }
 
             // convert any assigned data to their equivalent entity object types
@@ -61,8 +56,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return 0;
             }
 
-            _context.BulkInsertOrUpdate(assignedData);
-            _context.BulkInsertOrUpdate(assignedData.Select(_ => _.AttributeDatumLocation).ToList());
+            _unitOfWork.Context.BulkInsertOrUpdate(assignedData);
+            _unitOfWork.Context.BulkInsertOrUpdate(assignedData.Select(_ => _.AttributeDatumLocation).ToList());
+            _unitOfWork.Context.SaveChanges();
 
             return assignedData.Count();
         }

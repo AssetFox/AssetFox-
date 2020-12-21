@@ -16,25 +16,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly ICommittedProjectConsequenceRepository _committedProjectConsequenceRepo;
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public CommittedProjectRepository(ICommittedProjectConsequenceRepository committedProjectConsequenceRepo,
-            IAMContext context)
+        public CommittedProjectRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _committedProjectConsequenceRepo = committedProjectConsequenceRepo ??
-                                               throw new ArgumentNullException(nameof(committedProjectConsequenceRepo));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateCommittedProjects(List<CommittedProject> committedProjects, Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _context.Simulation
+            var simulationEntity = _unitOfWork.Context.Simulation
                 .Include(_ => _.Network)
                 .ThenInclude(_ => _.Facilities)
                 .ThenInclude(_ => _.Sections)
@@ -55,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var attributeNames = committedProjects.SelectMany(_ => _.Consequences.Select(_ => _.Attribute.Name))
                 .Distinct().ToList();
-            var attributeEntities = _context.Attribute
+            var attributeEntities = _unitOfWork.Context.Attribute
                 .Where(_ => attributeNames.Contains(_.Name)).ToList();
 
             if (!attributeEntities.Any())
@@ -82,30 +78,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.CommittedProject.AddRange(committedProjectEntities);
+                _unitOfWork.Context.CommittedProject.AddRange(committedProjectEntities);
             }
             else
             {
-                _context.BulkInsert(committedProjectEntities);
+                _unitOfWork.Context.BulkInsert(committedProjectEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
 
             var consequencePerAttributeIdPerProjectId = committedProjects
                 .ToDictionary(_ => _.Id, _ => _.Consequences.Select(__ => (attributeIdPerName[__.Attribute.Name], __)).ToList());
 
             if (consequencePerAttributeIdPerProjectId.Values.Any())
             {
-                _committedProjectConsequenceRepo.CreateCommittedProjectConsequences(consequencePerAttributeIdPerProjectId);
+                _unitOfWork.CommittedProjectConsequenceRepo.CreateCommittedProjectConsequences(consequencePerAttributeIdPerProjectId);
             }
         }
 
         public void GetSimulationCommittedProjects(Simulation simulation)
         {
-            if (!_context.Simulation.Any(_ => _.Name == simulation.Name))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Name == simulation.Name))
             {
                 throw new RowNotInTableException($"No simulation found having nme {simulation.Name}");
             }
 
-            _context.CommittedProject
+            _unitOfWork.Context.CommittedProject
                 .Include(_ => _.Budget)
                 .Include(_ => _.Section)
                 .ThenInclude(_ => _.Facility)

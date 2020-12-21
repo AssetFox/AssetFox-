@@ -12,14 +12,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly ICriterionLibraryRepository _criterionLibraryRepo;
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public TreatmentSupersessionRepository(ICriterionLibraryRepository criterionLibraryRepo, IAMContext context)
+        public TreatmentSupersessionRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _criterionLibraryRepo =
-                criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateTreatmentSupersessions(Dictionary<Guid, List<TreatmentSupersession>> treatmentSupersessionsPerTreatmentId,
@@ -50,16 +47,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.TreatmentSupersession.AddRange(supersessionEntities);
+                _unitOfWork.Context.TreatmentSupersession.AddRange(supersessionEntities);
             }
             else
             {
-                _context.BulkInsert(supersessionEntities);
+                _unitOfWork.Context.BulkInsert(supersessionEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
 
             if (supersessionEntityIdsPerExpression.Values.Any())
             {
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(supersessionEntityIdsPerExpression, "TreatmentSupersessionEntity", simulationName);
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(supersessionEntityIdsPerExpression, "TreatmentSupersessionEntity", simulationName);
             }
         }
     }

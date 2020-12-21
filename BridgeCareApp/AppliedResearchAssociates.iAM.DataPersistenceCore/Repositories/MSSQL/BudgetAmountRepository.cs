@@ -17,18 +17,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public BudgetAmountRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
+        public BudgetAmountRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateBudgetAmounts(Dictionary<Guid, List<BudgetAmount>> budgetAmountsPerBudgetEntityId, Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            var simulationEntity = _context.Simulation
+            var simulationEntity = _unitOfWork.Context.Simulation
                 .Include(_ => _.InvestmentPlan)
                 .Single(_ => _.Id == simulationId);
 
@@ -51,12 +51,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.BudgetAmount.AddRange(budgetAmountEntities);
+                _unitOfWork.Context.BudgetAmount.AddRange(budgetAmountEntities);
             }
             else
             {
-                _context.BulkInsert(budgetAmountEntities);
+                _unitOfWork.Context.BulkInsert(budgetAmountEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
         }
     }
 }

@@ -51,7 +51,7 @@ namespace BridgeCareCore
 
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
             services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
-            services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
+            //services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
             services.AddScoped<IExcelHelper, ExcelHelper>();
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
             services.AddScoped<IHighlightWorkDoneCells, HighlightWorkDoneCells>();
@@ -96,7 +96,7 @@ namespace BridgeCareCore
                 options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
             services.AddScoped<UnitOfWork>();
 
-            services.AddScoped<INetworkRepository, NetworkRepository>();
+            /*services.AddScoped<INetworkRepository, NetworkRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
             services.AddScoped<IAttributeRepository, AttributeRepository>();
             services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
@@ -144,7 +144,7 @@ namespace BridgeCareCore
             services.AddScoped<ISimulationOutputRepository, SimulationOutputRepository>();
             services.AddScoped<ICommittedProjectConsequenceRepository, CommittedProjectConsequenceRepository>();
             services.AddScoped<ICommittedProjectRepository, CommittedProjectRepository>();
-            services.AddScoped<ISimulationAnalysisDetailRepository, SimulationAnalysisDetailRepository>();
+            services.AddScoped<ISimulationAnalysisDetailRepository, SimulationAnalysisDetailRepository>();*/
 
             // Repository for legacy database
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));

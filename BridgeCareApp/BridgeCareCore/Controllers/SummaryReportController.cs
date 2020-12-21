@@ -18,7 +18,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class SummaryReportController : ControllerBase
     {
-        /*private readonly ILogger<SummaryReportController> _logger;
+        private readonly ILogger<SummaryReportController> _logger;
         private readonly ISummaryReportGenerator _summaryReportGenerator;
         private readonly IHubContext<BridgeCareHub> HubContext;
 
@@ -73,6 +73,6 @@ namespace BridgeCareCore.Controllers
                 .Clients
                 .All
                 .SendAsync("BroadcastSummaryReportGenerationStatus", message, simulationId);
-        }*/
+        }
     }
 }

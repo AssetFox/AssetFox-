@@ -15,28 +15,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly ICriterionLibraryRepository _criterionLibraryRepo;
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public RemainingLifeLimitRepository(ICriterionLibraryRepository criterionLibraryRepo, IAMContext context)
+        public RemainingLifeLimitRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _criterionLibraryRepo =
-                criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateRemainingLifeLimitLibrary(string name, Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             var remainingLifeLimitLibraryEntity = new RemainingLifeLimitLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
-            _context.RemainingLifeLimitLibrary.Add(remainingLifeLimitLibraryEntity);
+            _unitOfWork.Context.RemainingLifeLimitLibrary.Add(remainingLifeLimitLibraryEntity);
 
-            _context.RemainingLifeLimitLibrarySimulation.Add(new RemainingLifeLimitLibrarySimulationEntity
+            _unitOfWork.Context.RemainingLifeLimitLibrarySimulation.Add(new RemainingLifeLimitLibrarySimulationEntity
             {
                 RemainingLifeLimitLibraryId = remainingLifeLimitLibraryEntity.Id, SimulationId = simulationId
             });
@@ -44,17 +41,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateRemainingLifeLimits(List<RemainingLifeLimit> remainingLifeLimits, Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _context.Simulation
+            var simulationEntity = _unitOfWork.Context.Simulation
                 .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
                 .Single(_ => _.Id == simulationId);
 
             var attributeNames = remainingLifeLimits.Select(_ => _.Attribute.Name).Distinct().ToList();
-            var attributeEntities = _context.Attribute
+            var attributeEntities = _unitOfWork.Context.Attribute
                 .Where(_ => attributeNames.Contains(_.Name)).ToList();
 
             if (!attributeEntities.Any())
@@ -82,11 +79,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.RemainingLifeLimit.AddRange(remainingLifeLimitEntities);
+                _unitOfWork.Context.RemainingLifeLimit.AddRange(remainingLifeLimitEntities);
             }
             else
             {
-                _context.BulkInsert(remainingLifeLimitEntities);
+                _unitOfWork.Context.BulkInsert(remainingLifeLimitEntities);
             }
 
             if (remainingLifeLimits.Any(_ => !_.Criterion.ExpressionIsBlank))
@@ -96,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.Criterion.Expression, _ => _)
                     .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
 
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(limitIdsPerExpression, "RemainingLifeLimitEntity", simulationEntity.Name);
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(limitIdsPerExpression, "RemainingLifeLimitEntity", simulationEntity.Name);
             }
         }
     }

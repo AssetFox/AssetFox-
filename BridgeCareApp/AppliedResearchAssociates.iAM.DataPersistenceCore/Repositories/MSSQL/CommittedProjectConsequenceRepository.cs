@@ -12,9 +12,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public CommittedProjectConsequenceRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
+        public CommittedProjectConsequenceRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateCommittedProjectConsequences(Dictionary<Guid, List<(Guid attributeId, TreatmentConsequence consequence)>> consequencePerAttributeIdPerProjectId)
         {
@@ -24,12 +24,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.CommittedProjectConsequence.AddRange(committedProjectConsequenceEntities);
+                _unitOfWork.Context.CommittedProjectConsequence.AddRange(committedProjectConsequenceEntities);
             }
             else
             {
-                _context.BulkInsert(committedProjectConsequenceEntities);
+                _unitOfWork.Context.BulkInsert(committedProjectConsequenceEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
         }
     }
 }

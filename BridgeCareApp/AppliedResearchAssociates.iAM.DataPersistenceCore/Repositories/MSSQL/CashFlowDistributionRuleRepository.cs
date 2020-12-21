@@ -16,9 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public CashFlowDistributionRuleRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
+        public CashFlowDistributionRuleRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateCashFlowDistributionRules(Dictionary<Guid, List<CashFlowDistributionRule>> distributionRulesPerCashFlowRuleEntityId)
         {
@@ -28,12 +28,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.CashFlowDistributionRule.AddRange(cashFlowDistributionRuleEntities);
+                _unitOfWork.Context.CashFlowDistributionRule.AddRange(cashFlowDistributionRuleEntities);
             }
             else
             {
-                _context.BulkInsert(cashFlowDistributionRuleEntities);
+                _unitOfWork.Context.BulkInsert(cashFlowDistributionRuleEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
         }
     }
 }

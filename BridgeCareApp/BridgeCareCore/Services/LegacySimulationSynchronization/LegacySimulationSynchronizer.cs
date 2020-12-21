@@ -21,41 +21,18 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
 
         private const int NetworkId = 13;
 
-        /*private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
-        private readonly IAttributeRepository _attributeRepo;
-        private readonly INetworkRepository _networkRepo;
-        private readonly IFacilityRepository _facilityRepo;
-        private readonly ISimulationRepository _simulationRepo;
-        private readonly IInvestmentPlanRepository _investmentPlanRepo;
-        private readonly IAnalysisMethodRepository _analysisMethodRepo;
-        private readonly IPerformanceCurveRepository _performanceCurveRepo;
-        private readonly ISelectableTreatmentRepository _selectableTreatmentRepo;*/
-        private readonly IConfiguration _config;
         private readonly IHubContext<BridgeCareHub> _hubContext;
         private readonly UnitOfWork _unitOfWork;
 
-        public LegacySimulationSynchronizer(/*IAttributeMetaDataRepository attributeMetaDataRepo, IAttributeRepository attributeRepo, INetworkRepository networkRepo,
-            IFacilityRepository facilityRepo, ISimulationRepository simulationRepo, IInvestmentPlanRepository investmentPlanRepo,
-            IAnalysisMethodRepository analysisMethodRepo, IPerformanceCurveRepository performanceCurveRepo, ISelectableTreatmentRepository selectableTreatmentRepo,*/
-            IConfiguration config, IHubContext<BridgeCareHub> hub, UnitOfWork unitOfWork)
+        public LegacySimulationSynchronizer(IHubContext<BridgeCareHub> hub, UnitOfWork unitOfWork)
         {
-            /*_attributeMetaDataRepo = attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
-            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
-            _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
-            _facilityRepo = facilityRepo ?? throw new ArgumentNullException(nameof(facilityRepo));
-            _simulationRepo = simulationRepo ?? throw new ArgumentNullException(nameof(simulationRepo));
-            _investmentPlanRepo = investmentPlanRepo ?? throw new ArgumentNullException(nameof(investmentPlanRepo));
-            _analysisMethodRepo = analysisMethodRepo ?? throw new ArgumentNullException(nameof(analysisMethodRepo));
-            _performanceCurveRepo = performanceCurveRepo ?? throw new ArgumentNullException(nameof(performanceCurveRepo));
-            _selectableTreatmentRepo = selectableTreatmentRepo ?? throw new ArgumentNullException(nameof(selectableTreatmentRepo));*/
-            _config = config ?? throw new ArgumentNullException(nameof(config));
             _hubContext = hub;
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public Task SynchronizeLegacySimulation(int legacySimulationId)
         {
-            using var connection = new SqlConnection(_config.GetConnectionString("BridgeCareLegacyConnex"));
+            using var connection = new SqlConnection(_unitOfWork.Config.GetConnectionString("BridgeCareLegacyConnex"));
             using var transaction = _unitOfWork.DbContextTransaction;
 
             try

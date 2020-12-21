@@ -15,14 +15,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly IAttributeValueHistoryRepository _attributeValueHistoryRepo;
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public SectionRepository(IAttributeValueHistoryRepository attributeValueHistoryRepo, IAMContext context)
+        public SectionRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _attributeValueHistoryRepo = attributeValueHistoryRepo ??
-                                         throw new ArgumentNullException(nameof(attributeValueHistoryRepo));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateSections(List<Section> sections)
@@ -31,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .SelectMany(_ => _.HistoricalAttributes.Select(__ => __.Name))
                 .Distinct().ToList();
 
-            var attributeEntities = _context.Attribute
+            var attributeEntities = _unitOfWork.Context.Attribute
                 .Where(_ => attributeNames.Contains(_.Name)).ToList();
 
             if (!attributeEntities.Any())
@@ -85,21 +82,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.Section.AddRange(sectionEntities);
+                _unitOfWork.Context.Section.AddRange(sectionEntities);
             }
             else
             {
-                _context.BulkInsert(sectionEntities);
+                _unitOfWork.Context.BulkInsert(sectionEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
 
             if (numericAttributeValueHistoryPerSectionIdAttributeIdTuple.Any())
             {
-                _attributeValueHistoryRepo.CreateNumericAttributeValueHistories(numericAttributeValueHistoryPerSectionIdAttributeIdTuple);
+                _unitOfWork.AttributeValueHistoryRepo.CreateNumericAttributeValueHistories(numericAttributeValueHistoryPerSectionIdAttributeIdTuple);
             }
 
             if (textAttributeValueHistoryPerSectionIdAttributeIdTuple.Any())
             {
-                _attributeValueHistoryRepo.CreateTextAttributeValueHistories(textAttributeValueHistoryPerSectionIdAttributeIdTuple);
+                _unitOfWork.AttributeValueHistoryRepo.CreateTextAttributeValueHistories(textAttributeValueHistoryPerSectionIdAttributeIdTuple);
             }
         }
     }

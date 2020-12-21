@@ -12,9 +12,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public TreatmentSchedulingRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
+        public TreatmentSchedulingRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateTreatmentSchedulings(Dictionary<Guid, List<TreatmentScheduling>> treatmentSchedulingsPerTreatmentId)
         {
@@ -24,12 +24,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.TreatmentScheduling.AddRange(treatmentSchedulingEntities);
+                _unitOfWork.Context.TreatmentScheduling.AddRange(treatmentSchedulingEntities);
             }
             else
             {
-                _context.BulkInsert(treatmentSchedulingEntities);
+                _unitOfWork.Context.BulkInsert(treatmentSchedulingEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
         }
     }
 }

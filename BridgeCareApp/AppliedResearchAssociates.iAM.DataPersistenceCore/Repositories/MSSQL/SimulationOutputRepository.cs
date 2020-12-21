@@ -14,18 +14,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class SimulationOutputRepository : ISimulationOutputRepository
     {
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public SimulationOutputRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
+        public SimulationOutputRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _context.Simulation.Single(_ => _.Id == simulationId);
+            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
 
             if (simulationOutput == null)
             {
@@ -35,36 +35,37 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
             var simulationOutputString = JsonConvert.SerializeObject(simulationOutput, settings);
 
-            _context.AddOrUpdate(new SimulationOutputEntity { SimulationId = simulationId, Output = simulationOutputString }, simulationId);
+            _unitOfWork.Context.AddOrUpdate(new SimulationOutputEntity { SimulationId = simulationId, Output = simulationOutputString }, simulationId);
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void GetSimulationOutput(Simulation simulation)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulation.Id))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
                 throw new RowNotInTableException($"Found no simulation having id {simulation.Id}");
             }
 
-            if (_context.SimulationOutput.Any(_ => _.SimulationId == simulation.Id))
+            if (_unitOfWork.Context.SimulationOutput.Any(_ => _.SimulationId == simulation.Id))
             {
-                _context.SimulationOutput.Single(_ => _.SimulationId == simulation.Id)
+                _unitOfWork.Context.SimulationOutput.Single(_ => _.SimulationId == simulation.Id)
                     .FillSimulationResults(simulation);
             }
         }
 
         public SimulationOutput GetSimulationOutput(Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"Found no simulation having id {simulationId}");
             }
 
-            if (!_context.SimulationOutput.Any(_ => _.SimulationId == simulationId))
+            if (!_unitOfWork.Context.SimulationOutput.Any(_ => _.SimulationId == simulationId))
             {
                 throw new RowNotInTableException($"No simulation analysis results were found for simulation having id {simulationId}. Please ensure that the simulation analysis has been run.");
             }
 
-            var simulationOutputString = _context.SimulationOutput.Single(_ => _.SimulationId == simulationId).Output;
+            var simulationOutputString = _unitOfWork.Context.SimulationOutput.Single(_ => _.SimulationId == simulationId).Output;
 
             return JsonConvert.DeserializeObject<SimulationOutput>(simulationOutputString, new JsonSerializerSettings
             {

@@ -113,7 +113,7 @@ const actions = {
         await ScenarioService.runNewScenarioSimulation(payload.networkId, payload.selectedScenarioId)
         .then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                dispatch('setSuccessMessage', {message: 'Simulation queued'});
+                dispatch('setSuccessMessage', {message: 'Simulation analysis complete'});
             }
         });
     },

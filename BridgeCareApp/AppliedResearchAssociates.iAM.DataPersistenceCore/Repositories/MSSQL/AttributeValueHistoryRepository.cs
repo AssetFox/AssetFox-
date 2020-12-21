@@ -25,13 +25,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             "Id", "CreatedDate", "LastModifiedDate", "CreatedBy", "LastModifiedBy", "SectionId", "AttributeId", "Year", "Value"
         };
 
-        private readonly IConfiguration _config;
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public AttributeValueHistoryRepository(IConfiguration config, IAMContext context)
+        public AttributeValueHistoryRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _config = config;
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateNumericAttributeValueHistories(
@@ -48,8 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.NumericAttributeValueHistory.AddRange(numericAttributeValueHistoryEntities);
-                _context.SaveChanges();
+                _unitOfWork.Context.NumericAttributeValueHistory.AddRange(numericAttributeValueHistoryEntities);
             }
             else
             {
@@ -61,18 +58,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var totalPages = (int)Math.Ceiling((decimal)numericAttributeValueHistoryEntities.Count / (decimal)take);
                     while (skip < totalPages)
                     {
-                        var currentEntities = numericAttributeValueHistoryEntities
-                            .Skip(skip * take).Take(take).ToList();/*.ToDataTable(Props);*/
-                        //BulkInsert(dt, "NumericAttributeValueHistory");
-                        _context.BulkInsert(currentEntities);
+                        dt = numericAttributeValueHistoryEntities
+                            .Skip(skip * take).Take(take).ToDataTable(Props);
+                        BulkInsert(dt, "NumericAttributeValueHistory");
+                        //_unitOfWork.Context.BulkInsert(currentEntities);
                         skip++;
                     }
                 }
                 else
                 {
-                    _context.BulkInsert(numericAttributeValueHistoryEntities);
+                    _unitOfWork.Context.BulkInsert(numericAttributeValueHistoryEntities);
                 }
             }
+
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void CreateTextAttributeValueHistories(
@@ -89,36 +88,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.TextAttributeValueHistory.AddRange(textAttributeValueHistoryEntities);
+                _unitOfWork.Context.TextAttributeValueHistory.AddRange(textAttributeValueHistoryEntities);
             }
             else
             {
 
                 if (textAttributeValueHistoryEntities.Count > 10000)
                 {
-                    //DataTable dt;
+                    DataTable dt;
                     var take = 1000;
                     var skip = 0;
                     var totalPages = (int)Math.Ceiling((decimal)textAttributeValueHistoryEntities.Count / (decimal)take);
                     while (skip < totalPages)
                     {
-                        var currentEntities = textAttributeValueHistoryEntities
-                            .Skip(skip * take).Take(take).ToList();/*.ToDataTable(Props);*/
-                        //BulkInsert(dt, "TextAttributeValueHistory");
-                        _context.BulkInsert(currentEntities);
+                        dt = textAttributeValueHistoryEntities
+                            .Skip(skip * take).Take(take).ToDataTable(Props);
+                        BulkInsert(dt, "TextAttributeValueHistory");
+                        //_unitOfWork.Context.BulkInsert(currentEntities);
                         skip++;
                     }
                 }
                 else
                 {
-                    _context.BulkInsert(textAttributeValueHistoryEntities);
+                    _unitOfWork.Context.BulkInsert(textAttributeValueHistoryEntities);
                 }
             }
+
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void BulkInsert(DataTable dt, string tableName)
         {
-            using (var connection = new SqlConnection(_config.GetConnectionString("BridgeCareConnex")))
+            using (var connection = new SqlConnection(_unitOfWork.Config.GetConnectionString("BridgeCareConnex")))
             {
                 // make sure to enable triggers
                 // more on triggers in next post

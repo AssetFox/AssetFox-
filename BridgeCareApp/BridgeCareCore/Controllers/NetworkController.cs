@@ -17,16 +17,11 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class NetworkController : ControllerBase
     {
-        /*private readonly IAttributeMetaDataRepository _attributeMetaDataFileRepo;
-        private readonly INetworkRepository _networkRepo;*/
         private readonly UnitOfWork _unitOfWork;
         private readonly ILog _log;
 
-        public NetworkController(/*IAttributeMetaDataRepository attributeMetaDataFileRepo,
-            INetworkRepository networkRepo, */UnitOfWork unitOfWork, ILog log)
+        public NetworkController(UnitOfWork unitOfWork, ILog log)
         {
-            /*_attributeMetaDataFileRepo = attributeMetaDataFileRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataFileRepo));
-            _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));*/
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _log = log ?? throw new ArgumentNullException(nameof(log));
         }

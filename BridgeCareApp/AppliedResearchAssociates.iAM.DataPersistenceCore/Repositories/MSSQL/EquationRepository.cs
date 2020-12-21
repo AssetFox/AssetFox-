@@ -14,20 +14,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public EquationRepository(IAMContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
+        public EquationRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateEquations(Dictionary<Guid, EquationEntity> equationEntityPerEntityId, string joinEntity)
         {
             if (IsRunningFromXUnit)
             {
-                _context.Equation.AddRange(equationEntityPerEntityId.Values.ToList());
+                _unitOfWork.Context.Equation.AddRange(equationEntityPerEntityId.Values.ToList());
             }
             else
             {
-                _context.BulkInsert(equationEntityPerEntityId.Values.ToList());
+                _unitOfWork.Context.BulkInsert(equationEntityPerEntityId.Values.ToList());
             }
+
+            _unitOfWork.Context.SaveChanges();
 
             switch (joinEntity)
             {
@@ -43,18 +45,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             default:
                 throw new InvalidOperationException("Unable to determine equation join entity type.");
             }
+
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void CreateEquations(List<EquationEntity> equationEntities)
         {
             if (IsRunningFromXUnit)
             {
-                equationEntities.ForEach(entity => _context.AddOrUpdate(entity, entity.Id));
+                equationEntities.ForEach(entity => _unitOfWork.Context.AddOrUpdate(entity, entity.Id));
             }
             else
             {
-                _context.BulkInsertOrUpdate(equationEntities);
+                _unitOfWork.Context.BulkInsertOrUpdate(equationEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
         }
 
         private void JoinEquationsWithPerformanceCurves(Dictionary<Guid, EquationEntity> equationEntityPerEntityId)
@@ -65,11 +71,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.PerformanceCurveEquation.AddRange(performanceCurveEquationJoinEntities);
+                _unitOfWork.Context.PerformanceCurveEquation.AddRange(performanceCurveEquationJoinEntities);
             }
             else
             {
-                _context.BulkInsert(performanceCurveEquationJoinEntities);
+                _unitOfWork.Context.BulkInsert(performanceCurveEquationJoinEntities);
             }
         }
 
@@ -81,11 +87,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.TreatmentConsequenceEquation.AddRange(treatmentConsequenceEquationJoinEntities);
+                _unitOfWork.Context.TreatmentConsequenceEquation.AddRange(treatmentConsequenceEquationJoinEntities);
             }
             else
             {
-                _context.BulkInsert(treatmentConsequenceEquationJoinEntities);
+                _unitOfWork.Context.BulkInsert(treatmentConsequenceEquationJoinEntities);
             }
         }
 
@@ -97,11 +103,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.TreatmentCostEquation.AddRange(treatmentCostEquationJoinEntities);
+                _unitOfWork.Context.TreatmentCostEquation.AddRange(treatmentCostEquationJoinEntities);
             }
             else
             {
-                _context.BulkInsert(treatmentCostEquationJoinEntities);
+                _unitOfWork.Context.BulkInsert(treatmentCostEquationJoinEntities);
             }
         }
     }

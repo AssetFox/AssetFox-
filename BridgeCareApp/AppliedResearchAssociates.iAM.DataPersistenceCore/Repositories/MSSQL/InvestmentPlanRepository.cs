@@ -17,36 +17,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromNUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("nunit.framework"));
 
-        private readonly IBudgetRepository _budgetRepo;
-        private readonly ICashFlowRuleRepository _cashFlowRuleRepo;
-        private readonly ICriterionLibraryRepository _criterionLibraryRepo;
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public InvestmentPlanRepository(IBudgetRepository budgetRepo,
-            ICriterionLibraryRepository criterionLibraryRepo,
-            ICashFlowRuleRepository cashFlowRuleRepo,
-            IAMContext context)
+        public InvestmentPlanRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _budgetRepo = budgetRepo ?? throw new ArgumentNullException(nameof(budgetRepo));
-            _criterionLibraryRepo = criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
-            _cashFlowRuleRepo = cashFlowRuleRepo ?? throw new ArgumentNullException(nameof(cashFlowRuleRepo));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateInvestmentPlan(InvestmentPlan investmentPlan, Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _context.Simulation.Single(_ => _.Id == simulationId);
+            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
 
             var investmentPlanEntity = investmentPlan.ToEntity(simulationEntity.Id);
 
-            _context.InvestmentPlan.Add(investmentPlanEntity);
+            _unitOfWork.Context.InvestmentPlan.Add(investmentPlanEntity);
 
-            _context.SaveChanges();
+            //_unitOfWork.Context.SaveChanges();
 
             if (investmentPlan.Budgets.Any())
             {
@@ -60,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.Criterion.Expression, _ => _.Budget.Id)
                     .ToDictionary(_ => _.Key, _ => _.ToList());
 
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(budgetEntityIdsPerExpression, "BudgetEntity", simulationEntity.Name);
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(budgetEntityIdsPerExpression, "BudgetEntity", simulationEntity.Name);
             }
 
             if (investmentPlan.CashFlowRules.Any())
@@ -71,26 +62,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void CreateInvestmentPlanBudgets(SimulationEntity simulationEntity, List<Budget> budgets)
         {
-            _budgetRepo.CreateBudgetLibrary($"{simulationEntity.Name} Simulation Investment Plan Budget Library", simulationEntity.Id);
+            _unitOfWork.BudgetRepo.CreateBudgetLibrary($"{simulationEntity.Name} Simulation Investment Plan Budget Library", simulationEntity.Id);
 
-            _budgetRepo.CreateBudgets(budgets, simulationEntity.Id);
+            _unitOfWork.BudgetRepo.CreateBudgets(budgets, simulationEntity.Id);
         }
 
         private void CreateInvestmentPlanCashFlowRules(SimulationEntity simulationEntity, List<CashFlowRule> cashFlowRules)
         {
-            _cashFlowRuleRepo.CreateCashFlowRuleLibrary($"{simulationEntity.Name} Simulation Cash Flow Rule Library", simulationEntity.Id);
+            _unitOfWork.CashFlowRuleRepo.CreateCashFlowRuleLibrary($"{simulationEntity.Name} Simulation Cash Flow Rule Library", simulationEntity.Id);
 
-            _cashFlowRuleRepo.CreateCashFlowRules(cashFlowRules, simulationEntity.Id);
+            _unitOfWork.CashFlowRuleRepo.CreateCashFlowRules(cashFlowRules, simulationEntity.Id);
         }
 
         public void GetSimulationInvestmentPlan(Simulation simulation)
         {
-            if (!_context.Simulation.Any(_ => _.Name == simulation.Name))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Name == simulation.Name))
             {
                 throw new RowNotInTableException($"No simulation found having name {simulation.Name}");
             }
 
-            _context.InvestmentPlan
+            _unitOfWork.Context.InvestmentPlan
                 .Include(_ => _.Simulation)
                 .ThenInclude(_ => _.BudgetLibrarySimulationJoin)
                 .ThenInclude(_ => _.BudgetLibrary)

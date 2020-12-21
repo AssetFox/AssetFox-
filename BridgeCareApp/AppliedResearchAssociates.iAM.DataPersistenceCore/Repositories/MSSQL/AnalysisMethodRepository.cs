@@ -12,50 +12,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AnalysisMethodRepository : IAnalysisMethodRepository
     {
-        private readonly ICriterionLibraryRepository _criterionLibraryRepo;
-        private readonly IBudgetPriorityRepository _budgetPriorityRepo;
-        private readonly ITargetConditionGoalRepository _targetConditionGoalRepo;
-        private readonly IDeficientConditionGoalRepository _deficientConditionGoalRepo;
-        private readonly IBenefitRepository _benefitRepo;
-        private readonly IRemainingLifeLimitRepository _remainingLifeLimitRepo;
-        private readonly IAMContext _context;
-
-        public AnalysisMethodRepository(ICriterionLibraryRepository criterionLibraryRepo,
-            IBudgetPriorityRepository budgetPriorityRepo,
-            ITargetConditionGoalRepository targetConditionGoalRepo,
-            IDeficientConditionGoalRepository deficientConditionGoalRepo,
-            IBenefitRepository benefitRepo,
-            IRemainingLifeLimitRepository remainingLifeLimitRepo,
-            IAMContext context)
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        public AnalysisMethodRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _criterionLibraryRepo = criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
-            _budgetPriorityRepo = budgetPriorityRepo ?? throw new ArgumentNullException(nameof(budgetPriorityRepo));
-            _targetConditionGoalRepo = targetConditionGoalRepo ?? throw new ArgumentNullException(nameof(targetConditionGoalRepo));
-            _deficientConditionGoalRepo = deficientConditionGoalRepo ?? throw new ArgumentNullException(nameof(deficientConditionGoalRepo));
-            _benefitRepo = benefitRepo ?? throw new ArgumentNullException(nameof(benefitRepo));
-            _remainingLifeLimitRepo = remainingLifeLimitRepo ?? throw new ArgumentNullException(nameof(remainingLifeLimitRepo));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateAnalysisMethod(AnalysisMethod analysisMethod, Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            if (!_context.Attribute.Any(_ => _.Name == analysisMethod.Weighting.Name))
+            if (!_unitOfWork.Context.Attribute.Any(_ => _.Name == analysisMethod.Weighting.Name))
             {
                 throw new RowNotInTableException($"No attribute found having name {analysisMethod.Weighting.Name}");
             }
 
-            var simulationEntity = _context.Simulation.Single(_ => _.Id == simulationId);
-            var attributeEntity = _context.Attribute.Single(_ => _.Name == analysisMethod.Weighting.Name);
+            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+            var attributeEntity = _unitOfWork.Context.Attribute.Single(_ => _.Name == analysisMethod.Weighting.Name);
 
             var analysisMethodEntity = analysisMethod.ToEntity(simulationEntity.Id, attributeEntity.Id);
-            _context.AnalysisMethod.Add(analysisMethodEntity);
+            _unitOfWork.Context.AnalysisMethod.Add(analysisMethodEntity);
+            _unitOfWork.Context.SaveChanges();
 
-            _benefitRepo.CreateBenefit(analysisMethod.Benefit, analysisMethodEntity.Id);
+            _unitOfWork.BenefitRepo.CreateBenefit(analysisMethod.Benefit, analysisMethodEntity.Id);
 
             if (!analysisMethod.Filter.ExpressionIsBlank)
             {
@@ -63,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             {analysisMethod.Filter.Expression, new List<Guid> {analysisMethodEntity.Id}}
                         };
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(analysisMethodEntityIdPerExpression,
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(analysisMethodEntityIdPerExpression,
                     "AnalysisMethodEntity", simulationEntity.Name);
             }
 
@@ -90,41 +72,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void CreateAnalysisMethodBudgetPriorities(SimulationEntity simulationEntity, List<BudgetPriority> budgetPriorities)
         {
-            _budgetPriorityRepo.CreateBudgetPriorityLibrary($"{simulationEntity.Name} Simulation Budget Priority Library", simulationEntity.Id);
+            _unitOfWork.BudgetPriorityRepo.CreateBudgetPriorityLibrary($"{simulationEntity.Name} Simulation Budget Priority Library", simulationEntity.Id);
 
-            _budgetPriorityRepo.CreateBudgetPriorities(budgetPriorities, simulationEntity.Id);
+            _unitOfWork.BudgetPriorityRepo.CreateBudgetPriorities(budgetPriorities, simulationEntity.Id);
         }
 
         private void CreateAnalysisMethodTargetConditionGoals(SimulationEntity simulationEntity, List<TargetConditionGoal> targetConditionGoals)
         {
-            _targetConditionGoalRepo.CreateTargetConditionGoalLibrary($"{simulationEntity.Name} Simulation Target Condition Goal Library", simulationEntity.Id);
+            _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoalLibrary($"{simulationEntity.Name} Simulation Target Condition Goal Library", simulationEntity.Id);
 
-            _targetConditionGoalRepo.CreateTargetConditionGoals(targetConditionGoals, simulationEntity.Id);
+            _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoals(targetConditionGoals, simulationEntity.Id);
         }
 
         private void CreateAnalysisMethodDeficientConditionGoals(SimulationEntity simulationEntity, List<DeficientConditionGoal> deficientConditionGoals)
         {
-            _deficientConditionGoalRepo.CreateDeficientConditionGoalLibrary($"{simulationEntity.Name} Simulation Deficient Condition Goal Library", simulationEntity.Id);
+            _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoalLibrary($"{simulationEntity.Name} Simulation Deficient Condition Goal Library", simulationEntity.Id);
 
-            _deficientConditionGoalRepo.CreateDeficientConditionGoals(deficientConditionGoals, simulationEntity.Id);
+            _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoals(deficientConditionGoals, simulationEntity.Id);
         }
 
         private void CreateAnalysisMethodRemainingLifeLimits(SimulationEntity simulationEntity,
             List<RemainingLifeLimit> remainingLifeLimits)
         {
-            _remainingLifeLimitRepo.CreateRemainingLifeLimitLibrary($"{simulationEntity.Name} Simulation Remaining Life Limit Library", simulationEntity.Id);
+            _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimitLibrary($"{simulationEntity.Name} Simulation Remaining Life Limit Library", simulationEntity.Id);
 
-            _remainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationEntity.Id);
+            _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationEntity.Id);
         }
 
         public void GetSimulationAnalysisMethod(Simulation simulation)
         {
-            if (!_context.Simulation.Any(_ => _.Name == simulation.Name))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Name == simulation.Name))
             {
                 throw new RowNotInTableException($"No simulation found having name {simulation.Name}");
             }
 
-            _context.AnalysisMethod.Include(_ => _.Attribute)
+            _unitOfWork.Context.AnalysisMethod.Include(_ => _.Attribute)
                 .Include(_ => _.Benefit)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CriterionLibraryAnalysisMethodJoin)

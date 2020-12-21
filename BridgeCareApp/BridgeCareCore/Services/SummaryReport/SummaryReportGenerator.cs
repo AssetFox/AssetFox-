@@ -16,9 +16,8 @@ using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.R
 
 namespace BridgeCareCore.Services.SummaryReport
 {
-    public class SummaryReportGenerator //: ISummaryReportGenerator
+    public class SummaryReportGenerator : ISummaryReportGenerator
     {
-        /*//private readonly ISimulationOutputRepository _simulationOutputRepo;
         private readonly IYearlyInvestmentRepository _yearlyInvestmentRepository;
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
@@ -28,31 +27,21 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
         private readonly SummaryReportGlossary _summaryReportGlossary;
         private readonly SummaryReportParameters _summaryReportParameters;
-
-        /*private readonly IAnalysisMethodRepository _analysisMethodRepository;
-        private readonly IInvestmentPlanRepository _investmentPlanRepository;#1#
-
         private readonly IHubContext<BridgeCareHub> HubContext;
-
         private readonly IAddGraphsInTabs _addGraphsInTabs;
-
         private readonly UnitOfWork _unitOfWork;
 
-        public SummaryReportGenerator(//ISimulationOutputRepository simulationOutputRepo,
-            IBridgeDataForSummaryReport bridgeDataForSummaryReport,
+        public SummaryReportGenerator(IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
             IPennDotReportARepository pennDotReportARepository,
             IUnfundedRecommendations unfundedRecommendations,
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
             IYearlyInvestmentRepository yearlyInvestmentRepository,
             SummaryReportGlossary summaryReportGlossary, SummaryReportParameters summaryReportParameters,
-            IHubContext<BridgeCareHub> hub, /*IAnalysisMethodRepository analysisMethodRepository,
-            IInvestmentPlanRepository investmentPlanRepository,#1#
-
+            IHubContext<BridgeCareHub> hub,
             IAddGraphsInTabs addGraphsInTabs,
             UnitOfWork unitOfWork)
         {
-            //_simulationOutputRepo = simulationOutputRepo ?? throw new ArgumentNullException(nameof(simulationOutputRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _bridgeDataForSummaryReport = bridgeDataForSummaryReport ?? throw new ArgumentNullException(nameof(bridgeDataForSummaryReport));
             _pennDotReportARepository = pennDotReportARepository ?? throw new ArgumentNullException(nameof(pennDotReportARepository));
@@ -63,10 +52,6 @@ namespace BridgeCareCore.Services.SummaryReport
             _summaryReportGlossary = summaryReportGlossary ?? throw new ArgumentNullException(nameof(summaryReportGlossary));
             _summaryReportParameters = summaryReportParameters ?? throw new ArgumentNullException(nameof(summaryReportParameters));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
-
-            /*_analysisMethodRepository = analysisMethodRepository ?? throw new ArgumentNullException(nameof(analysisMethodRepository));
-            _investmentPlanRepository = investmentPlanRepository ?? throw new ArgumentNullException(nameof(investmentPlanRepository));#1#
-
             _addGraphsInTabs = addGraphsInTabs ?? throw new ArgumentNullException(nameof(addGraphsInTabs));
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
@@ -163,6 +148,6 @@ namespace BridgeCareCore.Services.SummaryReport
                         .Clients
                         .All
                         .SendAsync("BroadcastSummaryReportGenerationStatus", message, simulationId);
-        }*/
+        }
     }
 }

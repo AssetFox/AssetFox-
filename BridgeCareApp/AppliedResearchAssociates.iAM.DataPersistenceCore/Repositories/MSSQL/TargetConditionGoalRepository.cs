@@ -15,46 +15,45 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly ICriterionLibraryRepository _criterionLibraryRepo;
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public TargetConditionGoalRepository(ICriterionLibraryRepository criterionLibraryRepo, IAMContext context)
+        public TargetConditionGoalRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _criterionLibraryRepo =
-                criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateTargetConditionGoalLibrary(string name, Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             var targetConditionGoalLibraryEntity = new TargetConditionGoalLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
-            _context.TargetConditionGoalLibrary.Add(targetConditionGoalLibraryEntity);
+            _unitOfWork.Context.TargetConditionGoalLibrary.Add(targetConditionGoalLibraryEntity);
 
-            _context.TargetConditionGoalLibrarySimulation.Add(new TargetConditionGoalLibrarySimulationEntity
+            _unitOfWork.Context.TargetConditionGoalLibrarySimulation.Add(new TargetConditionGoalLibrarySimulationEntity
             {
                 TargetConditionGoalLibraryId = targetConditionGoalLibraryEntity.Id, SimulationId = simulationId
             });
+
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void CreateTargetConditionGoals(List<TargetConditionGoal> targetConditionGoals, Guid simulationId)
         {
-            if (!_context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _context.Simulation
+            var simulationEntity = _unitOfWork.Context.Simulation
                 .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
                 .Single(_ => _.Id == simulationId);
 
             var attributeNames = targetConditionGoals.Select(_ => _.Attribute.Name).Distinct().ToList();
-            var attributeEntities = _context.Attribute.Where(_ => attributeNames.Contains(_.Name)).ToList();
+            var attributeEntities = _unitOfWork.Context.Attribute.Where(_ => attributeNames.Contains(_.Name)).ToList();
 
             if (!attributeEntities.Any())
             {
@@ -81,12 +80,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.TargetConditionGoal.AddRange(targetConditionGoalEntities);
+                _unitOfWork.Context.TargetConditionGoal.AddRange(targetConditionGoalEntities);
             }
             else
             {
-                _context.BulkInsert(targetConditionGoalEntities);
+                _unitOfWork.Context.BulkInsert(targetConditionGoalEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
 
             if (targetConditionGoals.Any(_ => !_.Criterion.ExpressionIsBlank))
             {
@@ -95,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.Criterion.Expression, _ => _)
                     .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
 
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(targetIdsPerExpression, "TargetConditionGoalEntity", simulationEntity.Name);
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(targetIdsPerExpression, "TargetConditionGoalEntity", simulationEntity.Name);
             }
         }
     }

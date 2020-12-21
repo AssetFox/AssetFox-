@@ -15,35 +15,13 @@ using MoreLinq;
 
 namespace BridgeCareCore.Services.SimulationAnalysis
 {
-    public class SimulationAnalysis //: ISimulationAnalysis
+    public class SimulationAnalysis : ISimulationAnalysis
     {
-        /*/*private readonly IAttributeRepository _attributeRepo;
-        private readonly INetworkRepository _networkRepo;
-        private readonly IInvestmentPlanRepository _investmentPlanRepo;
-        private readonly IAnalysisMethodRepository _analysisMethodRepo;
-        private readonly IPerformanceCurveRepository _performanceCurveRepo;
-        private readonly ISelectableTreatmentRepository _selectableTreatmentRepo;
-        private readonly ISimulationRepository _simulationRepo;
-        private readonly ISimulationOutputRepository _simulationOutputRepo;
-        private readonly ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;#1#
         private readonly UnitOfWork _unitOfWork;
         private readonly IHubContext<BridgeCareHub> HubContext;
 
-        public SimulationAnalysis(/*IAttributeRepository attributeRepo, INetworkRepository networkRepo,
-            IInvestmentPlanRepository investmentPlanRepo, IAnalysisMethodRepository analysisMethodRepo,
-            IPerformanceCurveRepository performanceCurveRepo, ISelectableTreatmentRepository selectableTreatmentRepo,
-            ISimulationRepository simulationRepo, ISimulationOutputRepository simulationOutputRepo,
-            ISimulationAnalysisDetailRepository simulationAnalysisDetailRepo, #1#UnitOfWork unitOfWork, IHubContext<BridgeCareHub> hub)
+        public SimulationAnalysis(UnitOfWork unitOfWork, IHubContext<BridgeCareHub> hub)
         {
-            /*_attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
-            _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
-            _investmentPlanRepo = investmentPlanRepo ?? throw new ArgumentNullException(nameof(investmentPlanRepo));
-            _analysisMethodRepo = analysisMethodRepo ?? throw new ArgumentNullException(nameof(analysisMethodRepo));
-            _performanceCurveRepo = performanceCurveRepo ?? throw new ArgumentNullException(nameof(performanceCurveRepo));
-            _selectableTreatmentRepo = selectableTreatmentRepo ?? throw new ArgumentNullException(nameof(selectableTreatmentRepo));
-            _simulationRepo = simulationRepo ?? throw new ArgumentNullException(nameof(simulationRepo));
-            _simulationOutputRepo = simulationOutputRepo ?? throw new ArgumentNullException(nameof(simulationOutputRepo));
-            _simulationAnalysisDetailRepo = simulationAnalysisDetailRepo ?? throw new ArgumentNullException(nameof(simulationAnalysisDetailRepo));#1#
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
         }
@@ -129,6 +107,6 @@ namespace BridgeCareCore.Services.SimulationAnalysis
                 .Clients
                 .All
                 .SendAsync("BroadcastSimulationAnalysisDetail", simulationAnalysisDetail);
-        }*/
+        }
     }
 }

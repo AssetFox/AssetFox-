@@ -11,10 +11,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AggregatedResultRepository : IAggregatedResultRepository
     {
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public AggregatedResultRepository(IAMContext context) =>
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+        public AggregatedResultRepository(UnitOfWork.UnitOfWork unitOfWork) =>
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public int CreateAggregatedResults(List<IAggregatedResult> aggregatedResults)
         {
@@ -22,19 +22,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entities = aggregatedResults.SelectMany(_ => _.ToEntity()).ToList();
 
-            _context.BulkInsert(entities);
+            _unitOfWork.Context.BulkInsert(entities);
+            _unitOfWork.Context.SaveChanges();
 
             return entities.Count();
         }
 
         public IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId)
         {
-            if (!_context.Network.Any(_ => _.Id == networkId))
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssets = _context.MaintainableAsset
+            var maintainableAssets = _unitOfWork.Context.MaintainableAsset
                 .Include(_ => _.AggregatedResults)
                 .Where(_ => _.Id == networkId)
                 .ToList();
@@ -46,13 +47,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void DeleteAggregatedResults(Guid networkId)
         {
-            if (!_context.Network.Any(_ => _.Id == networkId))
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            _context.Database.ExecuteSqlRaw(
+            _unitOfWork.Context.Database.ExecuteSqlRaw(
                 $"DELETE FROM dbo.AggregatedResult WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAsset WHERE NetworkId = '{networkId}')");
+            _unitOfWork.Context.SaveChanges();
         }
     }
 }

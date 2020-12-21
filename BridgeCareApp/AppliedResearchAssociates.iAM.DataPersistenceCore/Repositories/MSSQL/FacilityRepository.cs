@@ -14,18 +14,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly ISectionRepository _sectionRepository;
-        private readonly IAMContext _context;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public FacilityRepository(ISectionRepository sectionRepository, IAMContext context)
+        public FacilityRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _sectionRepository = sectionRepository ?? throw new ArgumentNullException(nameof(sectionRepository));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateFacilities(List<Facility> facilities, Guid networkId)
         {
-            if (!_context.Network.Any(_ => _.Id == networkId))
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
@@ -34,19 +32,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _context.Facility.AddRange(facilityEntities);
+                _unitOfWork.Context.Facility.AddRange(facilityEntities);
             }
             else
             {
-                _context.BulkInsert(facilityEntities);
+                _unitOfWork.Context.BulkInsert(facilityEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
 
             if (facilities.Any(_ => _.Sections.Any()))
             {
                 var sections = facilities.Where(_ => _.Sections.Any())
                     .SelectMany(_ => _.Sections).ToList();
 
-                _sectionRepository.CreateSections(sections);
+                _unitOfWork.SectionRepo.CreateSections(sections);
             }
         }
     }

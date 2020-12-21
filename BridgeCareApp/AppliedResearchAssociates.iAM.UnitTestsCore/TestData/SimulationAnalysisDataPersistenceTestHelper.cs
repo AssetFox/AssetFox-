@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Services.LegacySimulationSynchronization;
@@ -35,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         private readonly IAMContext _dbContext;
 
         public IConfiguration Config { get; set; }
-        public IAttributeMetaDataRepository AttributeMetaDataRepo { get; set; }
+        /*public IAttributeMetaDataRepository AttributeMetaDataRepo { get; set; }
         public INetworkRepository NetworkRepo { get; set; }
         public IAttributeValueHistoryRepository AttributeValueHistoryRepo { get; set; }
         public ISectionRepository SectionRepo { get; set; }
@@ -65,8 +66,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         public IAnalysisMethodRepository AnalysisMethodRepo { get; set; }
         public ISimulationOutputRepository SimulationOutputRepo { get; set; }
         public ICommittedProjectConsequenceRepository CommittedProjectConsequenceRepo { get; set; }
-        public ICommittedProjectRepository CommittedProjectRepo { get; set; }
+        public ICommittedProjectRepository CommittedProjectRepo { get; set; }*/
         public IHubContext<BridgeCareHub> HubContext { get; set; }
+        public UnitOfWork UnitOfWork { get; set; }
 
         public Simulation StandAloneSimulation { get; set; }
 
@@ -84,11 +86,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 .UseInMemoryDatabase(databaseName: "IAMv2")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options);
+            UnitOfWork = new UnitOfWork(Config, _dbContext);
         }
 
         public Simulation GetStandAloneSimulation() => _dataAccessor.GetStandAloneSimulation(NetworkId, SimulationId);
 
-            public void InitializeNetworkRepos()
+            /*public void InitializeNetworkRepos()
         {
             NetworkRepo = new NetworkRepository(_dbContext);
             AttributeValueHistoryRepo = new AttributeValueHistoryRepository(_dbContext);
@@ -162,18 +165,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             SimulationRepo = new SimulationRepository(SimulationAnalysisDetailRepo, Config, _dbContext);
         }
 
-        public void InitializeSimulationOutputRepo() => SimulationOutputRepo = new SimulationOutputRepository(_dbContext);
+        public void InitializeSimulationOutputRepo() => SimulationOutputRepo = new SimulationOutputRepository(_dbContext);*/
 
         public void CreateNetwork()
         {
-            NetworkRepo.CreateNetwork(StandAloneSimulation.Network);
+            UnitOfWork.NetworkRepo.CreateNetwork(StandAloneSimulation.Network);
 
-            FacilityRepo.CreateFacilities(StandAloneSimulation.Network.Facilities.ToList(), StandAloneSimulation.Network.Id);
+            UnitOfWork.FacilityRepo.CreateFacilities(StandAloneSimulation.Network.Facilities.ToList(), StandAloneSimulation.Network.Id);
         }
 
-        public void CreateAttributes() => AttributeRepo.UpsertAttributes(AttributeMetaDataRepo.GetAllAttributes().ToList());
+        public void CreateAttributes() => UnitOfWork.AttributeRepo.UpsertAttributes(UnitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
 
-        public void CreateAttributeCriteriaAndEquationJoins() => AttributeRepo.JoinAttributesWithEquationsAndCriteria(StandAloneSimulation.Network.Explorer);
+        public void CreateAttributeCriteriaAndEquationJoins() => UnitOfWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(StandAloneSimulation.Network.Explorer);
 
         public void AddTreatmentSchedulings()
         {
@@ -192,17 +195,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public void SynchronizeLegacySimulation()
         {
-            var legacySimulationSynchronizer = new LegacySimulationSynchronizer(AttributeMetaDataRepo,
-                AttributeRepo,
-                NetworkRepo,
-                FacilityRepo,
-                SimulationRepo,
-                InvestmentPlanRepo,
-                AnalysisMethodRepo,
-                PerformanceCurveRepo,
-                SelectableTreatmentRepo,
-                Config,
-                HubContext);
+            var legacySimulationSynchronizer = new LegacySimulationSynchronizer(HubContext, UnitOfWork);
 
             legacySimulationSynchronizer.SynchronizeLegacySimulation(SimulationId);
         }
@@ -246,91 +239,91 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         public void SetupAll()
         {
             StandAloneSimulation = GetStandAloneSimulation();
-            InitializeEquationAndCriterionRepos();
-            InitializeAttributeRepos();
+            /*InitializeEquationAndCriterionRepos();
+            InitializeAttributeRepos();*/
             CreateAttributes();
         }
 
         public void SetupForNetwork()
         {
             SetupAll();
-            InitializeNetworkRepos();
+            //InitializeNetworkRepos();
         }
 
         public void SetupForSimulation()
         {
             SetupAll();
-            InitializeNetworkRepos();
-            InitializeSimulationRepo();
+            /*InitializeNetworkRepos();
+            InitializeSimulationRepo();*/
             CreateNetwork();
         }
 
         public void SetupForAnalysisMethod()
         {
             SetupAll();
-            InitializeNetworkRepos();
+            /*InitializeNetworkRepos();
             InitializeSimulationRepo();
             InitializeInvestmentPlanRepos();
-            InitializeAnalysisMethodRepos();
+            InitializeAnalysisMethodRepos();*/
             CreateNetwork();
-            SimulationRepo.CreateSimulation(StandAloneSimulation);
-            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Id);
+            UnitOfWork.SimulationRepo.CreateSimulation(StandAloneSimulation);
+            UnitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Id);
         }
 
         public void SetupForPerformanceCurves()
         {
 
             SetupAll();
-            InitializeNetworkRepos();
+            /*InitializeNetworkRepos();
             InitializeSimulationRepo();
-            InitializePerformanceCurveRepo();
+            InitializePerformanceCurveRepo();*/
             CreateNetwork();
-            SimulationRepo.CreateSimulation(StandAloneSimulation);
+            UnitOfWork.SimulationRepo.CreateSimulation(StandAloneSimulation);
         }
 
         public void SetupForSimulationOutput()
         {
             SetupAll();
-            InitializeNetworkRepos();
+            /*InitializeNetworkRepos();
             InitializeSimulationRepo();
-            InitializeSimulationOutputRepo();
+            InitializeSimulationOutputRepo();*/
             CreateNetwork();
-            SimulationRepo.CreateSimulation(StandAloneSimulation);
+            UnitOfWork.SimulationRepo.CreateSimulation(StandAloneSimulation);
         }
 
         public void SetupForInvestmentPlan()
         {
             SetupAll();
-            InitializeNetworkRepos();
+            /*InitializeNetworkRepos();
             InitializeSimulationRepo();
-            InitializeInvestmentPlanRepos();
+            InitializeInvestmentPlanRepos();*/
             CreateNetwork();
-            SimulationRepo.CreateSimulation(StandAloneSimulation);
+            UnitOfWork.SimulationRepo.CreateSimulation(StandAloneSimulation);
         }
 
         public void SetupForCommittedProjects()
         {
             SetupAll();
-            InitializeNetworkRepos();
+            /*InitializeNetworkRepos();
             InitializeSimulationRepo();
             InitializeInvestmentPlanRepos();
-            InitializeCommittedProjectRepos();
+            InitializeCommittedProjectRepos();*/
             CreateNetwork();
-            SimulationRepo.CreateSimulation(StandAloneSimulation);
-            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Id);
+            UnitOfWork.SimulationRepo.CreateSimulation(StandAloneSimulation);
+            UnitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Id);
             AddCommittedProjects();
         }
 
         public void SetupForSelectableTreatments()
         {
             SetupAll();
-            InitializeNetworkRepos();
+            /*InitializeNetworkRepos();
             InitializeSimulationRepo();
             InitializeInvestmentPlanRepos();
-            InitializeSelectableTreatmentRepos();
+            InitializeSelectableTreatmentRepos();*/
             CreateNetwork();
-            SimulationRepo.CreateSimulation(StandAloneSimulation);
-            InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Id);
+            UnitOfWork.SimulationRepo.CreateSimulation(StandAloneSimulation);
+            UnitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(StandAloneSimulation.InvestmentPlan, StandAloneSimulation.Id);
             AddTreatmentSchedulings();
             AddTreatmentSupersessions();
         }
@@ -338,33 +331,34 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         public void SetupForFullSimulationAnalysisIntegration()
         {
             SetupAll();
-            InitializeNetworkRepos();
+            /*InitializeNetworkRepos();
             InitializeSimulationRepo();
             InitializeInvestmentPlanRepos();
             InitializeAnalysisMethodRepos();
             InitializePerformanceCurveRepo();
             InitializeCommittedProjectRepos();
             InitializeSelectableTreatmentRepos();
-            InitializeSimulationOutputRepo();
+            InitializeSimulationOutputRepo();*/
         }
 
         public void SetupForLegacySimulationSynchronization()
         {
             StandAloneSimulation = GetStandAloneSimulation();
-            InitializeEquationAndCriterionRepos();
+            /*InitializeEquationAndCriterionRepos();
             InitializeAttributeRepos();
             InitializeNetworkRepos();
             InitializeSimulationRepo();
             InitializeInvestmentPlanRepos();
             InitializeAnalysisMethodRepos();
             InitializePerformanceCurveRepo();
-            InitializeSelectableTreatmentRepos();
+            InitializeSelectableTreatmentRepos();*/
         }
 
         public void CleanUp()
         {
             _sqlConnection.Close();
             _dbContext.Database.EnsureDeleted();
+            UnitOfWork.Dispose();
         }
     }
 }

@@ -540,7 +540,7 @@ export default class Scenarios extends Vue {
     deleteDuplicateMongoScenarioAction: any;
     @Action('createNetwork') createNetworkAction: any;
     @Action('getNetworks') getNetworksAction: any;
-    @Action('migrateLegacyData') migrateLegacyDataAction: any;
+    @Action('migrateLegacySimulationData') migrateLegacySimulationDataAction: any;
     @Action('getMigratedData') getMigratedDataAction: any;
     @Action('updateSimulationAnalysisDetail') updateSimulationAnalysisDetailAction: any;
     @Action('setSuccessMessage') setSuccessMessageAction: any;
@@ -819,7 +819,7 @@ export default class Scenarios extends Vue {
 
     onStartDataMigration() {
         // the legacy scenario id is hardcoded to our test scenario "JML Run District 8"
-        this.migrateLegacyDataAction({simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY});
+        this.migrateLegacySimulationDataAction({simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY});
     }
 
     /**
@@ -876,8 +876,6 @@ export default class Scenarios extends Vue {
     }
 
     getDataMigrationStatusUpdate(data: any) {
-        /*this.DataMigrationStatusUpdate = data.status;
-        this.legacySimulationIdForStatusUpdate = data.legacySimulationId;*/
         const status: any = data.status;
         if (status.indexOf('Error') !== -1) {
             this.setErrorMessageAction({message: data.status});

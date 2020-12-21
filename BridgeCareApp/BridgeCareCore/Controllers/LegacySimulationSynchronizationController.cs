@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Logging;
@@ -26,9 +27,11 @@ namespace BridgeCareCore.Controllers
             _legacySimulationSynchronizer = legacySimulationSynchronizer ?? throw new ArgumentNullException(nameof(legacySimulationSynchronizer));
             _logger = logger;
         }
+
+
         [HttpPost]
-        [Route("SynchronizeLegacyData/{legacySimulationId}")]
-        public async Task<IActionResult> SynchronizeLegacyData(int legacySimulationId)
+        [Route("SynchronizeLegacySimulation/{simulationId}")]
+        public async Task<IActionResult> SynchronizeLegacySimulation(int simulationId)
         {
             try
             {
@@ -37,16 +40,16 @@ namespace BridgeCareCore.Controllers
                     .All
                     .SendAsync("BroadcastDataMigration", "Starting data migration...");
 
-                await _legacySimulationSynchronizer.SynchronizeLegacySimulation(legacySimulationId);
+                await _legacySimulationSynchronizer.Synchronize(simulationId);
 
                 await _hubContext
                     .Clients
                     .All
-                    .SendAsync("BroadcastDataMigration", "Finished data migration");
+                    .SendAsync("BroadcastDataMigration", "Finished data migration...");
 
                 return Ok();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _logger.Error($"{e.Message}::{e.StackTrace}");
                 return StatusCode(500, $"Error => {e.Message}::{e.StackTrace}");

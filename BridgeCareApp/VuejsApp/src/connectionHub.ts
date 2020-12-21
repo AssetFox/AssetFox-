@@ -23,8 +23,8 @@ export default {
                 statusHub.$emit('summaryReportGeneration-status-event', {status, scenarioId});
             });
 
-            connection.on('BroadcastDataMigration', (status, legacySimulationId) => {
-                statusHub.$emit('DataMigration-status-event', {status, legacySimulationId});
+            connection.on('BroadcastDataMigration', (status) => {
+                statusHub.$emit('DataMigration-status-event', {status});
             });
 
             connection.on('BroadcastScenarioStatusUpdate', (status, scenarioId) => {

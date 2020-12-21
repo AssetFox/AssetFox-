@@ -143,6 +143,7 @@ import {AxiosResponse} from 'axios';
 import {emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
 import {clone} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
+import {http2XX} from '@/shared/utils/http-utils';
 
 @Component({})
 export default class ReportsDownloaderDialog extends Vue {
@@ -224,20 +225,21 @@ export default class ReportsDownloaderDialog extends Vue {
                             if (this.isMigratedScenario) {
                                 this.isDownloading = true;
                                 await ReportsService.downloadTempSummaryReport(
-                                    scenarioId,
+                                    this.dialogData.scenario.id,
                                     this.newNetworkId
                                 ).then((response: AxiosResponse<any>) => {
                                     this.isDownloading = false;
-                                    if (response === undefined) {
-                                        this.setErrorMessageAction({
-                                            message: 'Error in new summary generation. Please generate the report before downloading',
-                                        });
-                                    } else {
+                                    if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                                         this.setSuccessMessageAction({
                                             message: 'Report has been downloaded',
                                         });
+
+                                        FileDownload(response.data, 'SummaryReportTestData.xlsx',);
+                                    } else {
+                                        this.setErrorMessageAction({
+                                            message: 'Error in new summary generation. Please generate the report before downloading',
+                                        });
                                     }
-                                    FileDownload(response.data, 'SummaryReportTestData.xlsx',);
                                 });
                             } else {
                                 this.isDownloading = true;

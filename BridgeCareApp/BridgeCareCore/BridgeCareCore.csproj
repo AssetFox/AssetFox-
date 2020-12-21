@@ -78,5 +78,11 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DownloadedNewReports\df71ac9b-b90a-425c-a519-7b2d6b531ddc\SummaryReportTestData.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 
 </Project>

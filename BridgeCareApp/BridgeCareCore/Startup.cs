@@ -51,7 +51,7 @@ namespace BridgeCareCore
 
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
             services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
-            //services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
+            services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
             services.AddScoped<IExcelHelper, ExcelHelper>();
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
             services.AddScoped<IHighlightWorkDoneCells, HighlightWorkDoneCells>();

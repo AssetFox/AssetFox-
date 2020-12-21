@@ -3,6 +3,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
@@ -15,9 +16,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        /*private readonly IConfiguration _config;
-        private readonly IAMContext this;*/
-
         public UnitOfWork(IConfiguration config, IAMContext context)
         {
             Config = config ?? throw new ArgumentNullException(nameof(config));
@@ -27,10 +25,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
             {
                 Context.Database.SetCommandTimeout(1800);
             }
+
+            Connection = new SqlConnection(Config.GetConnectionString("BridgeCareConnex"));
+            LegacyConnection = new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
         }
 
         public IConfiguration Config { get; }
         public IAMContext Context { get; }
+        public SqlConnection Connection { get; }
+        public SqlConnection LegacyConnection { get; }
 
         // REPOSITORIES
         private IAggregatedResultRepository _aggregatedResultRepo;
@@ -68,79 +71,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ITreatmentSchedulingRepository _treatmentSchedulingRepo;
         private ITreatmentSupersessionRepository _treatmentSupersessionRepo;
         private IDbContextTransaction _dbContextTransaction;
-
-        /*public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
-
-        public IAnalysisMethodRepository AnalysisMethodRepo =>
-            _analysisMethodRepo ??= new AnalysisMethodRepository(CriterionLibraryRepo,
-                BudgetPriorityRepo, TargetConditionGoalRepo, DeficientConditionGoalRepo, BenefitRepo,
-                RemainingLifeLimitRepo, this);
-
-        public IAttributeDatumRepository AttributeDatumRepo => _attributeDatumRepo ??= new AttributeDatumRepository(AttributeMetaDataRepo, AttributeRepo, this);
-
-        public IAttributeMetaDataRepository AttributeMetaDataRepo => _attributeMetaDataRepo ??= new AttributeMetaDataRepository();
-
-        public IAttributeRepository AttributeRepo => _attributeRepo ??= new AttributeRepository(EquationRepo, CriterionLibraryRepo, this);
-
-        public IAttributeValueHistoryRepository AttributeValueHistoryRepo => _attributeValueHistoryRepo ??= new AttributeValueHistoryRepository(_config, this);
-
-        public IBenefitRepository BenefitRepo => _benefitRepo ??= new BenefitRepository(this);
-
-        public IBudgetAmountRepository BudgetAmountRepo => _budgetAmountRepo ??= new BudgetAmountRepository(this);
-
-        public IBudgetPercentagePairRepository BudgetPercentagePairRepo => _budgetPercentagePairRepo ??= new BudgetPercentagePairRepository(this);
-
-        public IBudgetPriorityRepository BudgetPriorityRepo => _budgetPriorityRepo ??= new BudgetPriorityRepository(CriterionLibraryRepo, BudgetPercentagePairRepo, this);
-
-        public IBudgetRepository BudgetRepo => _budgetRepo ??= new BudgetRepository(BudgetAmountRepo, this);
-
-        public ICashFlowDistributionRuleRepository CashFlowDistributionRuleRepo => _cashFlowDistributionRuleRepo ??= new CashFlowDistributionRuleRepository(this);
-
-        public ICashFlowRuleRepository CashFlowRuleRepo => _cashFlowRuleRepo ??= new CashFlowRuleRepository(CashFlowDistributionRuleRepo, CriterionLibraryRepo, this);
-
-        public ICommittedProjectConsequenceRepository CommittedProjectConsequenceRepo => _committedProjectConsequenceRepo ??= new CommittedProjectConsequenceRepository(this);
-
-        public ICommittedProjectRepository CommittedProjectRepo => _committedProjectRepo ??= new CommittedProjectRepository(CommittedProjectConsequenceRepo, this);
-
-        public ICriterionLibraryRepository CriterionLibraryRepo => _criterionLibraryRepo ??= new CriterionLibraryRepository(this);
-
-        public IDeficientConditionGoalRepository DeficientConditionGoalRepo => _deficientConditionGoalRepo ??= new DeficientConditionGoalRepository(CriterionLibraryRepo, this);
-
-        public IEquationRepository EquationRepo => _equationRepo ??= new EquationRepository(this);
-
-        public IFacilityRepository FacilityRepo => _facilityRepo ??= new FacilityRepository(SectionRepo, this);
-
-        public IInvestmentPlanRepository InvestmentPlanRepo => _investmentPlanRepo ??= new InvestmentPlanRepository(BudgetRepo, CriterionLibraryRepo, CashFlowRuleRepo, this);
-
-        public IMaintainableAssetRepository MaintainableAssetRepo => _maintainableAssetRepo ??= new MaintainableAssetRepository(this);
-
-        public INetworkRepository NetworkRepo => _networkRepo ??= new NetworkRepository(this);
-
-        public IPerformanceCurveRepository PerformanceCurveRepo => _performanceCurveRepo ??= new PerformanceCurveRepository(EquationRepo, CriterionLibraryRepo, this);
-
-        public IRemainingLifeLimitRepository RemainingLifeLimitRepo => _remainingLifeLimitRepo ??= new RemainingLifeLimitRepository(CriterionLibraryRepo, this);
-
-        public ISectionRepository SectionRepo => _sectionRepo ??= new SectionRepository(AttributeValueHistoryRepo, this);
-
-        public ISelectableTreatmentRepository SelectableTreatmentRepo =>
-            _selectableTreatmentRepo ??= new SelectableTreatmentRepository(TreatmentConsequenceRepo, TreatmentCostRepo, CriterionLibraryRepo,
-                TreatmentSchedulingRepo, TreatmentSupersessionRepo, this);
-
-        public ISimulationAnalysisDetailRepository SimulationAnalysisDetailRepo => _simulationAnalysisDetailRepo ??= new SimulationAnalysisDetailRepository(this);
-
-        public ISimulationOutputRepository SimulationOutputRepo => _simulationOutputRepo ??= new SimulationOutputRepository(this);
-
-        public ISimulationRepository SimulationRepo => _simulationRepo ??= new SimulationRepository(SimulationAnalysisDetailRepo, _config, this);
-
-        public ITargetConditionGoalRepository TargetConditionGoalRepo => _targetConditionGoalRepo ??= new TargetConditionGoalRepository(CriterionLibraryRepo, this);
-
-        public ITreatmentConsequenceRepository TreatmentConsequenceRepo => _treatmentConsequenceRepo ??= new TreatmentConsequenceRepository(EquationRepo, CriterionLibraryRepo, this);
-
-        public ITreatmentCostRepository TreatmentCostRepo => _treatmentCostRepo ??= new TreatmentCostRepository(EquationRepo, CriterionLibraryRepo, this);
-
-        public ITreatmentSchedulingRepository TreatmentSchedulingRepo => _treatmentSchedulingRepo ??= new TreatmentSchedulingRepository(this);
-
-        public ITreatmentSupersessionRepository TreatmentSupersessionRepo => _treatmentSupersessionRepo ??= new TreatmentSupersessionRepository(CriterionLibraryRepo, this);*/
 
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
 
@@ -216,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public void Rollback() => DbContextTransaction.Rollback();
 
-        // DISPOSE PROPERTIES & PROPERTIES
+        // DISPOSE PROPERTIES & METHODS
         private bool _disposed = false;
 
         protected virtual void Dispose(bool disposing)

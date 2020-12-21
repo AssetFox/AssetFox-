@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
@@ -14,49 +15,26 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
     public class SummaryReportParameters
     {
         private readonly IExcelHelper _excelHelper;
+        private readonly UnitOfWork _unitOfWork;
 
-        private readonly IAttributeRepository _attributeRepo;
-        private readonly INetworkRepository _networkRepo;
-        private readonly IInvestmentPlanRepository _investmentPlanRepo;
-        private readonly IAnalysisMethodRepository _analysisMethodRepo;
-        private readonly IPerformanceCurveRepository _performanceCurveRepo;
-        private readonly ISelectableTreatmentRepository _selectableTreatmentRepo;
-        private readonly ISimulationRepository _simulationRepo;
-        private readonly ISimulationOutputRepository _simulationOutputRepo;
-        private readonly ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;
-
-        public SummaryReportParameters(IAttributeRepository attributeRepo, INetworkRepository networkRepo,
-            IInvestmentPlanRepository investmentPlanRepo, IAnalysisMethodRepository analysisMethodRepo,
-            IPerformanceCurveRepository performanceCurveRepo, ISelectableTreatmentRepository selectableTreatmentRepo,
-            ISimulationRepository simulationRepo, ISimulationOutputRepository simulationOutputRepo,
-            ISimulationAnalysisDetailRepository simulationAnalysisDetailRepo,
-            IExcelHelper excelHelper)
+        public SummaryReportParameters(IExcelHelper excelHelper, UnitOfWork unitOfWork)
         {
-            _attributeRepo = attributeRepo ?? throw new ArgumentNullException(nameof(attributeRepo));
-            _networkRepo = networkRepo ?? throw new ArgumentNullException(nameof(networkRepo));
-            _investmentPlanRepo = investmentPlanRepo ?? throw new ArgumentNullException(nameof(investmentPlanRepo));
-            _analysisMethodRepo = analysisMethodRepo ?? throw new ArgumentNullException(nameof(analysisMethodRepo));
-            _performanceCurveRepo = performanceCurveRepo ?? throw new ArgumentNullException(nameof(performanceCurveRepo));
-            _selectableTreatmentRepo = selectableTreatmentRepo ?? throw new ArgumentNullException(nameof(selectableTreatmentRepo));
-            _simulationRepo = simulationRepo ?? throw new ArgumentNullException(nameof(simulationRepo));
-            _simulationOutputRepo = simulationOutputRepo ?? throw new ArgumentNullException(nameof(simulationOutputRepo));
-            _simulationAnalysisDetailRepo = simulationAnalysisDetailRepo ?? throw new ArgumentNullException(nameof(simulationAnalysisDetailRepo));
-
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel,
             Guid simulationId, Guid networkId)
         {
-            var explorer = _attributeRepo.GetExplorer();
-            var network = _networkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
-            _simulationRepo.GetSimulationInNetwork(simulationId, network);
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
+            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
             var simulation = network.Simulations.First();
-            _investmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _analysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _performanceCurveRepo.GetSimulationPerformanceCurves(simulation);
-            _selectableTreatmentRepo.GetSimulationTreatments(simulation);
+            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+            _unitOfWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+            _unitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
 
             // Simulation Name format
             _excelHelper.MergeCells(worksheet, 1, 1, 1, 2);

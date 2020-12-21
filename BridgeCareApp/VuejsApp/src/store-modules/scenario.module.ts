@@ -118,17 +118,17 @@ const actions = {
         });
     },
 
-    async migrateLegacyData({dispatch, commit}: any, payload: any) {
-        await ScenarioService.migrateLegacyData(payload.simulationId)
+    async migrateLegacySimulationData({dispatch, commit}: any, payload: any) {
+        await ScenarioService.migrateLegacySimulationData(payload.simulationId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    dispatch('getMigratedData', {simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL});
+                    dispatch('getMigratedData');
                 }
             });
     },
 
     async getMigratedData({dispatch, commit}: any, payload: any) {
-        await ScenarioService.getMigratedData(payload.simulationId)
+        await ScenarioService.getMigratedData()
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const scenarios: Scenario[] = response.data.map((scenario: Scenario) => ({

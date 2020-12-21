@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -193,11 +194,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             });
         }
 
-        public void SynchronizeLegacySimulation()
+        public async void SynchronizeLegacySimulation()
         {
             var legacySimulationSynchronizer = new LegacySimulationSynchronizer(HubContext, UnitOfWork);
-
-            legacySimulationSynchronizer.SynchronizeLegacySimulation(SimulationId);
+            await legacySimulationSynchronizer.Synchronize(SimulationId);
         }
 
         public void AddTreatmentSupersessions()

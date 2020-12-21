@@ -3,14 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace BridgeCareCore.Services.LegacySimulationSynchronization
 {
@@ -30,89 +29,109 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public Task SynchronizeLegacySimulation(int legacySimulationId)
-        {
-            using var connection = new SqlConnection(_unitOfWork.Config.GetConnectionString("BridgeCareLegacyConnex"));
-            using var transaction = _unitOfWork.DbContextTransaction;
+        private DataAccessor GetDataAccessor() => new DataAccessor(_unitOfWork.LegacyConnection, null);
 
+        private void SynchronizeExplorerData()
+        {
+            sendRealTimeMessage("Upserting attributes...");
+
+            _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
+        }
+
+        private void SynchronizeNetwork(Simulation simulation)
+        {
+            var network = _unitOfWork.NetworkRepo.GetPennDotNetwork();
+
+            if (network == null)
+            {
+                sendRealTimeMessage("Creating the network...");
+
+                _unitOfWork.NetworkRepo.CreateNetwork(simulation.Network);
+            }
+        }
+
+        private Task SynchronizeLegacyNetworkData(Simulation simulation)
+        {
+            if (!_unitOfWork.NetworkRepo.CheckPennDotNetworkHasData())
+            {
+                _unitOfWork.NetworkRepo.DeleteNetworkData();
+
+                sendRealTimeMessage("Creating the network's facilities and sections...");
+
+                _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private Task SynchronizeLegacySimulation(Simulation simulation)
+        {
+            _unitOfWork.SimulationRepo.DeleteSimulationAndAllRelatedData();
+
+            // TODO: hard-coding simulation id for alpha 1
+            simulation.Id = new Guid(DataPersistenceConstants.TestSimulationId);
+            simulation.Name = $"*{simulation.Name} Alpha 1";
+
+            sendRealTimeMessage("Joining attributes with equations and criteria...");
+
+            _unitOfWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(simulation.Network.Explorer);
+
+            sendRealTimeMessage("Inserting simulation data...");
+
+            _unitOfWork.SimulationRepo.CreateSimulation(simulation);
+            _unitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
+            _unitOfWork.AnalysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Id);
+            _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
+            _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
+            _unitOfWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
+            _unitOfWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
+
+            return Task.CompletedTask;
+        }
+
+        public async Task Synchronize(int simulationId)
+        {
             try
             {
-                // delete all existing simulation data before migrating
-                // TODO: this is for alpha 1 only; will have a clean database when doing the full migration
-                _unitOfWork.SimulationRepo.DeleteSimulationAndAllRelatedData();
+                using var transaction = _unitOfWork.DbContextTransaction;
 
-                // open the sql connection and create new instance of data accessor
-                connection.Open();
-                var dataAccessor = new DataAccessor(connection, null);
+                
+                var dataAccessor = GetDataAccessor();
+                _unitOfWork.LegacyConnection.Open();
+                var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, simulationId);
+                simulation.Network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
+                _unitOfWork.LegacyConnection.Close();
 
-                var broadcastingMessage = "Upserting attributes...";
-                sendRealTimeMessage(broadcastingMessage, legacySimulationId);
+                SynchronizeExplorerData();
 
-                // ensure all attributes have been created
-                _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
+                SynchronizeNetwork(simulation);
 
-                sendRealTimeMessage("Getting stand alone simulation...", legacySimulationId);
-                // get the stand alone simulation
-                var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, legacySimulationId);
-                // TODO: hard-coding simulation id for alpha 1
-                simulation.Id = new Guid(DataPersistenceConstants.TestSimulationId);
-                simulation.Name = $"*{simulation.Name} Alpha 1";
+                await SynchronizeLegacyNetworkData(simulation);
 
-                sendRealTimeMessage("Joining attributes with equations and criteria...", legacySimulationId);
-                // join attributes with equations and criteria per the explorer object
-                var explorer = simulation.Network.Explorer;
-                _unitOfWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(explorer);
-
-                // create network unless penndot network already exists
-                var networks = _unitOfWork.NetworkRepo.GetAllNetworks().ToList();
-                if (networks.Any())
-                {
-                    explorer.Networks.First().Id = networks.First().Id;
-                }
-                else
-                {
-                    explorer.Networks.First().Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
-                    _unitOfWork.NetworkRepo.CreateNetwork(explorer.Networks.First());
-                }
-
-                sendRealTimeMessage("Creating the network's facilities and sections...", legacySimulationId);
-                // create the network's facilities and sections
-                _unitOfWork.FacilityRepo.CreateFacilities(explorer.Networks.First().Facilities.ToList(), explorer.Networks.First().Id);
-
-                sendRealTimeMessage("Inserting simulation data...", legacySimulationId);
-                // insert simulation data into our new data source
-                _unitOfWork.SimulationRepo.CreateSimulation(simulation);
-                _unitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
-                _unitOfWork.AnalysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Id);
-                _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
-                _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
-                _unitOfWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
-                _unitOfWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
+                await SynchronizeLegacySimulation(simulation);
 
                 _unitOfWork.Commit();
-
-                return Task.CompletedTask;
             }
             catch (Exception e)
             {
                 _unitOfWork.Rollback();
-                Console.WriteLine(e);
                 throw;
             }
             finally
             {
-                connection.Close();
+                _unitOfWork.Connection.Close();
+                _unitOfWork.LegacyConnection.Close();
             }
         }
 
-        private void sendRealTimeMessage(string message, int legacySimulationId)
+        private void sendRealTimeMessage(string message)
         {
             if (!IsRunningFromXUnit)
             {
                 _hubContext
                     .Clients
                     .All
-                    .SendAsync("BroadcastDataMigration", message, legacySimulationId);
+                    .SendAsync("BroadcastDataMigration", message);
             }
         }
     }

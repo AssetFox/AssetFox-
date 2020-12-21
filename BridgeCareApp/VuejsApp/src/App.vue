@@ -188,7 +188,7 @@
         hasSelectedScenario: boolean = false;
         selectedScenarioHasStatus: boolean = false;
         ignoredAPIs: string[] = [
-            'SynchronizeLegacyData',
+            'SynchronizeLegacySimulation',
             'RunSimulation',
             'GenerateSummaryReport'
         ]

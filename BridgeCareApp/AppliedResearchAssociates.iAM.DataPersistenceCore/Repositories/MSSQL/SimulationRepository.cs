@@ -139,28 +139,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.Context.TreatmentLibrary.ToList()
                     .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.TextAttributeValueHistory.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.NumericAttributeValueHistory.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.Section.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.Facility.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
             }
             else
             {
-                using var connection = new SqlConnection(_unitOfWork.Config.GetConnectionString("BridgeCareConnex"));
-                connection.Open();
-                var command = new SqlCommand("DeleteAllForAlphaMigration", connection)
+
+                /*var command = new SqlCommand("DeleteAllExceptNetworkDataForAlphaMigration", _unitOfWork.Connection)
                 {
                     CommandTimeout = 1800, CommandType = CommandType.StoredProcedure
                 };
+                _unitOfWork.Connection.Open();
                 command.ExecuteNonQuery();
+                _unitOfWork.Connection.Close();*/
+                _unitOfWork.Context.Database.ExecuteSqlRaw(
+                    "DELETE FROM dbo.Simulation;" +
+                    "DELETE FROM dbo.Equation;" +
+                    "DELETE FROM dbo.CriterionLibrary;" +
+                    "DELETE FROM dbo.BudgetLibrary;" +
+                    "DELETE FROM dbo.BudgetPriorityLibrary;" +
+                    "DELETE FROM dbo.CashFlowRuleLibrary;" +
+                    "DELETE FROM dbo.DeficientConditionGoalLibrary;" +
+                    "DELETE FROM dbo.PerformanceCurveLibrary;" +
+                    "DELETE FROM dbo.RemainingLifeLimitLibrary;" +
+                    "DELETE FROM dbo.TargetConditionGoalLibrary;" +
+                    "DELETE FROM dbo.TreatmentLibrary;");
             }
 
             _unitOfWork.Context.SaveChanges();

@@ -233,8 +233,8 @@ export default class ScenarioService {
         return bridgecareCoreAxiosInstance.post(`/api/Simulation/RunSimulation/${networkId}/${scenarioId}`);
     }
 
-    static migrateLegacyData(legacySimulationId: number): AxiosPromise{
-        return bridgecareCoreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacyData/${legacySimulationId}`);
+    static migrateLegacySimulationData(simulationId: number): AxiosPromise{
+        return bridgecareCoreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacySimulation/${simulationId}`);
     }
 
     static getMigratedData(): AxiosPromise {

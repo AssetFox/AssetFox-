@@ -20,8 +20,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             if (treatment != null && treatment.ToLower() != Properties.Resources.NoTreatment)
             {
                 var range = worksheet.Cells[row, column];
+                var rangeForCashFlow = worksheet.Cells[row, column - 1, row, column];
                 ParallelBridgeBAMs(parallelBridge, treatmentCause, range);
-                CashFlowedBridge(treatmentCause, range);
+                CashFlowedBridge(treatmentCause, rangeForCashFlow);
                 if (index != 1 && (treatmentCause == TreatmentCause.CommittedProject
                     && previousYearCause == TreatmentCause.CommittedProject))
                 {
@@ -30,7 +31,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     CommittedForConsecutiveYears(range);
                 }
                 ParallelBridgeMPMS(parallelBridge, treatmentCause, range);
-                ParallelBridgeCashFlow(parallelBridge, treatmentCause, range);
+                ParallelBridgeCashFlow(parallelBridge, treatmentCause, rangeForCashFlow);
             }
         }
 
@@ -42,7 +43,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
         private void ParallelBridgeBAMs(int isParallel, TreatmentCause projectPickType, ExcelRange range)
         {
-            if (isParallel == 1 && projectPickType == TreatmentCause.SelectedTreatment)
+            if (isParallel == 1 && (projectPickType == TreatmentCause.SelectedTreatment ||
+                projectPickType == TreatmentCause.CashFlowProject || projectPickType == TreatmentCause.CommittedProject))
             {
                 _excelHelper.ApplyColor(range, Color.FromArgb(0, 204, 255));
                 _excelHelper.SetTextColor(range, Color.Black);
@@ -67,7 +69,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         }
         private void CashFlowedBridge(TreatmentCause projectPickType, ExcelRange range)
         {
-            if (projectPickType == TreatmentCause.SelectedTreatment)
+            if (projectPickType == TreatmentCause.CashFlowProject)
             {
                 _excelHelper.ApplyColor(range, Color.FromArgb(0, 255, 0));
                 _excelHelper.SetTextColor(range, Color.Red);

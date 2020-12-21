@@ -31,8 +31,8 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("GenerateSummaryReport/{simulationId}")]
-        public async Task<FileResult> GenerateSummaryReport(Guid simulationId)
+        [Route("GenerateSummaryReport/{networkId}/{simulationId}")]
+        public async Task<FileResult> GenerateSummaryReport(Guid networkId, Guid simulationId)
         {
             var broadcastingMessage = "Starting report generation";
 
@@ -43,7 +43,8 @@ namespace BridgeCareCore.Controllers
                     .All
                     .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
 
-                var response = await Task.Factory.StartNew(() => _summaryReportGenerator.GenerateReport(simulationId));
+                var response = await Task.Factory.StartNew(() => _summaryReportGenerator.GenerateReport(simulationId, networkId));
+                //var response = _summaryReportGenerator.GenerateReport(simulationId, networkId));
 
                 const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 HttpContext.Response.ContentType = contentType;

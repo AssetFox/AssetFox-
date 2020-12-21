@@ -164,12 +164,15 @@ export default class ReportsDownloaderDialog extends Vue {
     showError: boolean = false;
     showMissingAttributesMessage: boolean = false;
     isMigratedScenario: boolean = false;
+    newNetworkId: string = '';
     isDownloading: boolean = false;
 
     @Watch('dialogData.showModal')
     onshowModalChanged(showModal: boolean) {
         if (showModal) {
-            this.isMigratedScenario = this.dialogData.scenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase();
+            if(process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL != undefined){
+                this.isMigratedScenario = this.dialogData.scenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase();
+            }
             this.errorMessage = '';
             this.showError = false;
             /*this.selectedScenarioData.networkId = this.dialogData.scenario.networkId;
@@ -178,6 +181,7 @@ export default class ReportsDownloaderDialog extends Vue {
                 : this.dialogData.scenario.simulationId;
             this.selectedScenarioData.simulationName = this.dialogData.scenario.simulationName;*/
             this.selectedScenarioData = {...this.dialogData.scenario};
+            this.newNetworkId = this.dialogData.newNetworkId;
             this.reports = this.isMigratedScenario
                 ? ['Summary Report']
                 : ['Detailed Report', 'Summary Report'];
@@ -220,12 +224,13 @@ export default class ReportsDownloaderDialog extends Vue {
                             if (this.isMigratedScenario) {
                                 this.isDownloading = true;
                                 await ReportsService.downloadTempSummaryReport(
-                                    this.selectedScenarioData,
+                                    scenarioId,
+                                    this.newNetworkId
                                 ).then((response: AxiosResponse<any>) => {
                                     this.isDownloading = false;
                                     if (response === undefined) {
                                         this.setErrorMessageAction({
-                                            message: 'Summary report does not exists on the target path. Please generate the report before downloading',
+                                            message: 'Error in new summary generation. Please generate the report before downloading',
                                         });
                                     } else {
                                         this.setSuccessMessageAction({

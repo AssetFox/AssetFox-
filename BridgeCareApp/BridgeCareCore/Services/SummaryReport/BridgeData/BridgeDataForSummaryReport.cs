@@ -198,21 +198,25 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     worksheet.Cells[row, ++column].Value = section.TreatmentCause; // Project Pick
 
                     var treatmentConsideration = section.TreatmentConsiderations.Find(_ => _.TreatmentName == section.AppliedTreatment);
-
                     var budgetName = treatmentConsideration == null ? "" :
                         treatmentConsideration.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull ||
                     _.Status == BudgetUsageStatus.CostCoveredInPart).BudgetName;
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
                     worksheet.Cells[row, ++column].Value = section.AppliedTreatment;
-                    if (section.TreatmentCause == TreatmentCause.SelectedTreatment)
+                    if (section.TreatmentCause == TreatmentCause.CashFlowProject)
                     {
                         _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
                         _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
+
+                        // Color the previous year project also
+                        _excelHelper.ApplyColor(worksheet.Cells[row, column - 16], Color.FromArgb(0, 255, 0));
+                        _excelHelper.SetTextColor(worksheet.Cells[row, column - 16], Color.Black);
                     }
 
-                    var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
-                    var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
+                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    //var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
+                    //var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks

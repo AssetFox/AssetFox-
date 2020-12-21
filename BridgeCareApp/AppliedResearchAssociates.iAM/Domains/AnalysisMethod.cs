@@ -34,6 +34,8 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public bool ShouldDeteriorateDuringCashFlow { get; set; }
 
+        public bool ShouldRestrictCashFlowToFirstYearBudget { get; set; } = true;
+
         public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
 
         public SpendingStrategy SpendingStrategy { get; set; }
@@ -99,6 +101,11 @@ namespace AppliedResearchAssociates.iAM.Domains
             if (OptimizationStrategy.UsesRemainingLife() && RemainingLifeLimits.Count == 0)
             {
                 results.Add(ValidationStatus.Error, "Optimization strategy uses remaining life, but no remaining life limits are defined.", this);
+            }
+
+            if (ShouldRestrictCashFlowToFirstYearBudget && ShouldUseExtraFundsAcrossBudgets)
+            {
+                results.Add(ValidationStatus.Error, "Using extra funds across budgets and restricting cash flow future budgets are currently incompatible settings.", this);
             }
 
             return results;

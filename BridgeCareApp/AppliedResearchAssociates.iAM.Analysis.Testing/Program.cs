@@ -27,9 +27,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
             var connectionString = string.Format(ConnectionFormats.SmallBridgeDatasetLocal, userId, password);
 
-            var obj = new ApiExamples();
-            //obj.CreateNetwork();
-
             using var connection = new SqlConnection(connectionString);
             connection.Open();
 
@@ -64,6 +61,10 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
             {
                 Console.WriteLine("Analysis should not run when validation errors are present. Run will proceed anyway and will exclude simulations with validation errors.");
             }
+
+            var connectionStringBuilder = new SqlConnectionStringBuilder(connectionString);
+            var outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "iAM Analysis Testing Outputs", connectionStringBuilder.InitialCatalog, DateTime.Now.ToString("yyyyMMddHHmmss"));
+            _ = Directory.CreateDirectory(outputFolder);
 
             foreach (var network in explorer.Networks)
             {
@@ -104,8 +105,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
                     Console.WriteLine("Final condition of network: " + simulation.Results.Years.Last().ConditionOfNetwork);
 
-                    var outputFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                    var outputFile = $"{DateTime.Now:yyyyMMddHHmmss} - Network {networkId} - Simulation {simulationId}.json";
+                    var outputFile = $"Network {networkId} - Simulation {simulationId}.json";
                     var outputPath = Path.Combine(outputFolder, outputFile);
                     using var outputStream = File.Create(outputPath);
                     using var outputWriter = new Utf8JsonWriter(outputStream, new JsonWriterOptions { Indented = true });

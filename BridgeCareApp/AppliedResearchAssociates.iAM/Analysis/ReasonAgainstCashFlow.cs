@@ -7,7 +7,7 @@
         ApplicableDistributionRuleIsForOnlyOneYear,
         LastYearOfCashFlowIsOutsideOfAnalysisPeriod,
         FutureEventScheduleIsBlocked,
-        FutureFundingIsNotAvailable,
+        FundingIsNotAvailable,
         None,
     }
 }

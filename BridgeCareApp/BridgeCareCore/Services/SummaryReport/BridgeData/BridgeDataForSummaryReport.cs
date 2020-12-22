@@ -198,9 +198,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     worksheet.Cells[row, ++column].Value = section.TreatmentCause; // Project Pick
 
                     var treatmentConsideration = section.TreatmentConsiderations.Find(_ => _.TreatmentName == section.AppliedTreatment);
-                    var budgetName = treatmentConsideration == null ? "" :
+                    var budgetUsage = treatmentConsideration == null ? null :
                         treatmentConsideration.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull ||
-                    _.Status == BudgetUsageStatus.CostCoveredInPart).BudgetName;
+                    _.Status == BudgetUsageStatus.CostCoveredInPart);
+
+                    var budgetName = budgetUsage == null ? "" :
+                        budgetUsage.BudgetName ;
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
                     worksheet.Cells[row, ++column].Value = section.AppliedTreatment;

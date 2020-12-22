@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class SectionEntity
+    public class SectionEntity : BaseEntity
     {
         public SectionEntity()
         {
             CommittedProjects = new HashSet<CommittedProjectEntity>();
             NumericAttributeValueHistories = new HashSet<NumericAttributeValueHistoryEntity>();
             TextAttributeValueHistories = new HashSet<TextAttributeValueHistoryEntity>();
-            NumericAttributeValueHistoryMostRecentValues = new HashSet<NumericAttributeValueHistoryMostRecentValueEntity>();
-            TextAttributeValueHistoryMostRecentValues = new HashSet<TextAttributeValueHistoryMostRecentValueEntity>();
         }
 
         public Guid Id { get; set; }
@@ -31,9 +30,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<NumericAttributeValueHistoryEntity> NumericAttributeValueHistories { get; set; }
 
         public virtual ICollection<TextAttributeValueHistoryEntity> TextAttributeValueHistories { get; set; }
-
-        public virtual ICollection<NumericAttributeValueHistoryMostRecentValueEntity> NumericAttributeValueHistoryMostRecentValues { get; set; }
-
-        public virtual ICollection<TextAttributeValueHistoryMostRecentValueEntity> TextAttributeValueHistoryMostRecentValues { get; set; }
     }
 }

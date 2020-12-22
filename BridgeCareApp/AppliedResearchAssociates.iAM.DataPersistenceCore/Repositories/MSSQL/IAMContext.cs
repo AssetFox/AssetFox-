@@ -177,9 +177,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<TextAttributeValueHistoryEntity> TextAttributeValueHistory { get; set; }
 
-        public virtual DbSet<NumericAttributeValueHistoryMostRecentValueEntity> NumericAttributeValueHistoryMostRecentValue { get; set; }
-
-        public virtual DbSet<TextAttributeValueHistoryMostRecentValueEntity> TextAttributeValueHistoryMostRecentValue { get; set; }
+        public virtual DbSet<SimulationAnalysisDetailEntity> SimulationAnalysisDetail { get; set; }
 
         private class MigrationConnection
         {
@@ -1352,8 +1350,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Year).IsRequired();
 
-                entity.Property(e => e.Value).IsRequired();
-
                 entity.HasOne(d => d.Section)
                     .WithMany(p => p.TextAttributeValueHistories)
                     .HasForeignKey(d => d.SectionId)
@@ -1365,45 +1361,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<NumericAttributeValueHistoryMostRecentValueEntity>(entity =>
+            modelBuilder.Entity<SimulationAnalysisDetailEntity>(entity =>
             {
-                entity.HasIndex(e => e.SectionId);
+                entity.HasKey(e => e.SimulationId);
 
-                entity.HasIndex(e => e.AttributeId);
+                entity.HasIndex(e => e.SimulationId).IsUnique();
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.MostRecentValue).IsRequired();
-
-                entity.HasOne(d => d.Section)
-                    .WithMany(p => p.NumericAttributeValueHistoryMostRecentValues)
-                    .HasForeignKey(d => d.SectionId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Attribute)
-                    .WithMany(p => p.NumericAttributeValueHistoryMostRecentValues)
-                    .HasForeignKey(d => d.AttributeId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<TextAttributeValueHistoryMostRecentValueEntity>(entity =>
-            {
-                entity.HasIndex(e => e.SectionId);
-
-                entity.HasIndex(e => e.AttributeId);
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.MostRecentValue).IsRequired();
-
-                entity.HasOne(d => d.Section)
-                    .WithMany(p => p.TextAttributeValueHistoryMostRecentValues)
-                    .HasForeignKey(d => d.SectionId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Attribute)
-                    .WithMany(p => p.TextAttributeValueHistoryMostRecentValues)
-                    .HasForeignKey(d => d.AttributeId)
+                entity.HasOne(d => d.Simulation)
+                    .WithOne(p => p.SimulationAnalysisDetail)
+                    .HasForeignKey<SimulationAnalysisDetailEntity>(d => d.SimulationId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }

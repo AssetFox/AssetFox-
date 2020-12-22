@@ -2,29 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class EquationRepository : MSSQLRepository, IEquationRepository
+    public class EquationRepository : IEquationRepository
     {
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public EquationRepository(IAMContext context) : base(context) { }
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+
+        public EquationRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateEquations(Dictionary<Guid, EquationEntity> equationEntityPerEntityId, string joinEntity)
         {
             if (IsRunningFromXUnit)
             {
-                Context.Equation.AddRange(equationEntityPerEntityId.Values.ToList());
+                _unitOfWork.Context.Equation.AddRange(equationEntityPerEntityId.Values.ToList());
             }
             else
             {
-                Context.BulkInsert(equationEntityPerEntityId.Values.ToList());
+                _unitOfWork.Context.BulkInsert(equationEntityPerEntityId.Values.ToList());
             }
+
+            _unitOfWork.Context.SaveChanges();
 
             switch (joinEntity)
             {
@@ -41,21 +46,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new InvalidOperationException("Unable to determine equation join entity type.");
             }
 
-            Context.SaveChanges();
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void CreateEquations(List<EquationEntity> equationEntities)
         {
             if (IsRunningFromXUnit)
             {
-                Context.Equation.AddRange(equationEntities);
+                equationEntities.ForEach(entity => _unitOfWork.Context.AddOrUpdate(entity, entity.Id));
             }
             else
             {
-                Context.BulkInsert(equationEntities);
+                _unitOfWork.Context.BulkInsertOrUpdate(equationEntities);
             }
 
-            Context.SaveChanges();
+            _unitOfWork.Context.SaveChanges();
         }
 
         private void JoinEquationsWithPerformanceCurves(Dictionary<Guid, EquationEntity> equationEntityPerEntityId)
@@ -66,11 +71,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.PerformanceCurveEquation.AddRange(performanceCurveEquationJoinEntities);
+                _unitOfWork.Context.PerformanceCurveEquation.AddRange(performanceCurveEquationJoinEntities);
             }
             else
             {
-                Context.BulkInsert(performanceCurveEquationJoinEntities);
+                _unitOfWork.Context.BulkInsert(performanceCurveEquationJoinEntities);
             }
         }
 
@@ -82,11 +87,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.TreatmentConsequenceEquation.AddRange(treatmentConsequenceEquationJoinEntities);
+                _unitOfWork.Context.TreatmentConsequenceEquation.AddRange(treatmentConsequenceEquationJoinEntities);
             }
             else
             {
-                Context.BulkInsert(treatmentConsequenceEquationJoinEntities);
+                _unitOfWork.Context.BulkInsert(treatmentConsequenceEquationJoinEntities);
             }
         }
 
@@ -98,11 +103,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.TreatmentCostEquation.AddRange(treatmentCostEquationJoinEntities);
+                _unitOfWork.Context.TreatmentCostEquation.AddRange(treatmentCostEquationJoinEntities);
             }
             else
             {
-                Context.BulkInsert(treatmentCostEquationJoinEntities);
+                _unitOfWork.Context.BulkInsert(treatmentCostEquationJoinEntities);
             }
         }
     }

@@ -139,7 +139,7 @@
     import iziToast from 'izitoast';
     import {hasValue} from '@/shared/utils/has-value-util';
     import {AxiosError, AxiosRequestConfig, AxiosResponse} from 'axios';
-    import {axiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
+    import {axiosInstance, bridgecareCoreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
     import {getErrorMessage, setAuthHeader, setContentTypeCharset} from '@/shared/utils/http-utils';
     import ReportsService from './services/reports.service';
     import Alert from '@/shared/modals/Alert.vue';
@@ -187,6 +187,11 @@
         selectedScenario: Scenario = clone(emptyScenario);
         hasSelectedScenario: boolean = false;
         selectedScenarioHasStatus: boolean = false;
+        ignoredAPIs: string[] = [
+            'SynchronizeLegacySimulation',
+            'RunSimulation',
+            'GenerateSummaryReport'
+        ]
 
         get container() {
             const container: any = {};
@@ -298,7 +303,7 @@
                     await new Promise(_ => setTimeout(_, 5000));
                 }
                 request.headers = setAuthHeader(request.headers);
-                app.setIsBusyAction({isBusy: true});
+                app.setIsBusyAction({isBusy: app.ignoredAPIs.every((ignored: string) => request.url!.indexOf(ignored) === -1)});
                 return request;
             }
             // set axios request interceptor to use request handler
@@ -307,6 +312,10 @@
             );
             // set nodejs axios request interceptor to use request handler
             nodejsAxiosInstance.interceptors.request.use(
+                (request: any) => requestHandler(this, request)
+            );
+            // set bridge care core axios request interceptor to use request handler
+            bridgecareCoreAxiosInstance.interceptors.request.use(
                 (request: any) => requestHandler(this, request)
             );
             // create a success & error handler
@@ -332,6 +341,11 @@
             );
             // set nodejs axios response handler to user success & error handlers
             nodejsAxiosInstance.interceptors.response.use(
+                (response: any) => successHandler(response),
+                (error: any) => errorHandler(error)
+            );
+            // set bridge care core axios response handler to use success & error handlers
+            bridgecareCoreAxiosInstance.interceptors.response.use(
                 (response: any) => successHandler(response),
                 (error: any) => errorHandler(error)
             );

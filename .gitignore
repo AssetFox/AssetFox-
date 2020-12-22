@@ -378,3 +378,5 @@ iAM-legacy/DatabaseManager.dll
 # Generated Excel and json files
 /BridgeCareApp/BridgeCareCore/DownloadedNewReports/*
 /BridgeCareApp/BridgeCareCore/DownloadedReports/*
+/BridgeCareApp/BridgeCareCore/Logs
+/BridgeCareApp/BridgeCareCore/2020-12-14_log.txt

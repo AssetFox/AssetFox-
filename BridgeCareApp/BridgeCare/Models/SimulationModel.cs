@@ -19,6 +19,8 @@ namespace BridgeCare.Models
         public DateTime? Created { get; set; }
         public DateTime? LastRun { get; set; }
         public List<SimulationUserModel> Users { get; set; }
+        // TODO: this property is temporary and only for alpha 1
+        public Guid Id { get; set; } = Guid.Empty;
 
         public string status { get; set; }
 

@@ -31,6 +31,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLe
 
         public string Structure_Type { get; private set; }
 
+        public string StructureLength { get; private set; }
+
         //public string PlanningPartner { get; private set; }
 
         public string Post_Status { get; private set; }

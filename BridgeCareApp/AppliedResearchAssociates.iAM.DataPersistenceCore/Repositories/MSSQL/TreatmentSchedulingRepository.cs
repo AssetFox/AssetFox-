@@ -7,12 +7,14 @@ using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class TreatmentSchedulingRepository : MSSQLRepository, ITreatmentSchedulingRepository
+    public class TreatmentSchedulingRepository : ITreatmentSchedulingRepository
     {
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public TreatmentSchedulingRepository(IAMContext context) : base(context) { }
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+
+        public TreatmentSchedulingRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateTreatmentSchedulings(Dictionary<Guid, List<TreatmentScheduling>> treatmentSchedulingsPerTreatmentId)
         {
@@ -22,12 +24,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.TreatmentScheduling.AddRange(treatmentSchedulingEntities);
+                _unitOfWork.Context.TreatmentScheduling.AddRange(treatmentSchedulingEntities);
             }
             else
             {
-                Context.BulkInsert(treatmentSchedulingEntities);
+                _unitOfWork.Context.BulkInsert(treatmentSchedulingEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
         }
     }
 }

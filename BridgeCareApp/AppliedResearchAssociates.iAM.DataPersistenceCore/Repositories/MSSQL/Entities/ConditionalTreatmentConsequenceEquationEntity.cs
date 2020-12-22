@@ -1,8 +1,9 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class ConditionalTreatmentConsequenceEquationEntity
+    public class ConditionalTreatmentConsequenceEquationEntity : BaseEntity
     {
         public Guid ConditionalTreatmentConsequenceId { get; set; }
 

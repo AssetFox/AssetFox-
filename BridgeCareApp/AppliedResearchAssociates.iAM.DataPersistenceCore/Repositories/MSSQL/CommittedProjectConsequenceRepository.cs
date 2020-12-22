@@ -7,12 +7,14 @@ using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class CommittedProjectConsequenceRepository : MSSQLRepository, ICommittedProjectConsequenceRepository
+    public class CommittedProjectConsequenceRepository : ICommittedProjectConsequenceRepository
     {
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public CommittedProjectConsequenceRepository(IAMContext context) : base(context) { }
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+
+        public CommittedProjectConsequenceRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateCommittedProjectConsequences(Dictionary<Guid, List<(Guid attributeId, TreatmentConsequence consequence)>> consequencePerAttributeIdPerProjectId)
         {
@@ -22,12 +24,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.CommittedProjectConsequence.AddRange(committedProjectConsequenceEntities);
+                _unitOfWork.Context.CommittedProjectConsequence.AddRange(committedProjectConsequenceEntities);
             }
             else
             {
-                Context.BulkInsert(committedProjectConsequenceEntities);
+                _unitOfWork.Context.BulkInsert(committedProjectConsequenceEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
         }
     }
 }

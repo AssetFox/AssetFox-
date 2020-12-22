@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class SimulationEntity
+    public class SimulationEntity : BaseEntity
     {
         public Guid Id { get; set; }
 
@@ -36,6 +37,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual TargetConditionGoalLibrarySimulationEntity TargetConditionGoalLibrarySimulationJoin { get; set; }
 
         public virtual TreatmentLibrarySimulationEntity TreatmentLibrarySimulationJoin { get; set; }
+
+        public virtual SimulationAnalysisDetailEntity SimulationAnalysisDetail { get; set; }
 
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
     }

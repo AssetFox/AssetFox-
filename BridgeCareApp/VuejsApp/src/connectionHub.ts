@@ -1,5 +1,6 @@
 import { HubConnectionBuilder, LogLevel, HttpTransportType } from '@microsoft/signalr';
 import { bridgecareCoreAxiosInstance } from './shared/utils/axios-instance';
+import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
 
 export default {
     install(Vue: any) {
@@ -21,6 +22,18 @@ export default {
             connection.on('BroadcastSummaryReportGenerationStatus', (status, scenarioId) => {
                 statusHub.$emit('summaryReportGeneration-status-event', {status, scenarioId});
             });
+
+            connection.on('BroadcastDataMigration', (status) => {
+                statusHub.$emit('DataMigration-status-event', {status});
+            });
+
+            connection.on('BroadcastScenarioStatusUpdate', (status, scenarioId) => {
+                statusHub.$emit('ScenarioStatusUpdate-status-event', {status, scenarioId});
+            });
+
+        connection.on('BroadcastSimulationAnalysisDetail', (simulationAnalysisDetail: SimulationAnalysisDetail) => {
+            statusHub.$emit('SimulationAnalysisDetail-status-event', {simulationAnalysisDetail});
+        });
 
         let startedPromise = null;
         function start() {

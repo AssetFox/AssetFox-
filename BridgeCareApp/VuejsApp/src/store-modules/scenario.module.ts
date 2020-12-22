@@ -1,14 +1,16 @@
 import {Analysis, emptyAnalysis, emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
 import ScenarioService from '@/services/scenario.service';
 import {AxiosResponse} from 'axios';
-import {any, clone, findIndex, propEq, remove, find, update, reject} from 'ramda';
+import {any, clone, findIndex, propEq, remove, find, update, reject, prepend} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
-import prepend from 'ramda/es/prepend';
 import AnalysisEditorService from '@/services/analysis-editor.service';
 import ReportsService from '@/services/reports.service';
 import {convertFromMongoToVue} from '@/shared/utils/mongo-model-conversion-utils';
 import moment from 'moment';
+import {getUserName} from '@/shared/utils/get-user-info';
+import {Simulation} from '@/shared/models/iAM/simulation';
+import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
 
 const state = {
     scenarios: [] as Scenario[],
@@ -34,6 +36,14 @@ const mutations = {
             );
         }
     },
+    addMigratedScenariosMutator(state: any, migratedScenarios: Scenario[]) {
+        migratedScenarios.forEach((migratedScenario: Scenario) => {
+            if (any(propEq('id', migratedScenario.id), state.scenarios)) {
+                state.scenarios = reject(propEq('id', migratedScenario.id), state.scenarios);
+            }
+            state.scenarios = prepend(migratedScenario, state.scenarios);
+        });
+    },
     removeScenarioMutator(state: any, simulationId: number) {
         if (any(propEq('simulationId', simulationId), state.scenarios)) {
             state.scenarios = reject(propEq('simulationId', simulationId), state.scenarios);
@@ -51,6 +61,20 @@ const mutations = {
     },
     missingSummaryReportAttributesMutator(state: any, missingAttributes: string[]) {
         state.missingSummaryReportAttributes = clone(missingAttributes);
+    },
+    simulationAnalysisDetailMutator(state: any, simulationAnalysisDetail: SimulationAnalysisDetail) {
+        if (any(propEq('id', simulationAnalysisDetail.simulationId), state.scenarios)) {
+            const updatedScenario: Scenario = find(propEq('id', simulationAnalysisDetail.simulationId), state.scenarios) as Scenario;
+            updatedScenario.lastRun = simulationAnalysisDetail.lastRun;
+            updatedScenario.status = simulationAnalysisDetail.status;
+            updatedScenario.runTime = simulationAnalysisDetail.runTime;
+
+            state.scenarios = update(
+                findIndex(propEq('simulationId', updatedScenario.simulationId), state.scenarios),
+                updatedScenario,
+                state.scenarios
+            );
+        }
     }
 };
 
@@ -58,12 +82,18 @@ const actions = {
     selectScenario({commit}: any, payload: any) {
         commit('selectedScenarioMutator', payload.simulationId);
     },
-    async getMongoScenarios({commit}: any) {
+    updateSimulationAnalysisDetail({commit}: any, payload: any) {
+        commit('simulationAnalysisDetailMutator', payload.simulationAnalysisDetail);
+    },
+    async getMongoScenarios({dispatch, commit}: any) {
         return await ScenarioService.getMongoScenarios()
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('scenariosMutator', response.data.map((data: any) => convertFromMongoToVue(data)));
                 }
+            })
+            .then(() => {
+                dispatch('getMigratedData', {simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL});
             });
     },
     async getLegacyScenarios() {
@@ -78,6 +108,39 @@ const actions = {
                 }
             });
     },
+
+    async runNewSimulation({dispatch, commit}: any, payload: any){
+        await ScenarioService.runNewScenarioSimulation(payload.networkId, payload.selectedScenarioId)
+        .then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                dispatch('setSuccessMessage', {message: 'Simulation analysis complete'});
+            }
+        });
+    },
+
+    async migrateLegacySimulationData({dispatch, commit}: any, payload: any) {
+        await ScenarioService.migrateLegacySimulationData(payload.simulationId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    dispatch('getMigratedData');
+                }
+            });
+    },
+
+    async getMigratedData({dispatch, commit}: any, payload: any) {
+        await ScenarioService.getMigratedData()
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const scenarios: Scenario[] = response.data.map((scenario: Scenario) => ({
+                        ...scenario,
+                        owner: getUserName(),
+                        creator: getUserName()
+                    })) as Scenario[];
+                    commit('addMigratedScenariosMutator', scenarios);
+                }
+            });
+    },
+
     async createScenario({dispatch, commit}: any, payload: any) {
         return await ScenarioService.createScenario(payload.createScenarioData, payload.userId)
             .then((response: AxiosResponse) => {

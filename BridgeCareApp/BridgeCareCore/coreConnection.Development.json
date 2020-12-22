@@ -1,0 +1,6 @@
+{
+  "ConnectionStrings": {
+    "BridgeCareConnex": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework;Connection Timeout=300",
+    "BridgeCareLegacyConnex": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework;Connection Timeout=300"
+  }
+}

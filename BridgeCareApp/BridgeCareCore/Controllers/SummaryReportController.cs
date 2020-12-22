@@ -43,7 +43,8 @@ namespace BridgeCareCore.Controllers
                     .All
                     .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
 
-                var response = _summaryReportGenerator.GenerateReport(networkId, simulationId);
+                var response = await Task.Factory.StartNew(() => _summaryReportGenerator.GenerateReport(simulationId, networkId));
+                //var response = _summaryReportGenerator.GenerateReport(simulationId, networkId));
 
                 const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 HttpContext.Response.ContentType = contentType;
@@ -55,22 +56,24 @@ namespace BridgeCareCore.Controllers
                 };
 
                 broadcastingMessage = "Finished generating the summary report.";
-                await HubContext
-                            .Clients
-                            .All
-                            .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+                sendRealTimeMessage(broadcastingMessage, simulationId);
 
                 return fileContentResult;
             }
             catch (Exception e)
             {
                 broadcastingMessage = "An error has occured while generating the summary report";
-                await HubContext
-                            .Clients
-                            .All
-                            .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+                sendRealTimeMessage(broadcastingMessage, simulationId);
                 return null;
             }
+        }
+
+        private void sendRealTimeMessage(string message, Guid simulationId)
+        {
+            HubContext
+                .Clients
+                .All
+                .SendAsync("BroadcastSummaryReportGenerationStatus", message, simulationId);
         }
     }
 }

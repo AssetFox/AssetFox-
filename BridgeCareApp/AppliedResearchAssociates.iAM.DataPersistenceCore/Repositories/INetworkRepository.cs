@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
@@ -10,8 +11,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void CreateNetwork(Network network);
 
-        IEnumerable<DataAssignment.Networking.Network> GetAllNetworks();
+        List<DataAssignment.Networking.Network> GetAllNetworks();
 
-        Domains.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer);
+        NetworkEntity GetPennDotNetwork();
+
+        bool CheckPennDotNetworkHasData();
+
+        Domains.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true);
+
+        void DeleteNetworkData();
     }
 }

@@ -9,20 +9,16 @@ using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class TreatmentCostRepository : MSSQLRepository, ITreatmentCostRepository
+    public class TreatmentCostRepository : ITreatmentCostRepository
     {
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly IEquationRepository _equationRepo;
-        private readonly ICriterionLibraryRepository _criterionLibraryRepo;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public TreatmentCostRepository(IEquationRepository equationRepo,
-            ICriterionLibraryRepository criterionLibraryRepo,
-            IAMContext context) : base(context)
+        public TreatmentCostRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _equationRepo = equationRepo ?? throw new ArgumentNullException(nameof(equationRepo));
-            _criterionLibraryRepo = criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateTreatmentCosts(Dictionary<Guid, List<TreatmentCost>> treatmentCostsPerTreatmentId, string simulationName)
@@ -66,21 +62,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.TreatmentCost.AddRange(costEntities);
+                _unitOfWork.Context.TreatmentCost.AddRange(costEntities);
             }
             else
             {
-                Context.BulkInsert(costEntities);
+                _unitOfWork.Context.BulkInsert(costEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
 
             if (equationEntityPerCostEntityId.Values.Any())
             {
-                _equationRepo.CreateEquations(equationEntityPerCostEntityId, "TreatmentCostEntity");
+                _unitOfWork.EquationRepo.CreateEquations(equationEntityPerCostEntityId, "TreatmentCostEntity");
             }
 
             if (costEntityIdsPerExpression.Values.Any())
             {
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(costEntityIdsPerExpression,
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(costEntityIdsPerExpression,
                     "TreatmentCostEntity", simulationName);
             }
         }

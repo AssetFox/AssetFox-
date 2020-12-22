@@ -8,18 +8,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class MaintainableAssetRepository : MSSQLRepository, IMaintainableAssetRepository
+    public class MaintainableAssetRepository : IMaintainableAssetRepository
     {
-        public MaintainableAssetRepository(IAMContext context) : base(context) { }
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+
+        public MaintainableAssetRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+
+
 
         public IEnumerable<MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId)
         {
-            if (!Context.Network.Any(_ => _.Id == networkId))
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssets = Context.MaintainableAsset
+            var maintainableAssets = _unitOfWork.Context.MaintainableAsset
                 .Include(_ => _.MaintainableAssetLocation)
                 .Include(_ => _.AssignedData)
                 .ThenInclude(_ => _.Attribute)

@@ -7,17 +7,17 @@ using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class TreatmentSupersessionRepository : MSSQLRepository, ITreatmentSupersessionRepository
+    public class TreatmentSupersessionRepository : ITreatmentSupersessionRepository
     {
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private ICriterionLibraryRepository _criterionLibraryRepo;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public TreatmentSupersessionRepository(ICriterionLibraryRepository criterionLibraryRepo, IAMContext context) :
-            base(context) =>
-            _criterionLibraryRepo =
-                criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
+        public TreatmentSupersessionRepository(UnitOfWork.UnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        }
 
         public void CreateTreatmentSupersessions(Dictionary<Guid, List<TreatmentSupersession>> treatmentSupersessionsPerTreatmentId,
             string simulationName)
@@ -47,16 +47,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                Context.TreatmentSupersession.AddRange(supersessionEntities);
+                _unitOfWork.Context.TreatmentSupersession.AddRange(supersessionEntities);
             }
             else
             {
-                Context.BulkInsert(supersessionEntities);
+                _unitOfWork.Context.BulkInsert(supersessionEntities);
             }
+
+            _unitOfWork.Context.SaveChanges();
 
             if (supersessionEntityIdsPerExpression.Values.Any())
             {
-                _criterionLibraryRepo.JoinEntitiesWithCriteria(supersessionEntityIdsPerExpression, "TreatmentSupersessionEntity", simulationName);
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(supersessionEntityIdsPerExpression, "TreatmentSupersessionEntity", simulationName);
             }
         }
     }

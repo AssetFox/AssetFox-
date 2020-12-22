@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract
 {
-    public abstract class ConditionGoalEntity
+    public abstract class ConditionGoalEntity : BaseEntity
     {
         public Guid Id { get; set; }
 

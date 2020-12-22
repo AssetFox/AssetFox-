@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -18,25 +19,16 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : ControllerBase
     {
-        private readonly IAttributeMetaDataRepository _attributeMetaDataRepo;
-        private readonly IMaintainableAssetRepository _maintainableAssetRepo;
-        private readonly IAggregatedResultRepository _aggregatedResultRepo;
-        private readonly IAttributeDatumRepository _attributeDatumRepo;
         private readonly ILogger<NetworkController> _logger;
         private readonly IHubContext<BridgeCareHub> HubContext;
+        private readonly UnitOfWork _unitOfWork;
 
-        public AggregationController(IAttributeMetaDataRepository attributeMetaDataRepo,
-            IMaintainableAssetRepository maintainableAssetRepo,
-            IAttributeDatumRepository attributeDatumRepo,
-            ILogger<NetworkController> logger, IHubContext<BridgeCareHub> hub,
-            IAggregatedResultRepository aggregatedResultRepo)
+        public AggregationController(
+            ILogger<NetworkController> logger, IHubContext<BridgeCareHub> hub, UnitOfWork unitOfWork)
         {
-            _attributeMetaDataRepo = attributeMetaDataRepo ?? throw new ArgumentNullException(nameof(attributeMetaDataRepo));
-            _maintainableAssetRepo = maintainableAssetRepo ?? throw new ArgumentNullException(nameof(maintainableAssetRepo));
-            _attributeDatumRepo = attributeDatumRepo ?? throw new ArgumentNullException(nameof(attributeDatumRepo));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
-            _aggregatedResultRepo = aggregatedResultRepo ?? throw new ArgumentNullException(nameof(aggregatedResultRepo));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         [HttpPost]
@@ -53,10 +45,10 @@ namespace BridgeCareCore.Controllers
                     .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
 
                 // Get/create configurable attributes
-                var configurationAttributes = _attributeMetaDataRepo.GetAllAttributes().ToList();
+                var configurationAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
 
                 // get all maintainable assets in the network with their assigned data (if any) and locations
-                var maintainableAssets = _maintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId)
+                var maintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId)
                     .ToList();
 
                 // Create list of attribute ids we are allowed to update with assigned data.
@@ -101,7 +93,7 @@ namespace BridgeCareCore.Controllers
                         .All
                         .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 // update the maintainable assets assigned data in the data source
-                var updatedRecordsCount = _attributeDatumRepo.UpdateAssignedData(maintainableAssets);
+                var updatedRecordsCount = _unitOfWork.AttributeDatumRepo.UpdateAssignedData(maintainableAssets);
 
                 AggregateData(networkId, maintainableAssets);
 
@@ -176,7 +168,7 @@ namespace BridgeCareCore.Controllers
                         .All
                         .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 // create aggregated data records in the data source
-                var createdRecordsCount = _aggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
+                var createdRecordsCount = _unitOfWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
 
                 broadcastingMessage = $"Successfully aggregated the data";
                 HubContext

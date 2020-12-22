@@ -2,128 +2,114 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
-using Attribute = AppliedResearchAssociates.iAM.Domains.Attribute;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class AttributeRepository : MSSQLRepository, IAttributeRepository
+    public class AttributeRepository : IAttributeRepository
     {
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly IEquationRepository _equationRepo;
-        private readonly ICriterionLibraryRepository _criterionLibraryRepo;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public AttributeRepository(IEquationRepository equationRepo, ICriterionLibraryRepository criterionLibraryRepo, IAMContext context) : base(context)
+        public AttributeRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _equationRepo = equationRepo ?? throw new ArgumentNullException(nameof(equationRepo));
-            _criterionLibraryRepo = criterionLibraryRepo ?? throw new ArgumentNullException(nameof(criterionLibraryRepo));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
-
-        public Dictionary<Guid, DataMinerAttribute> AttributeDictionary { get; set; }
 
         public void UpsertAttributes(List<DataMinerAttribute> attributes)
         {
             if (IsRunningFromXUnit)
             {
-                Context.Attribute.AddRange(attributes.Select(_ => _.ToEntity()).ToList());
+                attributes.ForEach(_ =>
+                {
+                    var entity = _.ToEntity();
+                    _unitOfWork.Context.AddOrUpdate(entity, entity.Id);
+                });
             }
             else
             {
-                Context.BulkInsertOrUpdate(attributes.Select(_ => _.ToEntity()).ToList());
+                _unitOfWork.Context.BulkInsertOrUpdate(attributes.Select(_ => _.ToEntity()).ToList());
             }
 
-            Context.SaveChanges();
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void JoinAttributesWithEquationsAndCriteria(Explorer explorer)
         {
-            using (var contextTransaction = Context.Database.BeginTransaction())
+            var calculatedFieldNames = explorer.CalculatedFields.Select(_ => _.Name).ToList();
+
+            var attributeEntities = _unitOfWork.Context.Attribute
+                .Where(_ => calculatedFieldNames.Contains(_.Name)).ToList();
+
+            var joinEntities = new List<AttributeEquationCriterionLibraryEntity>();
+            var equationEntities = new List<EquationEntity>();
+            var criterionLibraryEntities = new List<CriterionLibraryEntity>();
+
+            attributeEntities.ForEach(attributeEntity =>
             {
-                try
+                var calculatedField = explorer.CalculatedFields.Single(_ => _.Name == attributeEntity.Name);
+                calculatedField.ValueSources.ForEach(valueSource =>
                 {
-                    var calculatedFieldNames = explorer.CalculatedFields.Select(_ => _.Name).ToList();
+                    var joinEntity = new AttributeEquationCriterionLibraryEntity { AttributeId = attributeEntity.Id };
 
-                    var attributeEntities = Context.Attribute
-                        .Where(_ => calculatedFieldNames.Contains(_.Name)).ToList();
+                    var equationEntity = valueSource.Equation.ToEntity();
+                    equationEntities.Add(equationEntity);
 
-                    var joinEntities = new List<AttributeEquationCriterionLibraryEntity>();
-                    var equationEntities = new List<EquationEntity>();
-                    var criterionLibraryEntities = new List<CriterionLibraryEntity>();
+                    joinEntity.EquationId = equationEntity.Id;
 
-                    attributeEntities.ForEach(attributeEntity =>
+                    if (!valueSource.Criterion.ExpressionIsBlank)
                     {
-                        var calculatedField = explorer.CalculatedFields.Single(_ => _.Name == attributeEntity.Name);
-                        calculatedField.ValueSources.ForEach(valueSource =>
-                        {
-                            var joinEntity = new AttributeEquationCriterionLibraryEntity {AttributeId = attributeEntity.Id};
+                        var criterionLibraryEntity = criterionLibraryEntities.Any(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
+                            ? criterionLibraryEntities.Single(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
+                            : GetCriterionLibraryEntity(valueSource.Criterion.Expression, criterionLibraryEntities);
 
-                            var equationEntity = valueSource.Equation.ToEntity();
-                            equationEntities.Add(equationEntity);
-
-                            joinEntity.EquationId = equationEntity.Id;
-
-                            if (!valueSource.Criterion.ExpressionIsBlank)
-                            {
-                                var criterionLibraryEntity = criterionLibraryEntities.Any(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
-                                    ? criterionLibraryEntities.Single(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
-                                    : CreateCriterionLibraryEntity(valueSource.Criterion.Expression, criterionLibraryEntities);
-
-                                joinEntity.CriterionLibraryId = criterionLibraryEntity.Id;
-                            }
-
-                            joinEntities.Add(joinEntity);
-                        });
-                    });
-
-                    if (equationEntities.Any())
-                    {
-                        _equationRepo.CreateEquations(equationEntities);
+                        joinEntity.CriterionLibraryId = criterionLibraryEntity.Id;
                     }
 
-                    if (criterionLibraryEntities.Any())
-                    {
-                        _criterionLibraryRepo.CreateCriterionLibraries(criterionLibraryEntities);
-                    }
+                    joinEntities.Add(joinEntity);
+                });
+            });
 
-                    if (IsRunningFromXUnit)
-                    {
-                        Context.AttributeEquationCriterionLibrary.AddRange(joinEntities);
-                    }
-                    else
-                    {
-                        Context.BulkInsert(joinEntities);
-                    }
-
-                    Context.SaveChanges();
-
-                    contextTransaction.Commit();
-                }
-                catch (Exception e)
-                {
-                    contextTransaction.Rollback();
-                    Console.WriteLine(e);
-                    throw;
-                }
+            if (equationEntities.Any())
+            {
+                _unitOfWork.EquationRepo.CreateEquations(equationEntities);
             }
+
+            if (criterionLibraryEntities.Any())
+            {
+                _unitOfWork.CriterionLibraryRepo.CreateCriterionLibraries(criterionLibraryEntities);
+            }
+
+            if (IsRunningFromXUnit)
+            {
+                joinEntities.ForEach(entity => _unitOfWork.Context.AddOrUpdate(entity));
+                _unitOfWork.Context.AttributeEquationCriterionLibrary.AddRange(joinEntities);
+            }
+            else
+            {
+                _unitOfWork.Context.BulkInsertOrUpdate(joinEntities);
+            }
+
+            _unitOfWork.Context.SaveChanges();
         }
 
-        private CriterionLibraryEntity CreateCriterionLibraryEntity(string expression, List<CriterionLibraryEntity> criterionLibraryEntities)
+        private CriterionLibraryEntity GetCriterionLibraryEntity(string expression, List<CriterionLibraryEntity> criterionLibraryEntities)
         {
-            var criterionLibraryEntity = Context.CriterionLibrary
+            var criterionLibraryEntity = _unitOfWork.Context.CriterionLibrary
                 .SingleOrDefault(_ => _.MergedCriteriaExpression == expression && _.Name.Contains("Attribute"));
 
             if (criterionLibraryEntity == null)
             {
-                var criterionLibraryNames = Context.CriterionLibrary
+                var criterionLibraryNames = _unitOfWork.Context.CriterionLibrary
                     .Where(_ => _.Name.Contains("Attribute"))
                     .Select(_ => _.Name).ToList();
 
@@ -153,12 +139,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Explorer GetExplorer()
         {
-            if (!Context.Attribute.Any())
+            if (!_unitOfWork.Context.Attribute.Any())
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
 
-            var attributes = Context.Attribute
+            var attributes = _unitOfWork.Context.Attribute
                 .Include(_ => _.AttributeEquationCriterionLibraryJoins)
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.AttributeEquationCriterionLibraryJoins)

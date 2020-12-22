@@ -1,8 +1,9 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class PerformanceCurveLibrarySimulationEntity
+    public class PerformanceCurveLibrarySimulationEntity : BaseEntity
     {
         public Guid PerformanceCurveLibraryId { get; set; }
 

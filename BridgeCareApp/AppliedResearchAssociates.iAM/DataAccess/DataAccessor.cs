@@ -527,7 +527,7 @@ where simulationid = {simulationId}
                             var curve = simulation.AddPerformanceCurve();
                             var attributeName = reader.GetNullableString(0);
                             curve.Attribute = helper.NumberAttributePerName[attributeName];
-                            curve.Name = reader.GetNullableString(1);
+                            curve.Name = reader.GetNullableString(1) ?? $"{curve.Attribute.Name} Performance Curve";
                             curve.Criterion.Expression = reader.GetNullableString(2);
                             curve.Equation.Expression = reader.GetNullableString(3);
                             curve.Shift = reader.GetBoolean(4);
@@ -692,7 +692,7 @@ where simulationid = {simulationId}
                             goal.Attribute = helper.NumericAttributePerName[attributeName];
                             goal.Year = reader.GetNullableInt32(1);
                             goal.Target = reader.GetDouble(2);
-                            goal.Name = reader.GetNullableString(3);
+                            goal.Name = reader.GetNullableString(3) ?? $"{goal.Attribute.Name} Target Condition Goal";
                             goal.Criterion.Expression = reader.GetNullableString(4);
                         }
                     }
@@ -704,7 +704,7 @@ where simulationid = {simulationId}
                             var goal = simulation.AnalysisMethod.AddDeficientConditionGoal();
                             var attributeName = reader.GetNullableString(0);
                             goal.Attribute = helper.NumericAttributePerName[attributeName];
-                            goal.Name = reader.GetNullableString(1);
+                            goal.Name = reader.GetNullableString(1) ?? $"{goal.Attribute.Name} Deficient Condition Goal";
                             goal.DeficientLimit = reader.GetDouble(2);
                             goal.AllowedDeficientPercentage = reader.GetDouble(3);
                             goal.Criterion.Expression = reader.GetNullableString(4);
@@ -758,7 +758,7 @@ where simulationid = {simulationId}
                             if (!rulePerId.TryGetValue(id, out var rule))
                             {
                                 rule = simulation.InvestmentPlan.AddCashFlowRule();
-                                rule.Name = reader.GetNullableString(1);
+                                rule.Name = reader.GetNullableString(1) ?? $"{simulation.Name} Cash Flow Rule";
                                 rule.Criterion.Expression = reader.GetNullableString(2);
 
                                 rulePerId.Add(id, rule);

@@ -20,7 +20,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             _excelHelper = excelHelper;
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
         }
-        internal void FillCostOfBridgeWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, List<YearsData> costForBridgeBudgets, Dictionary<int, double> totalBudgetPerYearForBridgeWork)
+        internal void FillCostOfBridgeWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+            List<YearsData> costForBridgeBudgets, List<string> nonCulvertTreatments,
+            Dictionary<int, double> totalBudgetPerYearForBridgeWork)
         {
             var startYear = simulationYears[0];
             currentCell.Row += 1;
@@ -29,31 +31,43 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             currentCell.Row += 1;
             var startOfBridgeBudget = currentCell.Row;
             currentCell.Column = 1;
-            var uniqueTreatments = new Dictionary<string, int>();
+           // var uniqueTreatments = new Dictionary<string, int>();
             // Fill Bridge Budget
+            var treatmentTracker = new Dictionary<string, int>();
+            foreach (var treatment in nonCulvertTreatments)
+            {
+                worksheet.Cells[currentCell.Row, currentCell.Column].Value = treatment;
+                treatmentTracker.Add(treatment, currentCell.Row);
+                worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row,
+                    currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
+                currentCell.Row += 1;
+            }
+            //costForBridgeBudgets.Sort((a, b) => a.Treatment.CompareTo(b.Treatment));
             foreach (var item in costForBridgeBudgets)
             {
-                if (!uniqueTreatments.ContainsKey(item.Treatment))
-                {
-                    uniqueTreatments.Add(item.Treatment, currentCell.Row);
-                    worksheet.Cells[currentCell.Row, currentCell.Column].Value = item.Treatment;
+                var rowNum = treatmentTracker[item.Treatment];
+                //if (!uniqueTreatments.ContainsKey(item.Treatment))
+                //{
+                //    uniqueTreatments.Add(item.Treatment, currentCell.Row);
+                //    //worksheet.Cells[currentCell.Row, currentCell.Column].Value = item.Treatment;
+                //    var cellToEnterCost = item.Year - startYear;
+                //    worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = item.Amount;
+                //    currentCell.Row += 1;
+                //}
+                //else
+                //{
                     var cellToEnterCost = item.Year - startYear;
-                    worksheet.Cells[uniqueTreatments[item.Treatment], currentCell.Column + cellToEnterCost + 2].Value = item.Amount;
-                    currentCell.Row += 1;
-                }
-                else
-                {
-                    var cellToEnterCost = item.Year - startYear;
-                    var cellValue = worksheet.Cells[uniqueTreatments[item.Treatment], currentCell.Column + cellToEnterCost + 2].Value;
+                    var cellValue = worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value;
                     var totalAmount = 0.0;
                     if (cellValue != null)
                     {
                         totalAmount = (double)cellValue;
                     }
                     totalAmount += item.Amount;
-                    worksheet.Cells[uniqueTreatments[item.Treatment], currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
-                }
+                    worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
+                //}
             }
+            
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.BridgeTotal;
 
             foreach (var totalBridgeBudget in totalBudgetPerYearForBridgeWork)

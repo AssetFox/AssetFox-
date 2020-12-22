@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -28,6 +29,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             simulation.Id = entity.Id;
             simulation.Name = entity.Name;
             simulation.NumberOfYearsOfTreatmentOutlook = entity.NumberOfYearsOfTreatmentOutlook;
+        }
+
+        public static SimulationDTO ToDto(this SimulationEntity entity)
+        {
+            var dto = new SimulationDTO(entity);
+            if (entity.SimulationAnalysisDetail != null)
+            {
+                dto.LastRun = entity.SimulationAnalysisDetail.LastRun;
+                dto.RunTime = entity.SimulationAnalysisDetail.RunTime;
+                dto.Status = entity.SimulationAnalysisDetail.Status;
+            }
+            return dto;
         }
     }
 }

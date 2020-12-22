@@ -24,6 +24,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         private readonly List<double> previousYearInitialMinC = new List<double>();
         private List<double> previousYearSectionMinC = new List<double>();
         private Dictionary<int, (int on, int off)> PoorOnOffCount = new Dictionary<int, (int on, int off)>();
+
+        // This will be used in Parameters TAB
+        private readonly ParametersModel _parametersModel = new ParametersModel();
         public BridgeDataForSummaryReport(IExcelHelper excelHelper, IHighlightWorkDoneCells highlightWorkDoneCells)
         {
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
@@ -62,7 +65,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var workSummaryModel = new WorkSummaryModel
             {
                 PreviousYearInitialMinC = previousYearInitialMinC,
-                PoorOnOffCount = PoorOnOffCount
+                PoorOnOffCount = PoorOnOffCount,
+                ParametersModel = _parametersModel
             };
 
             return workSummaryModel;
@@ -105,6 +109,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 var i = 0;
                 foreach (var data in sectionsAndReportAData)
                 {
+                    TrackDataForParametersTAB(data.reportAData);
                     // Work done in a year
                     var range = worksheet.Cells[row, column];
                     setColor(data.reportAData.Parallel_Struct, data.section.AppliedTreatment, previousYearCause, data.section.TreatmentCause,
@@ -174,6 +179,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var initialColumn = column;
             foreach (var intialsection in outputResults.InitialSectionSummaries)
             {
+                TrackInitialYearDataForParametersTAB(intialsection);
                 column = initialColumn; // This is to reset the column
                 column = AddSimulationYearData(worksheet, row, column, intialsection, null);
                 row++;
@@ -192,21 +198,25 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     worksheet.Cells[row, ++column].Value = section.TreatmentCause; // Project Pick
 
                     var treatmentConsideration = section.TreatmentConsiderations.Find(_ => _.TreatmentName == section.AppliedTreatment);
-
                     var budgetName = treatmentConsideration == null ? "" :
                         treatmentConsideration.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull ||
                     _.Status == BudgetUsageStatus.CostCoveredInPart).BudgetName;
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
                     worksheet.Cells[row, ++column].Value = section.AppliedTreatment;
-                    if (section.TreatmentCause == TreatmentCause.SelectedTreatment)
+                    if (section.TreatmentCause == TreatmentCause.CashFlowProject)
                     {
                         _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
                         _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
+
+                        // Color the previous year project also
+                        _excelHelper.ApplyColor(worksheet.Cells[row, column - 16], Color.FromArgb(0, 255, 0));
+                        _excelHelper.SetTextColor(worksheet.Cells[row, column - 16], Color.Black);
                     }
 
-                    var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
-                    var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
+                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    //var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
+                    //var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
@@ -215,6 +225,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 }
             }
         }
+
         private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column,
             SectionSummaryDetail initialSection, SectionDetail section)
         {
@@ -503,6 +514,63 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             }
             return column;
         }
+
+        private void TrackInitialYearDataForParametersTAB(SectionSummaryDetail intialsection)
+        {
+            // Get NHS record for Parameter TAB
+            if (_parametersModel.nHSModel.NHS == null || _parametersModel.nHSModel.NonNHS == null)
+            {
+                int.TryParse(intialsection.ValuePerTextAttribute["NHS_IND"],
+                    out var numericValue);
+                if (numericValue > 0)
+                {
+                    _parametersModel.nHSModel.NHS = "Y";
+                }
+                else
+                {
+                    _parametersModel.nHSModel.NonNHS = "Y";
+                }
+            }
+            // Get BPN data for parameter TAB
+            if (!_parametersModel.BPNValues.Contains(intialsection.ValuePerTextAttribute["BUS_PLAN_NETWORK"]))
+            {
+                _parametersModel.BPNValues.Add(intialsection.ValuePerTextAttribute["BUS_PLAN_NETWORK"]);
+            }
+        }
+
+        private void TrackDataForParametersTAB(PennDotReportAEntity reportAData)
+        {
+            // Track status for parameters TAB
+            if (!_parametersModel.Status.Contains(reportAData.Post_Status.ToLower()))
+            {
+                _parametersModel.Status.Add(reportAData.Post_Status.ToLower());
+            }
+            // Track P3 for parameters TAB
+            if (reportAData.P3_Bridge > 0 && _parametersModel.P3 != 1)
+            {
+                _parametersModel.P3 = reportAData.P3_Bridge;
+            }
+            if (!_parametersModel.OwnerCode.Contains(reportAData.Owner_Code))
+            {
+                _parametersModel.OwnerCode.Add(reportAData.Owner_Code);
+            }
+
+            int.TryParse(reportAData.StructureLength, out var structureLength);
+
+            if (structureLength > 20 && _parametersModel.LengthGreaterThan20 != "Y")
+            {
+                _parametersModel.LengthGreaterThan20 = "Y";
+            }
+            if (structureLength >= 8 && structureLength <= 20 && _parametersModel.LengthBetween8and20 != "Y")
+            {
+                _parametersModel.LengthBetween8and20 = "Y";
+            }
+            if (!_parametersModel.FunctionalClass.Contains(reportAData.FUNC_CLASS))
+            {
+                _parametersModel.FunctionalClass.Add(reportAData.FUNC_CLASS);
+            }
+        }
+
         private enum MinCValue
         {
             minOfCulvDeckSubSuper,

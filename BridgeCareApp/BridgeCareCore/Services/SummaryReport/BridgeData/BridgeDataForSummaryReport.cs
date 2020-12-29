@@ -249,9 +249,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             }
             else
             {
-                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["PREV_DECKSEED"];
-                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["PREV_SUPSEED"];
-                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["PREV_SUBSEED"];
+                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["DECK_SEEDED"];
+                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["SUP_SEEDED"];
+                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["SUB_SEEDED"];
 
                 worksheet.Cells[row, column + 2].Value = selectedSection.ValuePerNumericAttribute["DECK_DURATION_N"];
                 worksheet.Cells[row, column + 3].Value = selectedSection.ValuePerNumericAttribute["SUP_DURATION_N"];
@@ -273,7 +273,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             }
             else
             {
-                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["PREV_CULVSEED"];
+                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["CULV_SEEDED"];
 
                 worksheet.Cells[row, column + 4].Value = selectedSection.ValuePerNumericAttribute["CULV_DURATION_N"];
             }

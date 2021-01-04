@@ -42,41 +42,47 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
         #region Private methods
         private void AddDynamicDataCells(ExcelWorksheet worksheet, List<int> simulationYears, SimulationOutput simulationOutput, CurrentCell currentCell)
         {
+            // cache to store whether "No Treatment" is present for all of the years for a given section.
+            var treatmentDecisionPerSection = new Dictionary<int, bool>();
+            var nonSelectedFacilities = new HashSet<int>();
+            foreach (var year in simulationOutput.Years)
+            {
+                foreach (var section in year.Sections)
+                {
+                    var facilityId = int.Parse(section.FacilityName);
+                    if (!treatmentDecisionPerSection.ContainsKey(facilityId))
+                    {
+                        treatmentDecisionPerSection.Add(facilityId, false);
+                    }
+                    if (section.ValuePerNumericAttribute["RISK_SCORE"] > 15000
+                        && section.TreatmentConsiderations.Count > 0)
+                    {
+                        if (section.TreatmentCause == TreatmentCause.NoSelection && !nonSelectedFacilities.Contains(facilityId))
+                        {
+                            treatmentDecisionPerSection[facilityId] = true;
+                        }
+                        if(section.TreatmentCause != TreatmentCause.NoSelection)
+                        {
+                            treatmentDecisionPerSection[facilityId] = false;
+                            nonSelectedFacilities.Add(facilityId);
+                        }
+                    }
+                }
+            }
+
             currentCell.Row = 4; // Data starts here
             currentCell.Column = 1;
             foreach (var initialSection in simulationOutput.InitialSectionSummaries)
             {
-                if (initialSection.ValuePerNumericAttribute["RISK_SCORE"] > 15000)
+                if (initialSection.ValuePerNumericAttribute["RISK_SCORE"] > 15000 &&
+                    treatmentDecisionPerSection[int.Parse(initialSection.FacilityName)] == true)
                 {
                     currentCell.Column = 1;
                     FillDataInWorkSheet(worksheet, currentCell, initialSection);
                     currentCell.Row++;
                 }
             }
-            // cache to store whether "No Treatment" is present for all of the years for a given section.
-            var treatmentDecisionPerSection = new Dictionary<int, bool>();
-            foreach (var year in simulationOutput.Years)
-            {
-                foreach (var section in year.Sections)
-                {
-                    if(section.ValuePerNumericAttribute["RISK_SCORE"] > 15000)
-                    {
-                        var facilityId = int.Parse(section.FacilityName);
-                        if (!treatmentDecisionPerSection.ContainsKey(facilityId))
-                        {
-                            treatmentDecisionPerSection.Add(facilityId, true);
-                        }
-                        if(section.TreatmentCause == TreatmentCause.NoSelection && treatmentDecisionPerSection[facilityId] == true)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            treatmentDecisionPerSection[facilityId] = false;
-                        }
-                    }
-                }
-            }
+
             currentCell.Row = 4; // Data starts here
             currentCell.Column += 1; // feasible treatment starts here
             foreach (var item in simulationOutput.Years)
@@ -85,13 +91,14 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
                 {
                     if (section.ValuePerNumericAttribute["RISK_SCORE"] > 15000 &&
                         treatmentDecisionPerSection[int.Parse(section.FacilityName)] == true
-                        && section.TreatmentConsiderations.Count > 0)
+                        )
                     {
                         var filteredOptions = section.TreatmentOptions.
                             Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
                         filteredOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
 
-                        var requiredTreatmentName = filteredOptions.FirstOrDefault().TreatmentName;
+                        var requiredTreatmentName = filteredOptions.Count > 0 ? filteredOptions.FirstOrDefault().TreatmentName
+                            : "";
 
                         worksheet.Cells[currentCell.Row, currentCell.Column].Value = requiredTreatmentName;
                         currentCell.Row++;

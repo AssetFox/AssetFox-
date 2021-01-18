@@ -110,8 +110,10 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
                         logToConsoleAndFile("Simulation failed: " + e.Message);
                         continue;
                     }
-
-                    logToConsoleAndFile("Elapsed runtime of simulation: " + timer.Elapsed);
+                    finally
+                    {
+                        logToConsoleAndFile("Elapsed runtime of simulation: " + timer.Elapsed);
+                    }
 
                     logToConsoleAndFile("Final condition of network: " + simulation.Results.Years.Last().ConditionOfNetwork);
 

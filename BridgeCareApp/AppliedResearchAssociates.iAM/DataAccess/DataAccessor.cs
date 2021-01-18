@@ -536,9 +536,6 @@ where simulationid = {simulationId}
 
                     void createCommittedProjects()
                     {
-                        // per Jake 2020-07-30, ignore committed projects for now.
-                        return;
-
                         var projectPerId = new Dictionary<int, CommittedProject>();
 
                         while (reader.Read())

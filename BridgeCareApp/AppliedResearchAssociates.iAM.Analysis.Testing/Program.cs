@@ -111,6 +111,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
                         continue;
                     }
 
+                    logToConsoleAndFile("Elapsed runtime of simulation: " + timer.Elapsed);
+
                     logToConsoleAndFile("Final condition of network: " + simulation.Results.Years.Last().ConditionOfNetwork);
 
                     var outputFile = $"Network {networkId} - Simulation {simulationId}.json";

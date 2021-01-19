@@ -543,18 +543,25 @@ where simulationid = {simulationId}
                             var id = reader.GetInt32(0);
                             if (!projectPerId.TryGetValue(id, out var project))
                             {
-                                var sectionId = reader.GetInt32(1);
-                                var section = helper.SectionPerId[sectionId];
-                                var year = reader.GetInt32(2);
-                                project = simulation.CommittedProjects.GetAdd(new CommittedProject(section, year)); // maybe modify this so that the project is ignored if the budget name is not found.
-                                project.Name = reader.GetNullableString(3);
-                                project.ShadowForSameTreatment = reader.GetInt32(4);
-                                project.ShadowForAnyTreatment = reader.GetInt32(5);
                                 var budgetName = reader.GetNullableString(6);
-                                project.Budget = budgetPerName[budgetName];
-                                project.Cost = reader.GetDouble(7);
+                                if (budgetPerName.TryGetValue(budgetName, out var budget))
+                                {
+                                    var sectionId = reader.GetInt32(1);
+                                    var section = helper.SectionPerId[sectionId];
+                                    var year = reader.GetInt32(2);
+                                    project = simulation.CommittedProjects.GetAdd(new CommittedProject(section, year));
+                                    project.Name = reader.GetNullableString(3);
+                                    project.ShadowForSameTreatment = reader.GetInt32(4);
+                                    project.ShadowForAnyTreatment = reader.GetInt32(5);
+                                    project.Budget = budget;
+                                    project.Cost = reader.GetDouble(7);
 
-                                projectPerId.Add(id, project);
+                                    projectPerId.Add(id, project);
+                                }
+                                else
+                                {
+                                    continue;
+                                }
                             }
 
                             var consequence = project.Consequences.GetAdd(new TreatmentConsequence());

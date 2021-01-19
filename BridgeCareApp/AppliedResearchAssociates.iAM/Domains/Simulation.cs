@@ -132,19 +132,20 @@ namespace AppliedResearchAssociates.iAM.Domains
 
             foreach (var context in budgetContexts)
             {
-                var committedProjectPerYear = committedProjectsPerBudget[context.Budget].ToSortedDictionary(committedProject => committedProject.Year);
+                var committedProjectsPerYear = committedProjectsPerBudget[context.Budget].ToLookup(committedProject => committedProject.Year);
 
-                if (committedProjectPerYear.Any())
+                if (committedProjectsPerYear.Any())
                 {
-                    foreach (var year in Static.RangeFromBounds(committedProjectPerYear.Last().Value.Year, InvestmentPlan.FirstYearOfAnalysisPeriod, -1))
+                    foreach (var year in InvestmentPlan.YearsOfAnalysis)
                     {
-                        if (committedProjectPerYear.TryGetValue(year, out var committedProject))
+                        var committedProjects = committedProjectsPerYear[year];
+                        if (committedProjects.Any())
                         {
-                            var cost = (decimal)committedProject.Cost;
+                            var cost = committedProjects.Sum(committedProject => (decimal)committedProject.Cost);
 
                             if (!costCanBeAllocated(cost, context, year))
                             {
-                                throw new SimulationException($"Committed project \"{committedProject.Name}\" cannot be funded.");
+                                throw new SimulationException($"At least one committed project in year {year} cannot be funded.");
                             }
 
                             context.AllocateCost(cost, year);

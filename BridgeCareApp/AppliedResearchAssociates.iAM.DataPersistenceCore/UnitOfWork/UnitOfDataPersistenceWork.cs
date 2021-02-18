@@ -11,12 +11,12 @@ using AttributeDatumRepository = AppliedResearchAssociates.iAM.DataPersistenceCo
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 {
-    public class UnitOfWork : IDisposable
+    public class UnitOfDataPersistenceWork : IDisposable
     {
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public UnitOfWork(IConfiguration config, IAMContext context)
+        public UnitOfDataPersistenceWork(IConfiguration config, IAMContext context)
         {
             Config = config ?? throw new ArgumentNullException(nameof(config));
 
@@ -70,7 +70,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ITreatmentCostRepository _treatmentCostRepo;
         private ITreatmentSchedulingRepository _treatmentSchedulingRepo;
         private ITreatmentSupersessionRepository _treatmentSupersessionRepo;
-        private IDbContextTransaction _dbContextTransaction;
 
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
 
@@ -140,14 +139,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public ITreatmentSupersessionRepository TreatmentSupersessionRepo => _treatmentSupersessionRepo ??= new TreatmentSupersessionRepository(this);
 
-        public IDbContextTransaction DbContextTransaction => _dbContextTransaction ??= Context.Database.BeginTransaction();
+        public IDbContextTransaction DbContextTransaction       
+        {
+            get => _dbContextTransaction;
+            private set => _dbContextTransaction = value;
+        }
 
-        public void Commit() => DbContextTransaction.Commit();
+        public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
 
-        public void Rollback() => DbContextTransaction.Rollback();
+        public void Commit()
+        {
+            if (DbContextTransaction != null)
+            {
+                DbContextTransaction.Commit();
+                DbContextTransaction.Dispose();
+            }
+        }
+
+        public void Rollback()
+        {
+            if (DbContextTransaction != null)
+            {
+                DbContextTransaction.Rollback();
+                DbContextTransaction.Dispose();
+            }
+        }
 
         // DISPOSE PROPERTIES & METHODS
         private bool _disposed = false;
+        private IDbContextTransaction _dbContextTransaction;
 
         protected virtual void Dispose(bool disposing)
         {

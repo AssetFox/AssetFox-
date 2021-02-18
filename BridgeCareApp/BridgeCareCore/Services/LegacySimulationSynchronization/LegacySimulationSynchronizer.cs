@@ -21,44 +21,44 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
         private const int NetworkId = 13;
 
         private readonly IHubContext<BridgeCareHub> _hubContext;
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public LegacySimulationSynchronizer(IHubContext<BridgeCareHub> hub, UnitOfWork unitOfWork)
+        public LegacySimulationSynchronizer(IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
             _hubContext = hub;
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
-        private DataAccessor GetDataAccessor() => new DataAccessor(_unitOfWork.LegacyConnection, null);
+        private DataAccessor GetDataAccessor() => new DataAccessor(_unitOfDataPersistenceWork.LegacyConnection, null);
 
         private void SynchronizeExplorerData()
         {
             sendRealTimeMessage("Upserting attributes...");
 
-            _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
+            _unitOfDataPersistenceWork.AttributeRepo.UpsertAttributes(_unitOfDataPersistenceWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
         }
 
         private void SynchronizeNetwork(Simulation simulation)
         {
-            var network = _unitOfWork.NetworkRepo.GetPennDotNetwork();
+            var network = _unitOfDataPersistenceWork.NetworkRepo.GetPennDotNetwork();
 
             if (network == null)
             {
                 sendRealTimeMessage("Creating the network...");
 
-                _unitOfWork.NetworkRepo.CreateNetwork(simulation.Network);
+                _unitOfDataPersistenceWork.NetworkRepo.CreateNetwork(simulation.Network);
             }
         }
 
         private Task SynchronizeLegacyNetworkData(Simulation simulation)
         {
-            if (!_unitOfWork.NetworkRepo.CheckPennDotNetworkHasData())
+            if (!_unitOfDataPersistenceWork.NetworkRepo.CheckPennDotNetworkHasData())
             {
-                _unitOfWork.NetworkRepo.DeleteNetworkData();
+                _unitOfDataPersistenceWork.NetworkRepo.DeleteNetworkData();
 
                 sendRealTimeMessage("Creating the network's facilities and sections...");
 
-                _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
+                _unitOfDataPersistenceWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
             }
 
             return Task.CompletedTask;
@@ -66,7 +66,7 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
 
         private Task SynchronizeLegacySimulation(Simulation simulation)
         {
-            _unitOfWork.SimulationRepo.DeleteSimulationAndAllRelatedData();
+            _unitOfDataPersistenceWork.SimulationRepo.DeleteSimulationAndAllRelatedData();
 
             // TODO: hard-coding simulation id for alpha 1
             simulation.Id = new Guid(DataPersistenceConstants.TestSimulationId);
@@ -74,17 +74,17 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
 
             sendRealTimeMessage("Joining attributes with equations and criteria...");
 
-            _unitOfWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(simulation.Network.Explorer);
+            _unitOfDataPersistenceWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(simulation.Network.Explorer);
 
             sendRealTimeMessage("Inserting simulation data...");
 
-            _unitOfWork.SimulationRepo.CreateSimulation(simulation);
-            _unitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
-            _unitOfWork.AnalysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Id);
-            _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
-            _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
-            _unitOfWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
-            _unitOfWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
+            _unitOfDataPersistenceWork.SimulationRepo.CreateSimulation(simulation);
+            _unitOfDataPersistenceWork.InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
+            _unitOfDataPersistenceWork.AnalysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Id);
+            _unitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
+            _unitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
+            _unitOfDataPersistenceWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
+            _unitOfDataPersistenceWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
 
             return Task.CompletedTask;
         }
@@ -93,14 +93,14 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
         {
             try
             {
-                using var transaction = _unitOfWork.DbContextTransaction;
+                using var transaction = _unitOfDataPersistenceWork.DbContextTransaction;
 
                 
                 var dataAccessor = GetDataAccessor();
-                _unitOfWork.LegacyConnection.Open();
+                _unitOfDataPersistenceWork.LegacyConnection.Open();
                 var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, simulationId);
                 simulation.Network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
-                _unitOfWork.LegacyConnection.Close();
+                _unitOfDataPersistenceWork.LegacyConnection.Close();
 
                 SynchronizeExplorerData();
 
@@ -110,17 +110,17 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
 
                 await SynchronizeLegacySimulation(simulation);
 
-                _unitOfWork.Commit();
+                _unitOfDataPersistenceWork.Commit();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
+                _unitOfDataPersistenceWork.Rollback();
                 throw;
             }
             finally
             {
-                _unitOfWork.Connection.Close();
-                _unitOfWork.LegacyConnection.Close();
+                _unitOfDataPersistenceWork.Connection.Close();
+                _unitOfDataPersistenceWork.LegacyConnection.Close();
             }
         }
 

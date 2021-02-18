@@ -1,10 +1,10 @@
-﻿using BridgeCare.Interfaces;
-using BridgeCare.Models;
-using BridgeCare.Security;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Web.Http;
+using BridgeCare.Models;
+using BridgeCare.Security;
 using System.Web.Http.Filters;
+using BridgeCare.Interfaces;
 
 namespace BridgeCare.Controllers
 {

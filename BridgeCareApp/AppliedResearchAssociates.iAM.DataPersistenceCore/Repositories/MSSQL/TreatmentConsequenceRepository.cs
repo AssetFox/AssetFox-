@@ -16,11 +16,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public TreatmentConsequenceRepository(UnitOfWork.UnitOfWork unitOfWork)
+        public TreatmentConsequenceRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         public void CreateTreatmentConsequences(Dictionary<Guid, List<ConditionalTreatmentConsequence>> consequencesPerTreatmentId, string simulationName)
@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var attributeNames = consequencesPerTreatmentId.Values
                 .SelectMany(_ => _.Select(__ => __.Attribute.Name).Distinct()).ToList();
-            var attributeEntities = _unitOfWork.Context.Attribute
+            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute
                 .Where(_ => attributeNames.Contains(_.Name)).ToList();
 
             if (!attributeEntities.Any())
@@ -87,23 +87,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfWork.Context.TreatmentConsequence.AddRange(consequenceEntities);
+                _unitOfDataPersistenceWork.Context.TreatmentConsequence.AddRange(consequenceEntities);
             }
             else
             {
-                _unitOfWork.Context.BulkInsert(consequenceEntities);
+                _unitOfDataPersistenceWork.Context.BulkInsert(consequenceEntities);
             }
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
 
             if (equationEntityPerConsequenceEntityId.Values.Any())
             {
-                _unitOfWork.EquationRepo.CreateEquations(equationEntityPerConsequenceEntityId, "TreatmentConsequenceEntity");
+                _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntityPerConsequenceEntityId, "TreatmentConsequenceEntity");
             }
 
             if (consequenceEntityIdsPerExpression.Values.Any())
             {
-                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(consequenceEntityIdsPerExpression,
+                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(consequenceEntityIdsPerExpression,
                     "TreatmentConsequenceEntity", simulationName);
             }
         }

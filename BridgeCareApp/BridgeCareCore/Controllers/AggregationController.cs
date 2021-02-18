@@ -21,14 +21,14 @@ namespace BridgeCareCore.Controllers
     {
         private readonly ILogger<NetworkController> _logger;
         private readonly IHubContext<BridgeCareHub> HubContext;
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
         public AggregationController(
-            ILogger<NetworkController> logger, IHubContext<BridgeCareHub> hub, UnitOfWork unitOfWork)
+            ILogger<NetworkController> logger, IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         [HttpPost]
@@ -45,10 +45,10 @@ namespace BridgeCareCore.Controllers
                     .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
 
                 // Get/create configurable attributes
-                var configurationAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
+                var configurationAttributes = _unitOfDataPersistenceWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
 
                 // get all maintainable assets in the network with their assigned data (if any) and locations
-                var maintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId)
+                var maintainableAssets = _unitOfDataPersistenceWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId)
                     .ToList();
 
                 // Create list of attribute ids we are allowed to update with assigned data.
@@ -93,7 +93,7 @@ namespace BridgeCareCore.Controllers
                         .All
                         .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 // update the maintainable assets assigned data in the data source
-                var updatedRecordsCount = _unitOfWork.AttributeDatumRepo.UpdateAssignedData(maintainableAssets);
+                var updatedRecordsCount = _unitOfDataPersistenceWork.AttributeDatumRepo.UpdateAssignedData(maintainableAssets);
 
                 AggregateData(networkId, maintainableAssets);
 
@@ -168,7 +168,7 @@ namespace BridgeCareCore.Controllers
                         .All
                         .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 // create aggregated data records in the data source
-                var createdRecordsCount = _unitOfWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
+                var createdRecordsCount = _unitOfDataPersistenceWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
 
                 broadcastingMessage = $"Successfully aggregated the data";
                 HubContext

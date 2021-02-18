@@ -1,4 +1,4 @@
-export interface PerformanceLibraryEquation {
+export interface PerformanceCurve {
     id: string;
     attribute: string;
     equationName: string;
@@ -9,16 +9,16 @@ export interface PerformanceLibraryEquation {
     isFunction: boolean;
 }
 
-export interface PerformanceLibrary {
+export interface PerformanceCurveLibrary {
     id: string;
     name: string;
     owner?: string;
     shared?: boolean;
     description: string;
-    equations: PerformanceLibraryEquation[];
+    performanceCurves: PerformanceCurve[];
 }
 
-export const emptyEquation: PerformanceLibraryEquation = {
+export const defaultPerformanceCurve: PerformanceCurve = {
     id: '0',
     attribute: '',
     equationName: '',
@@ -29,9 +29,9 @@ export const emptyEquation: PerformanceLibraryEquation = {
     isFunction: false,
 };
 
-export const emptyPerformanceLibrary: PerformanceLibrary = {
+export const emptyPerformanceLibrary: PerformanceCurveLibrary = {
     id: '0',
     name: '',
     description: '',
-    equations: []
+    performanceCurves: []
 };

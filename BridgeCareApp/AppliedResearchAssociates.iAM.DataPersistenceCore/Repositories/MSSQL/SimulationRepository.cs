@@ -20,45 +20,45 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public SimulationRepository(UnitOfWork.UnitOfWork unitOfWork)
+        public SimulationRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         public void CreateSimulation(Simulation simulation)
         {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == simulation.Network.Id))
+            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == simulation.Network.Id))
             {
                 throw new RowNotInTableException($"No network found having id {simulation.Network.Id}");
             }
 
-            _unitOfWork.Context.Simulation.Add(simulation.ToEntity());
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.Simulation.Add(simulation.ToEntity());
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void GetAllInNetwork(Network network)
         {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
+            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == network.Id))
             {
                 throw new RowNotInTableException($"No network found having id {network.Id}");
             }
 
-            var entities = _unitOfWork.Context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
+            var entities = _unitOfDataPersistenceWork.Context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
 
             entities.ForEach(_ => _.CreateSimulation(network));
         }
 
         public List<SimulationDTO> GetAllInNetwork(Guid networkId)
         {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
+            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == networkId))
             {
                 //throw new RowNotInTableException($"No network found having id {networkId}");
                 return null;
             }
 
-            var entities = _unitOfWork.Context.Simulation
+            var entities = _unitOfDataPersistenceWork.Context.Simulation
                 .Include(_ => _.SimulationAnalysisDetail)
                 .Where(_ => _.NetworkId == networkId);
 
@@ -67,34 +67,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetSimulationInNetwork(Guid simulationId, Network network)
         {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
+            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == network.Id))
             {
                 throw new RowNotInTableException($"No network found having id {network.Id}");
             }
 
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+            var simulationEntity = _unitOfDataPersistenceWork.Context.Simulation.Single(_ => _.Id == simulationId);
 
             simulationEntity.CreateSimulation(network);
         }
 
         public SimulationDTO GetSimulation(Guid simulationId)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationDTO = _unitOfWork.Context.Simulation
+            var simulationDTO = _unitOfDataPersistenceWork.Context.Simulation
                 .Include(_ => _.SimulationOutput)
                 .Single(_ => _.Id == simulationId)
                 .ToDto();
 
-            var simulationAnalysisDetail = _unitOfWork.SimulationAnalysisDetailRepo.GetSimulationAnalysisDetail(simulationId);
+            var simulationAnalysisDetail = _unitOfDataPersistenceWork.SimulationAnalysisDetailRepo.GetSimulationAnalysisDetail(simulationId);
 
             simulationDTO.LastRun = simulationAnalysisDetail.LastRun;
             simulationDTO.Status = simulationAnalysisDetail.Status;
@@ -107,38 +107,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (IsRunningFromXUnit)
             {
-                _unitOfWork.Context.Simulation.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.Simulation.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
 
-                _unitOfWork.Context.Equation.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.Equation.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
 
-                _unitOfWork.Context.CriterionLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.CriterionLibrary.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
 
-                _unitOfWork.Context.BudgetLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.BudgetLibrary.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
 
-                _unitOfWork.Context.BudgetPriorityLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.BudgetPriorityLibrary.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
 
-                _unitOfWork.Context.CashFlowRuleLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.CashFlowRuleLibrary.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
 
-                _unitOfWork.Context.DeficientConditionGoalLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.DeficientConditionGoalLibrary.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
 
-                _unitOfWork.Context.PerformanceCurveLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.PerformanceCurveLibrary.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
 
-                _unitOfWork.Context.RemainingLifeLimitLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
 
-                _unitOfWork.Context.TargetConditionGoalLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.TargetConditionGoalLibrary.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
 
-                _unitOfWork.Context.TreatmentLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfDataPersistenceWork.Context.TreatmentLibrary.ToList()
+                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
             }
             else
             {
@@ -150,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Connection.Open();
                 command.ExecuteNonQuery();
                 _unitOfWork.Connection.Close();*/
-                _unitOfWork.Context.Database.ExecuteSqlRaw(
+                _unitOfDataPersistenceWork.Context.Database.ExecuteSqlRaw(
                     "DELETE FROM dbo.Simulation;" +
                     "DELETE FROM dbo.Equation;" +
                     "DELETE FROM dbo.CriterionLibrary;" +
@@ -164,7 +164,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     "DELETE FROM dbo.TreatmentLibrary;");
             }
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
     }
 }

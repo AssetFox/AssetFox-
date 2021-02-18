@@ -25,11 +25,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             "Id", "CreatedDate", "LastModifiedDate", "CreatedBy", "LastModifiedBy", "SectionId", "AttributeId", "Year", "Value"
         };
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public AttributeValueHistoryRepository(UnitOfWork.UnitOfWork unitOfWork)
+        public AttributeValueHistoryRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         public void CreateNumericAttributeValueHistories(
@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfWork.Context.NumericAttributeValueHistory.AddRange(numericAttributeValueHistoryEntities);
+                _unitOfDataPersistenceWork.Context.NumericAttributeValueHistory.AddRange(numericAttributeValueHistoryEntities);
             }
             else
             {
@@ -61,17 +61,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var currentEntities = numericAttributeValueHistoryEntities
                             .Skip(skip * take).Take(take);/*.ToDataTable(Props);*/
                         //BulkInsert(dt, "NumericAttributeValueHistory");
-                        _unitOfWork.Context.BulkInsert(currentEntities.ToList());
+                        _unitOfDataPersistenceWork.Context.BulkInsert(currentEntities.ToList());
                         skip++;
                     }
                 }
                 else
                 {
-                    _unitOfWork.Context.BulkInsert(numericAttributeValueHistoryEntities);
+                    _unitOfDataPersistenceWork.Context.BulkInsert(numericAttributeValueHistoryEntities);
                 }
             }
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void CreateTextAttributeValueHistories(
@@ -88,7 +88,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfWork.Context.TextAttributeValueHistory.AddRange(textAttributeValueHistoryEntities);
+                _unitOfDataPersistenceWork.Context.TextAttributeValueHistory.AddRange(textAttributeValueHistoryEntities);
             }
             else
             {
@@ -104,17 +104,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var currentEntities = textAttributeValueHistoryEntities
                             .Skip(skip * take).Take(take);/*.ToDataTable(Props);*/
                         //BulkInsert(dt, "TextAttributeValueHistory");
-                        _unitOfWork.Context.BulkInsert(currentEntities.ToList());
+                        _unitOfDataPersistenceWork.Context.BulkInsert(currentEntities.ToList());
                         skip++;
                     }
                 }
                 else
                 {
-                    _unitOfWork.Context.BulkInsert(textAttributeValueHistoryEntities);
+                    _unitOfDataPersistenceWork.Context.BulkInsert(textAttributeValueHistoryEntities);
                 }
             }
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void BulkInsert(DataTable dt, string tableName)
@@ -123,7 +123,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // more on triggers in next post
             var bulkCopy = new SqlBulkCopy
                 (
-                    _unitOfWork.Connection,
+                    _unitOfDataPersistenceWork.Connection,
                     SqlBulkCopyOptions.TableLock |
                     SqlBulkCopyOptions.FireTriggers |
                     SqlBulkCopyOptions.UseInternalTransaction,
@@ -132,11 +132,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 { DestinationTableName = tableName };
 
             // set the destination table name
-            _unitOfWork.Connection.Open();
+            _unitOfDataPersistenceWork.Connection.Open();
 
             // write the data in the "dataTable"
             bulkCopy.WriteToServer(dt);
-            _unitOfWork.Connection.Close();
+            _unitOfDataPersistenceWork.Connection.Close();
         }
 
     }

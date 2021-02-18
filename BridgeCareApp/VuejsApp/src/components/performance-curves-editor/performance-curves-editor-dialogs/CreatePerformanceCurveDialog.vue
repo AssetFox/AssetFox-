@@ -9,17 +9,17 @@
                 </v-card-title>
                 <v-card-text>
                     <v-layout column>
-                        <v-text-field label="Name" outline v-model="newPerformanceLibraryEquation.equationName"
+                        <v-text-field label="Name" outline v-model="newPerformanceCurve.equationName"
                                       :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-                        <v-select :items="attributesSelectListItems" label="Select Attribute"
-                                  outline v-model="newPerformanceLibraryEquation.attribute"
+                        <v-select :items="attributeSelectItems" label="Select Attribute"
+                                  outline v-model="newPerformanceCurve.attribute"
                                   :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                     </v-layout>
                 </v-card-text>
                 <v-card-actions>
                     <v-layout justify-space-between row>
-                        <v-btn :disabled="newPerformanceLibraryEquation.equationName === '' ||
-                                          newPerformanceLibraryEquation.attribute === ''"
+                        <v-btn :disabled="newPerformanceCurve.equationName === '' ||
+                                          newPerformanceCurve.attribute === ''"
                                @click="onSubmit(true)" class="ara-blue-bg white--text">
                             Save
                         </v-btn>
@@ -35,7 +35,7 @@
     import Vue from 'vue';
     import {Component, Prop, Watch} from 'vue-property-decorator';
     import {State} from 'vuex-class';
-    import {emptyEquation, PerformanceLibraryEquation} from '@/shared/models/iAM/performance';
+    import {defaultPerformanceCurve, PerformanceCurve} from '@/shared/models/iAM/performance';
     import {SelectItem} from '@/shared/models/vue/select-item';
     import {Attribute} from '@/shared/models/iAM/attribute';
     import {hasValue} from '@/shared/utils/has-value-util';
@@ -45,13 +45,13 @@
     const ObjectID = require('bson-objectid');
 
     @Component
-    export default class CreatePerformanceLibraryEquationDialog extends Vue {
+    export default class CreatePerformanceCurveDialog extends Vue {
         @Prop() showDialog: boolean;
 
         @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
 
-        attributesSelectListItems: SelectItem[] = [];
-        newPerformanceLibraryEquation: PerformanceLibraryEquation = {...emptyEquation, id: ObjectID.generate()};
+        attributeSelectItems: SelectItem[] = [];
+        newPerformanceCurve: PerformanceCurve = {...defaultPerformanceCurve, id: ObjectID.generate()};
         rules: InputValidationRules = clone(rules);
 
         /**
@@ -59,43 +59,43 @@
          */
         mounted() {
             if (hasValue(this.stateNumericAttributes)) {
-                this.setAttributesSelectListItems();
+                this.setAttributeSelectItems();
             }
         }
 
         /**
-         * Calls the setAttributesSelectListItems function if a change to stateNumericAttributes causes it to have a value
+         * Calls the setAttributeSelectItems function if a change to stateNumericAttributes causes it to have a value
          */
         @Watch('stateNumericAttributes')
         onStateNumericAttributesChanged() {
             if (hasValue(this.stateNumericAttributes)) {
-                this.setAttributesSelectListItems();
+                this.setAttributeSelectItems();
             }
         }
 
         /**
          * Sets the attribute select items using numeric attributes from state
          */
-        setAttributesSelectListItems() {
-            this.attributesSelectListItems = this.stateNumericAttributes.map((attribute: Attribute) => ({
+        setAttributeSelectItems() {
+            this.attributeSelectItems = this.stateNumericAttributes.map((attribute: Attribute) => ({
                 text: attribute.name,
                 value: attribute.name
             }));
         }
 
         /**
-         * Emits the newPerformanceLibraryEquation object or a null value to the parent component and resets the
-         * newPerformanceLibraryEquation object
-         * @param submit Whether or not to emit the newPerformanceLibraryEquation object
+         * Emits the newPerformanceCurve object or a null value to the parent component and resets the
+         * newPerformanceCurve object
+         * @param submit Whether or not to emit the newPerformanceCurve object
          */
         onSubmit(submit: boolean) {
             if (submit) {
-                this.$emit('submit', this.newPerformanceLibraryEquation);
+                this.$emit('submit', this.newPerformanceCurve);
             } else {
                 this.$emit('submit', null);
             }
 
-            this.newPerformanceLibraryEquation = {...emptyEquation, id: ObjectID.generate()};
+            this.newPerformanceCurve = {...defaultPerformanceCurve, id: ObjectID.generate()};
         }
     }
 </script>

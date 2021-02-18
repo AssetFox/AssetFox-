@@ -10,20 +10,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class MaintainableAssetRepository : IMaintainableAssetRepository
     {
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public MaintainableAssetRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public MaintainableAssetRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
 
 
         public IEnumerable<MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId)
         {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
+            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var maintainableAssets = _unitOfWork.Context.MaintainableAsset
+            var maintainableAssets = _unitOfDataPersistenceWork.Context.MaintainableAsset
                 .Include(_ => _.MaintainableAssetLocation)
                 .Include(_ => _.AssignedData)
                 .ThenInclude(_ => _.Attribute)

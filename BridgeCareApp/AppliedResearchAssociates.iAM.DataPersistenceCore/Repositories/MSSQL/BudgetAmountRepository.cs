@@ -17,18 +17,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public BudgetAmountRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public BudgetAmountRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public void CreateBudgetAmounts(Dictionary<Guid, List<BudgetAmount>> budgetAmountsPerBudgetEntityId, Guid simulationId)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            var simulationEntity = _unitOfWork.Context.Simulation
+            var simulationEntity = _unitOfDataPersistenceWork.Context.Simulation
                 .Include(_ => _.InvestmentPlan)
                 .Single(_ => _.Id == simulationId);
 
@@ -51,14 +51,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfWork.Context.BudgetAmount.AddRange(budgetAmountEntities);
+                _unitOfDataPersistenceWork.Context.BudgetAmount.AddRange(budgetAmountEntities);
             }
             else
             {
-                _unitOfWork.Context.BulkInsert(budgetAmountEntities);
+                _unitOfDataPersistenceWork.Context.BulkInsert(budgetAmountEntities);
             }
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
     }
 }

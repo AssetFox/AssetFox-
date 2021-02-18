@@ -14,11 +14,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public TreatmentCostRepository(UnitOfWork.UnitOfWork unitOfWork)
+        public TreatmentCostRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         public void CreateTreatmentCosts(Dictionary<Guid, List<TreatmentCost>> treatmentCostsPerTreatmentId, string simulationName)
@@ -62,23 +62,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfWork.Context.TreatmentCost.AddRange(costEntities);
+                _unitOfDataPersistenceWork.Context.TreatmentCost.AddRange(costEntities);
             }
             else
             {
-                _unitOfWork.Context.BulkInsert(costEntities);
+                _unitOfDataPersistenceWork.Context.BulkInsert(costEntities);
             }
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
 
             if (equationEntityPerCostEntityId.Values.Any())
             {
-                _unitOfWork.EquationRepo.CreateEquations(equationEntityPerCostEntityId, "TreatmentCostEntity");
+                _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntityPerCostEntityId, "TreatmentCostEntity");
             }
 
             if (costEntityIdsPerExpression.Values.Any())
             {
-                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(costEntityIdsPerExpression,
+                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(costEntityIdsPerExpression,
                     "TreatmentCostEntity", simulationName);
             }
         }

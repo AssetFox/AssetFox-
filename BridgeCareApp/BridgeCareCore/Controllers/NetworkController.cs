@@ -17,12 +17,12 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class NetworkController : ControllerBase
     {
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly ILog _log;
 
-        public NetworkController(UnitOfWork unitOfWork, ILog log)
+        public NetworkController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog log)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
@@ -33,7 +33,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 _log.Information("Entered GetAllNetWorks call");
-                var networks = _unitOfWork.NetworkRepo.GetAllNetworks();
+                var networks = _unitOfDataPersistenceWork.NetworkRepo.GetAllNetworks();
                 // Sending the first network because PennDOT will always have only 1 network
                 var filteredNetworks = new List<Network> { networks.FirstOrDefault() };
                 return Ok(filteredNetworks);
@@ -52,7 +52,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 // get network definition attribute from json file
-                var attribute = _unitOfWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
+                var attribute = _unitOfDataPersistenceWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
 
                 // throw an exception if not network definition attribute is present
                 if (attribute == null)
@@ -66,7 +66,7 @@ namespace BridgeCareCore.Controllers
                 network.Name = networkName;
 
                 // insert network domain data into the data source
-                _unitOfWork.NetworkRepo.CreateNetwork(network);
+                _unitOfDataPersistenceWork.NetworkRepo.CreateNetwork(network);
 
                 // [TODO] Create DTO to return network information necessary to be stored in the UI
                 // for future reference.

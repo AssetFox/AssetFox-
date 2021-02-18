@@ -17,12 +17,12 @@ namespace BridgeCareCore.Services.SimulationAnalysis
 {
     public class SimulationAnalysis : ISimulationAnalysis
     {
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly IHubContext<BridgeCareHub> HubContext;
 
-        public SimulationAnalysis(UnitOfWork unitOfWork, IHubContext<BridgeCareHub> hub)
+        public SimulationAnalysis(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IHubContext<BridgeCareHub> hub)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
         }
 
@@ -34,18 +34,18 @@ namespace BridgeCareCore.Services.SimulationAnalysis
                 LastRun = DateTime.Now,
                 Status = "Starting analysis..."
             };
-            _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+            _unitOfDataPersistenceWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             sendSimulationAnalysisDetail(simulationAnalysisDetail);
 
-            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
-            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
-            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+            var explorer = _unitOfDataPersistenceWork.AttributeRepo.GetExplorer();
+            var network = _unitOfDataPersistenceWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
+            _unitOfDataPersistenceWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
             var simulation = network.Simulations.First();
-            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _unitOfWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
-            _unitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+            _unitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+            _unitOfDataPersistenceWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+            _unitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
 
             var runner = new SimulationRunner(simulation);
 
@@ -62,7 +62,7 @@ namespace BridgeCareCore.Services.SimulationAnalysis
                 {
                     simulationAnalysisDetail.Status = eventArgs.Message;
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
+                    _unitOfDataPersistenceWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
                 }
                 else
                 {
@@ -90,7 +90,7 @@ namespace BridgeCareCore.Services.SimulationAnalysis
                 var interval = stopDateTime - simulationAnalysisDetail.LastRun;
                 simulationAnalysisDetail.RunTime = interval.Value.ToString(@"hh\:mm\:ss");
             }
-            _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+            _unitOfDataPersistenceWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
         }
 
         private void sendRealTimeMessage(string message, Guid simulationId)

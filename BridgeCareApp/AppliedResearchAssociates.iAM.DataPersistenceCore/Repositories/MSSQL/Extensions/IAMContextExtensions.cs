@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions
@@ -15,41 +18,90 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 return;
             }
 
-            var existing = context.Set<T>().Find(key);
+            var entities = context.Set<T>();
 
-            if (existing != null)
+            var existingEntity = entities.Find(key);
+            if (existingEntity != null)
             {
                 var createdDatePropertyInfo = typeof(T).GetProperty("CreatedDate");
-                createdDatePropertyInfo.SetValue(entity, createdDatePropertyInfo.GetValue(existing));
+                createdDatePropertyInfo.SetValue(entity, createdDatePropertyInfo.GetValue(existingEntity));
                 var lastModifiedDatePropertyInfo = typeof(T).GetProperty("LastModifiedDate");
                 lastModifiedDatePropertyInfo.SetValue(entity, DateTime.Now);
-                context.Entry(existing).CurrentValues.SetValues(entity);
+                context.Entry(existingEntity).CurrentValues.SetValues(entity);
             }
             else
             {
-                context.Set<T>().Add(entity);
+                entities.Add(entity);
             }
         }
 
-        public static void AddOrUpdate(this IAMContext context, AttributeEquationCriterionLibraryEntity entity)
+        public static void AddOrUpdate<T>(this IAMContext context, T entity, Expression<Func<T, bool>> predicate) where T : class
         {
             if (entity == null)
             {
                 return;
             }
 
-            var existing = context.Set<AttributeEquationCriterionLibraryEntity>()
-                .SingleOrDefault(_ => _.AttributeId == entity.AttributeId && _.EquationId == entity.EquationId);
+            var entities = context.Set<T>();
 
-            if (existing != null)
+            var existingEntity = entities.SingleOrDefault(predicate);
+            if (existingEntity != null)
             {
-                entity.CreatedDate = existing.CreatedDate;
-                entity.LastModifiedDate = DateTime.Now;
-                context.Entry(existing).CurrentValues.SetValues(entity);
+                var createdDatePropertyInfo = typeof(T).GetProperty("CreatedDate");
+                createdDatePropertyInfo.SetValue(entity, createdDatePropertyInfo.GetValue(existingEntity));
+                var lastModifiedDatePropertyInfo = typeof(T).GetProperty("LastModifiedDate");
+                lastModifiedDatePropertyInfo.SetValue(entity, DateTime.Now);
+                context.Entry(existingEntity).CurrentValues.SetValues(entity);
             }
             else
             {
-                context.Set<AttributeEquationCriterionLibraryEntity>().Add(entity);
+                entities.Add(entity);
+            }
+        }
+
+        public static void Delete<T>(this IAMContext context, Expression<Func<T, bool>> predicate) where T : class
+        {
+            var entities = context.Set<T>();
+
+            var entitiesToDelete = entities.Where(predicate);
+            if (entitiesToDelete.Any())
+            {
+                entities.RemoveRange(entitiesToDelete);
+            }
+        }
+
+        public static void BulkAddOrUpdateOrDelete<T>(this IAMContext context, List<T> entities,
+            Dictionary<string, Expression<Func<T, bool>>> predicatesPerCrudOperation) where T : class
+        {
+            var contextEntities = context.Set<T>();
+
+            if (predicatesPerCrudOperation.ContainsKey("delete"))
+            {
+                var entitiesToDelete = contextEntities.Where(predicatesPerCrudOperation["delete"]);
+                if (entitiesToDelete.Any())
+                {
+                    context.BulkDelete(entitiesToDelete.ToList());
+                }
+            }
+
+            if (predicatesPerCrudOperation.ContainsKey("update"))
+            {
+                var entitiesToUpdate = entities.AsQueryable().Where(predicatesPerCrudOperation["update"]);
+                if (entitiesToUpdate.Any())
+                {
+                    var propsToExclude = new List<string> {"CreatedDate"};
+                    var config = new BulkConfig {PropertiesToExclude = propsToExclude};
+                    context.BulkUpdate(entitiesToUpdate.ToList(), config);
+                }
+            }
+
+            if (predicatesPerCrudOperation.ContainsKey("add"))
+            {
+                var entitiesToAdd = entities.AsQueryable().Where(predicatesPerCrudOperation["add"]);
+                if (entitiesToAdd.Any())
+                {
+                    context.BulkInsert(entitiesToAdd.ToList());
+                }
             }
         }
     }

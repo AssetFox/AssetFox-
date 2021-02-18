@@ -196,15 +196,15 @@
     import {Watch} from 'vue-property-decorator';
     import Component from 'vue-class-component';
     import {Action, State} from 'vuex-class';
-    import CreatePerformanceLibraryDialog from './performance-editor-dialogs/CreatePerformanceLibraryDialog.vue';
-    import CreatePerformanceLibraryEquationDialog from './performance-editor-dialogs/CreatePerformanceLibraryEquationDialog.vue';
+    import CreatePerformanceCurveLibraryDialog from './performance-curves-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
+    import CreatePerformanceCurveDialog from './performance-curves-editor-dialogs/CreatePerformanceCurveDialog.vue';
     import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
     import CriteriaEditorDialog from '../../shared/modals/CriteriaEditorDialog.vue';
     import {
-        emptyEquation,
+        defaultPerformanceCurve,
         emptyPerformanceLibrary,
-        PerformanceLibrary,
-        PerformanceLibraryEquation
+        PerformanceCurveLibrary,
+        PerformanceCurve
     } from '@/shared/models/iAM/performance';
     import {SelectItem} from '@/shared/models/vue/select-item';
     import {DataTableHeader} from '@/shared/models/vue/data-table-header';
@@ -234,21 +234,21 @@
 
     @Component({
         components: {
-            CreatePerformanceLibraryDialog,
-            CreatePerformanceLibraryEquationDialog,
+            CreatePerformanceLibraryDialog: CreatePerformanceCurveLibraryDialog,
+            CreatePerformanceLibraryEquationDialog: CreatePerformanceCurveDialog,
             EquationEditorDialog,
             CriteriaEditorDialog,
             Alert
         }
     })
-    export default class PerformanceEditor extends Vue {
-        @State(state => state.performanceEditor.performanceLibraries) statePerformanceLibraries: PerformanceLibrary[];
-        @State(state => state.performanceEditor.selectedPerformanceLibrary) stateSelectedPerformanceLibrary: PerformanceLibrary;
-        @State(state => state.performanceEditor.scenarioPerformanceLibrary) stateScenarioPerformanceLibrary: PerformanceLibrary;
+    export default class PerformanceCurvesEditor extends Vue {
+        @State(state => state.performanceEditor.performanceLibraries) statePerformanceLibraries: PerformanceCurveLibrary[];
+        @State(state => state.performanceEditor.selectedPerformanceLibrary) stateSelectedPerformanceLibrary: PerformanceCurveLibrary;
+        @State(state => state.performanceEditor.scenarioPerformanceCurveLibrary) stateScenarioPerformanceLibrary: PerformanceCurveLibrary;
         @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
 
-        @Action('getPerformanceLibraries') getPerformanceLibrariesAction: any;
-        @Action('selectPerformanceLibrary') selectPerformanceLibraryAction: any;
+        @Action('getPerformanceCurveLibraries') getPerformanceLibrariesAction: any;
+        @Action('selectPerformanceCurveLibrary') selectPerformanceLibraryAction: any;
         @Action('createPerformanceLibrary') createPerformanceLibraryAction: any;
         @Action('updatePerformanceLibrary') updatePerformanceLibraryAction: any;
         @Action('deletePerformanceLibrary') deletePerformanceLibraryAction: any;
@@ -257,8 +257,8 @@
         @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
         searchEquation = '';
-        performanceLibraries: PerformanceLibrary[] = [];
-        selectedPerformanceLibrary: PerformanceLibrary = clone(emptyPerformanceLibrary);
+        performanceLibraries: PerformanceCurveLibrary[] = [];
+        selectedPerformanceCurveLibrary: PerformanceCurveLibrary = clone(emptyPerformanceLibrary);
         selectedScenarioId: string = '0';
         hasSelectedPerformanceLibrary: boolean = false;
         performanceLibrariesSelectListItems: SelectItem[] = [];
@@ -270,9 +270,9 @@
             {text: 'Criteria', value: 'criteria', align: 'center', sortable: false, class: '', width: ''},
             {text: '', value: '', align: 'center', sortable: false, class: '', width: ''}
         ];
-        equationsGridData: PerformanceLibraryEquation[] = [];
-        attributesSelectListItems: SelectItem[] = [];
-        selectedEquation: PerformanceLibraryEquation = clone(emptyEquation);
+        equationsGridData: PerformanceCurve[] = [];
+        attributeSelectItems: SelectItem[] = [];
+        selectedEquation: PerformanceCurve = clone(defaultPerformanceCurve);
         createPerformanceLibraryDialogData: CreatePerformanceLibraryDialogData = clone(emptyCreatePerformanceLibraryDialogData);
         equationEditorDialogData: EquationEditorDialogData = clone(emptyEquationEditorDialogData);
         criteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
@@ -322,7 +322,7 @@
         @Watch('statePerformanceLibraries')
         onStatePerformanceLibrariesChanged() {
             this.performanceLibrariesSelectListItems = this.statePerformanceLibraries
-                .map((performanceLibrary: PerformanceLibrary) => ({
+                .map((performanceLibrary: PerformanceCurveLibrary) => ({
                     text: performanceLibrary.name,
                     value: performanceLibrary.id.toString()
                 }));
@@ -356,7 +356,7 @@
         }
 
         /**
-         * Calls the setAttributesSelectListItems function on a change to the stateNumericAttributes object
+         * Calls the setAttributesSelectItems function on a change to the stateNumericAttributes object
          */
         @Watch('stateNumericAttributes')
         onStateNumericAttributesChanged() {
@@ -364,7 +364,7 @@
         }
 
         /**
-         * Setter for the attributesSelectListItems object
+         * Setter for the attributeSelectItems object
          */
         setAttributesSelectListItems() {
             if (hasValue(this.stateNumericAttributes)) {
@@ -383,9 +383,9 @@
         }
 
         /**
-         * Appends new equation to selected performance library's equations list
+         * Appends new equation to selected performance library's performanceCurves list
          */
-        onCreatePerformanceLibraryEquation(createdEquation: PerformanceLibraryEquation) {
+        onCreatePerformanceLibraryEquation(createdEquation: PerformanceCurve) {
             this.showCreatePerformanceLibraryEquationDialog = false;
 
             if (!isNil(createdEquation)) {
@@ -401,15 +401,15 @@
          */
         onEditEquationProperty(id: string, property: string, value: any) {
             if (any(propEq('id', id), this.selectedPerformanceLibrary.equations)) {
-                const equation: PerformanceLibraryEquation = find(
+                const equation: PerformanceCurve = find(
                     propEq('id', id), this.selectedPerformanceLibrary.equations
-                ) as PerformanceLibraryEquation;
+                ) as PerformanceCurve;
 
                 this.selectedPerformanceLibrary = {
                     ...this.selectedPerformanceLibrary,
                     equations: update(
                         findIndex(propEq('id', equation.id), this.selectedPerformanceLibrary.equations),
-                        setItemPropertyValue(property, value, equation) as PerformanceLibraryEquation,
+                        setItemPropertyValue(property, value, equation) as PerformanceCurve,
                         this.selectedPerformanceLibrary.equations
                     )
                 };
@@ -422,7 +422,7 @@
         onShowEquationEditorDialog(id: string) {
             this.selectedEquation = find(
                 propEq('id', id), this.selectedPerformanceLibrary.equations
-            ) as PerformanceLibraryEquation;
+            ) as PerformanceCurve;
 
             if (!isNil(this.selectedEquation)) {
                 this.equationEditorDialogData = {
@@ -456,7 +456,7 @@
                 };
             }
 
-            this.selectedEquation = clone(emptyEquation);
+            this.selectedEquation = clone(defaultPerformanceCurve);
         }
 
         /**
@@ -465,7 +465,7 @@
         onShowCriteriaEditorDialog(id: string) {
             this.selectedEquation = find(
                 propEq('id', id), this.selectedPerformanceLibrary.equations
-            ) as PerformanceLibraryEquation;
+            ) as PerformanceCurve;
 
             if (!isNil(this.selectedEquation)) {
                 this.criteriaEditorDialogData = {
@@ -492,17 +492,17 @@
                 };
             }
 
-            this.selectedEquation = clone(emptyEquation);
+            this.selectedEquation = clone(defaultPerformanceCurve);
         }
 
         /**
-         * Removes a performance library equation from a performance library's equations property
+         * Removes a performance library equation from a performance library's performanceCurves property
          */
         onDeleteEquation(id: string) {
             this.selectedPerformanceLibrary = {
                 ...this.selectedPerformanceLibrary,
                 equations: this.selectedPerformanceLibrary.equations
-                    .filter((equation: PerformanceLibraryEquation) => equation.id !== id)
+                    .filter((equation: PerformanceCurve) => equation.id !== id)
             };
         }
 
@@ -520,7 +520,7 @@
         /**
          * Dispatches an action to create a new performance library
          */
-        onCreatePerformanceLibrary(createdPerformanceLibrary: PerformanceLibrary) {
+        onCreatePerformanceLibrary(createdPerformanceLibrary: PerformanceCurveLibrary) {
             this.createPerformanceLibraryDialogData = clone(emptyCreatePerformanceLibraryDialogData);
 
             if (!isNil(createdPerformanceLibrary)) {
@@ -578,7 +578,7 @@
         disableSubmitAction() {
             if (this.hasSelectedPerformanceLibrary) {
                 const allDataIsValid: boolean = this.selectedPerformanceLibrary.equations
-                    .every((pe: PerformanceLibraryEquation) => {
+                    .every((pe: PerformanceCurve) => {
                         return this.rules['generalRules'].valueIsNotEmpty(pe.equationName) === true &&
                             this.rules['generalRules'].valueIsNotEmpty(pe.attribute) === true;
                     });

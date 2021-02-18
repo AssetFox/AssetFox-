@@ -159,10 +159,10 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Performance',
+            tabName: 'Performance Curves',
             tabIcon: 'fas fa-chart-line',
             navigation: {
-                path: '/PerformanceEditor/Scenario/',
+                path: '/PerformanceCurvesEditor/Scenario/',
             },
         },
         {
@@ -397,7 +397,7 @@ export default class EditScenario extends Vue {
             this.runNewSimulationAction({
               networkId: process.env.VUE_APP_HARDCODED_NETWORKID_FROM_MSSQL,
               selectedScenarioId: this.selectedScenario.id
-            })
+            });
           } else {
             this.runSimulationAction({
               selectedScenario: this.selectedScenario,

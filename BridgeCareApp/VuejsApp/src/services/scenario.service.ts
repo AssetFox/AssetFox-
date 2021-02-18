@@ -242,7 +242,7 @@ export default class ScenarioService {
     }
 
     static runMigratedScenarioSimulation(networkId: string, simulationId: string): AxiosPromise {
-        return bridgecareCoreAxiosInstance.post(`/api/Simulation/RunSimulation/${networkId}/${simulationId}`)
+        return bridgecareCoreAxiosInstance.post(`/api/Simulation/RunSimulation/${networkId}/${simulationId}`);
     }
 
     static setScenarioUsers(scenarioId: number, scenarioUsers: ScenarioUser[]): AxiosPromise {

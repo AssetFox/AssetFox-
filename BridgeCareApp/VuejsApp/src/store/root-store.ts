@@ -7,7 +7,7 @@ import network from '../store-modules/network.module';
 import scenario from '../store-modules/scenario.module';
 import inventory from '@/store-modules/inventory.module';
 import investmentEditor from '@/store-modules/investment-editor.module';
-import performanceEditor from '@/store-modules/performance-editor.module';
+import performanceCurvesEditor from '@/store-modules/performance-curves-editor.module';
 import treatmentEditor from '@/store-modules/treatment-editor.module';
 import attribute from '@/store-modules/attribute.module';
 import toastr from '@/store-modules/toastr.module';
@@ -33,7 +33,7 @@ export default new Vuex.Store({
         scenario,
         inventory,
         investmentEditor,
-        performanceEditor,
+        performanceCurvesEditor: performanceCurvesEditor,
         attribute,
         treatmentEditor,
         toastr,

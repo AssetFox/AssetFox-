@@ -7,7 +7,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IEquationRepository
     {
-        void CreateEquations(Dictionary<Guid, EquationEntity> equationEntitiesPerEntityId, string joinEntity);
+        void CreateEquations(Dictionary<Guid, EquationEntity> equationEntitiesPerJoinEntityId, string joinEntity);
+        void DeleteOrphanEquationsAndJoins(string joinEntity, Guid? libraryId);
         void CreateEquations(List<EquationEntity> equationEntities);
     }
 }

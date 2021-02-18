@@ -172,7 +172,7 @@
     <TypeScriptCompile Include="src\services\inventory.service.ts" />
     <TypeScriptCompile Include="src\services\investment-editor.service.ts" />
     <TypeScriptCompile Include="src\services\network.service.ts" />
-    <TypeScriptCompile Include="src\services\performance-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\performance-curves-editor.service.ts" />
     <TypeScriptCompile Include="src\services\priority.service.ts" />
     <TypeScriptCompile Include="src\services\remaining-life-limit.service.ts" />
     <TypeScriptCompile Include="src\services\reports.service.ts" />
@@ -245,7 +245,7 @@
     <TypeScriptCompile Include="src\store-modules\inventory.module.ts" />
     <TypeScriptCompile Include="src\store-modules\investment-editor.module.ts" />
     <TypeScriptCompile Include="src\store-modules\network.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\performance-editor.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\performance-curves-editor.module.ts" />
     <TypeScriptCompile Include="src\store-modules\rollup.module.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

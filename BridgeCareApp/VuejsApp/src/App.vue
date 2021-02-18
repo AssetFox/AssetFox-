@@ -191,7 +191,7 @@
             'SynchronizeLegacySimulation',
             'RunSimulation',
             'GenerateSummaryReport'
-        ]
+        ];
 
         get container() {
             const container: any = {};

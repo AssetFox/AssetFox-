@@ -15,45 +15,45 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public TargetConditionGoalRepository(UnitOfWork.UnitOfWork unitOfWork)
+        public TargetConditionGoalRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         public void CreateTargetConditionGoalLibrary(string name, Guid simulationId)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             var targetConditionGoalLibraryEntity = new TargetConditionGoalLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
-            _unitOfWork.Context.TargetConditionGoalLibrary.Add(targetConditionGoalLibraryEntity);
+            _unitOfDataPersistenceWork.Context.TargetConditionGoalLibrary.Add(targetConditionGoalLibraryEntity);
 
-            _unitOfWork.Context.TargetConditionGoalLibrarySimulation.Add(new TargetConditionGoalLibrarySimulationEntity
+            _unitOfDataPersistenceWork.Context.TargetConditionGoalLibrarySimulation.Add(new TargetConditionGoalLibrarySimulationEntity
             {
                 TargetConditionGoalLibraryId = targetConditionGoalLibraryEntity.Id, SimulationId = simulationId
             });
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void CreateTargetConditionGoals(List<TargetConditionGoal> targetConditionGoals, Guid simulationId)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _unitOfWork.Context.Simulation
+            var simulationEntity = _unitOfDataPersistenceWork.Context.Simulation
                 .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
                 .Single(_ => _.Id == simulationId);
 
             var attributeNames = targetConditionGoals.Select(_ => _.Attribute.Name).Distinct().ToList();
-            var attributeEntities = _unitOfWork.Context.Attribute.Where(_ => attributeNames.Contains(_.Name)).ToList();
+            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute.Where(_ => attributeNames.Contains(_.Name)).ToList();
 
             if (!attributeEntities.Any())
             {
@@ -80,14 +80,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfWork.Context.TargetConditionGoal.AddRange(targetConditionGoalEntities);
+                _unitOfDataPersistenceWork.Context.TargetConditionGoal.AddRange(targetConditionGoalEntities);
             }
             else
             {
-                _unitOfWork.Context.BulkInsert(targetConditionGoalEntities);
+                _unitOfDataPersistenceWork.Context.BulkInsert(targetConditionGoalEntities);
             }
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
 
             if (targetConditionGoals.Any(_ => !_.Criterion.ExpressionIsBlank))
             {
@@ -96,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.Criterion.Expression, _ => _)
                     .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
 
-                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(targetIdsPerExpression, "TargetConditionGoalEntity", simulationEntity.Name);
+                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(targetIdsPerExpression, "TargetConditionGoalEntity", simulationEntity.Name);
             }
         }
     }

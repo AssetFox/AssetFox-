@@ -11,7 +11,7 @@ import AuthenticationStart from '@/components/authentication/AuthenticationStart
 const Scenario = () => import(/* webpackChunkName: "scenario" */ '@/components/scenarios/Scenarios.vue');
 const EditScenario = () => import(/* webpackChunkName: "editScenario" */ '@/components/scenarios/EditScenario.vue');
 const InvestmentEditor = () => import(/* webpackChunkName: "investmentEditor" */ '@/components/investment-editor/InvestmentEditor.vue');
-const PerformanceEditor = () => import(/* webpackChunkName: "performanceEditor" */ '@/components/performance-editor/PerformanceEditor.vue');
+const PerformanceCurvesEditor = () => import(/* webpackChunkName: "performanceCurvesEditor" */ '@/components/performance-curves-editor/PerformanceCurvesEditor.vue');
 const TreatmentEditor = () => import(/* webpackChunkName: "treatmentEditor" */ '@/components/treatment-editor/TreatmentEditor.vue');
 const PriorityEditor = () => import (/* webpackChunkName: "priorityEditor" */ '@/components/priority-editor/PriorityEditor.vue');
 const TargetEditor = () => import (/* webpackChunkName: "targetEditor" */ '@/components/target-editor/TargetEditor.vue');
@@ -57,8 +57,8 @@ const router = new VueRouter({
                     props: true
                 },
                 {
-                    path: '/PerformanceEditor/Scenario/',
-                    component: PerformanceEditor,
+                    path: '/PerformanceCurvesEditor/Scenario/',
+                    component: PerformanceCurvesEditor,
                     props: true
                 },
                 {
@@ -100,9 +100,9 @@ const router = new VueRouter({
             props: true
         },
         {
-            path: '/PerformanceEditor/Library/',
+            path: '/PerformanceCurvesEditor/Library/',
             name: 'PerformanceEditor',
-            component: PerformanceEditor,
+            component: PerformanceCurvesEditor,
             props: true
         },
         {

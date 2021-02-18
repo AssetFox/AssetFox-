@@ -17,13 +17,13 @@ namespace BridgeCareCore.Controllers
     public class SimulationController : Controller
     {
         private readonly ISimulationAnalysis _simulationAnalysis;
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly ILog _logger;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, UnitOfWork unitOfWork, ILog logger)
+        public SimulationController(ISimulationAnalysis simulationAnalysis, UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog logger)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _logger = logger;
         }
 
@@ -33,7 +33,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                return Ok(_unitOfWork.SimulationRepo.GetSimulation(simulationId));
+                return Ok(_unitOfDataPersistenceWork.SimulationRepo.GetSimulation(simulationId));
             }
             catch (Exception e)
             {
@@ -49,7 +49,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var simulationDtos = await Task.Factory
-                    .StartNew(() => _unitOfWork.SimulationRepo.GetAllInNetwork(new Guid(BridgeCareCoreConstants.PennDotNetworkId)));
+                    .StartNew(() => _unitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(new Guid(BridgeCareCoreConstants.PennDotNetworkId)));
                 return Ok(simulationDtos);
             }
             catch (Exception e)

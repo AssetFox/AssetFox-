@@ -31,8 +31,8 @@
     import {Component, Prop, Watch} from 'vue-property-decorator';
     import {
         emptyPerformanceLibrary,
-        PerformanceLibrary,
-        PerformanceLibraryEquation
+        PerformanceCurveLibrary,
+        PerformanceCurve
     } from '@/shared/models/iAM/performance';
     import {CreatePerformanceLibraryDialogData} from '@/shared/models/modals/create-performance-library-dialog-data';
     import {getUserName} from '@/shared/utils/get-user-info';
@@ -42,10 +42,10 @@
     const ObjectID = require('bson-objectid');
 
     @Component
-    export default class CreatePerformanceLibraryDialog extends Vue {
+    export default class CreatePerformanceCurveLibraryDialog extends Vue {
         @Prop() dialogData: CreatePerformanceLibraryDialogData;
 
-        newPerformanceLibrary: PerformanceLibrary = {...emptyPerformanceLibrary, id: ObjectID.generate()};
+        newPerformanceLibrary: PerformanceCurveLibrary = {...emptyPerformanceLibrary, id: ObjectID.generate()};
         rules: InputValidationRules = clone(rules);
 
         /**
@@ -56,7 +56,7 @@
             this.newPerformanceLibrary = {
                 ...this.newPerformanceLibrary,
                 description: this.dialogData.description,
-                equations: this.dialogData.equations
+                performanceCurves: this.dialogData.equations
             };
         }
 
@@ -78,11 +78,11 @@
         }
 
         /**
-         * Sets the ids for the newPerformanceLibrary object's equations
+         * Sets the ids for the newPerformanceLibrary object's performanceCurves
          */
         setIdsForNewPerformanceLibrarySubData() {
-            this.newPerformanceLibrary.equations = this.newPerformanceLibrary.equations
-                .map((equation: PerformanceLibraryEquation) => ({...equation, id: ObjectID.generate()}));
+            this.newPerformanceLibrary.performanceCurves = this.newPerformanceLibrary.performanceCurves
+                .map((equation: PerformanceCurve) => ({...equation, id: ObjectID.generate()}));
         }
     }
 </script>

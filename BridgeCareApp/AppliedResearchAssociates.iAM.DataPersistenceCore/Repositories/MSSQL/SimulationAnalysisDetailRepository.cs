@@ -10,34 +10,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class SimulationAnalysisDetailRepository : ISimulationAnalysisDetailRepository
     {
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public SimulationAnalysisDetailRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public SimulationAnalysisDetailRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public void UpsertSimulationAnalysisDetail(SimulationAnalysisDetailDTO dto)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == dto.SimulationId))
+            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == dto.SimulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {dto.SimulationId}.");
             }
 
-            _unitOfWork.Context.AddOrUpdate(dto.ToEntity(), dto.SimulationId);
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.AddOrUpdate(dto.ToEntity(), dto.SimulationId);
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public SimulationAnalysisDetailDTO GetSimulationAnalysisDetail(Guid simulationId)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            if (!_unitOfWork.Context.SimulationAnalysisDetail.Any(_ => _.SimulationId == simulationId))
+            if (!_unitOfDataPersistenceWork.Context.SimulationAnalysisDetail.Any(_ => _.SimulationId == simulationId))
             {
                 return new SimulationAnalysisDetailDTO();
             }
 
-            return _unitOfWork.Context.SimulationAnalysisDetail.Single(_ => _.SimulationId == simulationId).ToDto();
+            return _unitOfDataPersistenceWork.Context.SimulationAnalysisDetail.Single(_ => _.SimulationId == simulationId).ToDto();
         }
     }
 }

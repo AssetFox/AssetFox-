@@ -34,6 +34,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Network)
                 .ThenInclude(_ => _.Facilities)
                 .ThenInclude(_ => _.Sections)
+                .ThenInclude(_ => _.CommittedProjects)
+                .Include(_ => _.CommittedProjects)
                 .Include(_ => _.BudgetLibrarySimulationJoin)
                 .ThenInclude(_ => _.BudgetLibrary)
                 .ThenInclude(_ => _.Budgets)

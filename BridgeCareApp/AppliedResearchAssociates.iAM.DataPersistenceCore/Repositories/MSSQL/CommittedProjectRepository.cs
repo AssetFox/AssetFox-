@@ -78,6 +78,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var committedProjectEntities = committedProjects
                 .Select(_ => _.ToEntity(simulationEntity.Id)).ToList();
 
+            _unitOfWork.Context.CommittedProject.Add(committedProjectEntities[0]);
             if (IsRunningFromXUnit)
             {
                 _unitOfWork.Context.CommittedProject.AddRange(committedProjectEntities);

@@ -61,13 +61,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var currentEntities = numericAttributeValueHistoryEntities
                             .Skip(skip * take).Take(take);/*.ToDataTable(Props);*/
                         //BulkInsert(dt, "NumericAttributeValueHistory");
-                        _unitOfWork.Context.BulkInsert(currentEntities.ToList());
+                        _unitOfWork.Context.BulkInsertOrUpdate(currentEntities.ToList());
                         skip++;
                     }
                 }
                 else
                 {
-                    _unitOfWork.Context.BulkInsert(numericAttributeValueHistoryEntities);
+                    _unitOfWork.Context.BulkInsertOrUpdate(numericAttributeValueHistoryEntities);
                 }
             }
 
@@ -104,13 +104,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var currentEntities = textAttributeValueHistoryEntities
                             .Skip(skip * take).Take(take);/*.ToDataTable(Props);*/
                         //BulkInsert(dt, "TextAttributeValueHistory");
-                        _unitOfWork.Context.BulkInsert(currentEntities.ToList());
+                        _unitOfWork.Context.BulkInsertOrUpdate(currentEntities.ToList());
                         skip++;
                     }
                 }
                 else
                 {
-                    _unitOfWork.Context.BulkInsert(textAttributeValueHistoryEntities);
+                    _unitOfWork.Context.BulkInsertOrUpdate(textAttributeValueHistoryEntities);
                 }
             }
 

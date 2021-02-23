@@ -78,14 +78,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var committedProjectEntities = committedProjects
                 .Select(_ => _.ToEntity(simulationEntity.Id)).ToList();
 
-            _unitOfWork.Context.CommittedProject.Add(committedProjectEntities[0]);
+            //_unitOfWork.Context.CommittedProject.Add(committedProjectEntities[0]);
+
+            foreach(var item in committedProjectEntities)
+            {
+                _unitOfWork.Context.CommittedProject.Add(item);
+            }
             if (IsRunningFromXUnit)
             {
                 _unitOfWork.Context.CommittedProject.AddRange(committedProjectEntities);
             }
             else
             {
-                _unitOfWork.Context.BulkInsert(committedProjectEntities);
+                //_unitOfWork.Context.BulkInsertOrUpdate(committedProjectEntities);
             }
 
             _unitOfWork.Context.SaveChanges();

@@ -71,7 +71,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 {
                     foreach (var section in yearData.Sections)
                     {
-                        if(section.TreatmentCause != TreatmentCause.NoSelection)
+                        if(section.TreatmentCause != TreatmentCause.NoSelection && section.TreatmentCause != TreatmentCause.CommittedProject)
                         {
                             var treatmentConsideration = section.TreatmentConsiderations;
                             var budgetAmount = (double)treatmentConsideration.Sum(_ =>
@@ -95,10 +95,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 //var totalCostPerYear = summaryData.YearlyData.Sum(_ => _.Amount);
 
                 var costForCulvertBudget = summaryData.YearlyData
-                                             .FindAll(_ => _.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase));
+                                             .FindAll(_ => _.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && !_.Treatment.Contains("No Treatment", StringComparison.OrdinalIgnoreCase));
 
                 var costForBridgeBudgets = summaryData.YearlyData
-                                             .FindAll(_ => !_.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase));
+                                             .FindAll(_ => !_.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && !_.Treatment.Contains("No Treatment", StringComparison.OrdinalIgnoreCase));
 
 
                 var totalBudgetPerYearForCulvert = new Dictionary<int, double>();

@@ -86,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             else
             {
-                _unitOfWork.Context.BulkInsert(sectionEntities);
+                _unitOfWork.Context.BulkInsertOrUpdate(sectionEntities);
             }
 
             _unitOfWork.Context.SaveChanges();

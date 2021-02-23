@@ -7,7 +7,8 @@ export default class EquationEditorService {
      * Checks an equation's validity
      * @param equationValidation Equation info to validate
      */
-    static checkEquationValidity(equationValidation: Equation): AxiosPromise {
+    // TODO: update parameter type to Equation DTO after .net core API setup
+    static checkEquationValidity(equationValidation: any): AxiosPromise {
         return axiosInstance.post('/api/ValidateEquation', equationValidation);
     }
 }

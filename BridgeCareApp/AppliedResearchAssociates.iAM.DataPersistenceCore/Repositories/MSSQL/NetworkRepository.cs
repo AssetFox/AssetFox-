@@ -10,6 +10,8 @@ using AppliedResearchAssociates.iAM;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.Domains;
 using System.Linq;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using MoreLinq;
@@ -65,16 +67,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public List<DataAssignment.Networking.Network> GetAllNetworks()
-        {
-            /*if (_unitOfWork.Context.Network.Count() == 0)
-            {
-                throw new RowNotInTableException($"Cannot find networks in the database");
-            }*/
-
-            // consumer of this call will only need the network information. Not the maintainable assest information
-            return _unitOfDataPersistenceWork.Context.Network.Select(_ => _.ToDomain()).ToList();
-        }
+        public Task<List<NetworkDTO>> GetAllNetworks() =>
+            Task.Factory
+                .StartNew(() => _unitOfDataPersistenceWork.Context.Network.Select(_ => _.ToDto()).ToList());
 
         public NetworkEntity GetPennDotNetwork()
         {

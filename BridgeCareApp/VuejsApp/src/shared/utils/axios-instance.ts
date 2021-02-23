@@ -8,7 +8,7 @@ export const nodejsAxiosInstance: AxiosInstance = axios.create({
     baseURL: process.env.VUE_APP_NODE_URL
 });
 
-export const bridgecareCoreAxiosInstance: AxiosInstance = axios.create({
+export const coreAxiosInstance: AxiosInstance = axios.create({
     baseURL: process.env.VUE_APP_BRIDGECARE_CORE_URL
 });
 
@@ -20,3 +20,9 @@ export const bridgecareCoreAxiosInstance: AxiosInstance = axios.create({
 export const nodejsBackgroundAxiosInstance: AxiosInstance = axios.create({
     baseURL: process.env.VUE_APP_NODE_URL
 });
+
+export const API = {
+    PerformanceCurveLibraryController: '/api/PerformanceCurveLibrary',
+    CriterionLibraryController: '/api/CriterionLibrary',
+    NetworkController: '/api/Network'
+};

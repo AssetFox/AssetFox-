@@ -1,4 +1,4 @@
-export interface NewNetwork {
+export interface NetworkCore {
     id: string;
     name: string;
     createdDate?: Date;
@@ -6,7 +6,7 @@ export interface NewNetwork {
     assignmentStatus?: string;
 }
 
-export const emptyNewNetwork: NewNetwork = {
+export const emptyNewNetwork: NetworkCore = {
     id: '',
     name: '',
     createdDate: new Date(),

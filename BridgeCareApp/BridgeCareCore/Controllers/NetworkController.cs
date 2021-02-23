@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
@@ -28,20 +29,17 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetAllNetworks")]
-        public IActionResult GetAllNetworks()
+        public async Task<IActionResult> AllNetworks()
         {
             try
             {
-                _log.Information("Entered GetAllNetWorks call");
-                var networks = _unitOfDataPersistenceWork.NetworkRepo.GetAllNetworks();
-                // Sending the first network because PennDOT will always have only 1 network
-                var filteredNetworks = new List<Network> { networks.FirstOrDefault() };
-                return Ok(filteredNetworks);
+                var result = await _unitOfDataPersistenceWork.NetworkRepo.GetAllNetworks();
+                return Ok(result);
             }
             catch (Exception e)
             {
                 _log.Error($"GetAllNetworks Error => {e.Message}::{e.StackTrace}");
-                return StatusCode(500, $"{e.Message}::{e.StackTrace}");
+                return BadRequest(e);
             }
         }
 

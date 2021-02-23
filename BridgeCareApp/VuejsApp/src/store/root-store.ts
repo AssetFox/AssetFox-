@@ -21,7 +21,7 @@ import announcement from '@/store-modules/announcement.module';
 import cashFlowEditor from '@/store-modules/cash-flow.module';
 import userCriteria from '@/store-modules/user-criteria.module';
 import unsavedChangesFlag from '@/store-modules/unsaved-changes-flag.module';
-import criteriaEditor from '@/store-modules/criteria-editor.module';
+import criteriaEditor from '@/store-modules/criterion-library-editor.module';
 
 Vue.use(Vuex);
 
@@ -33,7 +33,7 @@ export default new Vuex.Store({
         scenario,
         inventory,
         investmentEditor,
-        performanceCurvesEditor: performanceCurvesEditor,
+        performanceCurvesEditor,
         attribute,
         treatmentEditor,
         toastr,

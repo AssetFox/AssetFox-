@@ -226,11 +226,11 @@
         SplitTreatmentLimit
     } from '@/shared/models/iAM/cash-flow';
     import {DataTableHeader} from '@/shared/models/vue/data-table-header';
-    import CriteriaEditorDialog from '@/shared/modals/CriteriaEditorDialog.vue';
+    import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
     import {
         CreateCashFlowLibraryDialogData,
         emptyCreateCashFlowLibraryDialogData
@@ -238,16 +238,17 @@
     import CreateCashFlowLibraryDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/CreateCashFlowLibraryDialog.vue';
     import {formatAsCurrency} from '@/shared/utils/currency-formatter';
     import {hasValue} from '@/shared/utils/has-value-util';
-    import {getLatestPropertyValue, getPropertyValuesNonUniq} from '@/shared/utils/getter-utils';
+    import {getLastPropertyValue, getPropertyValuesNonUniq} from '@/shared/utils/getter-utils';
     import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
     import Alert from '@/shared/modals/Alert.vue';
     import {hasUnsavedChanges} from '@/shared/utils/has-unsaved-changes-helper';
     import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     const ObjectID = require('bson-objectid');
 
     @Component({
-        components: {CreateCashFlowLibraryDialog, CriteriaEditorDialog, Alert}
+        components: {CreateCashFlowLibraryDialog, CriteriaEditorDialog: CriterionLibraryEditorDialog, Alert}
     })
     export default class CashFlowEditor extends Vue {
         @State(state => state.cashFlowEditor.cashFlowLibraries) stateCashFlowLibraries: CashFlowLibrary[];
@@ -287,10 +288,11 @@
         ];
         splitTreatmentLimitTableData: SplitTreatmentLimit[] = [];
         createCashFlowLibraryDialogData: CreateCashFlowLibraryDialogData = clone(emptyCreateCashFlowLibraryDialogData);
-        criteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+        criteriaEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
         alertBeforeDelete: AlertData = clone(emptyAlertData);
         objectIdMOngoDBForScenario: string = '';
         rules: InputValidationRules = clone(rules);
+        uuidNIL: string = getBlankGuid();
 
         beforeRouteEnter(to: any, from: any, next: any) {
             next((vm: any) => {
@@ -446,8 +448,8 @@
             if (this.selectedSplitTreatment.splitTreatmentLimits.length === 0) {
                 return newSplitTreatmentLimit;
             } else {
-                const newRank: number = getLatestPropertyValue('rank', this.selectedSplitTreatment.splitTreatmentLimits) + 1;
-                const newAmount: number = getLatestPropertyValue('amount', this.selectedSplitTreatment.splitTreatmentLimits);
+                const newRank: number = getLastPropertyValue('rank', this.selectedSplitTreatment.splitTreatmentLimits) + 1;
+                const newAmount: number = getLastPropertyValue('amount', this.selectedSplitTreatment.splitTreatmentLimits);
                 const newPercentages = this.getNewSplitTreatmentLimitPercentages(newRank);
 
                 return {
@@ -501,14 +503,15 @@
         onEditCriteria(splitTreatment: SplitTreatment) {
             this.selectedSplitTreatmentForCriteriaEdit = clone(splitTreatment);
 
+            // TODO: update with actual criterion library object id
             this.criteriaEditorDialogData = {
                 showDialog: true,
-                criteria: this.selectedSplitTreatmentForCriteriaEdit.criteria
+                libraryId: this.uuidNIL//this.selectedSplitTreatmentForCriteriaEdit.criteria
             };
         }
 
         onSubmitCriteria(criteria: string) {
-            this.criteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+            this.criteriaEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
             if (!isNil(criteria)) {
                 const updatedSplitTreatments = update(

@@ -76,7 +76,7 @@
     import {State} from 'vuex-class';
     import {append, clone, findIndex, isNil, propEq, update} from 'ramda';
     import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
-    import CriteriaEditorDialog from '../../../shared/modals/CriteriaEditorDialog.vue';
+    import CriterionLibraryEditorDialog from '../../../shared/modals/CriterionLibraryEditorDialog.vue';
     import {TabData} from '@/shared/models/child-components/tab-data';
     import {
         Consequence,
@@ -92,20 +92,22 @@
         EquationEditorDialogData
     } from '@/shared/models/modals/equation-editor-dialog-data';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
     import {hasValue} from '@/shared/utils/has-value-util';
     import {EquationEditorDialogResult} from '@/shared/models/modals/equation-editor-dialog-result';
     import {SelectItem} from '@/shared/models/vue/select-item';
     import {Attribute} from '@/shared/models/iAM/attribute';
     import {setItemPropertyValue} from '@/shared/utils/setter-utils';
     import {InputValidationRules} from '@/shared/utils/input-validation-rules';
+    import {emptyEquation} from '@/shared/models/iAM/equation';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     const ObjectID = require('bson-objectid');
 
     @Component({
-        components: {CriteriaEditorDialog, EquationEditorDialog}
+        components: {CriteriaEditorDialog: CriterionLibraryEditorDialog, EquationEditorDialog}
     })
     export default class ConsequencesTab extends Vue {
         @Prop() consequencesTabData: TabData;
@@ -125,9 +127,10 @@
         ];
         consequencesGridData: Consequence[] = [];
         equationEditorDialogData: EquationEditorDialogData = clone(emptyEquationEditorDialogData);
-        criteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+        criteriaEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
         selectedConsequence: Consequence = clone(emptyConsequence);
         attributesSelectListItems: SelectItem[] = [];
+        uuidNIL: string = getBlankGuid();
 
         /**
          * Component mounted event handler
@@ -236,10 +239,11 @@
         onEditConsequenceEquation(consequence: Consequence) {
             this.selectedConsequence = clone(consequence);
 
+            // TODO: use actual equation object
             this.equationEditorDialogData = {
                 ...emptyEquationEditorDialogData,
                 showDialog: true,
-                equation: this.selectedConsequence.equation
+                equation: clone(emptyEquation)//this.selectedConsequence.equation
             };
         }
 
@@ -275,24 +279,25 @@
         }
 
         /**
-         * Sets the selectedConsequence and shows the CriteriaEditorDialog passing in the selectedConsequence's criteria data
+         * Sets the selectedConsequence and shows the CriterionLibraryEditorDialog passing in the selectedConsequence's criteria data
          * @param consequence The consequence to set as the selectedConsequence
          */
         onEditConsequenceCriteria(consequence: Consequence) {
             this.selectedConsequence = clone(consequence);
 
+            // TODO: use actual criterion library object id
             this.criteriaEditorDialogData = {
                 showDialog: true,
-                criteria: this.selectedConsequence.criteria
+                libraryId: this.uuidNIL//this.selectedConsequence.criteria
             };
         }
 
         /**
-         * Modifies the selectedConsequence's criteria data using the CriteriaEditorDialog result
-         * @param criteria CriteriaEditorDialog result
+         * Modifies the selectedConsequence's criteria data using the CriterionLibraryEditorDialog result
+         * @param criteria CriterionLibraryEditorDialog result
          */
         onSubmitEditedConsequenceCriteria(criteria: string) {
-            this.criteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+            this.criteriaEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
             if (!isNil(criteria)) {
                 this.consequencesTabSelectedTreatmentLibrary = {

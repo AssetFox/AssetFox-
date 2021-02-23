@@ -180,10 +180,10 @@
     import {DataTableHeader} from '@/shared/models/vue/data-table-header';
     import {clone, contains, findIndex, isNil, prepend, propEq, update} from 'ramda';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
-    import CriteriaEditorDialog from '@/shared/modals/CriteriaEditorDialog.vue';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
+    import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
     import CreateDeficientDialog from '@/components/deficient-editor/deficient-editor-dialogs/CreateDeficientDialog.vue';
     import {
         CreateDeficientLibraryDialogData,
@@ -198,12 +198,13 @@
     import Alert from '@/shared/modals/Alert.vue';
     import {hasUnsavedChanges} from '@/shared/utils/has-unsaved-changes-helper';
     import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     @Component({
         components: {
             CreateDeficientLibraryDialog,
             CreateDeficientDialog,
-            DeficientCriteriaEditor: CriteriaEditorDialog,
+            DeficientCriteriaEditor: CriterionLibraryEditorDialog,
             Alert
         }
     })
@@ -251,11 +252,12 @@
         selectedDeficientIds: string[] = [];
         selectedDeficient: Deficient = clone(emptyDeficient);
         showCreateDeficientDialog: boolean = false;
-        deficientCriteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+        deficientCriteriaEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
         createDeficientLibraryDialogData: CreateDeficientLibraryDialogData = clone(emptyCreateDeficientLibraryDialogData);
         alertBeforeDelete: AlertData = clone(emptyAlertData);
         objectIdMOngoDBForScenario: string = '';
         rules: InputValidationRules = clone(rules);
+        uuidNIL: string = getBlankGuid();
 
         /**
          * Sets onload component UI properties
@@ -384,24 +386,25 @@
         }
 
         /**
-         * Enables the CriteriaEditorDialog and sends to it the selected deficient's criteria
+         * Enables the CriterionLibraryEditorDialog and sends to it the selected deficient's criteria
          * @param deficient Selected Deficient object
          */
         onEditDeficientCriteria(deficient: Deficient) {
             this.selectedDeficient = clone(deficient);
 
+            // TODO: update with actual criterion library object id
             this.deficientCriteriaEditorDialogData = {
                 showDialog: true,
-                criteria: deficient.criteria
+                libraryId: this.uuidNIL//deficient.criteria
             };
         }
 
         /**
-         * Updates the selected deficient's criteria with the CriteriaEditorDialog's result
-         * @param criteria CriteriaEditorDialog result
+         * Updates the selected deficient's criteria with the CriterionLibraryEditorDialog's result
+         * @param criteria CriterionLibraryEditorDialog result
          */
         onSubmitDeficientCriteria(criteria: string) {
-            this.deficientCriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+            this.deficientCriteriaEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
             if (!isNil(criteria)) {
                 this.selectedDeficientLibrary = {

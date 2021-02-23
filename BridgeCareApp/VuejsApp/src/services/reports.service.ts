@@ -1,5 +1,5 @@
 import { AxiosPromise } from 'axios';
-import { axiosInstance, bridgecareCoreAxiosInstance } from '@/shared/utils/axios-instance';
+import { axiosInstance, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { Scenario } from '@/shared/models/iAM/scenario';
 
 export default class ReportsService {
@@ -29,7 +29,7 @@ export default class ReportsService {
     }
 
     static downloadTempSummaryReport(scenarioId: string, networkId: string): AxiosPromise {
-          return bridgecareCoreAxiosInstance.request({
+          return coreAxiosInstance.request({
               method: 'POST',
               url: `/api/SummaryReport/GenerateSummaryReport/${networkId}/${scenarioId}`,
               headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},

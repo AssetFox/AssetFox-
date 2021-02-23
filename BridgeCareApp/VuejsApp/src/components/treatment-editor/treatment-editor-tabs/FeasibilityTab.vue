@@ -48,20 +48,21 @@
         Treatment,
         TreatmentLibrary
     } from '@/shared/models/iAM/treatment';
-    import CriteriaEditorDialog from '../../../shared/modals/CriteriaEditorDialog.vue';
+    import CriterionLibraryEditorDialog from '../../../shared/modals/CriterionLibraryEditorDialog.vue';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
     import {clone, findIndex, isNil, propEq, update} from 'ramda';
     import {TabData} from '@/shared/models/child-components/tab-data';
     import {hasValue} from '@/shared/utils/has-value-util';
     import {InputValidationRules} from '@/shared/utils/input-validation-rules';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     const ObjectID = require('bson-objectid');
 
     @Component({
-        components: {CriteriaEditorDialog}
+        components: {CriteriaEditorDialog: CriterionLibraryEditorDialog}
     })
     export default class FeasibilityTab extends Vue {
         @Prop() feasibilityTabData: TabData;
@@ -71,7 +72,8 @@
         feasibilityTabSelectedTreatmentLibrary: TreatmentLibrary = clone(emptyTreatmentLibrary);
         feasibilityTabSelectedTreatment: Treatment = clone(emptyTreatment);
         feasibility: Feasibility = clone(emptyFeasibility);
-        criteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+        criteriaEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+        uuidNIL: string = getBlankGuid();
 
         /**
          * Sets the component's data properties
@@ -95,21 +97,22 @@
         }
 
         /**
-         * Shows the CriteriaEditorDialog passing in the Feasibility object's criteria data
+         * Shows the CriterionLibraryEditorDialog passing in the Feasibility object's criteria data
          */
         onEditFeasibilityCriteria() {
+          // TODO: use actual criterion library object id
             this.criteriaEditorDialogData = {
                 showDialog: true,
-                criteria: this.feasibility.criteria
+                libraryId: this.uuidNIL//this.feasibility.criteria
             };
         }
 
         /**
-         * User has submitted a CriteriaEditorDialog result
+         * User has submitted a CriterionLibraryEditorDialog result
          * @param criteria The criteria submitted by the user
          */
         onSubmitFeasibilityCriteria(criteria: string) {
-            this.criteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+            this.criteriaEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
             if (!isNil(criteria)) {
                 this.feasibilityTabSelectedTreatmentLibrary = {

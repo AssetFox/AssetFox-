@@ -27,7 +27,7 @@
 <script lang="ts">
     import Vue from 'vue';
     import {Component, Prop, Watch} from 'vue-property-decorator';
-    import { emptyCreateNetworkData, NetworkCreationData } from '@/shared/models/iAM/newNetwork';
+    import { emptyCreateNetworkData, NetworkCreationData } from '@/shared/models/iAM/networkCore';
     import {clone} from 'ramda';
     import {getUserName} from '../../../shared/utils/get-user-info';
 

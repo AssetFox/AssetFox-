@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -31,6 +32,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Shift = dto.Shift
             };
 
+        public static PerformanceCurveLibraryEntity ToEntity(this PerformanceCurveLibraryDTO dto) =>
+            new PerformanceCurveLibraryEntity {Id = dto.Id, Name = dto.Name, Description = dto.Description};
+
         public static void CreatePerformanceCurve(this PerformanceCurveEntity entity, Simulation simulation)
         {
             var performanceCurve = simulation.AddPerformanceCurve();
@@ -49,9 +53,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = entity.Id,
                 Name = entity.Name,
+                Description = entity.Description,
                 PerformanceCurves = entity.PerformanceCurves.Any()
                     ? entity.PerformanceCurves.Select(_ => _.ToDto()).ToList()
-                    : new List<PerformanceCurveDTO>()
+                    : new List<PerformanceCurveDTO>(),
+                AppliedScenarioIds = entity.PerformanceCurveLibrarySimulationJoins.Any()
+                    ? entity.PerformanceCurveLibrarySimulationJoins.Select(_ => _.SimulationId).ToList()
+                    : new List<Guid>()
             };
 
         public static PerformanceCurveDTO ToDto(this PerformanceCurveEntity entity) =>

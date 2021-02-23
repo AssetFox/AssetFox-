@@ -76,21 +76,22 @@
     import {Action} from 'vuex-class';
     import {any, clone, isNil, update, findIndex, propEq} from 'ramda';
     import {DataTableHeader} from '@/shared/models/vue/data-table-header';
-    import CriteriaEditorDialog from '@/shared/modals/CriteriaEditorDialog.vue';
+    import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
     import {
         EditBudgetsDialogData
     } from '@/shared/models/modals/edit-budgets-dialog';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
     import {CriteriaDrivenBudget, emptyCriteriaDrivenBudget} from '@/shared/models/iAM/investment';
     import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
     import ObjectID from 'bson-objectid';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     @Component({
         components: {
-            CriteriaEditorDialog
+            CriteriaEditorDialog: CriterionLibraryEditorDialog
         }
     })
     export default class EditBudgetsDialog extends Vue {
@@ -104,9 +105,10 @@
         ];
         editBudgetsDialogGridData: CriteriaDrivenBudget[] = [];
         selectedGridRows: CriteriaDrivenBudget[] = [];
-        criteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+        criteriaEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
         selectedCriteriaDrivenBudget: CriteriaDrivenBudget = clone(emptyCriteriaDrivenBudget);
         rules: InputValidationRules = {...rules};
+        uuidNIL: string = getBlankGuid();
 
         /**
          * Sets the editBudgetsDialogGridData array using the dialogData object's budgets data property
@@ -184,14 +186,15 @@
         onEditCriteria(criteriaDrivenBudget: CriteriaDrivenBudget) {
             this.selectedCriteriaDrivenBudget = clone(criteriaDrivenBudget);
 
+            // TODO: replace with actual criterion library object id
             this.criteriaEditorDialogData = {
                 showDialog: true,
-                criteria: this.selectedCriteriaDrivenBudget.criteria
+                libraryId: this.uuidNIL//this.selectedCriteriaDrivenBudget.criteria
             };
         }
 
         onSubmitCriteria(criteria: string) {
-            this.criteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+            this.criteriaEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
             if (!isNil(criteria)) {
                 this.editBudgetsDialogGridData = update(

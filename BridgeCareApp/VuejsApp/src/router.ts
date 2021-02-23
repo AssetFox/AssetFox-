@@ -21,7 +21,7 @@ const AuthenticationFailure = () => import (/* webpackChunkName: "authentication
 const NoRole = () => import (/*webpackChunkName: "noRole" */ '@/components/authentication/NoRole.vue');
 const Inventory = () => import (/*webpackChunkName: "inventory" */ '@/components/Inventory.vue');
 const UserCriteriaEditor = () => import (/*webpackChunkName: "userCriteria" */ '@/components/user-criteria/UserCriteria.vue');
-const CriteriaLibraryEditor = () => import(/*webpackChunkName: "criteriaEditor" */ '@/components/criteria-editor/CriteriaLibraryEditor.vue');
+const CriterionLibraryEditor = () => import(/*webpackChunkName: "criterionLibraryEditor" */ '@/components/criteria-editor/CriterionLibraryEditor.vue');
 const AnalysisEditor = () => import (/*webpackChunkName: editAnalysis*/ '@/components/scenarios/EditAnalysis.vue');
 const RemainingLifeLimitEditor = () => import (/*webpackChunkName: remainingLifeLimitEditor*/ '@/components/remaining-life-limit-editor/RemainingLifeLimitEditor.vue');
 const CashFlowEditor = () => import (/*webpackChunkName: cashFlowEditor*/ '@/components/cash-flow-editor/CashFlowEditor.vue');
@@ -142,9 +142,9 @@ const router = new VueRouter({
             props: true
         },
         {
-            path: '/CriteriaLibraryEditor/Library/',
-            name: 'CriteriaLibraryEditor',
-            component: CriteriaLibraryEditor,
+            path: '/CriterionLibraryEditor/Library/',
+            name: 'CriterionLibraryEditor.vue',
+            component: CriterionLibraryEditor,
         },
         {
             path: '/Authentication/',

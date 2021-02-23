@@ -179,7 +179,7 @@
         EditBudgetsDialogData,
         emptyEditBudgetsDialogData
     } from '@/shared/models/modals/edit-budgets-dialog';
-    import {getLatestPropertyValue, getPropertyValues} from '@/shared/utils/getter-utils';
+    import {getLastPropertyValue, getPropertyValues} from '@/shared/utils/getter-utils';
     import {formatAsCurrency} from '@/shared/utils/currency-formatter';
     import Alert from '@/shared/modals/Alert.vue';
     import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
@@ -359,7 +359,7 @@
          * Appends a new investment library budget year to the selected investment library's budgetYears property
          */
         onAddBudgetYear() {
-            const latestYear: number = getLatestPropertyValue('year', this.selectedInvestmentLibrary.budgetYears);
+            const latestYear: number = getLastPropertyValue('year', this.selectedInvestmentLibrary.budgetYears);
             const nextYear = hasValue(latestYear) ? latestYear + 1 : moment().year();
 
             const newBudgetYears: InvestmentLibraryBudgetYear[] = this.selectedInvestmentLibrary.criteriaDrivenBudgets
@@ -390,7 +390,7 @@
             this.showSetRangeForAddingBudgetYearsDialog = false;
 
             if (range > 0) {
-                const latestYear = getLatestPropertyValue('year', this.selectedInvestmentLibrary.budgetYears);
+                const latestYear = getLastPropertyValue('year', this.selectedInvestmentLibrary.budgetYears);
                 const startYear: number = hasValue(latestYear) ? latestYear + 1 : moment().year();
                 const endYear = moment().year(startYear).add(range, 'years').year();
 

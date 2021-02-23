@@ -1,28 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PerformanceCurveLibraryController : ControllerBase
+    public class CriterionLibraryController : ControllerBase
     {
         private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public PerformanceCurveLibraryController(UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
+        public CriterionLibraryController(UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
             _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         [HttpGet]
-        [Route("GetPerformanceCurveLibraries")]
-        public async Task<IActionResult> PerformanceCurveLibraries()
+        [Route("GetCriterionLibraries")]
+        public async Task<IActionResult> CriterionLibraries()
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.PerformanceCurveRepo
-                    .PerformanceCurveLibrariesWithPerformanceCurves();
+                var result = await _unitOfDataPersistenceWork.CriterionLibraryRepo.CriterionLibraries();
                 return Ok(result);
             }
             catch (Exception e)
@@ -33,45 +35,41 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("AddOrUpdatePerformanceCurveLibrary/{simulationId}")]
-        public async Task<IActionResult> AddOrUpdatePerformanceCurveLibrary(Guid simulationId, PerformanceCurveLibraryDTO dto)
+        [Route("AddOrUpdateCriterionLibrary")]
+        public async Task<IActionResult> AddOrUpdateCriterionLibrary([FromBody] CriterionLibraryDTO dto)
         {
             try
             {
                 _unitOfDataPersistenceWork.BeginTransaction();
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfDataPersistenceWork.PerformanceCurveRepo
-                        .AddOrUpdatePerformanceCurveLibrary(dto, simulationId);
-                    _unitOfDataPersistenceWork.PerformanceCurveRepo
-                        .AddOrUpdateOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
+                    _unitOfDataPersistenceWork.CriterionLibraryRepo.AddOrUpdateCriterionLibrary(dto);
                 });
-                
+
                 _unitOfDataPersistenceWork.Commit();
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
                 Console.WriteLine(e);
                 return BadRequest(e);
             }
         }
 
         [HttpDelete]
-        [Route("DeletePerformanceCurveLibrary/{libraryId}")]
-        public async Task<IActionResult> DeletePerformanceCurveLibrary(Guid libraryId)
+        [Route("DeleteCriterionLibrary/{libraryId}")]
+        public async Task<IActionResult> DeleteCriterionLibrary(Guid libraryId)
         {
             try
             {
                 _unitOfDataPersistenceWork.BeginTransaction();
-                await Task.Factory.StartNew(() => _unitOfDataPersistenceWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(libraryId));
+                await Task.Factory.StartNew(() =>
+                    _unitOfDataPersistenceWork.CriterionLibraryRepo.DeleteCriterionLibrary(libraryId));
                 _unitOfDataPersistenceWork.Commit();
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
                 Console.WriteLine(e);
                 return BadRequest(e);
             }

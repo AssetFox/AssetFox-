@@ -1,56 +1,32 @@
 import {AxiosPromise} from 'axios';
 import {PerformanceCurveLibrary} from '@/shared/models/iAM/performance';
-import {axiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
-import {convertFromVueToMongo} from '@/shared/utils/mongo-model-conversion-utils';
+import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 
 
 export default class PerformanceCurvesEditorService {
     /**
-     * Gets all performance Libraries a user can read/edit
+     * Gets all performance curve libraries a user can read/edit
      */
     static getPerformanceCurveLibraries(): AxiosPromise {
-        return nodejsAxiosInstance.get('/api/GetPerformanceLibraries');
+        return coreAxiosInstance.get(`${API.PerformanceCurveLibraryController}/GetPerformanceCurveLibraries`);
     }
 
     /**
-     * Creates a performance library
-     * @param data The performance library create data
+     * Add or updates a performance curve library
+     * @param data - performance curve library object data
+     * @param scenarioId - scenario object id
      */
-    static createPerformanceCurveLibrary(data: PerformanceCurveLibrary): AxiosPromise {
-        return nodejsAxiosInstance.post('/api/CreatePerformanceLibrary', convertFromVueToMongo(data));
-    }
-
-    /**
-     * Updates a performance library
-     * @param data The performance library update data
-     */
-    static updatePerformanceCurveLibrary(data: PerformanceCurveLibrary): AxiosPromise {
-        return nodejsAxiosInstance.put('/api/UpdatePerformanceLibrary', convertFromVueToMongo(data));
+    static addOrUpdatePerformanceCurveLibrary(data: PerformanceCurveLibrary, scenarioId: string): AxiosPromise {
+        return coreAxiosInstance
+        .post(`${API.PerformanceCurveLibraryController}/AddOrUpdatePerformanceCurveLibrary/${scenarioId}`, data);
     }
 
     /**
      * Deletes a performance library
-     * @param data The performance library to delete
+     * @param libraryId - performance curve library object id
      */
-    static deletePerformanceCurveLibrary(data: PerformanceCurveLibrary): AxiosPromise {
-        return nodejsAxiosInstance.delete(`/api/DeletePerformanceLibrary/${data.id}`);
-    }
-
-    /**
-     * Gets a scenario's performance library
-     * @param selectedScenarioId Scenario object id
-     */
-    static getScenarioPerformanceCurveLibrary(selectedScenarioId: number): AxiosPromise {
-        return axiosInstance.get(`/api/GetScenarioPerformanceLibrary/${selectedScenarioId}`);
-    }
-
-    /**
-     * Saves a scenario performance library
-     * @param data The scenario performance library upsert data
-     */
-    static saveScenarioPerformanceCurveLibrary(data: PerformanceCurveLibrary, mongoId: string): AxiosPromise {
-        // Node API call is to update last modified date. (THe date is set in the nodejs app)
-        nodejsAxiosInstance.put(`/api/UpdateMongoScenario/${mongoId}`);
-        return axiosInstance.post('/api/SaveScenarioPerformanceLibrary', data);
+    static deletePerformanceCurveLibrary(libraryId: string): AxiosPromise {
+        return coreAxiosInstance
+        .delete(`${API.PerformanceCurveLibraryController}/DeletePerformanceCurveLibrary/${libraryId}`);
     }
 }

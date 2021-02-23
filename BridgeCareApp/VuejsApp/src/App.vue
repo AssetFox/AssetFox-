@@ -31,7 +31,7 @@
                         <v-list-tile @click="onNavigate('/InvestmentEditor/Library/')">
                             <v-list-tile-title>Investment</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/PerformanceEditor/Library/')">
+                        <v-list-tile @click="onNavigate('/PerformanceCurvesEditor/Library/')">
                             <v-list-tile-title>Performance</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/TreatmentEditor/Library/')">
@@ -52,7 +52,7 @@
                         <v-list-tile @click="onNavigate('/CashFlowEditor/Library/')">
                             <v-list-tile-title>Cash Flow</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/CriteriaLibraryEditor/Library/')">
+                        <v-list-tile @click="onNavigate('/CriterionLibraryEditor/Library/')">
                             <v-list-tile-title>Criteria</v-list-tile-title>
                         </v-list-tile>
                     </v-list-group>
@@ -139,7 +139,7 @@
     import iziToast from 'izitoast';
     import {hasValue} from '@/shared/utils/has-value-util';
     import {AxiosError, AxiosRequestConfig, AxiosResponse} from 'axios';
-    import {axiosInstance, bridgecareCoreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
+    import {axiosInstance, coreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
     import {getErrorMessage, setAuthHeader, setContentTypeCharset} from '@/shared/utils/http-utils';
     import ReportsService from './services/reports.service';
     import Alert from '@/shared/modals/Alert.vue';
@@ -315,7 +315,7 @@
                 (request: any) => requestHandler(this, request)
             );
             // set bridge care core axios request interceptor to use request handler
-            bridgecareCoreAxiosInstance.interceptors.request.use(
+            coreAxiosInstance.interceptors.request.use(
                 (request: any) => requestHandler(this, request)
             );
             // create a success & error handler
@@ -345,7 +345,7 @@
                 (error: any) => errorHandler(error)
             );
             // set bridge care core axios response handler to use success & error handlers
-            bridgecareCoreAxiosInstance.interceptors.response.use(
+            coreAxiosInstance.interceptors.response.use(
                 (response: any) => successHandler(response),
                 (error: any) => errorHandler(error)
             );

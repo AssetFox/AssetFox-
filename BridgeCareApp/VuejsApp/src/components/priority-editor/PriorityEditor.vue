@@ -170,11 +170,11 @@
         PriorityLibrary, ScenarioPriority
     } from '@/shared/models/iAM/priority';
     import CreatePriorityDialog from '@/components/priority-editor/priority-editor-dialogs/CreatePriorityDialog.vue';
-    import CriteriaEditorDialog from '@/shared/modals/CriteriaEditorDialog.vue';
+    import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
     import {any, clone, contains, find, findIndex, flatten, isNil, prepend, propEq, update, keys} from 'ramda';
     import {DataTableHeader} from '@/shared/models/vue/data-table-header';
     import {hasValue} from '@/shared/utils/has-value-util';
@@ -192,12 +192,13 @@
     import {hasUnsavedChanges} from '@/shared/utils/has-unsaved-changes-helper';
     import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
     import {InvestmentLibrary} from '@/shared/models/iAM/investment';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     const ObjectID = require('bson-objectid');
 
     @Component({
         components: {
-            CreatePriorityLibraryDialog, CreatePriorityDialog, PrioritiesCriteriaEditor: CriteriaEditorDialog, Alert
+            CreatePriorityLibraryDialog, CreatePriorityDialog, PrioritiesCriteriaEditor: CriterionLibraryEditorDialog, Alert
         }
     })
     export default class PriorityEditor extends Vue {
@@ -234,13 +235,14 @@
         selectedPriorityIds: string[] = [];
         selectedPriority: Priority = clone(emptyPriority);
         showCreatePriorityDialog: boolean = false;
-        prioritiesCriteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+        prioritiesCriteriaEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
         createPriorityLibraryDialogData: CreatePriorityLibraryDialogData = clone(emptyCreatePriorityLibraryDialogData);
         alertBeforeDelete: AlertData = clone(emptyAlertData);
         objectIdMOngoDBForScenario: string = '';
         rules: InputValidationRules = clone(rules);
         isScenarioPriorityLibrary: boolean = false;
         nonBudgetKeys: string[] = ['id', 'priorityLevel', 'year', 'criteria'];
+        uuidNIL: string = getBlankGuid();
 
         /**
          * Sets component UI properties that triggers cascading UI updates
@@ -516,24 +518,25 @@
         }
 
         /**
-         * Enables the CriteriaEditorDialog and sends to it the selected priority's criteria
+         * Enables the CriterionLibraryEditorDialog and sends to it the selected priority's criteria
          * @param priorityRow PrioritiesDataTableRow object
          */
         onEditPriorityCriteria(priorityRow: PrioritiesDataTableRow) {
             this.selectedPriority = find(propEq('id', priorityRow.id), this.selectedPriorityLibrary.priorities) as Priority;
 
+            // TODO: replace with actual criterion library object id
             this.prioritiesCriteriaEditorDialogData = {
                 showDialog: true,
-                criteria: priorityRow.criteria
+                libraryId: this.uuidNIL//priorityRow.criteria
             };
         }
 
         /**
-         * Updates the selected priority's criteria with the CriteriaEditorDialog's result
-         * @param criteria CriteriaEditorDialog result
+         * Updates the selected priority's criteria with the CriterionLibraryEditorDialog's result
+         * @param criteria CriterionLibraryEditorDialog result
          */
         onSubmitPriorityCriteria(criteria: string) {
-            this.prioritiesCriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+            this.prioritiesCriteriaEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
             if (!isNil(criteria)) {
                 this.selectedPriorityLibrary = {

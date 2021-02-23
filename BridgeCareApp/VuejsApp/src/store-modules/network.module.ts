@@ -3,47 +3,38 @@ import NetworkService from '../services/network.service';
 import {clone} from 'ramda';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
-import { NewNetwork } from '@/shared/models/iAM/newNetwork';
 import prepend from 'ramda/es/prepend';
-import { bridgecareCoreAxiosInstance } from '@/shared/utils/axios-instance';
 
 const state = {
-    networks: [] as Network[],
-    newNetworks: [] as NewNetwork[]
+    networks: [] as Network[]
 };
 
-// When we completely move to new Aggregation and Analysis. "NewNetwork" is the class which maps to the API
-// "NewNetwork" will be used in networksMutator as well
 const mutations = {
-    networksMutator(state: any, networks: NewNetwork[]) {
-        state.newNetworks = clone(networks);
+    networksMutator(state: any, networks: Network[]) {
+        state.networks = clone(networks);
     },
-    createdNetworkMutator(state: any, createdNetwork: NewNetwork) {
-        state.newNetworks = prepend(createdNetwork, state.newNetworks);
+    createdNetworkMutator(state: any, createdNetwork: Network) {
+        state.newNetworks = prepend(createdNetwork, state.networks);
     }
 };
 
 const actions = {
     async getNetworks({commit}: any) {
         await NetworkService.getNetworks()
-            .then((response: AxiosResponse<Network[]>) => {
+            .then((response: AxiosResponse<any[]>) => {
                 if (hasValue(response, 'data')) {
-                    commit('networksMutator', response.data);
+                    commit('networksMutator', response.data as Network[]);
                 }
             });
     },
 
-    async createNetwork({dispatch, commit}: any, payload: any){
-        return await NetworkService.createNetwork(payload.networkName.name)
-            .then((response: AxiosResponse<NewNetwork>) => {
+    async createNetwork({dispatch, commit}: any, payload: any) {
+        return await NetworkService.createNetwork(payload.name)
+            .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    const network: NewNetwork = response.data;
-                    var networkObj: NewNetwork = {
-                        ...response.data,
-                        name: payload.createNetworkData.name
-                    };
-                    commit('createdNetworkMutator', networkObj);
-                    dispatch('setSuccessMessage', {message: 'Successfully created network'});
+                    const network: Network = response.data;
+                    commit('createdNetworkMutator', network);
+                    dispatch('setSuccessMessage', {message: 'Created network'});
                 }
             });
     }

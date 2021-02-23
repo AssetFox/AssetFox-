@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
@@ -422,6 +424,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
             }
+
+            _unitOfDataPersistenceWork.Context.SaveChanges();
+        }
+
+        public Task<List<CriterionLibraryDTO>> CriterionLibraries()
+        {
+            if (!_unitOfDataPersistenceWork.Context.CriterionLibrary.Any())
+            {
+                return Task.Factory.StartNew(() => new List<CriterionLibraryDTO>());
+            }
+
+            return Task.Factory.StartNew(() =>
+                _unitOfDataPersistenceWork.Context.CriterionLibrary.Select(_ => _.ToDto()).ToList());
+        }
+
+        public void AddOrUpdateCriterionLibrary(CriterionLibraryDTO dto)
+        {
+            var entity = dto.ToEntity();
+
+            _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, dto.Id);
+        }
+
+        public void DeleteCriterionLibrary(Guid libraryId)
+        {
+            if (!_unitOfDataPersistenceWork.Context.CriterionLibrary.Any(_ => _.Id == libraryId))
+            {
+                return;
+            }
+
+            var libraryToDelete = _unitOfDataPersistenceWork.Context.CriterionLibrary.Single(_ => _.Id == libraryId);
+
+            _unitOfDataPersistenceWork.Context.CriterionLibrary.Remove(libraryToDelete);
 
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }

@@ -11,6 +11,6 @@ export const getPropertyValues = (property: string, items: any[]): any[] => {
     return uniq(getter(items));
 };
 
-export const getLatestPropertyValue = (property: string, items: any[]): any => {
+export const getLastPropertyValue = (property: string, items: any[]): any => {
     return last(sorter(getPropertyValues(property, items)) as any[]);
 };

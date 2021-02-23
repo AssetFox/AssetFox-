@@ -59,21 +59,23 @@
         EquationEditorDialogData
     } from '@/shared/models/modals/equation-editor-dialog-data';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
     import {DataTableHeader} from '@/shared/models/vue/data-table-header';
     import {EquationEditorDialogResult} from '@/shared/models/modals/equation-editor-dialog-result';
     import {append, clone, findIndex, isNil, propEq, update} from 'ramda';
     import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
-    import CriteriaEditorDialog from '../../../shared/modals/CriteriaEditorDialog.vue';
+    import CriterionLibraryEditorDialog from '../../../shared/modals/CriterionLibraryEditorDialog.vue';
     import {hasValue} from '@/shared/utils/has-value-util';
     import {TabData} from '@/shared/models/child-components/tab-data';
+    import {emptyEquation} from '@/shared/models/iAM/equation';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     const ObjectID = require('bson-objectid');
 
     @Component({
-        components: {CriteriaEditorDialog, EquationEditorDialog}
+        components: {CriteriaEditorDialog: CriterionLibraryEditorDialog, EquationEditorDialog}
     })
     export default class CostsTab extends Vue {
         @Prop() costsTabData: TabData;
@@ -88,8 +90,9 @@
         ];
         costsGridData: Cost[] = [];
         equationEditorDialogData: EquationEditorDialogData = clone(emptyEquationEditorDialogData);
-        criteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+        criteriaEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
         selectedCost: Cost = clone(emptyCost);
+        uuidNIL: string = getBlankGuid();
 
         /**
          * Sets the component's data properties
@@ -140,10 +143,11 @@
         onEditCostEquation(cost: Cost) {
             this.selectedCost = clone(cost);
 
+            // TODO: use actual equation object
             this.equationEditorDialogData = {
                 ...clone(emptyEquationEditorDialogData),
                 showDialog: true,
-                equation: this.selectedCost.equation
+                equation: clone(emptyEquation)//this.selectedCost.equation
             };
         }
 
@@ -177,15 +181,17 @@
         }
 
         /**
-         * Sets the selectedCost and shows the CriteriaEditorDialog passing in the selectedCost's criteria data
+         * Sets the selectedCost and shows the CriterionLibraryEditorDialog passing in the selectedCost's criteria data
          * data
          * @param cost The cost to set as selectedCost
          */
         onEditCostCriteria(cost: Cost) {
             this.selectedCost = clone(cost);
+
+            // TODO: use actual criterion library object id
             this.criteriaEditorDialogData = {
                 showDialog: true,
-                criteria: this.selectedCost.criteria
+                libraryId: this.uuidNIL//this.selectedCost.criteria
             };
         }
 
@@ -193,7 +199,7 @@
          * Modifies the selected cost in the costsTabSelectedTreatment's costs list with the specified criteria
          */
         onSubmitEditedCostCriteria(criteria: string) {
-            this.criteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+            this.criteriaEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
             if (!isNil(criteria)) {
                 this.costsTabSelectedTreatmentLibrary = {

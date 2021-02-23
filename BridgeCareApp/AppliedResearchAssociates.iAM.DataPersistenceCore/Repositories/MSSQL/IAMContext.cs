@@ -34,7 +34,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         migrationConnection = JsonConvert
                             .DeserializeAnonymousType(rawConnection, new { ConnectionStrings = default(MigrationConnection) })
                             .ConnectionStrings;
+                        sr.Close();
                     }
+                    fs.Close();
                 }
 
                 optionsBuilder.UseSqlServer(migrationConnection.BridgeCareConnex);

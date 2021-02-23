@@ -244,6 +244,7 @@ export default class EditScenario extends Vue {
                                     simulationName: to.query.simulationName,
                                     objectIdMOngoDBForScenario:
                                         to.query.objectIdMOngoDBForScenario,
+                                    scenarioId: 'df71ac9b-b90a-425c-a519-7b2d6b531ddc'
                                 },
                             },
                         };

@@ -1,5 +1,5 @@
 import { HubConnectionBuilder, LogLevel, HttpTransportType } from '@microsoft/signalr';
-import { bridgecareCoreAxiosInstance } from './shared/utils/axios-instance';
+import { coreAxiosInstance } from './shared/utils/axios-instance';
 import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
 
 export default {
@@ -37,9 +37,9 @@ export default {
 
         let startedPromise = null;
         function start() {
-            startedPromise = connection.start().catch(err => {
+            startedPromise = connection.start().catch((err: any) => {
                 console.error('Failed to connect with hub', err);
-                return new Promise((resolve, reject) =>
+                return new Promise((resolve: any, reject: any) =>
                     setTimeout(() => start().then(resolve).catch(reject), 5000));
             });
             return startedPromise;

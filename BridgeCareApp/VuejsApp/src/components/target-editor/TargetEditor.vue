@@ -157,11 +157,11 @@
     import {emptyTarget, emptyTargetLibrary, Target, TargetLibrary} from '@/shared/models/iAM/target';
     import {clone, contains, findIndex, isNil, prepend, propEq, update} from 'ramda';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
     import {DataTableHeader} from '@/shared/models/vue/data-table-header';
-    import CriteriaEditorDialog from '@/shared/modals/CriteriaEditorDialog.vue';
+    import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
     import CreateTargetDialog from '@/components/target-editor/target-editor-dialogs/CreateTargetDialog.vue';
     import {getPropertyValues} from '@/shared/utils/getter-utils';
     import {hasValue} from '@/shared/utils/has-value-util';
@@ -177,9 +177,10 @@
     import Alert from '@/shared/modals/Alert.vue';
     import {hasUnsavedChanges} from '@/shared/utils/has-unsaved-changes-helper';
     import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     @Component({
-        components: {CreateTargetLibraryDialog, CreateTargetDialog, TargetCriteriaEditor: CriteriaEditorDialog, Alert}
+        components: {CreateTargetLibraryDialog, CreateTargetDialog, TargetCriteriaEditor: CriterionLibraryEditorDialog, Alert}
     })
     export default class TargetEditor extends Vue {
         @State(state => state.targetEditor.targetLibraries) stateTargetLibraries: TargetLibrary[];
@@ -218,11 +219,12 @@
         selectedTargetIds: string[] = [];
         selectedTarget: Target = clone(emptyTarget);
         showCreateTargetDialog: boolean = false;
-        targetCriteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+        targetCriteriaEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
         createTargetLibraryDialogData: CreateTargetLibraryDialogData = clone(emptyCreateTargetLibraryDialogData);
         alertBeforeDelete: AlertData = clone(emptyAlertData);
         objectIdMOngoDBForScenario: string = '';
         rules: InputValidationRules = {...rules};
+        uuidNIL: string = getBlankGuid();
 
         /**
          * Sets onload component UI properties
@@ -359,24 +361,25 @@
         }
 
         /**
-         * Enables the CriteriaEditorDialog and sends to it the selected target's criteria
+         * Enables the CriterionLibraryEditorDialog and sends to it the selected target's criteria
          * @param target Selected Target object
          */
         onEditTargetCriteria(target: Target) {
             this.selectedTarget = clone(target);
 
+            // TODO: replace with actual criterion library object id
             this.targetCriteriaEditorDialogData = {
                 showDialog: true,
-                criteria: target.criteria
+                libraryId: this.uuidNIL//target.criteria
             };
         }
 
         /**
-         * Updates the selected target's criteria with the CriteriaEditorDialog's result
-         * @param criteria CriteriaEditorDialog result
+         * Updates the selected target's criteria with the CriterionLibraryEditorDialog's result
+         * @param criteria CriterionLibraryEditorDialog result
          */
         onSubmitTargetCriteria(criteria: string) {
-            this.targetCriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+            this.targetCriteriaEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
             if (!isNil(criteria)) {
                 this.selectedTargetLibrary = {

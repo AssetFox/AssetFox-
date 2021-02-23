@@ -68,8 +68,8 @@
     <Content Include="src\components\investment-editor\investment-editor-dialogs\CreateInvestmentLibraryDialog.vue" />
     <Content Include="src\components\investment-editor\investment-editor-dialogs\SetRangeForAddingBudgetYearsDialog.vue" />
     <Content Include="src\components\investment-editor\InvestmentEditor.vue" />
-    <Content Include="src\components\performance-editor\performance-editor-dialogs\CreatePerformanceLibraryDialog.vue" />
-    <Content Include="src\components\performance-editor\performance-editor-dialogs\CreatePerformanceLibraryEquationDialog.vue" />
+    <Content Include="src\components\performance-editor\performance-editor-dialogs\CreatePerformanceCurveLibraryDialog.vue" />
+    <Content Include="src\components\performance-editor\performance-editor-dialogs\CreatePerformanceCurveDialog.vue" />
     <Content Include="src\components\performance-editor\PerformanceEditor.vue" />
     <Content Include="src\components\priority-editor\priority-editor-dialogs\CreatePriorityDialog.vue" />
     <Content Include="src\components\priority-editor\priority-editor-dialogs\CreatePriorityLibraryDialog.vue" />
@@ -99,7 +99,7 @@
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="src\shared\modals\Alert.vue" />
-    <Content Include="src\shared\modals\CriteriaEditorDialog.vue" />
+    <Content Include="src\shared\modals\CriterionLibraryEditorDialog.vue" />
     <Content Include="src\shared\modals\EditBudgetsDialog.vue" />
     <Content Include="src\shared\modals\EditYearDialog.vue" />
     <Content Include="src\shared\modals\EquationEditorDialog.vue" />
@@ -207,12 +207,12 @@
     <TypeScriptCompile Include="src\shared\models\iAM\user-information.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\alert-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-investment-library-dialog-data.ts" />
-    <TypeScriptCompile Include="src\shared\models\modals\create-performance-library-dialog-data.ts" />
+    <TypeScriptCompile Include="src\shared\models\modals\create-performance-curve-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-priority-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-remaining-life-limit-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-remaining-life-limit-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-treatment-library-dialog-data.ts" />
-    <TypeScriptCompile Include="src\shared\models\modals\criteria-editor-dialog-data.ts" />
+    <TypeScriptCompile Include="src\shared\models\modals\criterion-library-editor-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\edit-budgets-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\edit-budgets-dialog.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\equation-editor-dialog-data.ts" />

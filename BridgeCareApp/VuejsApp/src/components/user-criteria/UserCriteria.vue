@@ -116,18 +116,19 @@
     import {Action, State} from 'vuex-class';
     import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
     import Alert from '@/shared/modals/Alert.vue';
-    import CriteriaEditorDialog from '@/shared/modals/CriteriaEditorDialog.vue';
+    import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
     import {isNil} from 'ramda';
     import {emptyUserCriteria, UserCriteria} from '@/shared/models/iAM/user-criteria';
     import {itemsAreEqual} from '@/shared/utils/equals-utils';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     @Component({
         components: {
-            CriteriaEditorDialog, Alert
+            CriteriaEditorDialog: CriterionLibraryEditorDialog, Alert
         }
     })
     export default class UserCriteriaEditor extends Vue {
@@ -146,8 +147,9 @@
 
         unassignedUsers: UserCriteria[] = [];
         assignedUsers: UserCriteria[] = [];
-        criteriaEditorDialogData: CriteriaEditorDialogData = {...emptyCriteriaEditorDialogData};
+        criteriaEditorDialogData: CriterionLibraryEditorDialogData = {...emptyCriterionLibraryEditorDialogData};
         selectedUser: UserCriteria = {...emptyUserCriteria};
+        uuidNIL: string = getBlankGuid();
 
         created() {
             this.getAllUserCriteriaAction();
@@ -162,14 +164,16 @@
 
         onEditCriteria(user: UserCriteria) {
             this.selectedUser = user;
+
+            // TODO: use actual criterion library object id
             this.criteriaEditorDialogData = {
                 showDialog: true,
-                criteria: user.criteria === undefined ? '' : user.criteria
+                libraryId: this.uuidNIL//user.criteria === undefined ? '' : user.criteria
             };
         }
 
         onSubmitCriteria(criteria: string) {
-            this.criteriaEditorDialogData = {...emptyCriteriaEditorDialogData};
+            this.criteriaEditorDialogData = {...emptyCriterionLibraryEditorDialogData};
 
             if (!isNil(criteria)) {
                 const userCriteria = {

@@ -1,15 +1,27 @@
 import {emptyInvestmentLibrary} from '@/shared/models/iAM/investment';
-import {emptyPerformanceLibrary} from '@/shared/models/iAM/performance';
+import {emptyPerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {emptyTreatmentLibrary} from '@/shared/models/iAM/treatment';
 import {emptyPriorityLibrary} from '@/shared/models/iAM/priority';
 import {emptyTargetLibrary} from '@/shared/models/iAM/target';
 import {emptyDeficientLibrary} from '@/shared/models/iAM/deficient';
 import {emptyRemainingLifeLimitLibrary} from '@/shared/models/iAM/remaining-life-limit';
 import {emptyCashFlowLibrary} from '@/shared/models/iAM/cash-flow';
-import {emptyCriteriaLibrary} from '@/shared/models/iAM/criteria';
+import {emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
 import {clone, isEmpty, keys, symmetricDifference} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {sorter} from '@/shared/utils/sorter-utils';
+
+export const hasUnsavedChangesCore = (editor: string, localSelectedLibrary: any, stateSelectedLibrary: any) => {
+    const localLibrary = sortNonObjectLists(clone(localSelectedLibrary));
+    const selectedLibrary = sortNonObjectLists(clone(stateSelectedLibrary));
+
+    switch (editor) {
+        case 'performance-curves':
+            return !isEqual(localLibrary, emptyPerformanceCurveLibrary) && !isEqual(localLibrary, selectedLibrary);
+        default:
+            return false;
+    }
+};
 
 export const hasUnsavedChanges = (editor: string, localSelectedLibrary: any, stateSelectedLibrary: any, stateScenarioLibrary: any) => {
     const localLibrary = sortNonObjectLists(clone(localSelectedLibrary));
@@ -22,7 +34,7 @@ export const hasUnsavedChanges = (editor: string, localSelectedLibrary: any, sta
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'performance':
-            return !isEqual(localLibrary, emptyPerformanceLibrary) &&
+            return !isEqual(localLibrary, emptyPerformanceCurveLibrary) &&
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'treatment':
@@ -50,7 +62,7 @@ export const hasUnsavedChanges = (editor: string, localSelectedLibrary: any, sta
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'criteria':
-            return !isEqual(localLibrary, emptyCriteriaLibrary) &&
+            return !isEqual(localLibrary, emptyCriterionLibrary) &&
                 !isEqual(localLibrary, selectedLibrary);
         default:
             return false;

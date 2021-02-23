@@ -11,6 +11,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public static class IAMContextExtensions
     {
+        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
+            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
+
         public static void AddOrUpdate<T>(this IAMContext context, T entity, Guid key) where T : class
         {
             if (entity == null)
@@ -63,10 +66,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         {
             var entities = context.Set<T>();
 
-            var entitiesToDelete = entities.Where(predicate);
+            var entityToDelete = entities.SingleOrDefault(predicate);
+            if (entityToDelete != null)
+            {
+                entities.Remove(entityToDelete);
+            }
+        }
+
+        public static void DeleteAll<T>(this IAMContext context, Expression<Func<T, bool>> predicate) where T : class
+        {
+            var entities = context.Set<T>();
+
+            var entitiesToDelete = entities.Where(predicate).ToList();
             if (entitiesToDelete.Any())
             {
-                entities.RemoveRange(entitiesToDelete);
+                if (IsRunningFromXUnit)
+                {
+                    entities.RemoveRange(entitiesToDelete);
+                }
+                else
+                {
+                    context.BulkDelete(entitiesToDelete);
+                }
             }
         }
 

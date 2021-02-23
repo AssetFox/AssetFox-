@@ -1,13 +1,12 @@
+import {emptyEquation, Equation} from '@/shared/models/iAM/equation';
+import {clone} from 'ramda';
+
 export interface EquationEditorDialogData {
     showDialog: boolean;
-    equation: string;
-    canBePiecewise: boolean;
-    isPiecewise: boolean;
+    equation: Equation;
 }
 
 export const emptyEquationEditorDialogData: EquationEditorDialogData = {
     showDialog: false,
-    equation: '',
-    canBePiecewise: false,
-    isPiecewise: false
+    equation: clone(emptyEquation)
 };

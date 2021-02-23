@@ -44,7 +44,7 @@ namespace BridgeCareCore.Services.SimulationAnalysis
             var simulation = network.Simulations.First();
             _unitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _unitOfDataPersistenceWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+            _unitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
             _unitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
 
             var runner = new SimulationRunner(simulation);

@@ -127,10 +127,10 @@
     import {Attribute} from '@/shared/models/iAM/attribute';
     import CreateRemainingLifeLimitDialog from '@/components/remaining-life-limit-editor/remaining-life-limit-editor-dialogs/CreateRemainingLifeLimitDialog.vue';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
-    import CriteriaEditorDialog from '@/shared/modals/CriteriaEditorDialog.vue';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
+    import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
     import {
         CreateRemainingLifeLimitLibraryDialogData,
         emptyCreateRemainingLifeLimitLibraryDialogData
@@ -145,10 +145,11 @@
     import {hasUnsavedChanges} from '@/shared/utils/has-unsaved-changes-helper';
     import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
     import {setItemPropertyValue} from '@/shared/utils/setter-utils';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     const ObjectID = require('bson-objectid');
     @Component({
-        components: {CreateRemainingLifeLimitLibraryDialog, CreateRemainingLifeLimitDialog, CriteriaEditorDialog, Alert}
+        components: {CreateRemainingLifeLimitLibraryDialog, CreateRemainingLifeLimitDialog, CriteriaEditorDialog: CriterionLibraryEditorDialog, Alert}
     })
     export default class RemainingLifeLimitEditor extends Vue {
         @State(state => state.remainingLifeLimitEditor.remainingLifeLimitLibraries) stateRemainingLifeLimitLibraries: RemainingLifeLimitLibrary[];
@@ -190,13 +191,14 @@
         numericAttributesSelectListItems: SelectItem[] = [];
         createRemainingLifeLimitDialogData: CreateRemainingLifeLimitDialogData = clone(emptyCreateRemainingLifeLimitDialogData);
         selectedRemainingLifeLimit: RemainingLifeLimit = clone(emptyRemainingLifeLimit);
-        remainingLifeLimitCriteriaEditorDialogData: CriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+        remainingLifeLimitCriteriaEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
         createRemainingLifeLimitLibraryDialogData: CreateRemainingLifeLimitLibraryDialogData = clone(
             emptyCreateRemainingLifeLimitLibraryDialogData
         );
         alertBeforeDelete: AlertData = clone(emptyAlertData);
         objectIdMOngoDBForScenario: string = '';
         rules: InputValidationRules = {...rules};
+        uuidNIL: string = getBlankGuid();
 
         /**
          * Sets component UI properties that triggers cascading UI updates
@@ -341,22 +343,23 @@
         }
 
         /**
-         * Toggles the CriteriaEditorDialog modal
+         * Toggles the CriterionLibraryEditorDialog modal
          */
         onEditCriteria(remainingLifeLimit: RemainingLifeLimit, criteria: string) {
             this.selectedRemainingLifeLimit = remainingLifeLimit;
 
+            // TODO: replace with actual criterion library object id
             this.remainingLifeLimitCriteriaEditorDialogData = {
                 showDialog: true,
-                criteria: criteria
+                libraryId: this.uuidNIL//criteria
             };
         }
 
         /**
-         * Modifies a RemainingLifeLimit criteria property with the CriteriaEditorDialog modal result
+         * Modifies a RemainingLifeLimit criteria property with the CriterionLibraryEditorDialog modal result
          */
         onSubmitEditedCriteria(criteria: string) {
-            this.remainingLifeLimitCriteriaEditorDialogData = clone(emptyCriteriaEditorDialogData);
+            this.remainingLifeLimitCriteriaEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
             if (!isNil(criteria)) {
                 this.selectedRemainingLifeLimitLibrary = {

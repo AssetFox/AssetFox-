@@ -378,7 +378,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     .GetSimulationAnalysisNetwork(testHelper.StandAloneSimulation.Network.Id, explorer);
                 testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
-                testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(dataSourceSimulation);
+                testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(dataSourceSimulation);
                 var dataSourcePerformanceCurves = dataSourceSimulation.PerformanceCurves.ToList();
                 AssertPerformanCurveProperties(testHelper.StandAloneSimulation.PerformanceCurves.ToList(), dataSourcePerformanceCurves);
             }
@@ -777,7 +777,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 {
                     testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
                     testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-                    testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+                    testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
                     testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
                 });
 
@@ -870,7 +870,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 {
                     testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
                     testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-                    testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+                    testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
                     testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
                 });
 
@@ -966,7 +966,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 {
                     testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
                     testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-                    testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+                    testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
                     testHelper.UnitOfDataPersistenceWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
                     testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
                 });
@@ -1051,7 +1051,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 {
                     testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
                     testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-                    testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+                    testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
                     testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
                 });
 

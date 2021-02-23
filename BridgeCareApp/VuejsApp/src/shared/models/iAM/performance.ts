@@ -1,37 +1,48 @@
+import {emptyEquation, Equation} from '@/shared/models/iAM/equation';
+import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
+import {clone} from 'ramda';
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
+
 export interface PerformanceCurve {
     id: string;
     attribute: string;
-    equationName: string;
-    equation: string;
-    criteria: string;
+    name: string;
     shift: boolean;
-    piecewise: boolean;
-    isFunction: boolean;
+    criterionLibrary: CriterionLibrary;
+    equation: Equation;
 }
 
 export interface PerformanceCurveLibrary {
     id: string;
     name: string;
-    owner?: string;
-    shared?: boolean;
     description: string;
     performanceCurves: PerformanceCurve[];
+    appliedScenarioIds: string[];
+    owner?: string;
+    shared?: boolean;
 }
 
-export const defaultPerformanceCurve: PerformanceCurve = {
-    id: '0',
+export interface PerformanceCurveGridItem {
+    id: string;
+    name: string;
+    attribute: string;
+    equation: string;
+    criterion: string;
+}
+
+export const emptyPerformanceCurve: PerformanceCurve = {
+    id: getBlankGuid(),
     attribute: '',
-    equationName: '',
-    equation: '',
-    criteria: '',
+    name: '',
     shift: false,
-    piecewise: false,
-    isFunction: false,
+    equation: clone(emptyEquation),
+    criterionLibrary: clone(emptyCriterionLibrary)
 };
 
-export const emptyPerformanceLibrary: PerformanceCurveLibrary = {
-    id: '0',
+export const emptyPerformanceCurveLibrary: PerformanceCurveLibrary = {
+    id: getBlankGuid(),
     name: '',
     description: '',
-    performanceCurves: []
+    performanceCurves: [],
+    appliedScenarioIds: []
 };

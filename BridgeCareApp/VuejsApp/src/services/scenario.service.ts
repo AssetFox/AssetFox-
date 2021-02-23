@@ -1,6 +1,6 @@
 import { AxiosPromise, AxiosResponse } from 'axios';
 import { Scenario, ScenarioUser } from '@/shared/models/iAM/scenario';
-import { axiosInstance, nodejsAxiosInstance, bridgecareCoreAxiosInstance } from '@/shared/utils/axios-instance';
+import { axiosInstance, nodejsAxiosInstance, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { ScenarioCreationData } from '@/shared/models/modals/scenario-creation-data';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { Simulation } from '@/shared/models/iAM/simulation';
@@ -230,19 +230,19 @@ export default class ScenarioService {
 
     static runNewScenarioSimulation(networkId: string, scenarioId: string | undefined): AxiosPromise {
         scenarioId = process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL; // hardcoded it for JML district 8
-        return bridgecareCoreAxiosInstance.post(`/api/Simulation/RunSimulation/${networkId}/${scenarioId}`);
+        return coreAxiosInstance.post(`/api/Simulation/RunSimulation/${networkId}/${scenarioId}`);
     }
 
     static migrateLegacySimulationData(simulationId: number): AxiosPromise{
-        return bridgecareCoreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacySimulation/${simulationId}`);
+        return coreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacySimulation/${simulationId}`);
     }
 
     static getMigratedData(): AxiosPromise {
-        return bridgecareCoreAxiosInstance.get('/api/Simulation/GetScenarios');
+        return coreAxiosInstance.get('/api/Simulation/GetScenarios');
     }
 
     static runMigratedScenarioSimulation(networkId: string, simulationId: string): AxiosPromise {
-        return bridgecareCoreAxiosInstance.post(`/api/Simulation/RunSimulation/${networkId}/${simulationId}`);
+        return coreAxiosInstance.post(`/api/Simulation/RunSimulation/${networkId}/${simulationId}`);
     }
 
     static setScenarioUsers(scenarioId: number, scenarioUsers: ScenarioUser[]): AxiosPromise {

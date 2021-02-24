@@ -45,7 +45,7 @@ import {hasValue} from '@/shared/utils/has-value-util';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {clone} from 'ramda';
-import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
+import {getNewGuid} from '@/shared/utils/uuid-utils';
 
 @Component
 export default class CreateCashFlowRuleLibraryDialog extends Vue {

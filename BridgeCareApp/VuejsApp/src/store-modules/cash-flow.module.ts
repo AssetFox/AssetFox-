@@ -5,7 +5,6 @@ import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
 import {getAppliedLibrary, hasAppliedLibrary, unapplyLibrary} from '@/shared/utils/library-utils';
-import {PerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
 const state = {
@@ -57,7 +56,7 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.cashFlowRuleLibraries, payload.scenarioId)) {
-                        const unAppliedLibrary: PerformanceCurveLibrary = unapplyLibrary(getAppliedLibrary(
+                        const unAppliedLibrary: CashFlowRuleLibrary = unapplyLibrary(getAppliedLibrary(
                             state.cashFlowRuleLibraries, payload.scenarioId), payload.scenarioId);
                         commit('addedOrUpdatedCashFlowRuleLibraryMutator', unAppliedLibrary);
                     }

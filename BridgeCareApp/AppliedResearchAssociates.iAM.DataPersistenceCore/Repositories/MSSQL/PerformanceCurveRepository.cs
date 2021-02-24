@@ -169,26 +169,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No performance curve library found having id {libraryId}.");
             }
 
-            var attributeNames = performanceCurves.Select(_ => _.Attribute).Distinct().ToList();
-            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute
-                .Where(_ => attributeNames.Contains(_.Name)).ToList();
-
-            if (attributeNames.Any() && !attributeEntities.Any())
+            if (performanceCurves.Any(_ => string.IsNullOrEmpty(_.Attribute)))
             {
-                throw new RowNotInTableException("Could not find matching attributes for given performance curves.");
+                throw new InvalidOperationException("All performance curves must have an attribute.");
             }
 
-            var attributeNamesFromDataSource = attributeEntities.Select(_ => _.Name).ToList();
-            if (!attributeNames.All(ruleName => attributeNamesFromDataSource.Contains(ruleName)))
+            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute.ToList();
+            var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
+            if (!performanceCurves.All(_ => attributeNames.Contains(_.Attribute)))
             {
-                var attributeNamesNotFound = attributeNames.Except(attributeNamesFromDataSource).ToList();
-                if (attributeNamesNotFound.Count() == 1)
+                var missingAttributes = performanceCurves.Select(_ => _.Attribute)
+                    .Except(attributeNames).ToList();
+                if (missingAttributes.Count == 1)
                 {
-                    throw new RowNotInTableException($"No attribute found having name {attributeNamesNotFound[0]}.");
+                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
                 }
 
                 throw new RowNotInTableException(
-                    $"No attributes found found having names: {string.Join(", ", attributeNamesNotFound)}.");
+                    $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
             }
 
             var performanceCurveEntities = performanceCurves

@@ -43,8 +43,8 @@
                         <v-list-tile @click="onNavigate('/TargetEditor/Library/')">
                             <v-list-tile-title>Target</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/DeficientEditor/Library/')">
-                            <v-list-tile-title>Deficient</v-list-tile-title>
+                        <v-list-tile @click="onNavigate('/DeficientConditionGoalEditor/Library/')">
+                            <v-list-tile-title>DeficientConditionGoal</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/RemainingLifeLimitEditor/Library/')" v-if="isAdmin">
                             <v-list-tile-title>Remaining Life Limit</v-list-tile-title>

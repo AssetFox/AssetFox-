@@ -62,8 +62,8 @@
     <Content Include="src\assets\images\inventory_mock_bridge_images\8.jpg" />
     <Content Include="src\assets\images\under-construction.png" />
     <Content Include="src\assets\logo.svg" />
-    <Content Include="src\components\deficient-editor\deficient-editor-dialogs\CreateDeficientDialog.vue" />
-    <Content Include="src\components\deficient-editor\DeficientEditor.vue" />
+    <Content Include="src\components\deficient-editor\deficient-editor-dialogs\CreateDeficientConditionGoalDialog.vue" />
+    <Content Include="src\components\deficient-editor\DeficientConditionGoalEditor.vue" />
     <Content Include="src\components\Inventory.vue" />
     <Content Include="src\components\investment-editor\investment-editor-dialogs\CreateInvestmentLibraryDialog.vue" />
     <Content Include="src\components\investment-editor\investment-editor-dialogs\SetRangeForAddingBudgetYearsDialog.vue" />
@@ -167,7 +167,7 @@
     <TypeScriptCompile Include="src\services\budget-criteria.service.ts" />
     <TypeScriptCompile Include="src\services\committed-projects.service.ts" />
     <TypeScriptCompile Include="src\services\criteria-editor.service.ts" />
-    <TypeScriptCompile Include="src\services\deficient.service.ts" />
+    <TypeScriptCompile Include="src\services\deficient-condition-goal.service.ts" />
     <TypeScriptCompile Include="src\services\equation-editor.service.ts" />
     <TypeScriptCompile Include="src\services\inventory.service.ts" />
     <TypeScriptCompile Include="src\services\investment-editor.service.ts" />
@@ -187,7 +187,7 @@
     <TypeScriptCompile Include="src\shared\models\iAM\criteria-driven-budgets.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\criteria-validation.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\criteria.ts" />
-    <TypeScriptCompile Include="src\shared\models\iAM\deficient.ts" />
+    <TypeScriptCompile Include="src\shared\models\iAM\deficient-condition-goal.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\equation-validation.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\inventory.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\investment.ts" />
@@ -239,7 +239,7 @@
     <TypeScriptCompile Include="src\store-modules\authentication.module.ts" />
     <TypeScriptCompile Include="src\store-modules\budget-criteria.module.ts" />
     <TypeScriptCompile Include="src\store-modules\busy.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\deficient.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\deficient-condition-goal.module.ts" />
     <TypeScriptCompile Include="src\store-modules\priority.module.ts" />
     <TypeScriptCompile Include="src\store-modules\remaining-life-limit.module.ts" />
     <TypeScriptCompile Include="src\store-modules\inventory.module.ts" />

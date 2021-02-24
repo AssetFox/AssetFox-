@@ -187,10 +187,10 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Deficient',
+            tabName: 'Deficient Condition Goal',
             tabIcon: 'fas fa-level-down-alt',
             navigation: {
-                path: '/DeficientEditor/Scenario/',
+                path: '/DeficientConditionGoalEditor/Scenario/',
             },
         },
         {

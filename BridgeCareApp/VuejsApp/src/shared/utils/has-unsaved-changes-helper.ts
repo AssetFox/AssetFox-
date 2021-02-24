@@ -3,7 +3,7 @@ import {emptyPerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {emptyTreatmentLibrary} from '@/shared/models/iAM/treatment';
 import {emptyPriorityLibrary} from '@/shared/models/iAM/priority';
 import {emptyTargetLibrary} from '@/shared/models/iAM/target';
-import {emptyDeficientLibrary} from '@/shared/models/iAM/deficient';
+import {emptyDeficientConditionGoalLibrary} from '@/shared/models/iAM/deficient-condition-goal';
 import {emptyRemainingLifeLimitLibrary} from '@/shared/models/iAM/remaining-life-limit';
 import {emptyCashFlowRuleLibrary} from '@/shared/models/iAM/cash-flow';
 import {emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
@@ -20,6 +20,10 @@ export const hasUnsavedChangesCore = (editor: string, localSelectedLibrary: any,
             return !isEqual(localLibrary, emptyPerformanceCurveLibrary) && !isEqual(localLibrary, selectedLibrary);
         case 'cash-flow':
             return !isEqual(localLibrary, emptyCashFlowRuleLibrary) && !isEqual(localLibrary, selectedLibrary);
+        case 'remaining-life-limit':
+            return !isEqual(localLibrary, emptyRemainingLifeLimitLibrary) && !isEqual(localLibrary, selectedLibrary);
+        case 'deficient-condition-goal':
+            return !isEqual(localLibrary, emptyDeficientConditionGoalLibrary) && !isEqual(localLibrary, selectedLibrary);
         default:
             return false;
     }
@@ -52,7 +56,7 @@ export const hasUnsavedChanges = (editor: string, localSelectedLibrary: any, sta
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'deficient':
-            return !isEqual(localLibrary, emptyDeficientLibrary) &&
+            return !isEqual(localLibrary, emptyDeficientConditionGoalLibrary) &&
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'remaininglifelimit':

@@ -25,5 +25,7 @@ export const API = {
     PerformanceCurveController: '/api/PerformanceCurve',
     CriterionLibraryController: '/api/CriterionLibrary',
     NetworkController: '/api/Network',
-    CashFlowController: '/api/CashFlow'
+    CashFlowController: '/api/CashFlow',
+    RemainingLifeLimitController: '/api/RemainingLifeLimit',
+    DeficientConditionGoalController: '/api/DeficientConditionGoal'
 };

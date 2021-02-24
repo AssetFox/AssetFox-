@@ -11,7 +11,7 @@ import performanceCurvesEditor from '@/store-modules/performance-curves-editor.m
 import treatmentEditor from '@/store-modules/treatment-editor.module';
 import attribute from '@/store-modules/attribute.module';
 import toastr from '@/store-modules/toastr.module';
-import deficientEditor from '@/store-modules/deficient.module';
+import deficientEditor from '@/store-modules/deficient-condition-goal.module';
 import priorityEditor from '@/store-modules/priority.module';
 import targetEditor from '@/store-modules/target.module';
 import remainingLifeLimitEditor from '@/store-modules/remaining-life-limit.module';

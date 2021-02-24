@@ -15,7 +15,7 @@ const PerformanceCurvesEditor = () => import(/* webpackChunkName: "performanceCu
 const TreatmentEditor = () => import(/* webpackChunkName: "treatmentEditor" */ '@/components/treatment-editor/TreatmentEditor.vue');
 const PriorityEditor = () => import (/* webpackChunkName: "priorityEditor" */ '@/components/priority-editor/PriorityEditor.vue');
 const TargetEditor = () => import (/* webpackChunkName: "targetEditor" */ '@/components/target-editor/TargetEditor.vue');
-const DeficientEditor = () => import (/* webpackChunkName: "deficientEditor" */ '@/components/deficient-editor/DeficientEditor.vue');
+const DeficientConditionGoalEditor = () => import (/* webpackChunkName: "deficientEditor" */ '@/components/deficient-condition-goal-editor/DeficientConditionGoalEditor.vue');
 const Authentication = () => import (/* webpackChunkName: "Authentication" */ '@/components/authentication/Authentication.vue');
 const AuthenticationFailure = () => import (/* webpackChunkName: "authenticationFailure" */ '@/components/authentication/AuthenticationFailure.vue');
 const NoRole = () => import (/*webpackChunkName: "noRole" */ '@/components/authentication/NoRole.vue');
@@ -77,8 +77,8 @@ const router = new VueRouter({
                     props: true
                 },
                 {
-                    path: '/DeficientEditor/Scenario/',
-                    component: DeficientEditor,
+                    path: '/DeficientConditionGoalEditor/Scenario/',
+                    component: DeficientConditionGoalEditor,
                     props: true
                 },
                 {
@@ -124,9 +124,9 @@ const router = new VueRouter({
             props: true
         },
         {
-            path: '/DeficientEditor/Library/',
-            name: 'DeficientEditor',
-            component: DeficientEditor,
+            path: '/DeficientConditionGoalEditor/Library/',
+            name: 'DeficientConditionGoalEditor',
+            component: DeficientConditionGoalEditor,
             props: true
         },
         {

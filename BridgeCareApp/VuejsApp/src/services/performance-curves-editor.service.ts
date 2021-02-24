@@ -8,7 +8,7 @@ export default class PerformanceCurvesEditorService {
      * Gets all performance curve libraries a user can read/edit
      */
     static getPerformanceCurveLibraries(): AxiosPromise {
-        return coreAxiosInstance.get(`${API.PerformanceCurveLibraryController}/GetPerformanceCurveLibraries`);
+        return coreAxiosInstance.get(`${API.PerformanceCurveController}/GetPerformanceCurveLibraries`);
     }
 
     /**
@@ -18,7 +18,7 @@ export default class PerformanceCurvesEditorService {
      */
     static addOrUpdatePerformanceCurveLibrary(data: PerformanceCurveLibrary, scenarioId: string): AxiosPromise {
         return coreAxiosInstance
-        .post(`${API.PerformanceCurveLibraryController}/AddOrUpdatePerformanceCurveLibrary/${scenarioId}`, data);
+        .post(`${API.PerformanceCurveController}/AddOrUpdatePerformanceCurveLibrary/${scenarioId}`, data);
     }
 
     /**
@@ -27,6 +27,6 @@ export default class PerformanceCurvesEditorService {
      */
     static deletePerformanceCurveLibrary(libraryId: string): AxiosPromise {
         return coreAxiosInstance
-        .delete(`${API.PerformanceCurveLibraryController}/DeletePerformanceCurveLibrary/${libraryId}`);
+        .delete(`${API.PerformanceCurveController}/DeletePerformanceCurveLibrary/${libraryId}`);
     }
 }

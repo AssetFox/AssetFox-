@@ -55,11 +55,12 @@ const actions = {
         await PerformanceCurvesEditorService.addOrUpdatePerformanceCurveLibrary(payload.library, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    if (hasAppliedLibrary(state.performanceCurveLibraries, payload.scenarioId)) {
+                    if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.performanceCurveLibraries, payload.scenarioId)) {
                         const unAppliedLibrary: PerformanceCurveLibrary = unapplyLibrary(getAppliedLibrary(
                             state.performanceCurveLibraries, payload.scenarioId), payload.scenarioId);
                         commit('addedOrUpdatedPerformanceCurveLibraryMutator', unAppliedLibrary);
                     }
+
                     const library: PerformanceCurveLibrary = {
                         ...payload.library,
                         appliedScenarioIds: payload.scenarioId !== getBlankGuid() &&
@@ -67,6 +68,7 @@ const actions = {
                             ? append(payload.scenarioId, payload.library.appliedScenarioIds)
                             : payload.library.appliedScenarioIds
                     };
+
                     const message: string = any(propEq('id', library.id), state.performanceCurveLibraries)
                         ? 'Updated performance curve library'
                         : 'Added performance curve library';

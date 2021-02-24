@@ -5,7 +5,7 @@
     <v-card>
       <v-card-title>
         <v-layout justify-center>
-          <h3>New Performance Library Library</h3>
+          <h3>New Performance Curve Library</h3>
         </v-layout>
       </v-card-title>
       <v-card-text>
@@ -47,6 +47,7 @@ import {getUserName} from '@/shared/utils/get-user-info';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {clone} from 'ramda';
 import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
+import {hasValue} from '@/shared/utils/has-value-util';
 
 @Component
 export default class CreatePerformanceCurveLibraryDialog extends Vue {
@@ -63,12 +64,13 @@ export default class CreatePerformanceCurveLibraryDialog extends Vue {
   onDialogDataChanged() {
     this.newPerformanceCurveLibrary = {
       ...this.newPerformanceCurveLibrary,
-      description: this.dialogData.description,
-      performanceCurves: this.dialogData.performanceCurves
-          .map((performanceCurve: PerformanceCurve) => ({
-            ...performanceCurve, id: getNewGuid(),
-            equation: {...performanceCurve.equation, id: getNewGuid()}
-          })),
+      performanceCurves: hasValue(this.dialogData.performanceCurves)
+          ? this.dialogData.performanceCurves
+              .map((performanceCurve: PerformanceCurve) => ({
+                ...performanceCurve, id: getNewGuid(),
+                equation: {...performanceCurve.equation, id: getNewGuid()}
+              }))
+          : [],
       owner: getUserName()
     };
   }
@@ -80,7 +82,7 @@ export default class CreatePerformanceCurveLibraryDialog extends Vue {
   onSubmit(submit: boolean) {
     if (submit) {
       //this.$emit('submit', {'performanceCurveLibrary': this.newPerformanceCurveLibrary, 'scenarioId': getBlankGuid()});
-      this.$emit('submit', this.newPerformanceCurveLibrary, getBlankGuid());
+      this.$emit('submit', this.newPerformanceCurveLibrary, this.dialogData.scenarioId);
     } else {
       this.$emit('submit', null);
     }

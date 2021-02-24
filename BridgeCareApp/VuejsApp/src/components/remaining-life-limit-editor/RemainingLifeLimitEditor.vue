@@ -55,9 +55,9 @@
                             </v-edit-dialog>
                         </td>
                         <td>
-                            <v-text-field :value="props.item.criteria" readonly>
+                            <v-text-field :value="props.item.criterionLibrary" readonly>
                                 <template slot="append-outer">
-                                    <v-icon @click="onEditCriteria(props.item, props.item.criteria)" class="edit-icon">
+                                    <v-icon @click="onEditCriteria(props.item, props.item.criterionLibrary)" class="edit-icon">
                                         fas fa-edit
                                     </v-icon>
                                 </template>

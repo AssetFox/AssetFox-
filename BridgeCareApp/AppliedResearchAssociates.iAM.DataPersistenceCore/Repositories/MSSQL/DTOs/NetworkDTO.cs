@@ -1,10 +1,10 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs
 {
-    public class NetworkDTO
+    public class NetworkDTO : BaseDTO
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime LastModifiedDate { get; set; }

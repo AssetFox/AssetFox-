@@ -1,5 +1,5 @@
 import {hasValue} from '@/shared/utils/has-value-util';
-import {SplitTreatment, SplitTreatmentLimit} from '@/shared/models/iAM/cash-flow';
+import {CashFlowRule, CashFlowDistributionRule} from '@/shared/models/iAM/cash-flow';
 import {findIndex, propEq, contains} from 'ramda';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {CriteriaDrivenBudget} from '@/shared/models/iAM/investment';
@@ -19,28 +19,28 @@ const generalRules = {
 };
 /***********************************************CASH FLOW RULES********************************************************/
 const cashFlowRules = {
-    'isRankGreaterThanPreviousRank': (splitTreatmentLimit: SplitTreatmentLimit, selectedSplitTreatment: SplitTreatment) => {
+    'isDurationGreaterThanPreviousDuration': (distributionRule: CashFlowDistributionRule, cashFlowRule: CashFlowRule) => {
         const index: number = findIndex(
-            propEq('id', splitTreatmentLimit.id), selectedSplitTreatment.splitTreatmentLimits);
+            propEq('id', distributionRule.id), cashFlowRule.cashFlowDistributionRules);
 
         if (index > 0) {
-            return splitTreatmentLimit.rank > selectedSplitTreatment.splitTreatmentLimits[index - 1].rank ||
+            return distributionRule.durationInYears > cashFlowRule.cashFlowDistributionRules[index - 1].durationInYears ||
                 'Value must be greater than previous value';
         }
 
         return true;
     },
-    'isAmountGreaterThanOrEqualToPreviousAmount': (splitTreatmentLimit: SplitTreatmentLimit, selectedSplitTreatment: SplitTreatment) => {
+    'isAmountGreaterThanOrEqualToPreviousAmount': (distributionRule: CashFlowDistributionRule, cashFlowRule: CashFlowRule) => {
         const index: number = findIndex(
-            propEq('id', splitTreatmentLimit.id), selectedSplitTreatment.splitTreatmentLimits);
+            propEq('id', distributionRule.id), cashFlowRule.cashFlowDistributionRules);
 
         if (index > 0) {
-            const currentAmount: number | null = hasValue(splitTreatmentLimit.amount)
-                ? parseFloat(splitTreatmentLimit.amount!.toString().replace(/(\$*)(\,*)/g, ''))
+            const currentAmount: number | null = hasValue(distributionRule.costCeiling)
+                ? parseFloat(distributionRule.costCeiling!.toString().replace(/(\$*)(\,*)/g, ''))
                 : null;
 
-            const previousAmount: number | null = hasValue(selectedSplitTreatment.splitTreatmentLimits[index - 1].amount)
-                ? selectedSplitTreatment.splitTreatmentLimits[index - 1].amount!
+            const previousAmount: number | null = hasValue(cashFlowRule.cashFlowDistributionRules[index - 1].costCeiling)
+                ? cashFlowRule.cashFlowDistributionRules[index - 1].costCeiling!
                 : null;
 
             return !hasValue(currentAmount) || (hasValue(currentAmount) && !hasValue(previousAmount)) ||

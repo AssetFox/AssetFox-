@@ -42,7 +42,7 @@
                             </td>
                             <td>
                                 <v-text-field readonly single-line class="sm-txt"
-                                              :value="props.item.criteria">
+                                              :value="props.item.criterionLibrary">
                                     <template slot="append-outer">
                                         <v-icon @click="onEditCriteria(props.item)"
                                                 class="edit-icon">

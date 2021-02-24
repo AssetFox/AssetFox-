@@ -91,6 +91,61 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             }
         }
 
+        public static void AddOrUpdateOrDelete<T>(this IAMContext context, List<T> entities,
+            Dictionary<string, Expression<Func<T, bool>>> predicatesPerCrudOperation) where T : class
+        {
+            var contextEntities = context.Set<T>();
+
+            if (predicatesPerCrudOperation.ContainsKey("delete"))
+            {
+                var entitiesToDelete = contextEntities
+                    .Where(predicatesPerCrudOperation["delete"])
+                    .ToList();
+
+                if (entitiesToDelete.Any())
+                {
+                    contextEntities.RemoveRange(entitiesToDelete);
+                }
+            }
+
+            if (predicatesPerCrudOperation.ContainsKey("update"))
+            {
+                var entitiesToUpdate = entities.AsQueryable()
+                    .Where(predicatesPerCrudOperation["update"])
+                    .ToList();
+
+                if (entitiesToUpdate.Any())
+                {
+                    entitiesToUpdate.ForEach(entity =>
+                    {
+                        var idPropertyInfo = typeof(T).GetProperty("Id");
+                        var existingEntity = contextEntities.Find(idPropertyInfo.GetValue(entity));
+
+                        if (existingEntity != null)
+                        {
+                            var createdDatePropertyInfo = typeof(T).GetProperty("CreatedDate");
+                            createdDatePropertyInfo.SetValue(entity, createdDatePropertyInfo.GetValue(existingEntity));
+                            var lastModifiedDatePropertyInfo = typeof(T).GetProperty("LastModifiedDate");
+                            lastModifiedDatePropertyInfo.SetValue(entity, DateTime.Now);
+                            context.Entry(existingEntity).CurrentValues.SetValues(entity);
+                        }
+                    });
+                }
+            }
+
+            if (predicatesPerCrudOperation.ContainsKey("add"))
+            {
+                var entitiesToAdd = entities.AsQueryable()
+                    .Where(predicatesPerCrudOperation["add"])
+                    .ToList();
+
+                if (entitiesToAdd.Any())
+                {
+                    contextEntities.AddRange(entitiesToAdd);
+                }
+            }
+        }
+
         public static void BulkAddOrUpdateOrDelete<T>(this IAMContext context, List<T> entities,
             Dictionary<string, Expression<Func<T, bool>>> predicatesPerCrudOperation) where T : class
         {

@@ -1,10 +1,10 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs
 {
-    public class EquationDTO
+    public class EquationDTO : BaseDTO
     {
-        public Guid Id { get; set; }
         public string Expression { get; set; }
     }
 }

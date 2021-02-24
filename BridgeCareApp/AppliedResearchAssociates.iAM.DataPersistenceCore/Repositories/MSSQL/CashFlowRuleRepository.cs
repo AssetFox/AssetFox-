@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
@@ -91,6 +95,154 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(cashFlowRuleEntityIdsPerExpression, "CashFlowRuleEntity", simulationEntity.Name);
             }
+        }
+
+        public Task<List<CashFlowRuleLibraryDTO>> CashFlowRuleLibrariesWithCashFlowRules()
+        {
+            if (!_unitOfDataPersistenceWork.Context.CashFlowRuleLibrary.Any())
+            {
+                return Task.Factory.StartNew(() => new List<CashFlowRuleLibraryDTO>());
+            }
+
+            return Task.Factory.StartNew(() => _unitOfDataPersistenceWork.Context.CashFlowRuleLibrary
+                .Include(_ => _.CashFlowRules)
+                .ThenInclude(_ => _.CriterionLibraryCashFlowRuleJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.CashFlowRules)
+                .ThenInclude(_ => _.CashFlowDistributionRules)
+                .Include(_ => _.CashFlowRuleLibrarySimulationJoins)
+                .Select(_ => _.ToDto())
+                .ToList());
+        }
+
+        public void AddOrUpdateCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto, Guid simulationId)
+        {
+            var cashFlowRuleLibraryEntity = dto.ToEntity();
+
+            _unitOfDataPersistenceWork.Context.AddOrUpdate(cashFlowRuleLibraryEntity, dto.Id);
+
+            if (simulationId != Guid.Empty)
+            {
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                {
+                    throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                }
+
+                _unitOfDataPersistenceWork.Context.Delete<CashFlowRuleLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
+
+                _unitOfDataPersistenceWork.Context.CashFlowRuleLibrarySimulation.Add(new CashFlowRuleLibrarySimulationEntity
+                {
+                    CashFlowRuleLibraryId = cashFlowRuleLibraryEntity.Id,
+                    SimulationId = simulationId
+                });
+            }
+
+            _unitOfDataPersistenceWork.Context.SaveChanges();
+        }
+
+        public void AddOrUpdateOrDeleteCashFlowRules(List<CashFlowRuleDTO> cashFlowRules, Guid libraryId)
+        {
+            if (!_unitOfDataPersistenceWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException($"No cash flow rule library found having id {libraryId}.");
+            }
+
+            var cashFlowRuleEntities = cashFlowRules
+                .Select(_ => _.ToEntity(libraryId))
+                .ToList();
+
+            if (IsRunningFromXUnit)
+            {
+                _unitOfDataPersistenceWork.Context.CashFlowRule.AddRange(cashFlowRuleEntities);
+            }
+            else
+            {
+                var entityIds = cashFlowRules.Select(_ => _.Id).ToList();
+
+                var existingEntityIds = _unitOfDataPersistenceWork.Context.CashFlowRule
+                    .Where(_ => _.CashFlowRuleLibrary.Id == libraryId && entityIds.Contains(_.Id))
+                    .Select(_ => _.Id).ToList();
+
+                var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<CashFlowRuleEntity, bool>>>
+                {
+                    {"delete", _ => _.CashFlowRuleLibrary.Id == libraryId && !entityIds.Contains(_.Id)},
+                    {"update", _ => existingEntityIds.Contains(_.Id)},
+                    {"add", _ => !existingEntityIds.Contains(_.Id)}
+                };
+
+                _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(cashFlowRuleEntities, predicatesPerCrudOperation);
+            }
+
+            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryCashFlowRuleEntity>(_ => _.CashFlowRule.CashFlowRuleLibraryId == libraryId);
+
+            if (cashFlowRules.Any(_ => _.CashFlowDistributionRules.Any()))
+            {
+                var cashFlowDistributionRuleEntities = cashFlowRules
+                    .Where(_ => _.CashFlowDistributionRules.Any())
+                    .SelectMany(_ => _.CashFlowDistributionRules.Select(__ => __.ToEntity(_.Id)))
+                    .ToList();
+
+                if (IsRunningFromXUnit)
+                {
+                    _unitOfDataPersistenceWork.Context.CashFlowDistributionRule.AddRange(cashFlowDistributionRuleEntities);
+                }
+                else
+                {
+                    var entityIds = cashFlowDistributionRuleEntities.Select(_ => _.Id).ToList();
+
+                    var existingEntityIds = _unitOfDataPersistenceWork.Context.CashFlowDistributionRule
+                        .Where(_ => _.CashFlowRule.CashFlowRuleLibraryId == libraryId && entityIds.Contains(_.Id))
+                        .Select(_ => _.Id).ToList();
+
+                    var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<CashFlowDistributionRuleEntity, bool>>>
+                    {
+                        {"delete", _ => _.CashFlowRule.CashFlowRuleLibraryId == libraryId && !entityIds.Contains(_.Id)},
+                        {"update", _ => existingEntityIds.Contains(_.Id)},
+                        {"add", _ => !existingEntityIds.Contains(_.Id)}
+                    };
+
+                    _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(cashFlowDistributionRuleEntities, predicatesPerCrudOperation);
+                }
+            }
+
+            if (cashFlowRules.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty && !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+            {
+                var ruleCriterionJoinsToAdd = cashFlowRules
+                    .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
+                    .Select(_ => new CriterionLibraryCashFlowRuleEntity
+                    {
+                        CriterionLibraryId = _.CriterionLibrary.Id, CashFlowRuleId = _.Id
+                    })
+                    .ToList();
+
+                if (IsRunningFromXUnit)
+                {
+                    _unitOfDataPersistenceWork.Context.CriterionLibraryCashFlowRule.AddRange(ruleCriterionJoinsToAdd);
+                }
+                else
+                {
+                    _unitOfDataPersistenceWork.Context.BulkInsert(ruleCriterionJoinsToAdd);
+                }
+            }
+
+            _unitOfDataPersistenceWork.Context.SaveChanges();
+        }
+
+        public void DeleteCashFlowRuleLibrary(Guid libraryId)
+        {
+            if (!_unitOfDataPersistenceWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == libraryId))
+            {
+                return;
+            }
+
+            var libraryToDelete = _unitOfDataPersistenceWork.Context.CashFlowRuleLibrary.Single(_ => _.Id == libraryId);
+
+            // deleting the library should start a cascade delete of the cash flow rules which will cascade into the criterion library joins
+            // and the cash flow distribution rules
+            _unitOfDataPersistenceWork.Context.CashFlowRuleLibrary.Remove(libraryToDelete);
+
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
     }
 }

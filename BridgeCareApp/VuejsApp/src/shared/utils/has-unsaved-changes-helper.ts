@@ -5,7 +5,7 @@ import {emptyPriorityLibrary} from '@/shared/models/iAM/priority';
 import {emptyTargetLibrary} from '@/shared/models/iAM/target';
 import {emptyDeficientLibrary} from '@/shared/models/iAM/deficient';
 import {emptyRemainingLifeLimitLibrary} from '@/shared/models/iAM/remaining-life-limit';
-import {emptyCashFlowLibrary} from '@/shared/models/iAM/cash-flow';
+import {emptyCashFlowRuleLibrary} from '@/shared/models/iAM/cash-flow';
 import {emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
 import {clone, isEmpty, keys, symmetricDifference} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
@@ -18,6 +18,8 @@ export const hasUnsavedChangesCore = (editor: string, localSelectedLibrary: any,
     switch (editor) {
         case 'performance-curves':
             return !isEqual(localLibrary, emptyPerformanceCurveLibrary) && !isEqual(localLibrary, selectedLibrary);
+        case 'cash-flow':
+            return !isEqual(localLibrary, emptyCashFlowRuleLibrary) && !isEqual(localLibrary, selectedLibrary);
         default:
             return false;
     }
@@ -58,7 +60,7 @@ export const hasUnsavedChanges = (editor: string, localSelectedLibrary: any, sta
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'cashflow':
-            return !isEqual(localLibrary, emptyCashFlowLibrary) &&
+            return !isEqual(localLibrary, emptyCashFlowRuleLibrary) &&
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'criteria':

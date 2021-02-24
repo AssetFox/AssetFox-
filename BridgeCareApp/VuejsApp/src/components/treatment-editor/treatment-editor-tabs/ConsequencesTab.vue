@@ -43,7 +43,7 @@
                             </v-textarea>
                         </td>
                         <td>
-                            <v-textarea full-width no-resize outline readonly rows="3" v-model="props.item.criteria">
+                            <v-textarea full-width no-resize outline readonly rows="3" v-model="props.item.criterionLibrary">
                                 <template slot="append-outer">
                                     <v-btn @click="onEditConsequenceCriteria(props.item)" class="edit-icon" icon>
                                         <v-icon>fas fa-edit</v-icon>

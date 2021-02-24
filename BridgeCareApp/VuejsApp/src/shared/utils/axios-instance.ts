@@ -22,7 +22,8 @@ export const nodejsBackgroundAxiosInstance: AxiosInstance = axios.create({
 });
 
 export const API = {
-    PerformanceCurveLibraryController: '/api/PerformanceCurveLibrary',
+    PerformanceCurveController: '/api/PerformanceCurve',
     CriterionLibraryController: '/api/CriterionLibrary',
-    NetworkController: '/api/Network'
+    NetworkController: '/api/Network',
+    CashFlowController: '/api/CashFlow'
 };

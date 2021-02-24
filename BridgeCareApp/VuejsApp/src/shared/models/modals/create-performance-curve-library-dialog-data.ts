@@ -1,13 +1,14 @@
 import {PerformanceCurve} from '@/shared/models/iAM/performance';
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
 export interface CreatePerformanceCurveLibraryDialogData {
     showDialog: boolean;
-    description: string;
     performanceCurves: PerformanceCurve[];
+    scenarioId: string;
 }
 
 export const emptyCreatePerformanceLibraryDialogData: CreatePerformanceCurveLibraryDialogData = {
     showDialog: false,
-    description: '',
-    performanceCurves: []
+    performanceCurves: [],
+    scenarioId: getBlankGuid()
 };

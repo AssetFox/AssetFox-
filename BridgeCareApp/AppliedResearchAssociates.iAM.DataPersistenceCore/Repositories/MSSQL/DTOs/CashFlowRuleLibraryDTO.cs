@@ -4,8 +4,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs.
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs
 {
-    public class PerformanceCurveLibraryDTO : BaseLibraryDTO
+    public class CashFlowRuleLibraryDTO : BaseLibraryDTO
     {
-        public List<PerformanceCurveDTO> PerformanceCurves { get; set; } = new List<PerformanceCurveDTO>();
+        public List<CashFlowRuleDTO> CashFlowRules { get; set; } = new List<CashFlowRuleDTO>();
     }
 }

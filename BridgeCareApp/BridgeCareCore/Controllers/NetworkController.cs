@@ -33,7 +33,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.NetworkRepo.GetAllNetworks();
+                var result = await _unitOfDataPersistenceWork.NetworkRepo.Networks();
                 return Ok(result);
             }
             catch (Exception e)

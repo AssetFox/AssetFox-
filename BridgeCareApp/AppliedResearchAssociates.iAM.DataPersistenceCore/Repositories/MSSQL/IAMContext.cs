@@ -26,18 +26,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Repositories\\MSSQL", "migrationConnection.json");
                 var migrationConnection = new MigrationConnection();
-                using (FileStream fs = File.Open(filePath, FileMode.Open))
+                string contents = File.ReadAllText(filePath);
+                /*using (FileStream fs = File.Open(filePath, FileMode.Open))
                 {
                     using (StreamReader sr = new StreamReader(fs))
-                    {
-                        string rawConnection = sr.ReadToEnd();
+                    {*/
+                        //string rawConnection = sr.ReadToEnd();
                         migrationConnection = JsonConvert
-                            .DeserializeAnonymousType(rawConnection, new { ConnectionStrings = default(MigrationConnection) })
+                            .DeserializeAnonymousType(contents, new { ConnectionStrings = default(MigrationConnection) })
                             .ConnectionStrings;
-                        sr.Close();
-                    }
-                    fs.Close();
-                }
+                    /*}
+                }*/
 
                 optionsBuilder.UseSqlServer(migrationConnection.BridgeCareConnex);
             }

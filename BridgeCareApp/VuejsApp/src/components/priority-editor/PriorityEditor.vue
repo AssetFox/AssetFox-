@@ -76,12 +76,12 @@
                                             </div>
                                             <div v-else class="priority-criteria-output">
                                                 <v-text-field readonly single-line class="sm-txt"
-                                                              :value="props.item.criteria"/>
+                                                              :value="props.item.criterionLibrary"/>
                                             </div>
                                         </template>
                                         <v-card>
                                             <v-card-text>
-                                                <v-textarea :value="props.item.criteria" full-width no-resize outline
+                                                <v-textarea :value="props.item.criterionLibrary" full-width no-resize outline
                                                             readonly rows="5"/>
                                             </v-card-text>
                                         </v-card>
@@ -401,7 +401,7 @@
                         id: priority.id,
                         priorityLevel: priority.priorityLevel.toString(),
                         year: !hasValue(priority.year) ? '' : priority.year!.toString(),
-                        criteria: priority.criteria
+                        criteria: priority.criterionLibrary
                     };
 
                     if (this.isScenarioPriorityLibrary && hasValue(this.budgets)) {

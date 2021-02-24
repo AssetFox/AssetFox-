@@ -124,7 +124,7 @@
                       </v-card-text>
                     </v-card>
                   </v-menu>
-                  <v-btn @click="onShowCriteriaEditorDialog(props.item.id)" class="edit-icon" icon>
+                  <v-btn @click="onEditPerformanceCurveCriterionLibrary(props.item.id)" class="edit-icon" icon>
                     <v-icon>fas fa-edit</v-icon>
                   </v-btn>
                 </td>
@@ -190,7 +190,7 @@
     <EquationEditorDialog :dialogData="equationEditorDialogData" @submit="onSubmitEquationEditorDialogResult"/>
 
     <CriterionLibraryEditorDialog :dialogData="criterionLibraryEditorDialogData"
-                                  @submit="onSubmitCriteriaEditorDialogResult"/>
+                                  @submit="onSubmitCriterionLibraryEditorDialogResult"/>
   </v-layout>
 </template>
 
@@ -289,7 +289,7 @@ export default class PerformanceCurvesEditor extends Vue {
    */
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
-      if (to.path === '/PerformanceCurvesEditor/Scenario/') {
+      if (to.path.indexOf('PerformanceCurvesEditor/Scenario') !== -1) {
         vm.selectedScenarioId = to.query.scenarioId;
         if (vm.selectedScenarioId === vm.uuidNIL) {
           vm.setErrorMessageAction({message: 'Unable to identify selected scenario.'});
@@ -340,9 +340,7 @@ export default class PerformanceCurvesEditor extends Vue {
    */
   @Watch('librarySelectItemValue')
   onLibrarySelectItemValueChanged() {
-    if (this.librarySelectItemValue !== this.selectedPerformanceCurveLibrary.id) {
-      this.selectPerformanceCurveLibraryAction({libraryId: this.librarySelectItemValue});
-    }
+    this.selectPerformanceCurveLibraryAction({libraryId: this.librarySelectItemValue});
   }
 
   /**
@@ -487,10 +485,10 @@ export default class PerformanceCurvesEditor extends Vue {
   }
 
   /**
-   * onShowCriteriaEditorDialog => This function is used to set the selectedPerformanceCurve object and set the
+   * onEditPerformanceCurveCriterionLibrary => This function is used to set the selectedPerformanceCurve object and set the
    * criterionLibraryEditorDialogData object.
    */
-  onShowCriteriaEditorDialog(performanceCurveId: string) {
+  onEditPerformanceCurveCriterionLibrary(performanceCurveId: string) {
     this.selectedPerformanceCurve = find(
         propEq('id', performanceCurveId), this.selectedPerformanceCurveLibrary.performanceCurves
     ) as PerformanceCurve;
@@ -506,10 +504,10 @@ export default class PerformanceCurvesEditor extends Vue {
   }
 
   /**
-   * onSubmitCriteriaEditorDialogResult => This function is used to modify the selectedPerformanceCurve object's
+   * onSubmitCriterionLibraryEditorDialogResult => This function is used to modify the selectedPerformanceCurve object's
    * criterionLibrary property within the selectedPerformanceCurveLibrary object's performanceCurves property.
    */
-  onSubmitCriteriaEditorDialogResult(criterionLibrary: CriterionLibrary) {
+  onSubmitCriterionLibraryEditorDialogResult(criterionLibrary: CriterionLibrary) {
     this.criterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
     if (!isNil(criterionLibrary) && this.hasSelectedPerformanceCurve) {
@@ -547,8 +545,8 @@ export default class PerformanceCurvesEditor extends Vue {
   onCreateAsNewLibrary() {
     this.createPerformanceCurveLibraryDialogData = {
       showDialog: true,
-      description: this.selectedPerformanceCurveLibrary.description,
-      performanceCurves: this.selectedPerformanceCurveLibrary.performanceCurves
+      performanceCurves: this.selectedPerformanceCurveLibrary.performanceCurves,
+      scenarioId: this.selectedScenarioId
     };
   }
 
@@ -560,12 +558,7 @@ export default class PerformanceCurvesEditor extends Vue {
     this.createPerformanceCurveLibraryDialogData = clone(emptyCreatePerformanceLibraryDialogData);
 
     if (!isNil(performanceCurveLibrary) && performanceCurveLibrary.id !== this.uuidNIL) {
-      this.addOrUpdatePerformanceCurveLibraryAction({library: performanceCurveLibrary, scenarioId: scenarioId})
-          .then(() => {
-            if (this.librarySelectItemValue !== performanceCurveLibrary.id) {
-              this.librarySelectItemValue = performanceCurveLibrary.id;
-            }
-          });
+      this.addOrUpdatePerformanceCurveLibraryAction({library: performanceCurveLibrary, scenarioId: scenarioId});
     }
   }
 
@@ -576,10 +569,13 @@ export default class PerformanceCurvesEditor extends Vue {
    */
   onDiscardChanges() {
     this.librarySelectItemValue = null;
-    if (this.selectedScenarioId !== this.uuidNIL &&
-        hasAppliedLibrary(this.statePerformanceCurveLibraries, this.selectedScenarioId)) {
-      this.librarySelectItemValue = getAppliedLibraryId(this.statePerformanceCurveLibraries, this.selectedScenarioId);
-    }
+    setTimeout(() => {
+      if (this.selectedScenarioId !== this.uuidNIL &&
+          hasAppliedLibrary(this.statePerformanceCurveLibraries, this.selectedScenarioId)) {
+        const libraryId: string = getAppliedLibraryId(this.statePerformanceCurveLibraries, this.selectedScenarioId);
+        this.librarySelectItemValue = libraryId;
+      }
+    });
   }
 
   /**

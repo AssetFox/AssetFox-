@@ -1025,7 +1025,7 @@ export default class Scenarios extends Vue {
     onSubmitNewNetwork(createNetworkData: NetworkCreationData) {
         this.showCreateNetworkDialog = false;
 
-        if (!isNil(createNetworkData) && !isEqual(emptyCreateNetworkData)) {
+        if (!isNil(createNetworkData) && !isEqual(createNetworkData, emptyCreateNetworkData)) {
             this.createNetworkAction({name: createNetworkData.name});
         }
     }

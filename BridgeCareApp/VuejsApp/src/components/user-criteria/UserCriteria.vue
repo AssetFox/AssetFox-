@@ -54,12 +54,12 @@
                                     <v-menu bottom
                                             min-height="500px" min-width="500px" v-if="props.item.hasCriteria">
                                         <template slot="activator">
-                                            <v-text-field class="sm-txt" :value="props.item.criteria" readonly
+                                            <v-text-field class="sm-txt" :value="props.item.criterionLibrary" readonly
                                                           style="width: 25em" type="text"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
-                                                <v-textarea :value="props.item.criteria" full-width no-resize outline
+                                                <v-textarea :value="props.item.criterionLibrary" full-width no-resize outline
                                                             readonly
                                                             rows="5">
                                                 </v-textarea>

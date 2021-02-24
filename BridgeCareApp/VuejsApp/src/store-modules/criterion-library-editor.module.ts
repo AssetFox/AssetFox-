@@ -4,7 +4,6 @@ import CriteriaEditorService from '@/services/criteria-editor.service';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
-import {TypeGuard} from '@/shared/utils/type-checker-utils';
 
 const state = {
     criterionLibraries: [] as CriterionLibrary[],

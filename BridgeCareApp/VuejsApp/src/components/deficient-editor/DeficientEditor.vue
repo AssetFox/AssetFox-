@@ -103,11 +103,11 @@
                                 <v-layout align-center row style="flex-wrap:nowrap">
                                     <v-menu bottom min-height="500px" min-width="500px">
                                         <template slot="activator">
-                                            <v-text-field readonly class="sm-txt" :value="props.item.criteria"/>
+                                            <v-text-field readonly class="sm-txt" :value="props.item.criterionLibrary"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
-                                                <v-textarea :value="props.item.criteria" full-width no-resize outline
+                                                <v-textarea :value="props.item.criterionLibrary" full-width no-resize outline
                                                             readonly
                                                             rows="5"/>
                                             </v-card-text>

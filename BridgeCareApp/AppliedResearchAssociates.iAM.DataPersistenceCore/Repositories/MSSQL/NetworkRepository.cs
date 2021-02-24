@@ -67,7 +67,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public Task<List<NetworkDTO>> GetAllNetworks() =>
+        public List<DataAssignment.Networking.Network> GetAllNetworks() =>
+            _unitOfDataPersistenceWork.Context.Network.Select(_ => _.ToDomain()).ToList();
+
+        public Task<List<NetworkDTO>> Networks() =>
             Task.Factory
                 .StartNew(() => _unitOfDataPersistenceWork.Context.Network.Select(_ => _.ToDto()).ToList());
 

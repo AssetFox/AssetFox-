@@ -8,15 +8,15 @@
             New Library
           </v-btn>
           <v-select :items="librarySelectItems"
-                    label="Select a DeficientConditionGoal Library"
+                    label="Select a Deficient Condition Goal Library"
                     outline v-if="!hasSelectedLibrary || selectedScenarioId !== uuidNIL"
-                    v-model="selectItemValue">
+                    v-model="librarySelectItemValue">
           </v-select>
           <v-text-field label="Library Name" v-if="hasSelectedLibrary && selectedScenarioId === uuidNIL"
                         v-model="selectedDeficientConditionGoalLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]">
             <template slot="append">
-              <v-btn @click="selectItemValue = null" class="ara-orange" icon>
+              <v-btn @click="librarySelectItemValue = null" class="ara-orange" icon>
                 <v-icon>fas fa-caret-left</v-icon>
               </v-btn>
             </template>
@@ -52,35 +52,35 @@
             <td v-for="header in deficientConditionGoalGridHeaders">
               <div>
                 <v-edit-dialog v-if="header.value !== 'criterionLibrary'"
-                    :return-value.sync="props.item[header.value]"
-                    @save="onEditDeficientConditionGoalProperty(props.item, header.value, props.item[header.value])"
-                    large lazy persistent>
-                  <v-text-field v-if="header.value !== 'allowedDeficientPercentage'" readonly class="sm-txt" :value="props.item[header.value]"
+                               :return-value.sync="props.item[header.value]"
+                               @save="onEditDeficientConditionGoalProperty(props.item, header.value, props.item[header.value])"
+                               large lazy persistent>
+                  <v-text-field v-if="header.value !== 'allowedDeficientPercentage'" readonly class="sm-txt"
+                                :value="props.item[header.value]"
                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                  <v-text-field v-if="header.value === 'allowedDeficientPercentage'" readonly class="sm-txt" :value="props.item[header.value]"
+                  <v-text-field v-if="header.value === 'allowedDeficientPercentage'" readonly class="sm-txt"
+                                :value="props.item[header.value]"
                                 :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [0, 100])]"/>
 
-                  <template v-if="header.value === 'name'" slot="input">
-                    <v-text-field label="Edit" single-line v-model="props.item[header.value]"
+                  <template slot="input">
+                    <v-text-field v-if="header.value === 'name'" label="Edit" single-line
+                                  v-model="props.item[header.value]"
                                   :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-                  </template>
 
-                  <template v-if="header.value === 'attribute'" slot="input">
-                    <v-select :items="numericAttributeNames" label="Select an Attribute"
+                    <v-select v-if="header.value === 'attribute'" :items="numericAttributeNames"
+                              label="Select an Attribute"
                               v-model="props.item[header.value]"
                               :rules="[rules['generalRules'].valueIsNotEmpty]">
                     </v-select>
-                  </template>
 
-                  <template v-if="header.value === 'deficientLimit'" slot="input">
-                    <v-text-field label="Edit" single-line v-model="props.item[header.value]"
+                    <v-text-field v-if="header.value === 'deficientLimit'" label="Edit" single-line
+                                  v-model="props.item[header.value]"
                                   :mask="'##########'"
                                   :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-                  </template>
 
-                  <template v-if="header.value === 'allowedDeficientPercentage'" slot="input">
-                    <v-text-field label="Edit" single-line v-model.number="props.item[header.value]"
+                    <v-text-field v-if="header.value === 'allowedDeficientPercentage'" label="Edit" single-line
+                                  v-model.number="props.item[header.value]"
                                   :mask="'###'"
                                   :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(props.item[header.value], [0, 100])]"/>
                   </template>
@@ -226,7 +226,7 @@ export default class DeficientConditionGoalEditor extends Vue {
 
   selectedScenarioId: string = getBlankGuid();
   librarySelectItems: SelectItem[] = [];
-  selectItemValue: string | null = null;
+  librarySelectItemValue: string | null = null;
   selectedDeficientConditionGoalLibrary: DeficientConditionGoalLibrary = clone(emptyDeficientConditionGoalLibrary);
   hasSelectedLibrary: boolean = false;
   deficientConditionGoalGridHeaders: DataTableHeader[] = [
@@ -265,7 +265,7 @@ export default class DeficientConditionGoalEditor extends Vue {
         }
       }
 
-      vm.selectItemValue = null;
+      vm.librarySelectItemValue = null;
       vm.getDeficientConditionGoalLibrariesAction();
     });
   }
@@ -282,13 +282,13 @@ export default class DeficientConditionGoalEditor extends Vue {
     }));
 
     if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateDeficientConditionGoalLibraries, this.selectedScenarioId)) {
-      this.selectItemValue = getAppliedLibraryId(this.stateDeficientConditionGoalLibraries, this.selectedScenarioId);
+      this.librarySelectItemValue = getAppliedLibraryId(this.stateDeficientConditionGoalLibraries, this.selectedScenarioId);
     }
   }
 
-  @Watch('selectItemValue')
+  @Watch('librarySelectItemValue')
   onSelectItemValueChanged() {
-    this.selectDeficientConditionGoalLibraryAction({libraryId: this.selectItemValue});
+    this.selectDeficientConditionGoalLibraryAction({libraryId: this.librarySelectItemValue});
   }
 
   @Watch('stateSelectedDeficientConditionGoalLibrary')
@@ -386,11 +386,11 @@ export default class DeficientConditionGoalEditor extends Vue {
   }
 
   onDiscardChanges() {
-    this.selectItemValue = null;
+    this.librarySelectItemValue = null;
     setTimeout(() => {
       if (this.selectedScenarioId !== this.uuidNIL &&
           hasAppliedLibrary(this.stateDeficientConditionGoalLibraries, this.selectedScenarioId)) {
-        this.selectItemValue = getAppliedLibraryId(this.stateDeficientConditionGoalLibraries, this.selectedScenarioId);
+        this.librarySelectItemValue = getAppliedLibraryId(this.stateDeficientConditionGoalLibraries, this.selectedScenarioId);
       }
     });
   }
@@ -416,7 +416,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     this.confirmDeleteAlertData = clone(emptyAlertData);
 
     if (submit) {
-      this.selectItemValue = null;
+      this.librarySelectItemValue = null;
       this.deleteDeficientConditionGoalLibraryAction({libraryId: this.selectedDeficientConditionGoalLibrary.id});
     }
   }

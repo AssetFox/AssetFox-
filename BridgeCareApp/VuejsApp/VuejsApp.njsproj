@@ -83,8 +83,8 @@
     <Content Include="src\components\scenarios\scenarios-dialogs\CreateScenarioDialog.vue" />
     <Content Include="src\components\scenarios\scenarios-dialogs\ReportsDownloaderDialog.vue" />
     <Content Include="src\components\scenarios\Scenarios.vue" />
-    <Content Include="src\components\target-editor\target-editor-dialogs\CreateTargetDialog.vue" />
-    <Content Include="src\components\target-editor\TargetEditor.vue" />
+    <Content Include="src\components\target-editor\target-editor-dialogs\CreateTargetConditionGoalDialog.vue" />
+    <Content Include="src\components\target-editor\TargetConditionGoalEditor.vue" />
     <Content Include="src\components\treatment-editor\treatment-editor-dialogs\CreateTreatmentDialog.vue" />
     <Content Include="src\components\treatment-editor\treatment-editor-dialogs\CreateTreatmentLibraryDialog.vue" />
     <Content Include="src\components\treatment-editor\treatment-editor-tabs\BudgetsTab.vue" />
@@ -180,7 +180,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\services\scenario.service.ts" />
-    <TypeScriptCompile Include="src\services\target.service.ts" />
+    <TypeScriptCompile Include="src\services\target-condition-goal.service.ts" />
     <TypeScriptCompile Include="src\services\treatment-editor.service.ts" />
     <TypeScriptCompile Include="src\shared\models\child-components\tab-data.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\attribute.ts" />
@@ -202,7 +202,7 @@
     <TypeScriptCompile Include="src\shared\models\iAM\route.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\scenario.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\simulation.ts" />
-    <TypeScriptCompile Include="src\shared\models\iAM\target.ts" />
+    <TypeScriptCompile Include="src\shared\models\iAM\target-condition-goal.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\treatment.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\user-information.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\alert-data.ts" />
@@ -250,7 +250,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\store-modules\scenario.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\target.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\target-condition-goal.module.ts" />
     <TypeScriptCompile Include="src\store-modules\toastr.module.ts" />
     <TypeScriptCompile Include="src\store-modules\treatment-editor.module.ts" />
     <TypeScriptCompile Include="src\store\root-store.ts" />

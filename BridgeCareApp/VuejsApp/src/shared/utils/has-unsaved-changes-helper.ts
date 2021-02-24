@@ -2,7 +2,7 @@ import {emptyInvestmentLibrary} from '@/shared/models/iAM/investment';
 import {emptyPerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {emptyTreatmentLibrary} from '@/shared/models/iAM/treatment';
 import {emptyPriorityLibrary} from '@/shared/models/iAM/priority';
-import {emptyTargetLibrary} from '@/shared/models/iAM/target';
+import {emptyTargetConditionGoalLibrary} from '@/shared/models/iAM/target-condition-goal';
 import {emptyDeficientConditionGoalLibrary} from '@/shared/models/iAM/deficient-condition-goal';
 import {emptyRemainingLifeLimitLibrary} from '@/shared/models/iAM/remaining-life-limit';
 import {emptyCashFlowRuleLibrary} from '@/shared/models/iAM/cash-flow';
@@ -24,6 +24,8 @@ export const hasUnsavedChangesCore = (editor: string, localSelectedLibrary: any,
             return !isEqual(localLibrary, emptyRemainingLifeLimitLibrary) && !isEqual(localLibrary, selectedLibrary);
         case 'deficient-condition-goal':
             return !isEqual(localLibrary, emptyDeficientConditionGoalLibrary) && !isEqual(localLibrary, selectedLibrary);
+        case 'target-condition-goal':
+            return !isEqual(localLibrary, emptyTargetConditionGoalLibrary) && !isEqual(localLibrary, selectedLibrary);
         default:
             return false;
     }
@@ -52,7 +54,7 @@ export const hasUnsavedChanges = (editor: string, localSelectedLibrary: any, sta
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'target':
-            return !isEqual(localLibrary, emptyTargetLibrary) &&
+            return !isEqual(localLibrary, emptyTargetConditionGoalLibrary) &&
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'deficient':

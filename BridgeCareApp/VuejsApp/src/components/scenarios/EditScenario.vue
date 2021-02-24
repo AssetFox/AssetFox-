@@ -180,10 +180,10 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Target',
+            tabName: 'Target Condition Goal',
             tabIcon: 'fas fa-bullseye',
             navigation: {
-                path: '/TargetEditor/Scenario/',
+                path: '/TargetConditionGoalEditor/Scenario/',
             },
         },
         {

@@ -73,8 +73,8 @@ const actions = {
                     };
 
                     const message: string = any(propEq('id', library.id), state.deficientConditionGoalLibraries)
-                        ? 'Updated remaining life limit library'
-                        : 'Added remaining life limit library';
+                        ? 'Updated target condition goal library'
+                        : 'Added target condition goal library';
                     commit('addedOrUpdatedDeficientConditionGoalLibraryMutator', library);
                     commit('selectedDeficientConditionGoalLibraryMutator', library.id);
                     dispatch('setSuccessMessage', {message: message});
@@ -86,7 +86,7 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     commit('deletedDeficientConditionGoalLibraryMutator', payload.libraryId);
-                    dispatch('setSuccessMessage', {message: 'Deleted remaining life limit library'});
+                    dispatch('setSuccessMessage', {message: 'Deleted target condition goal library'});
                 }
             });
     }

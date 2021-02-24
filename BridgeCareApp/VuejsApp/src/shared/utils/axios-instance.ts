@@ -27,5 +27,6 @@ export const API = {
     NetworkController: '/api/Network',
     CashFlowController: '/api/CashFlow',
     RemainingLifeLimitController: '/api/RemainingLifeLimit',
-    DeficientConditionGoalController: '/api/DeficientConditionGoal'
+    DeficientConditionGoalController: '/api/DeficientConditionGoal',
+    TargetConditionGoalController: '/api/TargetConditionGoal'
 };

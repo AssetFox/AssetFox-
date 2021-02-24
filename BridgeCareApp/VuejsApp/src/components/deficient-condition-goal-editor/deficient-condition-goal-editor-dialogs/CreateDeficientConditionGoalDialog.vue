@@ -72,20 +72,12 @@ export default class CreateDeficientConditionGoalDialog extends Vue {
   rules: InputValidationRules = rules;
 
   mounted() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.numericAttributeNames = getPropertyValues('name', this.stateNumericAttributes);
-    }
+    this.setNumericAttributeNames();
   }
 
   @Watch('stateNumericAttributes')
   onStateNumericAttributesChanged() {
-    if (hasValue(this.stateNumericAttributes)) {
-      this.numericAttributeNames = getPropertyValues('name', this.stateNumericAttributes);
-
-      if (this.showDialog) {
-        this.setNewDeficientConditionGoalDefaultValues();
-      }
-    }
+    this.setNumericAttributeNames();
   }
 
   @Watch('showDialog')
@@ -109,6 +101,16 @@ export default class CreateDeficientConditionGoalDialog extends Vue {
       name: `Unnamed Deficient Condition Goal ${this.currentNumberOfDeficientConditionGoals + 1}`,
       deficientLimit: this.currentNumberOfDeficientConditionGoals > 0 ? this.currentNumberOfDeficientConditionGoals + 1 : 1
     };
+  }
+
+  setNumericAttributeNames() {
+    if (hasValue(this.stateNumericAttributes)) {
+      this.numericAttributeNames = getPropertyValues('name', this.stateNumericAttributes);
+
+      if (this.showDialog) {
+        this.setNewDeficientConditionGoalDefaultValues();
+      }
+    }
   }
 
   disableSubmitBtn() {

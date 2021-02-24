@@ -32,7 +32,7 @@
                             <v-list-tile-title>Investment</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/PerformanceCurvesEditor/Library/')">
-                            <v-list-tile-title>Performance</v-list-tile-title>
+                            <v-list-tile-title>Performance Curve</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/TreatmentEditor/Library/')">
                             <v-list-tile-title>Treatment</v-list-tile-title>
@@ -40,11 +40,11 @@
                         <v-list-tile @click="onNavigate('/PriorityEditor/Library/')">
                             <v-list-tile-title>Priority</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/TargetEditor/Library/')">
-                            <v-list-tile-title>Target</v-list-tile-title>
+                        <v-list-tile @click="onNavigate('/TargetConditionGoalEditor/Library/')">
+                            <v-list-tile-title>Target Condition Goal</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/DeficientConditionGoalEditor/Library/')">
-                            <v-list-tile-title>DeficientConditionGoal</v-list-tile-title>
+                            <v-list-tile-title>Deficient Condition Goal</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/RemainingLifeLimitEditor/Library/')" v-if="isAdmin">
                             <v-list-tile-title>Remaining Life Limit</v-list-tile-title>

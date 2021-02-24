@@ -14,7 +14,7 @@ const InvestmentEditor = () => import(/* webpackChunkName: "investmentEditor" */
 const PerformanceCurvesEditor = () => import(/* webpackChunkName: "performanceCurvesEditor" */ '@/components/performance-curves-editor/PerformanceCurvesEditor.vue');
 const TreatmentEditor = () => import(/* webpackChunkName: "treatmentEditor" */ '@/components/treatment-editor/TreatmentEditor.vue');
 const PriorityEditor = () => import (/* webpackChunkName: "priorityEditor" */ '@/components/priority-editor/PriorityEditor.vue');
-const TargetEditor = () => import (/* webpackChunkName: "targetEditor" */ '@/components/target-editor/TargetEditor.vue');
+const TargetConditionGoalEditor = () => import (/* webpackChunkName: "targetEditor" */ '@/components/target-editor/TargetConditionGoalEditor.vue');
 const DeficientConditionGoalEditor = () => import (/* webpackChunkName: "deficientEditor" */ '@/components/deficient-condition-goal-editor/DeficientConditionGoalEditor.vue');
 const Authentication = () => import (/* webpackChunkName: "Authentication" */ '@/components/authentication/Authentication.vue');
 const AuthenticationFailure = () => import (/* webpackChunkName: "authenticationFailure" */ '@/components/authentication/AuthenticationFailure.vue');
@@ -72,8 +72,8 @@ const router = new VueRouter({
                     props: true
                 },
                 {
-                    path: '/TargetEditor/Scenario/',
-                    component: TargetEditor,
+                    path: '/TargetConditionGoalEditor/Scenario/',
+                    component: TargetConditionGoalEditor,
                     props: true
                 },
                 {
@@ -118,9 +118,9 @@ const router = new VueRouter({
             props: true
         },
         {
-            path: '/TargetEditor/Library/',
-            name: 'TargetEditor',
-            component: TargetEditor,
+            path: '/TargetConditionGoalEditor/Library/',
+            name: 'TargetConditionGoalEditor.vue',
+            component: TargetConditionGoalEditor,
             props: true
         },
         {

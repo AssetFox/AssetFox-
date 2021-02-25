@@ -48,6 +48,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
             // setting up model to store data. This will be used to fill up Bridge Work Summary By Budget TAB
             var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();
+            var dataForCommittedProject = new Dictionary<string, List<YearsData>>();
+
             var budgets = new HashSet<string>();
             foreach(var yearData in reportOutputData.Years)
             {
@@ -71,6 +73,32 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 {
                     foreach (var section in yearData.Sections)
                     {
+                        if(section.TreatmentCause == TreatmentCause.CommittedProject)
+                        {
+                            var committedtTreatment = section.TreatmentConsiderations;
+                            var budgetAmount = (double)committedtTreatment.Sum(_ =>
+                            _.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget).Sum(bu => bu.CoveredCost));
+
+                            summaryData.YearlyData.Add(new YearsData
+                            {
+                                Year = yearData.Year,
+                                Treatment = section.AppliedTreatment,
+                                Amount = budgetAmount
+                            });
+
+                            //if (!dataForCommittedProject.ContainsKey(section.AppliedTreatment))
+                            //{
+                            //    dataForCommittedProject.Add(section.AppliedTreatment, new List<YearsData>());
+                            //}
+                            //dataForCommittedProject[section.AppliedTreatment].Add(new YearsData
+                            //{
+                            //    Year = yearData.Year,
+                            //    Treatment = section.AppliedTreatment,
+                            //    Amount = budgetAmount
+                            //});
+                            continue;
+                        }
+
                         if(section.TreatmentCause != TreatmentCause.NoSelection && section.TreatmentCause != TreatmentCause.CommittedProject)
                         {
                             var treatmentConsideration = section.TreatmentConsiderations;
@@ -87,6 +115,16 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     }
                 }
             }
+
+            foreach(var comitted in dataForCommittedProject)
+            {
+                workSummaryByBudgetData.Add(new WorkSummaryByBudgetModel
+                {
+                    Budget = comitted.Key,
+                    YearlyData = comitted.Value,
+                    isCommitted = true
+                });
+            }
             // Model setup complete. [TODO]: Make it efficient
 
             foreach (var summaryData in workSummaryByBudgetData)
@@ -94,12 +132,21 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 //Filtering treatments for the given budget
                 //var totalCostPerYear = summaryData.YearlyData.Sum(_ => _.Amount);
 
-                var costForCulvertBudget = summaryData.YearlyData
-                                             .FindAll(_ => _.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && !_.Treatment.Contains("No Treatment", StringComparison.OrdinalIgnoreCase));
+                var costForCulvertBudget = new List<YearsData>();
+                var costForBridgeBudgets = new List<YearsData>();
+                var costForCommittedBudgets = new List<YearsData>();
+                if (!summaryData.isCommitted)
+                {
+                    costForCulvertBudget = summaryData.YearlyData
+                                             .FindAll(_ => _.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase));
 
-                var costForBridgeBudgets = summaryData.YearlyData
-                                             .FindAll(_ => !_.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && !_.Treatment.Contains("No Treatment", StringComparison.OrdinalIgnoreCase));
-
+                    costForBridgeBudgets = summaryData.YearlyData
+                                                 .FindAll(_ => !_.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase));
+                }
+                else
+                {
+                    costForCommittedBudgets = summaryData.YearlyData;
+                }
 
                 var totalBudgetPerYearForCulvert = new Dictionary<int, double>();
                 var totalBudgetPerYearForBridgeWork = new Dictionary<int, double>();
@@ -122,7 +169,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
                     yearlyBudget.Clear();
 
-                    totalSpent.Add((year, culvertAmountSum + budgetAmountSum));
+                    yearlyBudget = costForCommittedBudgets.FindAll(_ => _.Year == year);
+                    var committedAmountSum = yearlyBudget.Sum(s => s.Amount);
+                    totalBudgetPerYearForMPMS.Add(year, committedAmountSum);
+
+                    yearlyBudget.Clear();
+
+                    totalSpent.Add((year, culvertAmountSum + budgetAmountSum + committedAmountSum));
                 }
 
                 currentCell.Column = 1;

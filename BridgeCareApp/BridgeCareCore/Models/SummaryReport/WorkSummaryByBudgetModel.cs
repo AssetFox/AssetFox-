@@ -9,5 +9,7 @@ namespace BridgeCareCore.Models.SummaryReport
     {
         public string Budget { get; set; }
         public List<YearsData> YearlyData { get; set; }
+
+        public bool isCommitted { get; set; } = false;
     }
 }

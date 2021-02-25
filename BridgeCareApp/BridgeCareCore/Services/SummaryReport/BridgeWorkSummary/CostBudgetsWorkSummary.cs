@@ -34,7 +34,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 simulationYears, treatments, costPerTreatmentPerYear);
             var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears,
                 costPerTreatmentPerYear, yearlyBudgetAmount);
-            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow);
+            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
         }
 
         #region Private methods
@@ -79,13 +79,13 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
         }
 
         private void FillRemainingBudgetSection(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
-            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow)
+            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow, int committedTotalRow)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");
             worksheet.Cells[currentCell.Row, simulationYears.Count + 3].Value = "Total Remaining Budget(all years)";
             _excelHelper.ApplyStyle(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
             _excelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
-            AddDetailsForRemainingBudget(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow);
+            AddDetailsForRemainingBudget(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
         }
 
         private int AddCostsOfCommittedWork(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
@@ -296,7 +296,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
         }
 
         private void AddDetailsForRemainingBudget(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
-            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow)
+            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow, int committedTotalRow)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
@@ -311,19 +311,15 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 column = ++column;
                 var totalSpent = Convert.ToDouble(worksheet.Cells[culvertTotalRow, column].Value) +
                     Convert.ToDouble(worksheet.Cells[bridgeTotalRow, column].Value);
-                    //Convert.ToDouble(worksheet.Cells[committedTotalRow, column].Value);
+                    Convert.ToDouble(worksheet.Cells[committedTotalRow, column].Value);
 
                 worksheet.Cells[row, column].Value = Convert.ToDouble(worksheet.Cells[budgetTotalRow, column].Value) - totalSpent;
                 row++;
 
-                // [TODO] - right now, we are not entering committed project data in the excel file
-                //worksheet.Cells[row, column].Formula = worksheet.Cells[committedTotalRow, column] + "/" + totalSpent;
+                worksheet.Cells[row, column].Formula = worksheet.Cells[committedTotalRow, column] + "/" + totalSpent;
                 row++;
 
                 worksheet.Cells[row, column].Formula = 1 + "-" + worksheet.Cells[row - 1, column];
-
-                //[TODO] - Because we do not have anything for committed project. % for BAMS spent will always be 100
-                worksheet.Cells[row, column].Formula = 1 + "-" + 0;
             }
             worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column] + ")";
             worksheet.Cells[startRow, column + 2].Formula = worksheet.Cells[startRow, column + 1] + "/" + worksheet.Cells[budgetTotalRow, column + 1];

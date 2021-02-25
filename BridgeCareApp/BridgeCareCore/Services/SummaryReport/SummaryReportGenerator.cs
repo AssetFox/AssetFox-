@@ -11,6 +11,7 @@ using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using MoreLinq;
 using OfficeOpenXml;
 using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 

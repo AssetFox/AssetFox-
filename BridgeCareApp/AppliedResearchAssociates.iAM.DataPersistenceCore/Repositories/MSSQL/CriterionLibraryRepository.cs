@@ -21,38 +21,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        private static readonly Dictionary<string, string> NameConventionPerEntityType = new Dictionary<string, string>
-        {
-            {"AnalysisMethodEntity", "Analysis Method"},
-            {"BudgetEntity", "Budget"},
-            {"BudgetPriorityEntity", "Budget Priority"},
-            {"DeficientConditionGoalEntity", "Deficient Condition Goal"},
-            {"PerformanceCurveEntity", "Performance Curve"},
-            {"CashFlowRuleEntity", "Cash Flow Rule"},
-            {"RemainingLifeLimitEntity", "Remaining Life Limit"},
-            {"SelectableTreatmentEntity", "Feasibility"},
-            {"TargetConditionGoalEntity", "Target Condition Goal"},
-            {"TreatmentConsequenceEntity", "Treatment Consequence"},
-            {"TreatmentCostEntity", "Treatment Cost"},
-            {"TreatmentSupersessionEntity", "Treatment Supersession"}
-        };
+        
         public CriterionLibraryRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
-        public void JoinEntitiesWithCriteria(Dictionary<string, List<Guid>> entityIdsPerExpression, string joinEntity, string prependName)
-        {
+        public void JoinEntitiesWithCriteria(Dictionary<string, List<Guid>> entityIdsPerExpression, string joinEntity, string prependName) =>
             entityIdsPerExpression.Keys.ForEach(expression =>
             {
                 var criterionLibraryEntity = _unitOfDataPersistenceWork.Context.CriterionLibrary
                     .SingleOrDefault(_ => _.MergedCriteriaExpression == expression &&
-                                          _.Name.Contains(NameConventionPerEntityType[joinEntity]));
+                                          _.Name.Contains(DataPersistenceConstants.CriterionLibraryJoinEntities.NameConventionPerEntityType[joinEntity]));
 
                 if (criterionLibraryEntity == null)
                 {
                     var criterionLibraryNames = _unitOfDataPersistenceWork.Context.CriterionLibrary
-                        .Where(_ => _.Name.Contains(NameConventionPerEntityType[joinEntity]))
+                        .Where(_ => _.Name.Contains(DataPersistenceConstants.CriterionLibraryJoinEntities.NameConventionPerEntityType[joinEntity]))
                         .Select(_ => _.Name).ToList();
 
-                    var newCriterionLibraryName = $"{prependName} {NameConventionPerEntityType[joinEntity]} Criterion Library";
+                    var newCriterionLibraryName = $"{prependName} {DataPersistenceConstants.CriterionLibraryJoinEntities.NameConventionPerEntityType[joinEntity]} Criterion Library";
                     if (criterionLibraryNames.Contains(newCriterionLibraryName))
                     {
                         var version = 2;
@@ -74,38 +59,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 switch (joinEntity)
                 {
-                case "AnalysisMethodEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.AnalysisMethod:
                     CreateCriterionLibraryAnalysisMethodJoin(criterionLibraryEntity.Id, entityIdsPerExpression[expression].First());
                     break;
-                case "BudgetEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.Budget:
                     CreateCriterionLibraryBudgetJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
-                case "BudgetPriorityEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.BudgetPriority:
                     CreateCriterionLibraryBudgetPriorityJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
-                case "CashFlowRuleEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.CashFlowRule:
                     CreateCriterionLibraryCashFlowRuleJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
-                case "DeficientConditionGoalEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.DeficientConditionGoal:
                     CreateCriterionLibraryDeficientConditionGoalJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
-                case "PerformanceCurveEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.PerformanceCurve:
                     CreateCriterionLibraryPerformanceCurveJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
-                case "RemainingLifeLimitEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.RemainingLifeLimit:
                     CreateCriterionLibraryRemainingLifeLimitJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
-                case "TargetConditionGoalEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.TargetConditionGoal:
                     CreateCriterionLibraryTargetConditionGoalJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
-                case "TreatmentConsequenceEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.ConditionalTreatmentConsequence:
                     CreateCriterionLibraryTreatmentConsequenceJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
-                case "TreatmentCostEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.TreatmentCost:
                     CreateCriterionLibraryTreatmentCostJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
-                case "TreatmentSupersessionEntity":
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.TreatmentSupersession:
                     CreateCriterionLibraryTreatmentSupersessionJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
+                    break;
+                case DataPersistenceConstants.CriterionLibraryJoinEntities.SelectableTreatment:
+                    CreateCriterionLibrarySelectableTreatmentJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
                 default:
                     throw new InvalidOperationException("Unable to determine criterion library join entity type.");
@@ -113,7 +101,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfDataPersistenceWork.Context.SaveChanges();
             });
-        }
 
         public void CreateCriterionLibraries(List<CriterionLibraryEntity> criterionLibraryEntities)
         {
@@ -338,6 +325,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        private void CreateCriterionLibrarySelectableTreatmentJoins(Guid criterionLibraryId, List<Guid> treatmentIds)
+        {
+            var joinEntities = treatmentIds.Select(treatmentId =>
+                    new CriterionLibrarySelectableTreatmentEntity
+                    {
+                        CriterionLibraryId = criterionLibraryId,
+                        SelectableTreatmentId = treatmentId
+                    })
+                .ToList();
+
+            if (IsRunningFromXUnit)
+            {
+                _unitOfDataPersistenceWork.Context.CriterionLibrarySelectableTreatment.AddRange(joinEntities);
+            }
+            else
+            {
+                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
+            }
+        }
+
         public void JoinSelectableTreatmentEntitiesWithCriteria(
             Dictionary<Guid, List<string>> expressionsPerSelectableTreatmentEntityId, string simulationName)
         {
@@ -352,15 +359,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     var criterionLibraryEntity = _unitOfDataPersistenceWork.Context.CriterionLibrary
                         .SingleOrDefault(_ => _.MergedCriteriaExpression == expression &&
-                                              _.Name.Contains(NameConventionPerEntityType["SelectableTreatmentEntity"]));
+                                              _.Name.Contains(
+                                                  DataPersistenceConstants.CriterionLibraryJoinEntities
+                                                      .NameConventionPerEntityType[
+                                                          DataPersistenceConstants.CriterionLibraryJoinEntities
+                                                              .SelectableTreatment]));
 
                     if (criterionLibraryEntity == null)
                     {
                         var criterionLibraryNames = _unitOfDataPersistenceWork.Context.CriterionLibrary
-                            .Where(_ => _.Name.Contains(NameConventionPerEntityType["SelectableTreatmentEntity"]))
+                            .Where(_ => _.Name.Contains(
+                                DataPersistenceConstants.CriterionLibraryJoinEntities.NameConventionPerEntityType[
+                                    DataPersistenceConstants.CriterionLibraryJoinEntities.SelectableTreatment]))
                             .Select(_ => _.Name).ToList();
 
-                        var newCriterionLibraryName = $"{simulationName} Simulation {NameConventionPerEntityType["SelectableTreatmentEntity"]} Criterion Library";
+                        var newCriterionLibraryName =
+                            $"{simulationName} Simulation {DataPersistenceConstants.CriterionLibraryJoinEntities.NameConventionPerEntityType[DataPersistenceConstants.CriterionLibraryJoinEntities.SelectableTreatment]} Criterion Library";
                         if (criterionLibraryNames.Contains(newCriterionLibraryName))
                         {
                             var version = 2;

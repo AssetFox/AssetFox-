@@ -41,7 +41,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     LastModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<Guid>(nullable: false),
                     LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -57,7 +58,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     LastModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<Guid>(nullable: false),
                     LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -73,7 +75,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     LastModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<Guid>(nullable: false),
                     LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -90,6 +93,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     CreatedBy = table.Column<Guid>(nullable: false),
                     LastModifiedBy = table.Column<Guid>(nullable: false),
                     Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
                     MergedCriteriaExpression = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
@@ -106,7 +110,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     LastModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<Guid>(nullable: false),
                     LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -154,7 +159,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     LastModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<Guid>(nullable: false),
                     LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -170,7 +176,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     LastModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<Guid>(nullable: false),
                     LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -186,7 +193,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     LastModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<Guid>(nullable: false),
                     LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -202,7 +210,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     LastModifiedDate = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<Guid>(nullable: false),
                     LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -2068,7 +2077,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_CriterionLibrary_Treatment_SelectableTreatmentId",
                 table: "CriterionLibrary_Treatment",
-                column: "SelectableTreatmentId");
+                column: "SelectableTreatmentId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_CriterionLibrary_TreatmentConsequence_ConditionalTreatmentConsequenceId",

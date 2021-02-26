@@ -181,8 +181,7 @@ import {
   emptyCriterionLibraryEditorDialogData
 } from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
-import CreateDeficientConditionGoalDialog
-  from '@/components/deficient-condition-goal-editor/deficient-condition-goal-editor-dialogs/CreateDeficientConditionGoalDialog.vue';
+import CreateDeficientConditionGoalDialog from '@/components/deficient-condition-goal-editor/deficient-condition-goal-editor-dialogs/CreateDeficientConditionGoalDialog.vue';
 import {
   CreateDeficientConditionGoalLibraryDialogData,
   emptyCreateDeficientConditionGoalLibraryDialogData
@@ -190,8 +189,7 @@ import {
 import {setItemPropertyValue} from '@/shared/utils/setter-utils';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {SelectItem} from '@/shared/models/vue/select-item';
-import CreateDeficientConditionGoalLibraryDialog
-  from '@/components/deficient-condition-goal-editor/deficient-condition-goal-editor-dialogs/CreateDeficientConditionGoalLibraryDialog.vue';
+import CreateDeficientConditionGoalLibraryDialog from '@/components/deficient-condition-goal-editor/deficient-condition-goal-editor-dialogs/CreateDeficientConditionGoalLibraryDialog.vue';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';

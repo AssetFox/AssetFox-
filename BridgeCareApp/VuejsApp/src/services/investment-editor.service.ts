@@ -1,4 +1,4 @@
-import {axiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
+import {API, axiosInstance, coreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
 import {AxiosPromise} from 'axios';
 import {InvestmentLibrary} from '@/shared/models/iAM/investment';
 import {convertFromVueToMongo} from '@/shared/utils/mongo-model-conversion-utils';
@@ -51,5 +51,9 @@ export default class InvestmentEditorService {
         // Node API call is to update last modified date. (THe date is set in the nodejs app)
         nodejsAxiosInstance.put(`/api/UpdateMongoScenario/${objectIdMOngoDBForScenario}`);
         return axiosInstance.post('/api/SaveScenarioInvestmentLibrary', saveScenarioInvestmentLibraryData);
+    }
+
+    static getScenarioSimpleBudgetDetails(scenarioId: string) {
+        return coreAxiosInstance.get(`${API.InvestmentController}/GetScenarioSimpleBudgetDetails/${scenarioId}`);
     }
 }

@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             {analysisMethod.Filter.Expression, new List<Guid> {analysisMethodEntity.Id}}
                         };
                 _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(analysisMethodEntityIdPerExpression,
-                    "AnalysisMethodEntity", simulationEntity.Name);
+                    DataPersistenceConstants.CriterionLibraryJoinEntities.AnalysisMethod, simulationEntity.Name);
             }
 
             if (analysisMethod.BudgetPriorities.Any())

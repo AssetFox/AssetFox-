@@ -29,6 +29,11 @@ export interface BudgetYearsGridData {
     [budgetName: string]: number | null;
 }
 
+export interface SimpleBudgetDetail {
+    id: string;
+    name: string;
+}
+
 export const emptyInvestmentLibrary: InvestmentLibrary = {
     id: '0',
     name: '',

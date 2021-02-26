@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20210218175519_ModifyLibraryEntitiesWithDescriptionProp")]
-    partial class ModifyLibraryEntitiesWithDescriptionProp
+    [Migration("20210226054616_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1170,7 +1170,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("CriterionLibraryId");
 
-                    b.HasIndex("SelectableTreatmentId");
+                    b.HasIndex("SelectableTreatmentId")
+                        .IsUnique();
 
                     b.ToTable("CriterionLibrary_Treatment");
                 });
@@ -2728,8 +2729,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithMany("CriterionLibrarySelectableTreatmentJoins")
-                        .HasForeignKey("SelectableTreatmentId")
+                        .WithOne("CriterionLibrarySelectableTreatmentJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibrarySelectableTreatmentEntity", "SelectableTreatmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

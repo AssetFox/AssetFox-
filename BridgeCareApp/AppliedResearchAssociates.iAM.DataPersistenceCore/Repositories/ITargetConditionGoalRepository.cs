@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateTargetConditionGoals(List<TargetConditionGoal> targetConditionGoals, Guid simulationId);
         Task<List<TargetConditionGoalLibraryDTO>> TargetConditionGoalLibrariesWithTargetConditionGoals();
         void AddOrUpdateTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto, Guid simulationId);
-        void AddOrUpdateOrDeleteTargetConditionGoals(List<TargetConditionGoalDTO> remainingLifeLimits, Guid libraryId);
+        void AddOrUpdateOrDeleteTargetConditionGoals(List<TargetConditionGoalDTO> targetConditionGoals, Guid libraryId);
         void DeleteTargetConditionGoalLibrary(Guid libraryId);
     }
 }

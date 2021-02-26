@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
+using SQLitePCL;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -103,12 +108,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (selectableTreatments.Any(_ => _.FeasibilityCriteria.Any(__ => !__.ExpressionIsBlank)))
             {
-                var expressionsPerTreatmentId = selectableTreatments
+                var entityIdsPerExpression = selectableTreatments
                     .Where(_ => _.FeasibilityCriteria.Any(__ => !__.ExpressionIsBlank))
-                    .ToDictionary(_ => _.Id, _ => _.FeasibilityCriteria
-                        .Where(__ => !__.ExpressionIsBlank).Select(__ => __.Expression).ToList());
+                    .ToDictionary(_ => _.FeasibilityCriteria.ToList()[0].Expression, _ => new List<Guid> { _.Id });
 
-                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinSelectableTreatmentEntitiesWithCriteria(expressionsPerTreatmentId, simulationEntity.Name);
+                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(entityIdsPerExpression,
+                    DataPersistenceConstants.CriterionLibraryJoinEntities.SelectableTreatment, simulationEntity.Name);
             }
 
             if (selectableTreatments.Any(_ => _.Schedulings.Any()))
@@ -189,13 +194,179 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.CriterionLibrarySelectableTreatmentJoins)
+                .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.TreatmentSchedulings)
                 .Include(_ => _.TreatmentSupersessions)
                 .Where(_ => _.TreatmentLibrary.TreatmentLibrarySimulationJoins.SingleOrDefault(__ =>
                     __.Simulation.Name == simulation.Name) != null)
                 .ForEach(_ => _.CreateSelectableTreatment(simulation));
+        }
+
+        public Task<List<TreatmentLibraryDTO>> TreatmentLibrariesWithTreatments()
+        {
+            if (!_unitOfDataPersistenceWork.Context.SelectableTreatment.Any())
+            {
+                return Task.Factory.StartNew(() => new List<TreatmentLibraryDTO>());
+            }
+
+            return Task.Factory.StartNew(() => _unitOfDataPersistenceWork.Context.TreatmentLibrary
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.TreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentBudgetJoins)
+                .ThenInclude(_ => _.Budget)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.CriterionLibrarySelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.TreatmentLibrarySimulationJoins)
+                .Select(_ => _.ToDto())
+                .ToList());
+        }
+
+        public void AddOrUpdateTreatmentLibrary(TreatmentLibraryDTO dto, Guid simulationId)
+        {
+            var entity = dto.ToEntity();
+
+            _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, dto.Id);
+
+            if (simulationId != Guid.Empty)
+            {
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                {
+                    throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                }
+
+                _unitOfDataPersistenceWork.Context.Delete<TreatmentLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
+
+                _unitOfDataPersistenceWork.Context.TreatmentLibrarySimulation.Add(
+                    new TreatmentLibrarySimulationEntity {TreatmentLibraryId = dto.Id, SimulationId = simulationId});
+            }
+
+            _unitOfDataPersistenceWork.Context.SaveChanges();
+        }
+
+        public void AddOrUpdateOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId)
+        {
+            if (!_unitOfDataPersistenceWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException($"No treatment library found having id {libraryId}.");
+            }
+
+            var entities = treatments.Select(_ => _.ToEntity(libraryId)).ToList();
+
+            var entityIds = entities.Select(_ => _.Id).ToList();
+
+            var existingEntityIds = _unitOfDataPersistenceWork.Context.SelectableTreatment
+                .Where(_ => _.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
+                .ToList();
+
+            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<SelectableTreatmentEntity, bool>>>
+            {
+                {"delete", _ => _.TreatmentLibraryId == libraryId && !entityIds.Contains(_.Id)},
+                {"update", _ => existingEntityIds.Contains(_.Id)},
+                {"add", _ => !existingEntityIds.Contains(_.Id)}
+            };
+
+            if (IsRunningFromXUnit)
+            {
+                _unitOfDataPersistenceWork.Context.AddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+            }
+            else
+            {
+                _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+            }
+
+            _unitOfDataPersistenceWork.Context.DeleteAll<SelectableTreatmentBudgetEntity>(_ =>
+                _.SelectableTreatment.TreatmentLibraryId == libraryId);
+
+            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
+                _.SelectableTreatment.TreatmentLibraryId == libraryId);
+
+            if (treatments.Any(_ => _.Costs.Any()))
+            {
+                var costsPerTreatmentId =
+                    treatments.Where(_ => _.Costs.Any()).ToList().ToDictionary(_ => _.Id, _ => _.Costs);
+                _unitOfDataPersistenceWork.TreatmentCostRepo.AddOrUpdateOrDeleteTreatmentCosts(costsPerTreatmentId, libraryId);
+            }
+
+            if (treatments.Any(_ => _.Consequences.Any()))
+            {
+                var consequencesPerTreatmentId = treatments.Where(_ => _.Consequences.Any()).ToList()
+                    .ToDictionary(_ => _.Id, _ => _.Consequences);
+                _unitOfDataPersistenceWork.TreatmentConsequenceRepo.AddOrUpdateOrDeleteTreatmentConsequences(consequencesPerTreatmentId, libraryId);
+            }
+
+            if (treatments.Any(_ => _.BudgetIds.Any()))
+            {
+                var treatmentBudgetJoinsToAdd = treatments.Where(_ => _.BudgetIds.Any()).SelectMany(_ =>
+                    _.BudgetIds.Select(budgetId =>
+                        new SelectableTreatmentBudgetEntity {SelectableTreatmentId = _.Id, BudgetId = budgetId})).ToList();
+
+                if (IsRunningFromXUnit)
+                {
+                    _unitOfDataPersistenceWork.Context.TreatmentBudget.AddRange(treatmentBudgetJoinsToAdd);
+                }
+                else
+                {
+                    _unitOfDataPersistenceWork.Context.BulkInsert(treatmentBudgetJoinsToAdd);
+                }
+            }
+
+            if (treatments.Any(_ =>
+                _.CriterionLibrary?.Id != null && _.CriterionLibrary.Id != Guid.Empty &&
+                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+            {
+                var criterionLibraryJoinsToAdd = treatments
+                    .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary.Id != Guid.Empty &&
+                                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)).Select(_ =>
+                        new CriterionLibrarySelectableTreatmentEntity
+                        {
+                            CriterionLibraryId = _.CriterionLibrary.Id, SelectableTreatmentId = _.Id
+                        }).ToList();
+
+                if (IsRunningFromXUnit)
+                {
+                    _unitOfDataPersistenceWork.Context.CriterionLibrarySelectableTreatment.AddRange(criterionLibraryJoinsToAdd);
+                }
+                else
+                {
+                    _unitOfDataPersistenceWork.Context.BulkInsert(criterionLibraryJoinsToAdd);
+                }
+            }
+
+            _unitOfDataPersistenceWork.Context.SaveChanges();
+        }
+
+        public void DeleteTreatmentLibrary(Guid libraryId)
+        {
+            if (_unitOfDataPersistenceWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
+            {
+                return;
+            }
+
+            var libraryToDelete = _unitOfDataPersistenceWork.Context.TreatmentLibrary.Single(_ => _.Id == libraryId);
+
+            _unitOfDataPersistenceWork.Context.TreatmentLibrary.Remove(libraryToDelete);
+
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
     }
 }

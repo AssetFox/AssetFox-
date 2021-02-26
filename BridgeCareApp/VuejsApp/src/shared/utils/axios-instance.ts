@@ -28,5 +28,7 @@ export const API = {
     CashFlowController: '/api/CashFlow',
     RemainingLifeLimitController: '/api/RemainingLifeLimit',
     DeficientConditionGoalController: '/api/DeficientConditionGoal',
-    TargetConditionGoalController: '/api/TargetConditionGoal'
+    TargetConditionGoalController: '/api/TargetConditionGoal',
+    TreatmentController: '/api/Treatment',
+    InvestmentController: '/api/Investment'
 };

@@ -742,7 +742,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasIndex(e => e.CriterionLibraryId);
 
-                entity.HasIndex(e => e.SelectableTreatmentId);
+                entity.HasIndex(e => e.SelectableTreatmentId).IsUnique();
 
                 entity.HasOne(d => d.CriterionLibrary)
                     .WithMany(p => p.CriterionLibrarySelectableTreatmentJoins)
@@ -750,8 +750,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.SelectableTreatment)
-                    .WithMany(p => p.CriterionLibrarySelectableTreatmentJoins)
-                    .HasForeignKey(d => d.SelectableTreatmentId)
+                    .WithOne(p => p.CriterionLibrarySelectableTreatmentJoin)
+                    .HasForeignKey<CriterionLibrarySelectableTreatmentEntity>(d => d.SelectableTreatmentId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -876,6 +876,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Expression).IsRequired();
+
+                entity.HasOne(d => d.AttributeEquationCriterionLibraryJoin)
+                    .WithOne(p => p.Equation)
+                    .HasForeignKey<AttributeEquationCriterionLibraryEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ConditionalTreatmentConsequenceEquationJoin)
+                    .WithOne(p => p.Equation)
+                    .HasForeignKey<ConditionalTreatmentConsequenceEquationEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.PerformanceCurveEquationJoin)
+                    .WithOne(p => p.Equation)
+                    .HasForeignKey<PerformanceCurveEquationEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.TreatmentCostEquationJoin)
+                    .WithOne(p => p.Equation)
+                    .HasForeignKey<TreatmentCostEquationEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<FacilityEntity>(entity =>

@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
 
                 _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(deficientIdsPerExpression,
-                    "DeficientConditionGoalEntity", simulationEntity.Name);
+                    DataPersistenceConstants.CriterionLibraryJoinEntities.DeficientConditionGoal, simulationEntity.Name);
             }
         }
 

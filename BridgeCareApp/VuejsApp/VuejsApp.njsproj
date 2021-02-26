@@ -90,7 +90,7 @@
     <Content Include="src\components\treatment-editor\treatment-editor-tabs\BudgetsTab.vue" />
     <Content Include="src\components\treatment-editor\treatment-editor-tabs\ConsequencesTab.vue" />
     <Content Include="src\components\treatment-editor\treatment-editor-tabs\CostsTab.vue" />
-    <Content Include="src\components\treatment-editor\treatment-editor-tabs\FeasibilityTab.vue" />
+    <Content Include="src\components\treatment-editor\treatment-editor-tabs\TreatmentDetailsTab.vue" />
     <Content Include="src\components\treatment-editor\TreatmentEditor.vue" />
     <Content Include="src\components\UnderConstruction.vue" />
     <Content Include="src\shared\AppShowProgress.vue">
@@ -181,7 +181,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\services\scenario.service.ts" />
     <TypeScriptCompile Include="src\services\target-condition-goal.service.ts" />
-    <TypeScriptCompile Include="src\services\treatment-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\treatment.service.ts" />
     <TypeScriptCompile Include="src\shared\models\child-components\tab-data.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\attribute.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\criteria-driven-budgets.ts" />

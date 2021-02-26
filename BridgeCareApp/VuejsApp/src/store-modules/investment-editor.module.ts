@@ -1,4 +1,9 @@
-import {CriteriaDrivenBudget, emptyInvestmentLibrary, InvestmentLibrary} from '@/shared/models/iAM/investment';
+import {
+    CriteriaDrivenBudget,
+    emptyInvestmentLibrary,
+    InvestmentLibrary,
+    SimpleBudgetDetail
+} from '@/shared/models/iAM/investment';
 import InvestmentEditorService from '@/services/investment-editor.service';
 import {any, append, clone, equals, find, findIndex, propEq, reject, update} from 'ramda';
 import {AxiosResponse} from 'axios';
@@ -7,13 +12,16 @@ import {convertFromMongoToVue} from '@/shared/utils/mongo-model-conversion-utils
 import {http2XX} from '@/shared/utils/http-utils';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {sorter} from '@/shared/utils/sorter-utils';
+import TreatmentService from '@/services/treatment.service';
+import {TreatmentLibrary} from '@/shared/models/iAM/treatment';
 
 const ObjectID = require('bson-objectid');
 
 const state = {
     investmentLibraries: [] as InvestmentLibrary[],
     scenarioInvestmentLibrary: clone(emptyInvestmentLibrary) as InvestmentLibrary,
-    selectedInvestmentLibrary: clone(emptyInvestmentLibrary) as InvestmentLibrary
+    selectedInvestmentLibrary: clone(emptyInvestmentLibrary) as InvestmentLibrary,
+    scenarioSimpleBudgetDetails: [] as SimpleBudgetDetail[]
 };
 
 const mutations = {
@@ -77,6 +85,9 @@ const mutations = {
                 state.investmentLibraries
             );
         }
+    },
+    scenarioSimpleBudgetDetailsMutator(state: any, simpleBudgetDetails: SimpleBudgetDetail[]) {
+        state.scenarioSimpleBudgetDetails = clone(simpleBudgetDetails);
     }
 };
 
@@ -189,7 +200,15 @@ const actions = {
                 }
             }
         }
-    }
+    },
+    async getScenarioSimpleBudgetDetails({commit}: any, payload: any) {
+        await InvestmentEditorService.getScenarioSimpleBudgetDetails(payload.scenarioId)
+            .then((response: AxiosResponse<any[]>) => {
+                if (hasValue(response, 'data')) {
+                    commit('scenarioSimpleBudgetDetailsMutator', response.data as SimpleBudgetDetail[]);
+                }
+            });
+    },
 };
 
 const getters = {};

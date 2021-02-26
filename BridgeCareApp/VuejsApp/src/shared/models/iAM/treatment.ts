@@ -1,83 +1,93 @@
-export interface Feasibility {
+import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import {clone} from 'ramda';
+import {emptyEquation, Equation} from '@/shared/models/iAM/equation';
+import {SimpleBudgetDetail} from '@/shared/models/iAM/investment';
+
+export interface TreatmentCost {
     id: string;
-    criteria: string;
-    yearsBeforeAny: number;
-    yearsBeforeSame: number;
+    equation: Equation;
+    criterionLibrary: CriterionLibrary;
 }
 
-export interface Cost {
-    id: string;
-    equation: string;
-    isFunction?: boolean;
-    criteria: string;
-}
-
-export interface Consequence {
+export interface TreatmentConsequence {
     id: string;
     attribute: string;
-    change: string;
-    equation: string;
-    isFunction?: boolean;
-    criteria: string;
+    changeValue: string;
+    equation: Equation;
+    criterionLibrary: CriterionLibrary;
 }
 
 export interface Treatment {
     id: string;
     name: string;
-    feasibility: Feasibility;
-    costs: Cost[];
-    consequences: Consequence[];
-    budgets: string[];
+    description: string;
+    shadowForAnyTreatment: number;
+    shadowForSameTreatment: number;
+    criterionLibrary: CriterionLibrary;
+    costs: TreatmentCost[];
+    consequences: TreatmentConsequence[];
+    budgetIds: string[];
 }
 
 export interface TreatmentLibrary {
     id: string;
     name: string;
-    owner?: string;
-    shared?: boolean;
     description: string;
     treatments: Treatment[];
+    appliedScenarioIds: string[];
+    owner?: string;
+    shared?: boolean;
+}
+
+export interface TreatmentDetails {
+    description: string;
+    shadowForAnyTreatment: number;
+    shadowForSameTreatment: number;
+    criterionLibrary: CriterionLibrary;
 }
 
 export interface BudgetGridRow {
     budget: string;
 }
 
-export const emptyFeasibility: Feasibility = {
-    id: '0',
-    criteria: '',
-    yearsBeforeAny: 0,
-    yearsBeforeSame: 0,
+export const emptyCost: TreatmentCost = {
+    id: getBlankGuid(),
+    equation: clone(emptyEquation),
+    criterionLibrary: clone(emptyCriterionLibrary)
 };
 
-export const emptyCost: Cost = {
-    id: '0',
-    equation: '',
-    isFunction: false,
-    criteria: ''
-};
-
-export const emptyConsequence: Consequence = {
-    id: '0',
+export const emptyConsequence: TreatmentConsequence = {
+    id: getBlankGuid(),
     attribute: '',
-    change: '',
-    equation: '',
-    isFunction: false,
-    criteria: ''
+    changeValue: '',
+    equation: clone(emptyEquation),
+    criterionLibrary: clone(emptyCriterionLibrary)
 };
 
 export const emptyTreatment: Treatment = {
-    id: '0',
+    id: getBlankGuid(),
     name: '',
-    feasibility: emptyFeasibility,
+    description: '',
+    shadowForAnyTreatment: 0,
+    shadowForSameTreatment: 0,
+    criterionLibrary: clone(emptyCriterionLibrary),
     costs: [],
     consequences: [],
-    budgets: []
+    budgetIds: []
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {
-    id: '0',
+    id: getBlankGuid(),
     name: '',
     description: '',
-    treatments: []
+    treatments: [],
+    appliedScenarioIds: []
+};
+
+export const emptyTreatmentDetails: TreatmentDetails = {
+    description: '',
+    shadowForAnyTreatment: 0,
+    shadowForSameTreatment: 0,
+    criterionLibrary: clone(emptyCriterionLibrary)
 };

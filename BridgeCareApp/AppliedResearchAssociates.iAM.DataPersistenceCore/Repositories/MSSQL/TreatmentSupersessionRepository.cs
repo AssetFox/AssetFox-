@@ -14,10 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public TreatmentSupersessionRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
-        {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-        }
+        public TreatmentSupersessionRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public void CreateTreatmentSupersessions(Dictionary<Guid, List<TreatmentSupersession>> treatmentSupersessionsPerTreatmentId,
             string simulationName)
@@ -58,7 +55,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (supersessionEntityIdsPerExpression.Values.Any())
             {
-                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(supersessionEntityIdsPerExpression, "TreatmentSupersessionEntity", simulationName);
+                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(
+                    supersessionEntityIdsPerExpression,
+                    DataPersistenceConstants.CriterionLibraryJoinEntities.TreatmentSupersession, simulationName);
             }
         }
     }

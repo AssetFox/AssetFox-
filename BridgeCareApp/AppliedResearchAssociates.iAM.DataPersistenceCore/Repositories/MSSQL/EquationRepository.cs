@@ -34,13 +34,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             switch (joinEntity)
             {
-            case "PerformanceCurveEntity":
+            case DataPersistenceConstants.EquationJoinEntities.PerformanceCurve:
                 JoinEquationsWithPerformanceCurves(equationEntityPerJoinEntityId);
                 break;
-            case "TreatmentConsequenceEntity":
+            case DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence:
                 JoinEquationsWithTreatmentConsequences(equationEntityPerJoinEntityId);
                 break;
-            case "TreatmentCostEntity":
+            case DataPersistenceConstants.EquationJoinEntities.TreatmentCost:
                 JoinEquationsWithTreatmentCosts(equationEntityPerJoinEntityId);
                 break;
             default:

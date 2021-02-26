@@ -1168,7 +1168,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.HasIndex("CriterionLibraryId");
 
-                    b.HasIndex("SelectableTreatmentId");
+                    b.HasIndex("SelectableTreatmentId")
+                        .IsUnique();
 
                     b.ToTable("CriterionLibrary_Treatment");
                 });
@@ -2726,8 +2727,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithMany("CriterionLibrarySelectableTreatmentJoins")
-                        .HasForeignKey("SelectableTreatmentId")
+                        .WithOne("CriterionLibrarySelectableTreatmentJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibrarySelectableTreatmentEntity", "SelectableTreatmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

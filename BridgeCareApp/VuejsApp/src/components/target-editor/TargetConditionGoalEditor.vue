@@ -166,8 +166,7 @@ import {
 } from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
-import CreateTargetConditionGoalDialog
-  from '@/components/target-editor/target-editor-dialogs/CreateTargetConditionGoalDialog.vue';
+import CreateTargetConditionGoalDialog from '@/components/target-editor/target-editor-dialogs/CreateTargetConditionGoalDialog.vue';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {setItemPropertyValue} from '@/shared/utils/setter-utils';
@@ -175,8 +174,7 @@ import {
   CreateTargetConditionGoalLibraryDialogData,
   emptyCreateTargetConditionGoalLibraryDialogData
 } from '@/shared/models/modals/create-target-condition-goal-library-dialog-data';
-import CreateTargetConditionGoalLibraryDialog
-  from '@/components/target-editor/target-editor-dialogs/CreateTargetConditionGoalLibraryDialog.vue';
+import CreateTargetConditionGoalLibraryDialog from '@/components/target-editor/target-editor-dialogs/CreateTargetConditionGoalLibraryDialog.vue';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';

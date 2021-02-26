@@ -71,11 +71,8 @@ const investmentRules = {
 };
 /***********************************************TREATMENT RULES********************************************************/
 const treatmentRules = {
-    'changeHasEquation': (change: string, equation: string) => {
-        if (!hasValue(change)) {
-            return hasValue(equation) || 'Must have an equation to be blank';
-        }
-        return true;
+    'hasChangeValueOrEquation': (changeValue: string, expression: string) => {
+        return hasValue(changeValue) || hasValue(expression) || 'Must have an equation to be blank';
     }
 };
 /**************************************************ALL RULES***********************************************************/

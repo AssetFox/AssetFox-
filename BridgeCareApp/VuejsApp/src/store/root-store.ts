@@ -6,9 +6,9 @@ import authentication from '@/store-modules/authentication.module';
 import network from '../store-modules/network.module';
 import scenario from '../store-modules/scenario.module';
 import inventory from '@/store-modules/inventory.module';
-import investmentEditor from '@/store-modules/investment-editor.module';
-import performanceCurvesEditor from '@/store-modules/performance-curves-editor.module';
-import treatmentEditor from '@/store-modules/treatment-editor.module';
+import investmentEditor from '@/store-modules/investment.module';
+import performanceCurvesEditor from '@/store-modules/performance-curve.module';
+import treatmentEditor from '@/store-modules/treatment.module';
 import attribute from '@/store-modules/attribute.module';
 import toastr from '@/store-modules/toastr.module';
 import deficientEditor from '@/store-modules/deficient-condition-goal.module';
@@ -21,7 +21,7 @@ import announcement from '@/store-modules/announcement.module';
 import cashFlowEditor from '@/store-modules/cash-flow.module';
 import userCriteria from '@/store-modules/user-criteria.module';
 import unsavedChangesFlag from '@/store-modules/unsaved-changes-flag.module';
-import criteriaEditor from '@/store-modules/criterion-library-editor.module';
+import criteriaEditor from '@/store-modules/criterion-library.module';
 
 Vue.use(Vuex);
 

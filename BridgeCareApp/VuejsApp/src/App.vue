@@ -31,7 +31,7 @@
                         <v-list-tile @click="onNavigate('/InvestmentEditor/Library/')">
                             <v-list-tile-title>Investment</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/PerformanceCurvesEditor/Library/')">
+                        <v-list-tile @click="onNavigate('/PerformanceCurveEditor/Library/')">
                             <v-list-tile-title>Performance Curve</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/TreatmentEditor/Library/')">

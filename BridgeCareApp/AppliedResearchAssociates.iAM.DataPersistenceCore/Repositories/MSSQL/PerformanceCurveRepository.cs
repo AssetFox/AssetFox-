@@ -219,6 +219,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork.Context.DeleteAll<PerformanceCurveEquationEntity>(_ =>
                 _.PerformanceCurve.PerformanceCurveLibraryId == libraryId);
 
+            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ =>
+                _.AttributeEquationCriterionLibraryJoin == null &&
+                _.ConditionalTreatmentConsequenceEquationJoin == null && _.PerformanceCurveEquationJoin == null &&
+                _.TreatmentCostEquationJoin == null);
+
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryPerformanceCurveEntity>(_ =>
                 _.PerformanceCurve.PerformanceCurveLibraryId == libraryId);
 

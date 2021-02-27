@@ -159,20 +159,20 @@
     <TypeScriptCompile Include="src\router.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\services\analysis-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\analysis-method.service.ts" />
     <TypeScriptCompile Include="src\services\attribute.service.ts" />
     <TypeScriptCompile Include="src\services\authentication.service.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\services\budget-criteria.service.ts" />
     <TypeScriptCompile Include="src\services\committed-projects.service.ts" />
-    <TypeScriptCompile Include="src\services\criteria-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\criterion-library.service.ts" />
     <TypeScriptCompile Include="src\services\deficient-condition-goal.service.ts" />
-    <TypeScriptCompile Include="src\services\equation-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\equation.service.ts" />
     <TypeScriptCompile Include="src\services\inventory.service.ts" />
-    <TypeScriptCompile Include="src\services\investment-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\investment.service.ts" />
     <TypeScriptCompile Include="src\services\network.service.ts" />
-    <TypeScriptCompile Include="src\services\performance-curves-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\performance-curve.service.ts" />
     <TypeScriptCompile Include="src\services\priority.service.ts" />
     <TypeScriptCompile Include="src\services\remaining-life-limit.service.ts" />
     <TypeScriptCompile Include="src\services\reports.service.ts" />
@@ -206,7 +206,7 @@
     <TypeScriptCompile Include="src\shared\models\iAM\treatment.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\user-information.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\alert-data.ts" />
-    <TypeScriptCompile Include="src\shared\models\modals\create-investment-library-dialog-data.ts" />
+    <TypeScriptCompile Include="src\shared\models\modals\create-budget-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-performance-curve-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-priority-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-remaining-life-limit-dialog-data.ts" />
@@ -243,16 +243,16 @@
     <TypeScriptCompile Include="src\store-modules\priority.module.ts" />
     <TypeScriptCompile Include="src\store-modules\remaining-life-limit.module.ts" />
     <TypeScriptCompile Include="src\store-modules\inventory.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\investment-editor.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\investment.module.ts" />
     <TypeScriptCompile Include="src\store-modules\network.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\performance-curves-editor.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\performance-curve.module.ts" />
     <TypeScriptCompile Include="src\store-modules\rollup.module.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\store-modules\scenario.module.ts" />
     <TypeScriptCompile Include="src\store-modules\target-condition-goal.module.ts" />
     <TypeScriptCompile Include="src\store-modules\toastr.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\treatment-editor.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\treatment.module.ts" />
     <TypeScriptCompile Include="src\store\root-store.ts" />
   </ItemGroup>
   <ItemGroup>

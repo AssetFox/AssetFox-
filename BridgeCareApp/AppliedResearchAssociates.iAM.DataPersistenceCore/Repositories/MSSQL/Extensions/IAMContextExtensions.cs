@@ -36,6 +36,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             {
                 entities.Add(entity);
             }
+
+            context.SaveChanges();
         }
 
         public static void AddOrUpdate<T>(this IAMContext context, T entity, Expression<Func<T, bool>> predicate) where T : class
@@ -60,6 +62,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             {
                 entities.Add(entity);
             }
+
+            context.SaveChanges();
         }
 
         public static void Delete<T>(this IAMContext context, Expression<Func<T, bool>> predicate) where T : class
@@ -71,6 +75,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             {
                 entities.Remove(entityToDelete);
             }
+
+            context.SaveChanges();
         }
 
         public static void DeleteAll<T>(this IAMContext context, Expression<Func<T, bool>> predicate) where T : class
@@ -89,6 +95,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                     context.BulkDelete(entitiesToDelete);
                 }
             }
+
+            context.SaveChanges();
         }
 
         public static void AddOrUpdateOrDelete<T>(this IAMContext context, List<T> entities,
@@ -144,6 +152,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                     contextEntities.AddRange(entitiesToAdd);
                 }
             }
+
+            context.SaveChanges();
         }
 
         public static void BulkAddOrUpdateOrDelete<T>(this IAMContext context, List<T> entities,
@@ -179,6 +189,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                     context.BulkInsert(entitiesToAdd.ToList());
                 }
             }
+
+            context.SaveChanges();
         }
     }
 }

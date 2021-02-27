@@ -1,10 +1,9 @@
 import {AxiosPromise} from 'axios';
-import {API, axiosInstance, coreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
+import {API, axiosInstance, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import {CriteriaValidation} from '@/shared/models/iAM/criteria-validation';
 import {CriterionLibrary} from '@/shared/models/iAM/criteria';
-import {convertFromVueToMongo} from '@/shared/utils/mongo-model-conversion-utils';
 
-export default class CriteriaEditorService {
+export default class CriterionLibraryService {
     /**
      * Checks a criteria's validity
      * @param mergedCriteriaExpression Criteria string to validate

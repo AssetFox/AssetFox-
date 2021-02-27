@@ -33,9 +33,15 @@
 import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {CreateTreatmentLibraryDialogData} from '@/shared/models/modals/create-treatment-library-dialog-data';
-import {emptyTreatmentLibrary, Treatment, TreatmentLibrary} from '@/shared/models/iAM/treatment';
+import {
+  emptyTreatmentLibrary,
+  Treatment,
+  TreatmentConsequence,
+  TreatmentCost,
+  TreatmentLibrary
+} from '@/shared/models/iAM/treatment';
 import {getUserName} from '@/shared/utils/get-user-info';
-import {getNewGuid} from '@/shared/utils/uuid-utils';
+import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
 
 @Component
 export default class CreateTreatmentLibraryDialog extends Vue {
@@ -48,7 +54,21 @@ export default class CreateTreatmentLibraryDialog extends Vue {
     this.newTreatmentLibrary = {
       ...this.newTreatmentLibrary,
       treatments: this.dialogData.selectedTreatmentLibraryTreatments.map((treatment: Treatment) => ({
-        ...treatment, id: getNewGuid()
+        ...treatment, id: getNewGuid(),
+        costs: treatment.costs.map((cost: TreatmentCost) => {
+          cost.id = getNewGuid();
+          if (cost.equation.id !== getBlankGuid()) {
+            cost.equation.id = getNewGuid();
+          }
+          return cost;
+        }),
+        consequences: treatment.consequences.map((consequence: TreatmentConsequence) => {
+          consequence.id = getNewGuid();
+          if (consequence.equation.id !== getBlankGuid()) {
+            consequence.equation.id = getNewGuid();
+          }
+          return consequence;
+        })
       })),
       owner: getUserName()
     };

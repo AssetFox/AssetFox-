@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
@@ -14,15 +17,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class InvestmentPlanRepository : IInvestmentPlanRepository
     {
-        public static readonly bool IsRunningFromNUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("nunit.framework"));
-
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public InvestmentPlanRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
-        {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-        }
+        public InvestmentPlanRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public void CreateInvestmentPlan(InvestmentPlan investmentPlan, Guid simulationId)
         {
@@ -51,7 +50,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.Criterion.Expression, _ => _.Budget.Id)
                     .ToDictionary(_ => _.Key, _ => _.ToList());
 
-                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(budgetEntityIdsPerExpression, "BudgetEntity", simulationEntity.Name);
+                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(budgetEntityIdsPerExpression,
+                    DataPersistenceConstants.CriterionLibraryJoinEntities.Budget, simulationEntity.Name);
             }
 
             if (investmentPlan.CashFlowRules.Any())
@@ -106,6 +106,44 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CashFlowDistributionRules)
                 .Single(_ => _.Simulation.Name == simulation.Name)
                 .FillSimulationInvestmentPlan(simulation);
+        }
+
+        public Task<InvestmentPlanDTO> ScenarioInvestmentPlan(Guid simulationId)
+        {
+            if (simulationId == Guid.Empty)
+            {
+                return Task.Factory.StartNew(() => new InvestmentPlanDTO());
+            }
+
+            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+            }
+
+            return Task.Factory.StartNew(() =>
+            {
+                var investmentPlan =
+                    _unitOfDataPersistenceWork.Context.InvestmentPlan.SingleOrDefault(_ =>
+                        _.SimulationId == simulationId);
+                return investmentPlan != null ? investmentPlan.ToDto() : new InvestmentPlanDTO();
+            });
+        }
+
+        public void AddOrUpdateInvestmentPlan(InvestmentPlanDTO dto, Guid simulationId)
+        {
+            if (simulationId != Guid.Empty)
+            {
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                {
+                    throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                }
+
+                var entity = dto.ToEntity(simulationId);
+
+                _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, dto.Id);
+
+                _unitOfDataPersistenceWork.Context.SaveChanges();
+            }
         }
     }
 }

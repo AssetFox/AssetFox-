@@ -8,20 +8,20 @@
                       hide-actions>
           <template slot="items" slot-scope="props">
             <td v-for="header in consequencesGridHeaders">
-              <v-edit-dialog v-if="header.value !== 'equation' && header.value !== 'criterionLibrary'"
+              <v-edit-dialog v-if="header.value !== 'equation' && header.value !== 'criterionLibrary' && header.value !== ''"
                              :return-value.sync="props.item[header.value]"
                              @save="onEditConsequenceProperty(props.item, header.value, props.item[header.value])"
                              large lazy persistent>
                 <v-text-field v-if="header.value === 'attribute'" readonly single-line class="sm-txt"
                               :value="props.item.attribute"
                               :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-                <v-text-field v-else readonly single-line class="sm-txt" :value="props.item.changeValue"
+                <v-text-field v-if="header.value === 'changeValue'" readonly single-line class="sm-txt" :value="props.item.changeValue"
                               :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]"/>
                 <template slot="input">
                   <v-select v-if="header.value === 'attribute'" :items="attributeSelectItems" label="Edit"
                             v-model="props.item.attribute"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-                  <v-text-field v-else label="Edit" v-model="props.item.changeValue"
+                  <v-text-field v-if="header.value === 'changeValue'" label="Edit" v-model="props.item.changeValue"
                                 :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]"/>
                 </template>
               </v-edit-dialog>
@@ -44,7 +44,7 @@
                 </template>
               </v-textarea>
 
-              <v-layout v-else align-start>
+              <v-layout v-if="header.value === ''" align-start>
                 <v-btn @click="onRemoveConsequence(props.item.id)" class="ara-orange" icon>
                   <v-icon>fas fa-trash</v-icon>
                 </v-btn>

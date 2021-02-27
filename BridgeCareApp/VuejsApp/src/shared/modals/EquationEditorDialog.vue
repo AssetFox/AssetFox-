@@ -366,7 +366,7 @@ import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {Action, State} from 'vuex-class';
 import {EquationEditorDialogData} from '@/shared/models/modals/equation-editor-dialog-data';
-import EquationEditorService from '@/services/equation-editor.service';
+import EquationService from '@/services/equation.service';
 import {formulas} from '@/shared/utils/formulas';
 import {AxiosResponse} from 'axios';
 import {getLastPropertyValue, getPropertyValues} from '@/shared/utils/getter-utils';
@@ -808,7 +808,7 @@ export default class EquationEditorDialog extends Vue {
       isPiecewise: this.isPiecewise
     };
 
-    EquationEditorService.checkEquationValidity(equation)
+    EquationService.checkEquationValidity(equation)
         .then((response: AxiosResponse<EquationValidationResult>) => {
           if (hasValue(response, 'data')) {
             const validationResult: EquationValidationResult = response.data;

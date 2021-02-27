@@ -177,6 +177,8 @@ import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
 import {getAppliedLibraryId, hasAppliedLibrary} from '@/shared/utils/library-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
+import {SimpleBudgetDetail} from '@/shared/models/iAM/investment';
+import {getPropertyValues} from '@/shared/utils/getter-utils';
 
 @Component({
   components: {
@@ -197,7 +199,7 @@ export default class TreatmentEditor extends Vue {
   @Action('selectTreatmentLibrary') selectTreatmentLibraryAction: any;
   @Action('addOrUpdateTreatmentLibrary') addOrUpdateTreatmentLibraryAction: any;
   @Action('deleteTreatmentLibrary') deleteTreatmentLibraryAction: any;
-  @Action('getScenarioSimpleBudgetDetails') getScenarioInvestmentPlanSimpleBudgetDetailsAction: any;
+  @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
   selectedTreatmentLibrary: TreatmentLibrary = clone(emptyTreatmentLibrary);
@@ -229,7 +231,7 @@ export default class TreatmentEditor extends Vue {
         }
 
         vm.treatmentTabs = [...vm.treatmentTabs, 'budgets'];
-        vm.getScenarioInvestmentPlanSimpleBudgetDetailsAction({scenarioId: vm.selectedScenarioId});
+        vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.selectedScenarioId});
       }
 
       vm.librarySelectItemValue = null;
@@ -276,17 +278,18 @@ export default class TreatmentEditor extends Vue {
       value: treatment.id
     }));
 
-    if (hasValue(this.treatmentSelectItemValue) && !any(propEq('value', this.treatmentSelectItemValue), this.treatmentSelectItems)) {
+    if (this.selectedTreatment.id !== this.uuidNIL && !any(propEq('id', this.selectedTreatment.id), this.selectedTreatmentLibrary.treatments)) {
       this.treatmentSelectItemValue = null;
-    } else {
-      const tempTreatmentSelectItemValue: string = this.treatmentSelectItemValue;
-      this.treatmentSelectItemValue = null;
-      setTimeout(() => this.treatmentSelectItemValue = tempTreatmentSelectItemValue);
     }
   }
 
   @Watch('treatmentSelectItemValue')
   onTreatmentSelectItemValueChanged() {
+    if (this.treatmentSelectItemValue !== this.selectedTreatment.id && this.selectedTreatment.id !== this.uuidNIL &&
+        any(propEq('id', this.selectedTreatment.id), this.selectedTreatmentLibrary.treatments)) {
+      this.syncSelectedTreatmentWithTreatmentLibrary();
+    }
+
     if (hasValue(this.treatmentSelectItemValue) && any(propEq('id', this.treatmentSelectItemValue), this.selectedTreatmentLibrary.treatments)) {
       this.selectedTreatment = find(
           propEq('id', this.treatmentSelectItemValue), this.selectedTreatmentLibrary.treatments) as Treatment;
@@ -410,24 +413,29 @@ export default class TreatmentEditor extends Vue {
     }
   }
 
-  modifySelectedTreatmentBudgets(modifiedBudgetIds: string[]) {
+  modifySelectedTreatmentBudgets(simpleBudgetDetails: SimpleBudgetDetail[]) {
     if (this.hasSelectedTreatment) {
       this.modifySelectedTreatment({
         ...this.selectedTreatment,
-        budgetIds: modifiedBudgetIds
+        budgetIds: getPropertyValues('id', simpleBudgetDetails) as string[]
       });
     }
   }
 
   modifySelectedTreatment(treatment: Treatment) {
-    if (this.hasSelectedLibrary) {
-      this.selectedTreatmentLibrary = {
-        ...this.selectedTreatmentLibrary,
-        treatments: update(
-            findIndex(propEq('id', treatment.id), this.selectedTreatmentLibrary.treatments),
-            treatment, this.selectedTreatmentLibrary.treatments)
-      };
+    if (this.hasSelectedLibrary && this.hasSelectedTreatment) {
+      this.selectedTreatment = clone(treatment);
+      this.syncSelectedTreatmentWithTreatmentLibrary();
     }
+  }
+
+  syncSelectedTreatmentWithTreatmentLibrary() {
+    this.selectedTreatmentLibrary = {
+      ...this.selectedTreatmentLibrary,
+      treatments: update(
+          findIndex(propEq('id', this.selectedTreatment.id), this.selectedTreatmentLibrary.treatments),
+          this.selectedTreatment, this.selectedTreatmentLibrary.treatments)
+    };
   }
 
   onDiscardChanges() {

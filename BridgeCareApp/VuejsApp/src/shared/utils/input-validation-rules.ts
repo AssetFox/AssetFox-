@@ -2,7 +2,7 @@ import {hasValue} from '@/shared/utils/has-value-util';
 import {CashFlowRule, CashFlowDistributionRule} from '@/shared/models/iAM/cash-flow';
 import {findIndex, propEq, contains} from 'ramda';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
-import {CriteriaDrivenBudget} from '@/shared/models/iAM/investment';
+import {Budget} from '@/shared/models/iAM/investment';
 
 export interface InputValidationRules {
     [Rules: string]: any;
@@ -63,10 +63,14 @@ const cashFlowRules = {
 };
 /**********************************************INVESTMENT RULES********************************************************/
 const investmentRules = {
-    'budgetNameIsUnique': (budget: CriteriaDrivenBudget, budgets: CriteriaDrivenBudget[]) => {
+    'budgetNameIsUnique': (budget: Budget, budgets: Budget[]) => {
         const otherBudgetNames: string[] = getPropertyValues(
-            'budgetName', budgets.filter((b: CriteriaDrivenBudget) => b.id !== budget.id));
-        return !contains(budget.budgetName, otherBudgetNames) || 'Budget name must be unique';
+            'name', budgets.filter((b: Budget) => b.id !== budget.id));
+        return !contains(budget.name, otherBudgetNames) || 'Budget name must be unique';
+    },
+    'minCostLimitGreaterThanZero': (minCostLimit: any) => {
+        const parsedValue: number = parseFloat(minCostLimit.toString().replace(/(\$*)(\,*)/g, ''));
+        return parsedValue > 0 || 'Minimum project cost limit must be greater than zero';
     }
 };
 /***********************************************TREATMENT RULES********************************************************/

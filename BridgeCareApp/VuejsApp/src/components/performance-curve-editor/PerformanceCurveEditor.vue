@@ -199,8 +199,8 @@ import Vue from 'vue';
 import {Watch} from 'vue-property-decorator';
 import Component from 'vue-class-component';
 import {Action, State} from 'vuex-class';
-import CreatePerformanceCurveLibraryDialog from './performance-curves-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
-import CreatePerformanceCurveDialog from './performance-curves-editor-dialogs/CreatePerformanceCurveDialog.vue';
+import CreatePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
+import CreatePerformanceCurveDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import CriterionLibraryEditorDialog from '../../shared/modals/CriterionLibraryEditorDialog.vue';
 import {
@@ -246,7 +246,7 @@ import {getAppliedLibraryId, hasAppliedLibrary} from '@/shared/utils/library-uti
     ConfirmDeleteAlert: Alert
   }
 })
-export default class PerformanceCurvesEditor extends Vue {
+export default class PerformanceCurveEditor extends Vue {
   @State(state => state.performanceCurvesEditor.performanceCurveLibraries) statePerformanceCurveLibraries: PerformanceCurveLibrary[];
   @State(state => state.performanceCurvesEditor.selectedPerformanceCurveLibrary) stateSelectedPerformanceCurveLibrary: PerformanceCurveLibrary;
   @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
@@ -289,7 +289,7 @@ export default class PerformanceCurvesEditor extends Vue {
    */
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
-      if (to.path.indexOf('PerformanceCurvesEditor/Scenario') !== -1) {
+      if (to.path.indexOf('PerformanceCurveEditor/Scenario') !== -1) {
         vm.selectedScenarioId = to.query.scenarioId;
         if (vm.selectedScenarioId === vm.uuidNIL) {
           vm.setErrorMessageAction({message: 'Unable to identify selected scenario.'});

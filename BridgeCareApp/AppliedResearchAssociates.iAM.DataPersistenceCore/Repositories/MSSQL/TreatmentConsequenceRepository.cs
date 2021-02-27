@@ -115,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void AddOrUpdateOrDeleteTreatmentConsequences(Dictionary<Guid, List<TreatmentConsequenceDTO>> treatmentConsequencePerTreatmentId,
             Guid libraryId)
         {
-            var treatmentConsequences = treatmentConsequencePerTreatmentId.SelectMany(_ => _.Value).ToList();
+            var treatmentConsequences = treatmentConsequencePerTreatmentId.SelectMany(_ => _.Value.ToList()).ToList();
 
             var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute.ToList();
             var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
@@ -161,6 +161,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfDataPersistenceWork.Context.DeleteAll<ConditionalTreatmentConsequenceEquationEntity>(_ =>
                 _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId);
+
+            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ =>
+                _.AttributeEquationCriterionLibraryJoin == null &&
+                _.ConditionalTreatmentConsequenceEquationJoin == null && _.PerformanceCurveEquationJoin == null &&
+                _.TreatmentCostEquationJoin == null);
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
                 _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId);

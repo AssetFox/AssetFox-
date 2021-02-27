@@ -38,11 +38,12 @@
 <script lang="ts">
 import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
-import {clone} from 'ramda';
+import {clone, contains} from 'ramda';
 import {SimpleBudgetDetail} from '@/shared/models/iAM/investment';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {State} from 'vuex-class';
 import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
+import {getPropertyValues} from '@/shared/utils/getter-utils';
 
 @Component
 export default class BudgetsTab extends Vue {
@@ -54,7 +55,7 @@ export default class BudgetsTab extends Vue {
     {text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300px'}
   ];
   budgets: SimpleBudgetDetail[] = [];
-  selectedBudgets: string[] = [];
+  selectedBudgets: SimpleBudgetDetail[] = [];
 
   @Watch('stateScenarioSimpleBudgetDetails')
   onStateScenarioInvestmentLibraryChanged() {
@@ -63,12 +64,14 @@ export default class BudgetsTab extends Vue {
 
   @Watch('selectedTreatmentBudgets')
   onBudgetsTabDataChanged() {
-    this.selectedBudgets = clone(this.selectedTreatmentBudgets);
+    this.selectedBudgets = this.budgets
+        .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id, this.selectedTreatmentBudgets));
   }
 
   @Watch('selectedBudgets')
   onSelectedBudgetsChanged() {
-    if (!isEqual(this.selectedTreatmentBudgets, this.selectedBudgets)) {
+    const selectedBudgetIds: string[] = getPropertyValues('id', this.selectedBudgets) as string[];
+    if (!isEqual(this.selectedTreatmentBudgets, selectedBudgetIds)) {
       this.$emit('onModifyBudgets', this.selectedBudgets);
     }
   }

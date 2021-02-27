@@ -3,20 +3,6 @@
     <v-flex xs12>
       <v-layout column justify-center>
         <v-flex xs10 class="criteria-flex">
-          <!--          <v-text-field readonly full-width class="sm-txt" label="Treatment Criteria"
-                                  :value="selectedTreatmentDetails.criterionLibrary.mergedCriteriaExpression">
-                      <template slot="append-outer">
-                        <v-layout align-center fill-height row>
-                          <v-btn @click="onShowTreatmentCriterionLibraryEditorDialog" class="edit-icon" icon>
-                            <v-icon>fas fa-edit</v-icon>
-                          </v-btn>
-                          <v-btn @click="onRemoveTreatmentCriterionLibrary" class="ara-orange" icon>
-                            <v-icon>fas fa-minus-square</v-icon>
-                          </v-btn>
-                        </v-layout>
-                      </template>
-                    </v-text-field>-->
-
           <v-menu full-width bottom min-height="500px" min-width="800px">
             <template slot="activator">
               <v-text-field readonly full-width class="sm-txt" label="Treatment Criteria"
@@ -50,14 +36,14 @@
           <v-layout justify-space-between row>
             <v-flex xs5>
               <v-text-field :mask="'####'"
-                            @change="onEditTreatmentDetails('shadowForAnyTreatment', selectedTreatmentDetails.shadowForAnyTreatment)"
+                            @input="onEditTreatmentDetails('shadowForAnyTreatment', selectedTreatmentDetails.shadowForAnyTreatment)"
                             label="Years Before Any"
                             outline v-model="selectedTreatmentDetails.shadowForAnyTreatment"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
             </v-flex>
             <v-flex xs5>
               <v-text-field :mask="'####'" rows="4"
-                            @change="onEditTreatmentDetails('shadowForSameTreatment', selectedTreatmentDetails.shadowForSameTreatment)"
+                            @input="onEditTreatmentDetails('shadowForSameTreatment', selectedTreatmentDetails.shadowForSameTreatment)"
                             label="Years Before Same"
                             outline v-model="selectedTreatmentDetails.shadowForSameTreatment"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"/>
@@ -68,7 +54,8 @@
 
         <v-flex xs6 class="treatment-description-flex">
           <v-textarea label="Treatment Description" no-resize outline rows="2"
-                      v-model="selectedTreatmentDetails.description"/>
+                      v-model="selectedTreatmentDetails.description"
+                      @input="onEditTreatmentDetails('description', selectedTreatmentDetails.description)"/>
         </v-flex>
       </v-layout>
     </v-flex>

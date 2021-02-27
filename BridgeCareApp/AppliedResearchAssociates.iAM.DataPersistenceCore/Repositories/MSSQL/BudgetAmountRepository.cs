@@ -7,6 +7,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappi
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using System.Linq;
+using System.Linq.Expressions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
@@ -59,6 +62,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfDataPersistenceWork.Context.SaveChanges();
+        }
+
+        public void AddOrUpdateOrDeleteBudgetAmounts(Dictionary<Guid, List<BudgetAmountDTO>> budgetAmountsPerBudgetId, Guid libraryId)
+        {
+            var entities = budgetAmountsPerBudgetId.SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key))).ToList();
+
+            var entityIds = entities.Select(_ => _.Id).ToList();
+
+            var existingEntityIds = _unitOfDataPersistenceWork.Context.BudgetAmount
+                .Where(_ => _.Budget.BudgetLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
+                .ToList();
+
+            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<BudgetAmountEntity, bool>>>
+            {
+                {"delete", _ => _.Budget.BudgetLibraryId == libraryId && !entityIds.Contains(_.Id)},
+                {"update", _ => existingEntityIds.Contains(_.Id)},
+                {"add", _ => !existingEntityIds.Contains(_.Id)}
+            };
+
+            if (IsRunningFromXUnit)
+            {
+                _unitOfDataPersistenceWork.Context.AddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+            }
+            else
+            {
+                _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+            }
         }
     }
 }

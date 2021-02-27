@@ -1,4 +1,4 @@
-import {emptyInvestmentLibrary} from '@/shared/models/iAM/investment';
+import {emptyBudgetLibrary, emptyInvestmentPlan} from '@/shared/models/iAM/investment';
 import {emptyPerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {emptyTreatmentLibrary} from '@/shared/models/iAM/treatment';
 import {emptyPriorityLibrary} from '@/shared/models/iAM/priority';
@@ -11,21 +11,25 @@ import {clone, isEmpty, keys, symmetricDifference} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {sorter} from '@/shared/utils/sorter-utils';
 
-export const hasUnsavedChangesCore = (editor: string, localSelectedLibrary: any, stateSelectedLibrary: any) => {
-    const localLibrary = sortNonObjectLists(clone(localSelectedLibrary));
-    const selectedLibrary = sortNonObjectLists(clone(stateSelectedLibrary));
+export const hasUnsavedChangesCore = (objectType: string, object1: any, object2: any) => {
+    const localObject = sortNonObjectLists(clone(object1));
+    const stateObject = sortNonObjectLists(clone(object2));
 
-    switch (editor) {
+    switch (objectType) {
         case 'performance-curves':
-            return !isEqual(localLibrary, emptyPerformanceCurveLibrary) && !isEqual(localLibrary, selectedLibrary);
+            return !isEqual(localObject, emptyPerformanceCurveLibrary) && !isEqual(localObject, stateObject);
         case 'cash-flow':
-            return !isEqual(localLibrary, emptyCashFlowRuleLibrary) && !isEqual(localLibrary, selectedLibrary);
+            return !isEqual(localObject, emptyCashFlowRuleLibrary) && !isEqual(localObject, stateObject);
         case 'remaining-life-limit':
-            return !isEqual(localLibrary, emptyRemainingLifeLimitLibrary) && !isEqual(localLibrary, selectedLibrary);
+            return !isEqual(localObject, emptyRemainingLifeLimitLibrary) && !isEqual(localObject, stateObject);
         case 'deficient-condition-goal':
-            return !isEqual(localLibrary, emptyDeficientConditionGoalLibrary) && !isEqual(localLibrary, selectedLibrary);
+            return !isEqual(localObject, emptyDeficientConditionGoalLibrary) && !isEqual(localObject, stateObject);
         case 'target-condition-goal':
-            return !isEqual(localLibrary, emptyTargetConditionGoalLibrary) && !isEqual(localLibrary, selectedLibrary);
+            return !isEqual(localObject, emptyTargetConditionGoalLibrary) && !isEqual(localObject, stateObject);
+        case 'budget-library':
+            return !isEqual(localObject, emptyBudgetLibrary) && !isEqual(localObject, stateObject);
+        case 'investment-plan':
+            return !isEqual(localObject, emptyInvestmentPlan) && !isEqual(localObject, stateObject);
         default:
             return false;
     }
@@ -38,7 +42,7 @@ export const hasUnsavedChanges = (editor: string, localSelectedLibrary: any, sta
 
     switch (editor) {
         case 'investment':
-            return !isEqual(localLibrary, emptyInvestmentLibrary) &&
+            return !isEqual(localLibrary, emptyBudgetLibrary) &&
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'performance':

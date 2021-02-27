@@ -3,7 +3,7 @@ import {PerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 
 
-export default class PerformanceCurvesEditorService {
+export default class PerformanceCurveService {
     /**
      * Gets all performance curve libraries a user can read/edit
      */

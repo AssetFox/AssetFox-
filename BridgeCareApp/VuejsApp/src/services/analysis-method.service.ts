@@ -2,7 +2,7 @@ import {AxiosPromise} from 'axios';
 import {Analysis} from '@/shared/models/iAM/scenario';
 import {axiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
 
-export default class AnalysisEditorService {
+export default class AnalysisMethodService {
     /**
      * Gets a scenario's analysis data
      * @param selectedScenarioId A scenario's id

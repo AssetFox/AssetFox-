@@ -1,8 +1,7 @@
 import {AxiosPromise} from 'axios';
 import {axiosInstance} from '@/shared/utils/axios-instance';
-import {Equation} from '@/shared/models/iAM/equation';
 
-export default class EquationEditorService {
+export default class EquationService {
     /**
      * Checks an equation's validity
      * @param equationValidation Equation info to validate

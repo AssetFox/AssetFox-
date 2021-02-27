@@ -64,13 +64,13 @@ export default class CreatePerformanceCurveLibraryDialog extends Vue {
   onDialogDataChanged() {
     this.newPerformanceCurveLibrary = {
       ...this.newPerformanceCurveLibrary,
-      performanceCurves: hasValue(this.dialogData.performanceCurves)
-          ? this.dialogData.performanceCurves
-              .map((performanceCurve: PerformanceCurve) => ({
-                ...performanceCurve, id: getNewGuid(),
-                equation: {...performanceCurve.equation, id: getNewGuid()}
-              }))
-          : [],
+      performanceCurves: this.dialogData.performanceCurves.map((performanceCurve: PerformanceCurve) => {
+        performanceCurve.id = getNewGuid();
+        if (performanceCurve.equation.id !== getBlankGuid()) {
+          performanceCurve.equation.id = getNewGuid();
+        }
+        return performanceCurve;
+      }),
       owner: getUserName()
     };
   }

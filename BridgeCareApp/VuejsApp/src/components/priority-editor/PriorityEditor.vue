@@ -191,7 +191,7 @@
     import Alert from '@/shared/modals/Alert.vue';
     import {hasUnsavedChanges} from '@/shared/utils/has-unsaved-changes-helper';
     import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
-    import {InvestmentLibrary} from '@/shared/models/iAM/investment';
+    import {BudgetLibrary} from '@/shared/models/iAM/investment';
     import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     const ObjectID = require('bson-objectid');
@@ -202,7 +202,7 @@
         }
     })
     export default class PriorityEditor extends Vue {
-        @State(state => state.investmentEditor.scenarioInvestmentLibrary) stateScenarioInvestmentLibrary: InvestmentLibrary;
+        @State(state => state.investmentEditor.scenarioInvestmentLibrary) stateScenarioInvestmentLibrary: BudgetLibrary;
         @State(state => state.priorityEditor.priorityLibraries) statePriorityLibraries: PriorityLibrary[];
         @State(state => state.priorityEditor.selectedPriorityLibrary) stateSelectedPriorityLibrary: PriorityLibrary;
         @State(state => state.priorityEditor.scenarioPriorityLibrary) stateScenarioPriorityLibrary: PriorityLibrary;
@@ -287,7 +287,7 @@
         @Watch('stateScenarioInvestmentLibrary')
         onStateScenarioInvestmentLibraryChanged() {
             if (this.stateScenarioInvestmentLibrary.id === this.selectedScenarioId) {
-                this.budgets = getPropertyValues('budgetName', this.stateScenarioInvestmentLibrary.criteriaDrivenBudgets);
+                this.budgets = getPropertyValues('name', this.stateScenarioInvestmentLibrary.budgets);
             }
         }
 
@@ -446,10 +446,10 @@
                     ? {...newPriority, priorityFunds: []} as ScenarioPriority : {...newPriority} as Priority;
 
                 if (this.isScenarioPriorityLibrary && hasValue(this.budgets)) {
-                    this.budgets.forEach((budgetName: string) => {
+                    this.budgets.forEach((name: string) => {
                         priority.priorityFunds.push({
                             id: ObjectID.generate(),
-                            budget: budgetName,
+                            budget: name,
                             funding: 100
                         });
                     });
@@ -492,7 +492,7 @@
         }
 
         /**
-         * Updates the selected priority's priority fund's funding amount (where budget = budgetName)
+         * Updates the selected priority's priority fund's funding amount (where budget = name)
          * @param priorityRow PrioritiesDataTableRow object
          * @param budget A PriorityFund object's budget property value (used to find the object)
          * @param amount Value to set on the found PriorityFund object's amount property

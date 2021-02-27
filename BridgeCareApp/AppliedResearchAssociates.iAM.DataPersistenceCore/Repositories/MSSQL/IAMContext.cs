@@ -877,7 +877,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Expression).IsRequired();
 
-                entity.HasOne(d => d.AttributeEquationCriterionLibraryJoin)
+                /*entity.HasOne(d => d.AttributeEquationCriterionLibraryJoin)
                     .WithOne(p => p.Equation)
                     .HasForeignKey<AttributeEquationCriterionLibraryEntity>(d => d.EquationId)
                     .OnDelete(DeleteBehavior.Cascade);
@@ -895,7 +895,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.TreatmentCostEquationJoin)
                     .WithOne(p => p.Equation)
                     .HasForeignKey<TreatmentCostEquationEntity>(d => d.EquationId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.Cascade);*/
             });
 
             modelBuilder.Entity<FacilityEntity>(entity =>

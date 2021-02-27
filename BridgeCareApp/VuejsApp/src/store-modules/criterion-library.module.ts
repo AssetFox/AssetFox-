@@ -1,6 +1,6 @@
 import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
 import {any, append, clone, find, findIndex, propEq, reject, update} from 'ramda';
-import CriteriaEditorService from '@/services/criteria-editor.service';
+import CriterionLibraryService from '@/services/criterion-library.service';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
@@ -37,7 +37,7 @@ const actions = {
         commit('selectedCriterionLibraryMutator', payload.libraryId);
     },
     async getCriterionLibraries({commit}: any) {
-        await CriteriaEditorService.getCriterionLibraries()
+        await CriterionLibraryService.getCriterionLibraries()
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('criterionLibrariesMutator', response.data as CriterionLibrary[]);
@@ -45,7 +45,7 @@ const actions = {
             });
     },
     async addOrUpdateCriterionLibrary({commit, dispatch}: any, payload: any) {
-        await CriteriaEditorService.addOrUpdateCriterionLibrary(payload.library)
+        await CriterionLibraryService.addOrUpdateCriterionLibrary(payload.library)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     const library: CriterionLibrary = payload.library;
@@ -59,7 +59,7 @@ const actions = {
             });
     },
     async deleteCriterionLibrary({commit, dispatch}: any, payload: any) {
-        await CriteriaEditorService.deleteCriterionLibrary(payload.libraryId)
+        await CriterionLibraryService.deleteCriterionLibrary(payload.libraryId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     commit('deletedCriterionLibraryMutator', payload.libraryId);

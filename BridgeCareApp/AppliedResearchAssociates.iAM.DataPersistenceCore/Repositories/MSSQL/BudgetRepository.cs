@@ -80,6 +80,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Task<List<SimpleBudgetDetailDTO>> ScenarioSimpleBudgetDetails(Guid simulationId)
         {
+            if (simulationId == Guid.Empty)
+            {
+                return Task.Factory.StartNew(() => new List<SimpleBudgetDetailDTO>());
+            }
+
             if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
@@ -92,6 +97,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return Task.Factory.StartNew(() =>
                 _unitOfDataPersistenceWork.Context.BudgetLibrary
+                    .Include(_ => _.Budgets)
                     .Single(_ =>
                         _.BudgetLibrarySimulationJoins.FirstOrDefault(__ => __.SimulationId == simulationId) != null)
                     .Budgets.Select(_ => new SimpleBudgetDetailDTO { Id = _.Id, Name = _.Name }).ToList());

@@ -162,7 +162,7 @@ export default class EditScenario extends Vue {
             tabName: 'Performance Curves',
             tabIcon: 'fas fa-chart-line',
             navigation: {
-                path: '/PerformanceCurvesEditor/Scenario/',
+                path: '/PerformanceCurveEditor/Scenario/',
             },
         },
         {

@@ -138,7 +138,7 @@ import {parseCriteriaJson, parseCriteriaString, parseCriteriaTypeJson} from '../
 import {hasValue} from '../utils/has-value-util';
 import {any, clone, equals, findIndex, isEmpty, isNil, propEq, remove, update} from 'ramda';
 import {Attribute, AttributeSelectValues} from '@/shared/models/iAM/attribute';
-import CriteriaEditorService from '@/services/criteria-editor.service';
+import CriterionLibraryService from '@/services/criterion-library.service';
 import {AxiosResponse} from 'axios';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {Network} from '@/shared/models/iAM/network';
@@ -450,7 +450,7 @@ export default class CriteriaEditor extends Vue {
     const parsedCriteria = parseCriteriaJson(this.getMainCriteria());
 
     if (parsedCriteria) {
-      CriteriaEditorService.checkCriteriaValidity({criteria: parsedCriteria.join('')})
+      CriterionLibraryService.checkCriteriaValidity({criteria: parsedCriteria.join('')})
           .then((response: AxiosResponse<CriteriaValidationResult>) => {
             if (hasValue(response, 'data')) {
               const validationResult: CriteriaValidationResult = response.data;
@@ -508,7 +508,7 @@ export default class CriteriaEditor extends Vue {
       return;
     }
 
-    CriteriaEditorService.checkCriteriaValidity({criteria: criteria})
+    CriterionLibraryService.checkCriteriaValidity({criteria: criteria})
         .then((response: AxiosResponse<CriteriaValidationResult>) => {
           this.resetSubCriteriaValidationMessageProperties();
 

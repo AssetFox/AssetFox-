@@ -1,6 +1,6 @@
 import {emptyPerformanceCurveLibrary, PerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {any, append, clone, find, findIndex, propEq, reject, update} from 'ramda';
-import PerformanceCurvesEditorService from '@/services/performance-curves-editor.service';
+import PerformanceCurveService from '@/services/performance-curve.service';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
@@ -44,7 +44,7 @@ const actions = {
         commit('selectedPerformanceCurveLibraryMutator', payload.libraryId);
     },
     async getPerformanceCurveLibraries({commit}: any) {
-        await PerformanceCurvesEditorService.getPerformanceCurveLibraries()
+        await PerformanceCurveService.getPerformanceCurveLibraries()
             .then((response: AxiosResponse<any[]>) => {
                 if (hasValue(response, 'data')) {
                     commit('performanceCurveLibrariesMutator', response.data as PerformanceCurveLibrary[]);
@@ -52,7 +52,7 @@ const actions = {
             });
     },
     async addOrUpdatePerformanceCurveLibrary({dispatch, commit}: any, payload: any) {
-        await PerformanceCurvesEditorService.addOrUpdatePerformanceCurveLibrary(payload.library, payload.scenarioId)
+        await PerformanceCurveService.addOrUpdatePerformanceCurveLibrary(payload.library, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.performanceCurveLibraries, payload.scenarioId)) {
@@ -79,7 +79,7 @@ const actions = {
             });
     },
     async deletePerformanceCurveLibrary({dispatch, commit}: any, payload: any) {
-        await PerformanceCurvesEditorService.deletePerformanceCurveLibrary(payload.libraryId)
+        await PerformanceCurveService.deletePerformanceCurveLibrary(payload.libraryId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     commit('deletedPerformanceCurveLibraryMutator', payload.libraryId);

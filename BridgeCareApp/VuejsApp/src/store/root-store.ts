@@ -12,7 +12,7 @@ import treatmentEditor from '@/store-modules/treatment.module';
 import attribute from '@/store-modules/attribute.module';
 import toastr from '@/store-modules/toastr.module';
 import deficientEditor from '@/store-modules/deficient-condition-goal.module';
-import priorityEditor from '@/store-modules/priority.module';
+import priorityEditor from '@/store-modules/budget-priority.module';
 import targetEditor from '@/store-modules/target-condition-goal.module';
 import remainingLifeLimitEditor from '@/store-modules/remaining-life-limit.module';
 import rollup from '../store-modules/rollup.module';

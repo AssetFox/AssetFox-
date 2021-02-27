@@ -30,5 +30,6 @@ export const API = {
     DeficientConditionGoalController: '/api/DeficientConditionGoal',
     TargetConditionGoalController: '/api/TargetConditionGoal',
     TreatmentController: '/api/Treatment',
-    InvestmentController: '/api/Investment'
+    InvestmentController: '/api/Investment',
+    BudgetPriorityController: '/api/BudgetPriority'
 };

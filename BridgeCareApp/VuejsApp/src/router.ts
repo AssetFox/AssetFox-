@@ -11,11 +11,11 @@ import AuthenticationStart from '@/components/authentication/AuthenticationStart
 const Scenario = () => import(/* webpackChunkName: "scenario" */ '@/components/scenarios/Scenarios.vue');
 const EditScenario = () => import(/* webpackChunkName: "editScenario" */ '@/components/scenarios/EditScenario.vue');
 const InvestmentEditor = () => import(/* webpackChunkName: "investmentEditor" */ '@/components/investment-editor/InvestmentEditor.vue');
-const PerformanceCurvesEditor = () => import(/* webpackChunkName: "performanceCurvesEditor" */ '@/components/performance-curve-editor/PerformanceCurvesEditor.js');
+const PerformanceCurveEditor = () => import(/* webpackChunkName: "performanceCurveEditor" */ '@/components/performance-curve-editor/PerformanceCurveEditor.vue');
 const TreatmentEditor = () => import(/* webpackChunkName: "treatmentEditor" */ '@/components/treatment-editor/TreatmentEditor.vue');
-const PriorityEditor = () => import (/* webpackChunkName: "priorityEditor" */ '@/components/priority-editor/PriorityEditor.vue');
-const TargetConditionGoalEditor = () => import (/* webpackChunkName: "targetEditor" */ '@/components/target-editor/TargetConditionGoalEditor.vue');
-const DeficientConditionGoalEditor = () => import (/* webpackChunkName: "deficientEditor" */ '@/components/deficient-condition-goal-editor/DeficientConditionGoalEditor.vue');
+const BudgetPriorityEditor = () => import (/* webpackChunkName: "budgetPriorityEditor" */ '@/components/budget-priority-editor/BudgetPriorityEditor.vue');
+const TargetConditionGoalEditor = () => import (/* webpackChunkName: "targetConditionGoalEditor" */ '@/components/target-editor/TargetConditionGoalEditor.vue');
+const DeficientConditionGoalEditor = () => import (/* webpackChunkName: "deficientConditionGoalEditor" */ '@/components/deficient-condition-goal-editor/DeficientConditionGoalEditor.vue');
 const Authentication = () => import (/* webpackChunkName: "Authentication" */ '@/components/authentication/Authentication.vue');
 const AuthenticationFailure = () => import (/* webpackChunkName: "authenticationFailure" */ '@/components/authentication/AuthenticationFailure.vue');
 const NoRole = () => import (/*webpackChunkName: "noRole" */ '@/components/authentication/NoRole.vue');
@@ -58,7 +58,7 @@ const router = new VueRouter({
                 },
                 {
                     path: '/PerformanceCurveEditor/Scenario/',
-                    component: PerformanceCurvesEditor,
+                    component: PerformanceCurveEditor,
                     props: true
                 },
                 {
@@ -67,8 +67,8 @@ const router = new VueRouter({
                     props: true
                 },
                 {
-                    path: '/PriorityEditor/Scenario/',
-                    component: PriorityEditor,
+                    path: '/BudgetPriorityEditor/Scenario/',
+                    component: BudgetPriorityEditor,
                     props: true
                 },
                 {
@@ -102,7 +102,7 @@ const router = new VueRouter({
         {
             path: '/PerformanceCurveEditor/Library/',
             name: 'PerformanceEditor',
-            component: PerformanceCurvesEditor,
+            component: PerformanceCurveEditor,
             props: true
         },
         {
@@ -112,9 +112,9 @@ const router = new VueRouter({
             props: true
         },
         {
-            path: '/PriorityEditor/Library/',
-            name: 'PriorityEditor',
-            component: PriorityEditor,
+            path: '/BudgetPriorityEditor/Library/',
+            name: 'BudgetPriorityEditor',
+            component: BudgetPriorityEditor,
             props: true
         },
         {

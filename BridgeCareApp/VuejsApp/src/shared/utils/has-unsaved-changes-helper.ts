@@ -1,7 +1,7 @@
 import {emptyBudgetLibrary, emptyInvestmentPlan} from '@/shared/models/iAM/investment';
 import {emptyPerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {emptyTreatmentLibrary} from '@/shared/models/iAM/treatment';
-import {emptyPriorityLibrary} from '@/shared/models/iAM/priority';
+import {emptyBudgetPriorityLibrary} from '@/shared/models/iAM/budget-priority';
 import {emptyTargetConditionGoalLibrary} from '@/shared/models/iAM/target-condition-goal';
 import {emptyDeficientConditionGoalLibrary} from '@/shared/models/iAM/deficient-condition-goal';
 import {emptyRemainingLifeLimitLibrary} from '@/shared/models/iAM/remaining-life-limit';
@@ -30,6 +30,8 @@ export const hasUnsavedChangesCore = (objectType: string, object1: any, object2:
             return !isEqual(localObject, emptyBudgetLibrary) && !isEqual(localObject, stateObject);
         case 'investment-plan':
             return !isEqual(localObject, emptyInvestmentPlan) && !isEqual(localObject, stateObject);
+        case 'budget-priority':
+            return !isEqual(localObject, emptyBudgetPriorityLibrary) && !isEqual(localObject, stateObject);
         default:
             return false;
     }
@@ -54,7 +56,7 @@ export const hasUnsavedChanges = (editor: string, localSelectedLibrary: any, sta
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'priority':
-            return !isEqual(localLibrary, emptyPriorityLibrary) &&
+            return !isEqual(localLibrary, emptyBudgetPriorityLibrary) &&
                 !isEqual(localLibrary, selectedLibrary) &&
                 !isEqual(localLibrary, scenarioLibrary);
         case 'target':
@@ -97,6 +99,14 @@ export const sortNonObjectLists = (item: any) => {
     return item;
 };
 
-export const isEqual = (item1: any, item2: any) => {
+export const isEqual = (item1: any | any[], item2: any | any[]) => {
+    if ((Array.isArray(item1) && !Array.isArray(item2)) || (!Array.isArray(item1) && Array.isArray(item2))) {
+        return false;
+    }
+
+    if (Array.isArray(item1) && Array.isArray(item2)) {
+        return isEmpty(symmetricDifference(item1, item2));
+    }
+
     return isEmpty(symmetricDifference([item1], [item2]));
 };

@@ -37,8 +37,8 @@
                         <v-list-tile @click="onNavigate('/TreatmentEditor/Library/')">
                             <v-list-tile-title>Treatment</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/PriorityEditor/Library/')">
-                            <v-list-tile-title>Priority</v-list-tile-title>
+                        <v-list-tile @click="onNavigate('/BudgetPriorityEditor/Library/')">
+                            <v-list-tile-title>Budget Priority</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/TargetConditionGoalEditor/Library/')">
                             <v-list-tile-title>Target Condition Goal</v-list-tile-title>
@@ -53,7 +53,7 @@
                             <v-list-tile-title>Cash Flow</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/CriterionLibraryEditor/Library/')">
-                            <v-list-tile-title>Criteria</v-list-tile-title>
+                            <v-list-tile-title>Criterion</v-list-tile-title>
                         </v-list-tile>
                     </v-list-group>
                     <v-list-tile @click="onNavigate('/UserCriteria/')" v-if="isAdmin">

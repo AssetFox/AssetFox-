@@ -159,7 +159,7 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Performance Curves',
+            tabName: 'Performance Curve',
             tabIcon: 'fas fa-chart-line',
             navigation: {
                 path: '/PerformanceCurveEditor/Scenario/',
@@ -173,10 +173,10 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Priority',
+            tabName: 'Budget Priority',
             tabIcon: 'fas fa-copy',
             navigation: {
-                path: '/PriorityEditor/Scenario/',
+                path: '/BudgetPriorityEditor/Scenario/',
             },
         },
         {

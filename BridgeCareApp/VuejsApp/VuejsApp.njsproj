@@ -73,7 +73,7 @@
     <Content Include="src\components\performance-editor\PerformanceEditor.vue" />
     <Content Include="src\components\priority-editor\priority-editor-dialogs\CreatePriorityDialog.vue" />
     <Content Include="src\components\priority-editor\priority-editor-dialogs\CreatePriorityLibraryDialog.vue" />
-    <Content Include="src\components\priority-editor\PriorityEditor.vue" />
+    <Content Include="src\components\priority-editor\BudgetPriorityEditor.vue" />
     <Content Include="src\components\remaining-life-limit-editor\remaining-life-limit-editor-dialogs\CreateRemainingLifeLimitDialog.vue" />
     <Content Include="src\components\remaining-life-limit-editor\remaining-life-limit-editor-dialogs\CreateRemainingLifeLimitLibraryDialog.vue" />
     <Content Include="src\components\remaining-life-limit-editor\RemainingLifeLimitEditor.vue" />
@@ -173,7 +173,7 @@
     <TypeScriptCompile Include="src\services\investment.service.ts" />
     <TypeScriptCompile Include="src\services\network.service.ts" />
     <TypeScriptCompile Include="src\services\performance-curve.service.ts" />
-    <TypeScriptCompile Include="src\services\priority.service.ts" />
+    <TypeScriptCompile Include="src\services\budget-priority.service.ts" />
     <TypeScriptCompile Include="src\services\remaining-life-limit.service.ts" />
     <TypeScriptCompile Include="src\services\reports.service.ts" />
     <TypeScriptCompile Include="src\services\rollup.service.ts">
@@ -194,7 +194,7 @@
     <TypeScriptCompile Include="src\shared\models\iAM\navigation-tab.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\network.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\performance.ts" />
-    <TypeScriptCompile Include="src\shared\models\iAM\priority.ts" />
+    <TypeScriptCompile Include="src\shared\models\iAM\budget-priority.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\remaining-life-limit.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\rollup.ts">
       <SubType>Code</SubType>
@@ -208,7 +208,7 @@
     <TypeScriptCompile Include="src\shared\models\modals\alert-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-budget-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-performance-curve-library-dialog-data.ts" />
-    <TypeScriptCompile Include="src\shared\models\modals\create-priority-library-dialog-data.ts" />
+    <TypeScriptCompile Include="src\shared\models\modals\create-budget-priority-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-remaining-life-limit-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-remaining-life-limit-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-treatment-library-dialog-data.ts" />
@@ -240,7 +240,7 @@
     <TypeScriptCompile Include="src\store-modules\budget-criteria.module.ts" />
     <TypeScriptCompile Include="src\store-modules\busy.module.ts" />
     <TypeScriptCompile Include="src\store-modules\deficient-condition-goal.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\priority.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\budget-priority.module.ts" />
     <TypeScriptCompile Include="src\store-modules\remaining-life-limit.module.ts" />
     <TypeScriptCompile Include="src\store-modules\inventory.module.ts" />
     <TypeScriptCompile Include="src\store-modules\investment.module.ts" />

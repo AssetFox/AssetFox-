@@ -100,7 +100,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Include(_ => _.Budgets)
                     .Single(_ =>
                         _.BudgetLibrarySimulationJoins.FirstOrDefault(__ => __.SimulationId == simulationId) != null)
-                    .Budgets.Select(_ => new SimpleBudgetDetailDTO { Id = _.Id, Name = _.Name }).ToList());
+                    .Budgets.Select(_ => new SimpleBudgetDetailDTO {Id = _.Id, Name = _.Name}).OrderBy(_ => _.Name)
+                    .ToList());
         }
 
         public Task<List<BudgetLibraryDTO>> BudgetLibrariesWithBudgets()

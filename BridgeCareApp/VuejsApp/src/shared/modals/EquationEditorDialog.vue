@@ -273,7 +273,8 @@
         <v-card-text>
           <v-layout column justify-center>
             <div>
-              <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]" label="Time Value"
+              <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]"
+                            label="Time Value"
                             outline
                             type="number"
                             v-model="newDataPoint.timeValue">
@@ -333,7 +334,8 @@
         <v-card-text>
           <v-layout justify-center>
             <div v-if="editedDataPointProperty === 'timeValue'">
-              <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]" label="Time Value"
+              <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]"
+                            label="Time Value"
                             outline
                             type="number"
                             v-model="editedDataPoint.timeValue">
@@ -421,7 +423,8 @@ export default class EquationEditorDialog extends Vue {
   showEditDataPointPopup: boolean = false;
   editedDataPointProperty: string = '';
   editedDataPoint: TimeConditionDataPoint = clone(emptyTimeConditionDataPoint);
-  piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))+/;
+  piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/;
+  multipleDataPointsRegex: RegExp = /(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*)/
   uuidNIL: string = getBlankGuid();
 
   /**
@@ -970,7 +973,7 @@ export default class EquationEditorDialog extends Vue {
     const eachDataPointIsValid = this.multipleDataPoints
         .split(/\r?\n/).filter((dataPoints: string) => dataPoints !== '')
         .every((dataPoints: string) => {
-          return this.piecewiseRegex.test(dataPoints) &&
+          return this.multipleDataPointsRegex.test(dataPoints) &&
               dataPoints.split(',').every((value: string) => !isNaN(parseFloat(value)));
         });
 

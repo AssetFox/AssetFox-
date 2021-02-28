@@ -1,5 +1,5 @@
 <template>
-  <v-dialog persistent v-model="dialogData.showDialog">
+  <v-dialog persistent fullscreen v-model="dialogData.showDialog">
     <v-card>
       <v-card-text>
         <v-layout justify-center column>

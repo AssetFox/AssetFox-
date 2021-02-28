@@ -18,9 +18,9 @@
         <v-layout justify-space-between row>
           <v-spacer></v-spacer>
           <v-flex xs2>
-            <v-text-field label="Minimum Project Cost Limit" outline
+            <v-text-field label="Minimum Project Cost Limit" outline id="min-proj-cost-limit-txt"
                           v-model="investmentPlan.minimumProjectCostLimit"
-                          @input="syncAllBudgetAmountsWithMinimumCostLimit"
+                          @input="syncAllBudgetAmountsWithMinimumProjectCostLimit"
                           v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                           :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"/>
           </v-flex>
@@ -269,6 +269,19 @@ export default class InvestmentEditor extends Vue {
     });
   }
 
+  mounted() {
+    this.$nextTick(() => {
+      const minimumProjectCostLimitTextField: HTMLElement = document
+          .getElementById('min-proj-cost-limit-txt') as HTMLElement;
+      if (hasValue(minimumProjectCostLimitTextField)) {
+        setTimeout(() => {
+          minimumProjectCostLimitTextField.click();
+          setTimeout(() => minimumProjectCostLimitTextField.blur());
+        });
+      }
+    });
+  }
+
   beforeDestroy() {
     this.setHasUnsavedChangesAction({value: false});
   }
@@ -309,7 +322,12 @@ export default class InvestmentEditor extends Vue {
 
     this.setGridHeaders();
     this.setGridData();
+
     this.syncInvestmentPlanWithSelectedBudgetLibrary();
+
+    if (!this.hasBudgetsThatMeetMinimumProjectCostLimit()) {
+      this.syncAllBudgetAmountsWithMinimumProjectCostLimit();
+    }
   }
 
   @Watch('stateInvestmentPlan')
@@ -320,24 +338,23 @@ export default class InvestmentEditor extends Vue {
   @Watch('investmentPlan')
   onInvestmentPlanChanged() {
     this.setHasUnsavedChangesAction({
-      value: hasUnsavedChangesCore('investment-plan', this.investmentPlan, this.stateInvestmentPlan)
+      value: hasUnsavedChangesCore('investment-plan',
+          {
+            ...this.investmentPlan, minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
+                ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                : 0
+          },
+          {
+            ...this.stateInvestmentPlan, minimumProjectCostLimit: hasValue(this.stateInvestmentPlan.minimumProjectCostLimit)
+                ? parseFloat(this.stateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                : 0
+          })
     });
 
     this.syncInvestmentPlanWithSelectedBudgetLibrary();
 
-    const minProjectCostLimit: number = hasValue(this.investmentPlan.minimumProjectCostLimit)
-        ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
-        : 0;
-    const allBudgetsMeetMinimumProjectCostLimit = this.selectedBudgetLibrary.budgets
-        .flatMap((budget: Budget) => budget.budgetAmounts)
-        .every((budgetAmount: BudgetAmount) => {
-          const budgetAmountValue = hasValue(budgetAmount.value)
-              ? parseFloat(budgetAmount.value.toString().replace(/(\$*)(\,*)/g, ''))
-              : 0;
-          return budgetAmountValue >= minProjectCostLimit;
-        });
-    if (!allBudgetsMeetMinimumProjectCostLimit) {
-      this.syncAllBudgetAmountsWithMinimumCostLimit();
+    if (!this.hasBudgetsThatMeetMinimumProjectCostLimit()) {
+      this.syncAllBudgetAmountsWithMinimumProjectCostLimit();
     }
   }
 
@@ -390,20 +407,39 @@ export default class InvestmentEditor extends Vue {
       const allBudgetAmounts: BudgetAmount[] = this.selectedBudgetLibrary.budgets
           .flatMap((budget: Budget) => budget.budgetAmounts);
       const allBudgetYears: number[] = sorter(getPropertyValues('year', allBudgetAmounts)) as number[];
-      //const allBudgetAmountValues: number[] = sorter(getPropertyValues('value', allBudgetAmounts));
 
       this.investmentPlan.firstYearOfAnalysisPeriod = hasValue(allBudgetYears)
           ? allBudgetYears[0] : this.investmentPlan.firstYearOfAnalysisPeriod;
       this.investmentPlan.numberOfYearsInAnalysisPeriod = hasValue(allBudgetYears)
           ? allBudgetYears.length : 1;
-      //this.investmentPlan.minimumProjectCostLimit = hasValue(allBudgetAmountValues) ? allBudgetAmountValues[0] : 0;
     }
   }
 
-  syncAllBudgetAmountsWithMinimumCostLimit() {
+  hasBudgetsThatMeetMinimumProjectCostLimit() {
+    if (this.selectedScenarioId !== this.uuidNIL) {
+      const minProjectCostLimit: number = hasValue(this.investmentPlan.minimumProjectCostLimit)
+          ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+          : 0;
+
+      return this.selectedBudgetLibrary.budgets
+          .flatMap((budget: Budget) => budget.budgetAmounts)
+          .every((budgetAmount: BudgetAmount) => {
+            const budgetAmountValue = hasValue(budgetAmount.value)
+                ? parseFloat(budgetAmount.value.toString().replace(/(\$*)(\,*)/g, ''))
+                : 0;
+            
+            return budgetAmountValue >= minProjectCostLimit;
+          });
+    }
+
+    return true;
+  }
+
+  syncAllBudgetAmountsWithMinimumProjectCostLimit() {
     const minProjectCostLimit: number = hasValue(this.investmentPlan.minimumProjectCostLimit)
         ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
         : 0;
+
     if (minProjectCostLimit > 0 && this.selectedScenarioId !== this.uuidNIL) {
       this.selectedBudgetLibrary = {
         ...this.selectedBudgetLibrary,

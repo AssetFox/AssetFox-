@@ -47,7 +47,7 @@
     </v-flex>
     <v-flex>
       <v-layout v-show="hasSelectedCriterionLibrary" justify-end row>
-        <v-btn @click="onAddOrUpdateCriterionLibrary" class="ara-blue-bg white--text" :disabled="!canUpdateOrCreate">
+        <v-btn @click="onAddOrUpdateCriterionLibrary(selectedCriterionLibrary)" class="ara-blue-bg white--text" :disabled="!canUpdateOrCreate">
           Update Library
         </v-btn>
         <v-btn @click="onCreateAsNewLibrary" class="ara-blue-bg white--text" :disabled="!canUpdateOrCreate">

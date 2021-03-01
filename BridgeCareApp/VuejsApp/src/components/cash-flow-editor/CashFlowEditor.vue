@@ -74,7 +74,8 @@
                         </template>
                         <v-card>
                           <v-card-text>
-                            <v-textarea :value="props.item.criterionLibrary.mergedCriteriaExpression" full-width no-resize
+                            <v-textarea :value="props.item.criterionLibrary.mergedCriteriaExpression" full-width
+                                        no-resize
                                         outline readonly rows="5"/>
                           </v-card-text>
                         </v-card>
@@ -125,14 +126,14 @@
                     </td>
                     <td>
                       <v-edit-dialog :return-value.sync="props.item.costCeiling" large lazy persistent
-                                     full-width
+                                     full-width @open="onOpenCostCeilingEditDialog(props.item.id)"
                                      @save="onEditSelectedLibraryListData(props.item, 'costCeiling')">
                         <v-text-field readonly single-line class="sm-txt"
                                       :value="formatAsCurrency(props.item.costCeiling)"
                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['cashFlowRules'].isAmountGreaterThanOrEqualToPreviousAmount(props.item, selectedCashFlowRule)]"/>
                         <template slot="input">
-                          <v-text-field label="Edit" single-line
-                                        v-model.number="props.item.costCeiling"
+                          <v-text-field label="Edit" single-line :id="props.item.id"
+                                        v-model="props.item.costCeiling"
                                         v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                         :rules="[rules['generalRules'].valueIsNotEmpty, rules['cashFlowRules'].isAmountGreaterThanOrEqualToPreviousAmount(props.item, selectedCashFlowRule)]"/>
                         </template>
@@ -241,7 +242,8 @@ import {
   CreateCashFlowRuleLibraryDialogData,
   emptyCreateCashFlowLibraryDialogData
 } from '@/shared/models/modals/create-cash-flow-rule-library-dialog-data';
-import CreateCashFlowRuleLibraryDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/CreateCashFlowRuleLibraryDialog.vue';
+import CreateCashFlowRuleLibraryDialog
+  from '@/components/cash-flow-editor/cash-flow-editor-dialogs/CreateCashFlowRuleLibraryDialog.vue';
 import {formatAsCurrency} from '@/shared/utils/currency-formatter';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getLastPropertyValue} from '@/shared/utils/getter-utils';
@@ -286,7 +288,14 @@ export default class CashFlowEditor extends Vue {
   cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
     {text: 'Duration (yr)', value: 'durationInYears', align: 'left', sortable: false, class: '', width: '31.6%'},
     {text: 'Cost Ceiling', value: 'costCeiling', align: 'left', sortable: false, class: '', width: '31.6%'},
-    {text: 'Yearly Distribution (%)', value: 'yearlyPercentages', align: 'left', sortable: false, class: '', width: '31.6%'},
+    {
+      text: 'Yearly Distribution (%)',
+      value: 'yearlyPercentages',
+      align: 'left',
+      sortable: false,
+      class: '',
+      width: '31.6%'
+    },
     {text: '', value: '', align: 'left', sortable: false, class: '', width: '4.2%'}
   ];
   cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = [];
@@ -368,7 +377,7 @@ export default class CashFlowEditor extends Vue {
   @Watch('selectedCashFlowRule')
   onSelectedSplitTreatmentIdChanged() {
     this.cashFlowDistributionRuleGridData = hasValue(this.selectedCashFlowRule.cashFlowDistributionRules)
-      ? clone(this.selectedCashFlowRule.cashFlowDistributionRules) : [];
+        ? clone(this.selectedCashFlowRule.cashFlowDistributionRules) : [];
   }
 
   onSelectCashFlowRule() {
@@ -560,6 +569,18 @@ export default class CashFlowEditor extends Vue {
       ...this.selectedCashFlowRuleLibrary,
       cashFlowRules: updatedCashFlowRules
     };
+  }
+
+  onOpenCostCeilingEditDialog(distributionRuleId: string) {
+    this.$nextTick(() => {
+      const editDialogInputElement: HTMLElement = document.getElementById(distributionRuleId) as HTMLElement;
+      if (hasValue(editDialogInputElement)) {
+        setTimeout(() => {
+          editDialogInputElement.blur();
+          setTimeout(() => editDialogInputElement.click());
+        },250);
+      }
+    });
   }
 
   onAddOrUpdateCashFlowRuleLibrary(cashFlowRuleLibrary: CashFlowRuleLibrary, scenarioId: string) {

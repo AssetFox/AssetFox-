@@ -7,7 +7,8 @@ import {http2XX} from '@/shared/utils/http-utils';
 
 const state = {
     criterionLibraries: [] as CriterionLibrary[],
-    selectedCriterionLibrary: clone(emptyCriterionLibrary) as CriterionLibrary
+    selectedCriterionLibrary: clone(emptyCriterionLibrary) as CriterionLibrary,
+    selectedCriterionIsValid: false as boolean
 };
 
 const mutations = {
@@ -29,12 +30,18 @@ const mutations = {
     },
     deletedCriterionLibraryMutator(state: any, deletedCriteriaLibraryId: string) {
         state.criterionLibraries = reject(propEq('id', deletedCriteriaLibraryId), state.criterionLibraries);
+    },
+    selectedCriterionIsValidMutator(state: any, isValid: boolean) {
+        state.selectedCriterionIsValid = isValid;
     }
 };
 
 const actions = {
     selectCriterionLibrary({commit}: any, payload: any) {
         commit('selectedCriterionLibraryMutator', payload.libraryId);
+    },
+    setSelectedCriterionIsValid({commit}: any, payload: any) {
+        commit('selectedCriterionIsValidMutator', payload.isValid);
     },
     async getCriterionLibraries({commit}: any) {
         await CriterionLibraryService.getCriterionLibraries()
@@ -64,6 +71,7 @@ const actions = {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     commit('deletedCriterionLibraryMutator', payload.libraryId);
                     dispatch('setSuccessMessage', {message: 'Deleted criterion library'});
+                    commit('selectedCriterionIsValidMutator', false);
                 }
             });
     }

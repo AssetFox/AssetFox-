@@ -39,7 +39,7 @@
             <v-card-actions :class="{'validation-actions': criteriaEditorData.isLibraryContext}">
               <v-layout row>
                 <div class="validation-check-btn-container">
-                  <v-btn :disabled="onDisableCriteriaCheck()" @click="onCheckCriteria"
+                  <v-btn :disabled="onDisableCheckOutputButton()" @click="onCheckCriteria"
                          class="ara-blue-bg white--text">
                     Check Output
                   </v-btn>
@@ -58,7 +58,7 @@
           </v-card>
         </v-flex>
         <v-flex xs7>
-          <v-card>
+          <v-card class="criteria-editor-card">
             <v-card-title>
               <v-layout justify-center><h3>Criteria Editor</h3></v-layout>
             </v-card-title>
@@ -88,7 +88,7 @@
             <v-card-actions :class="{'validation-actions': criteriaEditorData.isLibraryContext}">
               <v-layout row>
                 <div class="validation-check-btn-container">
-                  <v-btn :disabled="onDisableSubCriteriaCheck()" @click="onCheckSubCriteria"
+                  <v-btn :disabled="onDisableCheckCriteriaButton()" @click="onCheckSubCriteria"
                          class="ara-blue-bg white--text">
                     Check Criteria
                   </v-btn>
@@ -142,6 +142,7 @@ import CriterionLibraryService from '@/services/criterion-library.service';
 import {AxiosResponse} from 'axios';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {Network} from '@/shared/models/iAM/network';
+import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
 
 @Component({
   components: {VueQueryBuilder}
@@ -186,18 +187,12 @@ export default class CriteriaEditor extends Vue {
   activeTab = 'tree-view';
   checkOutput: boolean = false;
 
-  /**
-   * Component mounted event handler
-   */
   mounted() {
     if (hasValue(this.stateAttributes)) {
       this.setQueryBuilderRules();
     }
   }
 
-  /**
-   * Event handler: criteriaEditorData
-   */
   @Watch('criteriaEditorData')
   onCriteriaEditorDataChanged() {
     const mainCriteria: Criteria = parseCriteriaString(this.criteriaEditorData.mergedCriteriaExpression) as Criteria;
@@ -216,9 +211,6 @@ export default class CriteriaEditor extends Vue {
     }
   }
 
-  /**
-   * Calls setQueryBuilderRules func. if stateAttributes property has value
-   */
   @Watch('stateAttributes')
   onStateAttributesChanged() {
     if (hasValue(this.stateAttributes)) {
@@ -226,17 +218,11 @@ export default class CriteriaEditor extends Vue {
     }
   }
 
-  /**
-   * Setter: selectedConjunction property
-   */
   @Watch('subCriteriaClauses')
   onSubCriteriaClausesChanged() {
     this.resetComponentCriteriaUIProperties();
   }
 
-  /**
-   * Calls the resetSubCriteriaValidationMessageProperties func. on selectedSubCriteriaClause property change
-   */
   @Watch('selectedSubCriteriaClause')
   onSelectedClauseChanged() {
     this.resetSubCriteriaValidationMessageProperties();
@@ -259,9 +245,6 @@ export default class CriteriaEditor extends Vue {
     }
   }
 
-  /**
-   * Calls the resetSubCriteriaValidationMessageProperties func. on selectedRawSubCriteriaClause property change
-   */
   @Watch('selectedRawSubCriteriaClause')
   onSelectedClauseRawChanged() {
     this.resetSubCriteriaValidationMessageProperties();
@@ -290,9 +273,6 @@ export default class CriteriaEditor extends Vue {
     }
   }
 
-  /**
-   * Setter: queryBuilderRules property
-   */
   setQueryBuilderRules() {
     this.queryBuilderRules = this.stateAttributes.map((attribute: Attribute) => ({
       type: 'text',
@@ -302,9 +282,6 @@ export default class CriteriaEditor extends Vue {
     }));
   }
 
-  /**
-   * Setter: subCriteriaClauses property
-   */
   setSubCriteriaClauses(mainCriteria: Criteria) {
     this.subCriteriaClauses = [];
     if (hasValue(mainCriteria) && hasValue(mainCriteria.children)) {
@@ -317,36 +294,24 @@ export default class CriteriaEditor extends Vue {
     }
   }
 
-  /**
-   * Resets component criteria UI related properties to their default values
-   */
   resetComponentCriteriaUIProperties() {
     this.validCriteriaMessage = null;
     this.invalidCriteriaMessage = null;
     this.cannotSubmit = !isEmpty(parseCriteriaJson(this.getMainCriteria()));
   }
 
-  /**
-   * Resets component sub-criteria UI related properties to their default values
-   */
   resetSubCriteriaValidationMessageProperties() {
     this.validSubCriteriaMessage = null;
     this.invalidSubCriteriaMessage = null;
     this.checkOutput = false;
   }
 
-  /**
-   * Resets component sub-criteria 'selected' named properties to their default values
-   */
   resetSubCriteriaSelectedProperties() {
     this.selectedSubCriteriaClauseIndex = -1;
     this.selectedSubCriteriaClause = null;
     this.selectedRawSubCriteriaClause = '';
   }
 
-  /**
-   * Functionality for adding a new clause
-   */
   onAddSubCriteria() {
     this.resetSubCriteriaSelectedProperties();
     setTimeout(() => {
@@ -357,10 +322,6 @@ export default class CriteriaEditor extends Vue {
     });
   }
 
-  /**
-   * Sets the selectedSubCriteriaClause & selectedSubCriteriaClauseIndex property with the specified clause & clauseIndex parameters;
-   * sets an invalid sub-criteria message if the clause cannot be parsed
-   */
   onClickSubCriteriaClauseTextarea(subCriteriaClause: string, subCriteriaClauseIndex: number) {
     this.resetSubCriteriaSelectedProperties();
     setTimeout(() => {
@@ -376,9 +337,6 @@ export default class CriteriaEditor extends Vue {
     });
   }
 
-  /**
-   * Removes a sub-criteria from the subCriteriaClauses property
-   */
   onRemoveSubCriteria(subCriteriaClauseIndex: number) {
     const subCriteriaClause: string = this.subCriteriaClauses[subCriteriaClauseIndex];
 
@@ -408,9 +366,6 @@ export default class CriteriaEditor extends Vue {
     }
   }
 
-  /**
-   * Parses the raw criteria for the tree view if valid; otherwise sets an invalid sub-criteria message
-   */
   onParseRawSubCriteria() {
     this.activeTab = 'tree-view';
     this.resetSubCriteriaValidationMessageProperties();
@@ -425,9 +380,6 @@ export default class CriteriaEditor extends Vue {
     }
   }
 
-  /**
-   * Parses the tree view criteria json for the raw criteria view
-   */
   onParseSubCriteriaJson() {
     this.activeTab = 'raw-criteria';
     this.resetSubCriteriaValidationMessageProperties();
@@ -439,10 +391,6 @@ export default class CriteriaEditor extends Vue {
     }
   }
 
-  /**
-   * Checks criteria editor validity and if valid modifies the main criteria with the editor changes; otherwise
-   * sets an invalid criteria message
-   */
   onCheckCriteria() {
     this.checkOutput = false;
     this.resetSubCriteriaSelectedProperties();
@@ -492,10 +440,6 @@ export default class CriteriaEditor extends Vue {
     }
   }
 
-  /**
-   * Checks the validity of the currently selected sub-criteria and sets an appropriate validation message based
-   * on the validity
-   */
   onCheckSubCriteria() {
     const criteria = this.getSubCriteriaValueToCheck();
 
@@ -546,9 +490,6 @@ export default class CriteriaEditor extends Vue {
         });
   }
 
-  /**
-   * Getter: the sub-criteria value to check
-   */
   getSubCriteriaValueToCheck() {
     if (this.activeTab === 'tree-view') {
       const parsedCriteriaJson = parseCriteriaJson(this.selectedSubCriteriaClause as Criteria);
@@ -559,11 +500,7 @@ export default class CriteriaEditor extends Vue {
     }
     return this.selectedRawSubCriteriaClause;
   }
-
-  /**
-   * Emits the parsed criteria object's data to the calling parent component or null if the user clicked the
-   * 'Cancel' button
-   */
+  
   onSubmitCriteriaEditorResult(submit: boolean) {
     this.resetSubCriteriaSelectedProperties();
     this.resetComponentCriteriaUIProperties();
@@ -581,27 +518,24 @@ export default class CriteriaEditor extends Vue {
       this.$emit('submitCriteriaEditorResult', null);
     }
   }
-
-  /**
-   * Determines whether or not the main criteria 'Check' button should be disabled
-   */
-  onDisableCriteriaCheck() {
+  
+  onDisableCheckOutputButton() {
     const mainCriteria: Criteria = this.getMainCriteria();
     const subCriteriaClausesAreEmpty = this.subCriteriaClauses
         .every((subCriteriaClause: string) => isEmpty(subCriteriaClause));
 
-    return !mainCriteria || (equals(mainCriteria, emptyCriteria) && subCriteriaClausesAreEmpty) ||
+    const disable: boolean = !mainCriteria || (isEqual(mainCriteria, emptyCriteria) && subCriteriaClausesAreEmpty) ||
         (!hasValue(mainCriteria.children) && subCriteriaClausesAreEmpty) ||
         isEmpty(parseCriteriaJson(mainCriteria));
-  }
 
-  /**
-   * Determines whether or not the sub-criteria 'Check' button should be disabled
-   */
-  onDisableSubCriteriaCheck() {
+    return disable;
+  }
+  
+  onDisableCheckCriteriaButton() {
     const parsedSelectedSubCriteriaClause = parseCriteriaJson(this.selectedSubCriteriaClause as Criteria);
     const parsedSelectedRawSubCriteriaClause = parseCriteriaJson(parseCriteriaString(this.selectedRawSubCriteriaClause) as Criteria);
-    return this.selectedSubCriteriaClauseIndex === -1 ||
+
+    const disable: boolean = this.selectedSubCriteriaClauseIndex === -1 ||
         (
             this.activeTab === 'tree-view' &&
             (
@@ -618,11 +552,10 @@ export default class CriteriaEditor extends Vue {
                 (parsedSelectedRawSubCriteriaClause && isEmpty(parsedSelectedRawSubCriteriaClause.join('')))
             )
         );
-  }
 
-  /**
-   * Returns the main criteria object parsed from the sub-criteria clauses
-   */
+    return disable;
+  }
+  
   getMainCriteria() {
     const filteredSubCriteria: string[] = this.subCriteriaClauses
         .filter((subCriteriaClause: string) => !isEmpty(subCriteriaClause));

@@ -1,11 +1,9 @@
 export interface CreateCriterionLibraryDialogData {
     showDialog: boolean;
-    description: string;
-    criteria: string;
+    mergedCriteriaExpression: string;
 }
 
 export const emptyCreateCriterionLibraryDialogData: CreateCriterionLibraryDialogData = {
     showDialog: false,
-    description: '',
-    criteria: ''
+    mergedCriteriaExpression: ''
 };

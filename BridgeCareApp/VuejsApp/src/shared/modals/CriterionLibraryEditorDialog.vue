@@ -1,16 +1,16 @@
 <template>
-  <v-dialog persistent fullscreen v-model="dialogData.showDialog">
+  <v-dialog persistent fullscreen v-model="dialogData.showDialog" class="criterion-library-editor-dialog">
     <v-card>
       <v-card-text>
         <v-layout justify-center column>
           <div>
-            <CriterionLibraryEditor />
+            <CriterionLibraryEditor :dialogLibraryId="dialogData.libraryId" />
           </div>
         </v-layout>
       </v-card-text>
       <v-card-actions>
         <v-layout justify-space-between row>
-          <v-btn :disabled="stateSelectedCriterionLibrary.id === uuidNIL"
+          <v-btn :disabled="stateSelectedCriterionLibrary.id === uuidNIL || !stateSelectedCriterionIsValid"
                  class="ara-blue-bg white--text"
                  @click="onSubmit(true)">
             Save
@@ -31,7 +31,6 @@ import {Component, Prop, Watch} from 'vue-property-decorator';
 import {Action, State} from 'vuex-class';
 import {CriterionLibraryEditorDialogData} from '../models/modals/criterion-library-editor-dialog-data';
 import {CriterionLibrary} from '@/shared/models/iAM/criteria';
-import {any, propEq} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
 import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
@@ -44,32 +43,40 @@ export default class CriterionLibraryEditorDialog extends Vue {
 
   @State(state => state.criteriaEditor.criterionLibraries) stateCriterionLibraries: CriterionLibrary[];
   @State(state => state.criteriaEditor.selectedCriterionLibrary) stateSelectedCriterionLibrary: CriterionLibrary;
+  @State(state => state.criteriaEditor.selectedCriterionIsValid) stateSelectedCriterionIsValid: boolean;
 
   @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
   @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
+  @Action('setSelectedCriterionIsValid') setSelectedCriterionIsValidAction: any;
 
   uuidNIL: string = getBlankGuid();
 
-  /**
-   *
-   */
-  mounted() {
-    this.getCriterionLibrariesAction();
-  }
-
-  /**
-   *
-   */
   @Watch('dialogData')
   onDialogDataChanged() {
-    if (hasValue(this.stateCriterionLibraries) && any(propEq('id', this.dialogData.libraryId), this.stateCriterionLibraries)) {
-      this.selectCriterionLibraryAction({libraryId: this.dialogData.libraryId});
+    const htmlTag: HTMLCollection = document.getElementsByTagName('html') as HTMLCollection;
+    const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
+
+    if (this.dialogData.showDialog) {
+      if (!hasValue(this.stateCriterionLibraries)) {
+        this.getCriterionLibrariesAction();
+      }
+
+      this.setSelectedCriterionIsValidAction({isValid: false});
+
+      if (hasValue(htmlTag)) {
+        htmlTag[0].setAttribute('style', 'overflow:hidden;');
+      }
+
+      if (hasValue(criteriaEditorCard)) {
+        criteriaEditorCard[0].setAttribute('style', 'height:100%');
+      }
+    } else {
+      if (hasValue(htmlTag)) {
+        htmlTag[0].setAttribute('style', 'overflow:auto;');
+      }
     }
   }
 
-  /**
-   *
-   */
   onSubmit(submit: boolean) {
     if (submit) {
       this.$emit('submit', this.stateSelectedCriterionLibrary);

@@ -45,6 +45,7 @@ import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
 
 @Component
 export default class CreateTargetConditionGoalDialog extends Vue {
@@ -66,39 +67,35 @@ export default class CreateTargetConditionGoalDialog extends Vue {
     this.setNumericAttributeNames();
   }
 
+  @Watch('numericAttributeNames')
+  onNumericAttributeNamesChanged() {
+    this.setNewTargetConditionGoalDefaultValues();
+  }
+
   @Watch('showDialog')
   onShowDialogChanged() {
     this.setNewTargetConditionGoalDefaultValues();
   }
 
-  @Watch('numericAttributeNames')
-  onNumericAttributeNamesChanged() {
-    this.setNumericAttributeNames();
-  }
-
   @Watch('currentNumberOfTargetConditionGoals')
   onCurrentNumberOfDeficientConditionGoalsChanged() {
-    if (this.showDialog) {
-      this.setNewTargetConditionGoalDefaultValues();
-    }
+    this.setNewTargetConditionGoalDefaultValues();
   }
 
   setNewTargetConditionGoalDefaultValues() {
-    this.newTargetConditionGoal = {
-      ...this.newTargetConditionGoal,
-      attribute: hasValue(this.numericAttributeNames) ? this.numericAttributeNames[0] : '',
-      name: `Unnamed Target Condition Goal ${this.currentNumberOfTargetConditionGoals + 1}`,
-      target: this.currentNumberOfTargetConditionGoals > 0 ? this.currentNumberOfTargetConditionGoals + 1 : 1
-    };
+    if (this.showDialog) {
+      this.newTargetConditionGoal = {
+        ...this.newTargetConditionGoal,
+        attribute: hasValue(this.numericAttributeNames) ? this.numericAttributeNames[0] : '',
+        name: `Unnamed Target Condition Goal ${this.currentNumberOfTargetConditionGoals + 1}`,
+        target: this.currentNumberOfTargetConditionGoals > 0 ? this.currentNumberOfTargetConditionGoals + 1 : 1
+      };
+    }
   }
 
   setNumericAttributeNames() {
-    if (hasValue(this.stateNumericAttributes)) {
+    if (hasValue(this.stateNumericAttributes) && !isEqual(this.numericAttributeNames, this.stateNumericAttributes)) {
       this.numericAttributeNames = getPropertyValues('name', this.stateNumericAttributes);
-
-      if (this.showDialog) {
-        this.setNewTargetConditionGoalDefaultValues();
-      }
     }
   }
 

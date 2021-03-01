@@ -50,6 +50,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute
                 .Where(_ => calculatedFieldNames.Contains(_.Name)).ToList();
 
+            var existingJoins = _unitOfDataPersistenceWork.Context.AttributeEquationCriterionLibrary
+                .Include(_ => _.Attribute)
+                .Include(_ => _.Equation)
+                .Include(_ => _.CriterionLibrary)
+                .ToList()
+                .Select(_ => (attributeName: _.Attribute.Name, equationExpression: _.Equation.Expression, criterionExpression: _.CriterionLibrary?.MergedCriteriaExpression ?? string.Empty))
+                .ToList();
+
             var joinEntities = new List<AttributeEquationCriterionLibraryEntity>();
             var equationEntities = new List<EquationEntity>();
             var criterionLibraryEntities = new List<CriterionLibraryEntity>();
@@ -59,23 +67,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var calculatedField = explorer.CalculatedFields.Single(_ => _.Name == attributeEntity.Name);
                 calculatedField.ValueSources.ForEach(valueSource =>
                 {
-                    var joinEntity = new AttributeEquationCriterionLibraryEntity { AttributeId = attributeEntity.Id };
+                    var joinTuple = (attributeName: attributeEntity.Name, equationExpression: valueSource.Equation.Expression, criterionExpression: valueSource.Criterion.Expression ?? string.Empty);
 
-                    var equationEntity = valueSource.Equation.ToEntity();
-                    equationEntities.Add(equationEntity);
-
-                    joinEntity.EquationId = equationEntity.Id;
-
-                    if (!valueSource.Criterion.ExpressionIsBlank)
+                    if (!existingJoins.Contains(joinTuple))
                     {
-                        var criterionLibraryEntity = criterionLibraryEntities.Any(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
-                            ? criterionLibraryEntities.Single(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
-                            : GetCriterionLibraryEntity(valueSource.Criterion.Expression, criterionLibraryEntities);
+                        var newJoinEntity = new AttributeEquationCriterionLibraryEntity {AttributeId = attributeEntity.Id,};
 
-                        joinEntity.CriterionLibraryId = criterionLibraryEntity.Id;
+                        var equationEntity =
+                            _unitOfDataPersistenceWork.Context.Equation.SingleOrDefault(_ =>
+                                _.Expression == valueSource.Equation.Expression);
+
+                        if (equationEntity == null)
+                        {
+                            equationEntity = valueSource.Equation.ToEntity();
+                            equationEntities.Add(equationEntity);
+                        }
+
+                        newJoinEntity.EquationId = equationEntity.Id;
+
+                        if (!valueSource.Criterion.ExpressionIsBlank)
+                        {
+                            var criterionLibraryEntity = _unitOfDataPersistenceWork.Context.CriterionLibrary.Any(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
+                                ? _unitOfDataPersistenceWork.Context.CriterionLibrary.Single(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
+                                : GetCriterionLibraryEntity(valueSource.Criterion.Expression, criterionLibraryEntities);
+
+                            newJoinEntity.CriterionLibraryId = criterionLibraryEntity.Id;
+                        }
+
+                        joinEntities.Add(newJoinEntity);
                     }
-
-                    joinEntities.Add(joinEntity);
                 });
             });
 
@@ -91,13 +111,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                joinEntities.ForEach(entity => _unitOfDataPersistenceWork.Context
-                    .AddOrUpdate(entity, _ => _.AttributeId == entity.AttributeId && _.EquationId == entity.EquationId));
                 _unitOfDataPersistenceWork.Context.AttributeEquationCriterionLibrary.AddRange(joinEntities);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkInsertOrUpdate(joinEntities);
+                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
             }
 
             _unitOfDataPersistenceWork.Context.SaveChanges();
@@ -106,12 +124,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private CriterionLibraryEntity GetCriterionLibraryEntity(string expression, List<CriterionLibraryEntity> criterionLibraryEntities)
         {
             var criterionLibraryEntity = _unitOfDataPersistenceWork.Context.CriterionLibrary
-                .SingleOrDefault(_ => _.MergedCriteriaExpression == expression && _.Name.Contains("Attribute"));
+                .SingleOrDefault(_ => _.MergedCriteriaExpression == expression && _.Name.Contains("Explorer Attribute"));
 
             if (criterionLibraryEntity == null)
             {
                 var criterionLibraryNames = _unitOfDataPersistenceWork.Context.CriterionLibrary
-                    .Where(_ => _.Name.Contains("Attribute"))
+                    .Where(_ => _.Name.Contains("Explorer Attribute"))
                     .Select(_ => _.Name).ToList();
 
                 var newCriterionLibraryName = $"Explorer Attribute Criterion Library";
@@ -171,7 +189,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             {
                                 var source = calculatedField.AddValueSource();
                                 source.Equation.Expression = join.Equation.Expression;
-                                source.Criterion.Expression = join.CriterionLibrary?.MergedCriteriaExpression;
+                                source.Criterion.Expression = join.CriterionLibrary?.MergedCriteriaExpression ?? string.Empty;
                             });
                         }
                     }

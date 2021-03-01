@@ -3,7 +3,7 @@
     <v-flex>
       <v-layout justify-center>
         <v-flex xs3>
-          <v-btn @click="onCreateNewLibrary" class="ara-blue-bg white--text">
+          <v-btn @click="onShowCreateCriterionLibraryDialog(false)" class="ara-blue-bg white--text">
             New Library
           </v-btn>
           <v-select v-if="!hasSelectedCriterionLibrary" v-model="librarySelectItemValue"
@@ -47,13 +47,15 @@
     </v-flex>
     <v-flex>
       <v-layout v-show="hasSelectedCriterionLibrary" justify-end row>
-        <v-btn @click="onAddOrUpdateCriterionLibrary(selectedCriterionLibrary)" class="ara-blue-bg white--text" :disabled="!canUpdateOrCreate">
+        <v-btn @click="onAddOrUpdateCriterionLibrary(selectedCriterionLibrary)" class="ara-blue-bg white--text"
+               :disabled="!canUpdateOrCreate">
           Update Library
         </v-btn>
-        <v-btn @click="onCreateAsNewLibrary" class="ara-blue-bg white--text" :disabled="!canUpdateOrCreate">
+        <v-btn @click="onShowCreateCriterionLibraryDialog(true)" class="ara-blue-bg white--text"
+               :disabled="!canUpdateOrCreate">
           Create as New Library
         </v-btn>
-        <v-btn @click="onDeleteCriterionLibrary" class="ara-orange-bg white--text">
+        <v-btn @click="onShowConfirmDeleteAlert" class="ara-orange-bg white--text">
           Delete Library
         </v-btn>
       </v-layout>
@@ -70,7 +72,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import {Action, State} from 'vuex-class';
-import {Watch} from 'vue-property-decorator';
+import {Prop, Watch} from 'vue-property-decorator';
 import CriteriaEditor from '@/shared/components/CriteriaEditor.vue';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {
@@ -82,12 +84,13 @@ import {
 } from '@/shared/models/iAM/criteria';
 
 import {clone, isNil} from 'ramda';
-import {hasUnsavedChanges} from '@/shared/utils/has-unsaved-changes-helper';
+import {hasUnsavedChanges, hasUnsavedChangesCore} from '@/shared/utils/has-unsaved-changes-helper';
 import {
   CreateCriterionLibraryDialogData,
   emptyCreateCriterionLibraryDialogData
 } from '@/shared/models/modals/create-criterion-library-dialog-data';
-import CreateCriterionLibraryDialog from '@/components/criteria-editor/criteria-editor-dialogs/CreateCriterionLibraryDialog.vue';
+import CreateCriterionLibraryDialog
+  from '@/components/criteria-editor/criteria-editor-dialogs/CreateCriterionLibraryDialog.vue';
 import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
@@ -96,6 +99,8 @@ import {getBlankGuid} from '@/shared/utils/uuid-utils';
   components: {Alert, CreateCriterionLibraryDialog, CriteriaEditor}
 })
 export default class CriterionLibraryEditor extends Vue {
+  @Prop() dialogLibraryId: string;
+
   @State(state => state.criteriaEditor.criterionLibraries) stateCriterionLibraries: CriterionLibrary[];
   @State(state => state.criteriaEditor.selectedCriterionLibrary) stateSelectedCriterionLibrary: CriterionLibrary;
 
@@ -103,6 +108,7 @@ export default class CriterionLibraryEditor extends Vue {
   @Action('addOrUpdateCriterionLibrary') addOrUpdateCriterionLibraryAction: any;
   @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
   @Action('deleteCriterionLibrary') deleteCriterionLibraryAction: any;
+  @Action('setSelectedCriterionIsValid') setSelectedCriterionIsValidAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
   hasSelectedCriterionLibrary: boolean = false;
@@ -118,10 +124,6 @@ export default class CriterionLibraryEditor extends Vue {
   canUpdateOrCreate: boolean = false;
   uuidNIL: string = getBlankGuid();
 
-  /**
-   * beforeRouteEnter => This event handler is used to unset the librarySelectItemValue object and to trigger an action
-   * to call a service function to create an HTTP request for all criterion libraries.
-   */
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
       if (to.path.indexOf('CriterionLibraryEditor/Library') !== -1) {
@@ -131,17 +133,10 @@ export default class CriterionLibraryEditor extends Vue {
     });
   }
 
-  /**
-   * beforeDestroy => This event handler is used to trigger an action to modify the vuex hasUnsavedChanges object.
-   */
   beforeDestroy() {
     this.setHasUnsavedChangesAction({value: false});
   }
 
-  /**
-   * onStateCriterionLibrariesChanged => This stateCriterionLibraries watcher is used to set the criterionLibrarySelectItems
-   * object.
-   */
   @Watch('stateCriterionLibraries')
   onStateCriterionLibrariesChanged() {
     this.criterionLibrarySelectItems = this.stateCriterionLibraries.map((library: CriterionLibrary) => ({
@@ -150,34 +145,32 @@ export default class CriterionLibraryEditor extends Vue {
     }));
   }
 
-  /**
-   * onLibrarySelectItemValueChanged => This librarySelectItemValue watcher is used to trigger an action to modify the
-   * vuex selectedCriterionLibrary object.
-   */
+  @Watch('dialogLibraryId')
+  onDialogLibraryIdChanged() {
+    this.librarySelectItemValue = this.dialogLibraryId;
+  }
+
   @Watch('librarySelectItemValue')
   onLibrarySelectItemValueChanged() {
     this.selectCriterionLibraryAction({libraryId: this.librarySelectItemValue});
   }
 
-  /**
-   * onStateSelectedCriterionLibraryChanged => This stateSelectedCriterionLibrary watcher is used to reset the
-   * canUpdateOrCreate object and to set the selectedCriterionLibrary object.
-   */
   @Watch('stateSelectedCriterionLibrary')
   onStateSelectedCriterionLibraryChanged() {
     this.canUpdateOrCreate = false;
     this.selectedCriterionLibrary = clone(this.stateSelectedCriterionLibrary);
   }
 
-  /**
-   * onSelectedCriterionLibraryChanged => This selectedCriterionLibrary watcher is used to trigger an action to modify
-   * the vuex hasUnsavedChanges object, set the hasSelectedCriterionLibrary object, and set the criteriaEditorData object.
-   */
+  @Watch('canUpdateOrCreate')
+  onCanUpdateOrCreateChanged() {
+
+  }
+
   @Watch('selectedCriterionLibrary')
   onSelectedCriterionLibraryChanged() {
     this.setHasUnsavedChangesAction({
-      value: hasUnsavedChanges(
-          'criteria', this.selectedCriterionLibrary, this.stateSelectedCriteriaLibrary, null
+      value: hasUnsavedChangesCore(
+          'criterion-library', this.selectedCriterionLibrary, this.stateSelectedCriterionLibrary
       )
     });
 
@@ -189,20 +182,13 @@ export default class CriterionLibraryEditor extends Vue {
     };
   }
 
-  /**
-   * onCreateNewLibrary => This function is used to set the createCriterionLibraryDialogData object.
-   */
-  onCreateNewLibrary() {
+  onShowCreateCriterionLibraryDialog(createAsNew: boolean) {
     this.createCriterionLibraryDialogData = {
-      ...this.createCriterionLibraryDialogData,
-      showDialog: true
+      showDialog: true,
+      mergedCriteriaExpression: createAsNew ? this.selectedCriterionLibrary.mergedCriteriaExpression : ''
     };
   }
 
-  /**
-   * onSubmitCriteriaEditorResult => This function is used to set the canUpdateOrCreate object and set the selectedCriterionLibrary
-   * object.
-   */
   onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
     this.canUpdateOrCreate = result.validated;
 
@@ -211,39 +197,23 @@ export default class CriterionLibraryEditor extends Vue {
         ...this.selectedCriterionLibrary,
         mergedCriteriaExpression: result.criteria!
       };
+
+      this.setSelectedCriterionIsValidAction({isValid: true});
+    } else {
+      this.setSelectedCriterionIsValidAction({isValid: false});
     }
   }
 
-  /**
-   * onCreateAsNewLibrary => This function is used to set the createCriterionLibraryDialogData object with context data
-   * from the selectedCriterionLibrary object.
-   */
-  onCreateAsNewLibrary() {
-    this.createCriterionLibraryDialogData = {
-      showDialog: true,
-      criteria: this.selectedCriterionLibrary.mergedCriteriaExpression,
-      description: this.selectedCriterionLibrary.description
-    };
-  }
-
-  /**
-   * onAddOrUpdateCriterionLibrary => This function is used to reset the createCriterionLibraryDialogData object and to
-   * trigger an action to call a service function to create an HTTP request to add/update the criterionLibrary object
-   * data in the database.
-   */
   onAddOrUpdateCriterionLibrary(criterionLibrary: CriterionLibrary) {
     this.createCriterionLibraryDialogData = clone(emptyCreateCriterionLibraryDialogData);
 
-    if (!isNil(criterionLibrary) && criterionLibrary.id !== this.uuidNIL) {
+    if (!isNil(criterionLibrary)) {
       this.addOrUpdateCriterionLibraryAction({library: criterionLibrary})
           .then(() => this.librarySelectItemValue = criterionLibrary.id);
     }
   }
 
-  /**
-   * onDeleteCriterionLibrary => This function is used to set the confirmDeleteAlertData object.
-   */
-  onDeleteCriterionLibrary() {
+  onShowConfirmDeleteAlert() {
     this.confirmDeleteAlertData = {
       showDialog: true,
       heading: 'Warning',
@@ -252,11 +222,6 @@ export default class CriterionLibraryEditor extends Vue {
     };
   }
 
-  /**
-   * onSubmitConfirmDeleteAlertResult => This function is used to reset the confirmDeleteAlertData object and to trigger
-   * an action to call a service function to create an HTTP request to delete the selectedCriterionLibrary object in the
-   * database.
-   */
   onSubmitConfirmDeleteAlertResult(submit: boolean) {
     this.confirmDeleteAlertData = clone(emptyAlertData);
 

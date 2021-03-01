@@ -49,8 +49,7 @@
         onDialogDataChanged() {
             this.newCriterionLibrary = {
                 ...this.newCriterionLibrary,
-                description: this.dialogData.description,
-                mergedCriteriaExpression: this.dialogData.criteria
+                mergedCriteriaExpression: this.dialogData.mergedCriteriaExpression
             };
         }
 

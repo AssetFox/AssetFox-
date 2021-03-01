@@ -285,6 +285,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {"add", _ => !existingEntityIds.Contains(_.Id)}
             };
 
+            var equationIds = _unitOfDataPersistenceWork.Context.TreatmentCostEquation
+                .Where(_ => _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId)
+                .Select(_ => _.EquationId).ToList();
+
+            equationIds.AddRange(_unitOfDataPersistenceWork.Context.TreatmentConsequenceEquation
+                .Where(_ => _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId)
+                .Select(_ => _.EquationId).ToList());
+
             if (IsRunningFromXUnit)
             {
                 _unitOfDataPersistenceWork.Context.AddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
@@ -294,11 +302,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
             }
 
+            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ => equationIds.Contains(_.Id));
+
             _unitOfDataPersistenceWork.Context.DeleteAll<SelectableTreatmentBudgetEntity>(_ =>
                 _.SelectableTreatment.TreatmentLibraryId == libraryId);
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
                 _.SelectableTreatment.TreatmentLibraryId == libraryId);
+
+            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryTreatmentCostEntity>(_ =>
+                _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId);
+
+            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
+                _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId);
 
             if (treatments.Any(_ => _.Costs.Any()))
             {
@@ -357,14 +373,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteTreatmentLibrary(Guid libraryId)
         {
-            if (_unitOfDataPersistenceWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
+            if (!_unitOfDataPersistenceWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
             {
                 return;
             }
 
             var libraryToDelete = _unitOfDataPersistenceWork.Context.TreatmentLibrary.Single(_ => _.Id == libraryId);
 
+            var equationIds = _unitOfDataPersistenceWork.Context.TreatmentCostEquation
+                .Where(_ => _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId)
+                .Select(_ => _.EquationId).ToList();
+
+            equationIds.AddRange(_unitOfDataPersistenceWork.Context.TreatmentConsequenceEquation
+                .Where(_ => _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId)
+                .Select(_ => _.EquationId).ToList());
+
             _unitOfDataPersistenceWork.Context.TreatmentLibrary.Remove(libraryToDelete);
+
+            _unitOfDataPersistenceWork.Context.SaveChanges();
+
+            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ => equationIds.Contains(_.Id));
 
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }

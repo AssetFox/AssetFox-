@@ -175,7 +175,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 var entitiesToUpdate = entities.AsQueryable().Where(predicatesPerCrudOperation["update"]);
                 if (entitiesToUpdate.Any())
                 {
-                    var propsToExclude = new List<string> {"CreatedDate"};
+                    var propsToExclude = new List<string> {"CreatedDate", "CreatedBy"};
                     var config = new BulkConfig {PropertiesToExclude = propsToExclude};
                     context.BulkUpdate(entitiesToUpdate.ToList(), config);
                 }

@@ -159,17 +159,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
             }
 
-            _unitOfDataPersistenceWork.Context.DeleteAll<ConditionalTreatmentConsequenceEquationEntity>(_ =>
-                _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId);
-
-            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ =>
-                _.AttributeEquationCriterionLibraryJoin == null &&
-                _.ConditionalTreatmentConsequenceEquationJoin == null && _.PerformanceCurveEquationJoin == null &&
-                _.TreatmentCostEquationJoin == null);
-
-            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
-                _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId);
-
             if (treatmentConsequences.Any(_ =>
                 _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression)))
             {
@@ -189,15 +178,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var criterionLibraryJoinsToAdd = treatmentConsequences
                     .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
                                 !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)).Select(_ =>
-                        new CriterionLibraryTreatmentCostEntity
+                        new CriterionLibraryConditionalTreatmentConsequenceEntity
                         {
                             CriterionLibraryId = _.CriterionLibrary.Id,
-                            TreatmentCostId = _.Id
+                            ConditionalTreatmentConsequenceId = _.Id
                         }).ToList();
 
                 if (IsRunningFromXUnit)
                 {
-                    _unitOfDataPersistenceWork.Context.CriterionLibraryTreatmentCost.AddRange(criterionLibraryJoinsToAdd);
+                    _unitOfDataPersistenceWork.Context.CriterionLibraryTreatmentConsequence.AddRange(criterionLibraryJoinsToAdd);
                 }
                 else
                 {

@@ -113,17 +113,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
             }
 
-            _unitOfDataPersistenceWork.Context.DeleteAll<TreatmentCostEquationEntity>(_ =>
-                _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId);
-
-            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ =>
-                _.AttributeEquationCriterionLibraryJoin == null &&
-                _.ConditionalTreatmentConsequenceEquationJoin == null && _.PerformanceCurveEquationJoin == null &&
-                _.TreatmentCostEquationJoin == null);
-
-            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryTreatmentCostEntity>(_ =>
-                _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId);
-
             var treatmentCosts = treatmentCostPerTreatmentId.SelectMany(_ => _.Value).ToList();
 
             if (treatmentCosts.Any(_ =>

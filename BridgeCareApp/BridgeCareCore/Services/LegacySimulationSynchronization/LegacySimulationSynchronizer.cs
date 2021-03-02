@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAccess;
@@ -52,14 +53,25 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
 
         private Task SynchronizeLegacyNetworkData(Simulation simulation)
         {
-            if (!_unitOfWork.NetworkRepo.CheckPennDotNetworkHasData())
+            if (_unitOfWork.NetworkRepo.GetPennDotNetwork() == null)
+            {
+                throw new RowNotInTableException($"No network found having id");
+            }
+            else
             {
                 _unitOfWork.NetworkRepo.DeleteNetworkData();
-
                 sendRealTimeMessage("Creating the network's facilities and sections...");
-
                 _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
+
             }
+            //if (!_unitOfWork.NetworkRepo.CheckPennDotNetworkHasData())
+            //{
+            //    _unitOfWork.NetworkRepo.DeleteNetworkData();
+
+            //    sendRealTimeMessage("Creating the network's facilities and sections...");
+
+            //    _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
+            //}
 
             return Task.CompletedTask;
         }
@@ -85,6 +97,8 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
             _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
             _unitOfWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
             _unitOfWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
+
+            _unitOfWork.CommittedProjectRepo.CreateCommittedProjects(simulation.CommittedProjects.ToList(), simulation.Id);
 
             return Task.CompletedTask;
         }

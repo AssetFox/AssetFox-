@@ -24,18 +24,28 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-            List<int> simulationYears, List<string> treatments, Dictionary<string, Budget> yearlyBudgetAmount)
+Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, List<int> simulationYears, List<string> treatments, Dictionary<string, Budget> yearlyBudgetAmount)
         {
+            var committedTotalRow = FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
+
             var culvertTotalRow = FillCostOfCulvertWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
             var bridgeTotalRow = FillCostOfBridgeWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
             var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears,
                 costPerTreatmentPerYear, yearlyBudgetAmount);
-            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow);
+            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
         }
 
         #region Private methods
+
+        private int FillCostOfCommittedWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj)
+        {
+            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of MPMS Work", "MPMS Work Type");
+            var committedTotalRow = AddCostsOfCommittedWork(worksheet, simulationYears, currentCell, yearlyCostCommittedProj);
+            return committedTotalRow;
+        }
 
         private int FillCostOfCulvertWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, List<string> treatments,
@@ -69,13 +79,80 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private void FillRemainingBudgetSection(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
-            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow)
+            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow, int committedTotalRow)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");
             worksheet.Cells[currentCell.Row, simulationYears.Count + 3].Value = "Total Remaining Budget(all years)";
             _excelHelper.ApplyStyle(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
             _excelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
-            AddDetailsForRemainingBudget(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow);
+            AddDetailsForRemainingBudget(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
+        }
+
+        private int AddCostsOfCommittedWork(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
+    Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj)
+        {
+            if (simulationYears.Count <= 0)
+            {
+                return 0;
+            }
+            var startYear = simulationYears[0];
+            _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out var startRow, out var startColumn, out var row, out var column);
+            currentCell.Column = column;
+            var committedTotalRow = 0;
+
+            var uniqueTreatments = new Dictionary<string, int>();
+            var costForTreatments = new Dictionary<string, decimal>();
+            // filling in the committed treatments in the excel TAB
+            foreach (var yearlyItem in yearlyCostCommittedProj)
+            {
+                decimal committedTotalCost = 0;
+                row = currentCell.Row;
+                //column = ++column;
+                foreach (var data in yearlyItem.Value)
+                {
+                    if (!uniqueTreatments.ContainsKey(data.Key))
+                    {
+                        uniqueTreatments.Add(data.Key, currentCell.Row);
+                        worksheet.Cells[row++, column].Value = data.Key;
+                        var cellToEnterCost = yearlyItem.Key - startYear;
+                        worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = data.Value.treatmentCost;
+                        costForTreatments.Add(data.Key, data.Value.treatmentCost);
+                        currentCell.Row += 1;
+                    }
+                    else
+                    {
+                        var cellToEnterCost = yearlyItem.Key - startYear;
+                        worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = data.Value.treatmentCost;
+                    }
+                    committedTotalCost += data.Value.treatmentCost;
+                }
+                //worksheet.Cells[row, column].Value = committedTotalCost;
+                TotalCommittedSpent.Add(yearlyItem.Key, committedTotalCost);
+            }
+
+            column = currentCell.Column;
+            worksheet.Cells[currentCell.Row, column].Value = Properties.Resources.CommittedTotal;
+            column++;
+            var fromColumn = column + 1;
+
+            foreach(var cost in TotalCommittedSpent)
+            {
+                worksheet.Cells[currentCell.Row, fromColumn++].Value = cost.Value;
+            }
+            committedTotalRow = currentCell.Row;
+            fromColumn = column + 1;
+            var endColumn = simulationYears.Count + 2;
+
+            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, committedTotalRow, endColumn]);
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, committedTotalRow, endColumn], "NegativeCurrency");
+            _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, committedTotalRow, endColumn], Color.FromArgb(198, 224, 180));
+
+            _excelHelper.ApplyColor(worksheet.Cells[committedTotalRow, fromColumn, committedTotalRow, endColumn], Color.FromArgb(84, 130, 53));
+            _excelHelper.SetTextColor(worksheet.Cells[committedTotalRow, fromColumn, committedTotalRow, endColumn], Color.White);
+            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, committedTotalRow + 1, endColumn);
+
+            return committedTotalRow;
+
         }
 
         private int AddCostsOfCulvertWork(ExcelWorksheet worksheet,
@@ -219,7 +296,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private void AddDetailsForRemainingBudget(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
-            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow)
+            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow, int committedTotalRow)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
@@ -234,19 +311,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column = ++column;
                 var totalSpent = Convert.ToDouble(worksheet.Cells[culvertTotalRow, column].Value) +
                     Convert.ToDouble(worksheet.Cells[bridgeTotalRow, column].Value);
-                    //Convert.ToDouble(worksheet.Cells[committedTotalRow, column].Value);
+                    Convert.ToDouble(worksheet.Cells[committedTotalRow, column].Value);
 
                 worksheet.Cells[row, column].Value = Convert.ToDouble(worksheet.Cells[budgetTotalRow, column].Value) - totalSpent;
                 row++;
 
-                // [TODO] - right now, we are not entering committed project data in the excel file
-                //worksheet.Cells[row, column].Formula = worksheet.Cells[committedTotalRow, column] + "/" + totalSpent;
+                worksheet.Cells[row, column].Formula = worksheet.Cells[committedTotalRow, column] + "/" + totalSpent;
                 row++;
 
                 worksheet.Cells[row, column].Formula = 1 + "-" + worksheet.Cells[row - 1, column];
-
-                //[TODO] - Because we do not have anything for committed project. % for BAMS spent will always be 100
-                worksheet.Cells[row, column].Formula = 1 + "-" + 0;
             }
             worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column] + ")";
             worksheet.Cells[startRow, column + 2].Formula = worksheet.Cells[startRow, column + 1] + "/" + worksheet.Cells[budgetTotalRow, column + 1];

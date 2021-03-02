@@ -34,6 +34,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Network)
                 .ThenInclude(_ => _.Facilities)
                 .ThenInclude(_ => _.Sections)
+                .ThenInclude(_ => _.CommittedProjects)
+                .Include(_ => _.CommittedProjects)
                 .Include(_ => _.BudgetLibrarySimulationJoin)
                 .ThenInclude(_ => _.BudgetLibrary)
                 .ThenInclude(_ => _.Budgets)
@@ -76,13 +78,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var committedProjectEntities = committedProjects
                 .Select(_ => _.ToEntity(simulationEntity.Id)).ToList();
 
+            //_unitOfWork.Context.CommittedProject.Add(committedProjectEntities[0]);
+
+            foreach(var item in committedProjectEntities)
+            {
+                _unitOfWork.Context.CommittedProject.Add(item);
+            }
             if (IsRunningFromXUnit)
             {
                 _unitOfWork.Context.CommittedProject.AddRange(committedProjectEntities);
             }
             else
             {
-                _unitOfWork.Context.BulkInsert(committedProjectEntities);
+                //_unitOfWork.Context.BulkInsertOrUpdate(committedProjectEntities);
             }
 
             _unitOfWork.Context.SaveChanges();

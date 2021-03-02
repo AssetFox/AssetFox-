@@ -185,7 +185,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        internal double GetInflationFactor(int year) => Math.Pow(1 + Simulation.InvestmentPlan.InflationRatePercentage / 100, year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod);
+        internal double GetInflationFactor(int year) => Simulation.InvestmentPlan.GetInflationFactor(year);
 
         internal void Inform(string message) => OnInformation(new InformationEventArgs(message));
 
@@ -638,7 +638,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (treatment is CommittedProject)
             {
-                treatmentConsideration.BudgetUsages.Single(budgetUsage => budgetUsage.Status == BudgetUsageStatus.NotNeeded).Status = BudgetUsageStatus.CostCoveredInFull;
+                sectionContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
+                var budgetUsageDetail = treatmentConsideration.BudgetUsages.Single(budgetUsage => budgetUsage.Status != BudgetUsageStatus.NotUsable);
+                budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInFull;
+                budgetUsageDetail.CoveredCost = (decimal)treatmentCost; // Cost is assumed to already include all appropriate adjustments, e.g. for inflation.
                 return CostCoverage.Full;
             }
 

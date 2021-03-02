@@ -1,4 +1,5 @@
 import {
+    Budget,
     BudgetLibrary,
     emptyBudgetLibrary,
     emptyInvestmentPlan,
@@ -13,6 +14,7 @@ import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
 import {getAppliedLibrary, hasAppliedLibrary, unapplyLibrary} from '@/shared/utils/library-utils';
+import {CriterionLibrary} from '@/shared/models/iAM/criteria';
 
 const state = {
     budgetLibraries: [] as BudgetLibrary[],
@@ -51,12 +53,26 @@ const mutations = {
     },
     scenarioSimpleBudgetDetailsMutator(state: any, simpleBudgetDetails: SimpleBudgetDetail[]) {
         state.scenarioSimpleBudgetDetails = clone(simpleBudgetDetails);
+    },
+    updatedBudgetsCriterionLibrariesMutator(state: any, criterionLibrary: CriterionLibrary) {
+        state.budgetLibraries = state.budgetLibraries.map((library: BudgetLibrary) => ({
+            ...library,
+            budgets: library.budgets.map((budget: Budget) => ({
+                ...budget,
+                criterionLibrary: budget.criterionLibrary.id == criterionLibrary.id
+                    ? clone(criterionLibrary)
+                    : budget.criterionLibrary
+            }))
+        }));
     }
 };
 
 const actions = {
     selectBudgetLibrary({commit}: any, payload: any) {
         commit('selectedBudgetLibraryMutator', payload.libraryId);
+    },
+    updateBudgetsCriterionLibraries({commit}: any, payload: any) {
+        commit('updatedBudgetsCriterionLibrariesMutator', payload.criterionLibrary);
     },
     async getInvestment({commit}: any, payload: any) {
         await InvestmentService.getInvestment(payload.scenarioId)

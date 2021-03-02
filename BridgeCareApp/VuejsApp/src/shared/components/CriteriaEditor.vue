@@ -220,12 +220,12 @@ export default class CriteriaEditor extends Vue {
 
   @Watch('subCriteriaClauses')
   onSubCriteriaClausesChanged() {
-    this.resetComponentCriteriaUIProperties();
+    this.resetCriteriaValidationProperties();
   }
 
   @Watch('selectedSubCriteriaClause')
   onSelectedClauseChanged() {
-    this.resetSubCriteriaValidationMessageProperties();
+    this.resetSubCriteriaValidationProperties();
 
     if (hasValue(this.selectedSubCriteriaClause) && hasValue(this.selectedSubCriteriaClause!.children)) {
       let missingAttributes: string[] = [];
@@ -247,7 +247,7 @@ export default class CriteriaEditor extends Vue {
 
   @Watch('selectedRawSubCriteriaClause')
   onSelectedClauseRawChanged() {
-    this.resetSubCriteriaValidationMessageProperties();
+    this.resetSubCriteriaValidationProperties();
   }
 
   @Watch('stateAttributesSelectValues')
@@ -294,13 +294,13 @@ export default class CriteriaEditor extends Vue {
     }
   }
 
-  resetComponentCriteriaUIProperties() {
+  resetCriteriaValidationProperties() {
     this.validCriteriaMessage = null;
     this.invalidCriteriaMessage = null;
     this.cannotSubmit = !isEmpty(parseCriteriaJson(this.getMainCriteria()));
   }
 
-  resetSubCriteriaValidationMessageProperties() {
+  resetSubCriteriaValidationProperties() {
     this.validSubCriteriaMessage = null;
     this.invalidSubCriteriaMessage = null;
     this.checkOutput = false;
@@ -318,7 +318,7 @@ export default class CriteriaEditor extends Vue {
       this.subCriteriaClauses.push('');
       this.selectedSubCriteriaClauseIndex = this.subCriteriaClauses.length - 1;
       this.selectedSubCriteriaClause = clone(emptyCriteria);
-      this.resetComponentCriteriaUIProperties();
+      this.resetCriteriaValidationProperties();
     });
   }
 
@@ -354,8 +354,7 @@ export default class CriteriaEditor extends Vue {
       }, this.subCriteriaClauses);
     }
 
-    this.resetComponentCriteriaUIProperties();
-
+    this.resetCriteriaValidationProperties();
 
     if (this.criteriaEditorData.isLibraryContext) {
       if (!hasValue(this.subCriteriaClauses)) {
@@ -368,7 +367,7 @@ export default class CriteriaEditor extends Vue {
 
   onParseRawSubCriteria() {
     this.activeTab = 'tree-view';
-    this.resetSubCriteriaValidationMessageProperties();
+    this.resetSubCriteriaValidationProperties();
     const parsedRawSubCriteria = parseCriteriaString(this.selectedRawSubCriteriaClause);
     if (parsedRawSubCriteria) {
       this.selectedSubCriteriaClause = parsedRawSubCriteria;
@@ -382,7 +381,7 @@ export default class CriteriaEditor extends Vue {
 
   onParseSubCriteriaJson() {
     this.activeTab = 'raw-criteria';
-    this.resetSubCriteriaValidationMessageProperties();
+    this.resetSubCriteriaValidationProperties();
     const parsedSubCriteria = parseCriteriaJson(this.selectedSubCriteriaClause as Criteria);
     if (parsedSubCriteria) {
       this.selectedRawSubCriteriaClause = parsedSubCriteria.join('');
@@ -419,7 +418,7 @@ export default class CriteriaEditor extends Vue {
                   }
                 }
               } else {
-                this.resetComponentCriteriaUIProperties();
+                this.resetCriteriaValidationProperties();
                 setTimeout(() => {
                   if (validationResult.numberOfResults === 0) {
                     this.invalidCriteriaMessage = message;
@@ -454,7 +453,7 @@ export default class CriteriaEditor extends Vue {
 
     CriterionLibraryService.checkCriteriaValidity({criteria: criteria})
         .then((response: AxiosResponse<CriteriaValidationResult>) => {
-          this.resetSubCriteriaValidationMessageProperties();
+          this.resetSubCriteriaValidationProperties();
 
           if (hasValue(response, 'data')) {
             const validationResult: CriteriaValidationResult = response.data;
@@ -466,7 +465,7 @@ export default class CriteriaEditor extends Vue {
                   criteria,
                   this.subCriteriaClauses
               );
-              this.resetComponentCriteriaUIProperties();
+              this.resetCriteriaValidationProperties();
               this.checkOutput = true;
 
               if (this.criteriaEditorData.isLibraryContext) {
@@ -480,7 +479,7 @@ export default class CriteriaEditor extends Vue {
                     criteria,
                     this.subCriteriaClauses
                 );
-                this.resetComponentCriteriaUIProperties();
+                this.resetCriteriaValidationProperties();
                 this.checkOutput = true;
               } else {
                 this.invalidSubCriteriaMessage = validationResult.message;
@@ -503,7 +502,7 @@ export default class CriteriaEditor extends Vue {
   
   onSubmitCriteriaEditorResult(submit: boolean) {
     this.resetSubCriteriaSelectedProperties();
-    this.resetComponentCriteriaUIProperties();
+    this.resetCriteriaValidationProperties();
 
     if (submit) {
       const parsedCriteria = parseCriteriaJson(this.getMainCriteria());

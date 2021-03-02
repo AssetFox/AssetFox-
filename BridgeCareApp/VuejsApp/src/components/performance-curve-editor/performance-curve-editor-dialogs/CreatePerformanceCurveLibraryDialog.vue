@@ -56,10 +56,6 @@ export default class CreatePerformanceCurveLibraryDialog extends Vue {
   newPerformanceCurveLibrary: PerformanceCurveLibrary = {...emptyPerformanceCurveLibrary, id: getNewGuid()};
   rules: InputValidationRules = clone(rules);
 
-  /**
-   * onDialogDataChanged => This dialogData watcher is used to modify the newPerformanceCurveLibrary object with context
-   * data from the dialogData object.
-   */
   @Watch('dialogData')
   onDialogDataChanged() {
     this.newPerformanceCurveLibrary = {
@@ -75,13 +71,8 @@ export default class CreatePerformanceCurveLibraryDialog extends Vue {
     };
   }
 
-  /**
-   * onSubmit => This function is used to emit the newPerformanceCurveLibrary object and scenarioId object back to the
-   * parent component.
-   */
   onSubmit(submit: boolean) {
     if (submit) {
-      //this.$emit('submit', {'performanceCurveLibrary': this.newPerformanceCurveLibrary, 'scenarioId': getBlankGuid()});
       this.$emit('submit', this.newPerformanceCurveLibrary, this.dialogData.scenarioId);
     } else {
       this.$emit('submit', null);

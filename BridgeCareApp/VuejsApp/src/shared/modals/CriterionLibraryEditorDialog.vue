@@ -4,7 +4,8 @@
       <v-card-text>
         <v-layout justify-center column>
           <div>
-            <CriterionLibraryEditor :dialogLibraryId="dialogData.libraryId" />
+            <CriterionLibraryEditor :dialogLibraryId="dialogData.libraryId"
+                                    @submit="onSubmitSelectedCriterionLibrary" />
           </div>
         </v-layout>
       </v-card-text>
@@ -12,7 +13,7 @@
         <v-layout justify-space-between row>
           <v-btn :disabled="stateSelectedCriterionLibrary.id === uuidNIL || !stateSelectedCriterionIsValid"
                  class="ara-blue-bg white--text"
-                 @click="onSubmit(true)">
+                 @click="onBeforeSubmit(true)">
             Save
           </v-btn>
           <v-btn class="ara-orange-bg white--text"
@@ -22,6 +23,8 @@
         </v-layout>
       </v-card-actions>
     </v-card>
+
+    <HasUnsavedChangesAlert :dialogData="hasUnsavedChangesAlertData" @submit="onCloseHasUnsavedChangesAlert"/>
   </v-dialog>
 </template>
 
@@ -30,13 +33,17 @@ import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {Action, State} from 'vuex-class';
 import {CriterionLibraryEditorDialogData} from '../models/modals/criterion-library-editor-dialog-data';
-import {CriterionLibrary} from '@/shared/models/iAM/criteria';
+import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
 import {hasValue} from '@/shared/utils/has-value-util';
 import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import {clone} from 'ramda';
+import {hasUnsavedChangesCore} from '@/shared/utils/has-unsaved-changes-helper';
+import Alert from '@/shared/modals/Alert.vue';
+import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 
 @Component({
-  components: {CriterionLibraryEditor}
+  components: {CriterionLibraryEditor, HasUnsavedChangesAlert: Alert}
 })
 export default class CriterionLibraryEditorDialog extends Vue {
   @Prop() dialogData: CriterionLibraryEditorDialogData;
@@ -48,8 +55,12 @@ export default class CriterionLibraryEditorDialog extends Vue {
   @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
   @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
   @Action('setSelectedCriterionIsValid') setSelectedCriterionIsValidAction: any;
+  @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
+  criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary = clone(emptyCriterionLibrary);
   uuidNIL: string = getBlankGuid();
+  hasUnsavedChanges: boolean = false;
+  hasUnsavedChangesAlertData: AlertData = clone(emptyAlertData);
 
   @Watch('dialogData')
   onDialogDataChanged() {
@@ -75,6 +86,38 @@ export default class CriterionLibraryEditorDialog extends Vue {
         htmlTag[0].setAttribute('style', 'overflow:auto;');
       }
     }
+  }
+
+  @Watch('criterionLibraryEditorSelectedCriterionLibrary')
+  onCriterionLibraryEditorSelectedCriterionLibraryChanged() {
+    this.hasUnsavedChanges = hasUnsavedChangesCore(
+        'criterion-library', this.criterionLibraryEditorSelectedCriterionLibrary, this.stateSelectedCriterionLibrary
+    );
+  }
+
+  onSubmitSelectedCriterionLibrary(criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary) {
+    this.criterionLibraryEditorSelectedCriterionLibrary = clone(criterionLibraryEditorSelectedCriterionLibrary);
+  }
+
+  onBeforeSubmit(submit: boolean) {
+    if (this.hasUnsavedChanges) {
+      this.onShowHasUnsavedChangesAlert();
+    } else {
+      this.onSubmit(submit);
+    }
+  }
+
+  onShowHasUnsavedChangesAlert() {
+    this.hasUnsavedChangesAlertData = {
+      showDialog: true,
+        heading: 'Unsaved Changes',
+        message: 'The selected criterion library has unsaved changes. Click "Update Library" or "Create as New Library" to save changes.',
+        choice: false
+    }
+  }
+
+  onCloseHasUnsavedChangesAlert() {
+    this.hasUnsavedChangesAlertData = clone(emptyAlertData);
   }
 
   onSubmit(submit: boolean) {

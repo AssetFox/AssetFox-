@@ -64,7 +64,7 @@
     <CreateCriterionLibraryDialog :dialogData="createCriterionLibraryDialogData"
                                   @submit="onAddOrUpdateCriterionLibrary"/>
 
-    <Alert :dialogData="confirmDeleteAlertData" @submit="onSubmitConfirmDeleteAlertResult"/>
+    <ConfirmDeleteAlert :dialogData="confirmDeleteAlertData" @submit="onSubmitConfirmDeleteAlertResult"/>
   </v-layout>
 </template>
 
@@ -94,9 +94,10 @@ import CreateCriterionLibraryDialog
 import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import {hasValue} from '@/shared/utils/has-value-util';
 
 @Component({
-  components: {Alert, CreateCriterionLibraryDialog, CriteriaEditor}
+  components: {ConfirmDeleteAlert: Alert, CreateCriterionLibraryDialog, CriteriaEditor}
 })
 export default class CriterionLibraryEditor extends Vue {
   @Prop() dialogLibraryId: string;
@@ -119,6 +120,7 @@ export default class CriterionLibraryEditor extends Vue {
     ...emptyCriteriaEditorData,
     isLibraryContext: true
   };
+  isLibraryContext: boolean = false;
   createCriterionLibraryDialogData: CreateCriterionLibraryDialogData = clone(emptyCreateCriterionLibraryDialogData);
   confirmDeleteAlertData: AlertData = clone(emptyAlertData);
   canUpdateOrCreate: boolean = false;
@@ -129,12 +131,16 @@ export default class CriterionLibraryEditor extends Vue {
       if (to.path.indexOf('CriterionLibraryEditor/Library') !== -1) {
         vm.librarySelectItemValue = null;
         vm.getCriterionLibrariesAction();
+      } else {
+        vm.isLibraryContext = false;
       }
     });
   }
 
   beforeDestroy() {
-    this.setHasUnsavedChangesAction({value: false});
+    if (this.isLibraryContext) {
+      this.setHasUnsavedChangesAction({value: false});
+    }
   }
 
   @Watch('stateCriterionLibraries')
@@ -143,6 +149,10 @@ export default class CriterionLibraryEditor extends Vue {
       text: library.name,
       value: library.id
     }));
+
+    if (!this.isLibraryContext && hasValue(this.librarySelectItemValue)) {
+      this.selectCriterionLibraryAction({libraryId: this.librarySelectItemValue});
+    }
   }
 
   @Watch('dialogLibraryId')
@@ -168,18 +178,22 @@ export default class CriterionLibraryEditor extends Vue {
 
   @Watch('selectedCriterionLibrary')
   onSelectedCriterionLibraryChanged() {
-    this.setHasUnsavedChangesAction({
-      value: hasUnsavedChangesCore(
-          'criterion-library', this.selectedCriterionLibrary, this.stateSelectedCriterionLibrary
-      )
-    });
-
     this.hasSelectedCriterionLibrary = this.selectedCriterionLibrary.id !== this.uuidNIL;
 
     this.criteriaEditorData = {
       ...this.criteriaEditorData,
       mergedCriteriaExpression: this.selectedCriterionLibrary.mergedCriteriaExpression
     };
+
+    if (this.isLibraryContext) {
+      this.setHasUnsavedChangesAction({
+        value: hasUnsavedChangesCore(
+            'criterion-library', this.selectedCriterionLibrary, this.stateSelectedCriterionLibrary
+        )
+      });
+    } else {
+      this.$emit('submit', this.selectedCriterionLibrary);
+    }
   }
 
   onShowCreateCriterionLibraryDialog(createAsNew: boolean) {

@@ -6,7 +6,7 @@
           <v-btn @click="onCreateNewLibrary" class="ara-blue-bg white--text" v-show="selectedScenarioId === uuidNIL">
             New Library
           </v-btn>
-          <v-select :items="cashFlowRuleLibrarySelectItems"
+          <v-select :items="librarySelectItems"
                     label="Select a Cash Flow Library" outline
                     v-if="!hasSelectedLibrary || selectedScenarioId !== uuidNIL"
                     v-model="librarySelectItemValue">
@@ -272,7 +272,7 @@ export default class CashFlowEditor extends Vue {
 
   hasSelectedLibrary: boolean = false;
   selectedScenarioId: string = getBlankGuid();
-  cashFlowRuleLibrarySelectItems: SelectItem[] = [];
+  librarySelectItems: SelectItem[] = [];
   librarySelectItemValue: string | null = null;
   selectedCashFlowRuleLibrary: CashFlowRuleLibrary = clone(emptyCashFlowRuleLibrary);
   cashFlowRuleGridHeaders: DataTableHeader[] = [
@@ -326,7 +326,7 @@ export default class CashFlowEditor extends Vue {
 
   @Watch('stateCashFlowRuleLibraries')
   onStateCashFlowRuleLibrariesChanged() {
-    this.cashFlowRuleLibrarySelectItems = this.stateCashFlowRuleLibraries.map((library: CashFlowRuleLibrary) => ({
+    this.librarySelectItems = this.stateCashFlowRuleLibraries.map((library: CashFlowRuleLibrary) => ({
       text: library.name,
       value: library.id
     }));

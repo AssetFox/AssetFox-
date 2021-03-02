@@ -6,7 +6,7 @@ import authentication from '@/store-modules/authentication.module';
 import network from '../store-modules/network.module';
 import scenario from '../store-modules/scenario.module';
 import inventory from '@/store-modules/inventory.module';
-import investmentEditor from '@/store-modules/investment.module';
+import investment from '@/store-modules/investment.module';
 import performanceCurvesEditor from '@/store-modules/performance-curve.module';
 import treatmentEditor from '@/store-modules/treatment.module';
 import attribute from '@/store-modules/attribute.module';
@@ -32,7 +32,7 @@ export default new Vuex.Store({
         network,
         scenario,
         inventory,
-        investmentEditor,
+        investmentEditor: investment,
         performanceCurvesEditor,
         attribute,
         treatmentEditor,

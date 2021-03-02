@@ -225,7 +225,6 @@ export default class BudgetPriorityEditor extends Vue {
   librarySelectItems: SelectItem[] = [];
   librarySelectItemValue: string | null = null;
   selectedBudgetPriorityLibrary: BudgetPriorityLibrary = clone(emptyBudgetPriorityLibrary);
-  budgetNames: string[] = [];
   budgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
   budgetPriorityGridHeaders: DataTableHeader[] = [
     {text: 'Priority', value: 'priorityLevel', align: 'left', sortable: false, class: '', width: ''},

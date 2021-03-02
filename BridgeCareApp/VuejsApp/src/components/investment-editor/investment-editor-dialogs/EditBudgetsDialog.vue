@@ -99,6 +99,7 @@ export default class EditBudgetsDialog extends Vue {
   @Prop() dialogData: EditBudgetsDialogData;
 
   @Action('setErrorMessage') setErrorMessageAction: any;
+  @Action('updateBudgetsCriterionLibraries') updateBudgetsCriterionLibrariesAction: any;
 
   editBudgetsDialogGridHeaders: DataTableHeader[] = [
     {text: 'Budget', value: 'name', sortable: false, align: 'center', class: '', width: ''},
@@ -165,6 +166,8 @@ export default class EditBudgetsDialog extends Vue {
           {...this.selectedBudgetForCriteriaEdit, criterionLibrary: criterionLibrary},
           this.editBudgetsDialogGridData
       );
+
+      this.updateBudgetsCriterionLibrariesAction({criterionLibrary: criterionLibrary});
 
       this.selectedBudgetForCriteriaEdit = clone(emptyBudget);
     }

@@ -10,7 +10,7 @@ import AuthenticationStart from '@/components/authentication/AuthenticationStart
 // Lazily-loaded pages
 const Scenario = () => import(/* webpackChunkName: "scenario" */ '@/components/scenarios/Scenarios.vue');
 const EditScenario = () => import(/* webpackChunkName: "editScenario" */ '@/components/scenarios/EditScenario.vue');
-const InvestmentEditor = () => import(/* webpackChunkName: "investmentEditor" */ '@/components/investment-editor/InvestmentEditor.vue');
+const InvestmentEditor = () => import(/* webpackChunkName: "investment" */ '@/components/investment-editor/InvestmentEditor.vue');
 const PerformanceCurveEditor = () => import(/* webpackChunkName: "performanceCurveEditor" */ '@/components/performance-curve-editor/PerformanceCurveEditor.vue');
 const TreatmentEditor = () => import(/* webpackChunkName: "treatmentEditor" */ '@/components/treatment-editor/TreatmentEditor.vue');
 const BudgetPriorityEditor = () => import (/* webpackChunkName: "budgetPriorityEditor" */ '@/components/budget-priority-editor/BudgetPriorityEditor.vue');

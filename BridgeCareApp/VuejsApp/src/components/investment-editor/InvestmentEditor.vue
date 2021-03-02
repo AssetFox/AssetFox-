@@ -224,9 +224,9 @@ import CreateBudgetLibraryDialog
   }
 })
 export default class InvestmentEditor extends Vue {
-  @State(state => state.investmentEditor.budgetLibraries) stateBudgetLibraries: BudgetLibrary[];
-  @State(state => state.investmentEditor.selectedBudgetLibrary) stateSelectedBudgetLibrary: BudgetLibrary;
-  @State(state => state.investmentEditor.investmentPlan) stateInvestmentPlan: InvestmentPlan;
+  @State(state => state.investment.budgetLibraries) stateBudgetLibraries: BudgetLibrary[];
+  @State(state => state.investment.selectedBudgetLibrary) stateSelectedBudgetLibrary: BudgetLibrary;
+  @State(state => state.investment.investmentPlan) stateInvestmentPlan: InvestmentPlan;
 
   @Action('getInvestment') getInvestmentAction: any;
   @Action('selectBudgetLibrary') selectBudgetLibraryAction: any;
@@ -294,7 +294,8 @@ export default class InvestmentEditor extends Vue {
           value: library.id
         }));
 
-    if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateBudgetLibraries, this.selectedScenarioId)) {
+    if (this.selectedScenarioId !== this.uuidNIL && this.selectedBudgetLibrary.id === this.uuidNIL &&
+        hasAppliedLibrary(this.stateBudgetLibraries, this.selectedScenarioId)) {
       this.librarySelectItemValue = getAppliedLibraryId(this.stateBudgetLibraries, this.selectedScenarioId);
     }
   }
@@ -345,7 +346,8 @@ export default class InvestmentEditor extends Vue {
                 : 0
           },
           {
-            ...this.stateInvestmentPlan, minimumProjectCostLimit: hasValue(this.stateInvestmentPlan.minimumProjectCostLimit)
+            ...this.stateInvestmentPlan,
+            minimumProjectCostLimit: hasValue(this.stateInvestmentPlan.minimumProjectCostLimit)
                 ? parseFloat(this.stateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                 : 0
           })
@@ -427,7 +429,7 @@ export default class InvestmentEditor extends Vue {
             const budgetAmountValue = hasValue(budgetAmount.value)
                 ? parseFloat(budgetAmount.value.toString().replace(/(\$*)(\,*)/g, ''))
                 : 0;
-            
+
             return budgetAmountValue >= minProjectCostLimit;
           });
     }

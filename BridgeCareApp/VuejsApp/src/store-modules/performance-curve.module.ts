@@ -1,4 +1,4 @@
-import {emptyPerformanceCurveLibrary, PerformanceCurveLibrary} from '@/shared/models/iAM/performance';
+import {emptyPerformanceCurveLibrary, PerformanceCurve, PerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {any, append, clone, find, findIndex, propEq, reject, update} from 'ramda';
 import PerformanceCurveService from '@/services/performance-curve.service';
 import {AxiosResponse} from 'axios';
@@ -6,6 +6,7 @@ import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
 import {getAppliedLibrary, hasAppliedLibrary, unapplyLibrary} from '@/shared/utils/library-utils';
+import {CriterionLibrary} from '@/shared/models/iAM/criteria';
 
 const state = {
     performanceCurveLibraries: [] as PerformanceCurveLibrary[],
@@ -36,12 +37,26 @@ const mutations = {
                 state.performanceCurveLibraries
             );
         }
+    },
+    updatedPerformanceCurvesCriterionLibrariesMutator(state: any, criterionLibrary: CriterionLibrary) {
+        state.performanceCurveLibraries = state.performanceCurveLibraries.map((library: PerformanceCurveLibrary) => ({
+            ...library,
+            performanceCurves: library.performanceCurves.map((curve: PerformanceCurve) => ({
+                ...curve,
+                criterionLibrary: curve.criterionLibrary.id == criterionLibrary.id
+                    ? clone(criterionLibrary)
+                    : curve.criterionLibrary
+            }))
+        }));
     }
 };
 
 const actions = {
     selectPerformanceCurveLibrary({commit}: any, payload: any) {
         commit('selectedPerformanceCurveLibraryMutator', payload.libraryId);
+    },
+    updatePerformanceCurvesCriterionLibraries({commit}: any, payload: any) {
+        commit('updatedPerformanceCurvesCriterionLibrariesMutator', payload.criterionLibrary);
     },
     async getPerformanceCurveLibraries({commit}: any) {
         await PerformanceCurveService.getPerformanceCurveLibraries()

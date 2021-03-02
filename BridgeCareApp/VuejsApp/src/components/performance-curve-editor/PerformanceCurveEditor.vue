@@ -3,10 +3,11 @@
     <v-flex xs12>
       <v-layout justify-center>
         <v-flex xs3>
-          <v-btn @click="onCreateNewLibrary" class="ara-blue-bg white--text" v-show="selectedScenarioId === '0'">
+          <v-btn @click="onShowCreatePerformanceCurveLibraryDialog(false)" class="ara-blue-bg white--text"
+                 v-show="selectedScenarioId === '0'">
             New Library
           </v-btn>
-          <v-select :items="performanceCurveLibrarySelectItems"
+          <v-select :items="librarySelectItems"
                     label="Select a Performance Library"
                     outline v-if="!hasSelectedLibrary || selectedScenarioId !== '0'"
                     v-model="librarySelectItemValue">
@@ -129,7 +130,7 @@
                   </v-btn>
                 </td>
                 <td class="text-xs-center">
-                  <v-btn @click="onDeletePerformanceCurve(props.item.id)" class="ara-orange" icon>
+                  <v-btn @click="onRemovePerformanceCurve(props.item.id)" class="ara-orange" icon>
                     <v-icon>fas fa-trash</v-icon>
                   </v-btn>
                 </td>
@@ -151,23 +152,23 @@
     </v-flex>
     <v-flex xs12>
       <v-layout justify-end row v-show="hasSelectedLibrary">
-        <v-btn :disabled="disableSubmitAction()"
+        <v-btn :disabled="disableCrudButton()"
                @click="onAddOrUpdatePerformanceCurveLibrary(selectedPerformanceCurveLibrary, selectedScenarioId)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId !== uuidNIL">
           Save
         </v-btn>
-        <v-btn :disabled="disableSubmitAction()"
+        <v-btn :disabled="disableCrudButton()"
                @click="onAddOrUpdatePerformanceCurveLibrary(selectedPerformanceCurveLibrary, uuidNIL)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId === uuidNIL">
           Update Library
         </v-btn>
-        <v-btn :disabled="disableSubmitAction()" @click="onCreateAsNewLibrary"
+        <v-btn :disabled="disableCrudButton()" @click="onShowCreatePerformanceCurveLibraryDialog(true)"
                class="ara-blue-bg white--text">
           Create as New Library
         </v-btn>
-        <v-btn @click="onDeletePerformanceCurveLibrary" class="ara-orange-bg white--text"
+        <v-btn @click="onShowConfirmDeleteAlert" class="ara-orange-bg white--text"
                v-show="selectedScenarioId === uuidNIL" :disabled="!hasSelectedLibrary">
           Delete Library
         </v-btn>
@@ -199,7 +200,8 @@ import Vue from 'vue';
 import {Watch} from 'vue-property-decorator';
 import Component from 'vue-class-component';
 import {Action, State} from 'vuex-class';
-import CreatePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
+import CreatePerformanceCurveLibraryDialog
+  from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
 import CreatePerformanceCurveDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import CriterionLibraryEditorDialog from '../../shared/modals/CriterionLibraryEditorDialog.vue';
@@ -256,12 +258,13 @@ export default class PerformanceCurveEditor extends Vue {
   @Action('addOrUpdatePerformanceCurveLibrary') addOrUpdatePerformanceCurveLibraryAction: any;
   @Action('deletePerformanceCurveLibrary') deletePerformanceCurveLibraryAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+  @Action('updatePerformanceCurvesCriterionLibraries') updatePerformanceCurveCriterionLibrariesAction: any;
 
   gridSearchTerm = '';
   selectedPerformanceCurveLibrary: PerformanceCurveLibrary = clone(emptyPerformanceCurveLibrary);
   selectedScenarioId: string = getBlankGuid();
   hasSelectedLibrary: boolean = false;
-  performanceCurveLibrarySelectItems: SelectItem[] = [];
+  librarySelectItems: SelectItem[] = [];
   librarySelectItemValue: string | null = '';
   performanceCurveGridHeaders: DataTableHeader[] = [
     {text: 'Name', value: 'name', align: 'center', sortable: true, class: '', width: ''},
@@ -282,11 +285,6 @@ export default class PerformanceCurveEditor extends Vue {
   rules: InputValidationRules = clone(rules);
   uuidNIL: string = getBlankGuid();
 
-  /**
-   * beforeRouteEnter => This event handler is used to set the selectedScenarioId object unset the librarySelectItemValue object,
-   * trigger an action to get all performance curve libraries, and trigger an action to get the selected scenario's
-   * performance curve library if it has one.
-   */
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
       if (to.path.indexOf('PerformanceCurveEditor/Scenario') !== -1) {
@@ -302,61 +300,38 @@ export default class PerformanceCurveEditor extends Vue {
     });
   }
 
-  /**
-   * mounted => This event handler is used to trigger a function to set the attributeSelectItems object.
-   */
   mounted() {
     this.setAttributeSelectItems();
   }
 
-  /**
-   * beforeDestroy => This event handler is used to trigger an action to reset the vuex hasUnsavedChanges object.
-   */
   beforeDestroy() {
     this.setHasUnsavedChangesAction({value: false});
   }
 
-  /**
-   * onStatePerformanceCurveLibrariesChanged => This statePerformanceCurveLibraries watcher is used to set the
-   * performanceCurveLibrarySelectItems object.
-   */
   @Watch('statePerformanceCurveLibraries')
   onStatePerformanceCurveLibrariesChanged() {
-    this.performanceCurveLibrarySelectItems = this.statePerformanceCurveLibraries
+    this.librarySelectItems = this.statePerformanceCurveLibraries
         .map((library: PerformanceCurveLibrary) => ({
           text: library.name,
           value: library.id
         }));
 
-    if (this.selectedScenarioId !== this.uuidNIL &&
+    if (this.selectedScenarioId !== this.uuidNIL && this.selectedPerformanceCurveLibrary.id === this.uuidNIL &&
         hasAppliedLibrary(this.statePerformanceCurveLibraries, this.selectedScenarioId)) {
       this.librarySelectItemValue = getAppliedLibraryId(this.statePerformanceCurveLibraries, this.selectedScenarioId);
     }
   }
 
-  /**
-   * onLibrarySelectItemValueChanged => This librarySelectItemValue watcher is used to trigger an action to set
-   * the vuex selectedPerformanceCurveLibrary object.
-   */
   @Watch('librarySelectItemValue')
   onLibrarySelectItemValueChanged() {
     this.selectPerformanceCurveLibraryAction({libraryId: this.librarySelectItemValue});
   }
 
-  /**
-   * onStateSelectedPerformanceCurveLibraryChanged => This stateSelectedPerformanceCurveLibrary watcher is used to
-   * set the selectedPerformanceCurveLibrary object.
-   */
   @Watch('stateSelectedPerformanceCurveLibrary')
   onStateSelectedPerformanceCurveLibraryChanged() {
     this.selectedPerformanceCurveLibrary = clone(this.stateSelectedPerformanceCurveLibrary);
   }
 
-  /**
-   * onSelectedPerformanceCurveLibraryChanged => This selectedPerformanceCurveLibrary watcher is used to trigger
-   * an action to set the vuex hasUnsavedChanges object, set the hasSelectedLibrary object, and set the
-   * performanceCurveGridData object.
-   */
   @Watch('selectedPerformanceCurveLibrary')
   onSelectedPerformanceCurveLibraryChanged() {
     this.setHasUnsavedChangesAction({
@@ -375,24 +350,13 @@ export default class PerformanceCurveEditor extends Vue {
           equation: item.equation.expression,
           criterion: item.criterionLibrary.mergedCriteriaExpression
         }));
-
-    if (this.librarySelectItemValue !== this.selectedPerformanceCurveLibrary.id) {
-      this.librarySelectItemValue = this.selectedPerformanceCurveLibrary.id;
-    }
   }
 
-  /**
-   * onStateNumericAttributesChanged => This stateNumericAttributes watcher triggers a function to set the
-   * attributeSelectItems object.
-   */
   @Watch('stateNumericAttributes')
   onStateNumericAttributesChanged() {
     this.setAttributeSelectItems();
   }
 
-  /**
-   * setAttributeSelectItems => This function is used to set the attributeSelectItems object.
-   */
   setAttributeSelectItems() {
     if (hasValue(this.stateNumericAttributes)) {
       this.attributeSelectItems = this.stateNumericAttributes.map((attribute: Attribute) => ({
@@ -402,17 +366,14 @@ export default class PerformanceCurveEditor extends Vue {
     }
   }
 
-  /**
-   * onCreateNewLibrary => This function is used to set the createPerformanceCurveLibraryDialogData object.
-   */
-  onCreateNewLibrary() {
-    this.createPerformanceCurveLibraryDialogData = {...emptyCreatePerformanceLibraryDialogData, showDialog: true};
+  onShowCreatePerformanceCurveLibraryDialog(createAsNewLibrary: boolean) {
+    this.createPerformanceCurveLibraryDialogData = {
+      showDialog: true,
+      performanceCurves: createAsNewLibrary ? this.selectedPerformanceCurveLibrary.performanceCurves : [],
+      scenarioId: createAsNewLibrary ? this.selectedScenarioId : this.uuidNIL
+    };
   }
 
-  /**
-   * onCreatePerformanceCurve => This function is used to append new performance curves to the
-   * selectedPerformanceCurveLibrary object's performanceCurves property.
-   */
   onCreatePerformanceCurve(newPerformanceCurve: PerformanceCurve) {
     this.showCreatePerformanceCurveDialog = false;
 
@@ -424,10 +385,6 @@ export default class PerformanceCurveEditor extends Vue {
     }
   }
 
-  /**
-   * onEditPerformanceCurveProperty => This function is used to modify a performance curve object's property within
-   * the selectedPerformanceCurveLibrary object's performanceCurves property.
-   */
   onEditPerformanceCurveProperty(id: string, property: string, value: any) {
     if (any(propEq('id', id), this.selectedPerformanceCurveLibrary.performanceCurves)) {
       const performanceCurve: PerformanceCurve = find(
@@ -445,10 +402,6 @@ export default class PerformanceCurveEditor extends Vue {
     }
   }
 
-  /**
-   * onShowEquationEditorDialog => This function is used to set the selectedPerformanceCurve object and then set
-   * the equationEditorDialogData object.
-   */
   onShowEquationEditorDialog(performanceCurveId: string) {
     this.selectedPerformanceCurve = find(
         propEq('id', performanceCurveId), this.selectedPerformanceCurveLibrary.performanceCurves
@@ -461,10 +414,6 @@ export default class PerformanceCurveEditor extends Vue {
     }
   }
 
-  /**
-   * onSubmitEquationEditorDialogResult => This function is used to modify the selectedPerformanceCurve object's
-   * equation property within the selectedPerformanceCurveLibrary object's performanceCurves property.
-   */
   onSubmitEquationEditorDialogResult(equation: Equation) {
     this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
@@ -484,10 +433,6 @@ export default class PerformanceCurveEditor extends Vue {
     this.hasSelectedPerformanceCurve = false;
   }
 
-  /**
-   * onEditPerformanceCurveCriterionLibrary => This function is used to set the selectedPerformanceCurve object and set the
-   * criterionLibraryEditorDialogData object.
-   */
   onEditPerformanceCurveCriterionLibrary(performanceCurveId: string) {
     this.selectedPerformanceCurve = find(
         propEq('id', performanceCurveId), this.selectedPerformanceCurveLibrary.performanceCurves
@@ -503,10 +448,6 @@ export default class PerformanceCurveEditor extends Vue {
     }
   }
 
-  /**
-   * onSubmitCriterionLibraryEditorDialogResult => This function is used to modify the selectedPerformanceCurve object's
-   * criterionLibrary property within the selectedPerformanceCurveLibrary object's performanceCurves property.
-   */
   onSubmitCriterionLibraryEditorDialogResult(criterionLibrary: CriterionLibrary) {
     this.criterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
@@ -520,17 +461,15 @@ export default class PerformanceCurveEditor extends Vue {
             this.selectedPerformanceCurveLibrary.performanceCurves
         )
       };
+
+      this.updatePerformanceCurveCriterionLibrariesAction({criterionLibrary: criterionLibrary});
     }
 
     this.selectedPerformanceCurve = clone(emptyPerformanceCurve);
     this.hasSelectedPerformanceCurve = false;
   }
 
-  /**
-   * onDeletePerformanceCurve => This function is used to remove a performance curve object from the
-   * selectedPerformanceCurveLibrary object's performanceCurves property.
-   */
-  onDeletePerformanceCurve(performanceCurveId: string) {
+  onRemovePerformanceCurve(performanceCurveId: string) {
     this.selectedPerformanceCurveLibrary = {
       ...this.selectedPerformanceCurveLibrary,
       performanceCurves: reject(propEq('id', performanceCurveId),
@@ -538,22 +477,6 @@ export default class PerformanceCurveEditor extends Vue {
     };
   }
 
-  /**
-   * onCreateAsNewLibrary => This function is used to set the createPerformanceCurveLibraryDialogData object
-   * using the selectedPerformanceCurveLibrary object's description and performanceCurves properties.
-   */
-  onCreateAsNewLibrary() {
-    this.createPerformanceCurveLibraryDialogData = {
-      showDialog: true,
-      performanceCurves: this.selectedPerformanceCurveLibrary.performanceCurves,
-      scenarioId: this.selectedScenarioId
-    };
-  }
-
-  /**
-   * onAddOrUpdatePerformanceCurveLibrary => This function is used to trigger an action that will add/update a performance
-   * curve library object and its child objects in the backend database.
-   */
   onAddOrUpdatePerformanceCurveLibrary(performanceCurveLibrary: PerformanceCurveLibrary, scenarioId: string) {
     this.createPerformanceCurveLibraryDialogData = clone(emptyCreatePerformanceLibraryDialogData);
 
@@ -562,26 +485,17 @@ export default class PerformanceCurveEditor extends Vue {
     }
   }
 
-  /**
-   * onDiscardChanges => This function is used to unset the librarySelectItemValue object and triggers an action to set
-   * the vuex selectedPerformanceCurveLibrary object if there is a selected scenario with one of the available libraries
-   * applied to it.
-   */
   onDiscardChanges() {
     this.librarySelectItemValue = null;
     setTimeout(() => {
       if (this.selectedScenarioId !== this.uuidNIL &&
           hasAppliedLibrary(this.statePerformanceCurveLibraries, this.selectedScenarioId)) {
-        const libraryId: string = getAppliedLibraryId(this.statePerformanceCurveLibraries, this.selectedScenarioId);
-        this.librarySelectItemValue = libraryId;
+        this.librarySelectItemValue = getAppliedLibraryId(this.statePerformanceCurveLibraries, this.selectedScenarioId);
       }
     });
   }
 
-  /**
-   * onDeletePerformanceCurveLibrary => This function is used to set the confirmDeleteAlertData object.
-   */
-  onDeletePerformanceCurveLibrary() {
+  onShowConfirmDeleteAlert() {
     this.confirmDeleteAlertData = {
       showDialog: true,
       heading: 'Warning',
@@ -590,10 +504,6 @@ export default class PerformanceCurveEditor extends Vue {
     };
   }
 
-  /**
-   * onSubmitConfirmDeleteAlertResult => This function is used to trigger an action to delete the
-   * selectedPerformanceCurveLibrary object's data from the backend database.
-   */
   onSubmitConfirmDeleteAlertResult(submit: boolean) {
     this.confirmDeleteAlertData = clone(emptyAlertData);
 
@@ -603,11 +513,7 @@ export default class PerformanceCurveEditor extends Vue {
     }
   }
 
-  /**
-   * disableSubmitAction => This function is used to disable all submit action buttons if there is no library selected or
-   * if the selectedPerformanceCurveLibrary object's data is invalid.
-   */
-  disableSubmitAction() {
+  disableCrudButton() {
     if (this.hasSelectedLibrary) {
       const allSubDataIsValid: boolean = this.selectedPerformanceCurveLibrary.performanceCurves
           .every((performanceCurve: PerformanceCurve) => {

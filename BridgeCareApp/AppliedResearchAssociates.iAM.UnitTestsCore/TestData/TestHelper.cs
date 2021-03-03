@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 .Build();
 
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
-                .UseInMemoryDatabase(databaseName: dbName)
+                .UseInMemoryDatabase(dbName)
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options);
             UnitOfDataPersistenceWork = new UnitOfDataPersistenceWork(Config, DbContext);

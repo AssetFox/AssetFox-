@@ -48,6 +48,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
+                _unitOfDataPersistenceWork.Rollback();
                 Console.WriteLine(e);
                 return BadRequest(e);
             }

@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.Data.SqlClient;
@@ -25,9 +26,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             "Id", "CreatedDate", "LastModifiedDate", "CreatedBy", "LastModifiedBy", "SectionId", "AttributeId", "Year", "Value"
         };
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public AttributeValueHistoryRepository(UnitOfWork.UnitOfWork unitOfWork)
+        public AttributeValueHistoryRepository(UnitOfDataPersistenceWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }

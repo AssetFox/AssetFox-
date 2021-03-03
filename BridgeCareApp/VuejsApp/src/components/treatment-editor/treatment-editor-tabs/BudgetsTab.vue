@@ -7,10 +7,10 @@
             <v-layout column v-if="budgets.length === 0">
               <h3>Investment Library Not Found</h3>
               <div>
-                No investment library data was found for the selected scenario.
+                No investmentModule library data was found for the selected scenario.
               </div>
               <div>
-                To add investment library data, go to the scenario's investment plan editor.
+                To add investmentModule library data, go to the scenario's investmentModule plan editor.
               </div>
             </v-layout>
             <v-layout v-else>
@@ -47,7 +47,7 @@ import {getPropertyValues} from '@/shared/utils/getter-utils';
 
 @Component
 export default class BudgetsTab extends Vue {
-  @State(state => state.investmentEditor.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
+  @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
 
   @Prop() selectedTreatmentBudgets: string[];
 

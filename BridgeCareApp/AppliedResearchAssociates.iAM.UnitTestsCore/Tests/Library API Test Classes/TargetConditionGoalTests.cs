@@ -52,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        private void SetupForAddOrUpdateOrDelete()
+        private void SetupForUpsertOrDelete()
         {
             SetupForGet();
             _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
@@ -84,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Act
                 var result = _controller
-                    .AddOrUpdateTargetConditionGoalLibrary(Guid.Empty, TestTargetConditionGoalLibrary.ToDto());
+                    .UpsertTargetConditionGoalLibrary(Guid.Empty, TestTargetConditionGoalLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result.Result);
@@ -151,7 +151,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType(
                     (_controller.TargetConditionGoalLibraries().Result as OkObjectResult).Value,
                     typeof(List<TargetConditionGoalLibraryDTO>));
@@ -164,7 +164,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.AddOrUpdateTargetConditionGoalLibrary(_testHelper.TestSimulation.Id,
+                    _controller.UpsertTargetConditionGoalLibrary(_testHelper.TestSimulation.Id,
                         targetConditionGoalLibraryDTO);
 
                 // Assert
@@ -205,7 +205,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType(
                     (_controller.TargetConditionGoalLibraries().Result as OkObjectResult).Value,
                     typeof(List<TargetConditionGoalLibraryDTO>));
@@ -214,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 targetConditionGoalLibraryDTO.TargetConditionGoals[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
-                await _controller.AddOrUpdateTargetConditionGoalLibrary(_testHelper.TestSimulation.Id,
+                await _controller.UpsertTargetConditionGoalLibrary(_testHelper.TestSimulation.Id,
                     targetConditionGoalLibraryDTO);
 
                 // Act

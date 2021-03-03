@@ -117,11 +117,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList());
         }
 
-        public void AddOrUpdateBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId)
+        public void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId)
         {
             var entity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, dto.Id);
+            _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -142,7 +142,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public void AddOrUpdateOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId)
+        public void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId)
         {
             if (!_unitOfDataPersistenceWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == libraryId))
             {
@@ -168,11 +168,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.AddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
             }
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryBudgetPriorityEntity>(_ =>
@@ -182,7 +182,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 var percentagePairsPerPriorityId = budgetPriorities.Where(_ => _.BudgetPercentagePairs.Any())
                     .ToDictionary(_ => _.Id, _ => _.BudgetPercentagePairs);
-                _unitOfDataPersistenceWork.BudgetPercentagePairRepo.AddOrUpdateOrDeleteBudgetPercentagePairs(percentagePairsPerPriorityId, libraryId);
+                _unitOfDataPersistenceWork.BudgetPercentagePairRepo.UpsertOrDeleteBudgetPercentagePairs(percentagePairsPerPriorityId, libraryId);
             }
 
             if (budgetPriorities.Any(_ =>

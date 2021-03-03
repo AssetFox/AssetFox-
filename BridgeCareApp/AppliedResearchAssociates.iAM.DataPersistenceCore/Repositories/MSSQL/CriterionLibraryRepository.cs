@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (IsRunningFromXUnit)
             {
-                criterionLibraryEntities.ForEach(entity => _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, entity.Id));
+                criterionLibraryEntities.ForEach(entity => _unitOfDataPersistenceWork.Context.Upsert(entity, entity.Id));
             }
             else
             {
@@ -465,11 +465,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.CriterionLibrary.Select(_ => _.ToDto()).ToList());
         }
 
-        public void AddOrUpdateCriterionLibrary(CriterionLibraryDTO dto)
+        public void UpsertCriterionLibrary(CriterionLibraryDTO dto)
         {
             var entity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, dto.Id);
+            _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
         }
 
         public void DeleteCriterionLibrary(Guid libraryId)

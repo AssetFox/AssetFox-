@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        private void SetupForAddOrUpdateOrDelete()
+        private void SetupForUpsertOrDelete()
         {
             SetupForGet();
             _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
@@ -92,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Act
                 var result = _controller
-                    .AddOrUpdatePerformanceCurveLibrary(Guid.Empty, TestPerformanceCurveLibrary.ToDto());
+                    .UpsertPerformanceCurveLibrary(Guid.Empty, TestPerformanceCurveLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result.Result);
@@ -159,7 +159,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType(
                     (_controller.PerformanceCurveLibraries().Result as OkObjectResult).Value,
                     typeof(List<PerformanceCurveLibraryDTO>));
@@ -173,7 +173,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.AddOrUpdatePerformanceCurveLibrary(_testHelper.TestSimulation.Id,
+                    _controller.UpsertPerformanceCurveLibrary(_testHelper.TestSimulation.Id,
                         performanceCurveLibraryDTO);
 
                 // Assert
@@ -221,7 +221,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType(
                     (_controller.PerformanceCurveLibraries().Result as OkObjectResult).Value,
                     typeof(List<PerformanceCurveLibraryDTO>));
@@ -230,7 +230,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 performanceCurveLibraryDTO.PerformanceCurves[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
-                await _controller.AddOrUpdatePerformanceCurveLibrary(_testHelper.TestSimulation.Id,
+                await _controller.UpsertPerformanceCurveLibrary(_testHelper.TestSimulation.Id,
                     performanceCurveLibraryDTO);
 
                 // Act

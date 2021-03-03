@@ -7,8 +7,8 @@ export default class RemainingLifeLimitService {
         return coreAxiosInstance.get(`${API.RemainingLifeLimitController}/GetRemainingLifeLimitLibraries`);
     }
 
-    static addOrUpdateRemainingLifeLimitLibrary(data: RemainingLifeLimitLibrary, scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.RemainingLifeLimitController}/AddOrUpdateRemainingLifeLimitLibrary/${scenarioId}`, data);
+    static upsertRemainingLifeLimitLibrary(data: RemainingLifeLimitLibrary, scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.RemainingLifeLimitController}/UpsertRemainingLifeLimitLibrary/${scenarioId}`, data);
     }
 
     static deleteRemainingLifeLimitLibrary(libraryId: string): AxiosPromise {

@@ -152,19 +152,19 @@
     })
     export default class AppComponent extends Vue {
         @State(state => state) state: any;
-        @State(state => state.authentication.authenticated) authenticated: boolean;
-        @State(state => state.authentication.hasRole) hasRole: boolean;
-        @State(state => state.authentication.username) username: string;
-        @State(state => state.authentication.isAdmin) isAdmin: boolean;
-        @State(state => state.authentication.refreshing) refreshing: boolean;
-        @State(state => state.breadcrumb.navigation) navigation: any[];
-        @State(state => state.toastr.successMessage) successMessage: string;
-        @State(state => state.toastr.warningMessage) warningMessage: string;
-        @State(state => state.toastr.errorMessage) errorMessage: string;
-        @State(state => state.toastr.infoMessage) infoMessage: string;
-        @State(state => state.unsavedChangesFlag.hasUnsavedChanges) hasUnsavedChanges: boolean;
-        @State(state => state.scenario.selectedScenario) stateSelectedScenario: Scenario;
-        @State(state => state.announcement.packageVersion) packageVersion: string;
+        @State(state => state.authenticationModule.authenticated) authenticated: boolean;
+        @State(state => state.authenticationModule.hasRole) hasRole: boolean;
+        @State(state => state.authenticationModule.username) username: string;
+        @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+        @State(state => state.authenticationModule.refreshing) refreshing: boolean;
+        @State(state => state.breadcrumbModule.navigation) navigation: any[];
+        @State(state => state.toastrModule.successMessage) successMessage: string;
+        @State(state => state.toastrModule.warningMessage) warningMessage: string;
+        @State(state => state.toastrModule.errorMessage) errorMessage: string;
+        @State(state => state.toastrModule.infoMessage) infoMessage: string;
+        @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
+        @State(state => state.scenarioModule.selectedScenario) stateSelectedScenario: Scenario;
+        @State(state => state.announcementModule.packageVersion) packageVersion: string;
 
         @Action('refreshTokens') refreshTokensAction: any;
         @Action('checkBrowserTokens') checkBrowserTokensAction: any;

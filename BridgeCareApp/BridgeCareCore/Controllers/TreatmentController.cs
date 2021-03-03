@@ -33,8 +33,8 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("AddOrUpdateTreatmentLibrary/{simulationId}")]
-        public async Task<IActionResult> AddOrUpdateTreatmentLibrary(Guid simulationId, TreatmentLibraryDTO dto)
+        [Route("UpsertTreatmentLibrary/{simulationId}")]
+        public async Task<IActionResult> UpsertTreatmentLibrary(Guid simulationId, TreatmentLibraryDTO dto)
         {
             try
             {
@@ -42,9 +42,9 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _unitOfDataPersistenceWork.SelectableTreatmentRepo
-                        .AddOrUpdateTreatmentLibrary(dto, simulationId);
+                        .UpsertTreatmentLibrary(dto, simulationId);
                     _unitOfDataPersistenceWork.SelectableTreatmentRepo
-                        .AddOrUpdateOrDeleteTreatments(dto.Treatments, dto.Id);
+                        .UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
                 });
 
                 _unitOfDataPersistenceWork.Commit();

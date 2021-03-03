@@ -120,11 +120,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList());
         }
 
-        public void AddOrUpdateRemainingLifeLimitLibrary(RemainingLifeLimitLibraryDTO dto, Guid simulationId)
+        public void UpsertRemainingLifeLimitLibrary(RemainingLifeLimitLibraryDTO dto, Guid simulationId)
         {
             var remainingLifeLimitLibraryEntity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.AddOrUpdate(remainingLifeLimitLibraryEntity, dto.Id);
+            _unitOfDataPersistenceWork.Context.Upsert(remainingLifeLimitLibraryEntity, dto.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -146,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public void AddOrUpdateOrDeleteRemainingLifeLimits(List<RemainingLifeLimitDTO> remainingLifeLimits,
+        public void UpsertOrDeleteRemainingLifeLimits(List<RemainingLifeLimitDTO> remainingLifeLimits,
             Guid libraryId)
         {
             if (!_unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == libraryId))
@@ -192,11 +192,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.AddOrUpdateOrDelete(remainingLifeLimitEntities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(remainingLifeLimitEntities, predicatesPerCrudOperation);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(remainingLifeLimitEntities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(remainingLifeLimitEntities, predicatesPerCrudOperation);
             }
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryRemainingLifeLimitEntity>(_ =>

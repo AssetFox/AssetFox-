@@ -385,7 +385,7 @@ import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
 export default class EquationEditorDialog extends Vue {
   @Prop() dialogData: EquationEditorDialogData;
 
-  @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
+  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 
   @Action('getAttributes') getAttributesAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;

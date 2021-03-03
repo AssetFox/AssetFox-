@@ -68,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        private void SetupForAddOrUpdateOrDelete()
+        private void SetupForUpsertOrDelete()
         {
             SetupForGet();
             _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
@@ -103,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Act
                 var result = _controller
-                    .AddOrUpdateBudgetPriorityLibrary(Guid.Empty, TestBudgetPriorityLibrary.ToDto());
+                    .UpsertBudgetPriorityLibrary(Guid.Empty, TestBudgetPriorityLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result.Result);
@@ -170,7 +170,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(
                     (_controller.BudgetPriorityLibraries().Result as OkObjectResult).Value,
                     typeof(List<BudgetPriorityLibraryDTO>));
@@ -184,7 +184,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.AddOrUpdateBudgetPriorityLibrary(_testHelper.TestSimulation.Id,
+                    _controller.UpsertBudgetPriorityLibrary(_testHelper.TestSimulation.Id,
                         budgetPriorityLibraryDTO);
 
                 // Assert
@@ -227,7 +227,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(
                     (_controller.BudgetPriorityLibraries().Result as OkObjectResult).Value,
                     typeof(List<BudgetPriorityLibraryDTO>));
@@ -236,7 +236,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 budgetPriorityLibraryDTO.BudgetPriorities[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
-                await _controller.AddOrUpdateBudgetPriorityLibrary(_testHelper.TestSimulation.Id,
+                await _controller.UpsertBudgetPriorityLibrary(_testHelper.TestSimulation.Id,
                     budgetPriorityLibraryDTO);
 
                 // Act

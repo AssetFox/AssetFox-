@@ -124,11 +124,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList());
         }
 
-        public void AddOrUpdateDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto, Guid simulationId)
+        public void UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto, Guid simulationId)
         {
             var entity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, dto.Id);
+            _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -150,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public void AddOrUpdateOrDeleteDeficientConditionGoals(List<DeficientConditionGoalDTO> deficientConditionGoals,
+        public void UpsertOrDeleteDeficientConditionGoals(List<DeficientConditionGoalDTO> deficientConditionGoals,
             Guid libraryId)
         {
             if (!_unitOfDataPersistenceWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId))
@@ -197,11 +197,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.AddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
             }
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryDeficientConditionGoalEntity>(_ =>

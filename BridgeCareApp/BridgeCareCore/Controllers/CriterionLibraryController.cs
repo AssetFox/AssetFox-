@@ -32,15 +32,15 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("AddOrUpdateCriterionLibrary")]
-        public async Task<IActionResult> AddOrUpdateCriterionLibrary([FromBody] CriterionLibraryDTO dto)
+        [Route("UpsertCriterionLibrary")]
+        public async Task<IActionResult> UpsertCriterionLibrary([FromBody] CriterionLibraryDTO dto)
         {
             try
             {
                 _unitOfDataPersistenceWork.BeginTransaction();
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfDataPersistenceWork.CriterionLibraryRepo.AddOrUpdateCriterionLibrary(dto);
+                    _unitOfDataPersistenceWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto);
                 });
 
                 _unitOfDataPersistenceWork.Commit();

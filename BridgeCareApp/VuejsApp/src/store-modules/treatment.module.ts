@@ -51,8 +51,8 @@ const actions = {
                 }
             });
     },
-    async addOrUpdateTreatmentLibrary({dispatch, commit}: any, payload: any) {
-        await TreatmentService.addOrUpdateTreatmentLibrary(payload.library, payload.scenarioId)
+    async upsertTreatmentLibrary({dispatch, commit}: any, payload: any) {
+        await TreatmentService.upsertTreatmentLibrary(payload.library, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.treatmentLibraries, payload.scenarioId)) {

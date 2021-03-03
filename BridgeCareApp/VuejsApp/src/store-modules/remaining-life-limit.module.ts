@@ -51,8 +51,8 @@ const actions = {
                 }
             });
     },
-    async addOrUpdateRemainingLifeLimitLibrary({dispatch, commit}: any, payload: any) {
-        await RemainingLifeLimitService.addOrUpdateRemainingLifeLimitLibrary(payload.library, payload.scenarioId)
+    async upsertRemainingLifeLimitLibrary({dispatch, commit}: any, payload: any) {
+        await RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(payload.library, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.remainingLifeLimitLibraries, payload.scenarioId)) {

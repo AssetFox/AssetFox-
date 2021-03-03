@@ -51,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        private void SetupForAddOrUpdateOrDelete()
+        private void SetupForUpsertOrDelete()
         {
             SetupForGet();
             _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
@@ -83,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Act
                 var result = _controller
-                    .AddOrUpdateRemainingLifeLimitLibrary(Guid.Empty, TestRemainingLifeLimitLibrary.ToDto());
+                    .UpsertRemainingLifeLimitLibrary(Guid.Empty, TestRemainingLifeLimitLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result.Result);
@@ -150,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType(
                     (_controller.RemainingLifeLimitLibraries().Result as OkObjectResult).Value,
                     typeof(List<RemainingLifeLimitLibraryDTO>));
@@ -163,7 +163,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.AddOrUpdateRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
+                    _controller.UpsertRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
                         remainingLifeLimitLibraryDTO);
 
                 // Assert
@@ -204,7 +204,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType(
                     (_controller.RemainingLifeLimitLibraries().Result as OkObjectResult).Value,
                     typeof(List<RemainingLifeLimitLibraryDTO>));
@@ -213,7 +213,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
-                await _controller.AddOrUpdateRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
+                await _controller.UpsertRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
                     remainingLifeLimitLibraryDTO);
 
                 // Act

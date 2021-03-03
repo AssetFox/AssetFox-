@@ -51,8 +51,8 @@ const actions = {
                 }
             });
     },
-    async addOrUpdateCriterionLibrary({commit, dispatch}: any, payload: any) {
-        await CriterionLibraryService.addOrUpdateCriterionLibrary(payload.library)
+    async upsertCriterionLibrary({commit, dispatch}: any, payload: any) {
+        await CriterionLibraryService.upsertCriterionLibrary(payload.library)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     const library: CriterionLibrary = payload.library;

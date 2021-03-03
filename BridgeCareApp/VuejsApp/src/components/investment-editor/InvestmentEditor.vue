@@ -139,13 +139,13 @@
     <v-flex xs12>
       <v-layout justify-end row v-show="hasSelectedLibrary">
         <v-btn :disabled="disableCrudButton()"
-               @click="onAddOrUpdateInvestment(selectedBudgetLibrary, selectedScenarioId)"
+               @click="onUpsertInvestment(selectedBudgetLibrary, selectedScenarioId)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId !== uuidNIL">
           Save
         </v-btn>
         <v-btn :disabled="disableCrudButton()"
-               @click="onAddOrUpdateInvestment(selectedBudgetLibrary, uuidNIL)"
+               @click="onUpsertInvestment(selectedBudgetLibrary, uuidNIL)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId === uuidNIL">
           Update Library
@@ -168,7 +168,7 @@
     <ConfirmDeleteAlert :dialogData="confirmDeleteAlertData" @submit="onSubmitConfirmDeleteAlertResult"/>
 
     <CreateBudgetLibraryDialog :dialogData="createBudgetLibraryDialogData"
-                               @submit="onAddOrUpdateInvestment"/>
+                               @submit="onUpsertInvestment"/>
 
     <SetRangeForAddingBudgetYearsDialog :showDialog="showSetRangeForAddingBudgetYearsDialog"
                                         @submit="onSubmitBudgetYearRange"/>
@@ -224,13 +224,13 @@ import CreateBudgetLibraryDialog
   }
 })
 export default class InvestmentEditor extends Vue {
-  @State(state => state.investment.budgetLibraries) stateBudgetLibraries: BudgetLibrary[];
-  @State(state => state.investment.selectedBudgetLibrary) stateSelectedBudgetLibrary: BudgetLibrary;
-  @State(state => state.investment.investmentPlan) stateInvestmentPlan: InvestmentPlan;
+  @State(state => state.investmentModule.budgetLibraries) stateBudgetLibraries: BudgetLibrary[];
+  @State(state => state.investmentModule.selectedBudgetLibrary) stateSelectedBudgetLibrary: BudgetLibrary;
+  @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
 
   @Action('getInvestment') getInvestmentAction: any;
   @Action('selectBudgetLibrary') selectBudgetLibraryAction: any;
-  @Action('addOrUpdateInvestment') addOrUpdateInvestmentAction: any;
+  @Action('upsertInvestment') upsertInvestmentAction: any;
   @Action('deleteBudgetLibrary') deleteBudgetLibraryAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
@@ -339,7 +339,7 @@ export default class InvestmentEditor extends Vue {
   @Watch('investmentPlan')
   onInvestmentPlanChanged() {
     this.setHasUnsavedChangesAction({
-      value: hasUnsavedChangesCore('investment-plan',
+      value: hasUnsavedChangesCore('investmentModule-plan',
           {
             ...this.investmentPlan, minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
                 ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
@@ -564,11 +564,11 @@ export default class InvestmentEditor extends Vue {
     }
   }
 
-  onAddOrUpdateInvestment(library: BudgetLibrary, scenarioId: string) {
+  onUpsertInvestment(library: BudgetLibrary, scenarioId: string) {
     this.createBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
 
     if (!isNil(library)) {
-      this.addOrUpdateInvestmentAction({
+      this.upsertInvestmentAction({
         library: {
           ...library,
           budgets: library.budgets.map((budget: Budget) => ({

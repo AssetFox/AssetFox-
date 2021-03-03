@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         Task<List<CriterionLibraryDTO>> CriterionLibraries();
 
-        void AddOrUpdateCriterionLibrary(CriterionLibraryDTO dto);
+        void UpsertCriterionLibrary(CriterionLibraryDTO dto);
 
         void DeleteCriterionLibrary(Guid libraryId);
     }

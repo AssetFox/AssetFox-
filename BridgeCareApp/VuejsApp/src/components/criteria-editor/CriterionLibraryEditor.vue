@@ -47,7 +47,7 @@
     </v-flex>
     <v-flex>
       <v-layout v-show="hasSelectedCriterionLibrary" justify-end row>
-        <v-btn @click="onAddOrUpdateCriterionLibrary(selectedCriterionLibrary)" class="ara-blue-bg white--text"
+        <v-btn @click="onUpsertCriterionLibrary(selectedCriterionLibrary)" class="ara-blue-bg white--text"
                :disabled="!canUpdateOrCreate">
           Update Library
         </v-btn>
@@ -62,7 +62,7 @@
     </v-flex>
 
     <CreateCriterionLibraryDialog :dialogData="createCriterionLibraryDialogData"
-                                  @submit="onAddOrUpdateCriterionLibrary"/>
+                                  @submit="onUpsertCriterionLibrary"/>
 
     <ConfirmDeleteAlert :dialogData="confirmDeleteAlertData" @submit="onSubmitConfirmDeleteAlertResult"/>
   </v-layout>
@@ -102,11 +102,11 @@ import {hasValue} from '@/shared/utils/has-value-util';
 export default class CriterionLibraryEditor extends Vue {
   @Prop() dialogLibraryId: string;
 
-  @State(state => state.criteriaEditor.criterionLibraries) stateCriterionLibraries: CriterionLibrary[];
-  @State(state => state.criteriaEditor.selectedCriterionLibrary) stateSelectedCriterionLibrary: CriterionLibrary;
+  @State(state => state.criterionModule.criterionLibraries) stateCriterionLibraries: CriterionLibrary[];
+  @State(state => state.criterionModule.selectedCriterionLibrary) stateSelectedCriterionLibrary: CriterionLibrary;
 
   @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-  @Action('addOrUpdateCriterionLibrary') addOrUpdateCriterionLibraryAction: any;
+  @Action('upsertCriterionLibrary') upsertCriterionLibraryAction: any;
   @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
   @Action('deleteCriterionLibrary') deleteCriterionLibraryAction: any;
   @Action('setSelectedCriterionIsValid') setSelectedCriterionIsValidAction: any;
@@ -218,11 +218,11 @@ export default class CriterionLibraryEditor extends Vue {
     }
   }
 
-  onAddOrUpdateCriterionLibrary(criterionLibrary: CriterionLibrary) {
+  onUpsertCriterionLibrary(criterionLibrary: CriterionLibrary) {
     this.createCriterionLibraryDialogData = clone(emptyCreateCriterionLibraryDialogData);
 
     if (!isNil(criterionLibrary)) {
-      this.addOrUpdateCriterionLibraryAction({library: criterionLibrary})
+      this.upsertCriterionLibraryAction({library: criterionLibrary})
           .then(() => this.librarySelectItemValue = criterionLibrary.id);
     }
   }

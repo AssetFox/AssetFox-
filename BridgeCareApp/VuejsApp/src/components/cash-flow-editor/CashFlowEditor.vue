@@ -181,13 +181,13 @@
     <v-flex xs12>
       <v-layout justify-end row v-show="hasSelectedLibrary">
         <v-btn :disabled="disableSubmitAction()"
-               @click="onAddOrUpdateCashFlowRuleLibrary(selectedCashFlowRuleLibrary, selectedScenarioId)"
+               @click="onUpsertCashFlowRuleLibrary(selectedCashFlowRuleLibrary, selectedScenarioId)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId !== uuidNIL">
           Save
         </v-btn>
         <v-btn :disabled="disableSubmitAction()"
-               @click="onAddOrUpdateCashFlowRuleLibrary(selectedCashFlowRuleLibrary, uuidNIL)"
+               @click="onUpsertCashFlowRuleLibrary(selectedCashFlowRuleLibrary, uuidNIL)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId === uuidNIL">
           Update Library
@@ -210,7 +210,7 @@
                         @submit="onSubmitConfirmDeleteAlertResult"/>
 
     <CreateCashFlowRuleLibraryDialog :dialogData="createCashFlowRuleLibraryDialogData"
-                                     @submit="onAddOrUpdateCashFlowRuleLibrary"/>
+                                     @submit="onUpsertCashFlowRuleLibrary"/>
 
     <CriterionLibraryEditorDialog :dialogData="criterionLibraryEditorDialogData"
                                   @submit="onSubmitCriterionLibraryEditorDialogResult"/>
@@ -260,12 +260,12 @@ import {sortByProperty} from '@/shared/utils/sorter-utils';
   components: {CreateCashFlowRuleLibraryDialog, CriterionLibraryEditorDialog, ConfirmDeleteAlert: Alert}
 })
 export default class CashFlowEditor extends Vue {
-  @State(state => state.cashFlowEditor.cashFlowRuleLibraries) stateCashFlowRuleLibraries: CashFlowRuleLibrary[];
-  @State(state => state.cashFlowEditor.selectedCashFlowRuleLibrary) stateSelectedCashRuleFlowLibrary: CashFlowRuleLibrary;
+  @State(state => state.cashFlowModule.cashFlowRuleLibraries) stateCashFlowRuleLibraries: CashFlowRuleLibrary[];
+  @State(state => state.cashFlowModule.selectedCashFlowRuleLibrary) stateSelectedCashRuleFlowLibrary: CashFlowRuleLibrary;
 
   @Action('getCashFlowRuleLibraries') getCashFlowRuleLibrariesAction: any;
   @Action('selectCashFlowRuleLibrary') selectCashFlowRuleLibraryAction: any;
-  @Action('addOrUpdateCashFlowRuleLibrary') addOrUpdateCashFlowRuleLibraryAction: any;
+  @Action('upsertCashFlowRuleLibrary') upsertCashFlowRuleLibraryAction: any;
   @Action('deleteCashFlowRuleLibrary') deleteCashFlowRuleLibraryAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
@@ -583,11 +583,11 @@ export default class CashFlowEditor extends Vue {
     });
   }
 
-  onAddOrUpdateCashFlowRuleLibrary(cashFlowRuleLibrary: CashFlowRuleLibrary, scenarioId: string) {
+  onUpsertCashFlowRuleLibrary(cashFlowRuleLibrary: CashFlowRuleLibrary, scenarioId: string) {
     this.createCashFlowRuleLibraryDialogData = clone(emptyCreateCashFlowLibraryDialogData);
 
     if (!isNil(cashFlowRuleLibrary) && cashFlowRuleLibrary.id !== this.uuidNIL) {
-      this.addOrUpdateCashFlowRuleLibraryAction({library: cashFlowRuleLibrary, scenarioId: scenarioId});
+      this.upsertCashFlowRuleLibraryAction({library: cashFlowRuleLibrary, scenarioId: scenarioId});
     }
   }
 

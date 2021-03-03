@@ -127,7 +127,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
         }
 
-        public void AddOrUpdateInvestmentPlan(InvestmentPlanDTO dto, Guid simulationId)
+        public void UpsertInvestmentPlan(InvestmentPlanDTO dto, Guid simulationId)
         {
             if (simulationId != Guid.Empty)
             {
@@ -138,7 +138,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 var entity = dto.ToEntity(simulationId);
 
-                _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, dto.Id);
+                _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
 
                 _unitOfDataPersistenceWork.Context.SaveChanges();
             }

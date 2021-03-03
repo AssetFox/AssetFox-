@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
             var simulationOutputString = JsonConvert.SerializeObject(simulationOutput, settings);
 
-            _unitOfDataPersistenceWork.Context.AddOrUpdate(new SimulationOutputEntity { SimulationId = simulationId, Output = simulationOutputString }, simulationId);
+            _unitOfDataPersistenceWork.Context.Upsert(new SimulationOutputEntity { SimulationId = simulationId, Output = simulationOutputString }, simulationId);
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 

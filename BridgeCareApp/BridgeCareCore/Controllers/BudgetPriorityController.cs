@@ -33,8 +33,8 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("AddOrUpdateBudgetPriorityLibrary/{simulationId}")]
-        public async Task<IActionResult> AddOrUpdateBudgetPriorityLibrary(Guid simulationId, BudgetPriorityLibraryDTO dto)
+        [Route("UpsertBudgetPriorityLibrary/{simulationId}")]
+        public async Task<IActionResult> UpsertBudgetPriorityLibrary(Guid simulationId, BudgetPriorityLibraryDTO dto)
         {
             try
             {
@@ -42,9 +42,9 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _unitOfDataPersistenceWork.BudgetPriorityRepo
-                        .AddOrUpdateBudgetPriorityLibrary(dto, simulationId);
+                        .UpsertBudgetPriorityLibrary(dto, simulationId);
                     _unitOfDataPersistenceWork.BudgetPriorityRepo
-                        .AddOrUpdateOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
+                        .UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
                 });
 
                 _unitOfDataPersistenceWork.Commit();

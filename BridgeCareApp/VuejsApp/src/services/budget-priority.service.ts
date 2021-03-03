@@ -7,8 +7,8 @@ export default class BudgetPriorityService {
         return coreAxiosInstance.get(`${API.BudgetPriorityController}/GetBudgetPriorityLibraries`);
     }
 
-    static addOrUpdateBudgetPriorityLibrary(data: BudgetPriorityLibrary, scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.BudgetPriorityController}/AddOrUpdateBudgetPriorityLibrary/${scenarioId}`, data);
+    static upsertBudgetPriorityLibrary(data: BudgetPriorityLibrary, scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.BudgetPriorityController}/UpsertBudgetPriorityLibrary/${scenarioId}`, data);
     }
 
     static deleteBudgetPriorityLibrary(libraryId: string): AxiosPromise {

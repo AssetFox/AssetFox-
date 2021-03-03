@@ -7,8 +7,8 @@ export default class InvestmentService {
         return coreAxiosInstance.get(`${API.InvestmentController}/GetInvestment/${scenarioId}`);
     }
 
-    static addOrUpdateInvestment(budgetLibrary: BudgetLibrary, investmentPlan: InvestmentPlan, scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.InvestmentController}/AddOrUpdateInvestment/${scenarioId}`, {
+    static upsertInvestment(budgetLibrary: BudgetLibrary, investmentPlan: InvestmentPlan, scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.InvestmentController}/UpsertInvestment/${scenarioId}`, {
             budgetLibrary: budgetLibrary,
             investmentPlan: investmentPlan
         });

@@ -4,10 +4,6 @@ import {CriteriaValidation} from '@/shared/models/iAM/criteria-validation';
 import {CriterionLibrary} from '@/shared/models/iAM/criteria';
 
 export default class CriterionLibraryService {
-    /**
-     * Checks a criteria's validity
-     * @param mergedCriteriaExpression Criteria string to validate
-     */
     static checkCriteriaValidity(criteriaValidation: CriteriaValidation): AxiosPromise {
         return axiosInstance.post('/api/ValidateCriteria', criteriaValidation);
     }
@@ -16,8 +12,8 @@ export default class CriterionLibraryService {
         return coreAxiosInstance.get(`${API.CriterionLibraryController}/GetCriterionLibraries`);
     }
 
-    static addOrUpdateCriterionLibrary(data: CriterionLibrary): AxiosPromise {
-        return coreAxiosInstance.post(`${API.CriterionLibraryController}/AddOrUpdateCriterionLibrary`, data);
+    static upsertCriterionLibrary(data: CriterionLibrary): AxiosPromise {
+        return coreAxiosInstance.post(`${API.CriterionLibraryController}/UpsertCriterionLibrary`, data);
     }
 
     static deleteCriterionLibrary(libraryId: string): AxiosPromise {

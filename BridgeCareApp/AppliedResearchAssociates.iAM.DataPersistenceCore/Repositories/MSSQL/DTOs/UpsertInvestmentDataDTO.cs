@@ -1,6 +1,6 @@
 ﻿namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs
 {
-    public class AddOrUpdateInvestmentDataDTO
+    public class UpsertInvestmentDataDTO
     {
         public BudgetLibraryDTO BudgetLibrary { get; set; }
 

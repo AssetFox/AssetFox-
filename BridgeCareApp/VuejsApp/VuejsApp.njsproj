@@ -65,9 +65,9 @@
     <Content Include="src\components\deficient-editor\deficient-editor-dialogs\CreateDeficientConditionGoalDialog.vue" />
     <Content Include="src\components\deficient-editor\DeficientConditionGoalEditor.vue" />
     <Content Include="src\components\Inventory.vue" />
-    <Content Include="src\components\investment-editor\investment-editor-dialogs\CreateInvestmentLibraryDialog.vue" />
-    <Content Include="src\components\investment-editor\investment-editor-dialogs\SetRangeForAddingBudgetYearsDialog.vue" />
-    <Content Include="src\components\investment-editor\InvestmentEditor.vue" />
+    <Content Include="src\components\investmentModule-editor\investmentModule-editor-dialogs\CreateInvestmentLibraryDialog.vue" />
+    <Content Include="src\components\investmentModule-editor\investmentModule-editor-dialogs\SetRangeForAddingBudgetYearsDialog.vue" />
+    <Content Include="src\components\investmentModule-editor\InvestmentEditor.vue" />
     <Content Include="src\components\performance-editor\performance-editor-dialogs\CreatePerformanceCurveLibraryDialog.vue" />
     <Content Include="src\components\performance-editor\performance-editor-dialogs\CreatePerformanceCurveDialog.vue" />
     <Content Include="src\components\performance-editor\PerformanceEditor.vue" />
@@ -122,8 +122,8 @@
     <Folder Include="src\components\" />
     <Folder Include="src\components\deficient-editor\" />
     <Folder Include="src\components\deficient-editor\deficient-editor-dialogs\" />
-    <Folder Include="src\components\investment-editor\" />
-    <Folder Include="src\components\investment-editor\investment-editor-dialogs\" />
+    <Folder Include="src\components\investmentModule-editor\" />
+    <Folder Include="src\components\investmentModule-editor\investmentModule-editor-dialogs\" />
     <Folder Include="src\components\performance-editor\" />
     <Folder Include="src\components\performance-editor\performance-editor-dialogs\" />
     <Folder Include="src\components\priority-editor\" />
@@ -170,7 +170,7 @@
     <TypeScriptCompile Include="src\services\deficient-condition-goal.service.ts" />
     <TypeScriptCompile Include="src\services\equation.service.ts" />
     <TypeScriptCompile Include="src\services\inventory.service.ts" />
-    <TypeScriptCompile Include="src\services\investment.service.ts" />
+    <TypeScriptCompile Include="src\services\investmentModule.service.ts" />
     <TypeScriptCompile Include="src\services\network.service.ts" />
     <TypeScriptCompile Include="src\services\performance-curve.service.ts" />
     <TypeScriptCompile Include="src\services\budget-priority.service.ts" />
@@ -190,7 +190,7 @@
     <TypeScriptCompile Include="src\shared\models\iAM\deficient-condition-goal.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\equation-validation.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\inventory.ts" />
-    <TypeScriptCompile Include="src\shared\models\iAM\investment.ts" />
+    <TypeScriptCompile Include="src\shared\models\iAM\investmentModule.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\navigation-tab.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\network.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\performance.ts" />
@@ -243,7 +243,7 @@
     <TypeScriptCompile Include="src\store-modules\budget-priority.module.ts" />
     <TypeScriptCompile Include="src\store-modules\remaining-life-limit.module.ts" />
     <TypeScriptCompile Include="src\store-modules\inventory.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\investment.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\investmentModule.module.ts" />
     <TypeScriptCompile Include="src\store-modules\network.module.ts" />
     <TypeScriptCompile Include="src\store-modules\performance-curve.module.ts" />
     <TypeScriptCompile Include="src\store-modules\rollup.module.ts">

@@ -7,8 +7,8 @@ export default class TargetConditionGoalService {
         return coreAxiosInstance.get(`${API.TargetConditionGoalController}/GetTargetConditionGoalLibraries`);
     }
 
-    static addOrUpdateTargetConditionGoalLibrary(data: TargetConditionGoalLibrary, scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.TargetConditionGoalController}/AddOrUpdateTargetConditionGoalLibrary/${scenarioId}`, data);
+    static upsertTargetConditionGoalLibrary(data: TargetConditionGoalLibrary, scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.TargetConditionGoalController}/UpsertTargetConditionGoalLibrary/${scenarioId}`, data);
     }
 
     static deleteTargetConditionGoalLibrary(libraryId: string): AxiosPromise {

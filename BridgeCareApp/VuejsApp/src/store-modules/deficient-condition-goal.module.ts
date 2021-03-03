@@ -54,8 +54,8 @@ const actions = {
                 }
             });
     },
-    async addOrUpdateDeficientConditionGoalLibrary({dispatch, commit}: any, payload: any) {
-        await DeficientConditionGoalService.addOrUpdateDeficientConditionGoalLibrary(payload.library, payload.scenarioId)
+    async upsertDeficientConditionGoalLibrary({dispatch, commit}: any, payload: any) {
+        await DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(payload.library, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.deficientConditionGoalLibraries, payload.scenarioId)) {

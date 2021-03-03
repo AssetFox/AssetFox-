@@ -124,12 +124,12 @@
     <v-flex v-show="hasSelectedLibrary" xs12>
       <v-layout justify-end row>
         <v-btn
-            @click="onAddOrUpdateDeficientConditionGoalLibrary(selectedDeficientConditionGoalLibrary, selectedScenarioId)"
+            @click="onUpsertDeficientConditionGoalLibrary(selectedDeficientConditionGoalLibrary, selectedScenarioId)"
             class="ara-blue-bg white--text"
             v-show="selectedScenarioId !== uuidNIL" :disabled="disableCrudButton()">
           Save
         </v-btn>
-        <v-btn @click="onAddOrUpdateDeficientConditionGoalLibrary(selectedDeficientConditionGoalLibrary, uuidNIL)"
+        <v-btn @click="onUpsertDeficientConditionGoalLibrary(selectedDeficientConditionGoalLibrary, uuidNIL)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId === uuidNIL" :disabled="disableCrudButton()">
           Update Library
@@ -152,7 +152,7 @@
     <ConfirmBeforeDeleteAlert :dialogData="confirmDeleteAlertData" @submit="onSubmitConfirmDeleteAlertResult"/>
 
     <CreateDeficientConditionGoalLibraryDialog :dialogData="createDeficientConditionGoalLibraryDialogData"
-                                               @submit="onAddOrUpdateDeficientConditionGoalLibrary"/>
+                                               @submit="onUpsertDeficientConditionGoalLibrary"/>
 
     <CreateDeficientConditionGoalDialog :showDialog="showCreateDeficientConditionGoalDialog"
                                         :currentNumberOfDeficientConditionGoals="selectedDeficientConditionGoalLibrary.deficientConditionGoals.length"
@@ -208,14 +208,14 @@ import {CriterionLibrary} from '@/shared/models/iAM/criteria';
   }
 })
 export default class DeficientConditionGoalEditor extends Vue {
-  @State(state => state.deficientEditor.deficientConditionGoalLibraries) stateDeficientConditionGoalLibraries: DeficientConditionGoalLibrary[];
-  @State(state => state.deficientEditor.selectedDeficientConditionGoalLibrary) stateSelectedDeficientConditionGoalLibrary: DeficientConditionGoalLibrary;
-  @State(state => state.attribute.numericAttributeNames) stateNumericAttributes: Attribute[];
+  @State(state => state.deficientConditionGoalModule.deficientConditionGoalLibraries) stateDeficientConditionGoalLibraries: DeficientConditionGoalLibrary[];
+  @State(state => state.deficientConditionGoalModule.selectedDeficientConditionGoalLibrary) stateSelectedDeficientConditionGoalLibrary: DeficientConditionGoalLibrary;
+  @State(state => state.attributeModule.numericAttributeNames) stateNumericAttributes: Attribute[];
 
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('getDeficientConditionGoalLibraries') getDeficientConditionGoalLibrariesAction: any;
   @Action('selectDeficientConditionGoalLibrary') selectDeficientConditionGoalLibraryAction: any;
-  @Action('addOrUpdateDeficientConditionGoalLibrary') addOrUpdateDeficientConditionGoalLibraryAction: any;
+  @Action('upsertDeficientConditionGoalLibrary') upsertDeficientConditionGoalLibraryAction: any;
   @Action('deleteDeficientConditionGoalLibrary') deleteDeficientConditionGoalLibraryAction: any;
   @Action('getAttributes') getAttributesAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
@@ -375,11 +375,11 @@ export default class DeficientConditionGoalEditor extends Vue {
     this.selectedDeficientConditionGoalForCriteriaEdit = clone(emptyDeficientConditionGoal);
   }
 
-  onAddOrUpdateDeficientConditionGoalLibrary(library: DeficientConditionGoalLibrary, scenarioId: string) {
+  onUpsertDeficientConditionGoalLibrary(library: DeficientConditionGoalLibrary, scenarioId: string) {
     this.createDeficientConditionGoalLibraryDialogData = clone(emptyCreateDeficientConditionGoalLibraryDialogData);
 
     if (!isNil(library)) {
-      this.addOrUpdateDeficientConditionGoalLibraryAction({library: library, scenarioId: scenarioId});
+      this.upsertDeficientConditionGoalLibraryAction({library: library, scenarioId: scenarioId});
     }
   }
 

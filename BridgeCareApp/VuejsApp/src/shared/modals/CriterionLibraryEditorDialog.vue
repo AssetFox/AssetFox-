@@ -48,9 +48,9 @@ import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 export default class CriterionLibraryEditorDialog extends Vue {
   @Prop() dialogData: CriterionLibraryEditorDialogData;
 
-  @State(state => state.criteriaEditor.criterionLibraries) stateCriterionLibraries: CriterionLibrary[];
-  @State(state => state.criteriaEditor.selectedCriterionLibrary) stateSelectedCriterionLibrary: CriterionLibrary;
-  @State(state => state.criteriaEditor.selectedCriterionIsValid) stateSelectedCriterionIsValid: boolean;
+  @State(state => state.criterionModule.criterionLibraries) stateCriterionLibraries: CriterionLibrary[];
+  @State(state => state.criterionModule.selectedCriterionLibrary) stateSelectedCriterionLibrary: CriterionLibrary;
+  @State(state => state.criterionModule.selectedCriterionIsValid) stateSelectedCriterionIsValid: boolean;
 
   @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
   @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;

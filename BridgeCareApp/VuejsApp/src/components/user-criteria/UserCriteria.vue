@@ -132,7 +132,7 @@
         }
     })
     export default class UserCriteriaEditor extends Vue {
-        @State(state => state.userCriteria.allUserCriteria) allUserCriteria: UserCriteria[];
+        @State(state => state.userCriteriaModule.allUserCriteria) allUserCriteria: UserCriteria[];
 
         @Action('getAllUserCriteria') getAllUserCriteriaAction: any;
         @Action('setUserCriteria') setUserCriteriaAction: any;

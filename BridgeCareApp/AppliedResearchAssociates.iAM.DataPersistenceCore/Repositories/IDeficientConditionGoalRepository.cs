@@ -14,9 +14,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         Task<List<DeficientConditionGoalLibraryDTO>> DeficientConditionGoalLibrariesWithDeficientConditionGoals();
 
-        void AddOrUpdateDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto, Guid simulationId);
+        void UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto, Guid simulationId);
 
-        void AddOrUpdateOrDeleteDeficientConditionGoals(List<DeficientConditionGoalDTO> deficientConditionGoals, Guid libraryId);
+        void UpsertOrDeleteDeficientConditionGoals(List<DeficientConditionGoalDTO> deficientConditionGoals, Guid libraryId);
 
         void DeleteDeficientConditionGoalLibrary(Guid libraryId);
     }

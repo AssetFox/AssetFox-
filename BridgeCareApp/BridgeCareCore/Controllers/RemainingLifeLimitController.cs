@@ -33,8 +33,8 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("AddOrUpdateRemainingLifeLimitLibrary/{simulationId}")]
-        public async Task<IActionResult> AddOrUpdateRemainingLifeLimitLibrary(Guid simulationId, RemainingLifeLimitLibraryDTO dto)
+        [Route("UpsertRemainingLifeLimitLibrary/{simulationId}")]
+        public async Task<IActionResult> UpsertRemainingLifeLimitLibrary(Guid simulationId, RemainingLifeLimitLibraryDTO dto)
         {
             try
             {
@@ -42,9 +42,9 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _unitOfDataPersistenceWork.RemainingLifeLimitRepo
-                        .AddOrUpdateRemainingLifeLimitLibrary(dto, simulationId);
+                        .UpsertRemainingLifeLimitLibrary(dto, simulationId);
                     _unitOfDataPersistenceWork.RemainingLifeLimitRepo
-                        .AddOrUpdateOrDeleteRemainingLifeLimits(dto.RemainingLifeLimits, dto.Id);
+                        .UpsertOrDeleteRemainingLifeLimits(dto.RemainingLifeLimits, dto.Id);
                 });
 
                 _unitOfDataPersistenceWork.Commit();

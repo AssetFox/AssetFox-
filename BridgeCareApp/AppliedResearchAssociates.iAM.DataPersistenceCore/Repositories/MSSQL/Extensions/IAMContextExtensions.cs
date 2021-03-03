@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public static void AddOrUpdate<T>(this IAMContext context, T entity, Guid key) where T : class
+        public static void Upsert<T>(this IAMContext context, T entity, Guid key) where T : class
         {
             if (entity == null)
             {
@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             context.SaveChanges();
         }
 
-        public static void AddOrUpdate<T>(this IAMContext context, T entity, Expression<Func<T, bool>> predicate) where T : class
+        public static void Upsert<T>(this IAMContext context, T entity, Expression<Func<T, bool>> predicate) where T : class
         {
             if (entity == null)
             {
@@ -96,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             context.SaveChanges();
         }
 
-        public static void AddOrUpdateOrDelete<T>(this IAMContext context, List<T> entities,
+        public static void UpsertOrDelete<T>(this IAMContext context, List<T> entities,
             Dictionary<string, Expression<Func<T, bool>>> predicatesPerCrudOperation) where T : class
         {
             var contextEntities = context.Set<T>();
@@ -153,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             context.SaveChanges();
         }
 
-        public static void BulkAddOrUpdateOrDelete<T>(this IAMContext context, List<T> entities,
+        public static void BulkUpsertOrDelete<T>(this IAMContext context, List<T> entities,
             Dictionary<string, Expression<Func<T, bool>>> predicatesPerCrudOperation) where T : class
         {
             var contextEntities = context.Set<T>();

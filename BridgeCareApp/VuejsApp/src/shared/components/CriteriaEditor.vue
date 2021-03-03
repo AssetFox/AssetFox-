@@ -150,9 +150,9 @@ import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
 export default class CriteriaEditor extends Vue {
   @Prop() criteriaEditorData: CriteriaEditorData;
 
-  @State(state => state.attribute.attributes) stateAttributes: Attribute[];
-  @State(state => state.attribute.attributesSelectValues) stateAttributesSelectValues: AttributeSelectValues[];
-  @State(state => state.network.networks) stateNetworks: Network[];
+  @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+  @State(state => state.attributeModule.attributesSelectValues) stateAttributesSelectValues: AttributeSelectValues[];
+  @State(state => state.networkModule.networks) stateNetworks: Network[];
 
   @Action('getAttributes') getAttributesAction: any;
   @Action('getAttributeSelectValues') getAttributeSelectValuesAction: any;

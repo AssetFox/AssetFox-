@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateCashFlowDistributionRules(
             Dictionary<Guid, List<CashFlowDistributionRule>> distributionRulesPerCashFlowRuleEntityId);
 
-        void AddOrUpdateOrDeleteCashFlowDistributionRules(
+        void UpsertOrDeleteCashFlowDistributionRules(
             Dictionary<Guid, List<CashFlowDistributionRuleDTO>> distributionRulesPerCashFlowRuleId, Guid libraryId);
     }
 }

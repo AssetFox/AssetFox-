@@ -124,13 +124,13 @@ import Alert from '@/shared/modals/Alert.vue';
     components: { CommittedProjectsFileUploaderDialog, Alert },
 })
 export default class EditScenario extends Vue {
-    @State(state => state.breadcrumb.navigation) navigation: any[];
-    @State(state => state.network.networks) networks: Network[];
-    @State(state => state.authentication.isAdmin) isAdmin: boolean;
-    @State(state => state.scenario.selectedScenario)
+    @State(state => state.breadcrumbModule.navigation) navigation: any[];
+    @State(state => state.networkModule.networks) networks: Network[];
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.scenarioModule.selectedScenario)
     stateSelectedScenario: Scenario;
-    @State(state => state.scenario.scenarios) stateScenarios: Scenario[];
-    @State(state => state.authentication.userId) userId: string;
+    @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
+    @State(state => state.authenticationModule.userId) userId: string;
 
     @Action('getMongoScenarios') getMongoScenariosAction: any;
     @Action('setErrorMessage') setErrorMessageAction: any;

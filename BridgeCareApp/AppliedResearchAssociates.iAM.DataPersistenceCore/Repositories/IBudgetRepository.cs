@@ -16,9 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         Task<List<BudgetLibraryDTO>> BudgetLibrariesWithBudgets();
 
-        void AddOrUpdateBudgetLibrary(BudgetLibraryDTO dto, Guid simulationId);
+        void UpsertBudgetLibrary(BudgetLibraryDTO dto, Guid simulationId);
 
-        void AddOrUpdateOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId);
+        void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId);
 
         void DeleteBudgetLibrary(Guid libraryId);
     }

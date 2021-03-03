@@ -33,8 +33,8 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("AddOrUpdateTargetConditionGoalLibrary/{simulationId}")]
-        public async Task<IActionResult> AddOrUpdateTargetConditionGoalLibrary(Guid simulationId, TargetConditionGoalLibraryDTO dto)
+        [Route("UpsertTargetConditionGoalLibrary/{simulationId}")]
+        public async Task<IActionResult> UpsertTargetConditionGoalLibrary(Guid simulationId, TargetConditionGoalLibraryDTO dto)
         {
             try
             {
@@ -42,9 +42,9 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _unitOfDataPersistenceWork.TargetConditionGoalRepo
-                        .AddOrUpdateTargetConditionGoalLibrary(dto, simulationId);
+                        .UpsertTargetConditionGoalLibrary(dto, simulationId);
                     _unitOfDataPersistenceWork.TargetConditionGoalRepo
-                        .AddOrUpdateOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
+                        .UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
                 });
 
                 _unitOfDataPersistenceWork.Commit();

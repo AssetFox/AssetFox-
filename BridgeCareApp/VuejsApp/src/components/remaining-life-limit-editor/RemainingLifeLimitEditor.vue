@@ -72,13 +72,13 @@
     <v-flex xs12>
       <v-layout justify-end row v-show="hasSelectedRemainingLifeLimitLibrary">
         <v-btn :disabled="disableCrudButton()"
-               @click="onAddOrUpdateRemainingLifeLimitLibrary(selectedRemainingLifeLimitLibrary, selectedScenarioId)"
+               @click="onUpsertRemainingLifeLimitLibrary(selectedRemainingLifeLimitLibrary, selectedScenarioId)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId !== uuidNIL">
           Save
         </v-btn>
         <v-btn :disabled="disableCrudButton()"
-               @click="onAddOrUpdateRemainingLifeLimitLibrary(selectedRemainingLifeLimitLibrary, uuidNIL)"
+               @click="onUpsertRemainingLifeLimitLibrary(selectedRemainingLifeLimitLibrary, uuidNIL)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId === uuidNIL">
           Update Library
@@ -103,7 +103,7 @@
     <ConfirmDeleteAlert :dialogData="confirmDeleteAlertData" @submit="onSubmitConfirmDeleteAlertResult"/>
 
     <CreateRemainingLifeLimitLibraryDialog :dialogData="createRemainingLifeLimitLibraryDialogData"
-                                           @submit="onAddOrUpdateRemainingLifeLimitLibrary"/>
+                                           @submit="onUpsertRemainingLifeLimitLibrary"/>
 
     <CreateRemainingLifeLimitDialog :dialogData="createRemainingLifeLimitDialogData"
                                     @submit="onAddRemainingLifeLimit"/>
@@ -162,12 +162,12 @@ import {CriterionLibrary} from '@/shared/models/iAM/criteria';
   }
 })
 export default class RemainingLifeLimitEditor extends Vue {
-  @State(state => state.remainingLifeLimitEditor.remainingLifeLimitLibraries) stateRemainingLifeLimitLibraries: RemainingLifeLimitLibrary[];
-  @State(state => state.remainingLifeLimitEditor.selectedRemainingLifeLimitLibrary) stateSelectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary;
-  @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
+  @State(state => state.remainingLifeLimitModule.remainingLifeLimitLibraries) stateRemainingLifeLimitLibraries: RemainingLifeLimitLibrary[];
+  @State(state => state.remainingLifeLimitModule.selectedRemainingLifeLimitLibrary) stateSelectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary;
+  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 
   @Action('getRemainingLifeLimitLibraries') getRemainingLifeLimitLibrariesAction: any;
-  @Action('addOrUpdateRemainingLifeLimitLibrary') addOrUpdateRemainingLifeLimitLibraryAction: any;
+  @Action('upsertRemainingLifeLimitLibrary') upsertRemainingLifeLimitLibraryAction: any;
   @Action('deleteRemainingLifeLimitLibrary') deleteRemainingLifeLimitLibraryAction: any;
   @Action('selectRemainingLifeLimitLibrary') selectRemainingLifeLimitLibraryAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
@@ -342,11 +342,11 @@ export default class RemainingLifeLimitEditor extends Vue {
     this.selectedRemainingLifeLimit = clone(emptyRemainingLifeLimit);
   }
 
-  onAddOrUpdateRemainingLifeLimitLibrary(remainingLifeLimitLibrary: RemainingLifeLimitLibrary, scenarioId: string) {
+  onUpsertRemainingLifeLimitLibrary(remainingLifeLimitLibrary: RemainingLifeLimitLibrary, scenarioId: string) {
     this.createRemainingLifeLimitLibraryDialogData = clone(emptyCreateRemainingLifeLimitLibraryDialogData);
 
     if (!isNil(remainingLifeLimitLibrary)) {
-      this.addOrUpdateRemainingLifeLimitLibraryAction({library: remainingLifeLimitLibrary, scenarioId: scenarioId});
+      this.upsertRemainingLifeLimitLibraryAction({library: remainingLifeLimitLibrary, scenarioId: scenarioId});
     }
   }
 

@@ -66,8 +66,8 @@ const actions = {
                 }
             });
     },
-    async addOrUpdatePerformanceCurveLibrary({dispatch, commit}: any, payload: any) {
-        await PerformanceCurveService.addOrUpdatePerformanceCurveLibrary(payload.library, payload.scenarioId)
+    async upsertPerformanceCurveLibrary({dispatch, commit}: any, payload: any) {
+        await PerformanceCurveService.upsertPerformanceCurveLibrary(payload.library, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.performanceCurveLibraries, payload.scenarioId)) {

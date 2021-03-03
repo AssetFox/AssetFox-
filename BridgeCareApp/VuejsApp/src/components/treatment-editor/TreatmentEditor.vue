@@ -110,12 +110,12 @@
     </v-flex>
     <v-flex xs12>
       <v-layout justify-end row v-show="hasSelectedLibrary">
-        <v-btn @click="onAddOrUpdateTreatmentLibrary(selectedTreatmentLibrary, selectedScenarioId)"
+        <v-btn @click="onUpsertTreatmentLibrary(selectedTreatmentLibrary, selectedScenarioId)"
                class="ara-blue-bg white--text" v-show="selectedScenarioId !== uuidNIL"
                :disabled="disableCrudButton()">
           Save
         </v-btn>
-        <v-btn @click="onAddOrUpdateTreatmentLibrary(selectedTreatmentLibrary, uuidNIL)" class="ara-blue-bg white--text"
+        <v-btn @click="onUpsertTreatmentLibrary(selectedTreatmentLibrary, uuidNIL)" class="ara-blue-bg white--text"
                v-show="selectedScenarioId === uuidNIL"
                :disabled="disableCrudButton()">
           Update Library
@@ -137,7 +137,7 @@
     <ConfirmDeleteAlert :dialogData="confirmBeforeDeleteAlertData" @submit="onSubmitConfirmDeleteAlertResult"/>
 
     <CreateTreatmentLibraryDialog :dialogData="createTreatmentLibraryDialogData"
-                                  @submit="onAddOrUpdateTreatmentLibrary"/>
+                                  @submit="onUpsertTreatmentLibrary"/>
 
     <CreateTreatmentDialog :showDialog="showCreateTreatmentDialog" @submit="onAddTreatment"/>
   </v-layout>
@@ -192,12 +192,12 @@ import {getPropertyValues} from '@/shared/utils/getter-utils';
   }
 })
 export default class TreatmentEditor extends Vue {
-  @State(state => state.treatmentEditor.treatmentLibraries) stateTreatmentLibraries: TreatmentLibrary[];
-  @State(state => state.treatmentEditor.selectedTreatmentLibrary) stateSelectedTreatmentLibrary: TreatmentLibrary;
+  @State(state => state.treatmentModule.treatmentLibraries) stateTreatmentLibraries: TreatmentLibrary[];
+  @State(state => state.treatmentModule.selectedTreatmentLibrary) stateSelectedTreatmentLibrary: TreatmentLibrary;
 
   @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
   @Action('selectTreatmentLibrary') selectTreatmentLibraryAction: any;
-  @Action('addOrUpdateTreatmentLibrary') addOrUpdateTreatmentLibraryAction: any;
+  @Action('upsertTreatmentLibrary') upsertTreatmentLibraryAction: any;
   @Action('deleteTreatmentLibrary') deleteTreatmentLibraryAction: any;
   @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
@@ -322,11 +322,11 @@ export default class TreatmentEditor extends Vue {
     };
   }
 
-  onAddOrUpdateTreatmentLibrary(library: TreatmentLibrary, scenarioId: string) {
+  onUpsertTreatmentLibrary(library: TreatmentLibrary, scenarioId: string) {
     this.createTreatmentLibraryDialogData = clone(emptyCreateTreatmentLibraryDialogData);
 
     if (!isNil(library)) {
-      this.addOrUpdateTreatmentLibraryAction({library: library, scenarioId: scenarioId});
+      this.upsertTreatmentLibraryAction({library: library, scenarioId: scenarioId});
     }
   }
 

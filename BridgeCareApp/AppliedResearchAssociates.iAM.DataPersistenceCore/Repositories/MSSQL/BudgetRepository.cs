@@ -123,11 +123,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList());
         }
 
-        public void AddOrUpdateBudgetLibrary(BudgetLibraryDTO dto, Guid simulationId)
+        public void UpsertBudgetLibrary(BudgetLibraryDTO dto, Guid simulationId)
         {
             var entity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, dto.Id);
+            _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -145,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public void AddOrUpdateOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId)
+        public void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId)
         {
             if (!_unitOfDataPersistenceWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
             {
@@ -168,11 +168,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.AddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
             }
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryBudgetEntity>(_ =>
@@ -180,7 +180,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var budgetAmountsPerBudgetId = budgets.ToDictionary(_ => _.Id, _ => _.BudgetAmounts);
 
-            _unitOfDataPersistenceWork.BudgetAmountRepo.AddOrUpdateOrDeleteBudgetAmounts(budgetAmountsPerBudgetId, libraryId);
+            _unitOfDataPersistenceWork.BudgetAmountRepo.UpsertOrDeleteBudgetAmounts(budgetAmountsPerBudgetId, libraryId);
 
             if (budgets.Any(_ =>
                 _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&

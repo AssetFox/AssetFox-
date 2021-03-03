@@ -75,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        private void SetupForAddOrUpdateOrDelete()
+        private void SetupForUpsertOrDelete()
         {
             SetupForGetAll();
             _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
@@ -107,8 +107,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Act
                 var result = _controller
-                    .AddOrUpdateInvestment(Guid.Empty,
-                        new AddOrUpdateInvestmentDataDTO
+                    .UpsertInvestment(Guid.Empty,
+                        new UpsertInvestmentDataDTO
                         {
                             BudgetLibrary = TestBudgetLibrary.ToDto(),
                             InvestmentPlan = new InvestmentPlanDTO()
@@ -210,12 +210,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dto = (InvestmentDTO)Convert.ChangeType(
                     (_controller.GetInvestment(_testHelper.TestSimulation.Id).Result as OkObjectResult).Value,
                     typeof(InvestmentDTO));
 
-                var addOrUpdateInvestmentDTO = new AddOrUpdateInvestmentDataDTO
+                var addOrUpdateInvestmentDTO = new UpsertInvestmentDataDTO
                 {
                     BudgetLibrary = dto.BudgetLibraries[0],
                     InvestmentPlan = dto.InvestmentPlan
@@ -231,7 +231,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.AddOrUpdateInvestment(_testHelper.TestSimulation.Id, addOrUpdateInvestmentDTO);
+                    _controller.UpsertInvestment(_testHelper.TestSimulation.Id, addOrUpdateInvestmentDTO);
 
                 // Assert
                 Assert.IsType<OkResult>(result.Result);
@@ -278,12 +278,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dto = (InvestmentDTO)Convert.ChangeType(
                     (_controller.GetInvestment(_testHelper.TestSimulation.Id).Result as OkObjectResult).Value,
                     typeof(InvestmentDTO));
 
-                var addOrUpdateInvestmentDTO = new AddOrUpdateInvestmentDataDTO
+                var addOrUpdateInvestmentDTO = new UpsertInvestmentDataDTO
                 {
                     BudgetLibrary = dto.BudgetLibraries[0],
                     InvestmentPlan = dto.InvestmentPlan
@@ -293,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
-                await _controller.AddOrUpdateInvestment(_testHelper.TestSimulation.Id, addOrUpdateInvestmentDTO);
+                await _controller.UpsertInvestment(_testHelper.TestSimulation.Id, addOrUpdateInvestmentDTO);
 
                 // Act
                 var result = _controller.DeleteBudgetLibrary(BudgetLibraryId);

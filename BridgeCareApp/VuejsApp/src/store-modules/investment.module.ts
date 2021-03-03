@@ -84,8 +84,8 @@ const actions = {
                 }
             });
     },
-    async addOrUpdateInvestment({dispatch, commit}: any, payload: any) {
-        await InvestmentService.addOrUpdateInvestment(payload.library, payload.investmentPlan, payload.scenarioId)
+    async upsertInvestment({dispatch, commit}: any, payload: any) {
+        await InvestmentService.upsertInvestment(payload.library, payload.investmentPlan, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.budgetLibraries, payload.scenarioId)) {
@@ -109,7 +109,7 @@ const actions = {
                     const hasLibraryToUpdate: boolean = any(propEq('id', library.id), state.budgetLibraries);
                     let message: string = '';
                     if (payload.scenarioId !== getBlankGuid()) {
-                        message = 'Updated investment data';
+                        message = 'Updated investmentModule data';
                     } else if (hasLibraryToUpdate) {
                         message = 'Updated budget library';
                     } else {

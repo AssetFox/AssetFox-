@@ -123,12 +123,12 @@
     </v-flex>
     <v-flex xs12>
       <v-layout justify-end row v-show="hasSelectedLibrary">
-        <v-btn @click="onAddOrUpdateBudgetPriorityLibrary(selectedBudgetPriorityLibrary, selectedScenarioId)"
+        <v-btn @click="onUpsertBudgetPriorityLibrary(selectedBudgetPriorityLibrary, selectedScenarioId)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId !== uuidNIL" :disabled="disableCrudButtons()">
           Save
         </v-btn>
-        <v-btn @click="onAddOrUpdateBudgetPriorityLibrary(selectedBudgetPriorityLibrary, uuidNIL)"
+        <v-btn @click="onUpsertBudgetPriorityLibrary(selectedBudgetPriorityLibrary, uuidNIL)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId === uuidNIL" :disabled="disableCrudButtons()">
           Update Library
@@ -151,7 +151,7 @@
     <ConfirmDeleteAlert :dialogData="confirmDeleteAlertData" @submit="onSubmitConfirmDeleteAlertResult"/>
 
     <CreatePriorityLibraryDialog :dialogData="createBudgetPriorityLibraryDialogData"
-                                 @submit="onAddOrUpdateBudgetPriorityLibrary"/>
+                                 @submit="onUpsertBudgetPriorityLibrary"/>
 
     <CreatePriorityDialog :showDialog="showCreateBudgetPriorityDialog" @submit="onAddBudgetPriority"/>
 
@@ -208,15 +208,15 @@ const ObjectID = require('bson-objectid');
   }
 })
 export default class BudgetPriorityEditor extends Vue {
-  @State(state => state.investmentEditor.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
-  @State(state => state.priorityEditor.budgetPriorityLibraries) stateBudgetPriorityLibraries: BudgetPriorityLibrary[];
-  @State(state => state.priorityEditor.selectedBudgetPriorityLibrary) stateSelectedBudgetPriorityLibrary: BudgetPriorityLibrary;
+  @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
+  @State(state => state.budgetPriorityModule.budgetPriorityLibraries) stateBudgetPriorityLibraries: BudgetPriorityLibrary[];
+  @State(state => state.budgetPriorityModule.selectedBudgetPriorityLibrary) stateSelectedBudgetPriorityLibrary: BudgetPriorityLibrary;
 
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;
   @Action('getBudgetPriorityLibraries') getBudgetPriorityLibrariesAction: any;
   @Action('selectBudgetPriorityLibrary') selectBudgetPriorityLibraryAction: any;
-  @Action('addOrUpdateBudgetPriorityLibrary') addOrUpdateBudgetPriorityLibraryAction: any;
+  @Action('upsertBudgetPriorityLibrary') upsertBudgetPriorityLibraryAction: any;
   @Action('deleteBudgetPriorityLibrary') deleteBudgetPriorityLibraryAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
@@ -523,11 +523,11 @@ export default class BudgetPriorityEditor extends Vue {
     this.selectedBudgetPriorityForCriteriaEdit = clone(emptyBudgetPriority);
   }
 
-  onAddOrUpdateBudgetPriorityLibrary(library: BudgetPriorityLibrary, scenarioId: string) {
+  onUpsertBudgetPriorityLibrary(library: BudgetPriorityLibrary, scenarioId: string) {
     this.createBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
 
     if (!isNil(library)) {
-      this.addOrUpdateBudgetPriorityLibraryAction({library: library, scenarioId: scenarioId});
+      this.upsertBudgetPriorityLibraryAction({library: library, scenarioId: scenarioId});
     }
   }
 

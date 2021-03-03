@@ -241,11 +241,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList());
         }
 
-        public void AddOrUpdateTreatmentLibrary(TreatmentLibraryDTO dto, Guid simulationId)
+        public void UpsertTreatmentLibrary(TreatmentLibraryDTO dto, Guid simulationId)
         {
             var entity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, dto.Id);
+            _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -263,7 +263,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public void AddOrUpdateOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId)
+        public void UpsertOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId)
         {
             if (!_unitOfDataPersistenceWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
             {
@@ -295,11 +295,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.AddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
             }
 
             _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ => equationIds.Contains(_.Id));
@@ -320,14 +320,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 var costsPerTreatmentId =
                     treatments.Where(_ => _.Costs.Any()).ToList().ToDictionary(_ => _.Id, _ => _.Costs);
-                _unitOfDataPersistenceWork.TreatmentCostRepo.AddOrUpdateOrDeleteTreatmentCosts(costsPerTreatmentId, libraryId);
+                _unitOfDataPersistenceWork.TreatmentCostRepo.UpsertOrDeleteTreatmentCosts(costsPerTreatmentId, libraryId);
             }
 
             if (treatments.Any(_ => _.Consequences.Any()))
             {
                 var consequencesPerTreatmentId = treatments.Where(_ => _.Consequences.Any()).ToList()
                     .ToDictionary(_ => _.Id, _ => _.Consequences);
-                _unitOfDataPersistenceWork.TreatmentConsequenceRepo.AddOrUpdateOrDeleteTreatmentConsequences(consequencesPerTreatmentId, libraryId);
+                _unitOfDataPersistenceWork.TreatmentConsequenceRepo.UpsertOrDeleteTreatmentConsequences(consequencesPerTreatmentId, libraryId);
             }
 
             if (treatments.Any(_ => _.BudgetIds.Any()))

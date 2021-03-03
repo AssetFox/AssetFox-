@@ -7,8 +7,8 @@ export default class DeficientConditionGoalService {
         return coreAxiosInstance.get(`${API.DeficientConditionGoalController}/GetDeficientConditionGoalLibraries`);
     }
 
-    static addOrUpdateDeficientConditionGoalLibrary(data: DeficientConditionGoalLibrary, scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.DeficientConditionGoalController}/AddOrUpdateDeficientConditionGoalLibrary/${scenarioId}`, data);
+    static upsertDeficientConditionGoalLibrary(data: DeficientConditionGoalLibrary, scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.DeficientConditionGoalController}/UpsertDeficientConditionGoalLibrary/${scenarioId}`, data);
     }
 
     static deleteDeficientConditionGoalLibrary(libraryId: string): AxiosPromise {

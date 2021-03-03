@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 Id = new Guid(DataPersistenceConstants.PennDotNetworkId),
                 Name = network.Name
             };
-            _unitOfDataPersistenceWork.Context.AddOrUpdate(networkEntity, networkEntity.Id);
+            _unitOfDataPersistenceWork.Context.Upsert(networkEntity, networkEntity.Id);
             _unitOfDataPersistenceWork.Context.SaveChanges();
 
             // convert maintainable assets and all child domains to entities

@@ -65,7 +65,7 @@ export default class CreateDeficientConditionGoalDialog extends Vue {
   @Prop() showDialog: boolean;
   @Prop() currentNumberOfDeficientConditionGoals: number;
 
-  @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
+  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 
   newDeficientConditionGoal: DeficientConditionGoal = clone({...emptyDeficientConditionGoal, id: getNewGuid()});
   numericAttributeNames: string[] = [];

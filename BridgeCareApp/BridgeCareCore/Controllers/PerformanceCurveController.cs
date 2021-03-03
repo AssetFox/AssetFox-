@@ -33,8 +33,8 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("AddOrUpdatePerformanceCurveLibrary/{simulationId}")]
-        public async Task<IActionResult> AddOrUpdatePerformanceCurveLibrary(Guid simulationId, PerformanceCurveLibraryDTO dto)
+        [Route("UpsertPerformanceCurveLibrary/{simulationId}")]
+        public async Task<IActionResult> UpsertPerformanceCurveLibrary(Guid simulationId, PerformanceCurveLibraryDTO dto)
         {
             try
             {
@@ -42,9 +42,9 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _unitOfDataPersistenceWork.PerformanceCurveRepo
-                        .AddOrUpdatePerformanceCurveLibrary(dto, simulationId);
+                        .UpsertPerformanceCurveLibrary(dto, simulationId);
                     _unitOfDataPersistenceWork.PerformanceCurveRepo
-                        .AddOrUpdateOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
+                        .UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
                 });
 
                 _unitOfDataPersistenceWork.Commit();

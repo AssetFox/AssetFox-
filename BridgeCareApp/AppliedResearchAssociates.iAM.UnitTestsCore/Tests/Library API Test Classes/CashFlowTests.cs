@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        private void SetupForAddOrUpdateOrDelete()
+        private void SetupForUpsertOrDelete()
         {
             SetupForGet();
             _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
@@ -92,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Act
                 var result = _controller
-                    .AddOrUpdateCashFlowRuleLibrary(Guid.Empty, TestCashFlowRuleLibrary.ToDto());
+                    .UpsertCashFlowRuleLibrary(Guid.Empty, TestCashFlowRuleLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result.Result);
@@ -159,7 +159,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<CashFlowRuleLibraryDTO>)Convert.ChangeType(
                     (_controller.CashFlowRuleLibraries().Result as OkObjectResult).Value,
                     typeof(List<CashFlowRuleLibraryDTO>));
@@ -173,7 +173,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.AddOrUpdateCashFlowRuleLibrary(_testHelper.TestSimulation.Id,
+                    _controller.UpsertCashFlowRuleLibrary(_testHelper.TestSimulation.Id,
                         cashFlowRuleLibraryDTO);
 
                 // Assert
@@ -215,7 +215,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<CashFlowRuleLibraryDTO>)Convert.ChangeType(
                     (_controller.CashFlowRuleLibraries().Result as OkObjectResult).Value,
                     typeof(List<CashFlowRuleLibraryDTO>));
@@ -224,7 +224,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 cashFlowRuleLibraryDTO.CashFlowRules[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
-                await _controller.AddOrUpdateCashFlowRuleLibrary(_testHelper.TestSimulation.Id,
+                await _controller.UpsertCashFlowRuleLibrary(_testHelper.TestSimulation.Id,
                     cashFlowRuleLibraryDTO);
 
                 // Act

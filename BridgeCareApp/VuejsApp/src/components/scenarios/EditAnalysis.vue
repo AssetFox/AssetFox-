@@ -106,8 +106,8 @@
         components: {CriteriaEditorDialog: CriterionLibraryEditorDialog}
     })
     export default class EditAnalysis extends Vue {
-        @State(state => state.scenario.analysis) stateAnalysis: Analysis;
-        @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
+        @State(state => state.scenarioModule.analysis) stateAnalysis: Analysis;
+        @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 
         @Action('getScenarioAnalysis') getScenarioAnalysisAction: any;
         @Action('saveScenarioAnalysis') saveScenarioAnalysisAction: any;

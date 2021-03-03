@@ -99,7 +99,7 @@ export default class ConsequencesTab extends Vue {
   @Prop() selectedTreatmentConsequences: TreatmentConsequence[];
   @Prop() rules: InputValidationRules;
 
-  @State(state => state.attribute.attributes) stateAttributes: Attribute[];
+  @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
 
   consequencesGridHeaders: DataTableHeader[] = [
     {text: 'Attribute', value: 'attribute', align: 'left', sortable: false, class: '', width: '200px'},

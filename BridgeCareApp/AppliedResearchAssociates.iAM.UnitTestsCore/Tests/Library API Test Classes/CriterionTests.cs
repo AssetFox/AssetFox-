@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Act
                 var result = _controller
-                    .AddOrUpdateCriterionLibrary(_testHelper.TestCriterionLibrary.ToDto());
+                    .UpsertCriterionLibrary(_testHelper.TestCriterionLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result.Result);
@@ -136,8 +136,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 }.ToDto();
 
                 // Act
-                var updateResult = _controller.AddOrUpdateCriterionLibrary(criterionLibraryDTO);
-                var addResult = _controller.AddOrUpdateCriterionLibrary(newCriterionLibraryDTO);
+                var updateResult = _controller.UpsertCriterionLibrary(criterionLibraryDTO);
+                var addResult = _controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
 
                 // Assert
                 Assert.IsType<OkResult>(updateResult.Result);

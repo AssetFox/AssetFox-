@@ -34,8 +34,8 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("AddOrUpdateCashFlowRuleLibrary/{simulationId}")]
-        public async Task<IActionResult> AddOrUpdateCashFlowRuleLibrary(Guid simulationId, CashFlowRuleLibraryDTO dto)
+        [Route("UpsertCashFlowRuleLibrary/{simulationId}")]
+        public async Task<IActionResult> UpsertCashFlowRuleLibrary(Guid simulationId, CashFlowRuleLibraryDTO dto)
         {
             try
             {
@@ -43,9 +43,9 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _unitOfDataPersistenceWork.CashFlowRuleRepo
-                        .AddOrUpdateCashFlowRuleLibrary(dto, simulationId);
+                        .UpsertCashFlowRuleLibrary(dto, simulationId);
                     _unitOfDataPersistenceWork.CashFlowRuleRepo
-                        .AddOrUpdateOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
+                        .UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
                 });
 
                 _unitOfDataPersistenceWork.Commit();

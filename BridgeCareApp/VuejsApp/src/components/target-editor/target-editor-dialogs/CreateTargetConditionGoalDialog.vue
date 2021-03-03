@@ -52,7 +52,7 @@ export default class CreateTargetConditionGoalDialog extends Vue {
   @Prop() showDialog: boolean;
   @Prop() currentNumberOfTargetConditionGoals: number;
 
-  @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
+  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 
   newTargetConditionGoal: TargetConditionGoal = {...emptyTargetConditionGoal, id: getNewGuid()};
   numericAttributeNames: string[] = [];

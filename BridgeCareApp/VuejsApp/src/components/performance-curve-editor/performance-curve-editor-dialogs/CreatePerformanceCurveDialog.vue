@@ -56,7 +56,7 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 export default class CreatePerformanceCurveDialog extends Vue {
   @Prop() showDialog: boolean;
 
-  @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
+  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 
   attributeSelectItems: SelectItem[] = [];
   newPerformanceCurve: PerformanceCurve = {...emptyPerformanceCurve, id: getNewGuid()};

@@ -7,8 +7,8 @@ export default class CashFlowService {
         return coreAxiosInstance.get(`${API.CashFlowController}/GetCashFlowRuleLibraries`);
     }
 
-    static addOrUpdateCashFlowRuleLibrary(data: CashFlowRuleLibrary, scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.CashFlowController}/AddOrUpdateCashFlowRuleLibrary/${scenarioId}`, data);
+    static upsertCashFlowRuleLibrary(data: CashFlowRuleLibrary, scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.CashFlowController}/UpsertCashFlowRuleLibrary/${scenarioId}`, data);
     }
 
     static deleteCashFlowRuleLibrary(libraryId: string): AxiosPromise {

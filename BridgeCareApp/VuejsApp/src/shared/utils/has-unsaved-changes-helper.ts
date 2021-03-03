@@ -28,7 +28,7 @@ export const hasUnsavedChangesCore = (objectType: string, object1: any, object2:
             return !isEqual(localObject, emptyTargetConditionGoalLibrary) && !isEqual(localObject, stateObject);
         case 'budget-library':
             return !isEqual(localObject, emptyBudgetLibrary) && !isEqual(localObject, stateObject);
-        case 'investment-plan':
+        case 'investmentModule-plan':
             return !isEqual(localObject, emptyInvestmentPlan) && !isEqual(localObject, stateObject);
         case 'budget-priority':
             return !isEqual(localObject, emptyBudgetPriorityLibrary) && !isEqual(localObject, stateObject);

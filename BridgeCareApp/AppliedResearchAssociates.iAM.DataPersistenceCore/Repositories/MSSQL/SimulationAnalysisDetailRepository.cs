@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having id {dto.SimulationId}.");
             }
 
-            _unitOfDataPersistenceWork.Context.AddOrUpdate(dto.ToEntity(), dto.SimulationId);
+            _unitOfDataPersistenceWork.Context.Upsert(dto.ToEntity(), dto.SimulationId);
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 

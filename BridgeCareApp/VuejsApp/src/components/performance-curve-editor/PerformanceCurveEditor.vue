@@ -153,13 +153,13 @@
     <v-flex xs12>
       <v-layout justify-end row v-show="hasSelectedLibrary">
         <v-btn :disabled="disableCrudButton()"
-               @click="onAddOrUpdatePerformanceCurveLibrary(selectedPerformanceCurveLibrary, selectedScenarioId)"
+               @click="onUpsertPerformanceCurveLibrary(selectedPerformanceCurveLibrary, selectedScenarioId)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId !== uuidNIL">
           Save
         </v-btn>
         <v-btn :disabled="disableCrudButton()"
-               @click="onAddOrUpdatePerformanceCurveLibrary(selectedPerformanceCurveLibrary, uuidNIL)"
+               @click="onUpsertPerformanceCurveLibrary(selectedPerformanceCurveLibrary, uuidNIL)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId === uuidNIL">
           Update Library
@@ -183,7 +183,7 @@
                         @submit="onSubmitConfirmDeleteAlertResult"/>
 
     <CreatePerformanceCurveLibraryDialog :dialogData="createPerformanceCurveLibraryDialogData"
-                                         @submit="onAddOrUpdatePerformanceCurveLibrary"/>
+                                         @submit="onUpsertPerformanceCurveLibrary"/>
 
     <CreatePerformanceCurveDialog :showDialog="showCreatePerformanceCurveDialog"
                                   @submit="onCreatePerformanceCurve"/>
@@ -249,13 +249,13 @@ import {getAppliedLibraryId, hasAppliedLibrary} from '@/shared/utils/library-uti
   }
 })
 export default class PerformanceCurveEditor extends Vue {
-  @State(state => state.performanceCurvesEditor.performanceCurveLibraries) statePerformanceCurveLibraries: PerformanceCurveLibrary[];
-  @State(state => state.performanceCurvesEditor.selectedPerformanceCurveLibrary) stateSelectedPerformanceCurveLibrary: PerformanceCurveLibrary;
-  @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
+  @State(state => state.performanceCurveModule.performanceCurveLibraries) statePerformanceCurveLibraries: PerformanceCurveLibrary[];
+  @State(state => state.performanceCurveModule.selectedPerformanceCurveLibrary) stateSelectedPerformanceCurveLibrary: PerformanceCurveLibrary;
+  @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 
   @Action('getPerformanceCurveLibraries') getPerformanceCurveLibrariesAction: any;
   @Action('selectPerformanceCurveLibrary') selectPerformanceCurveLibraryAction: any;
-  @Action('addOrUpdatePerformanceCurveLibrary') addOrUpdatePerformanceCurveLibraryAction: any;
+  @Action('upsertPerformanceCurveLibrary') upsertPerformanceCurveLibraryAction: any;
   @Action('deletePerformanceCurveLibrary') deletePerformanceCurveLibraryAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
   @Action('updatePerformanceCurvesCriterionLibraries') updatePerformanceCurveCriterionLibrariesAction: any;
@@ -477,11 +477,11 @@ export default class PerformanceCurveEditor extends Vue {
     };
   }
 
-  onAddOrUpdatePerformanceCurveLibrary(performanceCurveLibrary: PerformanceCurveLibrary, scenarioId: string) {
+  onUpsertPerformanceCurveLibrary(performanceCurveLibrary: PerformanceCurveLibrary, scenarioId: string) {
     this.createPerformanceCurveLibraryDialogData = clone(emptyCreatePerformanceLibraryDialogData);
 
     if (!isNil(performanceCurveLibrary) && performanceCurveLibrary.id !== this.uuidNIL) {
-      this.addOrUpdatePerformanceCurveLibraryAction({library: performanceCurveLibrary, scenarioId: scenarioId});
+      this.upsertPerformanceCurveLibraryAction({library: performanceCurveLibrary, scenarioId: scenarioId});
     }
   }
 

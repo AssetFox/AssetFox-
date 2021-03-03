@@ -98,7 +98,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        private void SetupForAddOrUpdateOrDelete()
+        private void SetupForUpsertOrDelete()
         {
             SetupForGet();
             //_testHelper.UnitOfDataPersistenceWork.Context.TreatmentCost.Add(TestTreatmentCost);
@@ -137,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Act
-                var result = _controller.AddOrUpdateTreatmentLibrary(Guid.Empty, TestTreatmentLibrary.ToDto());
+                var result = _controller.UpsertTreatmentLibrary(Guid.Empty, TestTreatmentLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result.Result);
@@ -203,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(
                     (_controller.TreatmentLibraries().Result as OkObjectResult).Value,
                     typeof(List<TreatmentLibraryDTO>));
@@ -230,7 +230,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.AddOrUpdateTreatmentLibrary(_testHelper.TestSimulation.Id, treatmentLibraryDTO);
+                    _controller.UpsertTreatmentLibrary(_testHelper.TestSimulation.Id, treatmentLibraryDTO);
 
                 // Assert
                 Assert.IsType<OkResult>(result.Result);
@@ -308,7 +308,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                SetupForAddOrUpdateOrDelete();
+                SetupForUpsertOrDelete();
                 var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(
                     (_controller.TreatmentLibraries().Result as OkObjectResult).Value,
                     typeof(List<TreatmentLibraryDTO>));
@@ -331,7 +331,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 treatmentLibraryDTO.Treatments[0].Consequences.Add(consequenceDTO);
                 treatmentLibraryDTO.Treatments[0].BudgetIds.Add(BudgetId);
 
-                await _controller.AddOrUpdateTreatmentLibrary(_testHelper.TestSimulation.Id, treatmentLibraryDTO);
+                await _controller.UpsertTreatmentLibrary(_testHelper.TestSimulation.Id, treatmentLibraryDTO);
 
                 // Act
                 var result = _controller.DeleteTreatmentLibrary(TreatmentLibraryId);

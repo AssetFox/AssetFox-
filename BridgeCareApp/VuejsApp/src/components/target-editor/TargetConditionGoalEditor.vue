@@ -109,12 +109,12 @@
     </v-flex>
     <v-flex v-show="hasSelectedLibrary" xs12>
       <v-layout justify-end row>
-        <v-btn @click="onAddOrUpdateTargetConditionGoalLibrary(selectedTargetConditionGoalLibrary, selectedScenarioId)"
+        <v-btn @click="onUpsertTargetConditionGoalLibrary(selectedTargetConditionGoalLibrary, selectedScenarioId)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId !== uuidNIL" :disabled="disableCrudButton()">
           Save
         </v-btn>
-        <v-btn @click="onAddOrUpdateTargetConditionGoalLibrary(selectedTargetConditionGoalLibrary, uuidNIL)"
+        <v-btn @click="onUpsertTargetConditionGoalLibrary(selectedTargetConditionGoalLibrary, uuidNIL)"
                class="ara-blue-bg white--text"
                v-show="selectedScenarioId === uuidNIL" :disabled="disableCrudButton()">
           Update Library
@@ -137,7 +137,7 @@
     <ConfirmDeleteAlert :dialogData="confirmDeleteAlertData" @submit="onSubmitConfirmDeleteAlertResult"/>
 
     <CreateTargetConditionGoalLibraryDialog :dialogData="createTargetConditionGoalLibraryDialogData"
-                                            @submit="onAddOrUpdateTargetConditionGoalLibrary"/>
+                                            @submit="onUpsertTargetConditionGoalLibrary"/>
 
     <CreateTargetConditionGoalDialog :showDialog="showCreateTargetConditionGoalDialog"
                                      :currentNumberOfTargetConditionGoals="selectedTargetConditionGoalLibrary.targetConditionGoals.length"
@@ -193,14 +193,14 @@ import {CriterionLibrary} from '@/shared/models/iAM/criteria';
   }
 })
 export default class TargetConditionGoalEditor extends Vue {
-  @State(state => state.targetEditor.targetConditionGoalLibraries) stateTargetConditionGoalLibraries: TargetConditionGoalLibrary[];
-  @State(state => state.targetEditor.selectedTargetConditionGoalLibrary) stateSelectedTargetConditionLibrary: TargetConditionGoalLibrary;
-  @State(state => state.attribute.numericAttributeNames) stateNumericAttributes: Attribute[];
+  @State(state => state.targetConditionGoalModule.targetConditionGoalLibraries) stateTargetConditionGoalLibraries: TargetConditionGoalLibrary[];
+  @State(state => state.targetConditionGoalModule.selectedTargetConditionGoalLibrary) stateSelectedTargetConditionLibrary: TargetConditionGoalLibrary;
+  @State(state => state.attributeModule.numericAttributeNames) stateNumericAttributes: Attribute[];
 
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('getTargetConditionGoalLibraries') getTargetConditionGoalLibrariesAction: any;
   @Action('selectTargetConditionGoalLibrary') selectTargetConditionGoalLibraryAction: any;
-  @Action('addOrUpdateTargetConditionGoalLibrary') createTargetConditionGoalLibraryAction: any;
+  @Action('upsertTargetConditionGoalLibrary') createTargetConditionGoalLibraryAction: any;
   @Action('deleteTargetConditionGoalLibrary') deleteTargetConditionGoalLibraryAction: any;
   @Action('getAttributes') getAttributesAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
@@ -352,7 +352,7 @@ export default class TargetConditionGoalEditor extends Vue {
     this.selectedTargetConditionGoalForCriteriaEdit = clone(emptyTargetConditionGoal);
   }
 
-  onAddOrUpdateTargetConditionGoalLibrary(library: TargetConditionGoalLibrary, scenarioId: string) {
+  onUpsertTargetConditionGoalLibrary(library: TargetConditionGoalLibrary, scenarioId: string) {
     this.createTargetConditionGoalLibraryDialogData = clone(emptyCreateTargetConditionGoalLibraryDialogData);
 
     if (!isNil(library)) {

@@ -136,11 +136,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ForEach(_ => _.CreatePerformanceCurve(simulation));
         }
 
-        public void AddOrUpdatePerformanceCurveLibrary(PerformanceCurveLibraryDTO dto, Guid simulationId)
+        public void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto, Guid simulationId)
         {
             var performanceCurveLibraryEntity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.AddOrUpdate(performanceCurveLibraryEntity, dto.Id);
+            _unitOfDataPersistenceWork.Context.Upsert(performanceCurveLibraryEntity, dto.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -161,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public void AddOrUpdateOrDeletePerformanceCurves(List<PerformanceCurveDTO> performanceCurves, Guid libraryId)
+        public void UpsertOrDeletePerformanceCurves(List<PerformanceCurveDTO> performanceCurves, Guid libraryId)
         {
             if (!_unitOfDataPersistenceWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == libraryId))
             {
@@ -211,11 +211,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.AddOrUpdateOrDelete(performanceCurveEntities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(performanceCurveEntities, predicatesPerCrudOperation);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkAddOrUpdateOrDelete(performanceCurveEntities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(performanceCurveEntities, predicatesPerCrudOperation);
             }
 
             _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ => equationIds.Contains(_.Id));

@@ -8,9 +8,9 @@ export default class PerformanceCurveService {
         return coreAxiosInstance.get(`${API.PerformanceCurveController}/GetPerformanceCurveLibraries`);
     }
 
-    static addOrUpdatePerformanceCurveLibrary(data: PerformanceCurveLibrary, scenarioId: string): AxiosPromise {
+    static upsertPerformanceCurveLibrary(data: PerformanceCurveLibrary, scenarioId: string): AxiosPromise {
         return coreAxiosInstance
-        .post(`${API.PerformanceCurveController}/AddOrUpdatePerformanceCurveLibrary/${scenarioId}`, data);
+        .post(`${API.PerformanceCurveController}/UpsertPerformanceCurveLibrary/${scenarioId}`, data);
     }
 
     static deletePerformanceCurveLibrary(libraryId: string): AxiosPromise {

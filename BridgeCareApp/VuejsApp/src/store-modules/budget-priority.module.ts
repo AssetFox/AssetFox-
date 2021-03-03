@@ -51,8 +51,8 @@ const actions = {
                 }
             });
     },
-    async addOrUpdateBudgetPriorityLibrary({dispatch, commit}: any, payload: any) {
-        await BudgetPriorityService.addOrUpdateBudgetPriorityLibrary(payload.library, payload.scenarioId)
+    async upsertBudgetPriorityLibrary({dispatch, commit}: any, payload: any) {
+        await BudgetPriorityService.upsertBudgetPriorityLibrary(payload.library, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.budgetPriorityLibraries, payload.scenarioId)) {

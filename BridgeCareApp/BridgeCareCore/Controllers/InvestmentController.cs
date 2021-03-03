@@ -39,8 +39,8 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("AddOrUpdateInvestment/{simulationId}")]
-        public async Task<IActionResult> AddOrUpdateInvestment(Guid simulationId, [FromBody] AddOrUpdateInvestmentDataDTO data)
+        [Route("UpsertInvestment/{simulationId}")]
+        public async Task<IActionResult> UpsertInvestment(Guid simulationId, [FromBody] UpsertInvestmentDataDTO data)
         {
             try
             {
@@ -48,11 +48,11 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _unitOfDataPersistenceWork.BudgetRepo
-                        .AddOrUpdateBudgetLibrary(data.BudgetLibrary, simulationId);
+                        .UpsertBudgetLibrary(data.BudgetLibrary, simulationId);
                     _unitOfDataPersistenceWork.BudgetRepo
-                        .AddOrUpdateOrDeleteBudgets(data.BudgetLibrary.Budgets, data.BudgetLibrary.Id);
+                        .UpsertOrDeleteBudgets(data.BudgetLibrary.Budgets, data.BudgetLibrary.Id);
                     _unitOfDataPersistenceWork.InvestmentPlanRepo
-                        .AddOrUpdateInvestmentPlan(data.InvestmentPlan, simulationId);
+                        .UpsertInvestmentPlan(data.InvestmentPlan, simulationId);
                 });
 
                 _unitOfDataPersistenceWork.Commit();

@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 attributes.ForEach(_ =>
                 {
                     var entity = _.ToEntity();
-                    _unitOfDataPersistenceWork.Context.AddOrUpdate(entity, entity.Id);
+                    _unitOfDataPersistenceWork.Context.Upsert(entity, entity.Id);
                 });
             }
             else

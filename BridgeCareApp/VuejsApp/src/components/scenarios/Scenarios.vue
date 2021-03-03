@@ -512,20 +512,20 @@ import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
     },
 })
 export default class Scenarios extends Vue {
-    @State(state => state.scenario.scenarios) stateScenarios: Scenario[];
-    @State(state => state.authentication.userId) userId: string;
-    @State(state => state.breadcrumb.navigation) navigation: any[];
-    @State(state => state.network.networks) networks: Network[];
-    @State(state => state.authentication.authenticated) authenticated: boolean;
+    @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
+    @State(state => state.authenticationModule.userId) userId: string;
+    @State(state => state.breadcrumbModule.navigation) navigation: any[];
+    @State(state => state.networkModule.networks) networks: Network[];
+    @State(state => state.authenticationModule.authenticated) authenticated: boolean;
     //@State(state => state.rollup.rollups) rollups: Rollup[];
-    @State(state => state.authentication.isAdmin) isAdmin: boolean;
-    @State(state => state.authentication.isCWOPA) isCWOPA: boolean;
-    @State(state => state.network.newNetworks) newNetworks: NetworkCore[];
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.isCWOPA) isCWOPA: boolean;
+    @State(state => state.networkModule.newNetworks) newNetworks: NetworkCore[];
+
     @Action('getMongoScenarios') getMongoScenariosAction: any;
     @Action('getLegacyScenarios') getLegacyScenariosAction: any;
     @Action('runSimulation') runSimulationAction: any; // Obselete
     @Action('runNewSimulation') runNewSimulationAction: any;
-
     @Action('createScenario') createScenarioAction: any;
     @Action('deleteScenario') deleteScenarioAction: any;
     @Action('updateScenario') updateScenarioAction: any;

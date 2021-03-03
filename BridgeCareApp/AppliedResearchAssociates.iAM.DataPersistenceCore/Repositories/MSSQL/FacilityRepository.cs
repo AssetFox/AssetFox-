@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using AppliedResearchAssociates.iAM.Domains;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
-using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -13,16 +14,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public FacilityRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+        public FacilityRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateFacilities(List<Facility> facilities, Guid networkId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == networkId))
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
@@ -31,21 +32,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.Facility.AddRange(facilityEntities);
+                _unitOfWork.Context.Facility.AddRange(facilityEntities);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkInsert(facilityEntities);
+                _unitOfWork.Context.BulkInsertOrUpdate(facilityEntities);
             }
 
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.SaveChanges();
 
             if (facilities.Any(_ => _.Sections.Any()))
             {
                 var sections = facilities.Where(_ => _.Sections.Any())
                     .SelectMany(_ => _.Sections).ToList();
 
-                _unitOfDataPersistenceWork.SectionRepo.CreateSections(sections);
+                _unitOfWork.SectionRepo.CreateSections(sections);
             }
         }
     }

@@ -72,6 +72,7 @@ namespace BridgeCareCore
 
             services.AddScoped<CulvertCost>();
             services.AddScoped<BridgeWorkCost>();
+            services.AddScoped<CommittedProjectCost>();
 
             // Summary report Graph TABS
             services.AddScoped<IAddGraphsInTabs, AddGraphsInTabs>();

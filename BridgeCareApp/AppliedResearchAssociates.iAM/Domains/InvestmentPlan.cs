@@ -102,6 +102,9 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public void Remove(CashFlowRule cashFlowRule) => _CashFlowRules.Remove(cashFlowRule);
 
+        internal double GetInflationFactor(int year) => Math.Pow(1 + InflationRatePercentage / 100, year - FirstYearOfAnalysisPeriod);
+
+
         private readonly List<BudgetCondition> _BudgetConditions = new List<BudgetCondition>();
 
         private readonly List<Budget> _Budgets = new List<Budget>();

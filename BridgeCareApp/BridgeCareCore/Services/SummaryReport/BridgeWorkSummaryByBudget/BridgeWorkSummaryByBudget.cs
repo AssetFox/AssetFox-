@@ -17,14 +17,16 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
         private readonly CulvertCost _culvertCost;
         private readonly BridgeWorkCost _bridgeWorkCost;
+        private readonly CommittedProjectCost _committedProjectCost;
 
         public BridgeWorkSummaryByBudget(IExcelHelper excelHelper, BridgeWorkSummaryCommon bridgeWorkSummaryCommon,
-            CulvertCost culvertCost, BridgeWorkCost bridgeWorkCost)
+            CulvertCost culvertCost, BridgeWorkCost bridgeWorkCost, CommittedProjectCost committedProjectCost)
         {
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
             _culvertCost = culvertCost ?? throw new ArgumentNullException(nameof(culvertCost));
             _bridgeWorkCost = bridgeWorkCost ?? throw new ArgumentNullException(nameof(bridgeWorkCost));
+            _committedProjectCost = committedProjectCost ?? throw new ArgumentNullException(nameof(committedProjectCost));
         }
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
             List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount)
@@ -48,6 +50,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
             // setting up model to store data. This will be used to fill up Bridge Work Summary By Budget TAB
             var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();
+
             var budgets = new HashSet<string>();
             foreach(var yearData in reportOutputData.Years)
             {
@@ -65,13 +68,32 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 });
             }
 
+            var committedTreatments = new HashSet<string>();
             foreach (var summaryData in workSummaryByBudgetData)
             {
                 foreach (var yearData in reportOutputData.Years)
                 {
                     foreach (var section in yearData.Sections)
                     {
-                        if(section.TreatmentCause != TreatmentCause.NoSelection)
+                        if (section.TreatmentCause == TreatmentCause.CommittedProject)
+                        {
+                            var committedtTreatment = section.TreatmentConsiderations;
+                            var budgetAmount = (double)committedtTreatment.Sum(_ =>
+                            _.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget).Sum(bu => bu.CoveredCost));
+
+                            summaryData.YearlyData.Add(new YearsData
+                            {
+                                Year = yearData.Year,
+                                Treatment = section.AppliedTreatment,
+                                Amount = budgetAmount,
+                                isCommitted = true
+                            });
+                            committedTreatments.Add(section.AppliedTreatment);
+
+                            continue;
+                        }
+
+                        if (section.TreatmentCause != TreatmentCause.NoSelection)
                         {
                             var treatmentConsideration = section.TreatmentConsiderations;
                             var budgetAmount = (double)treatmentConsideration.Sum(_ =>
@@ -94,12 +116,18 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 //Filtering treatments for the given budget
                 //var totalCostPerYear = summaryData.YearlyData.Sum(_ => _.Amount);
 
-                var costForCulvertBudget = summaryData.YearlyData
-                                             .FindAll(_ => _.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase));
+                var costForCulvertBudget = new List<YearsData>();
+                var costForBridgeBudgets = new List<YearsData>();
+                var costForCommittedBudgets = new List<YearsData>();
 
-                var costForBridgeBudgets = summaryData.YearlyData
-                                             .FindAll(_ => !_.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase));
+                costForCulvertBudget = summaryData.YearlyData
+                                            .FindAll(_ => _.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && !_.isCommitted);
 
+                costForBridgeBudgets = summaryData.YearlyData
+                                                .FindAll(_ => !_.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && !_.isCommitted);
+
+                costForCommittedBudgets = summaryData.YearlyData
+                                                    .FindAll(_ => _.isCommitted);
 
                 var totalBudgetPerYearForCulvert = new Dictionary<int, double>();
                 var totalBudgetPerYearForBridgeWork = new Dictionary<int, double>();
@@ -122,7 +150,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
                     yearlyBudget.Clear();
 
-                    totalSpent.Add((year, culvertAmountSum + budgetAmountSum));
+                    yearlyBudget = costForCommittedBudgets.FindAll(_ => _.Year == year);
+                    var committedAmountSum = yearlyBudget.Sum(s => s.Amount);
+                    totalBudgetPerYearForMPMS.Add(year, committedAmountSum);
+
+                    yearlyBudget.Clear();
+
+                    totalSpent.Add((year, culvertAmountSum + budgetAmountSum + committedAmountSum));
                 }
 
                 currentCell.Column = 1;
@@ -140,6 +174,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
                     _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, nonCulvertTreatments,
                         totalBudgetPerYearForBridgeWork);
+
+                    _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets,
+                        committedTreatments, totalBudgetPerYearForMPMS);
                 }
 
                 currentCell.Row += 1;
@@ -200,9 +237,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value = budgetData.Value - (decimal)perYearTotalSpent.amount;
 
                     // Because we do not have committed project right now. The percentage will always be 0
-                    worksheet.Cells[currentCell.Row + 1, currentCell.Column + cellFortotalBudget + 2].Value =  0;
+                    worksheet.Cells[currentCell.Row + 1, currentCell.Column + cellFortotalBudget + 2].Value =
+                        totalBudgetPerYearForMPMS[perYearTotalSpent.year] /perYearTotalSpent.amount;
 
-                    worksheet.Cells[currentCell.Row + 2, currentCell.Column + cellFortotalBudget + 2].Value = 1 - 0;
+                    worksheet.Cells[currentCell.Row + 2, currentCell.Column + cellFortotalBudget + 2].Value = 1 -
+                        totalBudgetPerYearForMPMS[perYearTotalSpent.year] / perYearTotalSpent.amount;
                     yearTracker++;
                 }
 

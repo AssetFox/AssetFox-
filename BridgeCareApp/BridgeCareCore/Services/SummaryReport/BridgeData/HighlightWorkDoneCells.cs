@@ -23,8 +23,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 var rangeForCashFlow = worksheet.Cells[row, column - 1, row, column];
                 ParallelBridgeBAMs(parallelBridge, treatmentCause, range);
                 CashFlowedBridge(treatmentCause, rangeForCashFlow);
-                if (index != 1 && (treatmentCause == TreatmentCause.CommittedProject
-                    && previousYearCause == TreatmentCause.CommittedProject))
+
+                if (index != 1 && treatmentCause == TreatmentCause.CommittedProject
+                    && previousYearCause == TreatmentCause.CommittedProject)
                 {
                     var rangeWithPreviousColumn = worksheet.Cells[row, column - 1];
                     CommittedForConsecutiveYears(rangeWithPreviousColumn);

@@ -46,13 +46,32 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
             // cache to store total cost per treatment for a given year along with count of culvert and non-culvert bridges
             var costPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
+            var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
             foreach (var yearData in reportOutputData.Years)
             {
                 costPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int bridgeCount)>());
+                yearlyCostCommittedProj.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int bridgeCount)>());
                 foreach (var section in yearData.Sections)
                 {
                     if (section.TreatmentCause == TreatmentCause.NoSelection) //|| section.TreatmentOptions.Count <= 0
                     {
+                        continue;
+                    }
+                    if(section.TreatmentCause == TreatmentCause.CommittedProject)
+                    {
+                        var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+
+                        if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(section.AppliedTreatment))
+                        {
+                            yearlyCostCommittedProj[yearData.Year].Add(section.AppliedTreatment, (commitedCost, 1));
+                        }
+                        else
+                        {
+                            var treatmentCost = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment].treatmentCost + commitedCost;
+                            var bridgeCount = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment].bridgeCount + 1;
+                            var newCostAndCount = (treatmentCost, bridgeCount);
+                            yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = newCostAndCount;
+                        }
                         continue;
                     }
                     //[TODO] - ask Jake regarding cash flow project. It won't have anything in the TreartmentOptions barring 1st year
@@ -74,7 +93,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             }
             #endregion
 
-            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costPerTreatmentPerYear,
+            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costPerTreatmentPerYear, yearlyCostCommittedProj,
                 simulationYears, treatments, yearlyBudgetAmount);
 
             _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costPerTreatmentPerYear, simulationYears, treatments);

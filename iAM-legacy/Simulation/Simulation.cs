@@ -7212,7 +7212,7 @@ namespace Simulation
                 Hashtable hashConsequences = new Hashtable();
 
                 List<AttributeChange> committedConsequences;
-                if (!m_dictionaryCommittedEquations.ContainsKey(commit.ConsequenceID))
+                if (!m_dictionaryCommittedConsequences.ContainsKey(commit.ConsequenceID))
                 {
                     committedConsequences = new List<AttributeChange>();
                 }

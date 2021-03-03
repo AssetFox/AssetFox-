@@ -117,11 +117,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                     if (abbreviatedTreatmentNames.ContainsKey(data.section.AppliedTreatment))
                     {
-                        range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[data.section.AppliedTreatment]) ? "--" : abbreviatedTreatmentNames[data.section.AppliedTreatment];
+                        range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[data.section.AppliedTreatment])
+                            || data.section.AppliedTreatment.ToLower() == Properties.Resources.NoTreatment
+                            ? "--" : abbreviatedTreatmentNames[data.section.AppliedTreatment];
                     }
                     else
                     {
-                        range.Value = "--";
+                        range.Value = data.section.AppliedTreatment.ToLower() == Properties.Resources.NoTreatment ? "--" :
+                            data.section.AppliedTreatment.ToLower();
                     }
                     if (!range.Value.Equals("--"))
                     {

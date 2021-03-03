@@ -42,5 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLe
         public int Parallel_Struct { get; private set; }
 
         public string Owner_Code { get; private set; }
+
+        public string County { get; private set; }
     }
 }

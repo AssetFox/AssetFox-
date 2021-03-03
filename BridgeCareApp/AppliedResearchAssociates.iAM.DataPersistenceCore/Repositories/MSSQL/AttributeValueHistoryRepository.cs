@@ -8,7 +8,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappi
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using MoreLinq;
+using Attribute = AppliedResearchAssociates.iAM.Domains.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -22,11 +25,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             "Id", "CreatedDate", "LastModifiedDate", "CreatedBy", "LastModifiedBy", "SectionId", "AttributeId", "Year", "Value"
         };
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public AttributeValueHistoryRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+        public AttributeValueHistoryRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateNumericAttributeValueHistories(
@@ -43,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.NumericAttributeValueHistory.AddRange(numericAttributeValueHistoryEntities);
+                _unitOfWork.Context.NumericAttributeValueHistory.AddRange(numericAttributeValueHistoryEntities);
             }
             else
             {
@@ -58,17 +61,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var currentEntities = numericAttributeValueHistoryEntities
                             .Skip(skip * take).Take(take);/*.ToDataTable(Props);*/
                         //BulkInsert(dt, "NumericAttributeValueHistory");
-                        _unitOfDataPersistenceWork.Context.BulkInsert(currentEntities.ToList());
+                        _unitOfWork.Context.BulkInsertOrUpdate(currentEntities.ToList());
                         skip++;
                     }
                 }
                 else
                 {
-                    _unitOfDataPersistenceWork.Context.BulkInsert(numericAttributeValueHistoryEntities);
+                    _unitOfWork.Context.BulkInsertOrUpdate(numericAttributeValueHistoryEntities);
                 }
             }
 
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void CreateTextAttributeValueHistories(
@@ -85,10 +88,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.TextAttributeValueHistory.AddRange(textAttributeValueHistoryEntities);
+                _unitOfWork.Context.TextAttributeValueHistory.AddRange(textAttributeValueHistoryEntities);
             }
             else
             {
+
                 if (textAttributeValueHistoryEntities.Count > 10000)
                 {
                     //DataTable dt;
@@ -100,39 +104,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var currentEntities = textAttributeValueHistoryEntities
                             .Skip(skip * take).Take(take);/*.ToDataTable(Props);*/
                         //BulkInsert(dt, "TextAttributeValueHistory");
-                        _unitOfDataPersistenceWork.Context.BulkInsert(currentEntities.ToList());
+                        _unitOfWork.Context.BulkInsertOrUpdate(currentEntities.ToList());
                         skip++;
                     }
                 }
                 else
                 {
-                    _unitOfDataPersistenceWork.Context.BulkInsert(textAttributeValueHistoryEntities);
+                    _unitOfWork.Context.BulkInsertOrUpdate(textAttributeValueHistoryEntities);
                 }
             }
 
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.SaveChanges();
         }
 
         public void BulkInsert(DataTable dt, string tableName)
         {
-            // make sure to enable triggers more on triggers in next post
+            // make sure to enable triggers
+            // more on triggers in next post
             var bulkCopy = new SqlBulkCopy
                 (
-                    _unitOfDataPersistenceWork.Connection,
+                    _unitOfWork.Connection,
                     SqlBulkCopyOptions.TableLock |
                     SqlBulkCopyOptions.FireTriggers |
                     SqlBulkCopyOptions.UseInternalTransaction,
                     null
                 )
-            { DestinationTableName = tableName };
+                { DestinationTableName = tableName };
 
             // set the destination table name
-            _unitOfDataPersistenceWork.Connection.Open();
+            _unitOfWork.Connection.Open();
 
             // write the data in the "dataTable"
             bulkCopy.WriteToServer(dt);
-            _unitOfDataPersistenceWork.Connection.Close();
+            _unitOfWork.Connection.Close();
         }
+
     }
 
     public static class BulkUploadToSqlHelper
@@ -147,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var prop = properties.Find(propName, false);
                 table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
             }
-
+                
             foreach (var item in data)
             {
                 var row = table.NewRow();
@@ -156,6 +162,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     var prop = properties.Find(propName, false);
                     row[prop.Name] = prop.GetValue(item) ?? DBNull.Value;
+                    
                 }
 
                 table.Rows.Add(row);

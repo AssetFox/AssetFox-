@@ -135,6 +135,15 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Committed Total.
+        /// </summary>
+        internal static string CommittedTotal {
+            get {
+                return ResourceManager.GetString("CommittedTotal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to culvert.
         /// </summary>
         internal static string Culvert {

@@ -47,6 +47,8 @@ namespace BridgeCareCore.Services.SimulationAnalysis
             _unitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
             _unitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
 
+            _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+
             var runner = new SimulationRunner(simulation);
 
             runner.Failure += (sender, eventArgs) =>

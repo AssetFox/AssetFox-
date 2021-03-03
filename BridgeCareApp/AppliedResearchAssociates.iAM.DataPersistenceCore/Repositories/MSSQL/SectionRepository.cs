@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -14,11 +15,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfWork _unitOfWork;
 
-        public SectionRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+        public SectionRepository(UnitOfWork.UnitOfWork unitOfWork)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateSections(List<Section> sections)
@@ -27,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .SelectMany(_ => _.HistoricalAttributes.Select(__ => __.Name))
                 .Distinct().ToList();
 
-            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute
+            var attributeEntities = _unitOfWork.Context.Attribute
                 .Where(_ => attributeNames.Contains(_.Name)).ToList();
 
             if (!attributeEntities.Any())
@@ -81,23 +82,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.Section.AddRange(sectionEntities);
+                _unitOfWork.Context.Section.AddRange(sectionEntities);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkInsert(sectionEntities);
+                _unitOfWork.Context.BulkInsertOrUpdate(sectionEntities);
             }
 
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.SaveChanges();
 
             if (numericAttributeValueHistoryPerSectionIdAttributeIdTuple.Any())
             {
-                _unitOfDataPersistenceWork.AttributeValueHistoryRepo.CreateNumericAttributeValueHistories(numericAttributeValueHistoryPerSectionIdAttributeIdTuple);
+                _unitOfWork.AttributeValueHistoryRepo.CreateNumericAttributeValueHistories(numericAttributeValueHistoryPerSectionIdAttributeIdTuple);
             }
 
             if (textAttributeValueHistoryPerSectionIdAttributeIdTuple.Any())
             {
-                _unitOfDataPersistenceWork.AttributeValueHistoryRepo.CreateTextAttributeValueHistories(textAttributeValueHistoryPerSectionIdAttributeIdTuple);
+                _unitOfWork.AttributeValueHistoryRepo.CreateTextAttributeValueHistories(textAttributeValueHistoryPerSectionIdAttributeIdTuple);
             }
         }
     }

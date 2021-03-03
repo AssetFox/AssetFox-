@@ -13,8 +13,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 {
     internal static class Program
     {
-        private static void LogProgressToConsole(TimeSpan elapsed, string label) => Console.WriteLine($"{elapsed} --- {label}");
-
         private static void Main()
         {
             Console.WriteLine("User Id:");
@@ -25,12 +23,26 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
             Console.Clear();
 
-            var connectionString = string.Format(ConnectionFormats.SmallBridgeDatasetLocal, userId, password);
+            var connectionString = string.Format(ConnectionFormats.MainDatasetLocal, userId, password);
 
             using var connection = new SqlConnection(connectionString);
             connection.Open();
 
-            var accessor = new DataAccessor(connection, LogProgressToConsole);
+            var connectionStringBuilder = new SqlConnectionStringBuilder(connectionString);
+            var outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "iAM Analysis Testing Outputs", connectionStringBuilder.InitialCatalog, DateTime.Now.ToString("yyyyMMddHHmmss"));
+            _ = Directory.CreateDirectory(outputFolder);
+
+            var logFilePath = Path.Combine(outputFolder, "Log.txt");
+
+            void logToConsoleAndFile(string text = null)
+            {
+                Console.WriteLine(text);
+                File.AppendAllText(logFilePath, text + Environment.NewLine);
+            }
+
+            void logAccessorProgress(TimeSpan elapsed, string label) => logToConsoleAndFile($"{elapsed} --- {label}");
+
+            var accessor = new DataAccessor(connection, logAccessorProgress);
 
             Console.WriteLine("Network/Simulation ID specification:");
             // E.g. "net1:sim1,sim2,sim3;net2" where sims 1, 2, and 3 of net1 are run, and all sims
@@ -54,17 +66,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
             foreach (var result in explorer.GetAllValidationResults())
             {
                 errorIsPresent |= result.Status == ValidationStatus.Error;
-                Console.WriteLine($"[{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");
+                logToConsoleAndFile($"[{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");
             }
 
             if (errorIsPresent)
             {
-                Console.WriteLine("Analysis should not run when validation errors are present. Run will proceed anyway and will exclude simulations with validation errors.");
+                logToConsoleAndFile("Analysis should not run when validation errors are present. Run will proceed anyway and will exclude simulations with validation errors.");
             }
-
-            var connectionStringBuilder = new SqlConnectionStringBuilder(connectionString);
-            var outputFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "iAM Analysis Testing Outputs", connectionStringBuilder.InitialCatalog, DateTime.Now.ToString("yyyyMMddHHmmss"));
-            _ = Directory.CreateDirectory(outputFolder);
 
             foreach (var network in explorer.Networks)
             {
@@ -74,20 +82,22 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
                 {
                     var simulationId = accessor.IdPerSimulation[simulation];
 
-                    Console.WriteLine();
+                    logToConsoleAndFile();
+
+                    var networkSimulationLabel = $"{network.Name} ({networkId}) {simulation.Name} ({simulationId})";
 
                     if (simulation.GetAllValidationResults().Any(result => result.Status == ValidationStatus.Error))
                     {
-                        Console.WriteLine($"Skipping {network.Name} ({networkId}) {simulation.Name} ({simulationId}) due to validation errors.");
+                        logToConsoleAndFile($"Skipping {networkSimulationLabel} due to validation errors.");
                         continue;
                     }
 
-                    Console.WriteLine($"Running {network.Name} ({networkId}) {simulation.Name} ({simulationId}) ...");
+                    logToConsoleAndFile($"Running {networkSimulationLabel} ...");
 
                     var runner = new SimulationRunner(simulation);
-                    runner.Information += (sender, eventArgs) => Console.WriteLine(eventArgs.Message);
-                    runner.Warning += (sender, eventArgs) => Console.WriteLine(eventArgs.Message);
-                    runner.Failure += (sender, eventArgs) => Console.WriteLine(eventArgs.Message);
+                    runner.Information += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
+                    runner.Warning += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
+                    runner.Failure += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
 
                     var timer = Stopwatch.StartNew();
 
@@ -97,13 +107,15 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
                     }
                     catch (SimulationException e)
                     {
-                        Console.WriteLine("Simulation failed: " + e.Message);
+                        logToConsoleAndFile("Simulation failed: " + e.Message);
                         continue;
                     }
+                    finally
+                    {
+                        logToConsoleAndFile("Elapsed runtime of simulation: " + timer.Elapsed);
+                    }
 
-                    LogProgressToConsole(timer.Elapsed, "simulation run");
-
-                    Console.WriteLine("Final condition of network: " + simulation.Results.Years.Last().ConditionOfNetwork);
+                    logToConsoleAndFile("Final condition of network: " + simulation.Results.Years.Last().ConditionOfNetwork);
 
                     var outputFile = $"Network {networkId} - Simulation {simulationId}.json";
                     var outputPath = Path.Combine(outputFolder, outputFile);

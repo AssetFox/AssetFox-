@@ -22,9 +22,9 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
         private const int NetworkId = 13;
 
         private readonly IHubContext<BridgeCareHub> _hubContext;
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public LegacySimulationSynchronizer(IHubContext<BridgeCareHub> hub, UnitOfWork unitOfWork)
+        public LegacySimulationSynchronizer(IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfWork)
         {
             _hubContext = hub;
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

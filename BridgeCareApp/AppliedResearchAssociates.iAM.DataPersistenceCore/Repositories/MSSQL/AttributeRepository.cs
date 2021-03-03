@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (!existingJoins.Contains(joinTuple))
                     {
-                        var newJoinEntity = new AttributeEquationCriterionLibraryEntity {AttributeId = attributeEntity.Id,};
+                        var newJoinEntity = new AttributeEquationCriterionLibraryEntity { AttributeId = attributeEntity.Id, };
 
                         var equationEntity =
                             _unitOfDataPersistenceWork.Context.Equation.SingleOrDefault(_ =>

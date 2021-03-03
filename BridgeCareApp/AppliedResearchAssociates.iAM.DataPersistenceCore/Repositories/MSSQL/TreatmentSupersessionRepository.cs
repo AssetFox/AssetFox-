@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         }
                         else
                         {
-                            supersessionEntityIdsPerExpression.Add(__.Criterion.Expression, new List<Guid>{ entity.Id });
+                            supersessionEntityIdsPerExpression.Add(__.Criterion.Expression, new List<Guid> { entity.Id });
                         }
                     }
 

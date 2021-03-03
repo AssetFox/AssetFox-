@@ -6,9 +6,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class NetworkDTO : BaseDTO
     {
         public string Name { get; set; }
+
         public DateTime CreatedDate { get; set; }
+
         public DateTime LastModifiedDate { get; set; }
+
         public string AssignmentStatus { get; set; }
+
         public int NetworkId { get; set; } = 13;
     }
 }

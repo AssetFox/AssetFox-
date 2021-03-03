@@ -39,7 +39,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfDataPersistenceWork.Context.BudgetPriorityLibrarySimulation.Add(new BudgetPriorityLibrarySimulationEntity
             {
-                BudgetPriorityLibraryId = budgetPriorityLibraryEntity.Id, SimulationId = simulationId
+                BudgetPriorityLibraryId = budgetPriorityLibraryEntity.Id,
+                SimulationId = simulationId
             });
 
             _unitOfDataPersistenceWork.Context.SaveChanges();
@@ -175,7 +176,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryBudgetPriorityEntity>(_ =>
-                _.BudgetPriority.BudgetPriorityLibraryId== libraryId);
+                _.BudgetPriority.BudgetPriorityLibraryId == libraryId);
 
             if (budgetPriorities.Any(_ => _.BudgetPercentagePairs.Any()))
             {

@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -238,7 +234,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<AttributeEquationCriterionLibraryEntity>(entity =>
             {
-                entity.HasKey(e => new {e.AttributeId, e.EquationId});
+                entity.HasKey(e => new { e.AttributeId, e.EquationId });
 
                 entity.HasIndex(e => e.AttributeId);
 
@@ -1224,7 +1220,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<ConditionalTreatmentConsequenceEquationEntity>(entity =>
             {
-                entity.HasKey(e => new {TreatmentConsequenceId = e.ConditionalTreatmentConsequenceId, e.EquationId});
+                entity.HasKey(e => new { TreatmentConsequenceId = e.ConditionalTreatmentConsequenceId, e.EquationId });
 
                 entity.ToTable("TreatmentConsequence_Equation");
 
@@ -1257,7 +1253,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<TreatmentCostEquationEntity>(entity =>
             {
-                entity.HasKey(e => new {e.TreatmentCostId, e.EquationId});
+                entity.HasKey(e => new { e.TreatmentCostId, e.EquationId });
 
                 entity.ToTable("TreatmentCost_Equation");
 

@@ -30,13 +30,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            var cashFlowRuleLibraryEntity = new CashFlowRuleLibraryEntity {Id = Guid.NewGuid(), Name = name};
+            var cashFlowRuleLibraryEntity = new CashFlowRuleLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
             _unitOfDataPersistenceWork.Context.CashFlowRuleLibrary.Add(cashFlowRuleLibraryEntity);
 
             _unitOfDataPersistenceWork.Context.CashFlowRuleLibrarySimulation.Add(new CashFlowRuleLibrarySimulationEntity
             {
-                CashFlowRuleLibraryId = cashFlowRuleLibraryEntity.Id, SimulationId = simulationId
+                CashFlowRuleLibraryId = cashFlowRuleLibraryEntity.Id,
+                SimulationId = simulationId
             });
 
             _unitOfDataPersistenceWork.Context.SaveChanges();
@@ -217,8 +218,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var libraryToDelete = _unitOfDataPersistenceWork.Context.CashFlowRuleLibrary.Single(_ => _.Id == libraryId);
 
-            // deleting the library should start a cascade delete of the cash flow rules which will cascade into the criterion library joins
-            // and the cash flow distribution rules
+            // deleting the library should start a cascade delete of the cash flow rules which will
+            // cascade into the criterion library joins and the cash flow distribution rules
             _unitOfDataPersistenceWork.Context.CashFlowRuleLibrary.Remove(libraryToDelete);
 
             _unitOfDataPersistenceWork.Context.SaveChanges();

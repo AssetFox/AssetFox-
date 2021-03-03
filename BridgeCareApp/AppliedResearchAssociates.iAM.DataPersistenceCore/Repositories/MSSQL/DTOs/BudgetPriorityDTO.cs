@@ -6,8 +6,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class BudgetPriorityDTO : BaseDTO
     {
         public int PriorityLevel { get; set; }
+
         public int? Year { get; set; }
+
         public List<BudgetPercentagePairDTO> BudgetPercentagePairs { get; set; }
+
         public CriterionLibraryDTO CriterionLibrary { get; set; }
     }
 }

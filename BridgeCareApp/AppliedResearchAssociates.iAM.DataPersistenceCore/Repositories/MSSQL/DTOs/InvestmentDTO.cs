@@ -5,6 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class InvestmentDTO
     {
         public InvestmentPlanDTO InvestmentPlan { get; set; }
+
         public List<BudgetLibraryDTO> BudgetLibraries { get; set; }
     }
 }

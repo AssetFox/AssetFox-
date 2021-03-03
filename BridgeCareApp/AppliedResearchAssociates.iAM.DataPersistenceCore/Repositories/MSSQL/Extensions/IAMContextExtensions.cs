@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions
 {
@@ -175,8 +172,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 var entitiesToUpdate = entities.AsQueryable().Where(predicatesPerCrudOperation["update"]);
                 if (entitiesToUpdate.Any())
                 {
-                    var propsToExclude = new List<string> {"CreatedDate", "CreatedBy"};
-                    var config = new BulkConfig {PropertiesToExclude = propsToExclude};
+                    var propsToExclude = new List<string> { "CreatedDate", "CreatedBy" };
+                    var config = new BulkConfig { PropertiesToExclude = propsToExclude };
                     context.BulkUpdate(entitiesToUpdate.ToList(), config);
                 }
             }

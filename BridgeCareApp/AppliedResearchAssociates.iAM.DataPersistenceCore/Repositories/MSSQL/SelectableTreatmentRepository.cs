@@ -12,7 +12,6 @@ using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
-using SQLitePCL;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -153,7 +152,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 treatmentBudgetJoins.AddRange(budgetIds.Select(budgetId => new SelectableTreatmentBudgetEntity
                 {
-                    SelectableTreatmentId = treatmentId, BudgetId = budgetId
+                    SelectableTreatmentId = treatmentId,
+                    BudgetId = budgetId
                 }));
             });
 
@@ -257,7 +257,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.Delete<TreatmentLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
                 _unitOfDataPersistenceWork.Context.TreatmentLibrarySimulation.Add(
-                    new TreatmentLibrarySimulationEntity {TreatmentLibraryId = dto.Id, SimulationId = simulationId});
+                    new TreatmentLibrarySimulationEntity { TreatmentLibraryId = dto.Id, SimulationId = simulationId });
             }
 
             _unitOfDataPersistenceWork.Context.SaveChanges();
@@ -334,7 +334,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 var treatmentBudgetJoinsToAdd = treatments.Where(_ => _.BudgetIds.Any()).SelectMany(_ =>
                     _.BudgetIds.Select(budgetId =>
-                        new SelectableTreatmentBudgetEntity {SelectableTreatmentId = _.Id, BudgetId = budgetId})).ToList();
+                        new SelectableTreatmentBudgetEntity { SelectableTreatmentId = _.Id, BudgetId = budgetId })).ToList();
 
                 if (IsRunningFromXUnit)
                 {
@@ -355,7 +355,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)).Select(_ =>
                         new CriterionLibrarySelectableTreatmentEntity
                         {
-                            CriterionLibraryId = _.CriterionLibrary.Id, SelectableTreatmentId = _.Id
+                            CriterionLibraryId = _.CriterionLibrary.Id,
+                            SelectableTreatmentId = _.Id
                         }).ToList();
 
                 if (IsRunningFromXUnit)

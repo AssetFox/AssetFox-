@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
-using DA = AppliedResearchAssociates.iAM.DataAssignment;
-using DM = AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using MoreLinq.Extensions;
@@ -12,12 +9,12 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class SimulationAnalysisDataPersistenceTests
     {
         private readonly SimulationAnalysisDataPersistenceTestHelper _testHelper;
+
         public SimulationAnalysisDataPersistenceTests() => _testHelper = new SimulationAnalysisDataPersistenceTestHelper();
 
         [Fact]
@@ -407,7 +404,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
                 var runner = new SimulationRunner(_testHelper.StandAloneSimulation);
                 var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) => {
+                runner.Information += (sender, eventArgs) =>
+                {
                     if (eventArgs.Message == "Simulation complete.")
                     {
                         simulationIsRunning = false;
@@ -698,7 +696,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     var treatmentSchedulings = treatment.Schedulings.ToList();
                     var dataSourceTreatmentSchedulings = dataSourceTreatment.Schedulings.ToList();
                     Assert.Equal(treatmentSchedulings.Count(), dataSourceTreatmentSchedulings.Count());
-                    treatmentSchedulings.ForEach(treatmentScheduling  =>
+                    treatmentSchedulings.ForEach(treatmentScheduling =>
                     {
                         var dataSourceTreatmentScheduling = dataSourceTreatmentSchedulings
                             .SingleOrDefault(_ => _.Id == treatmentScheduling.Id);
@@ -726,9 +724,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void TestFullSimulationAnalysisIntegrationWithoutCommittedProjectsSchedulingsOrSupersessions()
         {
-            
             var testOutputHelper = new TestOutputHelper();
-            
+
             try
             {
                 // Arrange
@@ -772,7 +769,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 simulation.ClearResults();
                 var runner = new SimulationRunner(simulation);
                 var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) => {
+                runner.Information += (sender, eventArgs) =>
+                {
                     if (eventArgs.Message == "Simulation complete.")
                     {
                         simulationIsRunning = false;
@@ -788,7 +786,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 dataSourceSimulation.ClearResults();
                 var dataSourceRunner = new SimulationRunner(dataSourceSimulation);
                 var dataSourceSimulationIsRunning = true;
-                dataSourceRunner.Information += (sender, eventArgs) => {
+                dataSourceRunner.Information += (sender, eventArgs) =>
+                {
                     if (eventArgs.Message == "Simulation complete.")
                     {
                         dataSourceSimulationIsRunning = false;
@@ -811,13 +810,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 // CleanUp
                 _testHelper.CleanUp();
             }
-            
         }
 
         [Fact]
         public void TestFullSimulationAnalysisIntegrationWithoutCommittedProjectsWithSchedulingsAndSupersessions()
         {
-            
             var testOutputHelper = new TestOutputHelper();
 
             try
@@ -865,7 +862,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 simulation.ClearResults();
                 var runner = new SimulationRunner(simulation);
                 var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) => {
+                runner.Information += (sender, eventArgs) =>
+                {
                     if (eventArgs.Message == "Simulation complete.")
                     {
                         simulationIsRunning = false;
@@ -881,7 +879,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 dataSourceSimulation.ClearResults();
                 var dataSourceRunner = new SimulationRunner(dataSourceSimulation);
                 var dataSourceSimulationIsRunning = true;
-                dataSourceRunner.Information += (sender, eventArgs) => {
+                dataSourceRunner.Information += (sender, eventArgs) =>
+                {
                     if (eventArgs.Message == "Simulation complete.")
                     {
                         dataSourceSimulationIsRunning = false;
@@ -904,8 +903,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 // CleanUp
                 _testHelper.CleanUp();
             }
-
-            
         }
 
         [Fact]
@@ -961,7 +958,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 simulation.ClearResults();
                 var runner = new SimulationRunner(simulation);
                 var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) => {
+                runner.Information += (sender, eventArgs) =>
+                {
                     if (eventArgs.Message == "Simulation complete.")
                     {
                         simulationIsRunning = false;
@@ -977,7 +975,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 dataSourceSimulation.ClearResults();
                 var dataSourceRunner = new SimulationRunner(dataSourceSimulation);
                 var dataSourceSimulationIsRunning = true;
-                dataSourceRunner.Information += (sender, eventArgs) => {
+                dataSourceRunner.Information += (sender, eventArgs) =>
+                {
                     if (eventArgs.Message == "Simulation complete.")
                     {
                         dataSourceSimulationIsRunning = false;
@@ -1005,7 +1004,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void TestLegacySimulationSynchronization()
         {
-            
             var testOutputHelper = new TestOutputHelper();
 
             try
@@ -1038,7 +1036,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 simulation.ClearResults();
                 var runner = new SimulationRunner(simulation);
                 var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) => {
+                runner.Information += (sender, eventArgs) =>
+                {
                     if (eventArgs.Message == "Simulation complete.")
                     {
                         simulationIsRunning = false;
@@ -1054,7 +1053,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 dataSourceSimulation.ClearResults();
                 var dataSourceRunner = new SimulationRunner(dataSourceSimulation);
                 var dataSourceSimulationIsRunning = true;
-                dataSourceRunner.Information += (sender, eventArgs) => {
+                dataSourceRunner.Information += (sender, eventArgs) =>
+                {
                     if (eventArgs.Message == "Simulation complete.")
                     {
                         dataSourceSimulationIsRunning = false;

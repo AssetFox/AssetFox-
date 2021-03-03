@@ -6,9 +6,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class BudgetConditionEntity : BaseEntity
     {
         public Guid Id { get; set; }
+
         public Guid BudgetId { get; set; }
 
         public virtual BudgetEntity Budget { get; set; }
+
         public virtual CriterionLibraryBudgetConditionEntity CriterionLibraryBudgetConditionJoin { get; set; }
     }
 }

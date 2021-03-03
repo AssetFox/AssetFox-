@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static TargetConditionGoalLibraryEntity ToEntity(this TargetConditionGoalLibraryDTO dto) =>
-            new TargetConditionGoalLibraryEntity {Id = dto.Id, Name = dto.Name, Description = dto.Description};
+            new TargetConditionGoalLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
 
         public static void CreateTargetConditionGoal(this TargetConditionGoalEntity entity, Simulation simulation)
         {
@@ -47,7 +47,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             targetConditionGoal.Criterion.Expression =
                 entity.CriterionLibraryTargetConditionGoalJoin?.CriterionLibrary.MergedCriteriaExpression ??
                 string.Empty;
-
         }
 
         public static TargetConditionGoalDTO ToDto(this TargetConditionGoalEntity entity) =>

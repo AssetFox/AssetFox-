@@ -2,16 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
-using EFCore.BulkExtensions;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -142,7 +136,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             else
             {
-
                 /*var command = new SqlCommand("DeleteAllExceptNetworkDataForAlphaMigration", _unitOfWork.Connection)
                 {
                     CommandTimeout = 1800, CommandType = CommandType.StoredProcedure

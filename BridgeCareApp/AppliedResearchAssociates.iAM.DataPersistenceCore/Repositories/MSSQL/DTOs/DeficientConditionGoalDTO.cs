@@ -5,9 +5,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class DeficientConditionGoalDTO : BaseDTO
     {
         public string Name { get; set; }
+
         public string Attribute { get; set; }
+
         public double AllowedDeficientPercentage { get; set; }
+
         public double DeficientLimit { get; set; }
+
         public CriterionLibraryDTO CriterionLibrary { get; set; }
     }
 }

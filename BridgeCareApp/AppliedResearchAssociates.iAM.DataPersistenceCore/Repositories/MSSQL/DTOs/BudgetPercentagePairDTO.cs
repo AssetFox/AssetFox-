@@ -6,7 +6,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class BudgetPercentagePairDTO : BaseDTO
     {
         public decimal Percentage { get; set; }
+
         public Guid BudgetId { get; set; }
+
         public string BudgetName { get; set; }
     }
 }

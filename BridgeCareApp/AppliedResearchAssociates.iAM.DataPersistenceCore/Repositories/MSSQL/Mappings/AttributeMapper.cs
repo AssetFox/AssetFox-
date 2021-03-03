@@ -1,7 +1,6 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.Domains;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 using TextAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.TextAttribute;
 
@@ -71,7 +70,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 entity.DefaultValue = numericAttribute.DefaultValue.ToString();
                 entity.Maximum = numericAttribute.Maximum;
                 entity.Minimum = numericAttribute.Minimum;
-
             }
             else if (domain is TextAttribute textAttribute)
             {

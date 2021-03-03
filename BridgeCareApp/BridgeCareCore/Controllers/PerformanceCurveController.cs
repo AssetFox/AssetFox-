@@ -46,7 +46,7 @@ namespace BridgeCareCore.Controllers
                     _unitOfDataPersistenceWork.PerformanceCurveRepo
                         .AddOrUpdateOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
                 });
-                
+
                 _unitOfDataPersistenceWork.Commit();
                 return Ok();
             }

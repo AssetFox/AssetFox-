@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore
 {
@@ -17,7 +16,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
 
         public static class CriterionLibraryJoinEntities
         {
-
             public const string AnalysisMethod = "AnalysisMethodEntity";
             public const string Budget = "BudgetEntity";
             public const string BudgetPriority = "BudgetPriorityEntity";

@@ -6,7 +6,6 @@ using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.Mvc;
@@ -55,8 +54,9 @@ namespace BridgeCareCore.Controllers
                 var networkAttributeIds = maintainableAssets.Where(_ => _.AssignedData != null && _.AssignedData.Any())
                     .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();
 
-                // create list of attribute data from configuration attributes (exclude attributes that don't have command text as there
-                // will be no way to select data for them from the data source)
+                // create list of attribute data from configuration attributes (exclude attributes
+                // that don't have command text as there will be no way to select data for them from
+                // the data source)
                 var attributeData = configurationAttributes.Where(_ => !string.IsNullOrEmpty(_.Command))
                     .Select(AttributeConnectionBuilder.Build)
                     .SelectMany(AttributeDataBuilder.GetData).ToList();
@@ -117,11 +117,10 @@ namespace BridgeCareCore.Controllers
             var percentage = 0.0;
             try
             {
-                 HubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
-
+                HubContext
+                   .Clients
+                   .All
+                   .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
 
                 var aggregatedResults = new List<IAggregatedResult>();
 
@@ -163,10 +162,10 @@ namespace BridgeCareCore.Controllers
                 }
 
                 broadcastingMessage = $"Finished aggregating attribute data. Saving it to the datasource...";
-                 HubContext
-                        .Clients
-                        .All
-                        .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
+                HubContext
+                       .Clients
+                       .All
+                       .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 // create aggregated data records in the data source
                 var createdRecordsCount = _unitOfDataPersistenceWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
 
@@ -179,10 +178,10 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 broadcastingMessage = "An error has occured while aggregating data";
-                 HubContext
-                            .Clients
-                            .All
-                            .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
+                HubContext
+                           .Clients
+                           .All
+                           .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
             }
         }
     }

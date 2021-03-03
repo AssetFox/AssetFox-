@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
-using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using MoreLinq.Extensions;
-
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -21,7 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        
         public CriterionLibraryRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public void JoinEntitiesWithCriteria(Dictionary<string, List<Guid>> entityIdsPerExpression, string joinEntity, string prependName) =>
@@ -50,7 +46,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     criterionLibraryEntity = new CriterionLibraryEntity
                     {
-                        Id = Guid.NewGuid(), Name = newCriterionLibraryName, MergedCriteriaExpression = expression
+                        Id = Guid.NewGuid(),
+                        Name = newCriterionLibraryName,
+                        MergedCriteriaExpression = expression
                     };
 
                     _unitOfDataPersistenceWork.Context.CriterionLibrary.Add(criterionLibraryEntity);
@@ -62,39 +60,51 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.AnalysisMethod:
                     CreateCriterionLibraryAnalysisMethodJoin(criterionLibraryEntity.Id, entityIdsPerExpression[expression].First());
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.Budget:
                     CreateCriterionLibraryBudgetJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.BudgetPriority:
                     CreateCriterionLibraryBudgetPriorityJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.CashFlowRule:
                     CreateCriterionLibraryCashFlowRuleJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.DeficientConditionGoal:
                     CreateCriterionLibraryDeficientConditionGoalJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.PerformanceCurve:
                     CreateCriterionLibraryPerformanceCurveJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.RemainingLifeLimit:
                     CreateCriterionLibraryRemainingLifeLimitJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.TargetConditionGoal:
                     CreateCriterionLibraryTargetConditionGoalJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.ConditionalTreatmentConsequence:
                     CreateCriterionLibraryTreatmentConsequenceJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.TreatmentCost:
                     CreateCriterionLibraryTreatmentCostJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.TreatmentSupersession:
                     CreateCriterionLibraryTreatmentSupersessionJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 case DataPersistenceConstants.CriterionLibraryJoinEntities.SelectableTreatment:
                     CreateCriterionLibrarySelectableTreatmentJoins(criterionLibraryEntity.Id, entityIdsPerExpression[expression]);
                     break;
+
                 default:
                     throw new InvalidOperationException("Unable to determine criterion library join entity type.");
                 }
@@ -120,7 +130,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var joinEntity = new CriterionLibraryAnalysisMethodEntity
             {
-                CriterionLibraryId = criterionLibraryId, AnalysisMethodId = analysisMethodId
+                CriterionLibraryId = criterionLibraryId,
+                AnalysisMethodId = analysisMethodId
             };
 
             _unitOfDataPersistenceWork.Context.CriterionLibraryAnalysisMethod.Add(joinEntity);
@@ -211,7 +222,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var joinEntities = performanceCurveIds.Select(performanceCurveId =>
                 new CriterionLibraryPerformanceCurveEntity
                 {
-                    CriterionLibraryId = criterionLibraryId, PerformanceCurveId = performanceCurveId
+                    CriterionLibraryId = criterionLibraryId,
+                    PerformanceCurveId = performanceCurveId
                 })
                 .ToList();
 

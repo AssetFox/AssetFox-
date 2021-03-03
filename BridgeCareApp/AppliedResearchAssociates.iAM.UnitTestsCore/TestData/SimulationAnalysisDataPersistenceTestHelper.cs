@@ -1,29 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using AppliedResearchAssociates.iAM.DataAccess;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Services.LegacySimulationSynchronization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using MoreLinq;
-using Attribute = AppliedResearchAssociates.iAM.Domains.Attribute;
-using DA = AppliedResearchAssociates.iAM.DataAssignment;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 {
@@ -36,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         private readonly DataAccessor _dataAccessor;
 
         public IHubContext<BridgeCareHub> HubContext { get; set; }
+
         public Simulation StandAloneSimulation { get; set; }
 
         public SimulationAnalysisDataPersistenceTestHelper()
@@ -140,7 +126,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public void SetupForPerformanceCurves()
         {
-
             SetupAll();
             CreateNetwork();
             UnitOfDataPersistenceWork.SimulationRepo.CreateSimulation(StandAloneSimulation);

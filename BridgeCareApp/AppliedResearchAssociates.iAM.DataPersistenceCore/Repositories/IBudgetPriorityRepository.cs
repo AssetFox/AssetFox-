@@ -9,10 +9,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public interface IBudgetPriorityRepository
     {
         void CreateBudgetPriorityLibrary(string name, Guid simulationId);
+
         void CreateBudgetPriorities(List<BudgetPriority> budgetPriorities, Guid simulationId);
+
         Task<List<BudgetPriorityLibraryDTO>> BudgetPriorityLibrariesWithBudgetPriorities();
+
         void AddOrUpdateBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId);
+
         void AddOrUpdateOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId);
+
         void DeleteBudgetPriorityLibrary(Guid libraryId);
     }
 }

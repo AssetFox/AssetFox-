@@ -23,11 +23,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             Guid attributeId) =>
             new RemainingLifeLimitEntity
             {
-                Id = dto.Id, RemainingLifeLimitLibraryId = libraryId, AttributeId = attributeId, Value = dto.Value
+                Id = dto.Id,
+                RemainingLifeLimitLibraryId = libraryId,
+                AttributeId = attributeId,
+                Value = dto.Value
             };
 
         public static RemainingLifeLimitLibraryEntity ToEntity(this RemainingLifeLimitLibraryDTO dto) =>
-            new RemainingLifeLimitLibraryEntity {Id = dto.Id, Name = dto.Name, Description = dto.Description};
+            new RemainingLifeLimitLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
 
         public static void CreateRemainingLifeLimit(this RemainingLifeLimitEntity entity, Simulation simulation)
         {

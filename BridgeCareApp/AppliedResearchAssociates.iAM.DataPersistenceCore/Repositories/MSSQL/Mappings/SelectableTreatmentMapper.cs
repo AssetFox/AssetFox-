@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.Domains;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
@@ -34,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static TreatmentLibraryEntity ToEntity(this TreatmentLibraryDTO dto) =>
-            new TreatmentLibraryEntity {Id = dto.Id, Name = dto.Name, Description = dto.Description};
+            new TreatmentLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
 
         public static void CreateSelectableTreatment(this SelectableTreatmentEntity entity, Simulation simulation)
         {
@@ -82,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static SimpleBudgetDetailDTO ToDto(this SelectableTreatmentBudgetEntity entity) =>
-            new SimpleBudgetDetailDTO {Id = entity.BudgetId, Name = entity.Budget.Name};
+            new SimpleBudgetDetailDTO { Id = entity.BudgetId, Name = entity.Budget.Name };
 
         public static TreatmentDTO ToDto(this SelectableTreatmentEntity entity) =>
             new TreatmentDTO

@@ -4,7 +4,6 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
-using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +37,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         public TreatmentLibraryEntity TestTreatmentLibrary { get; } = new TreatmentLibraryEntity
         {
-            Id = TreatmentLibraryId, Name = "Test Name"
+            Id = TreatmentLibraryId,
+            Name = "Test Name"
         };
 
         public SelectableTreatmentEntity TestTreatment { get; } = new SelectableTreatmentEntity
@@ -52,33 +52,41 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         public TreatmentCostEntity TestTreatmentCost { get; } = new TreatmentCostEntity
         {
-            Id = CostId, TreatmentId = TreatmentId
+            Id = CostId,
+            TreatmentId = TreatmentId
         };
 
         public ConditionalTreatmentConsequenceEntity TestTeatmentConsequence { get; } =
             new ConditionalTreatmentConsequenceEntity
             {
-                Id = ConsequenceId, SelectableTreatmentId = TreatmentId, ChangeValue = "1"
+                Id = ConsequenceId,
+                SelectableTreatmentId = TreatmentId,
+                ChangeValue = "1"
             };
 
         public EquationEntity TestCostEquation = new EquationEntity
         {
-            Id = CostEquationId, Expression = "Test Expression"
+            Id = CostEquationId,
+            Expression = "Test Expression"
         };
 
         public EquationEntity TestConsequenceEquation = new EquationEntity
         {
-            Id = ConsequenceEquationId, Expression = "Test Expression"
+            Id = ConsequenceEquationId,
+            Expression = "Test Expression"
         };
 
         public BudgetLibraryEntity TestBudgetLibrary { get; } = new BudgetLibraryEntity
         {
-            Id = BudgetLibraryId, Name = "Test Name"
+            Id = BudgetLibraryId,
+            Name = "Test Name"
         };
 
         public BudgetEntity TestBudget { get; } = new BudgetEntity
         {
-            Id = BudgetId, BudgetLibraryId = BudgetLibraryId, Name = "Test Name"
+            Id = BudgetId,
+            BudgetLibraryId = BudgetLibraryId,
+            Name = "Test Name"
         };
 
         public SelectableTreatmentBudgetEntity TestTreatmentBudget = new SelectableTreatmentBudgetEntity();

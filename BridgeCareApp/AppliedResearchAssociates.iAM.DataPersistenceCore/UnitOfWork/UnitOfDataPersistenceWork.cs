@@ -31,12 +31,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         }
 
         public IConfiguration Config { get; }
+
         public IAMContext Context { get; }
+
         public SqlConnection Connection { get; }
+
         public SqlConnection LegacyConnection { get; }
 
         // REPOSITORIES
         private IAggregatedResultRepository _aggregatedResultRepo;
+
         private IAnalysisMethodRepository _analysisMethodRepo;
         private IAttributeDatumRepository _attributeDatumRepo;
         private IAttributeMetaDataRepository _attributeMetaDataRepo;
@@ -139,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public ITreatmentSupersessionRepository TreatmentSupersessionRepo => _treatmentSupersessionRepo ??= new TreatmentSupersessionRepository(this);
 
-        public IDbContextTransaction DbContextTransaction       
+        public IDbContextTransaction DbContextTransaction
         {
             get => _dbContextTransaction;
             private set => _dbContextTransaction = value;
@@ -167,6 +171,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         // DISPOSE PROPERTIES & METHODS
         private bool _disposed = false;
+
         private IDbContextTransaction _dbContextTransaction;
 
         protected virtual void Dispose(bool disposing)

@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Interfaces.Simulation;
 using BridgeCareCore.Logging;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace BridgeCareCore.Controllers
 {
@@ -58,7 +54,6 @@ namespace BridgeCareCore.Controllers
                 return StatusCode(500, e);
             }
         }
-
 
         [HttpPost]
         [Route("RunSimulation/{networkId}/{simulationId}")]

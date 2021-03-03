@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
-using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -37,12 +34,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             case DataPersistenceConstants.EquationJoinEntities.PerformanceCurve:
                 JoinEquationsWithPerformanceCurves(equationEntityPerJoinEntityId);
                 break;
+
             case DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence:
                 JoinEquationsWithTreatmentConsequences(equationEntityPerJoinEntityId);
                 break;
+
             case DataPersistenceConstants.EquationJoinEntities.TreatmentCost:
                 JoinEquationsWithTreatmentCosts(equationEntityPerJoinEntityId);
                 break;
+
             default:
                 throw new InvalidOperationException("Unable to determine equation join entity type.");
             }

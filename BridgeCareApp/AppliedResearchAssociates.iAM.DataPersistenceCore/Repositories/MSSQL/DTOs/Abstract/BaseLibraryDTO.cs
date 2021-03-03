@@ -6,7 +6,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public abstract class BaseLibraryDTO : BaseDTO
     {
         public string Name { get; set; }
+
         public string Description { get; set; }
+
         public List<Guid> AppliedScenarioIds { get; set; } = new List<Guid>();
     }
 }

@@ -39,7 +39,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrarySimulation.Add(new RemainingLifeLimitLibrarySimulationEntity
             {
-                RemainingLifeLimitLibraryId = remainingLifeLimitLibraryEntity.Id, SimulationId = simulationId
+                RemainingLifeLimitLibraryId = remainingLifeLimitLibraryEntity.Id,
+                SimulationId = simulationId
             });
         }
 
@@ -210,7 +211,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)).Select(_ =>
                         new CriterionLibraryRemainingLifeLimitEntity
                         {
-                            CriterionLibraryId = _.CriterionLibrary.Id, RemainingLifeLimitId = _.Id
+                            CriterionLibraryId = _.CriterionLibrary.Id,
+                            RemainingLifeLimitId = _.Id
                         }).ToList();
 
                 if (IsRunningFromXUnit)
@@ -236,8 +238,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var libraryToDelete =
                 _unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Single(_ => _.Id == libraryId);
 
-            // deleting the library should start a delete cascade where the remaining life limits will be deleted along with any join table
-            // records
+            // deleting the library should start a delete cascade where the remaining life limits
+            // will be deleted along with any join table records
             _unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Remove(libraryToDelete);
 
             _unitOfDataPersistenceWork.Context.SaveChanges();

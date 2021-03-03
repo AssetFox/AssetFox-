@@ -40,7 +40,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("AddOrUpdateInvestment/{simulationId}")]
-        public async Task<IActionResult> AddOrUpdateInvestment(Guid simulationId, [FromBody]AddOrUpdateInvestmentDataDTO data)
+        public async Task<IActionResult> AddOrUpdateInvestment(Guid simulationId, [FromBody] AddOrUpdateInvestmentDataDTO data)
         {
             try
             {

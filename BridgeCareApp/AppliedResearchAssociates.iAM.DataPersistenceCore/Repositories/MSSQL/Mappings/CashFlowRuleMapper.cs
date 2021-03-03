@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static CashFlowRuleEntity ToEntity(this CashFlowRuleDTO dto, Guid libraryId) =>
-            new CashFlowRuleEntity {Id = dto.Id, Name = dto.Name, CashFlowRuleLibraryId = libraryId};
+            new CashFlowRuleEntity { Id = dto.Id, Name = dto.Name, CashFlowRuleLibraryId = libraryId };
 
         public static CashFlowRuleDTO ToDto(this CashFlowRuleEntity entity) =>
             new CashFlowRuleDTO

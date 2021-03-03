@@ -14,6 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateNetwork(Network network);
 
         Task<List<NetworkDTO>> Networks();
+
         List<DataAssignment.Networking.Network> GetAllNetworks();
 
         NetworkEntity GetPennDotNetwork();

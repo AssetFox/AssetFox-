@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.IO;
-using AppliedResearchAssociates.iAM.Analysis;
 using System.Linq;
-using System.Text;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;

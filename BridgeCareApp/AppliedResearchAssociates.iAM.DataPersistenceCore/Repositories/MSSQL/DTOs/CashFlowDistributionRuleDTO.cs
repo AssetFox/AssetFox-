@@ -5,7 +5,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class CashFlowDistributionRuleDTO : BaseDTO
     {
         public int DurationInYears { get; set; }
+
         public decimal CostCeiling { get; set; }
+
         public string YearlyPercentages { get; set; }
     }
 }

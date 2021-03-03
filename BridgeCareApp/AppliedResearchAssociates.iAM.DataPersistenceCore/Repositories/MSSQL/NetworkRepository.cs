@@ -2,18 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
-using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
-using AppliedResearchAssociates.iAM;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.Domains;
-using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.Domains;
+using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using MoreLinq.Extensions;
 
@@ -112,8 +108,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.Id == networkId);
             if (areFacilitiesRequired)
             {
-
-
                 var facilityEntities = _unitOfDataPersistenceWork.Context.Facility
                     .Where(_ => _.Network.Id == networkId).ToList();
 

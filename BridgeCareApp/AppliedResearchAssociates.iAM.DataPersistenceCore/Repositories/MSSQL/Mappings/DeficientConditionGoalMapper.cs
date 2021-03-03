@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static DeficientConditionGoalLibraryEntity ToEntity(this DeficientConditionGoalLibraryDTO dto) =>
-            new DeficientConditionGoalLibraryEntity {Id = dto.Id, Name = dto.Name, Description = dto.Description};
+            new DeficientConditionGoalLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
 
         public static void CreateDeficientConditionGoal(this DeficientConditionGoalEntity entity, Simulation simulation)
         {
@@ -46,7 +46,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             deficientConditionGoal.Criterion.Expression =
                 entity.CriterionLibraryDeficientConditionGoalJoin?.CriterionLibrary.MergedCriteriaExpression ??
                 string.Empty;
-
         }
 
         public static DeficientConditionGoalDTO ToDto(this DeficientConditionGoalEntity entity) =>

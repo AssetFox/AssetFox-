@@ -6,7 +6,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class BudgetDTO : BaseDTO
     {
         public string Name { get; set; }
+
         public List<BudgetAmountDTO> BudgetAmounts { get; set; }
+
         public CriterionLibraryDTO CriterionLibrary { get; set; }
     }
 }

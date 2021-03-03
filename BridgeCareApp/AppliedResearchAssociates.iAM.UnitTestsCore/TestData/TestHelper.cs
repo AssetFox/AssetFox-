@@ -17,7 +17,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         private static readonly Guid CriterionLibraryId = Guid.Parse("47380dd4-8df8-46e2-9195-b7f786a4258a");
 
         public readonly IAMContext DbContext;
+
         public IConfiguration Config { get; set; }
+
         public UnitOfDataPersistenceWork UnitOfDataPersistenceWork { get; set; }
 
         public TestHelper(string dbName = "IAMv2")
@@ -50,7 +52,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public CriterionLibraryEntity TestCriterionLibrary { get; } = new CriterionLibraryEntity
         {
-            Id = CriterionLibraryId, Name = "Test Criterion", MergedCriteriaExpression = "Test Expression"
+            Id = CriterionLibraryId,
+            Name = "Test Criterion",
+            MergedCriteriaExpression = "Test Expression"
         };
 
         public virtual void CreateAttributes()

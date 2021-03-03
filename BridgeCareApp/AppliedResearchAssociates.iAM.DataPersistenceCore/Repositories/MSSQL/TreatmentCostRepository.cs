@@ -136,7 +136,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)).Select(_ =>
                         new CriterionLibraryTreatmentCostEntity
                         {
-                            CriterionLibraryId = _.CriterionLibrary.Id, TreatmentCostId = _.Id
+                            CriterionLibraryId = _.CriterionLibrary.Id,
+                            TreatmentCostId = _.Id
                         }).ToList();
 
                 if (IsRunningFromXUnit)

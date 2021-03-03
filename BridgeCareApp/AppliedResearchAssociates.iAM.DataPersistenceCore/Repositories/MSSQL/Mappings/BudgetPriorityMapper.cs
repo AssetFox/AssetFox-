@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.Domains;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
@@ -22,11 +22,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static BudgetPriorityEntity ToEntity(this BudgetPriorityDTO dto, Guid libraryId) =>
             new BudgetPriorityEntity
             {
-                Id = dto.Id, BudgetPriorityLibraryId = libraryId, PriorityLevel = dto.PriorityLevel, Year = dto.Year
+                Id = dto.Id,
+                BudgetPriorityLibraryId = libraryId,
+                PriorityLevel = dto.PriorityLevel,
+                Year = dto.Year
             };
 
         public static BudgetPriorityLibraryEntity ToEntity(this BudgetPriorityLibraryDTO dto) =>
-            new BudgetPriorityLibraryEntity {Id = dto.Id, Name = dto.Name, Description = dto.Description};
+            new BudgetPriorityLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
 
         public static BudgetPriorityDTO ToDto(this BudgetPriorityEntity entity) =>
             new BudgetPriorityDTO

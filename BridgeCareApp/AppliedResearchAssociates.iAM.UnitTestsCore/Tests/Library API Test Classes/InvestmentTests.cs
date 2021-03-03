@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -111,7 +110,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                     .AddOrUpdateInvestment(Guid.Empty,
                         new AddOrUpdateInvestmentDataDTO
                         {
-                            BudgetLibrary = TestBudgetLibrary.ToDto(), InvestmentPlan = new InvestmentPlanDTO()
+                            BudgetLibrary = TestBudgetLibrary.ToDto(),
+                            InvestmentPlan = new InvestmentPlanDTO()
                         });
 
                 // Assert
@@ -217,7 +217,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 var addOrUpdateInvestmentDTO = new AddOrUpdateInvestmentDataDTO
                 {
-                    BudgetLibrary = dto.BudgetLibraries[0], InvestmentPlan = dto.InvestmentPlan
+                    BudgetLibrary = dto.BudgetLibraries[0],
+                    InvestmentPlan = dto.InvestmentPlan
                 };
                 addOrUpdateInvestmentDTO.BudgetLibrary.Description = "Updated Description";
                 addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].Name = "Updated Name";
@@ -284,7 +285,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 var addOrUpdateInvestmentDTO = new AddOrUpdateInvestmentDataDTO
                 {
-                    BudgetLibrary = dto.BudgetLibraries[0], InvestmentPlan = dto.InvestmentPlan
+                    BudgetLibrary = dto.BudgetLibraries[0],
+                    InvestmentPlan = dto.InvestmentPlan
                 };
                 addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].BudgetAmounts
                     .Add(TestBudgetAmount.ToDto("Test Name"));

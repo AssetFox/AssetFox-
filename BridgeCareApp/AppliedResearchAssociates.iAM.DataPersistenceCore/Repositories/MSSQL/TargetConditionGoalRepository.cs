@@ -39,7 +39,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfDataPersistenceWork.Context.TargetConditionGoalLibrarySimulation.Add(new TargetConditionGoalLibrarySimulationEntity
             {
-                TargetConditionGoalLibraryId = targetConditionGoalLibraryEntity.Id, SimulationId = simulationId
+                TargetConditionGoalLibraryId = targetConditionGoalLibraryEntity.Id,
+                SimulationId = simulationId
             });
 
             _unitOfDataPersistenceWork.Context.SaveChanges();
@@ -141,7 +142,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.TargetConditionGoalLibrarySimulation.Add(
                     new TargetConditionGoalLibrarySimulationEntity
                     {
-                        TargetConditionGoalLibraryId = dto.Id, SimulationId = simulationId
+                        TargetConditionGoalLibraryId = dto.Id,
+                        SimulationId = simulationId
                     });
             }
 

@@ -5,6 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class TreatmentCostDTO : BaseDTO
     {
         public EquationDTO Equation { get; set; }
+
         public CriterionLibraryDTO CriterionLibrary { get; set; }
     }
 }

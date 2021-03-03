@@ -13,6 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class AnalysisMethodRepository : IAnalysisMethodRepository
     {
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+
         public AnalysisMethodRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
             _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));

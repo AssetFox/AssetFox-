@@ -7,7 +7,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappi
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Classes
@@ -131,7 +130,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 var newCriterionLibraryDTO = new CriterionLibraryEntity
                 {
-                    Id = Guid.NewGuid(), Name = "New Name", MergedCriteriaExpression = "New Expression"
+                    Id = Guid.NewGuid(),
+                    Name = "New Name",
+                    MergedCriteriaExpression = "New Expression"
                 }.ToDto();
 
                 // Act

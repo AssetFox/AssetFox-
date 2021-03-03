@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Antlr4.Runtime;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
@@ -40,7 +39,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfDataPersistenceWork.Context.DeficientConditionGoalLibrarySimulation.Add(new DeficientConditionGoalLibrarySimulationEntity
             {
-                DeficientConditionGoalLibraryId = deficientConditionGoalLibraryEntity.Id, SimulationId = simulationId
+                DeficientConditionGoalLibraryId = deficientConditionGoalLibraryEntity.Id,
+                SimulationId = simulationId
             });
 
             _unitOfDataPersistenceWork.Context.SaveChanges();
@@ -142,7 +142,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.DeficientConditionGoalLibrarySimulation.Add(
                     new DeficientConditionGoalLibrarySimulationEntity
                     {
-                        DeficientConditionGoalLibraryId = dto.Id, SimulationId = simulationId
+                        DeficientConditionGoalLibraryId = dto.Id,
+                        SimulationId = simulationId
                     });
             }
 
@@ -215,7 +216,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)).Select(_ =>
                         new CriterionLibraryDeficientConditionGoalEntity
                         {
-                            CriterionLibraryId = _.CriterionLibrary.Id, DeficientConditionGoalId = _.Id
+                            CriterionLibraryId = _.CriterionLibrary.Id,
+                            DeficientConditionGoalId = _.Id
                         }).ToList();
 
                 if (IsRunningFromXUnit)

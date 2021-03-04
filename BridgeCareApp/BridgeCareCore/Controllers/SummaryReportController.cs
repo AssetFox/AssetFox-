@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using Microsoft.AspNetCore.Http;
@@ -44,7 +45,6 @@ namespace BridgeCareCore.Controllers
                     .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
 
                 var response = await Task.Factory.StartNew(() => _summaryReportGenerator.GenerateReport(simulationId, networkId));
-                //var response = _summaryReportGenerator.GenerateReport(simulationId, networkId));
 
                 const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 HttpContext.Response.ContentType = contentType;
@@ -62,7 +62,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                broadcastingMessage = "An error has occured while generating the summary report";
+                broadcastingMessage = $"An error has occured {e.Message}";
                 sendRealTimeMessage(broadcastingMessage, simulationId);
                 return null;
             }

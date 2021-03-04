@@ -1,484 +1,520 @@
 <template>
-    <v-layout column>
-        <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs3>
-                    <v-btn @click="createTreatmentLibraryDialogData.showDialog = true" class="ara-blue-bg white--text"
-                           v-show="selectedScenarioId === '0'">
-                        New Library
-                    </v-btn>
-                    <v-select :items="treatmentLibrariesSelectListItems"
-                              class="treatment-library-select" label="Select a Treatment Library"
-                              outline v-if="!hasSelectedTreatmentLibrary || selectedScenarioId !== '0'"
-                              v-model="treatmentLibrarySelectItemValue">
-                    </v-select>
-                    <v-text-field v-if="hasSelectedTreatmentLibrary && selectedScenarioId === '0'" label="Treatment Name"
-                                  v-model="selectedTreatmentLibrary.name" :rules="[rules['generalRules'].valueIsNotEmpty]">
-                        <template slot="append">
-                            <v-btn @click="treatmentLibrarySelectItemValue = null" class="ara-orange" icon>
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field>
-                    <div v-if="hasSelectedTreatmentLibrary && selectedScenarioId === '0'">
-                        Owner: {{selectedTreatmentLibrary.owner ? selectedTreatmentLibrary.owner : "[ No Owner ]"}}
-                    </div>
-                    <v-checkbox class="sharing" label="Shared"
-                                v-if="hasSelectedTreatmentLibrary && selectedScenarioId === '0'"
-                                v-model="selectedTreatmentLibrary.shared"/>
-                </v-flex>
-            </v-layout>
+  <v-layout column>
+    <v-flex xs12>
+      <v-layout justify-center>
+        <v-flex xs3>
+          <v-btn @click="onShowCreateTreatmentLibraryDialog(false)" class="ara-blue-bg white--text"
+                 v-show="selectedScenarioId === uuidNIL">
+            New Library
+          </v-btn>
+          <v-select :items="librarySelectItems"
+                    class="treatment-library-select" label="Select a Treatment Library"
+                    outline v-if="!hasSelectedLibrary || selectedScenarioId !== uuidNIL"
+                    v-model="librarySelectItemValue">
+          </v-select>
+          <v-text-field v-if="hasSelectedLibrary && selectedScenarioId === uuidNIL" label="Treatment Name"
+                        v-model="selectedTreatmentLibrary.name" :rules="[rules['generalRules'].valueIsNotEmpty]">
+            <template slot="append">
+              <v-btn @click="librarySelectItemValue = null" class="ara-orange" icon>
+                <v-icon>fas fa-caret-left</v-icon>
+              </v-btn>
+            </template>
+          </v-text-field>
+          <div v-if="hasSelectedLibrary && selectedScenarioId === uuidNIL">
+            Owner: {{ selectedTreatmentLibrary.owner ? selectedTreatmentLibrary.owner : "[ No Owner ]" }}
+          </div>
+          <v-checkbox class="sharing" label="Shared"
+                      v-if="hasSelectedLibrary && selectedScenarioId === uuidNIL"
+                      v-model="selectedTreatmentLibrary.shared"/>
         </v-flex>
-        <v-divider v-show="hasSelectedTreatmentLibrary"></v-divider>
-        <v-flex v-show="hasSelectedTreatmentLibrary" xs12>
-            <div class="treatments-div">
-                <v-layout justify-center row>
-                    <v-flex xs3>
-                        <v-btn @click="showCreateTreatmentDialog = true" class="ara-blue-bg white--text">
-                            Add Treatment
-                        </v-btn>
-                        <v-select :items="treatmentsSelectListItems" label="Select a Treatment"
-                                  outline v-model="treatmentSelectItemValue" v-if="!hasSelectedTreatment">
-                        </v-select>
-                        <v-text-field v-if="hasSelectedTreatment" label="Treatment Name"
-                                      v-model="selectedTreatment.name" :rules="[rules['generalRules'].valueIsNotEmpty]">
-                            <template slot="append">
-                                <v-btn @click="treatmentSelectItemValue = null" class="ara-orange" icon>
-                                    <v-icon>fas fa-caret-left</v-icon>
-                                </v-btn>
-                            </template>
-                        </v-text-field>
-                    </v-flex>
-                    <v-flex xs9>
-                        <div v-show="selectedTreatment.id !== '0'">
-                            <v-tabs v-model="activeTab">
-                                <v-tab :key="index" @click="activeTab = index" ripple
-                                       v-for="(treatmentTab, index) in treatmentTabs">
-                                    {{treatmentTab}}
-                                </v-tab>
-                                <v-tabs-items v-model="activeTab">
-                                    <v-tab-item>
-                                        <v-card>
-                                            <v-card-text class="card-tab-content">
-                                                <FeasibilityTab :feasibilityTabData="tabData" :rules="rules"
-                                                                @submit="updateSelectedTreatmentLibrary"/>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-tab-item>
-                                    <v-tab-item>
-                                        <v-card>
-                                            <v-card-text class="card-tab-content">
-                                                <CostsTab :costsTabData="tabData"
-                                                          @submit="updateSelectedTreatmentLibrary"/>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-tab-item>
-                                    <v-tab-item>
-                                        <v-card>
-                                            <v-card-text class="card-tab-content">
-                                                <ConsequencesTab :consequencesTabData="tabData" :rules="rules"
-                                                                 @submit="updateSelectedTreatmentLibrary"/>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-tab-item>
-                                    <v-tab-item>
-                                        <v-card>
-                                            <v-card-text class="card-tab-content">
-                                                <BudgetsTab :budgetsTabData="tabData"
-                                                            @submit="updateSelectedTreatmentLibrary"/>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-tab-item>
-                                </v-tabs-items>
-                            </v-tabs>
-                        </div>
-                    </v-flex>
-                </v-layout>
+      </v-layout>
+    </v-flex>
+    <v-divider v-show="hasSelectedLibrary"></v-divider>
+    <v-flex v-show="hasSelectedLibrary" xs12>
+      <div class="treatments-div">
+        <v-layout justify-center row>
+          <v-flex xs3>
+            <v-btn @click="showCreateTreatmentDialog = true" class="ara-blue-bg white--text">
+              Add Treatment
+            </v-btn>
+            <v-select :items="treatmentSelectItems" label="Select a Treatment" @change="keepActiveTab = false"
+                      outline v-model="treatmentSelectItemValue" v-if="!hasSelectedTreatment">
+            </v-select>
+            <v-text-field v-if="hasSelectedTreatment" label="Treatment Name"
+                          v-model="selectedTreatment.name" :rules="[rules['generalRules'].valueIsNotEmpty]">
+              <template slot="append">
+                <v-btn @click="treatmentSelectItemValue = null" class="ara-orange" icon>
+                  <v-icon>fas fa-caret-left</v-icon>
+                </v-btn>
+              </template>
+            </v-text-field>
+          </v-flex>
+          <v-flex xs9>
+            <div v-show="selectedTreatment.id !== uuidNIL">
+              <v-tabs v-model="activeTab">
+                <v-tab :key="index" @click="activeTab = index" ripple
+                       v-for="(treatmentTab, index) in treatmentTabs">
+                  {{ treatmentTab }}
+                </v-tab>
+                <v-tabs-items v-model="activeTab">
+                  <v-tab-item>
+                    <v-card>
+                      <v-card-text class="card-tab-content">
+                        <TreatmentDetailsTab :selectedTreatmentDetails="selectedTreatmentDetails" :rules="rules" s
+                                             @onModifyTreatmentDetails="modifySelectedTreatmentDetails"/>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <v-tab-item>
+                    <v-card>
+                      <v-card-text class="card-tab-content">
+                        <CostsTab :selectedTreatmentCosts="selectedTreatment.costs"
+                                  @onAddCost="addSelectedTreatmentCost"
+                                  @onModifyCost="modifySelectedTreatmentCost"
+                                  @onRemoveCost="removeSelectedTreatmentCost"/>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <v-tab-item>
+                    <v-card>
+                      <v-card-text class="card-tab-content">
+                        <ConsequencesTab :selectedTreatmentConsequences="selectedTreatment.consequences" :rules="rules"
+                                         @onAddConsequence="addSelectedTreatmentConsequence"
+                                         @onModifyConsequence="modifySelectedTreatmentConsequence"
+                                         @onRemoveConsequence="removeSelectedTreatmentConsequence"/>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <v-tab-item>
+                    <v-card>
+                      <v-card-text class="card-tab-content">
+                        <BudgetsTab :selectedTreatmentBudgets="selectedTreatment.budgetIds"
+                                    @onModifyBudgets="modifySelectedTreatmentBudgets"/>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                </v-tabs-items>
+              </v-tabs>
             </div>
+          </v-flex>
+        </v-layout>
+      </div>
+    </v-flex>
+    <v-divider v-show="hasSelectedLibrary"></v-divider>
+    <v-flex v-show="hasSelectedLibrary && selectedScenarioId === uuidNIL" xs12>
+      <v-layout justify-center>
+        <v-flex xs6>
+          <v-textarea label="Description" no-resize outline rows="4" v-model="selectedTreatmentLibrary.description"/>
         </v-flex>
-        <v-divider v-show="hasSelectedTreatmentLibrary"></v-divider>
-        <v-flex v-show="hasSelectedTreatmentLibrary && selectedTreatmentLibrary.id !== stateScenarioTreatmentLibrary.id"
-                xs12>
-            <v-layout justify-center>
-                <v-flex xs6>
-                    <v-textarea label="Description" no-resize outline rows="4"
-                                v-model="selectedTreatmentLibrary.description"/>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex xs12>
-            <v-layout justify-end row v-show="hasSelectedTreatmentLibrary">
-                <v-btn @click="onApplyToScenario" class="ara-blue-bg white--text" v-show="selectedScenarioId !== '0'"
-                       :disabled="disableSubmitAction()">
-                    Save
-                </v-btn>
-                <v-btn @click="onUpdateLibrary" class="ara-blue-bg white--text" v-show="selectedScenarioId === '0'"
-                       :disabled="disableSubmitAction()">
-                    Update Library
-                </v-btn>
-                <v-btn @click="onCreateAsNewLibrary" class="ara-blue-bg white--text":disabled="disableSubmitAction()">
-                    Create as New Library
-                </v-btn>
-                <v-btn @click="onDeleteTreatmentLibrary" class="ara-orange-bg white--text"
-                       v-show="selectedScenarioId === '0'" :disabled="!hasSelectedTreatmentLibrary">
-                    Delete Library
-                </v-btn>
-                <v-btn @click="onDiscardChanges" class="ara-orange-bg white--text" v-show="selectedScenarioId !== '0'">
-                    Discard Changes
-                </v-btn>
-            </v-layout>
-        </v-flex>
+      </v-layout>
+    </v-flex>
+    <v-flex xs12>
+      <v-layout justify-end row v-show="hasSelectedLibrary">
+        <v-btn @click="onUpsertTreatmentLibrary(selectedTreatmentLibrary, selectedScenarioId)"
+               class="ara-blue-bg white--text" v-show="selectedScenarioId !== uuidNIL"
+               :disabled="disableCrudButton()">
+          Save
+        </v-btn>
+        <v-btn @click="onUpsertTreatmentLibrary(selectedTreatmentLibrary, uuidNIL)" class="ara-blue-bg white--text"
+               v-show="selectedScenarioId === uuidNIL"
+               :disabled="disableCrudButton()">
+          Update Library
+        </v-btn>
+        <v-btn @click="onShowCreateTreatmentLibraryDialog(true)" class="ara-blue-bg white--text"
+               :disabled="disableCrudButton()">
+          Create as New Library
+        </v-btn>
+        <v-btn @click="onShowConfirmDeleteAlert" class="ara-orange-bg white--text"
+               v-show="selectedScenarioId === uuidNIL" :disabled="!hasSelectedLibrary">
+          Delete Library
+        </v-btn>
+        <v-btn @click="onDiscardChanges" class="ara-orange-bg white--text" v-show="selectedScenarioId !== uuidNIL">
+          Discard Changes
+        </v-btn>
+      </v-layout>
+    </v-flex>
 
-        <Alert :dialogData="alertBeforeDelete" @submit="onSubmitDeleteResponse"/>
+    <ConfirmDeleteAlert :dialogData="confirmBeforeDeleteAlertData" @submit="onSubmitConfirmDeleteAlertResult"/>
 
-        <CreateTreatmentLibraryDialog :dialogData="createTreatmentLibraryDialogData"
-                                      @submit="onCreateTreatmentLibrary"/>
+    <CreateTreatmentLibraryDialog :dialogData="createTreatmentLibraryDialogData"
+                                  @submit="onUpsertTreatmentLibrary"/>
 
-        <CreateTreatmentDialog :showDialog="showCreateTreatmentDialog" @submit="onCreateTreatment"/>
-    </v-layout>
+    <CreateTreatmentDialog :showDialog="showCreateTreatmentDialog" @submit="onAddTreatment"/>
+  </v-layout>
 </template>
 
 <script lang="ts">
-    import Vue from 'vue';
-    import Component from 'vue-class-component';
-    import {Watch} from 'vue-property-decorator';
-    import {Action, State} from 'vuex-class';
-    import CreateTreatmentLibraryDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentLibraryDialog.vue';
-    import {SelectItem} from '@/shared/models/vue/select-item';
-    import {
-        CreateTreatmentLibraryDialogData,
-        emptyCreateTreatmentLibraryDialogData
-    } from '@/shared/models/modals/create-treatment-library-dialog-data';
-    import {
-        Consequence,
-        emptyTreatment,
-        emptyTreatmentLibrary,
-        Treatment,
-        TreatmentLibrary
-    } from '@/shared/models/iAM/treatment';
-    import {hasValue} from '@/shared/utils/has-value-util';
-    import CreateTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentDialog.vue';
-    import {any, append, clone, find, isNil, propEq} from 'ramda';
-    import FeasibilityTab from '@/components/treatment-editor/treatment-editor-tabs/FeasibilityTab.vue';
-    import CostsTab from '@/components/treatment-editor/treatment-editor-tabs/CostsTab.vue';
-    import {emptyTabData, TabData} from '@/shared/models/child-components/tab-data';
-    import ConsequencesTab from '@/components/treatment-editor/treatment-editor-tabs/ConsequencesTab.vue';
-    import BudgetsTab from '@/components/treatment-editor/treatment-editor-tabs/BudgetsTab.vue';
-    import {InvestmentLibrary} from '@/shared/models/iAM/investment';
-    import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
-    import Alert from '@/shared/modals/Alert.vue';
-    import {hasUnsavedChanges} from '@/shared/utils/has-unsaved-changes-helper';
-    import {rules, InputValidationRules} from '@/shared/utils/input-validation-rules';
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import {Watch} from 'vue-property-decorator';
+import {Action, State} from 'vuex-class';
+import CreateTreatmentLibraryDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentLibraryDialog.vue';
+import {SelectItem} from '@/shared/models/vue/select-item';
+import {
+  CreateTreatmentLibraryDialogData,
+  emptyCreateTreatmentLibraryDialogData
+} from '@/shared/models/modals/create-treatment-library-dialog-data';
+import {
+  emptyTreatment,
+  emptyTreatmentDetails,
+  emptyTreatmentLibrary,
+  Treatment,
+  TreatmentConsequence,
+  TreatmentCost,
+  TreatmentDetails,
+  TreatmentLibrary
+} from '@/shared/models/iAM/treatment';
+import CreateTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentDialog.vue';
+import {any, append, clone, find, findIndex, isNil, prepend, propEq, reject, update} from 'ramda';
+import TreatmentDetailsTab from '@/components/treatment-editor/treatment-editor-tabs/TreatmentDetailsTab.vue';
+import CostsTab from '@/components/treatment-editor/treatment-editor-tabs/CostsTab.vue';
+import ConsequencesTab from '@/components/treatment-editor/treatment-editor-tabs/ConsequencesTab.vue';
+import BudgetsTab from '@/components/treatment-editor/treatment-editor-tabs/BudgetsTab.vue';
+import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
+import Alert from '@/shared/modals/Alert.vue';
+import {hasUnsavedChangesCore} from '@/shared/utils/has-unsaved-changes-helper';
+import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import {getAppliedLibraryId, hasAppliedLibrary} from '@/shared/utils/library-utils';
+import {hasValue} from '@/shared/utils/has-value-util';
+import {SimpleBudgetDetail} from '@/shared/models/iAM/investment';
+import {getPropertyValues} from '@/shared/utils/getter-utils';
 
-    const ObjectID = require('bson-objectid');
+@Component({
+  components: {
+    BudgetsTab,
+    ConsequencesTab,
+    CostsTab,
+    TreatmentDetailsTab,
+    CreateTreatmentDialog,
+    CreateTreatmentLibraryDialog,
+    ConfirmDeleteAlert: Alert
+  }
+})
+export default class TreatmentEditor extends Vue {
+  @State(state => state.treatmentModule.treatmentLibraries) stateTreatmentLibraries: TreatmentLibrary[];
+  @State(state => state.treatmentModule.selectedTreatmentLibrary) stateSelectedTreatmentLibrary: TreatmentLibrary;
 
-    @Component({
-        components: {
-            BudgetsTab,
-            ConsequencesTab, CostsTab, FeasibilityTab, CreateTreatmentDialog, CreateTreatmentLibraryDialog, Alert
-        }
-    })
-    export default class TreatmentEditor extends Vue {
-        @State(state => state.treatmentEditor.treatmentLibraries) stateTreatmentLibraries: TreatmentLibrary[];
-        @State(state => state.treatmentEditor.selectedTreatmentLibrary) stateSelectedTreatmentLibrary: TreatmentLibrary;
-        @State(state => state.treatmentEditor.scenarioTreatmentLibrary) stateScenarioTreatmentLibrary: TreatmentLibrary;
-        @State(state => state.investmentEditor.scenarioInvestmentLibrary) stateScenarioInvestmentLibrary: InvestmentLibrary;
+  @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
+  @Action('selectTreatmentLibrary') selectTreatmentLibraryAction: any;
+  @Action('upsertTreatmentLibrary') upsertTreatmentLibraryAction: any;
+  @Action('deleteTreatmentLibrary') deleteTreatmentLibraryAction: any;
+  @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;
+  @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
-        @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
-        @Action('getScenarioTreatmentLibrary') getScenarioTreatmentLibraryAction: any;
-        @Action('selectTreatmentLibrary') selectTreatmentLibraryAction: any;
-        @Action('createTreatmentLibrary') createTreatmentLibraryAction: any;
-        @Action('updateTreatmentLibrary') updateTreatmentLibraryAction: any;
-        @Action('deleteTreatmentLibrary') deleteTreatmentLibraryAction: any;
-        @Action('saveScenarioTreatmentLibrary') saveScenarioTreatmentLibraryAction: any;
-        @Action('getScenarioInvestmentLibrary') getScenarioInvestmentLibraryAction: any;
-        @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+  selectedTreatmentLibrary: TreatmentLibrary = clone(emptyTreatmentLibrary);
+  selectedScenarioId: string = getBlankGuid();
+  hasSelectedLibrary: boolean = false;
+  librarySelectItems: SelectItem[] = [];
+  librarySelectItemValue: string | null = null;
+  treatmentSelectItems: SelectItem[] = [];
+  treatmentSelectItemValue: string | null = null;
+  selectedTreatment: Treatment = clone(emptyTreatment);
+  selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
+  activeTab: number = 0;
+  treatmentTabs: string[] = ['treatmentDetails', 'costs', 'consequences'];
+  createTreatmentLibraryDialogData: CreateTreatmentLibraryDialogData = clone(emptyCreateTreatmentLibraryDialogData);
+  showCreateTreatmentDialog: boolean = false;
+  confirmBeforeDeleteAlertData: AlertData = clone(emptyAlertData);
+  hasSelectedTreatment: boolean = false;
+  rules: InputValidationRules = rules;
+  uuidNIL: string = getBlankGuid();
+  keepActiveTab: boolean = false;
 
-        selectedTreatmentLibrary: TreatmentLibrary = clone(emptyTreatmentLibrary);
-        selectedScenarioId: string = '0';
-        hasSelectedTreatmentLibrary: boolean = false;
-        treatmentLibrariesSelectListItems: SelectItem[] = [];
-        treatmentLibrarySelectItemValue: string | null = null;
-        treatmentsSelectListItems: SelectItem[] = [];
-        treatmentSelectItemValue: string | null = null;
-        selectedTreatment: Treatment = clone(emptyTreatment);
-        activeTab: number = 0;
-        treatmentTabs: string[] = ['feasibility', 'costs', 'consequences'];
-        createTreatmentLibraryDialogData: CreateTreatmentLibraryDialogData = clone(emptyCreateTreatmentLibraryDialogData);
-        showCreateTreatmentDialog: boolean = false;
-        tabData: TabData = clone(emptyTabData);
-        alertBeforeDelete: AlertData = clone(emptyAlertData);
-        objectIdMOngoDBForScenario: string = '';
-        hasSelectedTreatment: boolean = false;
-        rules: InputValidationRules = {...rules};
-
-        /**
-         * Sets component ui properties that triggers cascading ui updates
-         */
-        beforeRouteEnter(to: any, from: any, next: any) {
-            next((vm: any) => {
-                if (to.path === '/TreatmentEditor/Scenario/') {
-                    vm.selectedScenarioId = to.query.selectedScenarioId;
-                    vm.objectIdMOngoDBForScenario = to.query.objectIdMOngoDBForScenario;
-                    if (vm.selectedScenarioId === '0') {
-                        // set 'no selected scenario' error message, then redirect user to Scenarios UI
-                        vm.setErrorMessageAction({message: 'Found no selected scenario for edit'});
-                        vm.$router.push('/Scenarios/');
-                    }
-
-                    vm.treatmentTabs = [...vm.treatmentTabs, 'budgets'];
-                }
-
-                vm.treatmentLibrarySelectItemValue = null;
-                vm.getTreatmentLibrariesAction()
-                    .then(() => {
-                        if (vm.selectedScenarioId !== '0') {
-                            vm.getScenarioTreatmentLibraryAction({selectedScenarioId: parseInt(vm.selectedScenarioId)})
-                                .then(() =>
-                                    vm.getScenarioInvestmentLibraryAction({selectedScenarioId: parseInt(vm.selectedScenarioId)})
-                                );
-                        }
-                    });
-            });
+  beforeRouteEnter(to: any, from: any, next: any) {
+    next((vm: any) => {
+      if (to.path.indexOf('TreatmentEditor/Scenario') !== -1) {
+        vm.selectedScenarioId = to.query.scenarioId;
+        if (vm.selectedScenarioId === vm.uuidNIL) {
+          vm.setErrorMessageAction({message: 'Found no selected scenario for edit'});
+          vm.$router.push('/Scenarios/');
         }
 
-        beforeDestroy() {
-            this.setHasUnsavedChangesAction({value: false});
-        }
+        vm.treatmentTabs = [...vm.treatmentTabs, 'budgets'];
+        vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.selectedScenarioId});
+      }
 
-        /**
-         * Sets treatmentLibraries with the treatmentLibraries state data
-         */
-        @Watch('stateTreatmentLibraries')
-        onStateTreatmentLibrariesChanged() {
-            this.treatmentLibrariesSelectListItems = this.stateTreatmentLibraries
-                .map((treatmentLibrary: TreatmentLibrary) => ({
-                    text: treatmentLibrary.name,
-                    value: treatmentLibrary.id.toString()
-                }));
-        }
+      vm.librarySelectItemValue = null;
+      vm.getTreatmentLibrariesAction();
+    });
+  }
 
-        /**
-         * Sets the selected treatment library based on treatmentLibrarySelectItemValue
-         */
-        @Watch('treatmentLibrarySelectItemValue')
-        onTreatmentLibrarySelectItemValueChanged() {
-            this.selectTreatmentLibraryAction({selectedLibraryId: this.treatmentLibrarySelectItemValue});
-        }
+  beforeDestroy() {
+    this.setHasUnsavedChangesAction({value: false});
+  }
 
-        /**
-         * Sets selectedTreatmentLibrary with selectedTreatmentLibrary state data
-         */
-        @Watch('stateSelectedTreatmentLibrary')
-        onStateSelectedTreatmentLibraryChanged() {
-            this.selectedTreatmentLibrary = clone(this.stateSelectedTreatmentLibrary);
-        }
+  @Watch('stateTreatmentLibraries')
+  onStateTreatmentLibrariesChanged() {
+    this.librarySelectItems = this.stateTreatmentLibraries.map((library: TreatmentLibrary) => ({
+      text: library.name,
+      value: library.id.toString()
+    }));
 
-        /**
-         * Sets/resets the component UI properties reliant on a selected treatment library
-         */
-        @Watch('selectedTreatmentLibrary')
-        onSelectedTreatmentLibraryChanged() {
-            this.setHasUnsavedChangesAction({
-                value: hasUnsavedChanges(
-                    'treatment', this.selectedTreatmentLibrary, this.stateSelectedTreatmentLibrary, this.stateScenarioTreatmentLibrary
-                )
-            });
-
-            this.hasSelectedTreatmentLibrary = this.selectedTreatmentLibrary.id !== '0';
-
-            this.treatmentsSelectListItems = hasValue(this.selectedTreatmentLibrary.treatments)
-                ? this.selectedTreatmentLibrary.treatments.map((treatment: Treatment) => ({
-                    text: treatment.name,
-                    value: treatment.id
-                }))
-                : [];
-
-            if (!hasValue(this.selectedTreatmentLibrary.treatments) ||
-                !any(propEq('id', this.selectedTreatment.id), this.selectedTreatmentLibrary.treatments)) {
-                this.treatmentSelectItemValue = null;
-            }
-        }
-
-        /**
-         * Sets the selected treatment
-         */
-        @Watch('treatmentSelectItemValue')
-        onTreatmentSelectItemValueChanged() {
-            let selectedTreatment: Treatment = clone(emptyTreatment);
-
-            if (any(propEq('id', this.treatmentSelectItemValue), this.selectedTreatmentLibrary.treatments)) {
-                selectedTreatment = find(
-                    propEq('id', this.treatmentSelectItemValue), this.selectedTreatmentLibrary.treatments) as Treatment;
-            }
-
-            this.activeTab = 0;
-            this.selectedTreatment = selectedTreatment;
-        }
-
-        @Watch('selectedTreatment')
-        onSelectedTreatmentChanged() {
-            this.hasSelectedTreatment = this.selectedTreatment.id !== '0';
-            if (this.hasSelectedTreatment) {
-                this.tabData = {
-                    tabTreatmentLibraries: clone(this.stateTreatmentLibraries),
-                    tabSelectedTreatmentLibrary: clone(this.selectedTreatmentLibrary),
-                    tabSelectedTreatment: clone(this.selectedTreatment),
-                    tabScenarioInvestmentLibrary: clone(this.stateScenarioInvestmentLibrary)
-                };
-            }
-        }
-
-        /**
-         * Dispatches an action to update the selected treatment library in state, then resets the selected treatment
-         * @param updatedSelectedTreatmentLibrary The selected treatment library data to use for updating
-         */
-        updateSelectedTreatmentLibrary(updatedSelectedTreatmentLibrary: TreatmentLibrary) {
-            this.selectedTreatmentLibrary = {...updatedSelectedTreatmentLibrary};
-            this.selectedTreatment = find(
-                propEq('id', this.selectedTreatment.id), this.selectedTreatmentLibrary.treatments) as Treatment;
-        }
-
-        /**
-         * Shows the CreateTreatmentLibraryDialog passing in the selected treatment library's description & treatments data
-         */
-        onCreateAsNewLibrary() {
-            this.createTreatmentLibraryDialogData = {
-                showDialog: true,
-                selectedTreatmentLibraryDescription: this.selectedTreatmentLibrary.description,
-                selectedTreatmentLibraryTreatments: this.selectedTreatmentLibrary.treatments
-            };
-        }
-
-        /**
-         * Dispatches an action to create a new treatment library on the server
-         */
-        onCreateTreatmentLibrary(createdTreatmentLibrary: TreatmentLibrary) {
-            this.createTreatmentLibraryDialogData = clone(emptyCreateTreatmentLibraryDialogData);
-
-            if (!isNil(createdTreatmentLibrary)) {
-                this.createTreatmentLibraryAction({createdTreatmentLibrary: createdTreatmentLibrary})
-                    .then(() => this.treatmentLibrarySelectItemValue = createdTreatmentLibrary.id);
-            }
-        }
-
-        /**
-         * Dispatches an action to add a created treatment to the selected treatment library's treatments list in state
-         */
-        onCreateTreatment(createdTreatment: Treatment) {
-            this.showCreateTreatmentDialog = false;
-
-            if (!isNil(createdTreatment)) {
-                this.selectedTreatmentLibrary = {
-                    ...this.selectedTreatmentLibrary,
-                    treatments: append(createdTreatment, this.selectedTreatmentLibrary.treatments)
-                };
-
-                setTimeout(() => this.treatmentSelectItemValue = createdTreatment.id);
-            }
-        }
-
-        /**
-         * Dispatches an action to update the selected treatment library on the server
-         */
-        onUpdateLibrary() {
-            this.updateTreatmentLibraryAction({updatedTreatmentLibrary: this.selectedTreatmentLibrary});
-        }
-
-        /**
-         * Dispatches an action to update the scenario's treatment library data with the currently selected treatment library
-         */
-        onApplyToScenario() {
-            this.saveScenarioTreatmentLibraryAction({
-                saveScenarioTreatmentLibraryData: {
-                    ...this.selectedTreatmentLibrary,
-                    id: this.selectedScenarioId
-                },
-                objectIdMOngoDBForScenario: this.objectIdMOngoDBForScenario
-            }).then(() => this.onDiscardChanges());
-        }
-
-        /**
-         * Clears the selected treatment library and dispatches an action to update the selected treatment library in
-         * state with the scenario treatment library (if present), otherwise an action is dispatched to get the scenario
-         * treatment library from the server to update the selected treatment library in state
-         */
-        onDiscardChanges() {
-            this.treatmentLibrarySelectItemValue = null;
-            this.treatmentSelectItemValue = null;
-            setTimeout(() => this.selectTreatmentLibraryAction({selectedLibraryId: this.stateScenarioTreatmentLibrary.id}));
-        }
-
-        onDeleteTreatmentLibrary() {
-            this.alertBeforeDelete = {
-                showDialog: true,
-                heading: 'Warning',
-                choice: true,
-                message: 'Are you sure you want to delete?'
-            };
-        }
-
-        onSubmitDeleteResponse(response: boolean) {
-            this.alertBeforeDelete = clone(emptyAlertData);
-
-            if (response) {
-                this.treatmentLibrarySelectItemValue = null;
-                this.deleteTreatmentLibraryAction({treatmentLibrary: this.selectedTreatmentLibrary});
-            }
-        }
-
-        disableSubmitAction() {
-            if (this.hasSelectedTreatmentLibrary) {
-                const allDataIsValid: boolean = this.selectedTreatmentLibrary.treatments.every((t: Treatment) => {
-                    const allSubDataIsValid: boolean = t.consequences.every((c: Consequence) => {
-                        return this.rules['generalRules'].valueIsNotEmpty(c.attribute) === true &&
-                                this.rules['treatmentRules'].changeHasEquation(c.change, c.equation) === true;
-                    });
-                    return allSubDataIsValid && this.rules['generalRules'].valueIsNotEmpty(t.name) === true &&
-                            this.rules['generalRules'].valueIsNotEmpty(t.feasibility.yearsBeforeAny) === true &&
-                            this.rules['generalRules'].valueIsNotEmpty(t.feasibility.yearsBeforeSame) === true;
-                });
-
-                if (this.selectedScenarioId !== '0') {
-                    return !allDataIsValid;
-                } else {
-                    return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedTreatmentLibrary.name) &&
-                        allDataIsValid);
-                }
-            }
-
-            return true;
-        }
+    if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateTreatmentLibraries, this.selectedScenarioId)) {
+      this.librarySelectItemValue = getAppliedLibraryId(this.stateTreatmentLibraries, this.selectedScenarioId);
     }
+  }
+
+  @Watch('librarySelectItemValue')
+  onLibrarySelectItemValueChanged() {
+    this.selectTreatmentLibraryAction({libraryId: this.librarySelectItemValue});
+  }
+
+  @Watch('stateSelectedTreatmentLibrary')
+  onStateSelectedTreatmentLibraryChanged() {
+    this.selectedTreatmentLibrary = clone(this.stateSelectedTreatmentLibrary);
+  }
+
+  @Watch('selectedTreatmentLibrary')
+  onSelectedTreatmentLibraryChanged() {
+    this.setHasUnsavedChangesAction({
+      value: hasUnsavedChangesCore('treatment', this.selectedTreatmentLibrary, this.stateSelectedTreatmentLibrary)
+    });
+
+    this.hasSelectedLibrary = this.selectedTreatmentLibrary.id !== this.uuidNIL;
+
+    this.treatmentSelectItems = this.selectedTreatmentLibrary.treatments.map((treatment: Treatment) => ({
+      text: treatment.name,
+      value: treatment.id
+    }));
+
+    if (this.selectedTreatment.id !== this.uuidNIL && !any(propEq('id', this.selectedTreatment.id), this.selectedTreatmentLibrary.treatments)) {
+      this.treatmentSelectItemValue = null;
+    }
+  }
+
+  @Watch('treatmentSelectItemValue')
+  onTreatmentSelectItemValueChanged() {
+    if (this.treatmentSelectItemValue !== this.selectedTreatment.id && this.selectedTreatment.id !== this.uuidNIL &&
+        any(propEq('id', this.selectedTreatment.id), this.selectedTreatmentLibrary.treatments)) {
+      this.syncSelectedTreatmentWithTreatmentLibrary();
+    }
+
+    if (hasValue(this.treatmentSelectItemValue) && any(propEq('id', this.treatmentSelectItemValue), this.selectedTreatmentLibrary.treatments)) {
+      this.selectedTreatment = find(
+          propEq('id', this.treatmentSelectItemValue), this.selectedTreatmentLibrary.treatments) as Treatment;
+    } else {
+      this.selectedTreatment = clone(emptyTreatment);
+    }
+
+    if (!this.keepActiveTab) {
+      this.activeTab = 0;
+    }
+    this.keepActiveTab = true;
+  }
+
+  @Watch('selectedTreatment')
+  onSelectedTreatmentChanged() {
+    this.hasSelectedTreatment = this.selectedTreatment.id !== this.uuidNIL;
+    this.selectedTreatmentDetails = {
+      description: this.selectedTreatment.description,
+      shadowForSameTreatment: this.selectedTreatment.shadowForSameTreatment,
+      shadowForAnyTreatment: this.selectedTreatment.shadowForAnyTreatment,
+      criterionLibrary: this.selectedTreatment.criterionLibrary
+    };
+  }
+
+  onShowCreateTreatmentLibraryDialog(createAsNewLibrary: boolean) {
+    this.createTreatmentLibraryDialogData = {
+      showDialog: true,
+      selectedTreatmentLibraryTreatments: createAsNewLibrary ? this.selectedTreatmentLibrary.treatments : [],
+      scenarioId: createAsNewLibrary ? this.selectedScenarioId : this.uuidNIL
+    };
+  }
+
+  onUpsertTreatmentLibrary(library: TreatmentLibrary, scenarioId: string) {
+    this.createTreatmentLibraryDialogData = clone(emptyCreateTreatmentLibraryDialogData);
+
+    if (!isNil(library)) {
+      this.upsertTreatmentLibraryAction({library: library, scenarioId: scenarioId});
+    }
+  }
+
+  onAddTreatment(newTreatment: Treatment) {
+    this.showCreateTreatmentDialog = false;
+
+    if (!isNil(newTreatment) && this.selectedTreatmentLibrary.id !== this.uuidNIL) {
+      this.selectedTreatmentLibrary = {
+        ...this.selectedTreatmentLibrary,
+        treatments: append(newTreatment, this.selectedTreatmentLibrary.treatments)
+      };
+
+      setTimeout(() => this.treatmentSelectItemValue = newTreatment.id);
+    }
+  }
+
+  modifySelectedTreatmentDetails(treatmentDetails: TreatmentDetails) {
+    if (this.hasSelectedTreatment) {
+      this.modifySelectedTreatment({
+        ...this.selectedTreatment,
+        description: treatmentDetails.description,
+        shadowForAnyTreatment: treatmentDetails.shadowForAnyTreatment,
+        shadowForSameTreatment: treatmentDetails.shadowForSameTreatment,
+        criterionLibrary: treatmentDetails.criterionLibrary
+      });
+    }
+  }
+
+  addSelectedTreatmentCost(newCost: TreatmentCost) {
+    if (this.hasSelectedTreatment) {
+      this.modifySelectedTreatment({
+        ...this.selectedTreatment,
+        costs: prepend(newCost, this.selectedTreatment.costs)
+      });
+    }
+  }
+
+  modifySelectedTreatmentCost(modifiedCost: TreatmentCost) {
+    if (this.hasSelectedTreatment) {
+      this.modifySelectedTreatment({
+        ...this.selectedTreatment,
+        costs: update(
+            findIndex(propEq('id', modifiedCost.id), this.selectedTreatment.costs),
+            modifiedCost, this.selectedTreatment.costs)
+      });
+    }
+  }
+
+  removeSelectedTreatmentCost(costId: string) {
+    if (this.hasSelectedTreatment) {
+      this.modifySelectedTreatment({
+        ...this.selectedTreatment,
+        costs: reject(propEq('id', costId), this.selectedTreatment.costs)
+      });
+    }
+  }
+
+  addSelectedTreatmentConsequence(newConsequence: TreatmentConsequence) {
+    if (this.hasSelectedTreatment) {
+      this.modifySelectedTreatment({
+        ...this.selectedTreatment,
+        consequences: prepend(newConsequence, this.selectedTreatment.consequences)
+      });
+    }
+  }
+
+  modifySelectedTreatmentConsequence(modifiedConsequence: TreatmentConsequence) {
+    if (this.hasSelectedTreatment) {
+      this.modifySelectedTreatment({
+        ...this.selectedTreatment,
+        consequences: update(
+            findIndex(propEq('id', modifiedConsequence.id), this.selectedTreatment.consequences),
+            modifiedConsequence, this.selectedTreatment.consequences)
+      });
+    }
+  }
+
+  removeSelectedTreatmentConsequence(consequenceId: string) {
+    if (this.hasSelectedTreatment) {
+      this.modifySelectedTreatment({
+        ...this.selectedTreatment,
+        consequences: reject(propEq('id', consequenceId), this.selectedTreatment.consequences)
+      });
+    }
+  }
+
+  modifySelectedTreatmentBudgets(simpleBudgetDetails: SimpleBudgetDetail[]) {
+    if (this.hasSelectedTreatment) {
+      this.modifySelectedTreatment({
+        ...this.selectedTreatment,
+        budgetIds: getPropertyValues('id', simpleBudgetDetails) as string[]
+      });
+    }
+  }
+
+  modifySelectedTreatment(treatment: Treatment) {
+    if (this.hasSelectedLibrary && this.hasSelectedTreatment) {
+      this.selectedTreatment = clone(treatment);
+      this.syncSelectedTreatmentWithTreatmentLibrary();
+    }
+  }
+
+  syncSelectedTreatmentWithTreatmentLibrary() {
+    this.selectedTreatmentLibrary = {
+      ...this.selectedTreatmentLibrary,
+      treatments: update(
+          findIndex(propEq('id', this.selectedTreatment.id), this.selectedTreatmentLibrary.treatments),
+          this.selectedTreatment, this.selectedTreatmentLibrary.treatments)
+    };
+  }
+
+  onDiscardChanges() {
+    this.librarySelectItemValue = null;
+    this.treatmentSelectItemValue = null;
+    setTimeout(() => {
+      if (this.selectedScenarioId !== this.uuidNIL &&
+          hasAppliedLibrary(this.stateTreatmentLibraries, this.selectedScenarioId)) {
+        this.librarySelectItemValue = getAppliedLibraryId(this.stateTreatmentLibraries, this.selectedScenarioId);
+      }
+    });
+  }
+
+  onShowConfirmDeleteAlert() {
+    this.confirmBeforeDeleteAlertData = {
+      showDialog: true,
+      heading: 'Warning',
+      choice: true,
+      message: 'Are you sure you want to delete?'
+    };
+  }
+
+  onSubmitConfirmDeleteAlertResult(submit: boolean) {
+    this.confirmBeforeDeleteAlertData = clone(emptyAlertData);
+
+    if (submit) {
+      this.librarySelectItemValue = null;
+      this.deleteTreatmentLibraryAction({libraryId: this.selectedTreatmentLibrary.id});
+    }
+  }
+
+  disableCrudButton() {
+    if (this.hasSelectedLibrary) {
+      const allDataIsValid: boolean = this.selectedTreatmentLibrary.treatments.every((treatment: Treatment) => {
+        const allSubDataIsValid: boolean = treatment.consequences.every((consequence: TreatmentConsequence) => {
+          return this.rules['generalRules'].valueIsNotEmpty(consequence.attribute) === true &&
+              this.rules['treatmentRules'].hasChangeValueOrEquation(consequence.changeValue, consequence.equation.expression) === true;
+        });
+
+        return allSubDataIsValid && this.rules['generalRules'].valueIsNotEmpty(treatment.name) === true &&
+            this.rules['generalRules'].valueIsNotEmpty(treatment.shadowForAnyTreatment) === true &&
+            this.rules['generalRules'].valueIsNotEmpty(treatment.shadowForSameTreatment) === true;
+      });
+
+      return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedTreatmentLibrary.name) && allDataIsValid);
+    }
+
+    return true;
+  }
+}
 </script>
 
 <style>
-    .treatment-editor-container {
-        height: 730px;
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
+.treatment-editor-container {
+  height: 730px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
 
-    .treatments-div {
-        height: 355px;
-    }
+.treatments-div {
+  height: 355px;
+}
 
-    .card-tab-content {
-        height: 305px;
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
+.card-tab-content {
+  height: 305px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
 
-    .treatment-library-select {
-        height: 60px;
-    }
+.treatment-library-select {
+  height: 60px;
+}
 
-    .sharing label {
-        padding-top: 0.5em;
-    }
+.sharing label {
+  padding-top: 0.5em;
+}
 
-    .sharing {
-        padding-top: 0;
-        margin: 0;
-    }
+.sharing {
+  padding-top: 0;
+  margin: 0;
+}
 </style>

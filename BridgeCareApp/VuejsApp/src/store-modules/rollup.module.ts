@@ -7,11 +7,11 @@ import {Rollup} from '@/shared/models/iAM/rollup';
 import RollupService from '../services/rollup.service';
 import {convertFromMongoToVue} from '@/shared/utils/mongo-model-conversion-utils';
 import { Network } from '@/shared/models/iAM/network';
-import { NewNetwork } from '@/shared/models/iAM/newNetwork';
+import { NetworkCore } from '@/shared/models/iAM/networkCore';
 
 const state = {
     rollups: [] as Rollup[]
-    //newNetworks: [] as NewNetwork[]
+    //newNetworks: [] as NetworkCore[]
 };
 
 const mutations = {
@@ -29,7 +29,7 @@ const mutations = {
             state.rollups = rollups;
         }
     }
-    // newNetworksMutator(state: any, network: NewNetwork[]){
+    // newNetworksMutator(state: any, network: NetworkCore[]){
     //     state.newNetworks = clone(network);
     // }
 };

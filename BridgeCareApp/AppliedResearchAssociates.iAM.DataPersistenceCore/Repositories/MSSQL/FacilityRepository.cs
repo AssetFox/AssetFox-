@@ -4,6 +4,7 @@ using System.Data;
 using AppliedResearchAssociates.iAM.Domains;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,9 +15,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public FacilityRepository(UnitOfWork.UnitOfWork unitOfWork)
+        public FacilityRepository(UnitOfDataPersistenceWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }

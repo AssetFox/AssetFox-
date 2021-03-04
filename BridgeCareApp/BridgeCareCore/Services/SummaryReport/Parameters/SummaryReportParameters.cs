@@ -15,26 +15,26 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
     public class SummaryReportParameters
     {
         private readonly IExcelHelper _excelHelper;
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public SummaryReportParameters(IExcelHelper excelHelper, UnitOfWork unitOfWork)
+        public SummaryReportParameters(IExcelHelper excelHelper, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel,
             Guid simulationId, Guid networkId)
         {
-            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
-            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
-            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+            var explorer = _unitOfDataPersistenceWork.AttributeRepo.GetExplorer();
+            var network = _unitOfDataPersistenceWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
+            _unitOfDataPersistenceWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
             var simulation = network.Simulations.First();
-            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _unitOfWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
-            _unitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+            _unitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+            _unitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
+            _unitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
 
             // Simulation Name format
             _excelHelper.MergeCells(worksheet, 1, 1, 1, 2);

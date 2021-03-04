@@ -1,151 +1,91 @@
-import {CashFlowLibrary, emptyCashFlowLibrary} from '@/shared/models/iAM/cash-flow';
-import {any, append, clone, equals, find, findIndex, propEq, reject, update} from 'ramda';
+import {CashFlowRuleLibrary, emptyCashFlowRuleLibrary} from '@/shared/models/iAM/cash-flow';
+import {any, append, clone, find, findIndex, propEq, reject, update} from 'ramda';
 import CashFlowService from '@/services/cash-flow.service';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
-import {convertFromMongoToVue} from '@/shared/utils/mongo-model-conversion-utils';
 import {http2XX} from '@/shared/utils/http-utils';
+import {getAppliedLibrary, hasAppliedLibrary, unapplyLibrary} from '@/shared/utils/library-utils';
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
 const state = {
-    cashFlowLibraries: [] as CashFlowLibrary[],
-    selectedCashFlowLibrary: clone(emptyCashFlowLibrary) as CashFlowLibrary,
-    scenarioCashFlowLibrary: clone(emptyCashFlowLibrary) as CashFlowLibrary,
+    cashFlowRuleLibraries: [] as CashFlowRuleLibrary[],
+    selectedCashFlowRuleLibrary: clone(emptyCashFlowRuleLibrary) as CashFlowRuleLibrary
 };
 
 const mutations = {
-    cashFlowLibrariesMutator(state: any, cashFlowLibraries: CashFlowLibrary[]) {
-        state.cashFlowLibraries = clone(cashFlowLibraries);
+    cashFlowRuleLibrariesMutator(state: any, libraries: CashFlowRuleLibrary[]) {
+        state.cashFlowRuleLibraries = clone(libraries);
     },
-    selectedCashFlowLibraryMutator(state: any, libraryId: string) {
-        if (any(propEq('id', libraryId), state.cashFlowLibraries)) {
-            state.selectedCashFlowLibrary = find(propEq('id', libraryId), state.cashFlowLibraries);
-        } else if (state.scenarioCashFlowLibrary.id === libraryId) {
-            state.selectedCashFlowLibrary = clone(state.scenarioCashFlowLibrary);
+    selectedCashFlowRuleLibraryMutator(state: any, libraryId: string) {
+        if (any(propEq('id', libraryId), state.cashFlowRuleLibraries)) {
+            state.selectedCashFlowRuleLibrary = find(propEq('id', libraryId), state.cashFlowRuleLibraries);
         } else {
-            state.selectedCashFlowLibrary = clone(emptyCashFlowLibrary);
+            state.selectedCashFlowRuleLibrary = clone(emptyCashFlowRuleLibrary);
         }
     },
-    createdCashFlowLibraryMutator(state: any, createdCashFlowLibrary: CashFlowLibrary) {
-        state.cashFlowLibraries = append(createdCashFlowLibrary, state.cashFlowLibraries);
+    addedOrUpdatedCashFlowRuleLibraryMutator(state: any, library: CashFlowRuleLibrary) {
+        state.cashFlowRuleLibraries = any(propEq('id', library.id), state.cashFlowRuleLibraries)
+            ? update(findIndex(propEq('id', library.id), state.cashFlowRuleLibraries),
+                library, state.cashFlowRuleLibraries)
+            : append(library, state.cashFlowRuleLibraries);
     },
-    updatedCashFlowLibraryMutator(state: any, updatedCashFlowLibrary: CashFlowLibrary) {
-        state.cashFlowLibraries = update(
-            findIndex(propEq('id', updatedCashFlowLibrary.id), state.cashFlowLibraries),
-            updatedCashFlowLibrary,
-            state.cashFlowLibraries
-        );
-    },
-    deletedCashFlowLibraryMutator(state: any, deletedCashFlowLibraryId: string) {
-        if (any(propEq('id', deletedCashFlowLibraryId), state.cashFlowLibraries)) {
-            state.cashFlowLibraries = reject(
-                (library: CashFlowLibrary) => deletedCashFlowLibraryId === library.id,
-                state.cashFlowLibraries
+    deletedCashFlowRuleLibraryMutator(state: any, deletedLibraryId: string) {
+        if (any(propEq('id', deletedLibraryId), state.cashFlowRuleLibraries)) {
+            state.cashFlowRuleLibraries = reject(
+                (library: CashFlowRuleLibrary) => deletedLibraryId === library.id,
+                state.cashFlowRuleLibraries
             );
         }
-    },
-    scenarioCashFlowLibraryMutator(state: any, scenarioCashFlowLibrary: CashFlowLibrary) {
-        state.scenarioCashFlowLibrary = clone(scenarioCashFlowLibrary);
     }
 };
 
 const actions = {
-    selectCashFlowLibrary({commit}: any, payload: any) {
-        commit('selectedCashFlowLibraryMutator', payload.selectedLibraryId);
+    selectCashFlowRuleLibrary({commit}: any, payload: any) {
+        commit('selectedCashFlowRuleLibraryMutator', payload.libraryId);
     },
-    async getCashFlowLibraries({commit}: any) {
-        await CashFlowService.getCashFlowLibraries().then((response: AxiosResponse<any[]>) => {
-            if (hasValue(response, 'data')) {
-                const cashFlowLibraries: CashFlowLibrary[] = response.data
-                    .map((data: any) => convertFromMongoToVue(data));
-                commit('cashFlowLibrariesMutator', cashFlowLibraries);
-            }
-        });
-    },
-    async createCashFlowLibrary({dispatch, commit}: any, payload: any) {
-        await CashFlowService.createCashFlowLibrary(payload.createdCashFlowLibrary)
-            .then((response: AxiosResponse) => {
+    async getCashFlowRuleLibraries({commit}: any) {
+        await CashFlowService.getCashFlowRuleLibraries()
+            .then((response: AxiosResponse<any[]>) => {
                 if (hasValue(response, 'data')) {
-                    const createdCashFlowLibrary: CashFlowLibrary = convertFromMongoToVue(response.data);
-                    commit('createdCashFlowLibraryMutator', createdCashFlowLibrary);
-                    commit('selectedCashFlowLibraryMutator', createdCashFlowLibrary.id);
-                    dispatch('setSuccessMessage', {message: 'Successfully created cash flow library'});
+                    commit('cashFlowRuleLibrariesMutator', response.data as CashFlowRuleLibrary[]);
                 }
             });
     },
-    async updateCashFlowLibrary({dispatch, commit}: any, payload: any) {
-        await CashFlowService.updateCashFlowLibrary(payload.updatedCashFlowLibrary)
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    const updatedCashFlowLibrary: CashFlowLibrary = convertFromMongoToVue(response.data);
-                    commit('updatedCashFlowLibraryMutator', updatedCashFlowLibrary);
-                    commit('selectedCashFlowLibraryMutator', updatedCashFlowLibrary.id);
-                    dispatch('setSuccessMessage', {message: 'Successfully updated cash flow library'});
-                }
-            });
-    },
-    async deleteCashFlowLibrary({dispatch, commit, state}: any, payload: any) {
-        await CashFlowService.deleteCashFlowLibrary(payload.cashFlowLibrary)
+    async upsertCashFlowRuleLibrary({dispatch, commit}: any, payload: any) {
+        await CashFlowService.upsertCashFlowRuleLibrary(payload.library, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    commit('deletedCashFlowLibraryMutator', payload.cashFlowLibrary.id);
-                    dispatch('setSuccessMessage', {message: 'Successfully deleted cash flow library'});
-                }
-            });
-    },
-    async getScenarioCashFlowLibrary({commit}: any, payload: any) {
-        await CashFlowService.getScenarioCashFlowLibrary(payload.selectedScenarioId)
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    commit('scenarioCashFlowLibraryMutator', response.data);
-                    commit('selectedCashFlowLibraryMutator', response.data.id);
-                }
-            });
-    },
-    async saveScenarioCashFlowLibrary({dispatch, commit}: any, payload: any) {
-        await CashFlowService.saveScenarioCashFlowLibrary(payload.scenarioCashFlowLibrary, payload.objectIdMOngoDBForScenario)
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    commit('scenarioCashFlowLibraryMutator', response.data);
-                    dispatch('setSuccessMessage', {message: 'Successfully saved scenario cash flow library'});
-                }
-            });
-    },
-    async socket_cashFlowLibrary({dispatch, state, commit}: any, payload: any) {
-        if (hasValue(payload, 'operationType')) {
-            if (hasValue(payload, 'fullDocument')) {
-                const cashFlowLibrary: CashFlowLibrary = convertFromMongoToVue(payload.fullDocument);
-                switch (payload.operationType) {
-                    case 'update':
-                    case 'replace':
-                        commit('updatedCashFlowLibraryMutator', cashFlowLibrary);
-                        if (state.selectedCashFlowLibrary.id === cashFlowLibrary.id && !equals(state.selectedCashFlowLibrary, cashFlowLibrary)) {
-                            commit('selectedCashFlowLibraryMutator', cashFlowLibrary.id);
-                            dispatch('setInfoMessage', {message: `Cash flow library '${cashFlowLibrary.name}' has been changed from another source`});
-                        }
-                        break;
-                    case 'insert':
-                        if (!any(propEq('id', cashFlowLibrary.id), state.cashFlowLibraries)) {
-                            commit('createdCashFlowLibraryMutator', cashFlowLibrary);
-                            dispatch('setInfoMessage', {message: `Cash flow library '${cashFlowLibrary.name}' has been created from another source`});
-                        }
-                }
-            } else if (hasValue(payload, 'documentKey')) {
-                if (any(propEq('id', payload.documentKey._id), state.cashFlowLibraries)) {
-                    const deletedCashFlowLibrary: CashFlowLibrary = find(propEq('id', payload.documentKey._id), state.cashFlowLibraries);
-                    commit('deletedCashFlowLibraryMutator', payload.documentKey._id);
-
-                    if (deletedCashFlowLibrary.id === state.selectedCashFlowLibrary) {
-                        if (!equals(state.scenarioCashFlowLibrary, emptyCashFlowLibrary)) {
-                            commit('selectedCashFlowLibraryMutator', state.scenarioCashFlowLibrary.id);
-                        } else {
-                            commit('selectedCashFlowLibraryMutator', null);
-                        }
+                    if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.cashFlowRuleLibraries, payload.scenarioId)) {
+                        const unAppliedLibrary: CashFlowRuleLibrary = unapplyLibrary(getAppliedLibrary(
+                            state.cashFlowRuleLibraries, payload.scenarioId), payload.scenarioId);
+                        commit('addedOrUpdatedCashFlowRuleLibraryMutator', unAppliedLibrary);
                     }
 
-                    dispatch('setInfoMessage', {message: `Cash flow library ${deletedCashFlowLibrary.name} has been deleted from another source`});
+                    const library: CashFlowRuleLibrary = {
+                        ...payload.library,
+                        appliedScenarioIds: payload.scenarioId !== getBlankGuid() &&
+                        payload.library.appliedScenarioIds.indexOf(payload.scenarioId) === -1
+                            ? append(payload.scenarioId, payload.library.appliedScenarioIds)
+                            : payload.library.appliedScenarioIds
+                    };
+
+                    const message: string = any(propEq('id', library.id), state.cashFlowRuleLibraries)
+                        ? 'Updated cash flow rule library'
+                        : 'Added cash flow rule library';
+                    commit('addedOrUpdatedCashFlowRuleLibraryMutator', library);
+                    commit('selectedCashFlowRuleLibraryMutator', library.id);
+                    dispatch('setSuccessMessage', {message: message});
                 }
-            }
-        }
+            });
+    },
+    async deleteCashFlowRuleLibrary({dispatch, commit, state}: any, payload: any) {
+        await CashFlowService.deleteCashFlowRuleLibrary(payload.libraryId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    commit('deletedCashFlowRuleLibraryMutator', payload.libraryId);
+                    dispatch('setSuccessMessage', {message: 'Deleted cash flow rule library'});
+                }
+            });
     }
 };
 

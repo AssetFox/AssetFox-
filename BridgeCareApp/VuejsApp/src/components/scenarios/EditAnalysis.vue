@@ -90,23 +90,24 @@
     import {Action, State} from 'vuex-class';
     import moment from 'moment';
     import {Analysis, emptyAnalysis} from '@/shared/models/iAM/scenario';
-    import CriteriaEditorDialog from '@/shared/modals/CriteriaEditorDialog.vue';
+    import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
     import {
-        CriteriaEditorDialogData,
-        emptyCriteriaEditorDialogData
-    } from '@/shared/models/modals/criteria-editor-dialog-data';
+        CriterionLibraryEditorDialogData,
+        emptyCriterionLibraryEditorDialogData
+    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
     import {clone, equals, isNil} from 'ramda';
     import {hasValue} from '@/shared/utils/has-value-util';
     import {Attribute} from '@/shared/models/iAM/attribute';
     import {getPropertyValues} from '@/shared/utils/getter-utils';
     import {setItemPropertyValue} from '@/shared/utils/setter-utils';
+    import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
     @Component({
-        components: {CriteriaEditorDialog}
+        components: {CriteriaEditorDialog: CriterionLibraryEditorDialog}
     })
     export default class EditAnalysis extends Vue {
-        @State(state => state.scenario.analysis) stateAnalysis: Analysis;
-        @State(state => state.attribute.numericAttributes) stateNumericAttributes: Attribute[];
+        @State(state => state.scenarioModule.analysis) stateAnalysis: Analysis;
+        @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 
         @Action('getScenarioAnalysis') getScenarioAnalysisAction: any;
         @Action('saveScenarioAnalysis') saveScenarioAnalysisAction: any;
@@ -124,7 +125,8 @@
         benefitAttributes: string[] = [];
         weightingAttributes: string[] = ['None'];
         simulationName: string;
-        criteriaEditorDialogData: CriteriaEditorDialogData = {...emptyCriteriaEditorDialogData};
+        criteriaEditorDialogData: CriterionLibraryEditorDialogData = {...emptyCriterionLibraryEditorDialogData};
+        uuidNIL: string = getBlankGuid();
 
         /**
          * beforeRouterEnter event handler
@@ -195,12 +197,13 @@
         }
 
         /**
-         * Opens the CriteriaEditorDialog passing in the analysis criteria
+         * Opens the CriterionLibraryEditorDialog passing in the analysis criteria
          */
         onEditScopeCriteria() {
+          // TODO: replace with actual criterion library object id
             this.criteriaEditorDialogData = {
                 showDialog: true,
-                criteria: this.analysis.criteria
+                libraryId: this.uuidNIL//this.analysis.criteria
             };
         }
 
@@ -208,7 +211,7 @@
          * Updates the analysis criteria (if present) with the user's submitted criteria
          */
         onSubmitScopeCriteria(criteria: string) {
-            this.criteriaEditorDialogData = {...emptyCriteriaEditorDialogData};
+            this.criteriaEditorDialogData = {...emptyCriterionLibraryEditorDialogData};
 
             if (!isNil(criteria)) {
                 this.analysis = {...this.analysis, criteria: criteria};

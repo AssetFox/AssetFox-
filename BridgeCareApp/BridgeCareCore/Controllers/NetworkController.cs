@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Logging;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace BridgeCareCore.Controllers
 {
@@ -17,31 +13,28 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class NetworkController : ControllerBase
     {
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly ILog _log;
 
-        public NetworkController(UnitOfWork unitOfWork, ILog log)
+        public NetworkController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog log)
         {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
         [HttpGet]
         [Route("GetAllNetworks")]
-        public IActionResult GetAllNetworks()
+        public async Task<IActionResult> AllNetworks()
         {
             try
             {
-                _log.Information("Entered GetAllNetWorks call");
-                var networks = _unitOfWork.NetworkRepo.GetAllNetworks();
-                // Sending the first network because PennDOT will always have only 1 network
-                var filteredNetworks = new List<Network> { networks.FirstOrDefault() };
-                return Ok(filteredNetworks);
+                var result = await _unitOfDataPersistenceWork.NetworkRepo.Networks();
+                return Ok(result);
             }
             catch (Exception e)
             {
                 _log.Error($"GetAllNetworks Error => {e.Message}::{e.StackTrace}");
-                return StatusCode(500, $"{e.Message}::{e.StackTrace}");
+                return BadRequest(e);
             }
         }
 
@@ -52,7 +45,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 // get network definition attribute from json file
-                var attribute = _unitOfWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
+                var attribute = _unitOfDataPersistenceWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
 
                 // throw an exception if not network definition attribute is present
                 if (attribute == null)
@@ -66,7 +59,7 @@ namespace BridgeCareCore.Controllers
                 network.Name = networkName;
 
                 // insert network domain data into the data source
-                _unitOfWork.NetworkRepo.CreateNetwork(network);
+                _unitOfDataPersistenceWork.NetworkRepo.CreateNetwork(network);
 
                 // [TODO] Create DTO to return network information necessary to be stored in the UI
                 // for future reference.
@@ -78,6 +71,7 @@ namespace BridgeCareCore.Controllers
                 return StatusCode(500, $"{e.Message}::{e.StackTrace}");
             }
         }
+
         public class NetworkName
         {
             internal string name { get; set; }

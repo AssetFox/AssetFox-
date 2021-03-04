@@ -6,7 +6,6 @@ using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.Mvc;
@@ -21,14 +20,14 @@ namespace BridgeCareCore.Controllers
     {
         private readonly ILogger<NetworkController> _logger;
         private readonly IHubContext<BridgeCareHub> HubContext;
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
         public AggregationController(
-            ILogger<NetworkController> logger, IHubContext<BridgeCareHub> hub, UnitOfWork unitOfWork)
+            ILogger<NetworkController> logger, IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         [HttpPost]
@@ -45,18 +44,19 @@ namespace BridgeCareCore.Controllers
                     .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
 
                 // Get/create configurable attributes
-                var configurationAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
+                var configurationAttributes = _unitOfDataPersistenceWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
 
                 // get all maintainable assets in the network with their assigned data (if any) and locations
-                var maintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId)
+                var maintainableAssets = _unitOfDataPersistenceWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId)
                     .ToList();
 
                 // Create list of attribute ids we are allowed to update with assigned data.
                 var networkAttributeIds = maintainableAssets.Where(_ => _.AssignedData != null && _.AssignedData.Any())
                     .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();
 
-                // create list of attribute data from configuration attributes (exclude attributes that don't have command text as there
-                // will be no way to select data for them from the data source)
+                // create list of attribute data from configuration attributes (exclude attributes
+                // that don't have command text as there will be no way to select data for them from
+                // the data source)
                 var attributeData = configurationAttributes.Where(_ => !string.IsNullOrEmpty(_.Command))
                     .Select(AttributeConnectionBuilder.Build)
                     .SelectMany(AttributeDataBuilder.GetData).ToList();
@@ -93,7 +93,7 @@ namespace BridgeCareCore.Controllers
                         .All
                         .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 // update the maintainable assets assigned data in the data source
-                var updatedRecordsCount = _unitOfWork.AttributeDatumRepo.UpdateAssignedData(maintainableAssets);
+                var updatedRecordsCount = _unitOfDataPersistenceWork.AttributeDatumRepo.UpdateAssignedData(maintainableAssets);
 
                 AggregateData(networkId, maintainableAssets);
 
@@ -117,11 +117,10 @@ namespace BridgeCareCore.Controllers
             var percentage = 0.0;
             try
             {
-                 HubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
-
+                HubContext
+                   .Clients
+                   .All
+                   .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
 
                 var aggregatedResults = new List<IAggregatedResult>();
 
@@ -163,12 +162,12 @@ namespace BridgeCareCore.Controllers
                 }
 
                 broadcastingMessage = $"Finished aggregating attribute data. Saving it to the datasource...";
-                 HubContext
-                        .Clients
-                        .All
-                        .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
+                HubContext
+                       .Clients
+                       .All
+                       .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 // create aggregated data records in the data source
-                var createdRecordsCount = _unitOfWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
+                var createdRecordsCount = _unitOfDataPersistenceWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
 
                 broadcastingMessage = $"Successfully aggregated the data";
                 HubContext
@@ -179,10 +178,10 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 broadcastingMessage = "An error has occured while aggregating data";
-                 HubContext
-                            .Clients
-                            .All
-                            .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
+                HubContext
+                           .Clients
+                           .All
+                           .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
             }
         }
     }

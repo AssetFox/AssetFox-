@@ -1,3 +1,5 @@
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
+
 export interface TimeConditionDataPoint {
     id: string;
     timeValue: number;
@@ -5,7 +7,7 @@ export interface TimeConditionDataPoint {
 }
 
 export const emptyTimeConditionDataPoint = {
-    id: '',
+    id: getBlankGuid(),
     timeValue: 0,
     conditionValue: 0
 };

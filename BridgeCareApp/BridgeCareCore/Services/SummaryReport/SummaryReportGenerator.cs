@@ -30,7 +30,7 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly SummaryReportParameters _summaryReportParameters;
         private readonly IHubContext<BridgeCareHub> HubContext;
         private readonly IAddGraphsInTabs _addGraphsInTabs;
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
         public SummaryReportGenerator(IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
@@ -41,7 +41,7 @@ namespace BridgeCareCore.Services.SummaryReport
             SummaryReportGlossary summaryReportGlossary, SummaryReportParameters summaryReportParameters,
             IHubContext<BridgeCareHub> hub,
             IAddGraphsInTabs addGraphsInTabs,
-            UnitOfWork unitOfWork)
+            UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _bridgeDataForSummaryReport = bridgeDataForSummaryReport ?? throw new ArgumentNullException(nameof(bridgeDataForSummaryReport));
@@ -54,12 +54,12 @@ namespace BridgeCareCore.Services.SummaryReport
             _summaryReportParameters = summaryReportParameters ?? throw new ArgumentNullException(nameof(summaryReportParameters));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
             _addGraphsInTabs = addGraphsInTabs ?? throw new ArgumentNullException(nameof(addGraphsInTabs));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         public byte[] GenerateReport(Guid simulationId, Guid networkId)
         {
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var reportOutputData = _unitOfDataPersistenceWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
 
             // sorting the sections based on facility name. This is helpful throught the report generation process
             reportOutputData.InitialSectionSummaries.Sort(

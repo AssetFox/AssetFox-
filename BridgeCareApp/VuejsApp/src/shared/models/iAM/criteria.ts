@@ -1,3 +1,5 @@
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
+
 export interface CriteriaEditorAttribute {
     name: string;
     values: string[];
@@ -26,17 +28,17 @@ export interface CriteriaValidationResult {
     message: string;
 }
 
-export interface CriteriaLibrary {
+export interface CriterionLibrary {
     id: string;
     name: string;
+    mergedCriteriaExpression: string;
     description: string;
-    criteria: string;
     owner?: string;
     shared?: boolean;
 }
 
 export interface CriteriaEditorData {
-    mainCriteriaString: string;
+    mergedCriteriaExpression: string;
     isLibraryContext: boolean;
 }
 
@@ -50,14 +52,14 @@ export const emptyCriteria: Criteria = {
     children: []
 };
 
-export const emptyCriteriaLibrary: CriteriaLibrary = {
-    id: '0',
+export const emptyCriterionLibrary: CriterionLibrary = {
+    id: getBlankGuid(),
     name: '',
     description: '',
-    criteria: ''
+    mergedCriteriaExpression: ''
 };
 
 export const emptyCriteriaEditorData: CriteriaEditorData = {
-    mainCriteriaString: '',
+    mergedCriteriaExpression: '',
     isLibraryContext: false
 };

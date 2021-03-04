@@ -315,10 +315,10 @@
 
     @Component
     export default class Inventory extends Vue {
-        @State(state => state.inventory.inventoryItems) inventoryItems: InventoryItem[];
-        @State(state => state.inventory.inventoryItemDetail) inventoryItemDetail: InventoryItemDetail;
-        @State(state => state.inventory.lastFiveBmsIdSearches) stateLastFiveBmsIdSearches: string[];
-        @State(state => state.inventory.lastFiveBrKeySearches) stateLastFiveBrKeySearches: number[];
+        @State(state => state.inventoryModule.inventoryItems) inventoryItems: InventoryItem[];
+        @State(state => state.inventoryModule.inventoryItemDetail) inventoryItemDetail: InventoryItemDetail;
+        @State(state => state.inventoryModule.lastFiveBmsIdSearches) stateLastFiveBmsIdSearches: string[];
+        @State(state => state.inventoryModule.lastFiveBrKeySearches) stateLastFiveBrKeySearches: number[];
 
         @Action('getInventory') getInventoryAction: any;
         @Action('getInventoryItemDetailByBMSId') getInventoryItemDetailByBMSIdAction: any;

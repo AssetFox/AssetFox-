@@ -29,9 +29,9 @@
 
     @Component
     export default class AuthenticationStart extends Vue {
-        @State(state => state.authentication.authenticated) authenticated: boolean;
-        @State(state => state.authentication.hasRole) hasRole: boolean;
-        @State(state => state.authentication.checkedForRole) checkedForRole: boolean;
+        @State(state => state.authenticationModule.authenticated) authenticated: boolean;
+        @State(state => state.authenticationModule.hasRole) hasRole: boolean;
+        @State(state => state.authenticationModule.checkedForRole) checkedForRole: boolean;
 
         onRedirect() {
             if (!this.authenticated) {

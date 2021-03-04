@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
+
 using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
@@ -48,6 +50,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = domain.Id,
                 Name = domain.Name
+            };
+
+        public static NetworkDTO ToDto(this NetworkEntity entity) =>
+            new NetworkDTO
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                CreatedDate = entity.CreatedDate,
+                LastModifiedDate = entity.LastModifiedDate
             };
 
         public static SimulationAnalysisDomains.Network ToSimulationAnalysisDomain(this NetworkEntity entity, Explorer explorer)

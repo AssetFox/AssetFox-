@@ -1,27 +1,43 @@
-export interface InvestmentLibraryBudgetYear {
+import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import {clone} from 'ramda';
+import moment from 'moment';
+
+export interface Investment {
+    investmentPlan: InvestmentPlan;
+    budgetLibraries: BudgetLibrary[];
+}
+
+export interface BudgetAmount {
     id: string;
+    budgetName: string;
     year: number;
-    budgetName: string;
-    budgetAmount: number | null;
-    criteriaDrivenBudgetId: string;
+    value: number;
 }
 
-export interface CriteriaDrivenBudget {
-    id: string;
-    budgetName: string;
-    criteria: string;
-}
-
-export interface InvestmentLibrary {
+export interface Budget {
     id: string;
     name: string;
+    budgetAmounts: BudgetAmount[];
+    criterionLibrary: CriterionLibrary;
+}
+
+export interface BudgetLibrary {
+    id: string;
+    name: string;
+    description: string;
+    budgets: Budget[];
+    appliedScenarioIds: string[];
     owner?: string;
     shared?: boolean;
-    inflationRate: number;
-    description: string;
-    budgetOrder: string[];
-    budgetYears: InvestmentLibraryBudgetYear[];
-    criteriaDrivenBudgets: CriteriaDrivenBudget[];
+}
+
+export interface InvestmentPlan {
+    id: string;
+    firstYearOfAnalysisPeriod: number;
+    inflationRatePercentage: number;
+    minimumProjectCostLimit: number;
+    numberOfYearsInAnalysisPeriod: number;
 }
 
 export interface BudgetYearsGridData {
@@ -29,18 +45,37 @@ export interface BudgetYearsGridData {
     [budgetName: string]: number | null;
 }
 
-export const emptyInvestmentLibrary: InvestmentLibrary = {
-    id: '0',
+export interface SimpleBudgetDetail {
+    id: string;
+    name: string;
+}
+
+export const emptyBudgetLibrary: BudgetLibrary = {
+    id: getBlankGuid(),
     name: '',
-    inflationRate: 0,
     description: '',
-    budgetOrder: [],
-    budgetYears: [],
-    criteriaDrivenBudgets: []
+    budgets: [],
+    appliedScenarioIds: []
 };
 
-export const emptyCriteriaDrivenBudget: CriteriaDrivenBudget = {
-    id: '0',
+export const emptyBudget: Budget = {
+    id: getBlankGuid(),
+    name: '',
+    budgetAmounts: [],
+    criterionLibrary: clone(emptyCriterionLibrary)
+};
+
+export const emptyBudgetAmount: BudgetAmount = {
+    id: getBlankGuid(),
     budgetName: '',
-    criteria: ''
+    year: moment().year(),
+    value: 0
+};
+
+export const emptyInvestmentPlan: InvestmentPlan = {
+    id: getBlankGuid(),
+    firstYearOfAnalysisPeriod: moment().year(),
+    inflationRatePercentage: 0,
+    minimumProjectCostLimit: 500000,
+    numberOfYearsInAnalysisPeriod: 1
 };

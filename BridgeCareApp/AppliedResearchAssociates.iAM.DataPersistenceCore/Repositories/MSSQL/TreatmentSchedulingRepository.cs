@@ -12,9 +12,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public TreatmentSchedulingRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public TreatmentSchedulingRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public void CreateTreatmentSchedulings(Dictionary<Guid, List<TreatmentScheduling>> treatmentSchedulingsPerTreatmentId)
         {
@@ -24,14 +24,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfWork.Context.TreatmentScheduling.AddRange(treatmentSchedulingEntities);
+                _unitOfDataPersistenceWork.Context.TreatmentScheduling.AddRange(treatmentSchedulingEntities);
             }
             else
             {
-                _unitOfWork.Context.BulkInsert(treatmentSchedulingEntities);
+                _unitOfDataPersistenceWork.Context.BulkInsert(treatmentSchedulingEntities);
             }
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
     }
 }

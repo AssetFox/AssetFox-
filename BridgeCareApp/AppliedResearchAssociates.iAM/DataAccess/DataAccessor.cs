@@ -619,14 +619,32 @@ where simulationid = {simulationId}
                         }
                     }
 
+                    // treatments in the new schema can only ever have one criterion library; so need to merge all legacy feasibility criteria into one
                     void fillTreatmentFeasibilities()
                     {
+                        var expressionsPerTreatmentId = new Dictionary<int, List<string>>();
                         while (reader.Read())
                         {
                             var id = reader.GetInt32(0);
-                            var treatment = treatmentPerId[id];
+                            if (!expressionsPerTreatmentId.ContainsKey(id))
+                            {
+                                expressionsPerTreatmentId.Add(id, new List<string>());
+                            }
+
+                            var expression = reader.GetNullableString(1);
+                            if (!string.IsNullOrEmpty(expression))
+                            {
+                                expressionsPerTreatmentId[id].Add(expression);
+                            }
+                        }
+
+                        foreach (var treatmentId in expressionsPerTreatmentId.Keys)
+                        {
+                            var treatment = treatmentPerId[treatmentId];
                             var feasibility = treatment.AddFeasibilityCriterion();
-                            feasibility.Expression = reader.GetNullableString(1);
+                            feasibility.Expression = expressionsPerTreatmentId[treatmentId].Any()
+                                ? $"({string.Join(") OR (", expressionsPerTreatmentId[treatmentId])})"
+                                : string.Empty;
                         }
                     }
 

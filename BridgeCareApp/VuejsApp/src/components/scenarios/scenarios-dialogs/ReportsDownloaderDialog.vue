@@ -149,8 +149,8 @@ import {http2XX} from '@/shared/utils/http-utils';
 export default class ReportsDownloaderDialog extends Vue {
     @Prop() dialogData: ReportsDownloaderDialogData;
 
-    @State(state => state.busy.isBusy) isBusy: boolean;
-    @State(state => state.scenario.missingSummaryReportAttributes)
+    @State(state => state.busyModule.isBusy) isBusy: boolean;
+    @State(state => state.scenarioModule.missingSummaryReportAttributes)
     missingSummaryReportAttributes: string[];
 
     @Action('setErrorMessage') setErrorMessageAction: any;

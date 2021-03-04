@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Domains;
-using Attribute = AppliedResearchAssociates.iAM.Domains.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -11,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateTextAttributeValueHistories(List<((Guid sectionId, Guid attributeId) sectionIdAttributeId, AttributeValueHistory<string> textAttributeValueHistory)> textAttributeValueHistorySectionIdAttributeIdTupleTuples);*/
 
         void CreateNumericAttributeValueHistories(Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<double>> numericAttributeValueHistoryPerSectionIdAttributeIdTuple);
+
         void CreateTextAttributeValueHistories(Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<string>> numericAttributeValueHistoryPerSectionIdAttributeIdTuple);
     }
 }

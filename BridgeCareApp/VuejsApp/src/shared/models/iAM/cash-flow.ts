@@ -1,43 +1,49 @@
-export interface SplitTreatmentLimit {
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
+import {clone} from 'ramda';
+
+export interface CashFlowDistributionRule {
     id: string;
-    rank: number;
-    amount: number | null;
-    percentage: string;
+    durationInYears: number;
+    costCeiling: number | null;
+    yearlyPercentages: string;
 }
 
-export interface SplitTreatment {
-    id: string;
-    description: string;
-    criteria: string;
-    splitTreatmentLimits: SplitTreatmentLimit[];
-}
-
-export interface CashFlowLibrary {
+export interface CashFlowRule {
     id: string;
     name: string;
-    owner?: string;
-    shared?: boolean;
-    description: string;
-    splitTreatments: SplitTreatment[];
+    criterionLibrary: CriterionLibrary;
+    cashFlowDistributionRules: CashFlowDistributionRule[];
 }
 
-export const emptyCashFlowLibrary: CashFlowLibrary = {
-    id: '0',
+export interface CashFlowRuleLibrary {
+    id: string;
+    name: string;
+    description: string;
+    cashFlowRules: CashFlowRule[];
+    appliedScenarioIds: string[];
+    owner?: string;
+    shared?: boolean;
+}
+
+export const emptyCashFlowRuleLibrary: CashFlowRuleLibrary = {
+    id: getBlankGuid(),
     name: '',
     description: '',
-    splitTreatments: []
+    cashFlowRules: [],
+    appliedScenarioIds: []
 };
 
-export const emptySplitTreatment: SplitTreatment = {
-    id: '0',
-    description: '',
-    criteria: '',
-    splitTreatmentLimits: []
+export const emptyCashFlowRule: CashFlowRule = {
+    id: getBlankGuid(),
+    name: '',
+    criterionLibrary: clone(emptyCriterionLibrary),
+    cashFlowDistributionRules: []
 };
 
-export const emptySplitTreatmentLimit: SplitTreatmentLimit = {
-    id: '0',
-    rank: 1,
-    amount: 0,
-    percentage: '100'
+export const emptyCashFlowDistributionRule: CashFlowDistributionRule = {
+    id: getBlankGuid(),
+    durationInYears: 1,
+    costCeiling: 0,
+    yearlyPercentages: '100'
 };

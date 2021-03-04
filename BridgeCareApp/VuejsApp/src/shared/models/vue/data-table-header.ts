@@ -1,7 +1,7 @@
 export interface DataTableHeader {
     text: string;
     value: string;
-    align: 'left' | 'center' | 'right';
+    align: string;
     sortable: boolean;
     class: string[] | string;
     width: string;

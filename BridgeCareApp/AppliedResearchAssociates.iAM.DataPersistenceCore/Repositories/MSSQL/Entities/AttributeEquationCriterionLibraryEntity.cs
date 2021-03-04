@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class AttributeEquationCriterionLibraryEntity : BaseEntity
     {
-        public Guid AttributeId  { get; set; }
+        public Guid AttributeId { get; set; }
 
         public Guid EquationId { get; set; }
 

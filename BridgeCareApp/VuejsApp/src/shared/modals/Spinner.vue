@@ -19,7 +19,7 @@
 
     @Component
     export default class Spinner extends Vue {
-        @State(store => store.busy.isBusy) loading: boolean;
+        @State(store => store.busyModule.isBusy) loading: boolean;
     }
 </script>
 

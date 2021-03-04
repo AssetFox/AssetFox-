@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -25,17 +21,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (!IsRunningFromNUnit)
             {
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Repositories\\MSSQL", "migrationConnection.json");
-                var migrationConnection = new MigrationConnection();
-                using (FileStream fs = File.Open(filePath, FileMode.Open))
-                {
-                    using (StreamReader sr = new StreamReader(fs))
-                    {
-                        string rawConnection = sr.ReadToEnd();
-                        migrationConnection = JsonConvert
-                            .DeserializeAnonymousType(rawConnection, new { ConnectionStrings = default(MigrationConnection) })
-                            .ConnectionStrings;
-                    }
-                }
+                string contents = File.ReadAllText(filePath);
+                var migrationConnection = JsonConvert
+                    .DeserializeAnonymousType(contents, new { ConnectionStrings = default(MigrationConnection) })
+                    .ConnectionStrings;
 
                 optionsBuilder.UseSqlServer(migrationConnection.BridgeCareConnex);
             }
@@ -245,7 +234,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<AttributeEquationCriterionLibraryEntity>(entity =>
             {
-                entity.HasKey(e => new {e.AttributeId, e.EquationId});
+                entity.HasKey(e => new { e.AttributeId, e.EquationId });
 
                 entity.HasIndex(e => e.AttributeId);
 
@@ -741,7 +730,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasIndex(e => e.CriterionLibraryId);
 
-                entity.HasIndex(e => e.SelectableTreatmentId);
+                entity.HasIndex(e => e.SelectableTreatmentId).IsUnique();
 
                 entity.HasOne(d => d.CriterionLibrary)
                     .WithMany(p => p.CriterionLibrarySelectableTreatmentJoins)
@@ -749,8 +738,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.SelectableTreatment)
-                    .WithMany(p => p.CriterionLibrarySelectableTreatmentJoins)
-                    .HasForeignKey(d => d.SelectableTreatmentId)
+                    .WithOne(p => p.CriterionLibrarySelectableTreatmentJoin)
+                    .HasForeignKey<CriterionLibrarySelectableTreatmentEntity>(d => d.SelectableTreatmentId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -875,6 +864,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Expression).IsRequired();
+
+                /*entity.HasOne(d => d.AttributeEquationCriterionLibraryJoin)
+                    .WithOne(p => p.Equation)
+                    .HasForeignKey<AttributeEquationCriterionLibraryEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ConditionalTreatmentConsequenceEquationJoin)
+                    .WithOne(p => p.Equation)
+                    .HasForeignKey<ConditionalTreatmentConsequenceEquationEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.PerformanceCurveEquationJoin)
+                    .WithOne(p => p.Equation)
+                    .HasForeignKey<PerformanceCurveEquationEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.TreatmentCostEquationJoin)
+                    .WithOne(p => p.Equation)
+                    .HasForeignKey<TreatmentCostEquationEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);*/
             });
 
             modelBuilder.Entity<FacilityEntity>(entity =>
@@ -1211,7 +1220,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<ConditionalTreatmentConsequenceEquationEntity>(entity =>
             {
-                entity.HasKey(e => new {TreatmentConsequenceId = e.ConditionalTreatmentConsequenceId, e.EquationId});
+                entity.HasKey(e => new { TreatmentConsequenceId = e.ConditionalTreatmentConsequenceId, e.EquationId });
 
                 entity.ToTable("TreatmentConsequence_Equation");
 
@@ -1244,7 +1253,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<TreatmentCostEquationEntity>(entity =>
             {
-                entity.HasKey(e => new {e.TreatmentCostId, e.EquationId});
+                entity.HasKey(e => new { e.TreatmentCostId, e.EquationId });
 
                 entity.ToTable("TreatmentCost_Equation");
 

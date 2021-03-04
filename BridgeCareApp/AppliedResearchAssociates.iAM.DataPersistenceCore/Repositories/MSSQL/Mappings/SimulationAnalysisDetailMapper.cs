@@ -9,7 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             var entity = new SimulationAnalysisDetailEntity
             {
-                SimulationId = dto.SimulationId, RunTime = dto.RunTime, Status = dto.Status
+                SimulationId = dto.SimulationId,
+                RunTime = dto.RunTime,
+                Status = dto.Status
             };
 
             if (dto.LastRun.HasValue)

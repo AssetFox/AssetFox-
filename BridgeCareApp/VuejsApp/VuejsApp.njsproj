@@ -62,18 +62,18 @@
     <Content Include="src\assets\images\inventory_mock_bridge_images\8.jpg" />
     <Content Include="src\assets\images\under-construction.png" />
     <Content Include="src\assets\logo.svg" />
-    <Content Include="src\components\deficient-editor\deficient-editor-dialogs\CreateDeficientDialog.vue" />
-    <Content Include="src\components\deficient-editor\DeficientEditor.vue" />
+    <Content Include="src\components\deficient-editor\deficient-editor-dialogs\CreateDeficientConditionGoalDialog.vue" />
+    <Content Include="src\components\deficient-editor\DeficientConditionGoalEditor.vue" />
     <Content Include="src\components\Inventory.vue" />
-    <Content Include="src\components\investment-editor\investment-editor-dialogs\CreateInvestmentLibraryDialog.vue" />
-    <Content Include="src\components\investment-editor\investment-editor-dialogs\SetRangeForAddingBudgetYearsDialog.vue" />
-    <Content Include="src\components\investment-editor\InvestmentEditor.vue" />
-    <Content Include="src\components\performance-editor\performance-editor-dialogs\CreatePerformanceLibraryDialog.vue" />
-    <Content Include="src\components\performance-editor\performance-editor-dialogs\CreatePerformanceLibraryEquationDialog.vue" />
+    <Content Include="src\components\investmentModule-editor\investmentModule-editor-dialogs\CreateInvestmentLibraryDialog.vue" />
+    <Content Include="src\components\investmentModule-editor\investmentModule-editor-dialogs\SetRangeForAddingBudgetYearsDialog.vue" />
+    <Content Include="src\components\investmentModule-editor\InvestmentEditor.vue" />
+    <Content Include="src\components\performance-editor\performance-editor-dialogs\CreatePerformanceCurveLibraryDialog.vue" />
+    <Content Include="src\components\performance-editor\performance-editor-dialogs\CreatePerformanceCurveDialog.vue" />
     <Content Include="src\components\performance-editor\PerformanceEditor.vue" />
     <Content Include="src\components\priority-editor\priority-editor-dialogs\CreatePriorityDialog.vue" />
     <Content Include="src\components\priority-editor\priority-editor-dialogs\CreatePriorityLibraryDialog.vue" />
-    <Content Include="src\components\priority-editor\PriorityEditor.vue" />
+    <Content Include="src\components\priority-editor\BudgetPriorityEditor.vue" />
     <Content Include="src\components\remaining-life-limit-editor\remaining-life-limit-editor-dialogs\CreateRemainingLifeLimitDialog.vue" />
     <Content Include="src\components\remaining-life-limit-editor\remaining-life-limit-editor-dialogs\CreateRemainingLifeLimitLibraryDialog.vue" />
     <Content Include="src\components\remaining-life-limit-editor\RemainingLifeLimitEditor.vue" />
@@ -83,14 +83,14 @@
     <Content Include="src\components\scenarios\scenarios-dialogs\CreateScenarioDialog.vue" />
     <Content Include="src\components\scenarios\scenarios-dialogs\ReportsDownloaderDialog.vue" />
     <Content Include="src\components\scenarios\Scenarios.vue" />
-    <Content Include="src\components\target-editor\target-editor-dialogs\CreateTargetDialog.vue" />
-    <Content Include="src\components\target-editor\TargetEditor.vue" />
+    <Content Include="src\components\target-editor\target-editor-dialogs\CreateTargetConditionGoalDialog.vue" />
+    <Content Include="src\components\target-editor\TargetConditionGoalEditor.vue" />
     <Content Include="src\components\treatment-editor\treatment-editor-dialogs\CreateTreatmentDialog.vue" />
     <Content Include="src\components\treatment-editor\treatment-editor-dialogs\CreateTreatmentLibraryDialog.vue" />
     <Content Include="src\components\treatment-editor\treatment-editor-tabs\BudgetsTab.vue" />
     <Content Include="src\components\treatment-editor\treatment-editor-tabs\ConsequencesTab.vue" />
     <Content Include="src\components\treatment-editor\treatment-editor-tabs\CostsTab.vue" />
-    <Content Include="src\components\treatment-editor\treatment-editor-tabs\FeasibilityTab.vue" />
+    <Content Include="src\components\treatment-editor\treatment-editor-tabs\TreatmentDetailsTab.vue" />
     <Content Include="src\components\treatment-editor\TreatmentEditor.vue" />
     <Content Include="src\components\UnderConstruction.vue" />
     <Content Include="src\shared\AppShowProgress.vue">
@@ -99,7 +99,7 @@
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="src\shared\modals\Alert.vue" />
-    <Content Include="src\shared\modals\CriteriaEditorDialog.vue" />
+    <Content Include="src\shared\modals\CriterionLibraryEditorDialog.vue" />
     <Content Include="src\shared\modals\EditBudgetsDialog.vue" />
     <Content Include="src\shared\modals\EditYearDialog.vue" />
     <Content Include="src\shared\modals\EquationEditorDialog.vue" />
@@ -122,8 +122,8 @@
     <Folder Include="src\components\" />
     <Folder Include="src\components\deficient-editor\" />
     <Folder Include="src\components\deficient-editor\deficient-editor-dialogs\" />
-    <Folder Include="src\components\investment-editor\" />
-    <Folder Include="src\components\investment-editor\investment-editor-dialogs\" />
+    <Folder Include="src\components\investmentModule-editor\" />
+    <Folder Include="src\components\investmentModule-editor\investmentModule-editor-dialogs\" />
     <Folder Include="src\components\performance-editor\" />
     <Folder Include="src\components\performance-editor\performance-editor-dialogs\" />
     <Folder Include="src\components\priority-editor\" />
@@ -159,42 +159,42 @@
     <TypeScriptCompile Include="src\router.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\services\analysis-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\analysis-method.service.ts" />
     <TypeScriptCompile Include="src\services\attribute.service.ts" />
     <TypeScriptCompile Include="src\services\authentication.service.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\services\budget-criteria.service.ts" />
     <TypeScriptCompile Include="src\services\committed-projects.service.ts" />
-    <TypeScriptCompile Include="src\services\criteria-editor.service.ts" />
-    <TypeScriptCompile Include="src\services\deficient.service.ts" />
-    <TypeScriptCompile Include="src\services\equation-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\criterion-library.service.ts" />
+    <TypeScriptCompile Include="src\services\deficient-condition-goal.service.ts" />
+    <TypeScriptCompile Include="src\services\equation.service.ts" />
     <TypeScriptCompile Include="src\services\inventory.service.ts" />
-    <TypeScriptCompile Include="src\services\investment-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\investmentModule.service.ts" />
     <TypeScriptCompile Include="src\services\network.service.ts" />
-    <TypeScriptCompile Include="src\services\performance-editor.service.ts" />
-    <TypeScriptCompile Include="src\services\priority.service.ts" />
+    <TypeScriptCompile Include="src\services\performance-curve.service.ts" />
+    <TypeScriptCompile Include="src\services\budget-priority.service.ts" />
     <TypeScriptCompile Include="src\services\remaining-life-limit.service.ts" />
     <TypeScriptCompile Include="src\services\reports.service.ts" />
     <TypeScriptCompile Include="src\services\rollup.service.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\services\scenario.service.ts" />
-    <TypeScriptCompile Include="src\services\target.service.ts" />
-    <TypeScriptCompile Include="src\services\treatment-editor.service.ts" />
+    <TypeScriptCompile Include="src\services\target-condition-goal.service.ts" />
+    <TypeScriptCompile Include="src\services\treatment.service.ts" />
     <TypeScriptCompile Include="src\shared\models\child-components\tab-data.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\attribute.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\criteria-driven-budgets.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\criteria-validation.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\criteria.ts" />
-    <TypeScriptCompile Include="src\shared\models\iAM\deficient.ts" />
+    <TypeScriptCompile Include="src\shared\models\iAM\deficient-condition-goal.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\equation-validation.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\inventory.ts" />
-    <TypeScriptCompile Include="src\shared\models\iAM\investment.ts" />
+    <TypeScriptCompile Include="src\shared\models\iAM\investmentModule.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\navigation-tab.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\network.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\performance.ts" />
-    <TypeScriptCompile Include="src\shared\models\iAM\priority.ts" />
+    <TypeScriptCompile Include="src\shared\models\iAM\budget-priority.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\remaining-life-limit.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\rollup.ts">
       <SubType>Code</SubType>
@@ -202,17 +202,17 @@
     <TypeScriptCompile Include="src\shared\models\iAM\route.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\scenario.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\simulation.ts" />
-    <TypeScriptCompile Include="src\shared\models\iAM\target.ts" />
+    <TypeScriptCompile Include="src\shared\models\iAM\target-condition-goal.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\treatment.ts" />
     <TypeScriptCompile Include="src\shared\models\iAM\user-information.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\alert-data.ts" />
-    <TypeScriptCompile Include="src\shared\models\modals\create-investment-library-dialog-data.ts" />
-    <TypeScriptCompile Include="src\shared\models\modals\create-performance-library-dialog-data.ts" />
-    <TypeScriptCompile Include="src\shared\models\modals\create-priority-library-dialog-data.ts" />
+    <TypeScriptCompile Include="src\shared\models\modals\create-budget-library-dialog-data.ts" />
+    <TypeScriptCompile Include="src\shared\models\modals\create-performance-curve-library-dialog-data.ts" />
+    <TypeScriptCompile Include="src\shared\models\modals\create-budget-priority-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-remaining-life-limit-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-remaining-life-limit-library-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\create-treatment-library-dialog-data.ts" />
-    <TypeScriptCompile Include="src\shared\models\modals\criteria-editor-dialog-data.ts" />
+    <TypeScriptCompile Include="src\shared\models\modals\criterion-library-editor-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\edit-budgets-dialog-data.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\edit-budgets-dialog.ts" />
     <TypeScriptCompile Include="src\shared\models\modals\equation-editor-dialog-data.ts" />
@@ -239,20 +239,20 @@
     <TypeScriptCompile Include="src\store-modules\authentication.module.ts" />
     <TypeScriptCompile Include="src\store-modules\budget-criteria.module.ts" />
     <TypeScriptCompile Include="src\store-modules\busy.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\deficient.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\priority.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\deficient-condition-goal.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\budget-priority.module.ts" />
     <TypeScriptCompile Include="src\store-modules\remaining-life-limit.module.ts" />
     <TypeScriptCompile Include="src\store-modules\inventory.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\investment-editor.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\investmentModule.module.ts" />
     <TypeScriptCompile Include="src\store-modules\network.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\performance-editor.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\performance-curve.module.ts" />
     <TypeScriptCompile Include="src\store-modules\rollup.module.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\store-modules\scenario.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\target.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\target-condition-goal.module.ts" />
     <TypeScriptCompile Include="src\store-modules\toastr.module.ts" />
-    <TypeScriptCompile Include="src\store-modules\treatment-editor.module.ts" />
+    <TypeScriptCompile Include="src\store-modules\treatment.module.ts" />
     <TypeScriptCompile Include="src\store\root-store.ts" />
   </ItemGroup>
   <ItemGroup>

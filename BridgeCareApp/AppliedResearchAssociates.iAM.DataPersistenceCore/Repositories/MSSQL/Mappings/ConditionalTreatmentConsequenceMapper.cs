@@ -1,7 +1,7 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
-using Attribute = AppliedResearchAssociates.iAM.Domains.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
@@ -16,6 +16,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ChangeValue = domain.Change.Expression
             };
 
+        public static ConditionalTreatmentConsequenceEntity ToEntity(this TreatmentConsequenceDTO dto, Guid treatmentId,
+            Guid attributeId) =>
+            new ConditionalTreatmentConsequenceEntity
+            {
+                Id = dto.Id,
+                SelectableTreatmentId = treatmentId,
+                AttributeId = attributeId,
+                ChangeValue = dto.ChangeValue
+            };
+
         public static void CreateConditionalTreatmentConsequence(this ConditionalTreatmentConsequenceEntity entity, SelectableTreatment treatment)
         {
             var consequence = treatment.AddConsequence();
@@ -26,5 +36,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 .MergedCriteriaExpression ?? string.Empty;
             consequence.Equation.Expression = entity.ConditionalTreatmentConsequenceEquationJoin?.Equation.Expression ?? string.Empty;
         }
+
+        public static TreatmentConsequenceDTO ToDto(this ConditionalTreatmentConsequenceEntity entity) =>
+            new TreatmentConsequenceDTO
+            {
+                Id = entity.Id,
+                ChangeValue = entity.ChangeValue,
+                Attribute = entity.Attribute != null
+                    ? entity.Attribute.Name
+                    : "",
+                Equation = entity.ConditionalTreatmentConsequenceEquationJoin != null
+                    ? entity.ConditionalTreatmentConsequenceEquationJoin.Equation.ToDto()
+                    : new EquationDTO(),
+                CriterionLibrary = entity.CriterionLibraryConditionalTreatmentConsequenceJoin != null
+                    ? entity.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.ToDto()
+                    : new CriterionLibraryDTO()
+            };
     }
 }

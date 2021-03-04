@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
@@ -14,12 +17,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public TreatmentCostRepository(UnitOfWork.UnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        }
+        public TreatmentCostRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public void CreateTreatmentCosts(Dictionary<Guid, List<TreatmentCost>> treatmentCostsPerTreatmentId, string simulationName)
         {
@@ -62,25 +64,93 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfWork.Context.TreatmentCost.AddRange(costEntities);
+                _unitOfDataPersistenceWork.Context.TreatmentCost.AddRange(costEntities);
             }
             else
             {
-                _unitOfWork.Context.BulkInsert(costEntities);
+                _unitOfDataPersistenceWork.Context.BulkInsert(costEntities);
             }
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
 
             if (equationEntityPerCostEntityId.Values.Any())
             {
-                _unitOfWork.EquationRepo.CreateEquations(equationEntityPerCostEntityId, "TreatmentCostEntity");
+                _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntityPerCostEntityId,
+                    DataPersistenceConstants.EquationJoinEntities.TreatmentCost);
             }
 
             if (costEntityIdsPerExpression.Values.Any())
             {
-                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(costEntityIdsPerExpression,
-                    "TreatmentCostEntity", simulationName);
+                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(costEntityIdsPerExpression,
+                    DataPersistenceConstants.EquationJoinEntities.TreatmentCost, simulationName);
             }
+        }
+
+        public void UpsertOrDeleteTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> treatmentCostPerTreatmentId, Guid libraryId)
+        {
+            var entities = treatmentCostPerTreatmentId.SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key)))
+                .ToList();
+
+            var entityIds = entities.Select(_ => _.Id).ToList();
+
+            var existingEntityIds = _unitOfDataPersistenceWork.Context.TreatmentCost
+                .Where(_ => _.SelectableTreatment.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id))
+                .Select(_ => _.Id).ToList();
+
+            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<TreatmentCostEntity, bool>>>
+            {
+                {"delete", _ => _.SelectableTreatment.TreatmentLibraryId == libraryId && !entityIds.Contains(_.Id)},
+                {"update", _ => existingEntityIds.Contains(_.Id)},
+                {"add", _ => !existingEntityIds.Contains(_.Id)}
+            };
+
+            if (IsRunningFromXUnit)
+            {
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
+            }
+            else
+            {
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
+            }
+
+            var treatmentCosts = treatmentCostPerTreatmentId.SelectMany(_ => _.Value).ToList();
+
+            if (treatmentCosts.Any(_ =>
+                _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression)))
+            {
+                var equationEntityPerTreatmentCostId = treatmentCosts
+                    .Where(_ => _.Equation?.Id != null && _.Equation?.Id != Guid.Empty &&
+                                !string.IsNullOrEmpty(_.Equation.Expression))
+                    .ToDictionary(_ => _.Id, _ => _.Equation.ToEntity());
+
+                _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntityPerTreatmentCostId,
+                    DataPersistenceConstants.EquationJoinEntities.TreatmentCost);
+            }
+
+            if (treatmentCosts.Any(_ =>
+                _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+            {
+                var criterionLibraryJoinsToAdd = treatmentCosts
+                    .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)).Select(_ =>
+                        new CriterionLibraryTreatmentCostEntity
+                        {
+                            CriterionLibraryId = _.CriterionLibrary.Id,
+                            TreatmentCostId = _.Id
+                        }).ToList();
+
+                if (IsRunningFromXUnit)
+                {
+                    _unitOfDataPersistenceWork.Context.CriterionLibraryTreatmentCost.AddRange(criterionLibraryJoinsToAdd);
+                }
+                else
+                {
+                    _unitOfDataPersistenceWork.Context.BulkInsert(criterionLibraryJoinsToAdd);
+                }
+            }
+
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
     }
 }

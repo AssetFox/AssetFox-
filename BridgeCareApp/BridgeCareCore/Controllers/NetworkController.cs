@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Logging;
+using BridgeCareCore.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
@@ -16,7 +17,7 @@ namespace BridgeCareCore.Controllers
         private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly ILog _log;
 
-        public NetworkController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog log)
+        public NetworkController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, EsecSecurity esecSecurity, ILog log)
         {
             _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _log = log ?? throw new ArgumentNullException(nameof(log));
@@ -24,6 +25,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetAllNetworks")]
+        [RestrictAccess]
         public async Task<IActionResult> AllNetworks()
         {
             try

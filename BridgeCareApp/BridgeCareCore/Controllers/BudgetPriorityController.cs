@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCare.Security;
+using BridgeCareCore.Models;
+using BridgeCareCore.Security;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
@@ -10,13 +14,19 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class BudgetPriorityController : ControllerBase
     {
+        private readonly EsecSecurity _esecSecurity;
         private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public BudgetPriorityController(UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public BudgetPriorityController(EsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+        {
+            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        }
 
         [HttpGet]
         [Route("GetBudgetPriorityLibraries")]
+        [RestrictAccess]
         public async Task<IActionResult> BudgetPriorityLibraries()
         {
             try
@@ -34,10 +44,17 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertBudgetPriorityLibrary/{simulationId}")]
+        [RestrictAccess(Role.ADMINISTRATOR, Role.DISTRICT_ENGINEER)]
         public async Task<IActionResult> UpsertBudgetPriorityLibrary(Guid simulationId, BudgetPriorityLibraryDTO dto)
         {
             try
             {
+                var userInfo = _esecSecurity.GetUserInformation(Request);
+                if (userInfo.Role != Role.ADMINISTRATOR)
+                {
+
+                }
+
                 _unitOfDataPersistenceWork.BeginTransaction();
                 await Task.Factory.StartNew(() =>
                 {
@@ -56,6 +73,37 @@ namespace BridgeCareCore.Controllers
                 Console.WriteLine(e);
                 return BadRequest(e);
             }
+        }
+
+        private async void Upsert(Guid simulationId, BudgetPriorityLibraryDTO dto)
+        {
+            try
+            {
+                _unitOfDataPersistenceWork.BeginTransaction();
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfDataPersistenceWork.BudgetPriorityRepo
+                        .UpsertBudgetPriorityLibrary(dto, simulationId);
+                    _unitOfDataPersistenceWork.BudgetPriorityRepo
+                        .UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
+                });
+
+                _unitOfDataPersistenceWork.Commit();
+            }
+            catch (Exception e)
+            {
+                _unitOfDataPersistenceWork.Rollback();
+                throw;
+            }
+        }
+
+        private void UpsertPermitted(Guid simulationId, UserInfo userInfo, BudgetPriorityLibraryDTO dto)
+        {
+            if (false)
+            {
+                throw new UnauthorizedAccessException("User is not authorized to edit scenario's budget priorities.");
+            }
+            Upsert(simulationId, dto);
         }
 
         [HttpDelete]

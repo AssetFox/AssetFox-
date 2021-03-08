@@ -5,16 +5,16 @@ import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 
 export default class PerformanceCurveService {
     static getPerformanceCurveLibraries(): AxiosPromise {
-        return coreAxiosInstance.get(`${API.PerformanceCurveController}/GetPerformanceCurveLibraries`);
+        return coreAxiosInstance.get(`${API.PerformanceCurve}/GetPerformanceCurveLibraries`);
     }
 
     static upsertPerformanceCurveLibrary(data: PerformanceCurveLibrary, scenarioId: string): AxiosPromise {
         return coreAxiosInstance
-        .post(`${API.PerformanceCurveController}/UpsertPerformanceCurveLibrary/${scenarioId}`, data);
+        .post(`${API.PerformanceCurve}/UpsertPerformanceCurveLibrary/${scenarioId}`, data);
     }
 
     static deletePerformanceCurveLibrary(libraryId: string): AxiosPromise {
         return coreAxiosInstance
-        .delete(`${API.PerformanceCurveController}/DeletePerformanceCurveLibrary/${libraryId}`);
+        .delete(`${API.PerformanceCurve}/DeletePerformanceCurveLibrary/${libraryId}`);
     }
 }

@@ -51,7 +51,8 @@ namespace BridgeCareCore
                 .ConfigureAppConfiguration((hostcontext, config) =>
                 {
                     var env = hostcontext.HostingEnvironment;
-#if MSSQLDEBUG
+                    config.AddJsonFile("esec.json", optional: true, reloadOnChange: true);
+#if MsSqlDebug
                     config.AddJsonFile("coreConnection.Development.json", optional: true, reloadOnChange: true);
 #else
                     config.AddJsonFile("coreConnection.json", optional: true, reloadOnChange: true);

@@ -4,14 +4,14 @@ import {DeficientConditionGoalLibrary} from '@/shared/models/iAM/deficient-condi
 
 export default class DeficientConditionGoalService {
     static getDeficientConditionGoalLibraries(): AxiosPromise {
-        return coreAxiosInstance.get(`${API.DeficientConditionGoalController}/GetDeficientConditionGoalLibraries`);
+        return coreAxiosInstance.get(`${API.DeficientConditionGoal}/GetDeficientConditionGoalLibraries`);
     }
 
     static upsertDeficientConditionGoalLibrary(data: DeficientConditionGoalLibrary, scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.DeficientConditionGoalController}/UpsertDeficientConditionGoalLibrary/${scenarioId}`, data);
+        return coreAxiosInstance.post(`${API.DeficientConditionGoal}/UpsertDeficientConditionGoalLibrary/${scenarioId}`, data);
     }
 
     static deleteDeficientConditionGoalLibrary(libraryId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`${API.DeficientConditionGoalController}/DeleteDeficientConditionGoalLibrary/${libraryId}`);
+        return coreAxiosInstance.delete(`${API.DeficientConditionGoal}/DeleteDeficientConditionGoalLibrary/${libraryId}`);
     }
 }

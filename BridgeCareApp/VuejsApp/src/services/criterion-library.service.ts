@@ -9,14 +9,14 @@ export default class CriterionLibraryService {
     }
 
     static getCriterionLibraries(): AxiosPromise {
-        return coreAxiosInstance.get(`${API.CriterionLibraryController}/GetCriterionLibraries`);
+        return coreAxiosInstance.get(`${API.CriterionLibrary}/GetCriterionLibraries`);
     }
 
     static upsertCriterionLibrary(data: CriterionLibrary): AxiosPromise {
-        return coreAxiosInstance.post(`${API.CriterionLibraryController}/UpsertCriterionLibrary`, data);
+        return coreAxiosInstance.post(`${API.CriterionLibrary}/UpsertCriterionLibrary`, data);
     }
 
     static deleteCriterionLibrary(libraryId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`${API.CriterionLibraryController}/DeleteCriterionLibrary/${libraryId}`);
+        return coreAxiosInstance.delete(`${API.CriterionLibrary}/DeleteCriterionLibrary/${libraryId}`);
     }
 }

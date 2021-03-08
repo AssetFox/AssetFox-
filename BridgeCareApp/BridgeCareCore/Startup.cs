@@ -1,3 +1,5 @@
+using System;
+using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -26,6 +28,11 @@ using BridgeCareCore.Services.LegacySimulationSynchronization;
 using BridgeCareCore.Interfaces.Simulation;
 using BridgeCareCore.Services.SimulationAnalysis;
 using BridgeCareCore.Logging;
+using BridgeCareCore.Security;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BridgeCareCore
 {
@@ -90,62 +97,13 @@ namespace BridgeCareCore
             services.AddScoped<ISimulationAnalysis, SimulationAnalysis>();
             services.AddSignalR();
 
+            services.AddSingleton<EsecSecurity>();
+
 #if MsSqlDebug || Release
             // SQL SERVER SCOPINGS
-            //services.AddMSSQLServices(Configuration.GetConnectionString("BridgeCareConnex"));
             services.AddDbContext<IAMContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
             services.AddScoped<UnitOfDataPersistenceWork>();
-
-            /*services.AddScoped<INetworkRepository, NetworkRepository>();
-            services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
-            services.AddScoped<IAttributeRepository, AttributeRepository>();
-            services.AddScoped<IAttributeDatumRepository, AttributeDatumRepository>();
-            services.AddScoped<IAggregatedResultRepository, AggregatedResultRepository>();
-            services.AddScoped<ISimulationRepository, SimulationRepository>();
-            services.AddScoped<IEquationRepository, EquationRepository>();
-            services.AddScoped<ICriterionLibraryRepository, CriterionLibraryRepository>();
-            services.AddScoped<IAnalysisMethodRepository, AnalysisMethodRepository>();
-            services.AddScoped<IInvestmentPlanRepository, InvestmentPlanRepository>();
-            services.AddScoped<IBudgetPriorityRepository, BudgetPriorityRepository>();
-            services.AddScoped<IBudgetRepository, BudgetRepository>();
-            services.AddScoped<IBudgetPercentagePairRepository, BudgetPercentagePairRepository>();
-            services.AddScoped<IBudgetAmountRepository, BudgetAmountRepository>();
-            services.AddScoped<ICashFlowRuleRepository, CashFlowRuleRepository>();
-            services.AddScoped<ICashFlowDistributionRuleRepository, CashFlowDistributionRuleRepository>();
-            services.AddScoped<ITargetConditionGoalRepository, TargetConditionGoalRepository>();
-            services.AddScoped<IDeficientConditionGoalRepository, DeficientConditionGoalRepository>();
-            services.AddScoped<IRemainingLifeLimitRepository, RemainingLifeLimitRepository>();
-            services.AddScoped<IBenefitRepository, BenefitRepository>();
-            services.AddScoped<IAttributeValueHistoryRepository, AttributeValueHistoryRepository>();
-            services.AddScoped<ISectionRepository, SectionRepository>();
-            services.AddScoped<IFacilityRepository, FacilityRepository>();
-            services.AddScoped<ISimulationRepository, SimulationRepository>();
-            services.AddScoped<IBudgetAmountRepository, BudgetAmountRepository>();
-            services.AddScoped<IBudgetRepository, BudgetRepository>();
-            services.AddScoped<ICriterionLibraryRepository, CriterionLibraryRepository>();
-            services.AddScoped<ICashFlowDistributionRuleRepository, CashFlowDistributionRuleRepository>();
-            services.AddScoped<ICashFlowRuleRepository, CashFlowRuleRepository>();
-            services.AddScoped<IInvestmentPlanRepository, InvestmentPlanRepository>();
-            services.AddScoped<IEquationRepository, EquationRepository>();
-            services.AddScoped<IAttributeRepository, AttributeRepository>();
-            services.AddScoped<IPerformanceCurveRepository, PerformanceCurveRepository>();
-            services.AddScoped<ITreatmentConsequenceRepository, TreatmentConsequenceRepository>();
-            services.AddScoped<ITreatmentCostRepository, TreatmentCostRepository>();
-            services.AddScoped<ITreatmentSchedulingRepository, TreatmentSchedulingRepository>();
-            services.AddScoped<ITreatmentSupersessionRepository, TreatmentSupersessionRepository>();
-            services.AddScoped<ISelectableTreatmentRepository, SelectableTreatmentRepository>();
-            services.AddScoped<IBudgetPercentagePairRepository, BudgetPercentagePairRepository>();
-            services.AddScoped<IBudgetPriorityRepository, BudgetPriorityRepository>();
-            services.AddScoped<ITargetConditionGoalRepository, TargetConditionGoalRepository>();
-            services.AddScoped<IDeficientConditionGoalRepository, DeficientConditionGoalRepository>();
-            services.AddScoped<IBenefitRepository, BenefitRepository>();
-            services.AddScoped<IRemainingLifeLimitRepository, RemainingLifeLimitRepository>();
-            services.AddScoped<IAnalysisMethodRepository, AnalysisMethodRepository>();
-            services.AddScoped<ISimulationOutputRepository, SimulationOutputRepository>();
-            services.AddScoped<ICommittedProjectConsequenceRepository, CommittedProjectConsequenceRepository>();
-            services.AddScoped<ICommittedProjectRepository, CommittedProjectRepository>();
-            services.AddScoped<ISimulationAnalysisDetailRepository, SimulationAnalysisDetailRepository>();*/
 
             // Repository for legacy database
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
@@ -171,6 +129,20 @@ namespace BridgeCareCore
                 .AllowCredentials()
                 .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com");
             }));
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        RequireExpirationTime = true,
+                        RequireSignedTokens = true,
+                        ValidateAudience = false,
+                        ValidateIssuer = false,
+                        ValidateLifetime = true,
+                        IssuerSigningKey = SecurityFunctions.GetPublicKey(Configuration.GetSection("EsecConfig"))
+                    };
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -188,6 +160,8 @@ namespace BridgeCareCore
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

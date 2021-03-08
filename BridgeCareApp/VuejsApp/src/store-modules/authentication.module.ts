@@ -3,6 +3,7 @@ import {AxiosResponse} from 'axios';
 import {UserInfo, UserTokens} from '@/shared/models/iAM/authentication';
 import {http2XX} from '@/shared/utils/http-utils';
 import {checkLDAP, parseLDAP, regexCheckLDAP} from '@/shared/utils/parse-ldap';
+import {hasValue} from '@/shared/utils/has-value-util';
 
 const state = {
     authenticated: false,
@@ -41,9 +42,10 @@ const mutations = {
 const actions = {
     async getUserTokens({commit}: any, code: string) {
         await AuthenticationService.getUserTokens(code)
-            .then((response: AxiosResponse<string>) => {
-                if (http2XX.test(response.status.toString())) {
-                    localStorage.setItem('UserTokens', response.data);
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    const userTokens: UserTokens = response.data as UserTokens;
+                    localStorage.setItem('UserTokens', JSON.stringify(userTokens));
                     const expiration: Date = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes, in milliseconds
                     localStorage.setItem('TokenExpiration', expiration.getTime().toString());
                     commit('authenticatedMutator', true);
@@ -81,8 +83,8 @@ const actions = {
             commit('refreshingMutator', true);
             const userTokens: UserTokens = JSON.parse(localStorage.getItem('UserTokens') as string) as UserTokens;
             await AuthenticationService.refreshTokens(userTokens.refresh_token)
-                .then((response: AxiosResponse<string>) => {
-                    if (http2XX.test(response.status.toString())) {
+                .then((response: AxiosResponse) => {
+                    if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                         localStorage.setItem('UserTokens', JSON.stringify({
                             ...userTokens,
                             ...JSON.parse(response.data)
@@ -101,10 +103,10 @@ const actions = {
         } else {
             const userTokens: UserTokens = JSON.parse(localStorage.getItem('UserTokens') as string) as UserTokens;
             await AuthenticationService.getUserInfo(userTokens.access_token)
-                .then((response: AxiosResponse<string>) => {
-                    if (http2XX.test(response.status.toString())) {
-                        localStorage.setItem('UserInfo', response.data);
-                        const userInfo: UserInfo = JSON.parse(response.data) as UserInfo;
+                .then((response: AxiosResponse) => {
+                    if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                        const userInfo: UserInfo = response.data as UserInfo;
+                        localStorage.setItem('UserInfo', JSON.stringify(userInfo));
                         const username: string = parseLDAP(userInfo.sub)[0];
                         commit('hasRoleMutator', regexCheckLDAP(userInfo.roles, /PD-BAMS-(Administrator|CWOPA|PlanningPartner|DBEngineer)/));
                         if (state.hasRole) {

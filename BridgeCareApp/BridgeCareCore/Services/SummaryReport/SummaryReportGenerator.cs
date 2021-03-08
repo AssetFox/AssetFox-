@@ -72,7 +72,7 @@ namespace BridgeCareCore.Services.SummaryReport
             };
 
 
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var reportOutputData = _unitOfDataPersistenceWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
 
             var initialSectionValues = reportOutputData.InitialSectionSummaries[0].ValuePerNumericAttribute;
 

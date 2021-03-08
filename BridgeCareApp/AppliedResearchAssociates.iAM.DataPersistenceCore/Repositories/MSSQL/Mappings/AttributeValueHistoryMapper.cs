@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
-using SQLitePCL;
-using TextAttribute = AppliedResearchAssociates.iAM.Domains.TextAttribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
@@ -121,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 }
                 else
                 {
-                    history.MostRecentValue = entitiesPerAttributeName[attributeName].Single(_ => _.Year ==0).Value;
+                    history.MostRecentValue = entitiesPerAttributeName[attributeName].Single(_ => _.Year == 0).Value;
                 }
             });
         }

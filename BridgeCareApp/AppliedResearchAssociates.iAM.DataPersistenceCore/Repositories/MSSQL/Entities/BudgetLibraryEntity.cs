@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
@@ -13,7 +12,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         }
 
         public virtual ICollection<BudgetEntity> Budgets { get; set; }
-
 
         public virtual ICollection<BudgetLibrarySimulationEntity> BudgetLibrarySimulationJoins { get; set; }
     }

@@ -5,6 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class NumericAttributeValueHistoryEntity : AttributeValueHistoryEntity
     {
         public int Year { get; set; }
+
         public double Value { get; set; }
     }
 }

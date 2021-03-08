@@ -485,11 +485,11 @@ import {
 import {ScenarioCreationData} from '@/shared/models/modals/scenario-creation-data';
 import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
 import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
-import {Network} from '@/shared/models/iAM/network';
+import {emptyCreateNetworkData, Network} from '@/shared/models/iAM/network';
 import {
-    NewNetwork,
+    NetworkCore,
     NetworkCreationData,
-} from '@/shared/models/iAM/newNetwork';
+} from '@/shared/models/iAM/networkCore';
 import {any, clone, isNil} from 'ramda';
 import {Simulation} from '@/shared/models/iAM/simulation';
 import {emptyRollup, Rollup} from '@/shared/models/iAM/rollup';
@@ -500,6 +500,7 @@ import {
 } from '@/shared/utils/input-validation-rules';
 import CreateNetworkDialog from '@/components/scenarios/scenarios-dialogs/CreateNetworkDialog.vue';
 import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
+import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
 
 @Component({
     components: {
@@ -511,20 +512,20 @@ import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-
     },
 })
 export default class Scenarios extends Vue {
-    @State(state => state.scenario.scenarios) stateScenarios: Scenario[];
-    @State(state => state.authentication.userId) userId: string;
-    @State(state => state.breadcrumb.navigation) navigation: any[];
-    @State(state => state.network.networks) networks: Network[];
-    @State(state => state.authentication.authenticated) authenticated: boolean;
+    @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
+    @State(state => state.authenticationModule.userId) userId: string;
+    @State(state => state.breadcrumbModule.navigation) navigation: any[];
+    @State(state => state.networkModule.networks) networks: Network[];
+    @State(state => state.authenticationModule.authenticated) authenticated: boolean;
     //@State(state => state.rollup.rollups) rollups: Rollup[];
-    @State(state => state.authentication.isAdmin) isAdmin: boolean;
-    @State(state => state.authentication.isCWOPA) isCWOPA: boolean;
-    @State(state => state.network.newNetworks) newNetworks: NewNetwork[];
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.isCWOPA) isCWOPA: boolean;
+    @State(state => state.networkModule.newNetworks) newNetworks: NetworkCore[];
+
     @Action('getMongoScenarios') getMongoScenariosAction: any;
     @Action('getLegacyScenarios') getLegacyScenariosAction: any;
     @Action('runSimulation') runSimulationAction: any; // Obselete
     @Action('runNewSimulation') runNewSimulationAction: any;
-
     @Action('createScenario') createScenarioAction: any;
     @Action('deleteScenario') deleteScenarioAction: any;
     @Action('updateScenario') updateScenarioAction: any;
@@ -685,9 +686,11 @@ export default class Scenarios extends Vue {
 
     @Watch('DataMigrationStatusUpdate')
     onDataMigrationStatusUpdate() {
-        var scenarioObj = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()); // TODO : use this.scenarioIdForStatusUpdate
+      //@ts-ignore
+        let scenarioObj: any = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()); // TODO : use this.scenarioIdForStatusUpdate
 
         if (isNil(scenarioObj)) {
+          //@ts-ignore
             scenarioObj = this.userScenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()); // TODO : use this.scenarioIdForStatusUpdate
         }
 
@@ -984,7 +987,7 @@ export default class Scenarios extends Vue {
                 simulationId: scenario.simulationId,
                 simulationName: scenario.simulationName,
                 networkId: this.networks[0].networkId,
-                networkName: this.networks[0].networkName,
+                networkName: this.networks[0].name,
             };
 
             this.updateScenarioAction({
@@ -1013,11 +1016,9 @@ export default class Scenarios extends Vue {
 
     onSubmitNewNetwork(createNetworkData: NetworkCreationData) {
         this.showCreateNetworkDialog = false;
-        var name = createNetworkData.name;
-        if (hasValue(createNetworkData)) {
-            this.createNetworkAction({
-                networkName: {name: name},
-            });
+
+        if (!isNil(createNetworkData) && !isEqual(createNetworkData, emptyCreateNetworkData)) {
+            this.createNetworkAction({name: createNetworkData.name});
         }
     }
 

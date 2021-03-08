@@ -31,20 +31,20 @@
                         <v-list-tile @click="onNavigate('/InvestmentEditor/Library/')">
                             <v-list-tile-title>Investment</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/PerformanceEditor/Library/')">
-                            <v-list-tile-title>Performance</v-list-tile-title>
+                        <v-list-tile @click="onNavigate('/PerformanceCurveEditor/Library/')">
+                            <v-list-tile-title>Performance Curve</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/TreatmentEditor/Library/')">
                             <v-list-tile-title>Treatment</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/PriorityEditor/Library/')">
-                            <v-list-tile-title>Priority</v-list-tile-title>
+                        <v-list-tile @click="onNavigate('/BudgetPriorityEditor/Library/')">
+                            <v-list-tile-title>Budget Priority</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/TargetEditor/Library/')">
-                            <v-list-tile-title>Target</v-list-tile-title>
+                        <v-list-tile @click="onNavigate('/TargetConditionGoalEditor/Library/')">
+                            <v-list-tile-title>Target Condition Goal</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/DeficientEditor/Library/')">
-                            <v-list-tile-title>Deficient</v-list-tile-title>
+                        <v-list-tile @click="onNavigate('/DeficientConditionGoalEditor/Library/')">
+                            <v-list-tile-title>Deficient Condition Goal</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile @click="onNavigate('/RemainingLifeLimitEditor/Library/')" v-if="isAdmin">
                             <v-list-tile-title>Remaining Life Limit</v-list-tile-title>
@@ -52,8 +52,8 @@
                         <v-list-tile @click="onNavigate('/CashFlowEditor/Library/')">
                             <v-list-tile-title>Cash Flow</v-list-tile-title>
                         </v-list-tile>
-                        <v-list-tile @click="onNavigate('/CriteriaLibraryEditor/Library/')">
-                            <v-list-tile-title>Criteria</v-list-tile-title>
+                        <v-list-tile @click="onNavigate('/CriterionLibraryEditor/Library/')">
+                            <v-list-tile-title>Criterion</v-list-tile-title>
                         </v-list-tile>
                     </v-list-group>
                     <v-list-tile @click="onNavigate('/UserCriteria/')" v-if="isAdmin">
@@ -139,7 +139,7 @@
     import iziToast from 'izitoast';
     import {hasValue} from '@/shared/utils/has-value-util';
     import {AxiosError, AxiosRequestConfig, AxiosResponse} from 'axios';
-    import {axiosInstance, bridgecareCoreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
+    import {axiosInstance, coreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
     import {getErrorMessage, setAuthHeader, setContentTypeCharset} from '@/shared/utils/http-utils';
     import ReportsService from './services/reports.service';
     import Alert from '@/shared/modals/Alert.vue';
@@ -152,19 +152,19 @@
     })
     export default class AppComponent extends Vue {
         @State(state => state) state: any;
-        @State(state => state.authentication.authenticated) authenticated: boolean;
-        @State(state => state.authentication.hasRole) hasRole: boolean;
-        @State(state => state.authentication.username) username: string;
-        @State(state => state.authentication.isAdmin) isAdmin: boolean;
-        @State(state => state.authentication.refreshing) refreshing: boolean;
-        @State(state => state.breadcrumb.navigation) navigation: any[];
-        @State(state => state.toastr.successMessage) successMessage: string;
-        @State(state => state.toastr.warningMessage) warningMessage: string;
-        @State(state => state.toastr.errorMessage) errorMessage: string;
-        @State(state => state.toastr.infoMessage) infoMessage: string;
-        @State(state => state.unsavedChangesFlag.hasUnsavedChanges) hasUnsavedChanges: boolean;
-        @State(state => state.scenario.selectedScenario) stateSelectedScenario: Scenario;
-        @State(state => state.announcement.packageVersion) packageVersion: string;
+        @State(state => state.authenticationModule.authenticated) authenticated: boolean;
+        @State(state => state.authenticationModule.hasRole) hasRole: boolean;
+        @State(state => state.authenticationModule.username) username: string;
+        @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+        @State(state => state.authenticationModule.refreshing) refreshing: boolean;
+        @State(state => state.breadcrumbModule.navigation) navigation: any[];
+        @State(state => state.toastrModule.successMessage) successMessage: string;
+        @State(state => state.toastrModule.warningMessage) warningMessage: string;
+        @State(state => state.toastrModule.errorMessage) errorMessage: string;
+        @State(state => state.toastrModule.infoMessage) infoMessage: string;
+        @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
+        @State(state => state.scenarioModule.selectedScenario) stateSelectedScenario: Scenario;
+        @State(state => state.announcementModule.packageVersion) packageVersion: string;
 
         @Action('refreshTokens') refreshTokensAction: any;
         @Action('checkBrowserTokens') checkBrowserTokensAction: any;
@@ -191,7 +191,7 @@
             'SynchronizeLegacySimulation',
             'RunSimulation',
             'GenerateSummaryReport'
-        ]
+        ];
 
         get container() {
             const container: any = {};
@@ -315,7 +315,7 @@
                 (request: any) => requestHandler(this, request)
             );
             // set bridge care core axios request interceptor to use request handler
-            bridgecareCoreAxiosInstance.interceptors.request.use(
+            coreAxiosInstance.interceptors.request.use(
                 (request: any) => requestHandler(this, request)
             );
             // create a success & error handler
@@ -345,7 +345,7 @@
                 (error: any) => errorHandler(error)
             );
             // set bridge care core axios response handler to use success & error handlers
-            bridgecareCoreAxiosInstance.interceptors.response.use(
+            coreAxiosInstance.interceptors.response.use(
                 (response: any) => successHandler(response),
                 (error: any) => errorHandler(error)
             );

@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
 {
     public class SimulationAnalysisDetailDTO
     {
-        public SimulationAnalysisDetailDTO() {}
+        public SimulationAnalysisDetailDTO() { }
 
         public SimulationAnalysisDetailDTO(SimulationAnalysisDetailEntity entity)
         {
@@ -16,8 +16,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
         }
 
         public Guid SimulationId { get; set; }
+
         public DateTime? LastRun { get; set; }
+
         public string Status { get; set; }
+
         public string RunTime { get; set; }
     }
 }

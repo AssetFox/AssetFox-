@@ -98,8 +98,8 @@
 
     @Component
     export default class Home extends Vue {
-        @State(state => state.announcement.announcements) announcements: Announcement[];
-        @State(state => state.authentication.isAdmin) isAdmin: boolean;
+        @State(state => state.announcementModule.announcements) announcements: Announcement[];
+        @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
 
         @Action('createAnnouncement') createAnnouncementAction: any;
         @Action('getAnnouncements') getAnnouncementsAction: any;

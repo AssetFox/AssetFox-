@@ -1,9 +1,30 @@
-﻿export interface Network {
+﻿import {getBlankGuid} from '@/shared/utils/uuid-utils';
+
+export interface Network {
+    id: string;
+    name: string;
+    createdDate?: Date;
+    lastModifiedDate?: Date;
+    assignmentStatus?: string;
     networkId: number;
-    networkName: string;
 }
 
 export const emptyNetwork: Network = {
-    networkId: 0,
-    networkName: ''
+    id: getBlankGuid(),
+    name: '',
+    createdDate: new Date(),
+    lastModifiedDate: new Date(),
+    assignmentStatus: '',
+    networkId: 0
+};
+
+export interface NetworkCreationData {
+    name: string;
+    owner?: string;
+    creator: string;
+}
+
+export const emptyCreateNetworkData: NetworkCreationData = {
+    name: '',
+    creator: ''
 };

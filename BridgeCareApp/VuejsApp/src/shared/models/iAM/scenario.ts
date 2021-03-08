@@ -1,3 +1,5 @@
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
+
 export interface Analysis {
     id: number;
     startYear: number;
@@ -42,7 +44,7 @@ export interface Scenario {
     shared?: boolean;
     owner?: string;
     creator?: string;
-    id: number | string;
+    id: string;
     users: ScenarioUser[];
     runTime?: string;
 }
@@ -56,7 +58,7 @@ export const emptyScenario: Scenario = {
     lastModifiedDate: new Date(),
     status: '',
     shared: false,
-    id: 0,
+    id: getBlankGuid(),
     users: [],
     runTime: ''
 };

@@ -17,10 +17,10 @@ namespace BridgeCareCore.Services.SimulationAnalysis
 {
     public class SimulationAnalysis : ISimulationAnalysis
     {
-        private readonly UnitOfWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IHubContext<BridgeCareHub> HubContext;
 
-        public SimulationAnalysis(UnitOfWork unitOfWork, IHubContext<BridgeCareHub> hub)
+        public SimulationAnalysis(UnitOfDataPersistenceWork unitOfWork, IHubContext<BridgeCareHub> hub)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
@@ -44,7 +44,7 @@ namespace BridgeCareCore.Services.SimulationAnalysis
             var simulation = network.Simulations.First();
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _unitOfWork.PerformanceCurveRepo.GetSimulationPerformanceCurves(simulation);
+            _unitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
             _unitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
 
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);

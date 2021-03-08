@@ -45,6 +45,7 @@
 
   <ItemGroup>
     <Folder Include="Repositories\MSSQLLegacy\Mappings\" />
+    <Folder Include="Repositories\MSSQL\DTOs\Abstract\" />
   </ItemGroup>
 
   <ItemGroup>

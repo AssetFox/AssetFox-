@@ -21,8 +21,8 @@
 
     @Component
     export default class Authentication extends Vue {
-        @State(state => state.authentication.authenticated) authenticated: boolean;
-        @State(state => state.authentication.hasRole) hasRole: boolean;
+        @State(state => state.authenticationModule.authenticated) authenticated: boolean;
+        @State(state => state.authenticationModule.hasRole) hasRole: boolean;
 
         @Action('setSuccessMessage') setSuccessMessageAction: any;
         @Action('setErrorMessage') setErrorMessageAction: any;

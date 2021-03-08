@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
-using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
@@ -16,6 +15,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 DurationInYears = durationInYears,
                 YearlyPercentages = string.Join('/', domain.YearlyPercentages),
                 CostCeiling = domain.CostCeiling ?? 0
+            };
+
+        public static CashFlowDistributionRuleEntity ToEntity(this CashFlowDistributionRuleDTO dto, Guid cashFlowRuleId) =>
+            new CashFlowDistributionRuleEntity
+            {
+                Id = dto.Id,
+                CashFlowRuleId = cashFlowRuleId,
+                CostCeiling = dto.CostCeiling,
+                DurationInYears = dto.DurationInYears,
+                YearlyPercentages = dto.YearlyPercentages
+            };
+
+        public static CashFlowDistributionRuleDTO ToDto(this CashFlowDistributionRuleEntity entity) =>
+            new CashFlowDistributionRuleDTO
+            {
+                Id = entity.Id,
+                CostCeiling = entity.CostCeiling,
+                DurationInYears = entity.DurationInYears,
+                YearlyPercentages = entity.YearlyPercentages
             };
     }
 }

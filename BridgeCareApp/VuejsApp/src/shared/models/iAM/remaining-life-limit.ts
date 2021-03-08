@@ -1,15 +1,19 @@
+import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
+import {clone} from 'ramda';
+
 export interface RemainingLifeLimit {
     id: string;
     attribute: string;
-    limit: number;
-    criteria: string;
+    value: number;
+    criterionLibrary: CriterionLibrary;
 }
 
 export const emptyRemainingLifeLimit: RemainingLifeLimit = {
-    id: '0',
+    id: getBlankGuid(),
     attribute: '',
-    limit: 0,
-    criteria: ''
+    value: 0,
+    criterionLibrary: clone(emptyCriterionLibrary)
 };
 
 export interface RemainingLifeLimitLibrary {
@@ -17,11 +21,15 @@ export interface RemainingLifeLimitLibrary {
     name: string;
     description: string;
     remainingLifeLimits: RemainingLifeLimit[];
+    appliedScenarioIds: string[];
+    owner?: string;
+    shared?: boolean;
 }
 
 export const emptyRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = {
-    id: '0',
+    id: getBlankGuid(),
     name: '',
     description: '',
-    remainingLifeLimits: []
+    remainingLifeLimits: [],
+    appliedScenarioIds: []
 };

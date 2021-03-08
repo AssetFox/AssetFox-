@@ -95,7 +95,7 @@ namespace BridgeCareCore
             //services.AddMSSQLServices(Configuration.GetConnectionString("BridgeCareConnex"));
             services.AddDbContext<IAMContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
-            services.AddScoped<UnitOfWork>();
+            services.AddScoped<UnitOfDataPersistenceWork>();
 
             /*services.AddScoped<INetworkRepository, NetworkRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();

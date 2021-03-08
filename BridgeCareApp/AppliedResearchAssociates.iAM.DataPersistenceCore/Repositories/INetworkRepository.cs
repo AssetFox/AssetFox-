@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 
@@ -10,6 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateNetwork(DataAssignment.Networking.Network network);
 
         void CreateNetwork(Network network);
+
+        Task<List<NetworkDTO>> Networks();
 
         List<DataAssignment.Networking.Network> GetAllNetworks();
 

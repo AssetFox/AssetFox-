@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Services.LegacySimulationSynchronization;
@@ -27,7 +25,6 @@ namespace BridgeCareCore.Controllers
             _legacySimulationSynchronizer = legacySimulationSynchronizer ?? throw new ArgumentNullException(nameof(legacySimulationSynchronizer));
             _logger = logger;
         }
-
 
         [HttpPost]
         [Route("SynchronizeLegacySimulation/{simulationId}")]

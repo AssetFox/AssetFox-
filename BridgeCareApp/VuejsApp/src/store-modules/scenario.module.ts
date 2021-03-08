@@ -4,7 +4,7 @@ import {AxiosResponse} from 'axios';
 import {any, clone, findIndex, propEq, remove, find, update, reject, prepend} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
-import AnalysisEditorService from '@/services/analysis-editor.service';
+import AnalysisMethodService from '@/services/analysis-method.service';
 import ReportsService from '@/services/reports.service';
 import {convertFromMongoToVue} from '@/shared/utils/mongo-model-conversion-utils';
 import moment from 'moment';
@@ -193,7 +193,7 @@ const actions = {
         });
     },
     async getScenarioAnalysis({commit}: any, payload: any) {
-        await AnalysisEditorService.getScenarioAnalysisData(payload.selectedScenarioId)
+        await AnalysisMethodService.getScenarioAnalysisData(payload.selectedScenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const analysis: Analysis = {
@@ -205,7 +205,7 @@ const actions = {
             });
     },
     async saveScenarioAnalysis({dispatch, commit}: any, payload: any) {
-        await AnalysisEditorService.saveScenarioAnalysisData(payload.scenarioAnalysisData, payload.objectIdMOngoDBForScenario)
+        await AnalysisMethodService.saveScenarioAnalysisData(payload.scenarioAnalysisData, payload.objectIdMOngoDBForScenario)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     commit('analysisMutator', payload.scenarioAnalysisData);

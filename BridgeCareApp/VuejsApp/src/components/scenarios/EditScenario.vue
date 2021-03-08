@@ -124,13 +124,13 @@ import Alert from '@/shared/modals/Alert.vue';
     components: { CommittedProjectsFileUploaderDialog, Alert },
 })
 export default class EditScenario extends Vue {
-    @State(state => state.breadcrumb.navigation) navigation: any[];
-    @State(state => state.network.networks) networks: Network[];
-    @State(state => state.authentication.isAdmin) isAdmin: boolean;
-    @State(state => state.scenario.selectedScenario)
+    @State(state => state.breadcrumbModule.navigation) navigation: any[];
+    @State(state => state.networkModule.networks) networks: Network[];
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.scenarioModule.selectedScenario)
     stateSelectedScenario: Scenario;
-    @State(state => state.scenario.scenarios) stateScenarios: Scenario[];
-    @State(state => state.authentication.userId) userId: string;
+    @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
+    @State(state => state.authenticationModule.userId) userId: string;
 
     @Action('getMongoScenarios') getMongoScenariosAction: any;
     @Action('setErrorMessage') setErrorMessageAction: any;
@@ -159,10 +159,10 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Performance',
+            tabName: 'Performance Curve',
             tabIcon: 'fas fa-chart-line',
             navigation: {
-                path: '/PerformanceEditor/Scenario/',
+                path: '/PerformanceCurveEditor/Scenario/',
             },
         },
         {
@@ -173,24 +173,24 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Priority',
+            tabName: 'Budget Priority',
             tabIcon: 'fas fa-copy',
             navigation: {
-                path: '/PriorityEditor/Scenario/',
+                path: '/BudgetPriorityEditor/Scenario/',
             },
         },
         {
-            tabName: 'Target',
+            tabName: 'Target Condition Goal',
             tabIcon: 'fas fa-bullseye',
             navigation: {
-                path: '/TargetEditor/Scenario/',
+                path: '/TargetConditionGoalEditor/Scenario/',
             },
         },
         {
-            tabName: 'Deficient',
+            tabName: 'Deficient Condition Goal',
             tabIcon: 'fas fa-level-down-alt',
             navigation: {
-                path: '/DeficientEditor/Scenario/',
+                path: '/DeficientConditionGoalEditor/Scenario/',
             },
         },
         {
@@ -244,6 +244,7 @@ export default class EditScenario extends Vue {
                                     simulationName: to.query.simulationName,
                                     objectIdMOngoDBForScenario:
                                         to.query.objectIdMOngoDBForScenario,
+                                    scenarioId: 'df71ac9b-b90a-425c-a519-7b2d6b531ddc'
                                 },
                             },
                         };
@@ -397,7 +398,7 @@ export default class EditScenario extends Vue {
             this.runNewSimulationAction({
               networkId: process.env.VUE_APP_HARDCODED_NETWORKID_FROM_MSSQL,
               selectedScenarioId: this.selectedScenario.id
-            })
+            });
           } else {
             this.runSimulationAction({
               selectedScenario: this.selectedScenario,

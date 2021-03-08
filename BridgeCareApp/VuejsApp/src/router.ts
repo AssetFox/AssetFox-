@@ -10,18 +10,18 @@ import AuthenticationStart from '@/components/authentication/AuthenticationStart
 // Lazily-loaded pages
 const Scenario = () => import(/* webpackChunkName: "scenario" */ '@/components/scenarios/Scenarios.vue');
 const EditScenario = () => import(/* webpackChunkName: "editScenario" */ '@/components/scenarios/EditScenario.vue');
-const InvestmentEditor = () => import(/* webpackChunkName: "investmentEditor" */ '@/components/investment-editor/InvestmentEditor.vue');
-const PerformanceEditor = () => import(/* webpackChunkName: "performanceEditor" */ '@/components/performance-editor/PerformanceEditor.vue');
+const InvestmentEditor = () => import(/* webpackChunkName: "investmentModule" */ '@/components/investment-editor/InvestmentEditor.vue');
+const PerformanceCurveEditor = () => import(/* webpackChunkName: "performanceCurveEditor" */ '@/components/performance-curve-editor/PerformanceCurveEditor.vue');
 const TreatmentEditor = () => import(/* webpackChunkName: "treatmentEditor" */ '@/components/treatment-editor/TreatmentEditor.vue');
-const PriorityEditor = () => import (/* webpackChunkName: "priorityEditor" */ '@/components/priority-editor/PriorityEditor.vue');
-const TargetEditor = () => import (/* webpackChunkName: "targetEditor" */ '@/components/target-editor/TargetEditor.vue');
-const DeficientEditor = () => import (/* webpackChunkName: "deficientEditor" */ '@/components/deficient-editor/DeficientEditor.vue');
+const BudgetPriorityEditor = () => import (/* webpackChunkName: "budgetPriorityEditor" */ '@/components/budget-priority-editor/BudgetPriorityEditor.vue');
+const TargetConditionGoalEditor = () => import (/* webpackChunkName: "targetConditionGoalEditor" */ '@/components/target-editor/TargetConditionGoalEditor.vue');
+const DeficientConditionGoalEditor = () => import (/* webpackChunkName: "deficientConditionGoalEditor" */ '@/components/deficient-condition-goal-editor/DeficientConditionGoalEditor.vue');
 const Authentication = () => import (/* webpackChunkName: "Authentication" */ '@/components/authentication/Authentication.vue');
 const AuthenticationFailure = () => import (/* webpackChunkName: "authenticationFailure" */ '@/components/authentication/AuthenticationFailure.vue');
 const NoRole = () => import (/*webpackChunkName: "noRole" */ '@/components/authentication/NoRole.vue');
 const Inventory = () => import (/*webpackChunkName: "inventory" */ '@/components/Inventory.vue');
 const UserCriteriaEditor = () => import (/*webpackChunkName: "userCriteria" */ '@/components/user-criteria/UserCriteria.vue');
-const CriteriaLibraryEditor = () => import(/*webpackChunkName: "criteriaEditor" */ '@/components/criteria-editor/CriteriaLibraryEditor.vue');
+const CriterionLibraryEditor = () => import(/*webpackChunkName: "criterionLibraryEditor" */ '@/components/criteria-editor/CriterionLibraryEditor.vue');
 const AnalysisEditor = () => import (/*webpackChunkName: editAnalysis*/ '@/components/scenarios/EditAnalysis.vue');
 const RemainingLifeLimitEditor = () => import (/*webpackChunkName: remainingLifeLimitEditor*/ '@/components/remaining-life-limit-editor/RemainingLifeLimitEditor.vue');
 const CashFlowEditor = () => import (/*webpackChunkName: cashFlowEditor*/ '@/components/cash-flow-editor/CashFlowEditor.vue');
@@ -57,8 +57,8 @@ const router = new VueRouter({
                     props: true
                 },
                 {
-                    path: '/PerformanceEditor/Scenario/',
-                    component: PerformanceEditor,
+                    path: '/PerformanceCurveEditor/Scenario/',
+                    component: PerformanceCurveEditor,
                     props: true
                 },
                 {
@@ -67,18 +67,18 @@ const router = new VueRouter({
                     props: true
                 },
                 {
-                    path: '/PriorityEditor/Scenario/',
-                    component: PriorityEditor,
+                    path: '/BudgetPriorityEditor/Scenario/',
+                    component: BudgetPriorityEditor,
                     props: true
                 },
                 {
-                    path: '/TargetEditor/Scenario/',
-                    component: TargetEditor,
+                    path: '/TargetConditionGoalEditor/Scenario/',
+                    component: TargetConditionGoalEditor,
                     props: true
                 },
                 {
-                    path: '/DeficientEditor/Scenario/',
-                    component: DeficientEditor,
+                    path: '/DeficientConditionGoalEditor/Scenario/',
+                    component: DeficientConditionGoalEditor,
                     props: true
                 },
                 {
@@ -100,9 +100,9 @@ const router = new VueRouter({
             props: true
         },
         {
-            path: '/PerformanceEditor/Library/',
+            path: '/PerformanceCurveEditor/Library/',
             name: 'PerformanceEditor',
-            component: PerformanceEditor,
+            component: PerformanceCurveEditor,
             props: true
         },
         {
@@ -112,21 +112,21 @@ const router = new VueRouter({
             props: true
         },
         {
-            path: '/PriorityEditor/Library/',
-            name: 'PriorityEditor',
-            component: PriorityEditor,
+            path: '/BudgetPriorityEditor/Library/',
+            name: 'BudgetPriorityEditor',
+            component: BudgetPriorityEditor,
             props: true
         },
         {
-            path: '/TargetEditor/Library/',
-            name: 'TargetEditor',
-            component: TargetEditor,
+            path: '/TargetConditionGoalEditor/Library/',
+            name: 'TargetConditionGoalEditor.vue',
+            component: TargetConditionGoalEditor,
             props: true
         },
         {
-            path: '/DeficientEditor/Library/',
-            name: 'DeficientEditor',
-            component: DeficientEditor,
+            path: '/DeficientConditionGoalEditor/Library/',
+            name: 'DeficientConditionGoalEditor',
+            component: DeficientConditionGoalEditor,
             props: true
         },
         {
@@ -142,9 +142,9 @@ const router = new VueRouter({
             props: true
         },
         {
-            path: '/CriteriaLibraryEditor/Library/',
-            name: 'CriteriaLibraryEditor',
-            component: CriteriaLibraryEditor,
+            path: '/CriterionLibraryEditor/Library/',
+            name: 'CriterionLibraryEditor.vue',
+            component: CriterionLibraryEditor,
         },
         {
             path: '/Authentication/',

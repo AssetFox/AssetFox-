@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
-
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
@@ -18,6 +18,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 InflationRatePercentage = domain.InflationRatePercentage,
                 MinimumProjectCostLimit = domain.MinimumProjectCostLimit,
                 NumberOfYearsInAnalysisPeriod = domain.NumberOfYearsInAnalysisPeriod
+            };
+
+        public static InvestmentPlanEntity ToEntity(this InvestmentPlanDTO dto, Guid simulationId) =>
+            new InvestmentPlanEntity
+            {
+                Id = dto.Id,
+                SimulationId = simulationId,
+                FirstYearOfAnalysisPeriod = dto.FirstYearOfAnalysisPeriod,
+                InflationRatePercentage = dto.InflationRatePercentage,
+                MinimumProjectCostLimit = dto.MinimumProjectCostLimit,
+                NumberOfYearsInAnalysisPeriod = dto.NumberOfYearsInAnalysisPeriod
+            };
+
+        public static InvestmentPlanDTO ToDto(this InvestmentPlanEntity entity) =>
+            new InvestmentPlanDTO
+            {
+                Id = entity.Id,
+                FirstYearOfAnalysisPeriod = entity.FirstYearOfAnalysisPeriod,
+                InflationRatePercentage = entity.InflationRatePercentage,
+                MinimumProjectCostLimit = entity.MinimumProjectCostLimit,
+                NumberOfYearsInAnalysisPeriod = entity.NumberOfYearsInAnalysisPeriod
             };
 
         public static void FillSimulationInvestmentPlan(this InvestmentPlanEntity entity, Simulation simulation)
@@ -50,7 +71,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 budgetCondition.Budget = budget;
                 budgetCondition.Criterion.Expression = _.CriterionLibraryBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
             });
-
 
             entity.Simulation.CashFlowRuleLibrarySimulationJoin?.CashFlowRuleLibrary.CashFlowRules.ForEach(_ =>
             {

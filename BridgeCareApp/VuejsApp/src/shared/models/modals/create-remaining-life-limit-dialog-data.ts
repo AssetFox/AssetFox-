@@ -2,10 +2,10 @@ import {SelectItem} from '@/shared/models/vue/select-item';
 
 export interface CreateRemainingLifeLimitDialogData {
     showDialog: boolean;
-    numericAttributesSelectListItems: SelectItem[];
+    numericAttributeSelectItems: SelectItem[];
 }
 
 export const emptyCreateRemainingLifeLimitDialogData: CreateRemainingLifeLimitDialogData = {
     showDialog: false,
-    numericAttributesSelectListItems: []
+    numericAttributeSelectItems: []
 };

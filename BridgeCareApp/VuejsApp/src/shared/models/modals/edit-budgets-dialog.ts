@@ -1,13 +1,11 @@
-import {CriteriaDrivenBudget} from '@/shared/models/iAM/investment';
+import {Budget} from '@/shared/models/iAM/investment';
 
 export interface EditBudgetsDialogData {
     showDialog: boolean;
-    criteriaDrivenBudgets: CriteriaDrivenBudget[];
-    scenarioId: number;
+    budgets: Budget[]
 }
 
 export const emptyEditBudgetsDialogData: EditBudgetsDialogData = {
     showDialog: false,
-    criteriaDrivenBudgets: [],
-    scenarioId: 0
+    budgets: []
 };

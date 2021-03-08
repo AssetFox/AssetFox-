@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore.Internal;
-using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -16,9 +18,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfWork _unitOfWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public CashFlowDistributionRuleRepository(UnitOfWork.UnitOfWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public CashFlowDistributionRuleRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public void CreateCashFlowDistributionRules(Dictionary<Guid, List<CashFlowDistributionRule>> distributionRulesPerCashFlowRuleEntityId)
         {
@@ -28,14 +32,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfWork.Context.CashFlowDistributionRule.AddRange(cashFlowDistributionRuleEntities);
+                _unitOfDataPersistenceWork.Context.CashFlowDistributionRule.AddRange(cashFlowDistributionRuleEntities);
             }
             else
             {
-                _unitOfWork.Context.BulkInsert(cashFlowDistributionRuleEntities);
+                _unitOfDataPersistenceWork.Context.BulkInsert(cashFlowDistributionRuleEntities);
             }
 
-            _unitOfWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.SaveChanges();
+        }
+
+        public void UpsertOrDeleteCashFlowDistributionRules(
+            Dictionary<Guid, List<CashFlowDistributionRuleDTO>> distributionRulesPerCashFlowRuleId, Guid libraryId)
+        {
+            var entities = distributionRulesPerCashFlowRuleId.SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key)))
+                .ToList();
+
+            var entityIds = entities.Select(_ => _.Id).ToList();
+
+            var existingEntityIds = _unitOfDataPersistenceWork.Context.CashFlowDistributionRule
+                .Where(_ => _.CashFlowRule.CashFlowRuleLibraryId == libraryId && entityIds.Contains(_.Id))
+                .Select(_ => _.Id).ToList();
+
+            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<CashFlowDistributionRuleEntity, bool>>>
+            {
+                {"delete", _ => _.CashFlowRule.CashFlowRuleLibraryId == libraryId && !entityIds.Contains(_.Id)},
+                {"update", _ => existingEntityIds.Contains(_.Id)},
+                {"add", _ => !existingEntityIds.Contains(_.Id)}
+            };
+
+            if (IsRunningFromXUnit)
+            {
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
+            }
+            else
+            {
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
+            }
         }
     }
 }

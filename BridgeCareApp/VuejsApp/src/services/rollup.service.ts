@@ -1,5 +1,5 @@
 ﻿import {AxiosPromise, AxiosResponse} from 'axios';
-import {axiosInstance, bridgecareCoreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
+import {axiosInstance, coreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {any, propEq} from 'ramda';
 import {Rollup} from '@/shared/models/iAM/rollup';
@@ -55,7 +55,7 @@ export default class RollupService {
 
     static aggregateNetworkData(networkId: string) : AxiosPromise {
         return new Promise<AxiosResponse<string>>((resolve) => {
-            bridgecareCoreAxiosInstance.post(`api/Aggregation/AggregateNetworkData/${networkId}`)
+            coreAxiosInstance.post(`api/Aggregation/AggregateNetworkData/${networkId}`)
             .then((response: AxiosResponse<string>) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     return resolve(response);

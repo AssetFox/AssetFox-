@@ -168,6 +168,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<SimulationAnalysisDetailEntity> SimulationAnalysisDetail { get; set; }
 
+        public virtual DbSet<UserEntity> User { get; set; }
+
+        public virtual DbSet<SimulationUserEntity> SimulationUser { get; set; }
+
+        public virtual DbSet<CriterionLibraryUserEntity> CriterionLibraryUser { get; set; }
+
         private class MigrationConnection
         {
             public string BridgeCareConnex { get; set; }
@@ -1379,6 +1385,53 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.Simulation)
                     .WithOne(p => p.SimulationAnalysisDetail)
                     .HasForeignKey<SimulationAnalysisDetailEntity>(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<UserEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+            });
+
+            modelBuilder.Entity<SimulationUserEntity>(entity =>
+            {
+                entity.HasKey(e => new {e.SimulationId, e.UserId});
+
+                entity.ToTable("Simulation_User");
+
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.SimulationUserJoins)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.SimulationUserJoins)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CriterionLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.UserId });
+
+                entity.ToTable("CriterionLibrary_User");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.UserId).IsUnique();
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryUserJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithOne(p => p.CriterionLibraryUserJoin)
+                    .HasForeignKey<CriterionLibraryUserEntity>(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }

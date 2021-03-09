@@ -57,7 +57,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                broadcastingMessage = "An error has occured while generating the summary report";
+                broadcastingMessage = "An error has occurred while generating the summary report";
                 sendRealTimeMessage(broadcastingMessage, simulationId);
                 return null;
             }

@@ -530,8 +530,6 @@ export default class Scenarios extends Vue {
     @Action('deleteScenario') deleteScenarioAction: any;
     @Action('updateScenario') updateScenarioAction: any;
     @Action('updateScenarioUsers') updateScenarioUsersAction: any;
-    @Action('getSummaryReportMissingAttributes')
-    getSummaryReportMissingAttributesAction: any;
     //@Action('getMongoRollups') getMongoRollupsAction: any;
     @Action('rollupNetwork') rollupNetworkAction: any;
     @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
@@ -675,10 +673,10 @@ export default class Scenarios extends Vue {
 
     @Watch('summaryReportStatusUpdate')
     onSummaryReportStatusUpdate() {
-        var scenarioObj = this.scenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
+        var scenarioObj = this.scenarios.find(_ => _.id == this.scenarioIdForStatusUpdate); // TODO : use  process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO
 
         if (isNil(scenarioObj)) {
-            scenarioObj = this.userScenarios.find(_ => _.id == process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO); // TODO : use this.scenarioIdForStatusUpdate
+            scenarioObj = this.userScenarios.find(_ => _.id == this.scenarioIdForStatusUpdate); // TODO : use process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MONGO
         }
 
         if (!isNil(scenarioObj)) {
@@ -965,19 +963,13 @@ export default class Scenarios extends Vue {
      * @param scenario Scenario object to use for setting the ReportsDownloaderDialogData object
      */
     onShowReportsDownloaderDialog(scenario: Scenario) {
-        this.getSummaryReportMissingAttributesAction({
-            //[TODO]: fix the id issue
-            selectedScenarioId: scenario.simulationId,
-            selectedNetworkId: 13, // this.networks[0].networkId ..... scenario.simulationId
-        }).then(() => {
-            setTimeout(() => {
+        setTimeout(() => {
                 this.reportsDownloaderDialogData = {
                     showModal: true,
                     scenario: scenario,
                     newNetworkId: this.newNetworks[0].id
                 };
             });
-        });
     }
 
     onCreateScenario() {

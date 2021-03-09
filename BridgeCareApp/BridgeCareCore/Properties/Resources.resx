@@ -150,11 +150,23 @@ Condition By Deck Area</value>
   <data name="CommittedTotal" xml:space="preserve">
     <value>Committed Total</value>
   </data>
+  <data name="CulvDurationN" xml:space="preserve">
+    <value>CULV_DURATION_N</value>
+  </data>
   <data name="Culvert" xml:space="preserve">
     <value>culvert</value>
   </data>
   <data name="CulvertTotal" xml:space="preserve">
     <value>Culvert Total</value>
+  </data>
+  <data name="CulvSeeded" xml:space="preserve">
+    <value>CULV_SEEDED</value>
+  </data>
+  <data name="DeckDurationN" xml:space="preserve">
+    <value>DECK_DURATION_N</value>
+  </data>
+  <data name="DeckSeeded" xml:space="preserve">
+    <value>DECK_SEEDED</value>
   </data>
   <data name="Fair" xml:space="preserve">
     <value>Fair</value>
@@ -204,6 +216,18 @@ Condition By Deck Area</value>
   </data>
   <data name="RemainingBudget" xml:space="preserve">
     <value>Remaining Budget</value>
+  </data>
+  <data name="SubDurationN" xml:space="preserve">
+    <value>SUB_DURATION_N</value>
+  </data>
+  <data name="SubSeeded" xml:space="preserve">
+    <value>SUB_SEEDED</value>
+  </data>
+  <data name="SupDurationN" xml:space="preserve">
+    <value>SUP_DURATION_N</value>
+  </data>
+  <data name="SupSeeded" xml:space="preserve">
+    <value>SUP_SEEDED</value>
   </data>
   <data name="Total" xml:space="preserve">
     <value>Total</value>

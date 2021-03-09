@@ -214,7 +214,7 @@ const actions = {
             });
     },
     async getSummaryReportMissingAttributes({commit}: any, payload: any) {
-        await ReportsService.getSummaryReportMissingAttributes(payload.selectedScenarioId, payload.selectedNetworkId)
+        await ReportsService.getSummaryReportMissingAttributes(payload.selectedScenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('missingSummaryReportAttributesMutator', response.data);

@@ -19,9 +19,9 @@ export default class ReportsService {
         return axiosInstance.post('/api/GenerateSummaryReport', selectedScenarioData, {});
     }
 
-    static getSummaryReportMissingAttributes(selectedScenarioId: number, selectedNetworkId: number) {
-        return axiosInstance
-            .get(`/api/GetSummaryReportMissingAttributes?simulationId=${selectedScenarioId}&networkId=${selectedNetworkId}`);
+    static getSummaryReportMissingAttributes(selectedScenarioId: String) {
+        return bridgecareCoreAxiosInstance
+            .get(`/api/SummaryReport/GetSummaryReportMissingAttributes/${selectedScenarioId}`);
     }
 
     static downloadSummaryReport(selectedScenarioData: Scenario): AxiosPromise {

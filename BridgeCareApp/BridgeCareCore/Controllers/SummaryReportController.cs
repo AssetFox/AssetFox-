@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
@@ -32,6 +33,12 @@ namespace BridgeCareCore.Controllers
         {
             var broadcastingMessage = "Starting report generation";
 
+            var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
+            {
+                SimulationId = simulationId,
+                Status = "Starting report generation..."
+            };
+
             try
             {
                 await HubContext
@@ -57,7 +64,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                broadcastingMessage = "An error has occurred while generating the summary report";
+                broadcastingMessage = $"An error has occurred while generating the report. {e.Message}";
                 sendRealTimeMessage(broadcastingMessage, simulationId);
                 return null;
             }

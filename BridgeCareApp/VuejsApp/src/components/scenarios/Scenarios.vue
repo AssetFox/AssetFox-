@@ -967,7 +967,7 @@ export default class Scenarios extends Vue {
                 this.reportsDownloaderDialogData = {
                     showModal: true,
                     scenario: scenario,
-                    newNetworkId: this.newNetworks[0].id
+                    newNetworkId: this.networks[0].id
                 };
             });
     }

@@ -1,8 +1,8 @@
 {
   "ConnectionStrings": {
-    /*"BridgeCareConnex": "data source=localhost;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
-    "BridgeCareLegacyConnex": "data source=localhost;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework"*/
-    "BridgeCareLegacyConnex": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
-    "BridgeCareConnex": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework"
+    "bridgecareconnex": "data source=localhost;initial catalog=IAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
+    "bridgecarelegacyconnex": "data source=localhost;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework"
+    //"BridgeCareLegacyConnex": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
+    //"BridgeCareConnex": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework"
   }
 }

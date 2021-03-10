@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
@@ -76,10 +77,19 @@ namespace BridgeCareCore.Services.SummaryReport
 
             var initialSectionValues = reportOutputData.InitialSectionSummaries[0].ValuePerNumericAttribute;
 
+            var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
+            {
+                SimulationId = simulationId,
+                Status = "Starting report generation..."
+            };
+
             foreach (var item in requiredSections)
             {
                 if (!initialSectionValues.ContainsKey(item))
                 {
+                    simulationAnalysisDetail.Status = $"The attribute {item} not found in initial section";
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
                     var broadcastingMessage = $"The attribute {item} not found in initial section";
                     sendRealTimeMessage(broadcastingMessage, simulationId);
                     throw new KeyNotFoundException($"The attribute {item} not found in initial section");
@@ -92,6 +102,9 @@ namespace BridgeCareCore.Services.SummaryReport
             {
                 if (!sectionValueAttribute.ContainsKey(item))
                 {
+                    simulationAnalysisDetail.Status = $"The attribute {item} not found in sections";
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
                     var broadcastingMessage = $"The attribute {item} not found in sections";
                     sendRealTimeMessage(broadcastingMessage, simulationId);
                     throw new KeyNotFoundException($"The attribute {item} not found in sections");
@@ -128,6 +141,8 @@ namespace BridgeCareCore.Services.SummaryReport
                 // Simulation parameters TAB
                 var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
 
+                simulationAnalysisDetail.Status = $"Creating Bridge Data TAB";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                 var broadcastingMessage = $"Creating Bridge Data TAB";
                 sendRealTimeMessage(broadcastingMessage, simulationId);
@@ -140,6 +155,9 @@ namespace BridgeCareCore.Services.SummaryReport
                 _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel,
                     simulationId, networkId);
 
+                simulationAnalysisDetail.Status = $"Creating Unfunded recommendations TAB";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
                 broadcastingMessage = $"Creating Unfunded recommendations TAB";
                 sendRealTimeMessage(broadcastingMessage, simulationId);
                 // Unfunded Recommendations TAB
@@ -151,6 +169,9 @@ namespace BridgeCareCore.Services.SummaryReport
                 _summaryReportGlossary.Fill(shortNameWorksheet);
 
 
+                simulationAnalysisDetail.Status = $"Creating Bridge work summary TAB";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
                 broadcastingMessage = $"Creating Bridge work summary TAB";
                 sendRealTimeMessage(broadcastingMessage, simulationId);
                 // Bridge work summary TAB
@@ -158,6 +179,8 @@ namespace BridgeCareCore.Services.SummaryReport
                 var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
                     simulationYears, workSummaryModel, yearlyBudgetAmount);
 
+                simulationAnalysisDetail.Status = $"Creating Bridge work summary By Budget TAB";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                 broadcastingMessage = $"Creating Bridge work summary By Budget TAB";
                 sendRealTimeMessage(broadcastingMessage, simulationId);
@@ -165,6 +188,9 @@ namespace BridgeCareCore.Services.SummaryReport
                 var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
                 _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
 
+
+                simulationAnalysisDetail.Status = $"Creating Graph TABs";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                 broadcastingMessage = $"Creating Graph TABs";
                 sendRealTimeMessage(broadcastingMessage, simulationId);
@@ -178,6 +204,9 @@ namespace BridgeCareCore.Services.SummaryReport
                 byte[] bin = excelPackage.GetAsByteArray();
                 File.WriteAllBytes(filePath, bin);
 
+                simulationAnalysisDetail.Status = "Finished generating the summary report.";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
                 return bin;
             }
         }
@@ -188,6 +217,16 @@ namespace BridgeCareCore.Services.SummaryReport
                         .Clients
                         .All
                         .SendAsync("BroadcastSummaryReportGenerationStatus", message, simulationId);
+        }
+
+        private void UpdateSimulationAnalysisDetail(SimulationAnalysisDetailDTO simulationAnalysisDetail, DateTime? stopDateTime)
+        {
+            if (stopDateTime != null)
+            {
+                var interval = stopDateTime - simulationAnalysisDetail.LastRun;
+                simulationAnalysisDetail.RunTime = interval.Value.ToString(@"hh\:mm\:ss");
+            }
+            _unitOfDataPersistenceWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
         }
     }
 }

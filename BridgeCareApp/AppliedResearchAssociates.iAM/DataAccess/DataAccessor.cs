@@ -6,6 +6,8 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Domains;
 using Humanizer;
 
+using IamAttribute = AppliedResearchAssociates.iAM.Domains.Attribute;
+
 namespace AppliedResearchAssociates.iAM.DataAccess
 {
     public sealed class DataAccessor
@@ -163,6 +165,7 @@ order by networkid
             var helper = new DataHelper
             {
                 AllAttributeNames = explorer.AllAttributes.Select(attribute => attribute.Name).ToHashSet(StringComparer.OrdinalIgnoreCase),
+                AttributePerName = explorer.AllAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase),
                 NumberAttributePerName = explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase),
                 NumericAttributePerName = explorer.NumericAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase),
             };
@@ -566,7 +569,7 @@ where simulationid = {simulationId}
 
                             var consequence = project.Consequences.GetAdd(new TreatmentConsequence());
                             var attributeName = reader.GetNullableString(8);
-                            consequence.Attribute = helper.NumberAttributePerName[attributeName];
+                            consequence.Attribute = helper.AttributePerName[attributeName];
                             consequence.Change.Expression = reader.GetNullableString(9);
                         }
                     }
@@ -600,7 +603,7 @@ where simulationid = {simulationId}
 
                             var consequence = treatment.AddConsequence();
                             var attributeName = reader.GetNullableString(6);
-                            consequence.Attribute = helper.NumberAttributePerName[attributeName];
+                            consequence.Attribute = helper.AttributePerName[attributeName];
                             consequence.Change.Expression = reader.GetNullableString(7);
                             consequence.Equation.Expression = reader.GetNullableString(8);
                             consequence.Criterion.Expression = reader.GetNullableString(9);
@@ -804,6 +807,8 @@ where simulationid = {simulationId}
         private sealed class DataHelper
         {
             public ISet<string> AllAttributeNames { get; set; }
+
+            public IDictionary<string, IamAttribute> AttributePerName { get; set; }
 
             public IDictionary<string, NumberAttribute> NumberAttributePerName { get; set; }
 

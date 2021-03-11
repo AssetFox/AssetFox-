@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
             Console.Clear();
 
-            var connectionString = string.Format(ConnectionFormats.MainDatasetLocal, userId, password);
+            var connectionString = string.Format(ConnectionFormats.BridgeCareNew, userId, password);
 
             using var connection = new SqlConnection(connectionString);
             connection.Open();
@@ -128,6 +128,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
         private static class ConnectionFormats
         {
+            public const string BridgeCareNew = @"Data Source=localhost;Initial Catalog=BridgeCare_New;User Id={0};Password={1}";
             public const string MainDataset = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=DbBackup;User Id={0};Password={1}";
             public const string MainDatasetLocal = @"Server=localhost;Database=DbBackup;User Id={0};Password={1}";
             public const string SmallBridgeDataset = @"Data Source=52.177.117.86,56242\SQL2014;Initial Catalog=PennDot_Light;User Id={0};Password={1}";

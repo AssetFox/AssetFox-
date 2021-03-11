@@ -12,20 +12,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public NumberAttribute AgeAttribute { get; }
 
-        public IEnumerable<Attribute> AllAttributes
-        {
-            get
-            {
-                var result = CalculatedFields.Concat<Attribute>(NumberAttributes).Concat(TextAttributes);
-
-                if (AgeAttribute != null)
-                {
-                    result = result.Prepend(AgeAttribute);
-                }
-
-                return result;
-            }
-        }
+        public IEnumerable<Attribute> AllAttributes => CalculatedFields.Concat<Attribute>(NumberAttributes).Concat(TextAttributes);
 
         public IReadOnlyCollection<CalculatedField> CalculatedFields => _CalculatedFields;
 

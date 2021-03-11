@@ -111,25 +111,6 @@ namespace AppliedResearchAssociates.iAM.Domains
 
             var committedProjectsPerBudget = CommittedProjects.ToLookup(committedProject => committedProject.Budget);
 
-            Func<decimal, BudgetContext, int, bool> costCanBeAllocated;
-            switch (AnalysisMethod.SpendingLimit)
-            {
-            case SpendingLimit.Zero:
-                costCanBeAllocated = (cost, context, year) => cost == 0;
-                break;
-
-            case SpendingLimit.Budget:
-                costCanBeAllocated = (cost, context, year) => cost <= context.GetAmount(year);
-                break;
-
-            case SpendingLimit.NoLimit:
-                costCanBeAllocated = (cost, context, year) => true;
-                break;
-
-            default:
-                throw new InvalidOperationException("Invalid spending limit.");
-            }
-
             foreach (var context in budgetContexts)
             {
                 var committedProjectsPerYear = committedProjectsPerBudget[context.Budget].ToLookup(committedProject => committedProject.Year);
@@ -142,12 +123,6 @@ namespace AppliedResearchAssociates.iAM.Domains
                         if (committedProjects.Any())
                         {
                             var cost = committedProjects.Sum(committedProject => (decimal)committedProject.Cost);
-
-                            if (!costCanBeAllocated(cost, context, year))
-                            {
-                                throw new SimulationException($"At least one committed project in year {year} cannot be funded.");
-                            }
-
                             context.AllocateCost(cost, year);
                         }
                     }

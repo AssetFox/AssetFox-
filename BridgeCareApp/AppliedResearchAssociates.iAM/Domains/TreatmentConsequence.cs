@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public class TreatmentConsequence : WeakEntity, IValidator
     {
-        public Attribute Attribute { get; set; }
+        public Attribute Attribute { get => Change.Attribute; set => Change.Attribute = value; }
 
         public AttributeValueChange Change { get; } = new AttributeValueChange();
 
@@ -24,6 +24,6 @@ namespace AppliedResearchAssociates.iAM.Domains
             return results;
         }
 
-        internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(CalculateEvaluateScope scope) => Change.GetApplicator(Attribute, scope).Once();
+        internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(CalculateEvaluateScope scope) => Change.GetApplicator(scope).Once();
     }
 }

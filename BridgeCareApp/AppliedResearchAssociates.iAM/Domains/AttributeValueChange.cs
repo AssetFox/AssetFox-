@@ -1,26 +1,49 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class AttributeValueChange : CompilableExpression
     {
-        internal ChangeApplicator GetApplicator(Attribute attribute, CalculateEvaluateScope scope)
+        public Attribute Attribute { get; set; }
+
+        public override ValidationResultBag GetDirectValidationResults()
         {
-            switch (attribute)
+            if (Attribute is null)
+            {
+                return new ValidationResultBag();
+            }
+            else
+            {
+                switch (Attribute)
+                {
+                case NumberAttribute _:
+                    return base.GetDirectValidationResults();
+                case TextAttribute _:
+                    return new ValidationResultBag();
+                default:
+                    throw new InvalidOperationException("Invalid attribute type.");
+                }
+            }
+        }
+
+        internal ChangeApplicator GetApplicator(CalculateEvaluateScope scope)
+        {
+            switch (Attribute)
             {
             case NumberAttribute _:
-                var oldNumber = scope.GetNumber(attribute.Name);
+                var oldNumber = scope.GetNumber(Attribute.Name);
                 var newNumber = ChangeNumber(oldNumber);
-                return new ChangeApplicator(() => scope.SetNumber(attribute.Name, newNumber), newNumber);
+                return new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newNumber), newNumber);
 
             case TextAttribute _:
                 var newText = Expression;
-                return new ChangeApplicator(() => scope.SetText(attribute.Name, newText), null);
+                return new ChangeApplicator(() => scope.SetText(Attribute.Name, newText), null);
 
             default:
-                throw new ArgumentException("Invalid attribute type.", nameof(attribute));
+                throw new InvalidOperationException("Invalid attribute type.");
             }
         }
 

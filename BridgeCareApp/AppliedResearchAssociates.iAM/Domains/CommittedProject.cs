@@ -56,10 +56,6 @@ namespace AppliedResearchAssociates.iAM.Domains
             {
                 results.Add(ValidationStatus.Error, "Cost is less than zero.", this, nameof(Cost));
             }
-            else if (Cost == 0)
-            {
-                results.Add(ValidationStatus.Warning, "Cost is zero.", this, nameof(Cost));
-            }
 
             if (Consequences.Select(consequence => consequence.Attribute).Distinct().Count() < Consequences.Count)
             {

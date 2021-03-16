@@ -86,8 +86,8 @@ namespace BridgeCareCore.Services.SummaryReport
                     simulationAnalysisDetail.Status = $"The attribute {item} not found in initial section";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
-                    var broadcastingMessage = $"The attribute {item} not found in initial section";
-                    sendRealTimeMessage(broadcastingMessage, simulationId);
+                    var message = $"The attribute {item} not found in initial section";
+                    SendRealTimeMessage(message, simulationId, userInfo);
                     throw new KeyNotFoundException($"The attribute {item} not found in initial section");
                 }
             }
@@ -101,8 +101,8 @@ namespace BridgeCareCore.Services.SummaryReport
                     simulationAnalysisDetail.Status = $"The attribute {item} not found in sections";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
-                    var broadcastingMessage = $"The attribute {item} not found in sections";
-                    sendRealTimeMessage(broadcastingMessage, simulationId);
+                    var message = $"The attribute {item} not found in sections";
+                    SendRealTimeMessage(message, simulationId, userInfo);
                     throw new KeyNotFoundException($"The attribute {item} not found in sections");
                 }
             }

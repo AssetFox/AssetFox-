@@ -1,5 +1,3 @@
-using System;
-using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
@@ -8,31 +6,29 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces.Simulation;
 using BridgeCareCore.Interfaces.SummaryReport;
+using BridgeCareCore.Logging;
+using BridgeCareCore.Security;
+using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using BridgeCareCore.Services.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeData;
+using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
+using BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget;
+using BridgeCareCore.Services.SummaryReport.GraphTabs;
+using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
+using BridgeCareCore.Services.SummaryReport.Parameters;
+using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 using BridgeCareCore.Services.SummaryReport.UnfundedRecommendations;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
-using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
-using BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget;
-using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
-using BridgeCareCore.Services.SummaryReport.GraphTabs;
-using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
-using BridgeCareCore.Services.SummaryReport.Parameters;
-using BridgeCareCore.Interfaces.Simulation;
-using BridgeCareCore.Logging;
-using BridgeCareCore.Security;
-using BridgeCareCore.Security.Interfaces;
-using BridgeCareCore.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BridgeCareCore
@@ -113,7 +109,8 @@ namespace BridgeCareCore
             services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository>();
             services.AddScoped<IMaintainableAssetRepository, LiteDb.MaintainableAssetRepository>();
 #endif
-            services.AddCors(o => o.AddPolicy("CorsPolicy", builder => {
+            services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
+            {
                 builder
                 .AllowAnyMethod()
                 .AllowAnyHeader()

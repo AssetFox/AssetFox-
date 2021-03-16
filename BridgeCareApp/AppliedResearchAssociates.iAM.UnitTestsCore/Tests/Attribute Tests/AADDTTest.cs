@@ -79,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attribute_Tests
             UnitOfDataPersistenceWork = new UnitOfDataPersistenceWork(Config, DbContext);
         }
 
-        [Test]
+        [Fact]
         public void ShouldMatchAADTTAttributeResult()
         {
             try

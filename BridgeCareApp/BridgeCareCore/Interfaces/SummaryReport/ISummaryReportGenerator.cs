@@ -1,5 +1,6 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Interfaces.SummaryReport
 {

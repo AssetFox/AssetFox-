@@ -58,7 +58,45 @@ namespace BridgeCareCore.Services.SummaryReport
 
         public byte[] GenerateReport(Guid networkId, Guid simulationId, UserInfoDTO userInfo)
         {
+            var requiredSections = new HashSet<string>()
+            {
+                $"{Properties.Resources.DeckSeeded}",
+                $"{Properties.Resources.SupSeeded}",
+                $"{Properties.Resources.SubSeeded}",
+                $"{Properties.Resources.CulvSeeded}",
+                $"{Properties.Resources.DeckDurationN}",
+                $"{Properties.Resources.SupDurationN}",
+                $"{Properties.Resources.SubDurationN}",
+                $"{Properties.Resources.CulvDurationN}"
+            };
+
+
             var reportOutputData = _unitOfDataPersistenceWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+
+            var initialSectionValues = reportOutputData.InitialSectionSummaries[0].ValuePerNumericAttribute;
+
+            foreach (var item in requiredSections)
+            {
+                if (!initialSectionValues.ContainsKey(item))
+                {
+                    var broadcastingMessage = $"The attribute {item} not found in initial section";
+                    sendRealTimeMessage(broadcastingMessage, simulationId);
+                    throw new KeyNotFoundException($"The attribute {item} not found in initial section");
+                }
+            }
+
+            var sectionValueAttribute = reportOutputData.Years[0].Sections[0].ValuePerNumericAttribute;
+
+            foreach (var item in requiredSections)
+            {
+                if (!sectionValueAttribute.ContainsKey(item))
+                {
+                    var broadcastingMessage = $"The attribute {item} not found in sections";
+                    sendRealTimeMessage(broadcastingMessage, simulationId);
+                    throw new KeyNotFoundException($"The attribute {item} not found in sections");
+                }
+            }
+
 
             // sorting the sections based on facility name. This is helpful throughout the report generation process
             reportOutputData.InitialSectionSummaries.Sort(

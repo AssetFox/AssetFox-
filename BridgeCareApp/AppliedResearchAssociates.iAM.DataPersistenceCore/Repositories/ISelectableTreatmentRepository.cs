@@ -16,9 +16,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         Task<List<TreatmentLibraryDTO>> TreatmentLibrariesWithTreatments();
 
-        void UpsertTreatmentLibrary(TreatmentLibraryDTO dto, Guid simulationId);
+        void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, TreatmentLibraryDTO dto);
 
-        void UpsertOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId);
+        void UpsertTreatmentLibrary(TreatmentLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo);
+
+        void UpsertOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId, UserInfoDTO userInfo);
 
         void DeleteTreatmentLibrary(Guid libraryId);
     }

@@ -4,14 +4,14 @@ import {TargetConditionGoalLibrary} from '@/shared/models/iAM/target-condition-g
 
 export default class TargetConditionGoalService {
     static getTargetConditionGoalLibraries(): AxiosPromise {
-        return coreAxiosInstance.get(`${API.TargetConditionGoalController}/GetTargetConditionGoalLibraries`);
+        return coreAxiosInstance.get(`${API.TargetConditionGoal}/GetTargetConditionGoalLibraries`);
     }
 
     static upsertTargetConditionGoalLibrary(data: TargetConditionGoalLibrary, scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.TargetConditionGoalController}/UpsertTargetConditionGoalLibrary/${scenarioId}`, data);
+        return coreAxiosInstance.post(`${API.TargetConditionGoal}/UpsertTargetConditionGoalLibrary/${scenarioId}`, data);
     }
 
     static deleteTargetConditionGoalLibrary(libraryId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`${API.TargetConditionGoalController}/DeleteTargetConditionGoalLibrary/${libraryId}`);
+        return coreAxiosInstance.delete(`${API.TargetConditionGoal}/DeleteTargetConditionGoalLibrary/${libraryId}`);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
@@ -63,5 +64,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             entity.Simulation.RemainingLifeLimitLibrarySimulationJoin?.RemainingLifeLimitLibrary.RemainingLifeLimits
                 .ForEach(_ => _.CreateRemainingLifeLimit(simulation));
         }
+
+        public static AnalysisMethodEntity ToEntity(this AnalysisMethodDTO dto, Guid simulationId, Guid? attributeId = null) =>
+            new AnalysisMethodEntity
+            {
+                Id = dto.Id,
+                SimulationId = simulationId,
+                Description = dto.Description,
+                OptimizationStrategy = dto.OptimizationStrategy,
+                SpendingStrategy = dto.SpendingStrategy,
+                ShouldApplyMultipleFeasibleCosts = dto.ShouldApplyMultipleFeasibleCosts,
+                ShouldDeteriorateDuringCashFlow = dto.ShouldDeteriorateDuringCashFlow,
+                ShouldUseExtraFundsAcrossBudgets = dto.ShouldUseExtraFundsAcrossBudgets,
+                AttributeId = attributeId,
+            };
+
+        public static AnalysisMethodDTO ToDto(this AnalysisMethodEntity entity) =>
+            new AnalysisMethodDTO
+            {
+                Id = entity.Id,
+                Description = entity.Description,
+                OptimizationStrategy = entity.OptimizationStrategy,
+                SpendingStrategy = entity.SpendingStrategy,
+                ShouldApplyMultipleFeasibleCosts = entity.ShouldApplyMultipleFeasibleCosts,
+                ShouldDeteriorateDuringCashFlow = entity.ShouldDeteriorateDuringCashFlow,
+                ShouldUseExtraFundsAcrossBudgets = entity.ShouldUseExtraFundsAcrossBudgets,
+                Attribute = entity.Attribute?.Name ?? string.Empty,
+                Benefit = entity.Benefit?.ToDto() ?? new BenefitDTO(),
+                CriterionLibrary = entity.CriterionLibraryAnalysisMethodJoin != null
+                    ? entity.CriterionLibraryAnalysisMethodJoin.CriterionLibrary.ToDto()
+                    : new CriterionLibraryDTO()
+            };
     }
 }

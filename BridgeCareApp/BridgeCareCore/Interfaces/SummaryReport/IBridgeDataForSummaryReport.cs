@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy.Entities;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;

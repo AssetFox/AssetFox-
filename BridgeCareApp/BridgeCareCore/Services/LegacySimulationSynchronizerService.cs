@@ -8,13 +8,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
-namespace BridgeCareCore.Services.LegacySimulationSynchronization
+namespace BridgeCareCore.Services
 {
-    public class LegacySimulationSynchronizer
+    public class LegacySimulationSynchronizerService
     {
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
@@ -24,7 +21,7 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
         private readonly IHubContext<BridgeCareHub> _hubContext;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public LegacySimulationSynchronizer(IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfWork)
+        public LegacySimulationSynchronizerService(IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfWork)
         {
             _hubContext = hub;
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -62,13 +59,12 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
                 _unitOfWork.NetworkRepo.DeleteNetworkData();
                 sendRealTimeMessage("Creating the network's facilities and sections...");
                 _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
-
             }
             //if (!_unitOfWork.NetworkRepo.CheckPennDotNetworkHasData())
             //{
             //    _unitOfWork.NetworkRepo.DeleteNetworkData();
 
-            //    sendRealTimeMessage("Creating the network's facilities and sections...");
+            // sendRealTimeMessage("Creating the network's facilities and sections...");
 
             //    _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
             //}
@@ -109,7 +105,6 @@ namespace BridgeCareCore.Services.LegacySimulationSynchronization
             {
                 using var transaction = _unitOfWork.DbContextTransaction;
 
-                
                 var dataAccessor = GetDataAccessor();
                 _unitOfWork.LegacyConnection.Open();
                 var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, simulationId);

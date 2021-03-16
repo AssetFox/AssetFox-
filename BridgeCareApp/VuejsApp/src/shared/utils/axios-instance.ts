@@ -22,14 +22,21 @@ export const nodejsBackgroundAxiosInstance: AxiosInstance = axios.create({
 });
 
 export const API = {
-    PerformanceCurveController: '/api/PerformanceCurve',
-    CriterionLibraryController: '/api/CriterionLibrary',
-    NetworkController: '/api/Network',
-    CashFlowController: '/api/CashFlow',
-    RemainingLifeLimitController: '/api/RemainingLifeLimit',
-    DeficientConditionGoalController: '/api/DeficientConditionGoal',
-    TargetConditionGoalController: '/api/TargetConditionGoal',
-    TreatmentController: '/api/Treatment',
-    InvestmentController: '/api/Investment',
-    BudgetPriorityController: '/api/BudgetPriority'
+    PerformanceCurve: '/api/PerformanceCurve',
+    CriterionLibrary: '/api/CriterionLibrary',
+    Network: '/api/Network',
+    CashFlow: '/api/CashFlow',
+    RemainingLifeLimit: '/api/RemainingLifeLimit',
+    DeficientConditionGoal: '/api/DeficientConditionGoal',
+    TargetConditionGoal: '/api/TargetConditionGoal',
+    Treatment: '/api/Treatment',
+    Investment: '/api/Investment',
+    BudgetPriority: '/api/BudgetPriority',
+    Authentication: '/api/Authentication',
+    Scenario: '/api/Simulation',
+    User: '/api/User',
+    Attribute: '/api/Attribute',
+    AnalysisMethod: '/api/AnalysisMethod',
+    SummaryReport: '/api/SummaryReport',
+    ExpressionValidation: '/api/ExpressionValidation'
 };

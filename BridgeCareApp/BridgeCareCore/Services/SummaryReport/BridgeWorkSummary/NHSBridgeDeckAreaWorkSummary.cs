@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
@@ -20,6 +19,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryComputationHelper));
         }
+
         internal void FillNHSBridgeDeckAreaWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, SimulationOutput reportOutputData, ChartRowsModel chartRowsModel)
         {
@@ -45,6 +45,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         #region
+
         private int FillNHSBridgeCountSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, SimulationOutput reportOutputData)
         {
@@ -53,6 +54,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             AddDetailsForNHSBridgeCount(worksheet, currentCell, reportOutputData);
             return dataStartRow;
         }
+
         private int FillNonNHSBridgeCountSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, int totalBridgeCountSectionStartRow, int nHSBridgeCountSectionStartRow, ChartRowsModel chartRowsModel)
         {
             _bridgeWorkSummaryCommon.AddBridgeHeaders(worksheet, currentCell, simulationYears, "Non-NHS Bridge Count", true);
@@ -60,6 +62,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             AddDetailsForNonNHSCountAndArea(worksheet, currentCell, simulationYears, totalBridgeCountSectionStartRow, nHSBridgeCountSectionStartRow, false);
             return dataStartRow;
         }
+
         private void AddDetailsForNHSBridgeCount(ExcelWorksheet worksheet, CurrentCell currentCell,
              SimulationOutput reportOutputData)
         {
@@ -75,6 +78,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 2, column]);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 3, column);
         }
+
         private void FillNHSBridgeCountPercentSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, int dataStartRow, ChartRowsModel chartRowsModel)
         {
@@ -82,6 +86,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             chartRowsModel.NHSBridgeCountPercentSectionYearsRow = currentCell.Row;
             AddDetailsForNHSPercentSection(worksheet, currentCell, simulationYears, dataStartRow);
         }
+
         private int FillNHSBridgeDeckAreaSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, SimulationOutput reportOutputData)
         {
@@ -90,6 +95,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             AddDetailsForNHSBridgeDeckArea(worksheet, currentCell, reportOutputData);
             return dataStartRow;
         }
+
         private void FillNonNHSBridgeCountPercentSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             int dataStartRow, ChartRowsModel chartRowsModel)
         {
@@ -97,6 +103,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             chartRowsModel.NonNHSBridgeCountPercentSectionYearsRow = currentCell.Row;
             AddDetailsForNonNHSPercentSection(worksheet, currentCell, simulationYears, dataStartRow);
         }
+
         private void FillNHSBridgeDeckAreaPercentSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, int dataStartRow, ChartRowsModel chartRowsModel)
         {
@@ -104,6 +111,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             chartRowsModel.NHSBridgeDeckAreaPercentSectionYearsRow = currentCell.Row;
             AddDetailsForNHSPercentSection(worksheet, currentCell, simulationYears, dataStartRow);
         }
+
         private int FillNonNHSDeckAreaSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             int totalDeckAreaSectionStartRow, int nHSDeckAreaSectionStartRow)
         {
@@ -112,6 +120,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             AddDetailsForNonNHSCountAndArea(worksheet, currentCell, simulationYears, totalDeckAreaSectionStartRow, nHSDeckAreaSectionStartRow, true);
             return dataStartRow;
         }
+
         private void FillNonNHSDeckAreaPercentSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             int dataStartRow, ChartRowsModel chartRowsModel)
         {
@@ -119,6 +128,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             chartRowsModel.NonNHSDeckAreaPercentSectionYearsRow = currentCell.Row;
             AddDetailsForNonNHSPercentSection(worksheet, currentCell, simulationYears, dataStartRow);
         }
+
         private void AddDetailsForNonNHSPercentSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, int dataStartRow)
         {
             int startRow, startColumn, row, column;
@@ -135,6 +145,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 2, column], "Percentage");
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row, column - 1);
         }
+
         private void AddNHSBridgeCount(ExcelWorksheet worksheet, int row, int column,
             List<SectionSummaryDetail> initialSectionSummaries, List<SectionDetail> sectionDetails)
         {
@@ -156,6 +167,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var yNHSCount = _bridgeWorkSummaryComputationHelper.TotalNHSBridgeCountOrArea(initialSectionSummaries, sectionDetails, true);
             worksheet.Cells[row + 1, column].Value = yNHSCount - (goodCount + poorCount);
         }
+
         private void AddDetailsForNHSPercentSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, int dataStartRow)
         {
             int startRow, startColumn, row, column;
@@ -172,6 +184,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 2, column], "Percentage");
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row, column - 1);
         }
+
         private void AddDetailsForNonNHSCountAndArea(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             int totalBridgeCountOrDeckAreaStartRow, int nHSBridgeCountOrDeckAreaStartRow, bool isDeckArea)
         {
@@ -201,6 +214,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row, column - 1], "Number");
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 1, column);
         }
+
         private void AddDetailsForNHSBridgeDeckArea(ExcelWorksheet worksheet, CurrentCell currentCell,
             SimulationOutput reportOutputData)
         {
@@ -217,6 +231,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row + 2, column], "Number");
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 3, column);
         }
+
         private void AddNHSBridgeDeckArea(ExcelWorksheet worksheet, int row, int column,
             List<SectionSummaryDetail> initialSectionSummaries, List<SectionDetail> sectionDetails)
         {
@@ -238,6 +253,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var totalDeckArea = _bridgeWorkSummaryComputationHelper.TotalNHSBridgeCountOrArea(initialSectionSummaries, sectionDetails, false);
             worksheet.Cells[row + 1, column].Value = totalDeckArea - (goodDeckArea + poorDeckArea);
         }
+
         #endregion
     }
 }

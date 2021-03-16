@@ -2,6 +2,9 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Security;
+using BridgeCareCore.Security.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
@@ -11,12 +14,18 @@ namespace BridgeCareCore.Controllers
     public class CriterionLibraryController : ControllerBase
     {
         private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly IEsecSecurity _esecSecurity;
 
-        public CriterionLibraryController(UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public CriterionLibraryController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
+        {
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+        }
 
         [HttpGet]
         [Route("GetCriterionLibraries")]
+        [Authorize]
         public async Task<IActionResult> CriterionLibraries()
         {
             try
@@ -33,14 +42,16 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertCriterionLibrary")]
+        [Authorize]
         public async Task<IActionResult> UpsertCriterionLibrary([FromBody] CriterionLibraryDTO dto)
         {
             try
             {
+                var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
                 _unitOfDataPersistenceWork.BeginTransaction();
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfDataPersistenceWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto);
+                    _unitOfDataPersistenceWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto, userInfo);
                 });
 
                 _unitOfDataPersistenceWork.Commit();
@@ -56,6 +67,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteCriterionLibrary/{libraryId}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCriterionLibrary(Guid libraryId)
         {
             try

@@ -30,8 +30,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
                 .DeserializeAnonymousType(rawAttributes, new { AttributeMetaData = default(List<AttributeMetaDatum>) })
                 .AttributeMetaData;
 
-            // Check to see if the GUIDs in the meta data are blank. A blank GUID requires that
-            // the attribute has never been assigned in a network previously.
+            // Check to see if the GUIDs in the meta data are blank. A blank GUID requires that the
+            // attribute has never been assigned in a network previously.
             if (attributeMetaData.Any(_ => Guid.Empty == _.Id))
             {
                 // give new meta data a guid

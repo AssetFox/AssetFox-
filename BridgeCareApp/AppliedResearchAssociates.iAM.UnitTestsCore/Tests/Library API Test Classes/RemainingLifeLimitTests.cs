@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new RemainingLifeLimitController(_testHelper.UnitOfDataPersistenceWork);
+            _controller = new RemainingLifeLimitController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
         }
 
         public RemainingLifeLimitLibraryEntity TestRemainingLifeLimitLibrary { get; } = new RemainingLifeLimitLibraryEntity
@@ -59,15 +59,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnGet()
+        public async void ShouldReturnOkResultOnGet()
         {
             try
             {
                 // Act
-                var result = _controller.RemainingLifeLimitLibraries();
+                var result = await _controller.RemainingLifeLimitLibraries();
 
                 // Assert
-                Assert.IsType<OkObjectResult>(result.Result);
+                Assert.IsType<OkObjectResult>(result);
             }
             finally
             {
@@ -77,16 +77,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnPost()
+        public async void ShouldReturnOkResultOnPost()
         {
             try
             {
                 // Act
-                var result = _controller
+                var result = await _controller
                     .UpsertRemainingLifeLimitLibrary(Guid.Empty, TestRemainingLifeLimitLibrary.ToDto());
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -96,15 +96,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnDelete()
+        public async void ShouldReturnOkResultOnDelete()
         {
             try
             {
                 // Act
-                var result = _controller.DeleteRemainingLifeLimitLibrary(Guid.Empty);
+                var result = await _controller.DeleteRemainingLifeLimitLibrary(Guid.Empty);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -114,7 +114,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldGetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
+        public async void ShouldGetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
         {
             try
             {
@@ -122,10 +122,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 SetupForGet();
 
                 // Act
-                var result = _controller.RemainingLifeLimitLibraries();
+                var result = await _controller.RemainingLifeLimitLibraries();
 
                 // Assert
-                var okObjResult = result.Result as OkObjectResult;
+                var okObjResult = result as OkObjectResult;
                 Assert.NotNull(okObjResult.Value);
 
                 var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType(okObjResult.Value,
@@ -145,14 +145,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldModifyRemainingLifeLimitData()
+        public async void ShouldModifyRemainingLifeLimitData()
         {
             try
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType(
-                    (_controller.RemainingLifeLimitLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.RemainingLifeLimitLibraries();
+                var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<RemainingLifeLimitLibraryDTO>));
 
                 var remainingLifeLimitLibraryDTO = dtos[0];
@@ -163,11 +163,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.UpsertRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
+                    await _controller.UpsertRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
                         remainingLifeLimitLibraryDTO);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 var remainingLifeLimitLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary
                     .Include(_ => _.RemainingLifeLimits)
@@ -205,8 +205,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType(
-                    (_controller.RemainingLifeLimitLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.RemainingLifeLimitLibraries();
+                var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<RemainingLifeLimitLibraryDTO>));
 
                 var remainingLifeLimitLibraryDTO = dtos[0];
@@ -217,10 +217,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                     remainingLifeLimitLibraryDTO);
 
                 // Act
-                var result = _controller.DeleteRemainingLifeLimitLibrary(RemainingLifeLimitLibraryId);
+                var result = await _controller.DeleteRemainingLifeLimitLibrary(RemainingLifeLimitLibraryId);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == RemainingLifeLimitLibraryId));
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimit.Any(_ => _.Id == RemainingLifeLimitId));

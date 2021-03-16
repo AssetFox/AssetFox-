@@ -20,6 +20,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryComputationHelper));
         }
+
         internal ChartRowsModel FillPoorDeckArea(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, SimulationOutput reportOutputData, ChartRowsModel chartRowsModel)
         {
@@ -30,6 +31,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         #region
+
         private void AddDetailsForPoorDeckArea(ExcelWorksheet worksheet, CurrentCell currentCell,
             SimulationOutput reportOutputData)
         {
@@ -90,6 +92,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             poorDeckArea = _bridgeWorkSummaryComputationHelper.CalculatePoorDeckAreaForRemainingBPN(sectionDetails);
             worksheet.Cells[row, column].Value = poorDeckArea;
         }
+
         #endregion
     }
 }

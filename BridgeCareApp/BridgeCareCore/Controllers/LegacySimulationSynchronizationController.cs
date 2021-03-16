@@ -2,11 +2,10 @@
 using System.Threading.Tasks;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Logging;
-using BridgeCareCore.Services.LegacySimulationSynchronization;
+using BridgeCareCore.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace BridgeCareCore.Controllers
 {
@@ -15,19 +14,20 @@ namespace BridgeCareCore.Controllers
     public class LegacySimulationSynchronizationController : ControllerBase
     {
         private readonly IHubContext<BridgeCareHub> _hubContext;
-        private readonly LegacySimulationSynchronizer _legacySimulationSynchronizer;
+        private readonly LegacySimulationSynchronizerService _legacySimulationSynchronizerService;
         private readonly ILog _logger;
 
         public LegacySimulationSynchronizationController(IHubContext<BridgeCareHub> hub,
-            LegacySimulationSynchronizer legacySimulationSynchronizer, ILog logger)
+            LegacySimulationSynchronizerService legacySimulationSynchronizerService, ILog logger)
         {
             _hubContext = hub ?? throw new ArgumentNullException(nameof(hub));
-            _legacySimulationSynchronizer = legacySimulationSynchronizer ?? throw new ArgumentNullException(nameof(legacySimulationSynchronizer));
+            _legacySimulationSynchronizerService = legacySimulationSynchronizerService ?? throw new ArgumentNullException(nameof(legacySimulationSynchronizerService));
             _logger = logger;
         }
 
         [HttpPost]
         [Route("SynchronizeLegacySimulation/{simulationId}")]
+        [Authorize]
         public async Task<IActionResult> SynchronizeLegacySimulation(int simulationId)
         {
             try
@@ -37,7 +37,7 @@ namespace BridgeCareCore.Controllers
                     .All
                     .SendAsync("BroadcastDataMigration", "Starting data migration...");
 
-                await _legacySimulationSynchronizer.Synchronize(simulationId);
+                await _legacySimulationSynchronizerService.Synchronize(simulationId);
 
                 await _hubContext
                     .Clients

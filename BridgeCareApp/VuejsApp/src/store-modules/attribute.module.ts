@@ -40,7 +40,7 @@ const actions = {
             });
     },
     async getAttributeSelectValues({commit, dispatch}: any, payload: any) {
-        await AttributeService.getAttributeSelectValues(payload.networkAttribute)
+        await AttributeService.getAttributeSelectValues(payload.attributeNames)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const results: AttributeSelectValuesResult[] = response.data as AttributeSelectValuesResult[];

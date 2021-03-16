@@ -31,12 +31,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _deckAreaBridgeWorkSummary = deckAreaBridgeWorkSummary ?? throw new ArgumentNullException(nameof(deckAreaBridgeWorkSummary));
             _postedClosedBridgeWorkSummary = postedClosedBridgeWorkSummary ?? throw new ArgumentNullException(nameof(postedClosedBridgeWorkSummary));
         }
+
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
             List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
             #region Initial work to set some data, which will be used throughout the Work summary TAB
+
             // Getting list of treatments. It will be used in several places throughout this excel TAB
             var treatments = new List<string>();
             var singleSection = reportOutputData.Years[0].Sections[0];
@@ -44,7 +46,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 .Union(singleSection.TreatmentRejections.Select(r => r.TreatmentName)).ToList();
             treatments.Sort();
 
-            // cache to store total cost per treatment for a given year along with count of culvert and non-culvert bridges
+            // cache to store total cost per treatment for a given year along with count of culvert
+            // and non-culvert bridges
             var costPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
             var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
             foreach (var yearData in reportOutputData.Years)
@@ -57,7 +60,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                     {
                         continue;
                     }
-                    if(section.TreatmentCause == TreatmentCause.CommittedProject)
+                    if (section.TreatmentCause == TreatmentCause.CommittedProject)
                     {
                         var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
 
@@ -91,7 +94,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                     }
                 }
             }
-            #endregion
+
+            #endregion Initial work to set some data, which will be used throughout the Work summary TAB
 
             _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costPerTreatmentPerYear, yearlyCostCommittedProj,
                 simulationYears, treatments, yearlyBudgetAmount);

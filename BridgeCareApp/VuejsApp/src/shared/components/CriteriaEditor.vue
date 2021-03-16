@@ -143,6 +143,8 @@ import {AxiosResponse} from 'axios';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {Network} from '@/shared/models/iAM/network';
 import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
+import ValidationService from '@/services/validation.service';
+import {CriterionValidationResult} from '@/shared/models/iAM/expression-validation';
 
 @Component({
   components: {VueQueryBuilder}
@@ -235,12 +237,7 @@ export default class CriteriaEditor extends Vue {
       }
 
       if (hasValue(missingAttributes)) {
-        this.getAttributeSelectValuesAction({
-          networkAttribute: {
-            networkId: this.stateNetworks[0].networkId,
-            attributes: missingAttributes
-          }
-        });
+        this.getAttributeSelectValuesAction({attributeNames: missingAttributes});
       }
     }
   }
@@ -397,12 +394,12 @@ export default class CriteriaEditor extends Vue {
     const parsedCriteria = parseCriteriaJson(this.getMainCriteria());
 
     if (parsedCriteria) {
-      CriterionLibraryService.checkCriteriaValidity({criteria: parsedCriteria.join('')})
-          .then((response: AxiosResponse<CriteriaValidationResult>) => {
+      ValidationService.getCriterionValidationResult({expression: parsedCriteria.join('')})
+          .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
-              const validationResult: CriteriaValidationResult = response.data;
-              const message = `${validationResult.numberOfResults} result(s) returned`;
-              if (validationResult.isValid) {
+              const result: CriterionValidationResult = response.data as CriterionValidationResult;
+              const message = `${result.resultsCount} result(s) returned`;
+              if (result.isValid) {
                 this.validCriteriaMessage = message;
                 this.cannotSubmit = false;
 
@@ -420,11 +417,11 @@ export default class CriteriaEditor extends Vue {
               } else {
                 this.resetCriteriaValidationProperties();
                 setTimeout(() => {
-                  if (validationResult.numberOfResults === 0) {
+                  if (result.resultsCount === 0) {
                     this.invalidCriteriaMessage = message;
                     this.cannotSubmit = false;
                   } else {
-                    this.invalidCriteriaMessage = validationResult.message;
+                    this.invalidCriteriaMessage = result.validationMessage;
                   }
                 });
 
@@ -451,14 +448,14 @@ export default class CriteriaEditor extends Vue {
       return;
     }
 
-    CriterionLibraryService.checkCriteriaValidity({criteria: criteria})
-        .then((response: AxiosResponse<CriteriaValidationResult>) => {
+    ValidationService.getCriterionValidationResult({expression: criteria})
+        .then((response: AxiosResponse) => {
           this.resetSubCriteriaValidationProperties();
 
           if (hasValue(response, 'data')) {
-            const validationResult: CriteriaValidationResult = response.data;
-            const message = `${validationResult.numberOfResults} result(s) returned`;
-            if (validationResult.isValid) {
+            const result: CriterionValidationResult = response.data as CriterionValidationResult;
+            const message = `${result.resultsCount} result(s) returned`;
+            if (result.isValid) {
               this.validSubCriteriaMessage = message;
               this.subCriteriaClauses = update(
                   this.selectedSubCriteriaClauseIndex,
@@ -472,7 +469,7 @@ export default class CriteriaEditor extends Vue {
                 this.$emit('submitCriteriaEditorResult', {validated: false, criteria: null});
               }
             } else {
-              if (validationResult.numberOfResults === 0) {
+              if (result.resultsCount === 0) {
                 this.invalidSubCriteriaMessage = message;
                 this.subCriteriaClauses = update(
                     this.selectedSubCriteriaClauseIndex,
@@ -482,7 +479,7 @@ export default class CriteriaEditor extends Vue {
                 this.resetCriteriaValidationProperties();
                 this.checkOutput = true;
               } else {
-                this.invalidSubCriteriaMessage = validationResult.message;
+                this.invalidSubCriteriaMessage = result.validationMessage;
               }
             }
           }
@@ -499,7 +496,7 @@ export default class CriteriaEditor extends Vue {
     }
     return this.selectedRawSubCriteriaClause;
   }
-  
+
   onSubmitCriteriaEditorResult(submit: boolean) {
     this.resetSubCriteriaSelectedProperties();
     this.resetCriteriaValidationProperties();
@@ -517,7 +514,7 @@ export default class CriteriaEditor extends Vue {
       this.$emit('submitCriteriaEditorResult', null);
     }
   }
-  
+
   onDisableCheckOutputButton() {
     const mainCriteria: Criteria = this.getMainCriteria();
     const subCriteriaClausesAreEmpty = this.subCriteriaClauses
@@ -529,7 +526,7 @@ export default class CriteriaEditor extends Vue {
 
     return disable;
   }
-  
+
   onDisableCheckCriteriaButton() {
     const parsedSelectedSubCriteriaClause = parseCriteriaJson(this.selectedSubCriteriaClause as Criteria);
     const parsedSelectedRawSubCriteriaClause = parseCriteriaJson(parseCriteriaString(this.selectedRawSubCriteriaClause) as Criteria);
@@ -554,7 +551,7 @@ export default class CriteriaEditor extends Vue {
 
     return disable;
   }
-  
+
   getMainCriteria() {
     const filteredSubCriteria: string[] = this.subCriteriaClauses
         .filter((subCriteriaClause: string) => !isEmpty(subCriteriaClause));

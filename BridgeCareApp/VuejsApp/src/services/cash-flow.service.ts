@@ -4,14 +4,14 @@ import {CashFlowRuleLibrary} from '@/shared/models/iAM/cash-flow';
 
 export default class CashFlowService {
     static getCashFlowRuleLibraries(): AxiosPromise {
-        return coreAxiosInstance.get(`${API.CashFlowController}/GetCashFlowRuleLibraries`);
+        return coreAxiosInstance.get(`${API.CashFlow}/GetCashFlowRuleLibraries`);
     }
 
     static upsertCashFlowRuleLibrary(data: CashFlowRuleLibrary, scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.CashFlowController}/UpsertCashFlowRuleLibrary/${scenarioId}`, data);
+        return coreAxiosInstance.post(`${API.CashFlow}/UpsertCashFlowRuleLibrary/${scenarioId}`, data);
     }
 
     static deleteCashFlowRuleLibrary(libraryId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`${API.CashFlowController}/DeleteCashFlowRuleLibrary/${libraryId}`);
+        return coreAxiosInstance.delete(`${API.CashFlow}/DeleteCashFlowRuleLibrary/${libraryId}`);
     }
 }

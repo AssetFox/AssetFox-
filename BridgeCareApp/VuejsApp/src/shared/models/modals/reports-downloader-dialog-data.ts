@@ -1,13 +1,13 @@
-﻿import {emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
+﻿import {getBlankGuid} from '@/shared/utils/uuid-utils';
 
 export interface ReportsDownloaderDialogData {
     showModal: boolean;
-    scenario: Scenario;
-    newNetworkId: string;
+    scenarioId: string;
+    networkId: string;
 }
 
 export const emptyReportsDownloadDialogData: ReportsDownloaderDialogData = {
     showModal: false,
-    scenario: emptyScenario,
-    newNetworkId: ''
+    scenarioId: getBlankGuid(),
+    networkId: getBlankGuid()
 };

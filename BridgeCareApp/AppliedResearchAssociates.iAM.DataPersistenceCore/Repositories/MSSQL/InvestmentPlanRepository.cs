@@ -74,9 +74,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetSimulationInvestmentPlan(Simulation simulation)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Name == simulation.Name))
+            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulation.Name}");
+                throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
             }
 
             _unitOfDataPersistenceWork.Context.InvestmentPlan
@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CashFlowRuleLibrary)
                 .ThenInclude(_ => _.CashFlowRules)
                 .ThenInclude(_ => _.CashFlowDistributionRules)
-                .Single(_ => _.Simulation.Name == simulation.Name)
+                .Single(_ => _.Simulation.Id == simulation.Id)
                 .FillSimulationInvestmentPlan(simulation);
         }
 
@@ -127,7 +127,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
         }
 
-        public void UpsertInvestmentPlan(InvestmentPlanDTO dto, Guid simulationId)
+        public void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, InvestmentPlanDTO dto)
+        {
+            if (simulationId != Guid.Empty)
+            {
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                {
+                    throw new RowNotInTableException($"No simulation found having id {dto.Id}");
+                }
+
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ =>
+                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
+                }
+
+                UpsertInvestmentPlan(dto, simulationId, userInfo);
+            }
+        }
+
+        public void UpsertInvestmentPlan(InvestmentPlanDTO dto, Guid simulationId, UserInfoDTO userInfo)
         {
             if (simulationId != Guid.Empty)
             {
@@ -136,11 +155,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                 }
 
-                var entity = dto.ToEntity(simulationId);
+                var userEntity =
+                    _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
-                _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
+                var investmentPlanEntity = dto.ToEntity(simulationId);
 
-                _unitOfDataPersistenceWork.Context.SaveChanges();
+                _unitOfDataPersistenceWork.Context.Upsert(investmentPlanEntity, dto.Id, userEntity?.Id);
             }
         }
     }

@@ -71,18 +71,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     }
                     else
                     {
-
                     }
                 }
                 else
                 {
                     if (item.Location.ToLower().Equals("section"))
                     {
-
                     }
                     else
                     {
-
                     }
                 }
             }

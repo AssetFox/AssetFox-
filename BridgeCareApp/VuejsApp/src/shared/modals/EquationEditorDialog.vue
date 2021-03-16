@@ -368,18 +368,19 @@ import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {Action, State} from 'vuex-class';
 import {EquationEditorDialogData} from '@/shared/models/modals/equation-editor-dialog-data';
-import EquationService from '@/services/equation.service';
 import {formulas} from '@/shared/utils/formulas';
 import {AxiosResponse} from 'axios';
 import {getLastPropertyValue, getPropertyValues} from '@/shared/utils/getter-utils';
 import {Attribute} from '@/shared/models/iAM/attribute';
 import {hasValue} from '@/shared/utils/has-value-util';
-import {emptyEquation, Equation, EquationValidationResult} from '@/shared/models/iAM/equation';
+import {emptyEquation, Equation} from '@/shared/models/iAM/equation';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {emptyTimeConditionDataPoint, TimeConditionDataPoint} from '@/shared/models/iAM/time-condition-data-point';
-import {add, clone, findIndex, insert, isEmpty, propEq, reverse, update, isNil} from 'ramda';
+import {add, clone, findIndex, insert, isEmpty, isNil, propEq, reverse, update} from 'ramda';
 import {sortByProperty} from '@/shared/utils/sorter-utils';
 import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
+import ValidationService from '@/services/validation.service';
+import {EquationValidationParameters, ValidationResult} from '@/shared/models/iAM/expression-validation';
 
 @Component
 export default class EquationEditorDialog extends Vue {
@@ -805,22 +806,22 @@ export default class EquationEditorDialog extends Vue {
    */
   onCheckEquation() {
     //TODO : replace with actual Equation DTO when .net core API is setup
-    const equation: any = {
-      equation: this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression,
-      isFunction: !this.isPiecewise,
+    const equationValidationParameters: EquationValidationParameters = {
+      expression: this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression,
+      /*isFunction: !this.isPiecewise,*/
       isPiecewise: this.isPiecewise
     };
 
-    EquationService.checkEquationValidity(equation)
-        .then((response: AxiosResponse<EquationValidationResult>) => {
+    ValidationService.getEquationValidationResult(equationValidationParameters)
+        .then((response: AxiosResponse) => {
           if (hasValue(response, 'data')) {
-            const validationResult: EquationValidationResult = response.data;
-            if (validationResult.isValid) {
+            const result: ValidationResult = response.data as ValidationResult;
+            if (result.isValid) {
               this.validExpressionMessage = 'Equation is valid.';
               this.invalidExpressionMessage = '';
               this.cannotSubmit = false;
             } else {
-              this.invalidExpressionMessage = validationResult.message;
+              this.invalidExpressionMessage = result.validationMessage;
               this.validExpressionMessage = '';
               this.cannotSubmit = true;
             }

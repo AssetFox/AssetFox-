@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
 
@@ -13,6 +12,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         {
             _stackedColumnChartCommon = stackedColumnChartCommon;
         }
+
         public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalPoorDeckAreaByBPNSectionYearsRow, int simulationYearsCount)
         {
             _stackedColumnChartCommon.SetWorksheetProperties(worksheet);
@@ -26,6 +26,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             chart.AdjustPositionAndSize();
             chart.Locked = true;
         }
+
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPoorDeckAreaByBPNYearsRow, int count, ExcelChart chart)
         {
             CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 1, Properties.Resources.BPN1, Color.FromArgb(0, 176, 80));
@@ -35,7 +36,6 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 3, Properties.Resources.BPN3, Color.FromArgb(0, 32, 96));
 
             CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 4, Properties.Resources.BPN4, Color.FromArgb(143, 170, 220));
-
         }
 
         private void CreateSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPoorDeckAreaByBPNYearsRow, int count, ExcelChart chart, int fromRow, string header, Color color)

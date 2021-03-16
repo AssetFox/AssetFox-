@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug</Configurations>
+    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug;Test</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

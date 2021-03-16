@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeData;
 using OfficeOpenXml;
@@ -10,6 +8,7 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
     public class SummaryReportGlossary
     {
         private readonly IExcelHelper _excelHelper;
+
         public SummaryReportGlossary(IExcelHelper excelHelper)
         {
             _excelHelper = excelHelper;

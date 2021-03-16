@@ -17,6 +17,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string Name { get; set; }
 
+        public virtual NetworkRollupDetailEntity NetworkRollupDetail { get; set; }
+
         public virtual ICollection<MaintainableAssetEntity> MaintainableAssets { get; set; }
 
         public virtual ICollection<SimulationEntity> Simulations { get; set; }

@@ -1,64 +1,29 @@
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
-
-export interface Analysis {
-    id: number;
-    startYear: number;
-    analysisPeriod: number;
-    optimizationType: string;
-    budgetType: string;
-    benefitLimit: number;
-    description: string;
-    criteria: string;
-    benefitAttribute: string;
-    weightingAttribute: string;
-}
-
-export const emptyAnalysis: Analysis = {
-    id: 0,
-    startYear: 0,
-    analysisPeriod: 0,
-    optimizationType: '',
-    budgetType: '',
-    benefitLimit: 0,
-    description: '',
-    criteria: '',
-    benefitAttribute: '',
-    weightingAttribute: ''
-};
-
 export interface ScenarioUser {
-    id?: number;
-    username: string | null;
+    userId: string;
+    username: string;
     canModify: boolean;
+    isOwner: boolean;
 }
 
 export interface Scenario {
-    networkId: number;
-    networkName: string;
-    simulationId: number;
-    simulationName: string;
+    id: string;
+    name: string;
+    users: ScenarioUser[];
+    owner?: string;
+    creator?: string;
     createdDate?: Date;
     lastModifiedDate?: Date;
     lastRun?: Date;
     status?: string;
-    shared?: boolean;
-    owner?: string;
-    creator?: string;
-    id: string;
-    users: ScenarioUser[];
+    reportStatus?: string;
     runTime?: string;
 }
 
 export const emptyScenario: Scenario = {
-    networkId: 0,
-    networkName: '',
-    simulationId: 0,
-    simulationName: '',
+    id: getBlankGuid(),
+    name: '',
+    users: [],
     createdDate: new Date(),
     lastModifiedDate: new Date(),
-    status: '',
-    shared: false,
-    id: getBlankGuid(),
-    users: [],
-    runTime: ''
 };

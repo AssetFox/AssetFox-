@@ -112,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public void UpsertOrDeleteTreatmentConsequences(Dictionary<Guid, List<TreatmentConsequenceDTO>> treatmentConsequencePerTreatmentId,
-            Guid libraryId)
+            Guid libraryId, Guid? userId = null)
         {
             var treatmentConsequences = treatmentConsequencePerTreatmentId.SelectMany(_ => _.Value.ToList()).ToList();
 
@@ -131,12 +131,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     $"No attributes found having the names: {string.Join(", ", missingAttributes)}.");
             }
 
-            var entities = treatmentConsequencePerTreatmentId.SelectMany(_ =>
+            var conditionalTreatmentConsequenceEntities = treatmentConsequencePerTreatmentId.SelectMany(_ =>
                     _.Value.Select(__ =>
                         __.ToEntity(_.Key, attributeEntities.Single(___ => ___.Name == __.Attribute).Id)))
                 .ToList();
 
-            var entityIds = entities.Select(_ => _.Id).ToList();
+            var entityIds = conditionalTreatmentConsequenceEntities.Select(_ => _.Id).ToList();
 
             var existingEntityIds = _unitOfDataPersistenceWork.Context.TreatmentConsequence
                 .Where(_ => _.SelectableTreatment.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id))
@@ -151,11 +151,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(conditionalTreatmentConsequenceEntities, predicatesPerCrudOperation, userId);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(conditionalTreatmentConsequenceEntities, predicatesPerCrudOperation, userId);
             }
 
             if (treatmentConsequences.Any(_ =>
@@ -167,7 +167,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .ToDictionary(_ => _.Id, _ => _.Equation.ToEntity());
 
                 _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntitiesPerJoinEntityId,
-                    DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence);
+                    DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence, userId);
             }
 
             if (treatmentConsequences.Any(_ =>
@@ -183,17 +183,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             ConditionalTreatmentConsequenceId = _.Id
                         }).ToList();
 
-                if (IsRunningFromXUnit)
-                {
-                    _unitOfDataPersistenceWork.Context.CriterionLibraryTreatmentConsequence.AddRange(criterionLibraryJoinsToAdd);
-                }
-                else
-                {
-                    _unitOfDataPersistenceWork.Context.BulkInsert(criterionLibraryJoinsToAdd);
-                }
+                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionLibraryJoinsToAdd, userId);
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
     }
 }

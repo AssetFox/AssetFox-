@@ -124,11 +124,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList());
         }
 
-        public void UpsertTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto, Guid simulationId)
+        public void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, TargetConditionGoalLibraryDTO dto)
         {
-            var entity = dto.ToEntity();
+            if (simulationId != Guid.Empty)
+            {
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                {
+                    throw new RowNotInTableException($"No simulation found having id {dto.Id}");
+                }
 
-            _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ =>
+                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
+                }
+            }
+
+            UpsertTargetConditionGoalLibrary(dto, simulationId, userInfo);
+            UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id, userInfo);
+        }
+
+        public void UpsertTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
+        {
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+
+            var targetConditionGoalLibraryEntity = dto.ToEntity();
+
+            _unitOfDataPersistenceWork.Context.Upsert(targetConditionGoalLibraryEntity, dto.Id, userEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -137,21 +159,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                 }
 
-                _unitOfDataPersistenceWork.Context.Delete<TargetConditionGoalLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
+                _unitOfDataPersistenceWork.Context.Delete<TargetConditionGoalLibrarySimulationEntity>(_ =>
+                    _.SimulationId == simulationId);
 
-                _unitOfDataPersistenceWork.Context.TargetConditionGoalLibrarySimulation.Add(
+                _unitOfDataPersistenceWork.Context.AddEntity(
                     new TargetConditionGoalLibrarySimulationEntity
                     {
                         TargetConditionGoalLibraryId = dto.Id,
                         SimulationId = simulationId
-                    });
+                    }, userEntity?.Id);
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void UpsertOrDeleteTargetConditionGoals(List<TargetConditionGoalDTO> targetConditionGoals,
-            Guid libraryId)
+            Guid libraryId, UserInfoDTO userInfo)
         {
             if (!_unitOfDataPersistenceWork.Context.TargetConditionGoalLibrary.Any(_ => _.Id == libraryId))
             {
@@ -162,6 +183,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new InvalidOperationException("All target condition goals must have an attribute.");
             }
+
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute.ToList();
             var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
@@ -177,10 +200,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     $"No attributes found having the names: {string.Join(", ", missingAttributes)}.");
             }
 
-            var entities = targetConditionGoals
+            var targetConditionGoalEntities = targetConditionGoals
                 .Select(_ => _.ToEntity(libraryId, attributeEntities.Single(__ => __.Name == _.Attribute).Id)).ToList();
 
-            var entityIds = entities.Select(_ => _.Id).ToList();
+            var entityIds = targetConditionGoalEntities.Select(_ => _.Id).ToList();
 
             var existingEntityIds = _unitOfDataPersistenceWork.Context.TargetConditionGoal
                 .Where(_ => _.TargetConditionGoalLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
@@ -195,11 +218,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(targetConditionGoalEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(targetConditionGoalEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryTargetConditionGoalEntity>(_ =>
@@ -218,17 +241,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             TargetConditionGoalId = _.Id
                         }).ToList();
 
-                if (IsRunningFromXUnit)
-                {
-                    _unitOfDataPersistenceWork.Context.CriterionLibraryTargetConditionGoal.AddRange(criterionLibraryJoinsToAdd);
-                }
-                else
-                {
-                    _unitOfDataPersistenceWork.Context.BulkInsert(criterionLibraryJoinsToAdd);
-                }
+                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void DeleteTargetConditionGoalLibrary(Guid libraryId)
@@ -238,12 +252,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            var libraryToDelete =
-                _unitOfDataPersistenceWork.Context.TargetConditionGoalLibrary.Single(_ => _.Id == libraryId);
-
-            _unitOfDataPersistenceWork.Context.TargetConditionGoalLibrary.Remove(libraryToDelete);
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.Delete<TargetConditionGoalLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

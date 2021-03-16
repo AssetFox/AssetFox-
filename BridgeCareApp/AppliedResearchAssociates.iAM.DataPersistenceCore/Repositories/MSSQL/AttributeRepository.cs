@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
@@ -210,6 +212,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
 
             return explorer;
+        }
+
+        public Task<List<AttributeDTO>> Attributes()
+        {
+            if (!_unitOfDataPersistenceWork.Context.Attribute.Any())
+            {
+                throw new RowNotInTableException("Found not attributes.");
+            }
+
+            return Task.Factory.StartNew(() =>
+                _unitOfDataPersistenceWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList());
         }
     }
 }

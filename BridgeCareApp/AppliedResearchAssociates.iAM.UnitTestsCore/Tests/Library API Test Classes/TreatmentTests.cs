@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new TreatmentController(_testHelper.UnitOfDataPersistenceWork);
+            _controller = new TreatmentController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
         }
 
         public TreatmentLibraryEntity TestTreatmentLibrary { get; } = new TreatmentLibraryEntity
@@ -114,15 +114,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnGet()
+        public async void ShouldReturnOkResultOnGet()
         {
             try
             {
                 // Act
-                var result = _controller.TreatmentLibraries();
+                var result = await _controller.TreatmentLibraries();
 
                 // Assert
-                Assert.IsType<OkObjectResult>(result.Result);
+                Assert.IsType<OkObjectResult>(result);
             }
             finally
             {
@@ -132,15 +132,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnPost()
+        public async void ShouldReturnOkResultOnPost()
         {
             try
             {
                 // Act
-                var result = _controller.UpsertTreatmentLibrary(Guid.Empty, TestTreatmentLibrary.ToDto());
+                var result = await _controller.UpsertTreatmentLibrary(Guid.Empty, TestTreatmentLibrary.ToDto());
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -150,15 +150,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnDelete()
+        public async void ShouldReturnOkResultOnDelete()
         {
             try
             {
                 // Act
-                var result = _controller.DeleteTreatmentLibrary(Guid.Empty);
+                var result = await _controller.DeleteTreatmentLibrary(Guid.Empty);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -168,7 +168,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldGetTreatmentData()
+        public async void ShouldGetTreatmentData()
         {
             try
             {
@@ -176,10 +176,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 SetupForGet();
 
                 // Act
-                var result = _controller.TreatmentLibraries();
+                var result = await _controller.TreatmentLibraries();
 
                 // Assert
-                var okObjResult = result.Result as OkObjectResult;
+                var okObjResult = result as OkObjectResult;
                 Assert.NotNull(okObjResult.Value);
 
                 var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<TreatmentLibraryDTO>));
@@ -198,14 +198,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldModifyTreatmentData()
+        public async void ShouldModifyTreatmentData()
         {
             try
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(
-                    (_controller.TreatmentLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.TreatmentLibraries();
+                var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<TreatmentLibraryDTO>));
 
                 var criterionLibraryDTO = _testHelper.TestCriterionLibrary.ToDto();
@@ -230,10 +230,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.UpsertTreatmentLibrary(_testHelper.TestSimulation.Id, treatmentLibraryDTO);
+                    await _controller.UpsertTreatmentLibrary(_testHelper.TestSimulation.Id, treatmentLibraryDTO);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 var treatmentLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.TreatmentLibrary
                     .Include(_ => _.Treatments)
@@ -309,8 +309,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(
-                    (_controller.TreatmentLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.TreatmentLibraries();
+                var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<TreatmentLibraryDTO>));
 
                 var criterionLibraryDTO = _testHelper.TestCriterionLibrary.ToDto();
@@ -334,10 +334,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 await _controller.UpsertTreatmentLibrary(_testHelper.TestSimulation.Id, treatmentLibraryDTO);
 
                 // Act
-                var result = _controller.DeleteTreatmentLibrary(TreatmentLibraryId);
+                var result = await _controller.DeleteTreatmentLibrary(TreatmentLibraryId);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.TreatmentLibrary.Any(_ => _.Id == TreatmentLibraryId));
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.SelectableTreatment.Any(_ => _.Id == TreatmentId));

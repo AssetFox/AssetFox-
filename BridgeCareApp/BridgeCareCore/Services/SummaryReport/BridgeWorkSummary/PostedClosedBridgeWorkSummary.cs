@@ -24,6 +24,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryComputationHelper));
         }
+
         internal ChartRowsModel FillMoneyNeededByBPN(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, SimulationOutput reportOutputData, ChartRowsModel chartRowsModel)
         {

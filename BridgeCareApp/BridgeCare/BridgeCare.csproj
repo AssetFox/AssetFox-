@@ -356,8 +356,8 @@
     <Compile Include="Models\AggregationObjects\NetworkMetaData.cs" />
     <Compile Include="Models\AttributeSelectValuesResult.cs" />
     <Compile Include="Models\CashFlowLibraryModel.cs" />
-    <Compile Include="Models\CriteriaValidationResult.cs" />
-    <Compile Include="Models\EquationValidationResult.cs" />
+    <Compile Include="Models\CriterionValidationResult.cs" />
+    <Compile Include="Models\ValidationResult.cs" />
     <Compile Include="Models\NetworkAttributes.cs" />
     <Compile Include="Models\SimulationUserModel.cs" />
     <Compile Include="Models\SplitTreatmentLimitModel.cs" />
@@ -542,8 +542,8 @@
     <Compile Include="Models\TargetModel.cs" />
     <Compile Include="Models\TargetParameters.cs" />
     <Compile Include="Models\UserInformationModel.cs" />
-    <Compile Include="Models\ValidateCriteriaModel.cs" />
-    <Compile Include="Models\ValidateModel.cs" />
+    <Compile Include="Models\ValidationParameterModel.cs" />
+    <Compile Include="Models\EquationValidationParametersModel.cs" />
     <Compile Include="Models\YearlyBudgetAndCost.cs" />
     <Compile Include="Models\YearlyDataModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -709,6 +709,16 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'LiteDbDebug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Test|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>

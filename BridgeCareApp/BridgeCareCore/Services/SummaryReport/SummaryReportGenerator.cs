@@ -77,8 +77,7 @@ namespace BridgeCareCore.Services.SummaryReport
             {
                 if (!initialSectionValues.ContainsKey(item))
                 {
-                    var broadcastingMessage = $"The attribute {item} not found in initial section";
-                    sendRealTimeMessage(broadcastingMessage, simulationId);
+                    SendRealTimeMessage($"The attribute {item} not found in initial section", simulationId, userInfo);
                     throw new KeyNotFoundException($"The attribute {item} not found in initial section");
                 }
             }
@@ -89,8 +88,7 @@ namespace BridgeCareCore.Services.SummaryReport
             {
                 if (!sectionValueAttribute.ContainsKey(item))
                 {
-                    var broadcastingMessage = $"The attribute {item} not found in sections";
-                    sendRealTimeMessage(broadcastingMessage, simulationId);
+                    SendRealTimeMessage($"The attribute {item} not found in sections", simulationId, userInfo);
                     throw new KeyNotFoundException($"The attribute {item} not found in sections");
                 }
             }

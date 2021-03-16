@@ -13,6 +13,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         {
             _stackedColumnChartCommon = stackedColumnChartCommon ?? throw new ArgumentNullException(nameof(stackedColumnChartCommon));
         }
+
         public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalBridgeCountPercentYearsRow, int simulationYearsCount)
         {
             _stackedColumnChartCommon.SetWorksheetProperties(worksheet);

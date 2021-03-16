@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
@@ -20,6 +18,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             _excelHelper = excelHelper;
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
         }
+
         internal void FillCostOfCulvert(ExcelWorksheet worksheet, CurrentCell currentCell, List<YearsData> costForCulvertBudget,
             Dictionary<int, double> totalBudgetPerYearForCulvert, List<string> culvertTreatments, List<int> simulationYears)
         {
@@ -55,14 +54,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 //else
                 //{
                 var cellToEnterCost = item.Year - startYear;
-                    var cellValue = worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value;
-                    var totalAmount = 0.0;
-                    if (cellValue != null)
-                    {
-                        totalAmount = (double)cellValue;
-                    }
-                    totalAmount += item.Amount;
-                    worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
+                var cellValue = worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value;
+                var totalAmount = 0.0;
+                if (cellValue != null)
+                {
+                    totalAmount = (double)cellValue;
+                }
+                totalAmount += item.Amount;
+                worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
                 //}
             }
 
@@ -80,6 +79,5 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             _excelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
             _excelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
         }
-
     }
 }

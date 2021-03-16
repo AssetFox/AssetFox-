@@ -4,7 +4,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
 {
     public class SimulationReportDetailDTO
     {
-        public Guid SimulationId{ get; set; }
+        public Guid SimulationId { get; set; }
+
         public string Status { get; set; }
     }
 }

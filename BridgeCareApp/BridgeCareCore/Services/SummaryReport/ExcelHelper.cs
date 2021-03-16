@@ -8,7 +8,7 @@ namespace BridgeCareCore.Services.SummaryReport
     public class ExcelHelper : IExcelHelper
     {
         /// <summary>
-        /// Merge given cells
+        ///     Merge given cells
         /// </summary>
         /// <param name="worksheet"></param>
         /// <param name="fromRow"></param>
@@ -33,7 +33,7 @@ namespace BridgeCareCore.Services.SummaryReport
         }
 
         /// <summary>
-        /// Apply style to given cells
+        ///     Apply style to given cells
         /// </summary>
         /// <param name="cells"></param>
         public void ApplyStyle(ExcelRange cells)
@@ -45,7 +45,7 @@ namespace BridgeCareCore.Services.SummaryReport
         }
 
         /// <summary>
-        /// Apply border to given cells
+        ///     Apply border to given cells
         /// </summary>
         /// <param name="cells"></param>
         public void ApplyBorder(ExcelRange cells)
@@ -57,7 +57,7 @@ namespace BridgeCareCore.Services.SummaryReport
         }
 
         /// <summary>
-        /// Set currency format for given cells
+        ///     Set currency format for given cells
         /// </summary>
         /// <param name="cells"></param>
         public void SetCurrencyFormat(ExcelRange cells)
@@ -66,7 +66,7 @@ namespace BridgeCareCore.Services.SummaryReport
         }
 
         /// <summary>
-        /// Set custom format for given cells
+        ///     Set custom format for given cells
         /// </summary>
         /// <param name="cells"></param>
         public void SetCustomFormat(ExcelRange cells, string type)
@@ -76,9 +76,11 @@ namespace BridgeCareCore.Services.SummaryReport
             case "NegativeCurrency":
                 cells.Style.Numberformat.Format = "_-$* #,##0_-;$* (#,##0)_-;_-$* \"-\"??_-;_-@_-";
                 break;
+
             case "Number":
                 cells.Style.Numberformat.Format = "_-* #,##0_-;* (#,##0)_-;_-* \"-\"??_-;_-@_-";
                 break;
+
             case "Percentage":
                 cells.Style.Numberformat.Format = "#0%";
                 break;

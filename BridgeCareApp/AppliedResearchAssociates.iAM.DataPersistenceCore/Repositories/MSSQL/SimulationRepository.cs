@@ -407,7 +407,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (dto.Users.Any())
             {
-
                 _unitOfDataPersistenceWork.Context.DeleteAll<SimulationUserEntity>(_ => _.SimulationId == dto.Id);
                 _unitOfDataPersistenceWork.Context.BulkAddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(), user?.Id);
             }

@@ -137,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var updateResult = await _controller.UpsertCriterionLibrary(criterionLibraryDTO);
-                var addResult =  await _controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
+                var addResult = await _controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
 
                 // Assert
                 Assert.IsType<OkResult>(updateResult);

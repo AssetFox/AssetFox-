@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy
@@ -10,7 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLe
     {
         public YearlyInvestmentRepository(LegacyDbContext context) : base(context)
         {
-
         }
 
         public Dictionary<string, Budget> GetYearlyBudgetAmount(Guid simulationId, int firstYearOfAnalysisPeriod, int numberOfYears)

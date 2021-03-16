@@ -105,6 +105,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static AttributeDTO ToDto(this AttributeEntity entity) =>
-            new AttributeDTO {Name = entity.Name, Type = entity.DataType};
+            new AttributeDTO { Name = entity.Name, Type = entity.DataType };
     }
 }

@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
-using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -161,7 +160,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.Delete<BudgetLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
                 _unitOfDataPersistenceWork.Context.AddEntity(
-                    new BudgetLibrarySimulationEntity {BudgetLibraryId = dto.Id, SimulationId = simulationId},
+                    new BudgetLibrarySimulationEntity { BudgetLibraryId = dto.Id, SimulationId = simulationId },
                     userEntity?.Id);
             }
         }

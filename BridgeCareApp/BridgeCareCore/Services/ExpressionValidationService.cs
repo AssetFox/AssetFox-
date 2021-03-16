@@ -42,8 +42,6 @@ namespace BridgeCareCore.Services
                 }
 
                 compiler.GetCalculator(expression);
-
-
             }
             catch (CalculateEvaluateException e)
             {
@@ -51,10 +49,10 @@ namespace BridgeCareCore.Services
             }
             catch (Exception e)
             {
-                return new ValidationResult {IsValid = false, ValidationMessage = e.Message};
+                return new ValidationResult { IsValid = false, ValidationMessage = e.Message };
             }
 
-            return new ValidationResult{IsValid = true, ValidationMessage = "Success"};
+            return new ValidationResult { IsValid = true, ValidationMessage = "Success" };
         }
 
         private ValidationResult CheckPiecewise(string piecewise)
@@ -130,7 +128,6 @@ namespace BridgeCareCore.Services
             };
         }
 
-
         public CriterionValidationResult ValidateCriterion(string mergedCriteriaExpression)
         {
             var expression = mergedCriteriaExpression.Replace("|", "'").ToUpper();
@@ -191,7 +188,7 @@ namespace BridgeCareCore.Services
             if (string.IsNullOrEmpty(expression))
             {
                 _log.Error("There is no criteria created");
-                return new CriterionValidationResult{IsValid = false, ResultsCount = 0, ValidationMessage = "There is no criterion expression."};
+                return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = "There is no criterion expression." };
             }
 
             //oracle chokes on non-space whitespace
@@ -231,14 +228,16 @@ namespace BridgeCareCore.Services
             {
                 var message = $"Failed SQL Query: {strSelect}, Error Message: {e.Message}";
                 _log.Error(message);
-                return new CriterionValidationResult {IsValid = false, ResultsCount = 0, ValidationMessage = message};
+                return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = message };
             }
             catch (Exception e2)
             {
                 _log.Error(e2.Message);
                 return new CriterionValidationResult
                 {
-                    IsValid = false, ResultsCount = 0, ValidationMessage = e2.Message
+                    IsValid = false,
+                    ResultsCount = 0,
+                    ValidationMessage = e2.Message
                 };
             }
         }
@@ -271,9 +270,9 @@ namespace BridgeCareCore.Services
                     {
                         var lengthForCustomString = expression.Length - indexForSpacedString;
                         predicates.Add(expression.Substring(indexForSpacedString, lengthForCustomString));
-/*
-                        spacedString = 0;
-*/
+                        /*
+                                                spacedString = 0;
+                        */
                     }
                     break;
                 }
@@ -329,7 +328,8 @@ namespace BridgeCareCore.Services
                         var parameterizedPredicate = !attributes.Contains(value)
                             ? $"{splitPredicate[0]} {@operator} {parameterName}"
                             : $"{splitPredicate[0]} {@operator} {value}";
-                        // add a number of closed parentheses equal to closedParenthesesCount to end of parameterizedPredicate
+                        // add a number of closed parentheses equal to closedParenthesesCount to end
+                        // of parameterizedPredicate
                         if (closedParenthesesCount > 0)
                         {
                             for (var i = 0; i < closedParenthesesCount; i++)
@@ -356,7 +356,8 @@ namespace BridgeCareCore.Services
 
             return new ParameterizedData
             {
-                ParameterString = string.Join(" ", predicateParameters), SqlParameters = sqlParameters
+                ParameterString = string.Join(" ", predicateParameters),
+                SqlParameters = sqlParameters
             };
         }
     }
@@ -364,6 +365,7 @@ namespace BridgeCareCore.Services
     public class ParameterizedData
     {
         public string ParameterString { get; set; }
+
         public List<SqlParameter> SqlParameters { get; set; }
     }
 }

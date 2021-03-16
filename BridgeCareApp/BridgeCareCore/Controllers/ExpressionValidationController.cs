@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
-using BridgeCareCore.Security;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

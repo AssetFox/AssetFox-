@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using AppliedResearchAssociates.iAM;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using MoreLinq;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
 {
@@ -29,7 +26,8 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
             simulationOutput.Years.ForEach(_ => SimulationYears.Add(_.Year));
             var currentCell = AddHeadersCells(unfundedRecommendationWorksheet, headers, SimulationYears);
 
-            // Add row next to headers for filters and year numbers for dynamic data. Cover from top, left to right, and bottom set of data.
+            // Add row next to headers for filters and year numbers for dynamic data. Cover from
+            // top, left to right, and bottom set of data.
             using (var autoFilterCells = unfundedRecommendationWorksheet.Cells[3, 1, currentCell.Row, currentCell.Column - 1])
             {
                 autoFilterCells.AutoFilter = true;
@@ -40,6 +38,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
         }
 
         #region Private methods
+
         private void AddDynamicDataCells(ExcelWorksheet worksheet, List<int> simulationYears, SimulationOutput simulationOutput, CurrentCell currentCell)
         {
             // cache to store whether "No Treatment" is present for all of the years for a given section.
@@ -61,7 +60,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
                         {
                             treatmentDecisionPerSection[facilityId] = true;
                         }
-                        if(section.TreatmentCause != TreatmentCause.NoSelection)
+                        if (section.TreatmentCause != TreatmentCause.NoSelection)
                         {
                             treatmentDecisionPerSection[facilityId] = false;
                             nonSelectedFacilities.Add(facilityId);
@@ -108,6 +107,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
                 currentCell.Row = 4;
             }
         }
+
         private void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, SectionSummaryDetail sectionSummary)
         {
             var row = currentCell.Row;
@@ -127,7 +127,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
                     out var numericValue) && numericValue > 0 ? "Y" : "N";
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["STRUCTURE_TYPE"];
-            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"]; 
+            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"];
             worksheet.Cells[row, columnNo++].Value = (int)sectionSummary.ValuePerNumericAttribute["YEAR_BUILT"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["AGE"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["ADTTOTAL"];
@@ -137,6 +137,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
 
             currentCell.Column = columnNo;
         }
+
         private CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<string> headers, List<int> simulationYears)
         {
             int headerRow = 1;
@@ -150,6 +151,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
             AddDynamicHeadersCells(worksheet, currentCell, simulationYears);
             return currentCell;
         }
+
         private void AddDynamicHeadersCells(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
         {
             const string HeaderConstText = "Feasible ";
@@ -173,6 +175,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
             _excelHelper.ApplyBorder(worksheet.Cells[row, initialColumn, row + 1, worksheet.Dimension.Columns]);
             currentCell.Row = currentCell.Row + 2;
         }
+
         private List<string> GetHeaders()
         {
             return new List<string>
@@ -197,6 +200,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations
                 "P3"
             };
         }
-        #endregion
+
+        #endregion Private methods
     }
 }

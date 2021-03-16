@@ -12,7 +12,6 @@ using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
-using FileSystemRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 
 namespace BridgeCareCore.Services.SummaryReport
 {
@@ -70,7 +69,6 @@ namespace BridgeCareCore.Services.SummaryReport
                 $"{Properties.Resources.CulvDurationN}"
             };
 
-
             var reportOutputData = _unitOfDataPersistenceWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
 
             var initialSectionValues = reportOutputData.InitialSectionSummaries[0].ValuePerNumericAttribute;
@@ -97,8 +95,8 @@ namespace BridgeCareCore.Services.SummaryReport
                 }
             }
 
-
-            // sorting the sections based on facility name. This is helpful throughout the report generation process
+            // sorting the sections based on facility name. This is helpful throughout the report
+            // generation process
             reportOutputData.InitialSectionSummaries.Sort(
                     (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
                     );
@@ -147,7 +145,6 @@ namespace BridgeCareCore.Services.SummaryReport
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add("Legend");
             _summaryReportGlossary.Fill(shortNameWorksheet);
 
-
             broadcastingMessage = $"Creating Bridge work summary TAB";
             SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
             // Bridge work summary TAB
@@ -155,13 +152,11 @@ namespace BridgeCareCore.Services.SummaryReport
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
                 simulationYears, workSummaryModel, yearlyBudgetAmount);
 
-
             broadcastingMessage = $"Creating Bridge work summary By Budget TAB";
             SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
-
 
             broadcastingMessage = $"Creating Graph TABs";
             SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
@@ -180,7 +175,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
         private void SendRealTimeMessage(string message, Guid simulationId, UserInfoDTO userInfo)
         {
-            var dto = new SimulationReportDetailDTO {SimulationId = simulationId, Status = message};
+            var dto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = message };
 
             _hubContext
                         .Clients

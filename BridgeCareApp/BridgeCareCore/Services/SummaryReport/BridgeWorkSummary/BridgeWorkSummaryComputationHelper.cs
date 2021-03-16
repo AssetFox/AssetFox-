@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
@@ -9,9 +7,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
     public class BridgeWorkSummaryComputationHelper
     {
         public int TotalInitialPoorBridgesCount(SimulationOutput reportOutputData) => CountAndAreaOfBridges.GetTotalInitialPoorCount(reportOutputData.InitialSectionSummaries);
+
         public int TotalSectionalPoorBridgesCount(SimulationYearDetail YearlyData) => CountAndAreaOfBridges.GetTotalSectionalPoorCount(YearlyData.Sections);
 
         public double TotalInitialPoorBridgesDeckArea(SimulationOutput reportOutputData) => CountAndAreaOfBridges.GetTotalInitialPoorDeckArea(reportOutputData.InitialSectionSummaries);
+
         public double CalculateTotalPoorBridgesDeckArea(SimulationYearDetail yearlyData) => CountAndAreaOfBridges.TotalPoorBridgesDeckArea(yearlyData.Sections);
 
         internal int TotalInitialBridgeGoodCount(SimulationOutput reportOutputData)
@@ -40,6 +40,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var selectedBridges = postedBridges.FindAll(section => CountAndAreaOfBridges.IsMinCondLessThanFiveForSections(section));
             return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
         }
+
         internal double CalculatePoorDeckAreaForBPN2H(List<SectionDetail> sectionDetails)
         {
             var postedBridges = sectionDetails.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "2"
@@ -73,6 +74,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
             return totalCost;
         }
+
         internal double CalculateMoneyNeededByRemainingBPN(List<SectionDetail> sectionDetails)
         {
             var filteredBPNBridges = sectionDetails.FindAll(
@@ -153,14 +155,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var goodSections = filteredSection.FindAll(s => IsMinCondGreaterOrEqualSevenSection(s));
             if (isCount)
             {
-               return goodSections.Count;
+                return goodSections.Count;
             }
             return goodSections.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
         }
 
         internal double TotalNHSBridgeCountOrArea(List<SectionSummaryDetail> initialSectionSummaries, List<SectionDetail> sectionDetails, bool isCount)
         {
-            if(initialSectionSummaries != null)
+            if (initialSectionSummaries != null)
             {
                 var initialSections = initialSectionSummaries.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
             && numericValue > 0);
@@ -244,7 +246,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private bool IsMinCondGreaterOrEqualSevenInitialSection(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] >= 7;
 
         private bool IsMinCondGreaterOrEqualSevenSection(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] >= 7;
-        #endregion
+
+        #endregion Private methods
 
         private static class CountAndAreaOfBridges
         {
@@ -257,6 +260,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 }
                 return count;
             }
+
             internal static int GetTotalSectionalPoorCount(List<SectionDetail> sections)
             {
                 var count = 0;

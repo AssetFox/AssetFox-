@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
 
@@ -18,7 +14,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts
         }
 
         /// <summary>
-        /// Fill NHS Condition Bridge Cnt and DA tab reports.
+        ///     Fill NHS Condition Bridge Cnt and DA tab reports.
         /// </summary>
         /// <param name="worksheet"></param>
         /// <param name="bridgeWorkSummaryWorkSheet"></param>

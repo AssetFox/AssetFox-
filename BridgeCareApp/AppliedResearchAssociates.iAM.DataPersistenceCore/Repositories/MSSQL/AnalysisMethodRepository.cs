@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -266,7 +265,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 var criterionJoinEntity = new CriterionLibraryAnalysisMethodEntity
                 {
-                    CriterionLibraryId = dto.CriterionLibrary.Id, AnalysisMethodId = dto.Id
+                    CriterionLibraryId = dto.CriterionLibrary.Id,
+                    AnalysisMethodId = dto.Id
                 };
 
                 _unitOfDataPersistenceWork.Context.AddEntity(criterionJoinEntity, userEntity?.Id);

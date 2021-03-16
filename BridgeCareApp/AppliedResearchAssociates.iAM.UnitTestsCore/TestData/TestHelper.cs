@@ -1,29 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
-using BridgeCareCore;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Logging;
-using BridgeCareCore.Models;
-using BridgeCareCore.Security;
-using BridgeCareCore.Security.Interfaces;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Engine;
 using Moq;
-using Moq.Contrib.HttpClient;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 {

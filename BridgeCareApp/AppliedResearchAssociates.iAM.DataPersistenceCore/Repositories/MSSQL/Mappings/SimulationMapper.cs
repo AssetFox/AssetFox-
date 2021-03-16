@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore.Internal;
-using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
 {
@@ -22,7 +22,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static SimulationEntity ToEntity(this SimulationDTO dto, Guid networkId) =>
             new SimulationEntity
             {
-                Id = dto.Id, NetworkId = networkId, Name = dto.Name, NumberOfYearsOfTreatmentOutlook = 100
+                Id = dto.Id,
+                NetworkId = networkId,
+                Name = dto.Name,
+                NumberOfYearsOfTreatmentOutlook = 100
             };
 
         public static void CreateSimulation(this SimulationEntity entity, Network network)
@@ -50,7 +53,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? entity.SimulationUserJoins.Select(_ => _.ToDto()).ToList()
                     : new List<SimulationUserDTO>()
             };
-
-
     }
 }

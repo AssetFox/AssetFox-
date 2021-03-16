@@ -59,13 +59,12 @@ namespace BridgeCareCore.Services
                 _unitOfWork.NetworkRepo.DeleteNetworkData();
                 sendRealTimeMessage("Creating the network's facilities and sections...");
                 _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
-
             }
             //if (!_unitOfWork.NetworkRepo.CheckPennDotNetworkHasData())
             //{
             //    _unitOfWork.NetworkRepo.DeleteNetworkData();
 
-            //    sendRealTimeMessage("Creating the network's facilities and sections...");
+            // sendRealTimeMessage("Creating the network's facilities and sections...");
 
             //    _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
             //}
@@ -106,7 +105,6 @@ namespace BridgeCareCore.Services
             {
                 using var transaction = _unitOfWork.DbContextTransaction;
 
-                
                 var dataAccessor = GetDataAccessor();
                 _unitOfWork.LegacyConnection.Open();
                 var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, simulationId);

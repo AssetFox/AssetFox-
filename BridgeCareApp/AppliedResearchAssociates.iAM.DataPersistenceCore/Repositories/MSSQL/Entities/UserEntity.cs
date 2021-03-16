@@ -12,9 +12,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         }
 
         public Guid Id { get; set; }
+
         public string Username { get; set; }
+
         public bool HasInventoryAccess { get; set; }
+
         public virtual CriterionLibraryUserEntity CriterionLibraryUserJoin { get; set; }
+
         public ICollection<SimulationUserEntity> SimulationUserJoins { get; set; }
     }
 }

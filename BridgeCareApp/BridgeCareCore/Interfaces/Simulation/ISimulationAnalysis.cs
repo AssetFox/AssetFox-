@@ -8,6 +8,6 @@ namespace BridgeCareCore.Interfaces.Simulation
     {
         Task CreateAndRunPermitted(UserInfoDTO userInfo, Guid networkId, Guid simulationId);
 
-        Task CreateAndRun(Guid networkId,Guid simulationId);
+        Task CreateAndRun(Guid networkId, Guid simulationId);
     }
 }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
@@ -35,6 +32,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             _poorBridgeDeckArea = poorBridgeDeckArea ?? throw new ArgumentNullException(nameof(poorBridgeDeckArea));
             _poorBridgeDeckAreaByBPN = poorBridgeDeckAreaByBPN ?? throw new ArgumentNullException(nameof(poorBridgeDeckAreaByBPN));
         }
+
         public void Add(ExcelPackage excelPackage, ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet,
             ChartRowsModel chartRowModel, int simulationYearsCount)
         {
@@ -62,7 +60,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             worksheet = excelPackage.Workbook.Worksheets.Add("Combined Condition DA");
             _conditionDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalDeckAreaPercentYearsRow, simulationYearsCount);
 
-            // Poor Bridge Cnt tab 
+            // Poor Bridge Cnt tab
             worksheet = excelPackage.Workbook.Worksheets.Add("Poor Bridge Cnt");
             _poorBridgeCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorBridgesCountSectionYearsRow, simulationYearsCount);
 

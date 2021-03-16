@@ -13,9 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using SimulationUpdateMethod = Action<UserInfoDTO, SimulationDTO>;
     using SimulationDeleteMethod = Action<UserInfoDTO, Guid>;
     using SimulationRunMethod = Action<UserInfoDTO, Guid, Guid>;
+    using SimulationUpdateMethod = Action<UserInfoDTO, SimulationDTO>;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -124,7 +124,7 @@ namespace BridgeCareCore.Controllers
                     _unitOfDataPersistenceWork.Commit();
                     return _unitOfDataPersistenceWork.SimulationRepo.GetSimulation(dto.Id);
                 });
-                
+
                 return Ok(result.Result);
             }
             catch (Exception e)

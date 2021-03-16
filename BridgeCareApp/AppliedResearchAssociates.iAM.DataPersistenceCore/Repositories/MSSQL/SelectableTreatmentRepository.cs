@@ -279,7 +279,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.Delete<TreatmentLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
                 _unitOfDataPersistenceWork.Context.AddEntity(
-                    new TreatmentLibrarySimulationEntity {TreatmentLibraryId = dto.Id, SimulationId = simulationId},
+                    new TreatmentLibrarySimulationEntity { TreatmentLibraryId = dto.Id, SimulationId = simulationId },
                     userEntity?.Id);
             }
         }

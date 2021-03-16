@@ -1399,7 +1399,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<SimulationUserEntity>(entity =>
             {
-                entity.HasKey(e => new {e.SimulationId, e.UserId});
+                entity.HasKey(e => new { e.SimulationId, e.UserId });
 
                 entity.ToTable("Simulation_User");
 

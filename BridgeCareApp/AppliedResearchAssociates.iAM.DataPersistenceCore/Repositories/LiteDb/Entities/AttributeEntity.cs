@@ -18,10 +18,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
         public ConnectionType ConnectionType { get; set; }
 
         public string ConnectionString { get; set; }
+
         public string DefaultValue { get; set; }
+
         public double? Maximum { get; set; }
+
         public double? Minimum { get; set; }
+
         public bool IsCalculated { get; set; }
+
         public bool IsAscending { get; set; }
     }
 }

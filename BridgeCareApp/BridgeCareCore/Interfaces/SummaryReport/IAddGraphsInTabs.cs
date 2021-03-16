@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BridgeCareCore.Models.SummaryReport;
+﻿using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Interfaces.SummaryReport

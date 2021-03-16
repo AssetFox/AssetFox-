@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Security;
@@ -75,7 +74,7 @@ namespace BridgeCareCore.Controllers
 
         private void SendRealTimeMessage(string message, Guid simulationId, UserInfoDTO userInfo)
         {
-            var dto = new SimulationReportDetailDTO {SimulationId = simulationId, Status = message};
+            var dto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = message };
 
             _hubContext
                 .Clients

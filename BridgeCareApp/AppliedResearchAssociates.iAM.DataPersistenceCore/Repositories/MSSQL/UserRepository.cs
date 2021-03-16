@@ -27,7 +27,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfDataPersistenceWork.Context.User.Add(new UserEntity
             {
-                Id = Guid.NewGuid(), Username = username, HasInventoryAccess = !string.IsNullOrEmpty(role) && role == Role.Administrator
+                Id = Guid.NewGuid(),
+                Username = username,
+                HasInventoryAccess = !string.IsNullOrEmpty(role) && role == Role.Administrator
             });
 
             _unitOfDataPersistenceWork.Context.SaveChanges();

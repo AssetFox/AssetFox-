@@ -17,8 +17,7 @@
         public static List<(Location Location, double value)> SectionLocationForNumberAttribute
             = new List<(Location Location, double value)> { (new LinearLocation(new SimpleRoute("Test simple route"), "unique identifier", 0, 10), 100) };
 
-        // SQL connection sample
-        // we ll have different SQL object for each attribute
+        // SQL connection sample we ll have different SQL object for each attribute
         public static SqlAttributeConnection SQLConnection = new SqlAttributeConnection(Connectionstring, "select * from ADT");
 
         //Linear location sample

@@ -35,7 +35,7 @@ namespace BridgeCareCore.Controllers
         }
 
         /// <summary>
-        /// API endpoint for fetching user info from ESEC using the OpenID Connect protocol
+        ///     API endpoint for fetching user info from ESEC using the OpenID Connect protocol
         /// </summary>
         /// <param name="token">The user's access token</param>
         /// <returns></returns>
@@ -76,7 +76,7 @@ namespace BridgeCareCore.Controllers
         }
 
         /// <summary>
-        /// Fetches user info as a JSON-formatted string from ESEC
+        ///     Fetches user info as a JSON-formatted string from ESEC
         /// </summary>
         /// <param name="token">Access token</param>
         /// <returns>JSON-formatted user info</returns>
@@ -88,7 +88,7 @@ namespace BridgeCareCore.Controllers
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
 
-            using var client = new HttpClient(handler) {BaseAddress = new Uri(_esecConfig["ESECBaseAddress"])};
+            using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["ESECBaseAddress"]) };
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -105,7 +105,7 @@ namespace BridgeCareCore.Controllers
         }
 
         /// <summary>
-        /// Fetches user info as a dictionary
+        ///     Fetches user info as a dictionary
         /// </summary>
         /// <param name="token">Access token</param>
         /// <returns>User info dictionary</returns>
@@ -116,7 +116,7 @@ namespace BridgeCareCore.Controllers
             _esecSecurity.GetUserInformation(userInfoDictionary);
 
         /// <summary>
-        /// API endpoint for fetching ID and Access tokens from ESEC using the OpenID Connect protocol
+        ///     API endpoint for fetching ID and Access tokens from ESEC using the OpenID Connect protocol
         /// </summary>
         /// <param name="code">The authentication or error code</param>
         /// <returns></returns>
@@ -130,7 +130,7 @@ namespace BridgeCareCore.Controllers
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
 
-            using var client = new HttpClient(handler) {BaseAddress = new Uri(_esecConfig["EsecBaseAddress"])};
+            using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["EsecBaseAddress"]) };
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -157,7 +157,7 @@ namespace BridgeCareCore.Controllers
         }
 
         /// <summary>
-        /// Sends a refresh token to ESEC, returning a new Access Token
+        ///     Sends a refresh token to ESEC, returning a new Access Token
         /// </summary>
         /// <param name="refreshToken">Refresh token</param>
         /// <returns></returns>
@@ -171,7 +171,7 @@ namespace BridgeCareCore.Controllers
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
 
-            using var client = new HttpClient(handler) {BaseAddress = new Uri(_esecConfig["EsecBaseAddress"])};
+            using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["EsecBaseAddress"]) };
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -195,7 +195,8 @@ namespace BridgeCareCore.Controllers
         }
 
         /// <summary>
-        /// Sends an access or refresh token to the revocation endpoint, preventing the token from ever being used again.
+        ///     Sends an access or refresh token to the revocation endpoint, preventing the token
+        ///     from ever being used again.
         /// </summary>
         /// <param name="token">Access or Refresh Token</param>
         /// <returns></returns>
@@ -210,7 +211,7 @@ namespace BridgeCareCore.Controllers
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
 
-            using var client = new HttpClient(handler) {BaseAddress = new Uri(_esecConfig["EsecBaseAddress"])};
+            using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["EsecBaseAddress"]) };
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -237,9 +238,9 @@ namespace BridgeCareCore.Controllers
         }
 
         /// <summary>
-        /// Prevents an id token from being accepted by the application again.
-        /// ID tokens are not validated by the ESEC server, so they cannot be invalidated in the
-        /// same way as refresh or access tokens. Instead, we must locally keep track of them.
+        ///     Prevents an id token from being accepted by the application again. ID tokens are not
+        ///     validated by the ESEC server, so they cannot be invalidated in the same way as
+        ///     refresh or access tokens. Instead, we must locally keep track of them.
         /// </summary>
         [HttpPost]
         [Route("RevokeToken/Id")]
@@ -252,7 +253,7 @@ namespace BridgeCareCore.Controllers
         }
 
         /// <summary>
-        /// Checks to ensure that a response from the ESEC OIDC endpoint is not an error.
+        ///     Checks to ensure that a response from the ESEC OIDC endpoint is not an error.
         /// </summary>
         /// <param name="response">The JSON-formatted response string</param>
         private void ValidateResponse(string response)

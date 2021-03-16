@@ -19,6 +19,7 @@ namespace BridgeCareCore.Controllers
     {
         private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly IEsecSecurity _esecSecurity;
+
         private readonly IReadOnlyDictionary<string, TargetConditionGoalUpsertMethod>
             _targetConditionGoalUpsertMethods;
 

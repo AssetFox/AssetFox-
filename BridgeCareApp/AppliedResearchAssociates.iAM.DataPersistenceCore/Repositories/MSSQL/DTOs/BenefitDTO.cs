@@ -5,6 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class BenefitDTO : BaseDTO
     {
         public string Attribute { get; set; }
+
         public double Limit { get; set; }
     }
 }

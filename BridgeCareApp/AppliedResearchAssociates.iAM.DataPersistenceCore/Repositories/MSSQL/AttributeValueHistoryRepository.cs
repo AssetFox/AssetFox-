@@ -9,10 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using MoreLinq;
-using Attribute = AppliedResearchAssociates.iAM.Domains.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -93,7 +90,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             else
             {
-
                 if (textAttributeValueHistoryEntities.Count > 10000)
                 {
                     //DataTable dt;
@@ -120,8 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void BulkInsert(DataTable dt, string tableName)
         {
-            // make sure to enable triggers
-            // more on triggers in next post
+            // make sure to enable triggers more on triggers in next post
             var bulkCopy = new SqlBulkCopy
                 (
                     _unitOfWork.Connection,
@@ -130,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     SqlBulkCopyOptions.UseInternalTransaction,
                     null
                 )
-                { DestinationTableName = tableName };
+            { DestinationTableName = tableName };
 
             // set the destination table name
             _unitOfWork.Connection.Open();
@@ -139,7 +134,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             bulkCopy.WriteToServer(dt);
             _unitOfWork.Connection.Close();
         }
-
     }
 
     public static class BulkUploadToSqlHelper
@@ -154,7 +148,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var prop = properties.Find(propName, false);
                 table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
             }
-                
+
             foreach (var item in data)
             {
                 var row = table.NewRow();
@@ -163,7 +157,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     var prop = properties.Find(propName, false);
                     row[prop.Name] = prop.GetValue(item) ?? DBNull.Value;
-                    
                 }
 
                 table.Rows.Add(row);

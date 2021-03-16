@@ -9,7 +9,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static SimulationUserEntity ToEntity(this SimulationUserDTO dto, Guid simulationId) =>
             new SimulationUserEntity
             {
-                SimulationId = simulationId, UserId = dto.UserId, CanModify = dto.CanModify, IsOwner = dto.IsOwner
+                SimulationId = simulationId,
+                UserId = dto.UserId,
+                CanModify = dto.CanModify,
+                IsOwner = dto.IsOwner
             };
 
         public static SimulationUserDTO ToDto(this SimulationUserEntity entity) =>

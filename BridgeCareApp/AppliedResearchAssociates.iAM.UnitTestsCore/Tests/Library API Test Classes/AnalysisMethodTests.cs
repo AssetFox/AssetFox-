@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -7,7 +8,6 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
-using System.Linq;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Classes
 {

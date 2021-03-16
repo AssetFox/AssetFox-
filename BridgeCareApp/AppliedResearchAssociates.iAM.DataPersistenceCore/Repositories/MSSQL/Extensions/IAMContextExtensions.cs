@@ -212,7 +212,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
                         SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
                     }
-                        
+
                     existingEntities.Add(entity);
                 }
             });

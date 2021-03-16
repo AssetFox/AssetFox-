@@ -6,7 +6,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class NetworkRollupDetailEntity : BaseEntity
     {
         public Guid NetworkId { get; set; }
+
         public string Status { get; set; }
+
         public virtual NetworkEntity Network { get; set; }
     }
 }

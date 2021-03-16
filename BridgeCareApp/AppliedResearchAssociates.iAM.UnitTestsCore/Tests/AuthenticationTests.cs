@@ -15,6 +15,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     {
         private readonly TestServer _testServer;
         private readonly HttpClient _client;
+
         public AuthenticationTests()
         {
             var config = new ConfigurationBuilder()

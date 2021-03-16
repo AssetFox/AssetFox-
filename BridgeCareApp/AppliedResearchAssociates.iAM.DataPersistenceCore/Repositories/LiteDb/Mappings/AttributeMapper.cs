@@ -69,7 +69,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.
                 entity.DefaultValue = numericAttribute.DefaultValue.ToString();
                 entity.Maximum = numericAttribute.Maximum;
                 entity.Minimum = numericAttribute.Minimum;
-
             }
             else if (domain is TextAttribute textAttribute)
             {

@@ -22,6 +22,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon;
             _excelHelper = excelHelper;
         }
+
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
 Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, List<int> simulationYears, List<string> treatments, Dictionary<string, Budget> yearlyBudgetAmount)
@@ -135,7 +136,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             column++;
             var fromColumn = column + 1;
 
-            foreach(var cost in TotalCommittedSpent)
+            foreach (var cost in TotalCommittedSpent)
             {
                 worksheet.Cells[currentCell.Row, fromColumn++].Value = cost.Value;
             }
@@ -152,14 +153,13 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, committedTotalRow + 1, endColumn);
 
             return committedTotalRow;
-
         }
 
         private int AddCostsOfCulvertWork(ExcelWorksheet worksheet,
             List<int> simulationYears, CurrentCell currentCell, List<string> treatments,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
         {
-            if(simulationYears.Count <= 0)
+            if (simulationYears.Count <= 0)
             {
                 return 0;
             }
@@ -208,6 +208,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
             return culvertTotalRow;
         }
+
         private int AddCostsOfBridgeWork(ExcelWorksheet worksheet,
             List<int> simulationYears, CurrentCell currentCell, List<string> treatments,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
@@ -311,7 +312,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 column = ++column;
                 var totalSpent = Convert.ToDouble(worksheet.Cells[culvertTotalRow, column].Value) +
                     Convert.ToDouble(worksheet.Cells[bridgeTotalRow, column].Value);
-                    Convert.ToDouble(worksheet.Cells[committedTotalRow, column].Value);
+                Convert.ToDouble(worksheet.Cells[committedTotalRow, column].Value);
 
                 worksheet.Cells[row, column].Value = Convert.ToDouble(worksheet.Cells[budgetTotalRow, column].Value) - totalSpent;
                 row++;
@@ -336,7 +337,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 3, column);
             _excelHelper.ApplyColor(worksheet.Cells[row + 2, startColumn, row + 2, column], Color.DimGray);
         }
-
     }
-    #endregion
+
+    #endregion Private methods
 }

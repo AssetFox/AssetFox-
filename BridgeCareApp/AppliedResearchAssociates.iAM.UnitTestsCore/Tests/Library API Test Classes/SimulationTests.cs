@@ -34,7 +34,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         public UserEntity TestUser { get; } = new UserEntity
         {
-            Id = UserId, Username = "pdsystbamsusr02", HasInventoryAccess = true
+            Id = UserId,
+            Username = "pdsystbamsusr02",
+            HasInventoryAccess = true
         };
 
         private void SetupForClone()
@@ -65,26 +67,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             });
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new CriterionLibraryAnalysisMethodEntity
             {
-                CriterionLibraryId = _testHelper.TestCriterionLibrary.Id, AnalysisMethodId = analysisMethodId
+                CriterionLibraryId = _testHelper.TestCriterionLibrary.Id,
+                AnalysisMethodId = analysisMethodId
             });
-
 
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new InvestmentPlanEntity
             {
-                Id = Guid.NewGuid(), SimulationId = _testHelper.TestSimulation.Id
+                Id = Guid.NewGuid(),
+                SimulationId = _testHelper.TestSimulation.Id
             });
 
             var budgetLibraryId = Guid.NewGuid();
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
-                new BudgetLibraryEntity {Id = budgetLibraryId, Name = "Test Name"});
+                new BudgetLibraryEntity { Id = budgetLibraryId, Name = "Test Name" });
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new BudgetLibrarySimulationEntity
             {
-                BudgetLibraryId = budgetLibraryId, SimulationId = _testHelper.TestSimulation.Id
+                BudgetLibraryId = budgetLibraryId,
+                SimulationId = _testHelper.TestSimulation.Id
             });
 
             var budgetPriorityLibraryId = Guid.NewGuid();
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
-                new BudgetPriorityLibraryEntity {Id = budgetPriorityLibraryId, Name = "Test Name"});
+                new BudgetPriorityLibraryEntity { Id = budgetPriorityLibraryId, Name = "Test Name" });
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new BudgetPriorityLibrarySimulationEntity
             {
                 BudgetPriorityLibraryId = budgetPriorityLibraryId,
@@ -93,7 +97,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
             var cashFlowRuleLibraryId = Guid.NewGuid();
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
-                new CashFlowRuleLibraryEntity {Id = cashFlowRuleLibraryId, Name = "Test Name"});
+                new CashFlowRuleLibraryEntity { Id = cashFlowRuleLibraryId, Name = "Test Name" });
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new CashFlowRuleLibrarySimulationEntity
             {
                 CashFlowRuleLibraryId = cashFlowRuleLibraryId,
@@ -102,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
             var deficientConditionGoalLibraryId = Guid.NewGuid();
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
-                new DeficientConditionGoalLibraryEntity {Id = deficientConditionGoalLibraryId, Name = "Test Name"});
+                new DeficientConditionGoalLibraryEntity { Id = deficientConditionGoalLibraryId, Name = "Test Name" });
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new DeficientConditionGoalLibrarySimulationEntity
             {
                 DeficientConditionGoalLibraryId = deficientConditionGoalLibraryId,
@@ -111,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
             var performanceCurveLibraryId = Guid.NewGuid();
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
-                new PerformanceCurveLibraryEntity {Id = performanceCurveLibraryId, Name = "Test Name"});
+                new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "Test Name" });
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new PerformanceCurveLibrarySimulationEntity
             {
                 PerformanceCurveLibraryId = performanceCurveLibraryId,
@@ -120,7 +124,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
             var remainingLifeLimitLibraryId = Guid.NewGuid();
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
-                new RemainingLifeLimitLibraryEntity {Id = remainingLifeLimitLibraryId, Name = "Test Name"});
+                new RemainingLifeLimitLibraryEntity { Id = remainingLifeLimitLibraryId, Name = "Test Name" });
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new RemainingLifeLimitLibrarySimulationEntity
             {
                 RemainingLifeLimitLibraryId = remainingLifeLimitLibraryId,
@@ -129,7 +133,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
             var targetConditionGoalLibraryId = Guid.NewGuid();
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
-                new TargetConditionGoalLibraryEntity {Id = targetConditionGoalLibraryId, Name = "Test Name"});
+                new TargetConditionGoalLibraryEntity { Id = targetConditionGoalLibraryId, Name = "Test Name" });
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new TargetConditionGoalLibrarySimulationEntity
             {
                 TargetConditionGoalLibraryId = targetConditionGoalLibraryId,
@@ -138,7 +142,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
             var treatmentLibraryId = Guid.NewGuid();
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
-                new TreatmentLibraryEntity {Id = treatmentLibraryId, Name = "Test Name"});
+                new TreatmentLibraryEntity { Id = treatmentLibraryId, Name = "Test Name" });
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new TreatmentLibrarySimulationEntity
             {
                 TreatmentLibraryId = treatmentLibraryId,
@@ -146,12 +150,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             });
 
             var budgetId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new BudgetEntity {Id = budgetId, BudgetLibraryId = budgetLibraryId});
+            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new BudgetEntity { Id = budgetId, BudgetLibraryId = budgetLibraryId });
 
             var facilityId = Guid.NewGuid();
             _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new FacilityEntity
             {
-                Id = Guid.NewGuid(), NetworkId = _testHelper.TestNetwork.Id, Name = "Test Name"
+                Id = Guid.NewGuid(),
+                NetworkId = _testHelper.TestNetwork.Id,
+                Name = "Test Name"
             });
 
             var sectionId = Guid.NewGuid();

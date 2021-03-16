@@ -28,6 +28,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             _bridgeWorkCost = bridgeWorkCost ?? throw new ArgumentNullException(nameof(bridgeWorkCost));
             _committedProjectCost = committedProjectCost ?? throw new ArgumentNullException(nameof(committedProjectCost));
         }
+
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
             List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount)
         {
@@ -48,13 +49,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 .FindAll(_ => !_.Contains("culvert", StringComparison.OrdinalIgnoreCase));
             nonCulvertTreatments.Sort();
 
-            // setting up model to store data. This will be used to fill up Bridge Work Summary By Budget TAB
+            // setting up model to store data. This will be used to fill up Bridge Work Summary By
+            // Budget TAB
             var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();
 
             var budgets = new HashSet<string>();
-            foreach(var yearData in reportOutputData.Years)
+            foreach (var yearData in reportOutputData.Years)
             {
-                foreach(var item in yearData.Budgets)
+                foreach (var item in yearData.Budgets)
                 {
                     budgets.Add(item.BudgetName);
                 }
@@ -236,9 +238,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     var cellFortotalBudget = yearTracker;
                     worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value = budgetData.Value - (decimal)perYearTotalSpent.amount;
 
-                    // Because we do not have committed project right now. The percentage will always be 0
+                    // Because we do not have committed project right now. The percentage will
+                    // always be 0
                     worksheet.Cells[currentCell.Row + 1, currentCell.Column + cellFortotalBudget + 2].Value =
-                        totalBudgetPerYearForMPMS[perYearTotalSpent.year] /perYearTotalSpent.amount;
+                        totalBudgetPerYearForMPMS[perYearTotalSpent.year] / perYearTotalSpent.amount;
 
                     worksheet.Cells[currentCell.Row + 2, currentCell.Column + cellFortotalBudget + 2].Value = 1 -
                         totalBudgetPerYearForMPMS[perYearTotalSpent.year] / perYearTotalSpent.amount;

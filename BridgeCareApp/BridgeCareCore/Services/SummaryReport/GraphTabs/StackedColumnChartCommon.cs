@@ -8,7 +8,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
     public class StackedColumnChartCommon
     {
         /// <summary>
-        /// Set common chart properties
+        ///     Set common chart properties
         /// </summary>
         /// <param name="chart"></param>
         /// <param name="title"></param>
@@ -23,7 +23,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         }
 
         /// <summary>
-        /// Set chart axes
+        ///     Set chart axes
         /// </summary>
         /// <param name="chart"></param>
         public void SetChartAxes(ExcelChart chart)
@@ -41,7 +41,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         }
 
         /// <summary>
-        /// Set worksheet properties, same in all stacked column chart reports
+        ///     Set worksheet properties, same in all stacked column chart reports
         /// </summary>
         /// <param name="worksheet"></param>
         public void SetWorksheetProperties(ExcelWorksheet worksheet)

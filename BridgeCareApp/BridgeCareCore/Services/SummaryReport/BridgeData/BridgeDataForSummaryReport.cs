@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy.Entities;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
@@ -22,11 +21,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
         // This is also used in Bridge Work Summary TAB
         private readonly List<double> previousYearInitialMinC = new List<double>();
+
         private List<double> previousYearSectionMinC = new List<double>();
         private Dictionary<int, (int on, int off)> PoorOnOffCount = new Dictionary<int, (int on, int off)>();
 
         // This will be used in Parameters TAB
         private readonly ParametersModel _parametersModel = new ParametersModel();
+
         public BridgeDataForSummaryReport(IExcelHelper excelHelper, IHighlightWorkDoneCells highlightWorkDoneCells)
         {
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
@@ -43,7 +44,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
             var currentCell = AddHeadersCells(worksheet, headers, SimulationYears);
 
-            // Add row next to headers for filters and year numbers for dynamic data. Cover from top, left to right, and bottom set of data.
+            // Add row next to headers for filters and year numbers for dynamic data. Cover from
+            // top, left to right, and bottom set of data.
             using (ExcelRange autoFilterCells = worksheet.Cells[3, 1, currentCell.Row, currentCell.Column - 1])
             {
                 autoFilterCells.AutoFilter = true;
@@ -73,6 +75,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         }
 
         #region Private Methods
+
         private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults,
             SortedSet<PennDotReportAEntity> pennDotReportAData,
             CurrentCell currentCell)
@@ -95,12 +98,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             {
                 workDoneData = new List<int>(new int[outputResults.Years[0].Sections.Count]);
                 previousYearSectionMinC = new List<double>(new double[outputResults.Years[0].Sections.Count]);
-            } 
+            }
             var poorOnOffColumnStart = outputResults.Years.Count + column + 2;
             var index = 1; // to track the initial section from rest of the years
             foreach (var yearlySectionData in outputResults.Years)
             {
-                PoorOnOffCount.Add(yearlySectionData.Year, (on : 0, off : 0));
+                PoorOnOffCount.Add(yearlySectionData.Year, (on: 0, off: 0));
                 row = initialRow;
 
                 // Add work done cells
@@ -200,7 +203,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                     worksheet.Cells[row, ++column].Value = section.TreatmentCause; // Project Pick
 
-                        var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
+                    var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
                     BudgetUsageDetail budgetUsage = null;
 
                     foreach (var item in treatmentConsideration)
@@ -229,7 +232,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
-                    column = column+1;
+                    column = column + 1;
                     row++;
                 }
             }
@@ -296,6 +299,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
             return column;
         }
+
         private void AddBridgeDataModelsCells(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
         {
             var rowNo = currentCell.Row;
@@ -332,11 +336,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             currentCell.Row = rowNo;
             currentCell.Column = columnNo;
         }
+
         private void setColor(int parallelBridge, string treatment, TreatmentCause previousYearCause,
            TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
         {
             _highlightWorkDoneCells.CheckConditions(parallelBridge, treatment, previousYearCause, treatmentCause, year, index, worksheet, row, column);
         }
+
         private List<string> GetHeaders()
         {
             return new List<string>
@@ -361,6 +367,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 "P3"
             };
         }
+
         private CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<string> headers, List<int> simulationYears)
         {
             int headerRow = 1;
@@ -450,6 +457,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             _excelHelper.ApplyBorder(worksheet.Cells[row, initialColumn, row + 1, worksheet.Dimension.Columns]);
             currentCell.Row = currentCell.Row + 2;
         }
+
         private int AddSimulationHeaderTexts(ExcelWorksheet worksheet, int column, int row, List<string> simulationHeaderTexts, int length)
         {
             for (var index = 0; index < length; index++)
@@ -460,6 +468,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
             return column;
         }
+
         private List<string> GetSimulationHeaderTexts()
         {
             return new List<string>
@@ -483,6 +492,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 "District Remarks"
             };
         }
+
         private int EnterDefaultMinCValue(ExcelWorksheet worksheet, int row, int column, Dictionary<string, double> numericAttribute)
         {
             worksheet.Cells[row, ++column].Value = "N";
@@ -490,6 +500,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             numericAttribute["MINCOND"] = 100;
             return column;
         }
+
         private int EnterValueEqualsCulv(ExcelWorksheet worksheet, int row, int column, Dictionary<string, double> numericAttribute)
         {
             numericAttribute["MINCOND"] = numericAttribute["CULV"];
@@ -501,6 +512,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             }
             return column;
         }
+
         private int EnterMinDeckSuperSub(ExcelWorksheet worksheet, int row, int column, Dictionary<string, double> numericAttribute)
         {
             var minValue = Math.Min(numericAttribute["DECK"], Math.Min(numericAttribute["SUP"], numericAttribute["SUB"]));
@@ -513,6 +525,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             }
             return column;
         }
+
         private int EnterMinDeckSuperSubCulv(ExcelWorksheet worksheet, int row, int column, Dictionary<string, double> numericAttribute)
         {
             worksheet.Cells[row, ++column].Value = numericAttribute["MINCOND"];
@@ -587,6 +600,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             valueEqualsCulv,
             defaultValue
         }
-        #endregion
+
+        #endregion Private Methods
     }
 }

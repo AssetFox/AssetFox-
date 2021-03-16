@@ -5,7 +5,6 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
-using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using MoreLinq;
@@ -81,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             //_unitOfWork.Context.CommittedProject.Add(committedProjectEntities[0]);
 
-            foreach(var item in committedProjectEntities)
+            foreach (var item in committedProjectEntities)
             {
                 _unitOfWork.Context.CommittedProject.Add(item);
             }

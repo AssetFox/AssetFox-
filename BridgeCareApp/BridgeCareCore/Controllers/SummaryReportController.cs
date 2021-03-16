@@ -41,12 +41,6 @@ namespace BridgeCareCore.Controllers
             var broadcastingMessage = "Starting report generation";
             var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
 
-            var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
-            {
-                SimulationId = simulationId,
-                Status = "Starting report generation..."
-            };
-
             try
             {
                 await _hubContext

@@ -73,7 +73,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
             var initialSectionValues = reportOutputData.InitialSectionSummaries[0].ValuePerNumericAttribute;
 
-            var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
+            var simulationAnalysisDetail = new SimulationReportDetailDTO
             {
                 SimulationId = simulationId,
                 Status = "Starting report generation..."
@@ -84,7 +84,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 if (!initialSectionValues.ContainsKey(item))
                 {
                     simulationAnalysisDetail.Status = $"The attribute {item} not found in initial section";
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, userInfo);
 
                     var message = $"The attribute {item} not found in initial section";
                     SendRealTimeMessage(message, simulationId, userInfo);
@@ -99,7 +99,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 if (!sectionValueAttribute.ContainsKey(item))
                 {
                     simulationAnalysisDetail.Status = $"The attribute {item} not found in sections";
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, userInfo);
 
                     var message = $"The attribute {item} not found in sections";
                     SendRealTimeMessage(message, simulationId, userInfo);
@@ -147,7 +147,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel,
                 simulationId, networkId);
             simulationAnalysisDetail.Status = $"Creating Unfunded recommendations TAB";
-            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, userInfo);
             broadcastingMessage = $"Creating Unfunded recommendations TAB";
             SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
             // Unfunded Recommendations TAB
@@ -158,7 +158,7 @@ namespace BridgeCareCore.Services.SummaryReport
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add("Legend");
             _summaryReportGlossary.Fill(shortNameWorksheet);
             simulationAnalysisDetail.Status = $"Creating Bridge work summary TAB";
-            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, userInfo);
             broadcastingMessage = $"Creating Bridge work summary TAB";
             SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
             // Bridge work summary TAB
@@ -166,14 +166,14 @@ namespace BridgeCareCore.Services.SummaryReport
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
                 simulationYears, workSummaryModel, yearlyBudgetAmount);
             simulationAnalysisDetail.Status = $"Creating Bridge work summary By Budget TAB";
-            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, userInfo);
             broadcastingMessage = $"Creating Bridge work summary By Budget TAB";
             SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
             simulationAnalysisDetail.Status = $"Creating Graph TABs";
-            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, userInfo);
             broadcastingMessage = $"Creating Graph TABs";
             SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
 
@@ -186,7 +186,7 @@ namespace BridgeCareCore.Services.SummaryReport
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);
             simulationAnalysisDetail.Status = "Finished generating the summary report.";
-            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, userInfo);
             return bin;
         }
 
@@ -202,14 +202,9 @@ namespace BridgeCareCore.Services.SummaryReport
             _unitOfDataPersistenceWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto, userInfo);
         }
 
-        private void UpdateSimulationAnalysisDetail(SimulationAnalysisDetailDTO simulationAnalysisDetail, DateTime? stopDateTime)
+        private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO simulationAnalysisDetail, UserInfoDTO userInfo)
         {
-            if (stopDateTime != null)
-            {
-                var interval = stopDateTime - simulationAnalysisDetail.LastRun;
-                simulationAnalysisDetail.RunTime = interval.Value.ToString(@"hh\:mm\:ss");
-            }
-            _unitOfDataPersistenceWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+            _unitOfDataPersistenceWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(simulationAnalysisDetail, userInfo);
         }
     }
 }

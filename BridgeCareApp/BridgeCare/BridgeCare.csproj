@@ -543,7 +543,7 @@
     <Compile Include="Models\TargetParameters.cs" />
     <Compile Include="Models\UserInformationModel.cs" />
     <Compile Include="Models\ValidationParameterModel.cs" />
-    <Compile Include="Models\ValidateModel.cs" />
+    <Compile Include="Models\EquationValidationParametersModel.cs" />
     <Compile Include="Models\YearlyBudgetAndCost.cs" />
     <Compile Include="Models\YearlyDataModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

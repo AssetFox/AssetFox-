@@ -1,8 +1,0 @@
-﻿{
-  "EsecConfig": {
-    "EsecBaseAddress": "https://oidcservicessyst.penndot.gov/affwebservices/CASSO/oidc/BAMS/",
-    "EsecClientId": "a56bb9d5-190d-4873-afea-0767d82dd91c",
-    "EsecClientSecret": "2pb7TEIYR1uw18YVmR3AdU+bvNbetDCi1RDfQ5DRbSU=",
-    "EsecRedirect": "https://iam-deploy.com/Authentication/"
-  }
-}

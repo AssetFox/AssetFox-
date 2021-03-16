@@ -32,5 +32,11 @@ export const API = {
     Treatment: '/api/Treatment',
     Investment: '/api/Investment',
     BudgetPriority: '/api/BudgetPriority',
-    Authentication: '/api/Authentication'
+    Authentication: '/api/Authentication',
+    Scenario: '/api/Simulation',
+    User: '/api/User',
+    Attribute: '/api/Attribute',
+    AnalysisMethod: '/api/AnalysisMethod',
+    SummaryReport: '/api/SummaryReport',
+    ExpressionValidation: '/api/ExpressionValidation'
 };

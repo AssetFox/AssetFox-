@@ -1,12 +1,29 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
+using BridgeCareCore;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Logging;
+using BridgeCareCore.Models;
+using BridgeCareCore.Security;
+using BridgeCareCore.Security.Interfaces;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Engine;
+using Moq;
+using Moq.Contrib.HttpClient;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 {
@@ -16,23 +33,39 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         private static readonly Guid SimulationId = Guid.Parse("416ad546-0796-4889-9db4-9c11bbd6c50d");
         private static readonly Guid CriterionLibraryId = Guid.Parse("47380dd4-8df8-46e2-9195-b7f786a4258a");
 
+        public readonly string BaseUrl = "http://localhost:64469/api";
+
         public readonly IAMContext DbContext;
 
-        public IConfiguration Config { get; set; }
+        public IConfiguration Config { get; }
 
-        public UnitOfDataPersistenceWork UnitOfDataPersistenceWork { get; set; }
+        public UnitOfDataPersistenceWork UnitOfDataPersistenceWork { get; }
+
+        public MockEsecSecurity MockEsecSecurity { get; }
+
+        public ILog Logger { get; }
+
+        public Mock<IHubContext<BridgeCareHub>> MockHubContext { get; set; }
 
         public TestHelper(string dbName = "IAMv2")
         {
             Config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
+                .AddJsonFile("testEsec.json")
                 .Build();
+
+            MockEsecSecurity = new MockEsecSecurity();
+
+            Logger = new LogNLog();
+
+            MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
 
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseInMemoryDatabase(dbName)
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options);
+
             UnitOfDataPersistenceWork = new UnitOfDataPersistenceWork(Config, DbContext);
         }
 
@@ -68,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public virtual void CreateNetwork()
         {
-            if (UnitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == NetworkId))
+            if (!UnitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == NetworkId))
             {
                 UnitOfDataPersistenceWork.Context.Network.Add(TestNetwork);
                 UnitOfDataPersistenceWork.Context.SaveChanges();

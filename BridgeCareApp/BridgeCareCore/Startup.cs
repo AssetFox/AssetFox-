@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -24,11 +25,11 @@ using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 using BridgeCareCore.Services.SummaryReport.GraphTabs;
 using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
 using BridgeCareCore.Services.SummaryReport.Parameters;
-using BridgeCareCore.Services.LegacySimulationSynchronization;
 using BridgeCareCore.Interfaces.Simulation;
-using BridgeCareCore.Services.SimulationAnalysis;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Security;
+using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -49,13 +50,10 @@ namespace BridgeCareCore
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(Configuration);
-
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddSingleton<ILog, LogNLog>();
-
-            services.AddScoped<LegacySimulationSynchronizer>();
-
+            services.AddScoped<LegacySimulationSynchronizerService>();
             services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
             services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
             services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
@@ -67,7 +65,6 @@ namespace BridgeCareCore
             services.AddScoped<IBridgeWorkSummaryByBudget, BridgeWorkSummaryByBudget>();
             services.AddScoped<SummaryReportGlossary>();
             services.AddScoped<SummaryReportParameters>();
-
             services.AddScoped<CostBudgetsWorkSummary>();
             services.AddScoped<BridgesCulvertsWorkSummary>();
             services.AddScoped<BridgeRateDeckAreaWorkSummary>();
@@ -76,12 +73,9 @@ namespace BridgeCareCore
             services.AddScoped<PostedClosedBridgeWorkSummary>();
             services.AddScoped<BridgeWorkSummaryCommon>();
             services.AddScoped<BridgeWorkSummaryComputationHelper>();
-
             services.AddScoped<CulvertCost>();
             services.AddScoped<BridgeWorkCost>();
             services.AddScoped<CommittedProjectCost>();
-
-            // Summary report Graph TABS
             services.AddScoped<IAddGraphsInTabs, AddGraphsInTabs>();
             services.AddScoped<NHSConditionChart>();
             services.AddScoped<NonNHSConditionBridgeCount>();
@@ -91,15 +85,15 @@ namespace BridgeCareCore
             services.AddScoped<PoorBridgeCount>();
             services.AddScoped<PoorBridgeDeckArea>();
             services.AddScoped<PoorBridgeDeckAreaByBPN>();
-
             services.AddScoped<StackedColumnChartCommon>();
-
-            services.AddScoped<ISimulationAnalysis, SimulationAnalysis>();
+            services.AddScoped<ISimulationAnalysis, SimulationAnalysisService>();
             services.AddSignalR();
+            services.AddSingleton<IEsecSecurity, EsecSecurity>();
+            services.AddScoped<AttributeService>();
+            services.AddSingleton<IAuthorizationHandler, RestrictAccessHandler>();
+            services.AddScoped<ExpressionValidationService>();
 
-            services.AddSingleton<EsecSecurity>();
-
-#if MsSqlDebug || Release
+#if MsSqlDebug || Release || Test
             // SQL SERVER SCOPINGS
             services.AddDbContext<IAMContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
@@ -109,13 +103,10 @@ namespace BridgeCareCore
             services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
             services.AddScoped<IPennDotReportARepository, PennDotReportARepository>();
             services.AddScoped<IYearlyInvestmentRepository, YearlyInvestmentRepository>();
-
-            services.AddScoped<ISimulationRepository, SimulationRepository>();
 #elif LiteDbDebug
             // LITE DB SCOPINGS
             services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
             services.AddSingleton<LiteDb.ILiteDbContext, LiteDb.LiteDbContext>();
-
             services.AddScoped<IAttributeRepository, LiteDb.AttributeRepository>();
             services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository>();
             services.AddScoped<INetworkRepository, LiteDb.NetworkRepository>();
@@ -143,6 +134,16 @@ namespace BridgeCareCore
                         IssuerSigningKey = SecurityFunctions.GetPublicKey(Configuration.GetSection("EsecConfig"))
                     };
                 });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(SecurityConstants.Policy.AdminOrDistrictEngineer,
+                    policy => policy.Requirements.Add(
+                        new UserHasAllowedRoleRequirement(Role.Administrator, Role.DistrictEngineer)));
+                options.AddPolicy(SecurityConstants.Policy.Admin,
+                    policy => policy.Requirements.Add(
+                        new UserHasAllowedRoleRequirement(Role.Administrator)));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

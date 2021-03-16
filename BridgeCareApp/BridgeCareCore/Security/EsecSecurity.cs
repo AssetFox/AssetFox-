@@ -2,23 +2,18 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Cryptography;
-using BridgeCare.Security;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using BridgeCareCore.Models;
+using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using MoreLinq;
-using Newtonsoft.Json;
 
 namespace BridgeCareCore.Security
 {
-    public class EsecSecurity
+    public class EsecSecurity : IEsecSecurity
     {
         private readonly RsaSecurityKey _esecPublicKey;
 
@@ -34,13 +29,6 @@ namespace BridgeCareCore.Security
             var esecConfig = config?.GetSection("EsecConfig") ?? throw new ArgumentNullException(nameof(config));
             _esecPublicKey = SecurityFunctions.GetPublicKey(esecConfig);
         }
-
-        /// <summary>
-        ///     Checks if the provided token has been revoked.
-        /// </summary>
-        /// <param name="idToken">JWT ID Token</param>
-        /// <returns>bool</returns>
-        private bool TokenIsRevoked(string idToken) => _revokedTokens.ContainsKey(idToken);
 
         /// <summary>
         ///     Prevents the parser from accepting the provided token in the future.
@@ -73,21 +61,27 @@ namespace BridgeCareCore.Security
         /// <returns></returns>
         public UserInfo GetUserInformation(HttpRequest request)
         {
-            var idToken = request.Headers["Authorization"].Split(" ").Last().ToString();
-            if (TokenIsRevoked(idToken))
+            var idToken = request.Headers["Authorization"].ToString().Split(" ")[1];
+
+            if (string.IsNullOrEmpty(idToken))
+            {
+                throw new UnauthorizedAccessException("No authorization bearer present on request.");
+            }
+
+            if (_revokedTokens.ContainsKey(idToken))
             {
                 throw new UnauthorizedAccessException("Your ID Token has been revoked.");
             }
 
             var decodedToken = DecodeToken(idToken);
-            var roleStrings = ParseLdap(decodedToken.GetClaimValue("roles"));
+            var roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
             if (roleStrings.Count == 0)
             {
                 throw new UnauthorizedAccessException("User has no security roles assigned.");
             }
 
             var role = roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString));
-            var name = ParseLdap(decodedToken.GetClaimValue("sub"))[0];
+            var name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0];
             var email = decodedToken.GetClaimValue("email");
             return new UserInfo { Name = name, Role = role, Email = email };
         }
@@ -100,18 +94,12 @@ namespace BridgeCareCore.Security
         /// <returns></returns>
         public UserInfo GetUserInformation(Dictionary<string, string> userInformationDictionary)
         {
-            var role = ParseLdap(userInformationDictionary["roles"])
+            var role = SecurityFunctions.ParseLdap(userInformationDictionary["roles"])
                 .First(roleString => Role.AllValidRoles.Contains(roleString));
-            var name = ParseLdap(userInformationDictionary["sub"])[0];
+            var name = SecurityFunctions.ParseLdap(userInformationDictionary["sub"])[0];
             var email = userInformationDictionary.ContainsKey("email") ? userInformationDictionary["email"] : null;
             return new UserInfo { Name = name, Role = role, Email = email };
         }
-
-        /*public UserInfo GetUserInformation(HttpRequest request)
-        {
-            string GetValue(string key) => request.Headers.GetValues(key).First();
-            return new UserInfo { Name = GetValue("Name"), Role = GetValue("Role"), Email = GetValue("Email") };
-        }*/
 
         /// <summary>
         ///     Creates a JwtSecurityToken object from a JWT string.
@@ -132,25 +120,6 @@ namespace BridgeCareCore.Security
             var handler = new JwtSecurityTokenHandler();
             handler.ValidateToken(idToken, validationParameters, out var validatedToken);
             return validatedToken as JwtSecurityToken;
-        }
-
-        /// <summary>
-        ///     Given an LDAP-formatted string from ESEC, extracts the Common Name (CN) fields.
-        /// </summary>
-        /// <param name="ldap"></param>
-        /// <returns>Role</returns>
-        public List<string> ParseLdap(string ldap)
-        {
-            if (string.IsNullOrEmpty(ldap))
-            {
-                return new List<string>();
-            }
-
-            var segments = ldap.Split('^');
-            var commonNameSegments = segments.Select(segment => segment.Split(',')[0]);
-            //var validCommonNameSegments = commonNameSegments.Where(segment => segment.Contains('='));
-            var commonNames = commonNameSegments.Select(segment => segment.Split('=')[1]);
-            return commonNames.ToList();
         }
     }
 }

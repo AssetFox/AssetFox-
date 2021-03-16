@@ -14,9 +14,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         Task<List<BudgetPriorityLibraryDTO>> BudgetPriorityLibrariesWithBudgetPriorities();
 
-        void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId);
+        void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, BudgetPriorityLibraryDTO dto);
 
-        void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId);
+        void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo);
+
+        void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId, UserInfoDTO userInfo);
 
         void DeleteBudgetPriorityLibrary(Guid libraryId);
     }

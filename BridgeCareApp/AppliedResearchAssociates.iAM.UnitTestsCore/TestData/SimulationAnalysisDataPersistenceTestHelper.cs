@@ -4,7 +4,7 @@ using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
-using BridgeCareCore.Services.LegacySimulationSynchronization;
+using BridgeCareCore.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -20,11 +20,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         private readonly SqlConnection _sqlConnection;
         private readonly DataAccessor _dataAccessor;
 
-        public IHubContext<BridgeCareHub> HubContext { get; set; }
-
         public Simulation StandAloneSimulation { get; set; }
 
-        public SimulationAnalysisDataPersistenceTestHelper()
+        public SimulationAnalysisDataPersistenceTestHelper() : base()
         {
             _sqlConnection = new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
             _sqlConnection.Open();
@@ -59,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public async void SynchronizeLegacySimulation()
         {
-            var legacySimulationSynchronizer = new LegacySimulationSynchronizer(HubContext, UnitOfDataPersistenceWork);
+            var legacySimulationSynchronizer = new LegacySimulationSynchronizerService(MockHubContext.Object, UnitOfDataPersistenceWork);
             await legacySimulationSynchronizer.Synchronize(SimulationId);
         }
 

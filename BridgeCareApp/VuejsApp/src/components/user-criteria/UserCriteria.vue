@@ -122,9 +122,10 @@
         emptyCriterionLibraryEditorDialogData
     } from '@/shared/models/modals/criterion-library-editor-dialog-data';
     import {isNil} from 'ramda';
-    import {emptyUserCriteria, UserCriteria} from '@/shared/models/iAM/user-criteria';
+    import {emptyUser, User} from '@/shared/models/iAM/user';
     import {itemsAreEqual} from '@/shared/utils/equals-utils';
     import {getBlankGuid} from '@/shared/utils/uuid-utils';
+    import {CriterionLibrary} from '@/shared/models/iAM/criteria';
 
     @Component({
         components: {
@@ -132,63 +133,63 @@
         }
     })
     export default class UserCriteriaEditor extends Vue {
-        @State(state => state.userCriteriaModule.allUserCriteria) allUserCriteria: UserCriteria[];
+        @State(state => state.userModule.users) stateUsers: User[];
 
-        @Action('getAllUserCriteria') getAllUserCriteriaAction: any;
-        @Action('setUserCriteria') setUserCriteriaAction: any;
+        @Action('getAllUsers') getAllUserCriteriaAction: any;
+        @Action('updateUser') setUserCriteriaAction: any;
         @Action('deleteUser') deleteUserAction: any;
 
         beforeDeleteAlertData: AlertData = {...emptyAlertData};
         userCriteriaGridHeaders: object[] = [
             {text: 'User', align: 'left', sortable: false, value: 'username'},
-            {text: 'Criteria Filter', sortable: false, value: 'criteria'},
+            {text: 'Criteria Filter', sortable: false, value: 'criterionLibrary'},
             {text: '', align: 'right', sortable: false, value: 'actions'}
         ];
 
-        unassignedUsers: UserCriteria[] = [];
-        assignedUsers: UserCriteria[] = [];
+        unassignedUsers: User[] = [];
+        assignedUsers: User[] = [];
         criteriaEditorDialogData: CriterionLibraryEditorDialogData = {...emptyCriterionLibraryEditorDialogData};
-        selectedUser: UserCriteria = {...emptyUserCriteria};
+        selectedUser: User = {...emptyUser};
         uuidNIL: string = getBlankGuid();
 
         created() {
             this.getAllUserCriteriaAction();
         }
 
-        @Watch('allUserCriteria')
+        @Watch('stateUsers')
         onUserCriteriaChanged() {
-            this.unassignedUsers = this.allUserCriteria.filter((user: UserCriteria) => !user.hasAccess);
-            this.assignedUsers = this.allUserCriteria.filter((user: UserCriteria) => user.hasAccess);
+            this.unassignedUsers = this.stateUsers.filter((user: User) => !user.hasInventoryAccess);
+            this.assignedUsers = this.stateUsers.filter((user: User) => user.hasInventoryAccess);
             this.$forceUpdate();
         }
 
-        onEditCriteria(user: UserCriteria) {
+        onEditCriteria(user: User) {
             this.selectedUser = user;
 
             // TODO: use actual criterion library object id
             this.criteriaEditorDialogData = {
                 showDialog: true,
-                libraryId: this.uuidNIL//user.criteria === undefined ? '' : user.criteria
+                libraryId: user.criterionLibrary.id
             };
         }
 
-        onSubmitCriteria(criteria: string) {
+        onSubmitCriteria(criterionLibrary: CriterionLibrary) {
             this.criteriaEditorDialogData = {...emptyCriterionLibraryEditorDialogData};
 
-            if (!isNil(criteria)) {
+            if (!isNil(criterionLibrary) && this.selectedUser.id !== getBlankGuid()) {
                 const userCriteria = {
                     ...this.selectedUser,
-                    criteria,
+                    criterionLibrary,
                     hasAccess: true,
                     hasCriteria: true
                 };
                 this.setUserCriteriaAction({userCriteria});
             }
 
-            this.selectedUser = {...emptyUserCriteria};
+            this.selectedUser = {...emptyUser};
         }
 
-        onRevokeAccess(targetUser: UserCriteria) {
+        onRevokeAccess(targetUser: User) {
             const userCriteria = {
                 ...targetUser,
                 criteria: undefined,
@@ -198,7 +199,7 @@
             this.setUserCriteriaAction({userCriteria});
         }
 
-        onGiveUnrestrictedAccess(targetUser: UserCriteria) {
+        onGiveUnrestrictedAccess(targetUser: User) {
             const userCriteria = {
                 ...targetUser,
                 criteria: undefined,
@@ -208,7 +209,7 @@
             this.setUserCriteriaAction({userCriteria});
         }
 
-        onDeleteUser(user: UserCriteria) {
+        onDeleteUser(user: User) {
             this.selectedUser = user;
 
             this.beforeDeleteAlertData = {
@@ -222,9 +223,9 @@
         onSubmitDeleteUserResponse(doDelete: boolean) {
             this.beforeDeleteAlertData = {...emptyAlertData};
 
-            if (doDelete && !itemsAreEqual(this.selectedUser, emptyUserCriteria)) {
+            if (doDelete && !itemsAreEqual(this.selectedUser, emptyUser)) {
                 this.deleteUserAction({user: this.selectedUser.username})
-                    .then(() => this.selectedUser = {...emptyUserCriteria});
+                    .then(() => this.selectedUser = {...emptyUser});
             }
         }
     }

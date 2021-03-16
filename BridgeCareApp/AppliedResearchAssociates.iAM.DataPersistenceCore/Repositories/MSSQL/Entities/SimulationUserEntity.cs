@@ -8,6 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public Guid SimulationId { get; set; }
         public Guid UserId { get; set; }
         public bool CanModify { get; set; }
+        public bool IsOwner { get; set; }
         public virtual SimulationEntity Simulation { get; set; }
         public virtual UserEntity User { get; set; }
     }

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.Domains;
 using DataMiner = AppliedResearchAssociates.iAM.DataMiner;
 
@@ -27,6 +29,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             // This is a do nothing case for LiteDb.
             return new Explorer();
         }
+
+        public Task<List<AttributeDTO>> Attributes() => throw new System.NotImplementedException();
 
         public void AddAttribute(DataMiner.Attributes.Attribute attribute)
         {

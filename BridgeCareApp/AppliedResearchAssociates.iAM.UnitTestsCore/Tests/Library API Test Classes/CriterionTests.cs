@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new CriterionLibraryController(_testHelper.UnitOfDataPersistenceWork);
+            _controller = new CriterionLibraryController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
         }
 
         private void Setup()
@@ -32,15 +32,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnGet()
+        public async void ShouldReturnOkResultOnGet()
         {
             try
             {
                 // Act
-                var result = _controller.CriterionLibraries();
+                var result = await _controller.CriterionLibraries();
 
                 // Assert
-                Assert.IsType<OkObjectResult>(result.Result);
+                Assert.IsType<OkObjectResult>(result);
             }
             finally
             {
@@ -50,16 +50,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnPost()
+        public async void ShouldReturnOkResultOnPost()
         {
             try
             {
                 // Act
-                var result = _controller
+                var result = await _controller
                     .UpsertCriterionLibrary(_testHelper.TestCriterionLibrary.ToDto());
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -69,15 +69,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnDelete()
+        public async void ShouldReturnOkResultOnDelete()
         {
             try
             {
                 // Act
-                var result = _controller.DeleteCriterionLibrary(Guid.Empty);
+                var result = await _controller.DeleteCriterionLibrary(Guid.Empty);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -87,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldGetAllCriterionLibraries()
+        public async void ShouldGetAllCriterionLibraries()
         {
             try
             {
@@ -95,10 +95,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 Setup();
 
                 // Act
-                var result = _controller.CriterionLibraries();
+                var result = await _controller.CriterionLibraries();
 
                 // Assert
-                var okObjResult = result.Result as OkObjectResult;
+                var okObjResult = result as OkObjectResult;
                 Assert.NotNull(okObjResult.Value);
 
                 var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType(okObjResult.Value,
@@ -115,14 +115,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldModifyCriterionLibraries()
+        public async void ShouldModifyCriterionLibraries()
         {
             try
             {
                 // Arrange
                 Setup();
-                var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType(
-                    (_controller.CriterionLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.CriterionLibraries();
+                var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<CriterionLibraryDTO>));
 
                 var criterionLibraryDTO = dtos[0];
@@ -136,12 +136,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 }.ToDto();
 
                 // Act
-                var updateResult = _controller.UpsertCriterionLibrary(criterionLibraryDTO);
-                var addResult = _controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
+                var updateResult = await _controller.UpsertCriterionLibrary(criterionLibraryDTO);
+                var addResult =  await _controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
 
                 // Assert
-                Assert.IsType<OkResult>(updateResult.Result);
-                Assert.IsType<OkResult>(addResult.Result);
+                Assert.IsType<OkResult>(updateResult);
+                Assert.IsType<OkResult>(addResult);
 
                 var updatedCriterionLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary
                     .Single(_ => _.Id == _testHelper.TestCriterionLibrary.Id);
@@ -168,10 +168,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 Setup();
 
                 // Act
-                var result = _controller.DeleteCriterionLibrary(_testHelper.TestCriterionLibrary.Id);
+                var result = await _controller.DeleteCriterionLibrary(_testHelper.TestCriterionLibrary.Id);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 Assert.True(
                     !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Any(_ =>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
@@ -8,6 +10,8 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Moq.Contrib.HttpClient;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Classes
@@ -29,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new BudgetPriorityController(_testHelper.UnitOfDataPersistenceWork);
+            _controller = new BudgetPriorityController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
         }
 
         public BudgetPriorityLibraryEntity TestBudgetPriorityLibrary { get; } = new BudgetPriorityLibraryEntity
@@ -79,15 +83,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnGet()
+        public async void ShouldReturnOkResultOnGet()
         {
             try
             {
                 // Act
-                var result = _controller.BudgetPriorityLibraries();
+                var result = await _controller.BudgetPriorityLibraries();
 
                 // Assert
-                Assert.IsType<OkObjectResult>(result.Result);
+                Assert.IsType<OkObjectResult>(result);
             }
             finally
             {
@@ -97,16 +101,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnPost()
+        public async void ShouldReturnOkResultOnPost()
         {
             try
             {
                 // Act
-                var result = _controller
+                var result = await _controller
                     .UpsertBudgetPriorityLibrary(Guid.Empty, TestBudgetPriorityLibrary.ToDto());
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -116,15 +120,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnDelete()
+        public async void ShouldReturnOkResultOnDelete()
         {
             try
             {
                 // Act
-                var result = _controller.DeleteBudgetPriorityLibrary(Guid.Empty);
+                var result = await _controller.DeleteBudgetPriorityLibrary(Guid.Empty);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -134,7 +138,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldGetAllBudgetPriorityLibrariesWithBudgetPriorities()
+        public async void ShouldGetAllBudgetPriorityLibrariesWithBudgetPriorities()
         {
             try
             {
@@ -142,10 +146,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 SetupForGet();
 
                 // Act
-                var result = _controller.BudgetPriorityLibraries();
+                var result = await _controller.BudgetPriorityLibraries();
 
                 // Assert
-                var okObjResult = result.Result as OkObjectResult;
+                var okObjResult = result as OkObjectResult;
                 Assert.NotNull(okObjResult.Value);
 
                 var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(okObjResult.Value,
@@ -165,14 +169,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldModifyBudgetPriorityData()
+        public async void ShouldModifyBudgetPriorityData()
         {
             try
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(
-                    (_controller.BudgetPriorityLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.BudgetPriorityLibraries();
+                var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<BudgetPriorityLibraryDTO>));
 
                 var budgetPriorityLibraryDTO = dtos[0];
@@ -184,11 +188,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.UpsertBudgetPriorityLibrary(_testHelper.TestSimulation.Id,
+                    await _controller.UpsertBudgetPriorityLibrary(_testHelper.TestSimulation.Id,
                         budgetPriorityLibraryDTO);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 var budgetPriorityLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.BudgetPriorityLibrary
                     .Include(_ => _.BudgetPriorities)
@@ -228,8 +232,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(
-                    (_controller.BudgetPriorityLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.BudgetPriorityLibraries();
+                var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<BudgetPriorityLibraryDTO>));
 
                 var budgetPriorityLibraryDTO = dtos[0];
@@ -240,10 +244,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                     budgetPriorityLibraryDTO);
 
                 // Act
-                var result = _controller.DeleteBudgetPriorityLibrary(BudgetPriorityLibraryId);
+                var result = await _controller.DeleteBudgetPriorityLibrary(BudgetPriorityLibraryId);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == BudgetPriorityLibraryId));
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetPriority.Any(_ => _.Id == BudgetPriorityId));

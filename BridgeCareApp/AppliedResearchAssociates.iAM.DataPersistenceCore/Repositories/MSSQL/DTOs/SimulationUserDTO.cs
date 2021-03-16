@@ -1,11 +1,15 @@
-﻿namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs
+﻿using System;
+
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs
 {
-    public class SimulationUserDTO : CrudDTO
+    public class SimulationUserDTO
     {
-        public string Id { get; set; }
+        public Guid UserId { get; set; }
 
         public string Username { get; set; }
 
         public bool CanModify { get; set; }
+
+        public bool IsOwner { get; set; }
     }
 }

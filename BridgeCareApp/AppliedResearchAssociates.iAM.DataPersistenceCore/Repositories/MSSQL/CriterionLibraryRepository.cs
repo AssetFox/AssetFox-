@@ -465,11 +465,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.CriterionLibrary.Select(_ => _.ToDto()).ToList());
         }
 
-        public void UpsertCriterionLibrary(CriterionLibraryDTO dto)
+        public void UpsertCriterionLibrary(CriterionLibraryDTO dto, UserInfoDTO userInfo)
         {
-            var entity = dto.ToEntity();
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
-            _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
+            var criterionLibraryEntity = dto.ToEntity();
+
+            _unitOfDataPersistenceWork.Context.Upsert(criterionLibraryEntity, dto.Id, userEntity?.Id);
         }
 
         public void DeleteCriterionLibrary(Guid libraryId)
@@ -479,11 +481,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            var libraryToDelete = _unitOfDataPersistenceWork.Context.CriterionLibrary.Single(_ => _.Id == libraryId);
-
-            _unitOfDataPersistenceWork.Context.CriterionLibrary.Remove(libraryToDelete);
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.Delete<CriterionLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

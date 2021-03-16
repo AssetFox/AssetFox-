@@ -5,7 +5,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using BridgeCareCore.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -14,12 +15,33 @@ namespace BridgeCareCore.Security
 {
     public static class SecurityFunctions
     {
+        public static UserInfoDTO ToDto(this UserInfo userInfo) =>
+            new UserInfoDTO {Sub = userInfo.Name, Roles = userInfo.Role, Email = userInfo.Email};
+
         /// <summary>
         /// Retrieves the value of the claim of the given type from the JWT payload claims.
         /// </summary>
         /// <returns></returns>
         public static string GetClaimValue(this JwtSecurityToken jwt, string type) =>
             jwt.Claims.FirstOrDefault(claim => claim.Type == type)?.Value;
+
+        /// <summary>
+        ///     Given an LDAP-formatted string from ESEC, extracts the Common Name (CN) fields.
+        /// </summary>
+        /// <param name="ldap"></param>
+        /// <returns>Role</returns>
+        public static List<string> ParseLdap(string ldap)
+        {
+            if (string.IsNullOrEmpty(ldap))
+            {
+                return new List<string>();
+            }
+
+            var segments = ldap.Split('^');
+            var commonNameSegments = segments.Select(segment => segment.Split(',')[0]);
+            var commonNames = commonNameSegments.Select(segment => segment.Split('=')[1]);
+            return commonNames.ToList();
+        }
 
         /// <summary>
         ///     Fetches the public key information from the ESEC jwks endpoint, and generates an

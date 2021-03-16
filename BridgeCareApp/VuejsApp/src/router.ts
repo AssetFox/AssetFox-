@@ -1,7 +1,7 @@
 ﻿import Vue from 'vue';
 import VueRouter from 'vue-router';
 import './register-hooks';
-import EditAnalysis from '@/components/scenarios/EditAnalysis.vue';
+import EditAnalysisMethod from '@/components/scenarios/EditAnalysisMethod.vue';
 import UnderConstruction from '@/components/UnderConstruction.vue';
 import Logout from '@/components/Logout.vue';
 import Home from '@/components/Home.vue';
@@ -22,7 +22,7 @@ const NoRole = () => import (/*webpackChunkName: "noRole" */ '@/components/authe
 const Inventory = () => import (/*webpackChunkName: "inventory" */ '@/components/Inventory.vue');
 const UserCriteriaEditor = () => import (/*webpackChunkName: "userCriteria" */ '@/components/user-criteria/UserCriteria.vue');
 const CriterionLibraryEditor = () => import(/*webpackChunkName: "criterionLibraryEditor" */ '@/components/criteria-editor/CriterionLibraryEditor.vue');
-const AnalysisEditor = () => import (/*webpackChunkName: editAnalysis*/ '@/components/scenarios/EditAnalysis.vue');
+const AnalysisMethodEditor = () => import (/*webpackChunkName: editAnalysis*/ '@/components/scenarios/EditAnalysisMethod.vue');
 const RemainingLifeLimitEditor = () => import (/*webpackChunkName: remainingLifeLimitEditor*/ '@/components/remaining-life-limit-editor/RemainingLifeLimitEditor.vue');
 const CashFlowEditor = () => import (/*webpackChunkName: cashFlowEditor*/ '@/components/cash-flow-editor/CashFlowEditor.vue');
 
@@ -47,9 +47,9 @@ const router = new VueRouter({
             component: EditScenario,
             children: [
                 {
-                    path: '/EditAnalysis/',
-                    name: 'EditAnalysis',
-                    component: AnalysisEditor,
+                    path: '/EditAnalysisMethod/',
+                    name: 'EditAnalysisMethod',
+                    component: AnalysisMethodEditor,
                 },
                 {
                     path: '/InvestmentEditor/Scenario/',

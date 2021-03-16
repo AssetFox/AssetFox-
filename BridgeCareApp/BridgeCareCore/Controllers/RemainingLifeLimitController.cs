@@ -2,6 +2,9 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Security;
+using BridgeCareCore.Security.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
@@ -11,12 +14,18 @@ namespace BridgeCareCore.Controllers
     public class RemainingLifeLimitController : ControllerBase
     {
         private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly IEsecSecurity _esecSecurity;
 
-        public RemainingLifeLimitController(UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public RemainingLifeLimitController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
+        {
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+        }
 
         [HttpGet]
         [Route("GetRemainingLifeLimitLibraries")]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> RemainingLifeLimitLibraries()
         {
             try
@@ -34,17 +43,19 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertRemainingLifeLimitLibrary/{simulationId}")]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> UpsertRemainingLifeLimitLibrary(Guid simulationId, RemainingLifeLimitLibraryDTO dto)
         {
             try
             {
+                var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
                 _unitOfDataPersistenceWork.BeginTransaction();
                 await Task.Factory.StartNew(() =>
                 {
                     _unitOfDataPersistenceWork.RemainingLifeLimitRepo
-                        .UpsertRemainingLifeLimitLibrary(dto, simulationId);
+                        .UpsertRemainingLifeLimitLibrary(dto, simulationId, userInfo);
                     _unitOfDataPersistenceWork.RemainingLifeLimitRepo
-                        .UpsertOrDeleteRemainingLifeLimits(dto.RemainingLifeLimits, dto.Id);
+                        .UpsertOrDeleteRemainingLifeLimits(dto.RemainingLifeLimits, dto.Id, userInfo);
                 });
 
                 _unitOfDataPersistenceWork.Commit();
@@ -60,6 +71,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteRemainingLifeLimitLibrary/{libraryId}")]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> DeleteRemainingLifeLimitLibrary(Guid libraryId)
         {
             try

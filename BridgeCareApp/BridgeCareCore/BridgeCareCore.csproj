@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug</Configurations>
+    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug;Test</Configurations>
     <UserSecretsId>7bf892ee-3d69-4247-9888-2f7660ebee57</UserSecretsId>
   </PropertyGroup>
 
@@ -23,6 +23,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|AnyCPU'">
+    <DefineConstants>TRACE;Test</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,6 +51,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AppliedResearchAssociates.CalculateEvaluate\AppliedResearchAssociates.CalculateEvaluate.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataAssignment\AppliedResearchAssociates.iAM.DataAssignment.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj" />
   </ItemGroup>

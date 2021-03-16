@@ -39,11 +39,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public void UpsertOrDeleteBudgetPercentagePairs(
-            Dictionary<Guid, List<BudgetPercentagePairDTO>> percentagePairsPerPriorityId, Guid libraryId)
+            Dictionary<Guid, List<BudgetPercentagePairDTO>> percentagePairsPerPriorityId, Guid libraryId, Guid? userId = null)
         {
-            var entities = percentagePairsPerPriorityId.SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key))).ToList();
+            var budgetPercentagePairEntities = percentagePairsPerPriorityId.SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key))).ToList();
 
-            var entityIds = entities.Select(_ => _.Id).ToList();
+            var entityIds = budgetPercentagePairEntities.Select(_ => _.Id).ToList();
 
             var existingEntityIds = _unitOfDataPersistenceWork.Context.BudgetPercentagePair
                 .Where(_ => _.BudgetPriority.BudgetPriorityLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
@@ -58,11 +58,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(budgetPercentagePairEntities, predicatesPerCrudOperation, userId);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(budgetPercentagePairEntities, predicatesPerCrudOperation, userId);
             }
         }
     }

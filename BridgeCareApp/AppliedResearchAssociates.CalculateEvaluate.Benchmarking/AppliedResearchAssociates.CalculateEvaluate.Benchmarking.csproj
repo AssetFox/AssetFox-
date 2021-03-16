@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net48</TargetFramework>
-    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug</Configurations>
+    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug;Test</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

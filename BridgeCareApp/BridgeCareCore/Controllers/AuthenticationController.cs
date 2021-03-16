@@ -4,9 +4,12 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security;
+using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -19,13 +22,16 @@ namespace BridgeCareCore.Controllers
     {
         private readonly ILog _log;
         private static IConfigurationSection _esecConfig;
-        private static EsecSecurity _esecSecurity;
+        private static IEsecSecurity _esecSecurity;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public AuthenticationController(ILog log, IConfiguration config, EsecSecurity esecSecurity)
+        public AuthenticationController(ILog log, IConfiguration config, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _esecConfig = config?.GetSection("EsecConfig") ?? throw new ArgumentNullException(nameof(config));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         /// <summary>
@@ -37,9 +43,36 @@ namespace BridgeCareCore.Controllers
         [Route("UserInfo/{token}")]
         public IActionResult GetUserInfo(string token)
         {
-            var response = GetUserInfoString(token);
-            ValidateResponse(response);
-            return Ok(response);
+            try
+            {
+                var response = GetUserInfoString(token);
+                ValidateResponse(response);
+                var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(response);
+                AddUser(userInfo);
+                return Ok(userInfo);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e);
+            }
+        }
+
+        private void AddUser(UserInfoDTO userInfo)
+        {
+            try
+            {
+                _unitOfDataPersistenceWork.BeginTransaction();
+                _unitOfDataPersistenceWork.UserRepo.AddUser(SecurityFunctions.ParseLdap(userInfo.Sub)[0],
+                    SecurityFunctions.ParseLdap(userInfo.Roles)[0]);
+                _unitOfDataPersistenceWork.Commit();
+            }
+            catch (Exception e)
+            {
+                _unitOfDataPersistenceWork.Rollback();
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         /// <summary>
@@ -47,7 +80,7 @@ namespace BridgeCareCore.Controllers
         /// </summary>
         /// <param name="token">Access token</param>
         /// <returns>JSON-formatted user info</returns>
-        public static string GetUserInfoString(string token)
+        private static string GetUserInfoString(string token)
         {
             // These two lines should be removed as soon as the ESEC site's certificates start working
             var handler = new HttpClientHandler
@@ -77,7 +110,7 @@ namespace BridgeCareCore.Controllers
         /// <param name="token">Access token</param>
         /// <returns>User info dictionary</returns>
         public static Dictionary<string, string> GetUserInfoDictionary(string token) =>
-            DictionaryFromJson(GetUserInfoString(token));
+            JsonConvert.DeserializeObject<Dictionary<string, string>>(GetUserInfoString(token));
 
         public static UserInfo GetUserInformation(Dictionary<string, string> userInfoDictionary) =>
             _esecSecurity.GetUserInformation(userInfoDictionary);
@@ -118,7 +151,9 @@ namespace BridgeCareCore.Controllers
 
             ValidateResponse(response);
 
-            return Ok(response);
+            var userTokens = JsonConvert.DeserializeObject<UserTokensDTO>(response);
+
+            return Ok(userTokens);
         }
 
         /// <summary>
@@ -217,20 +252,12 @@ namespace BridgeCareCore.Controllers
         }
 
         /// <summary>
-        /// Converts a JSON-formatted string into a Dictionary
-        /// </summary>
-        /// <param name="jsonString">JSON-formatted string</param>
-        /// <returns>The JSON object as a dictionary</returns>
-        private static Dictionary<string, string> DictionaryFromJson(string jsonString) =>
-            JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString);
-
-        /// <summary>
         /// Checks to ensure that a response from the ESEC OIDC endpoint is not an error.
         /// </summary>
         /// <param name="response">The JSON-formatted response string</param>
         private void ValidateResponse(string response)
         {
-            var responseJson = DictionaryFromJson(response);
+            var responseJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
             if (!responseJson.ContainsKey("error"))
             {
                 return;

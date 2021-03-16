@@ -27,7 +27,6 @@ const actions = {
                 }
             });
     },
-
     async createNetwork({dispatch, commit}: any, payload: any) {
         return await NetworkService.createNetwork(payload.name)
             .then((response: AxiosResponse) => {

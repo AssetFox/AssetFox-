@@ -219,6 +219,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "User",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(nullable: false),
+                    CreatedBy = table.Column<Guid>(nullable: false),
+                    LastModifiedBy = table.Column<Guid>(nullable: false),
+                    Username = table.Column<string>(nullable: true),
+                    HasInventoryAccess = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_User", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Budget",
                 columns: table => new
                 {
@@ -401,6 +418,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "NetworkRollupDetail",
+                columns: table => new
+                {
+                    NetworkId = table.Column<Guid>(nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(nullable: false),
+                    CreatedBy = table.Column<Guid>(nullable: false),
+                    LastModifiedBy = table.Column<Guid>(nullable: false),
+                    Status = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NetworkRollupDetail", x => x.NetworkId);
+                    table.ForeignKey(
+                        name: "FK_NetworkRollupDetail_Network_NetworkId",
+                        column: x => x.NetworkId,
+                        principalTable: "Network",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Simulation",
                 columns: table => new
                 {
@@ -539,6 +578,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         name: "FK_SelectableTreatment_TreatmentLibrary_TreatmentLibraryId",
                         column: x => x.TreatmentLibraryId,
                         principalTable: "TreatmentLibrary",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CriterionLibrary_User",
+                columns: table => new
+                {
+                    CriterionLibraryId = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CriterionLibrary_User", x => new { x.CriterionLibraryId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_CriterionLibrary_User_CriterionLibrary_CriterionLibraryId",
+                        column: x => x.CriterionLibraryId,
+                        principalTable: "CriterionLibrary",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CriterionLibrary_User_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1082,6 +1145,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Simulation_User",
+                columns: table => new
+                {
+                    SimulationId = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(nullable: false),
+                    CreatedBy = table.Column<Guid>(nullable: false),
+                    LastModifiedBy = table.Column<Guid>(nullable: false),
+                    CanModify = table.Column<bool>(nullable: false),
+                    IsOwner = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Simulation_User", x => new { x.SimulationId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_Simulation_User_Simulation_SimulationId",
+                        column: x => x.SimulationId,
+                        principalTable: "Simulation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Simulation_User_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SimulationAnalysisDetail",
                 columns: table => new
                 {
@@ -1121,6 +1214,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     table.PrimaryKey("PK_SimulationOutput", x => x.SimulationId);
                     table.ForeignKey(
                         name: "FK_SimulationOutput_Simulation_SimulationId",
+                        column: x => x.SimulationId,
+                        principalTable: "Simulation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SimulationReportDetail",
+                columns: table => new
+                {
+                    SimulationId = table.Column<Guid>(nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(nullable: false),
+                    CreatedBy = table.Column<Guid>(nullable: false),
+                    LastModifiedBy = table.Column<Guid>(nullable: false),
+                    Status = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SimulationReportDetail", x => x.SimulationId);
+                    table.ForeignKey(
+                        name: "FK_SimulationReportDetail_Simulation_SimulationId",
                         column: x => x.SimulationId,
                         principalTable: "Simulation",
                         principalColumn: "Id",
@@ -2114,6 +2229,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_CriterionLibrary_User_CriterionLibraryId",
+                table: "CriterionLibrary_User",
+                column: "CriterionLibraryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CriterionLibrary_User_UserId",
+                table: "CriterionLibrary_User",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DeficientConditionGoal_AttributeId",
                 table: "DeficientConditionGoal",
                 column: "AttributeId");
@@ -2154,6 +2280,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "IX_MaintainableAssetLocation_MaintainableAssetId",
                 table: "MaintainableAssetLocation",
                 column: "MaintainableAssetId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NetworkRollupDetail_NetworkId",
+                table: "NetworkRollupDetail",
+                column: "NetworkId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -2236,6 +2368,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 column: "NetworkId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Simulation_User_SimulationId",
+                table: "Simulation_User",
+                column: "SimulationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Simulation_User_UserId",
+                table: "Simulation_User",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SimulationAnalysisDetail_SimulationId",
                 table: "SimulationAnalysisDetail",
                 column: "SimulationId",
@@ -2244,6 +2386,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_SimulationOutput_SimulationId",
                 table: "SimulationOutput",
+                column: "SimulationId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SimulationReportDetail_SimulationId",
+                table: "SimulationReportDetail",
                 column: "SimulationId",
                 unique: true);
 
@@ -2421,6 +2569,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_TreatmentSupersession");
 
             migrationBuilder.DropTable(
+                name: "CriterionLibrary_User");
+
+            migrationBuilder.DropTable(
                 name: "DeficientConditionGoalLibrary_Simulation");
 
             migrationBuilder.DropTable(
@@ -2428,6 +2579,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             migrationBuilder.DropTable(
                 name: "MaintainableAssetLocation");
+
+            migrationBuilder.DropTable(
+                name: "NetworkRollupDetail");
 
             migrationBuilder.DropTable(
                 name: "NumericAttributeValueHistory");
@@ -2442,10 +2596,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "RemainingLifeLimitLibrary_Simulation");
 
             migrationBuilder.DropTable(
+                name: "Simulation_User");
+
+            migrationBuilder.DropTable(
                 name: "SimulationAnalysisDetail");
 
             migrationBuilder.DropTable(
                 name: "SimulationOutput");
+
+            migrationBuilder.DropTable(
+                name: "SimulationReportDetail");
 
             migrationBuilder.DropTable(
                 name: "TargetConditionGoalLibrary_Simulation");
@@ -2493,13 +2653,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TargetConditionGoal");
 
             migrationBuilder.DropTable(
-                name: "CriterionLibrary");
-
-            migrationBuilder.DropTable(
                 name: "TreatmentSupersession");
 
             migrationBuilder.DropTable(
+                name: "CriterionLibrary");
+
+            migrationBuilder.DropTable(
                 name: "PerformanceCurve");
+
+            migrationBuilder.DropTable(
+                name: "User");
 
             migrationBuilder.DropTable(
                 name: "TreatmentConsequence");

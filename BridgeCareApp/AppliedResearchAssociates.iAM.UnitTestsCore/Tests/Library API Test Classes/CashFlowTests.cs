@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new CashFlowController(_testHelper.UnitOfDataPersistenceWork);
+            _controller = new CashFlowController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
         }
 
         public CashFlowRuleLibraryEntity TestCashFlowRuleLibrary { get; } = new CashFlowRuleLibraryEntity
@@ -68,15 +68,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnGet()
+        public async void ShouldReturnOkResultOnGet()
         {
             try
             {
                 // Act
-                var result = _controller.CashFlowRuleLibraries();
+                var result = await _controller.CashFlowRuleLibraries();
 
                 // Assert
-                Assert.IsType<OkObjectResult>(result.Result);
+                Assert.IsType<OkObjectResult>(result);
             }
             finally
             {
@@ -86,16 +86,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnPost()
+        public async void ShouldReturnOkResultOnPost()
         {
             try
             {
                 // Act
-                var result = _controller
+                var result = await _controller
                     .UpsertCashFlowRuleLibrary(Guid.Empty, TestCashFlowRuleLibrary.ToDto());
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -105,15 +105,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnDelete()
+        public async void ShouldReturnOkResultOnDelete()
         {
             try
             {
                 // Act
-                var result = _controller.DeleteCashFlowRuleLibrary(Guid.Empty);
+                var result = await _controller.DeleteCashFlowRuleLibrary(Guid.Empty);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -123,7 +123,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldGetAllCashFlowRuleLibrariesWithCashFlowRules()
+        public async void ShouldGetAllCashFlowRuleLibrariesWithCashFlowRules()
         {
             try
             {
@@ -131,10 +131,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 SetupForGet();
 
                 // Act
-                var result = _controller.CashFlowRuleLibraries();
+                var result = await _controller.CashFlowRuleLibraries();
 
                 // Assert
-                var okObjResult = result.Result as OkObjectResult;
+                var okObjResult = result as OkObjectResult;
                 Assert.NotNull(okObjResult.Value);
 
                 var dtos = (List<CashFlowRuleLibraryDTO>)Convert.ChangeType(okObjResult.Value,
@@ -154,14 +154,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldModifyCashFlowRuleData()
+        public async void ShouldModifyCashFlowRuleData()
         {
             try
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dtos = (List<CashFlowRuleLibraryDTO>)Convert.ChangeType(
-                    (_controller.CashFlowRuleLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.CashFlowRuleLibraries();
+                var dtos = (List<CashFlowRuleLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<CashFlowRuleLibraryDTO>));
 
                 var cashFlowRuleLibraryDTO = dtos[0];
@@ -173,11 +173,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.UpsertCashFlowRuleLibrary(_testHelper.TestSimulation.Id,
-                        cashFlowRuleLibraryDTO);
+                    await _controller.UpsertCashFlowRuleLibrary(_testHelper.TestSimulation.Id, cashFlowRuleLibraryDTO);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 var cashFlowRuleLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.CashFlowRuleLibrary
                     .Include(_ => _.CashFlowRules)
@@ -216,8 +215,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dtos = (List<CashFlowRuleLibraryDTO>)Convert.ChangeType(
-                    (_controller.CashFlowRuleLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.CashFlowRuleLibraries();
+                var dtos = (List<CashFlowRuleLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<CashFlowRuleLibraryDTO>));
 
                 var cashFlowRuleLibraryDTO = dtos[0];
@@ -228,10 +227,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                     cashFlowRuleLibraryDTO);
 
                 // Act
-                var result = _controller.DeleteCashFlowRuleLibrary(CashFlowRuleLibraryId);
+                var result = await _controller.DeleteCashFlowRuleLibrary(CashFlowRuleLibraryId);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == CashFlowRuleLibraryId));
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.CashFlowRule.Any(_ => _.Id == CashFlowRuleId));

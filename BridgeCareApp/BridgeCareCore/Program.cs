@@ -1,5 +1,4 @@
 using System;
-using BridgeCareCore.Services.LegacySimulationSynchronization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;

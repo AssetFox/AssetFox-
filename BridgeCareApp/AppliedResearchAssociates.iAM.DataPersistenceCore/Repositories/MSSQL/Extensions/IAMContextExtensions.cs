@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using EFCore.BulkExtensions;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions
 {
@@ -11,7 +14,85 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public static void Upsert<T>(this IAMContext context, T entity, Guid key) where T : class
+        public static void AddEntity<T>(this IAMContext context, T entity, Guid? userId = null) where T : class
+        {
+            if (entity == null)
+            {
+                return;
+            }
+
+            if (userId.HasValue)
+            {
+                SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
+
+                SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
+            }
+
+            context.Set<T>().Add(entity);
+
+            context.SaveChanges();
+        }
+
+        public static void BulkAddAll<T>(this IAMContext context, List<T> entities, Guid? userId = null) where T : class
+        {
+            if (!entities.Any())
+            {
+                return;
+            }
+
+            entities.ForEach(entity =>
+            {
+                if (userId.HasValue)
+                {
+                    SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
+
+                    SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
+                }
+            });
+
+            if (IsRunningFromXUnit)
+            {
+                context.Set<T>().AddRange(entities);
+            }
+            else
+            {
+                context.BulkInsert(entities);
+            }
+
+            context.SaveChanges();
+        }
+
+        public static void Update<T>(this IAMContext context, T entity, Guid key, Guid? userId = null) where T : class
+        {
+            if (entity == null)
+            {
+                return;
+            }
+
+            var existingEntity = context.Set<T>().Find(key);
+            if (existingEntity == null)
+            {
+                throw new RowNotInTableException($"No {typeof(T).Name} entry found having id {key}.");
+            }
+
+            SetPropertyValue(entity, BaseEntityProperty.CreatedBy,
+                GetPropertyInfo<T>(BaseEntityProperty.CreatedBy).GetValue(existingEntity));
+
+            SetPropertyValue(entity, BaseEntityProperty.CreatedDate,
+                GetPropertyInfo<T>(BaseEntityProperty.CreatedDate).GetValue(existingEntity));
+
+            SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy,
+                userId ?? GetPropertyInfo<T>(BaseEntityProperty.LastModifiedBy)
+                    .GetValue(existingEntity));
+
+            SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
+
+            context.Entry(existingEntity).CurrentValues.SetValues(entity);
+
+            context.SaveChanges();
+        }
+
+        public static void Upsert<T>(this IAMContext context, T entity, Guid key, Guid? userId = null) where T : class
         {
             if (entity == null)
             {
@@ -23,21 +104,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             var existingEntity = entities.Find(key);
             if (existingEntity != null)
             {
-                var createdDatePropertyInfo = typeof(T).GetProperty("CreatedDate");
-                createdDatePropertyInfo.SetValue(entity, createdDatePropertyInfo.GetValue(existingEntity));
-                var lastModifiedDatePropertyInfo = typeof(T).GetProperty("LastModifiedDate");
-                lastModifiedDatePropertyInfo.SetValue(entity, DateTime.Now);
+                SetPropertyValue(entity, BaseEntityProperty.CreatedBy,
+                    GetPropertyInfo<T>(BaseEntityProperty.CreatedBy).GetValue(existingEntity));
+
+                SetPropertyValue(entity, BaseEntityProperty.CreatedDate,
+                    GetPropertyInfo<T>(BaseEntityProperty.CreatedDate).GetValue(existingEntity));
+
+                SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy,
+                    userId ?? GetPropertyInfo<T>(BaseEntityProperty.LastModifiedBy)
+                        .GetValue(existingEntity));
+
+                SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
+
                 context.Entry(existingEntity).CurrentValues.SetValues(entity);
             }
             else
             {
+                if (userId != null)
+                {
+                    SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
+
+                    SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
+                }
+
                 entities.Add(entity);
             }
 
             context.SaveChanges();
         }
 
-        public static void Upsert<T>(this IAMContext context, T entity, Expression<Func<T, bool>> predicate) where T : class
+        public static void Upsert<T>(this IAMContext context, T entity, Expression<Func<T, bool>> predicate, Guid? userId = null) where T : class
         {
             if (entity == null)
             {
@@ -49,16 +145,77 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             var existingEntity = entities.SingleOrDefault(predicate);
             if (existingEntity != null)
             {
-                var createdDatePropertyInfo = typeof(T).GetProperty("CreatedDate");
-                createdDatePropertyInfo.SetValue(entity, createdDatePropertyInfo.GetValue(existingEntity));
-                var lastModifiedDatePropertyInfo = typeof(T).GetProperty("LastModifiedDate");
-                lastModifiedDatePropertyInfo.SetValue(entity, DateTime.Now);
+                SetPropertyValue(entity, BaseEntityProperty.CreatedBy,
+                    GetPropertyInfo<T>(BaseEntityProperty.CreatedBy).GetValue(existingEntity));
+
+                SetPropertyValue(entity, BaseEntityProperty.CreatedDate,
+                    GetPropertyInfo<T>(BaseEntityProperty.CreatedDate).GetValue(existingEntity));
+
+                SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy,
+                    userId ?? GetPropertyInfo<T>(BaseEntityProperty.LastModifiedBy)
+                        .GetValue(existingEntity));
+
+                SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
+
                 context.Entry(existingEntity).CurrentValues.SetValues(entity);
             }
             else
             {
+                if (userId.HasValue)
+                {
+                    SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
+
+                    SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
+                }
+
                 entities.Add(entity);
             }
+
+            context.SaveChanges();
+        }
+
+        public static void UpsertAll<T>(this IAMContext context, List<T> entities, Guid? userId = null) where T : class
+        {
+            if (!entities.Any())
+            {
+                return;
+            }
+
+            var existingEntities = context.Set<T>();
+
+            entities.ForEach(entity =>
+            {
+                var idPropertyInfo = GetPropertyInfo<T>("Id");
+                if (existingEntities.Any(_ => idPropertyInfo.GetValue(_) == idPropertyInfo.GetValue(entity)))
+                {
+                    var existingEntity = existingEntities.Find(idPropertyInfo.GetValue(entity));
+
+                    SetPropertyValue(entity, BaseEntityProperty.CreatedBy,
+                        GetPropertyInfo<T>(BaseEntityProperty.CreatedBy).GetValue(existingEntity));
+
+                    SetPropertyValue(entity, BaseEntityProperty.CreatedDate,
+                        GetPropertyInfo<T>(BaseEntityProperty.CreatedDate).GetValue(existingEntity));
+
+                    SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy,
+                        userId ?? GetPropertyInfo<T>(BaseEntityProperty.LastModifiedBy)
+                            .GetValue(existingEntity));
+
+                    SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
+
+                    context.Entry(existingEntity).CurrentValues.SetValues(entity);
+                }
+                else
+                {
+                    if (userId.HasValue)
+                    {
+                        SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
+
+                        SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
+                    }
+                        
+                    existingEntities.Add(entity);
+                }
+            });
 
             context.SaveChanges();
         }
@@ -97,7 +254,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         }
 
         public static void UpsertOrDelete<T>(this IAMContext context, List<T> entities,
-            Dictionary<string, Expression<Func<T, bool>>> predicatesPerCrudOperation) where T : class
+            Dictionary<string, Expression<Func<T, bool>>> predicatesPerCrudOperation, Guid? userId = null) where T : class
         {
             var contextEntities = context.Set<T>();
 
@@ -123,15 +280,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 {
                     entitiesToUpdate.ForEach(entity =>
                     {
-                        var idPropertyInfo = typeof(T).GetProperty("Id");
-                        var existingEntity = contextEntities.Find(idPropertyInfo.GetValue(entity));
+                        var existingEntity = contextEntities.Find(GetPropertyInfo<T>("Id").GetValue(entity));
 
                         if (existingEntity != null)
                         {
-                            var createdDatePropertyInfo = typeof(T).GetProperty("CreatedDate");
-                            createdDatePropertyInfo.SetValue(entity, createdDatePropertyInfo.GetValue(existingEntity));
-                            var lastModifiedDatePropertyInfo = typeof(T).GetProperty("LastModifiedDate");
-                            lastModifiedDatePropertyInfo.SetValue(entity, DateTime.Now);
+                            SetPropertyValue(entity, BaseEntityProperty.CreatedBy,
+                                GetPropertyInfo<T>(BaseEntityProperty.CreatedBy).GetValue(existingEntity));
+
+                            SetPropertyValue(entity, BaseEntityProperty.CreatedDate,
+                                GetPropertyInfo<T>(BaseEntityProperty.CreatedDate).GetValue(existingEntity));
+
+                            SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy,
+                                userId ?? GetPropertyInfo<T>(BaseEntityProperty.LastModifiedBy)
+                                    .GetValue(existingEntity));
+
+                            SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
+
                             context.Entry(existingEntity).CurrentValues.SetValues(entity);
                         }
                     });
@@ -146,7 +310,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
                 if (entitiesToAdd.Any())
                 {
-                    contextEntities.AddRange(entitiesToAdd);
+                    entitiesToAdd.ForEach(entity =>
+                    {
+                        if (userId.HasValue)
+                        {
+                            SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
+
+                            SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
+                        }
+
+                        contextEntities.Add(entity);
+                    });
                 }
             }
 
@@ -154,7 +328,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         }
 
         public static void BulkUpsertOrDelete<T>(this IAMContext context, List<T> entities,
-            Dictionary<string, Expression<Func<T, bool>>> predicatesPerCrudOperation) where T : class
+            Dictionary<string, Expression<Func<T, bool>>> predicatesPerCrudOperation, Guid? userId = null) where T : class
         {
             var contextEntities = context.Set<T>();
 
@@ -174,6 +348,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 {
                     var propsToExclude = new List<string> { "CreatedDate", "CreatedBy" };
                     var config = new BulkConfig { PropertiesToExclude = propsToExclude };
+
+                    entitiesToUpdate.ForEach(entity =>
+                    {
+                        if (userId.HasValue)
+                        {
+                            SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
+                        }
+
+                        SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
+                    });
+
                     context.BulkUpdate(entitiesToUpdate.ToList(), config);
                 }
             }
@@ -183,11 +368,44 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 var entitiesToAdd = entities.AsQueryable().Where(predicatesPerCrudOperation["add"]);
                 if (entitiesToAdd.Any())
                 {
+                    entitiesToAdd.ForEach(entity =>
+                    {
+                        if (userId.HasValue)
+                        {
+                            SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
+                            SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
+                        }
+                    });
+
                     context.BulkInsert(entitiesToAdd.ToList());
                 }
             }
 
             context.SaveChanges();
         }
+
+        private static void SetPropertyValue<T>(T entity, string property, object value) =>
+            GetPropertyInfo<T>(property)?.SetValue(entity, value);
+
+        private static PropertyInfo GetPropertyInfo<T>(string property) =>
+            typeof(T).GetProperty(property);
+
+        public static void ReInitializeAllEntityBaseProperties<T>(this IAMContext context, T entity, Guid? userId = null)
+        {
+            var currentDateTime = DateTime.Now;
+            SetPropertyValue(entity, BaseEntityProperty.CreatedDate, currentDateTime);
+            SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, currentDateTime);
+
+            SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId ?? Guid.Empty);
+            SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId ?? Guid.Empty);
+        }
+    }
+
+    public static class BaseEntityProperty
+    {
+        public const string CreatedBy = "CreatedBy";
+        public const string CreatedDate = "CreatedDate";
+        public const string LastModifiedBy = "LastModifiedBy";
+        public const string LastModifiedDate = "LastModifiedDate";
     }
 }

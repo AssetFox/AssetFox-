@@ -1,8 +1,7 @@
 ﻿namespace BridgeCare.Models
 {
-    public class ValidateEquationModel
+    public class EquationValidationParametersModel : ValidationParameterModel
     {
-        public string Equation { get; set; }
         public bool IsFunction { get; set; }
         public bool IsPiecewise { get; set; }
     }

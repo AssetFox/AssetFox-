@@ -11,8 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
 
         public DateTime LastModifiedDate { get; set; }
 
-        public string AssignmentStatus { get; set; }
-
-        public int NetworkId { get; set; } = 13;
+        public string Status { get; set; }
     }
 }

@@ -1,13 +1,8 @@
 import {AxiosPromise} from 'axios';
-import {API, axiosInstance, coreAxiosInstance} from '@/shared/utils/axios-instance';
-import {CriteriaValidation} from '@/shared/models/iAM/criteria-validation';
+import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import {CriterionLibrary} from '@/shared/models/iAM/criteria';
 
 export default class CriterionLibraryService {
-    static checkCriteriaValidity(criteriaValidation: CriteriaValidation): AxiosPromise {
-        return axiosInstance.post('/api/ValidateCriteria', criteriaValidation);
-    }
-
     static getCriterionLibraries(): AxiosPromise {
         return coreAxiosInstance.get(`${API.CriterionLibrary}/GetCriterionLibraries`);
     }

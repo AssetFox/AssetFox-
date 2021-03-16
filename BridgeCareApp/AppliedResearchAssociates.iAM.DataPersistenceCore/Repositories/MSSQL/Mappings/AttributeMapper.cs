@@ -1,5 +1,6 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 using TextAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.TextAttribute;
@@ -102,5 +103,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
         }
+
+        public static AttributeDTO ToDto(this AttributeEntity entity) =>
+            new AttributeDTO {Name = entity.Name, Type = entity.DataType};
     }
 }

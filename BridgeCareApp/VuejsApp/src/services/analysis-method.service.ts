@@ -1,23 +1,13 @@
 import {AxiosPromise} from 'axios';
-import {Analysis} from '@/shared/models/iAM/scenario';
-import {axiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
+import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
+import {AnalysisMethod} from '@/shared/models/iAM/analysis-method';
 
 export default class AnalysisMethodService {
-    /**
-     * Gets a scenario's analysis data
-     * @param selectedScenarioId A scenario's id
-     */
-    static getScenarioAnalysisData(selectedScenarioId: number): AxiosPromise {
-        return axiosInstance.get(`/api/GetScenarioAnalysisData/${selectedScenarioId}`);
+    static getAnalysisMethod(scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.AnalysisMethod}/GetAnalysisMethod/${scenarioId}`);
     }
 
-    /**
-     * Saves a scenario's analysis data
-     * @param scenarioAnalysisData A scenario's analysis data
-     */
-    static saveScenarioAnalysisData(scenarioAnalysisData: Analysis, objectIdMOngoDBForScenario: string): AxiosPromise {
-        // Node API call is to update last modified date. (THe date is set in the nodejs app)
-        nodejsAxiosInstance.put(`/api/UpdateMongoScenario/${objectIdMOngoDBForScenario}`);
-        return axiosInstance.post('/api/SaveScenarioAnalysisData', scenarioAnalysisData);
+    static upsetAnalysisMethod(data: AnalysisMethod, scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.AnalysisMethod}/UpsertAnalysisMethod/${scenarioId}`, data);
     }
 }

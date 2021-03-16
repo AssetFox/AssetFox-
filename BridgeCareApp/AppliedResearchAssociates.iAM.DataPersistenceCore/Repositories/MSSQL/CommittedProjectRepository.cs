@@ -107,9 +107,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetSimulationCommittedProjects(Simulation simulation)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Name == simulation.Name))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
-                throw new RowNotInTableException($"No simulation found having nme {simulation.Name}");
+                throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
             }
 
             _unitOfWork.Context.CommittedProject
@@ -117,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Section)
                 .ThenInclude(_ => _.Facility)
                 .Include(_ => _.CommittedProjectConsequences)
-                .Where(_ => _.Simulation.Name == simulation.Name)
+                .Where(_ => _.Simulation.Id == simulation.Id)
                 .ForEach(_ => _.CreateCommittedProject(simulation));
         }
     }

@@ -66,9 +66,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public List<DataAssignment.Networking.Network> GetAllNetworks() =>
             _unitOfDataPersistenceWork.Context.Network.Select(_ => _.ToDomain()).ToList();
 
-        public Task<List<NetworkDTO>> Networks() =>
-            Task.Factory
-                .StartNew(() => _unitOfDataPersistenceWork.Context.Network.Select(_ => _.ToDto()).ToList());
+        public Task<List<NetworkDTO>> Networks()
+        {
+            if (!_unitOfDataPersistenceWork.Context.Network.Any())
+            {
+                return Task.Factory.StartNew(() => new List<NetworkDTO>());
+            }
+
+            return Task.Factory.StartNew(() =>
+                _unitOfDataPersistenceWork.Context.Network.Select(_ => _.ToDto()).ToList());
+        }
 
         public NetworkEntity GetPennDotNetwork()
         {

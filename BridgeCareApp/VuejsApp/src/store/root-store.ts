@@ -19,9 +19,10 @@ import rollupModule from '../store-modules/rollup.module';
 import pollingModule from '@/store-modules/polling.module';
 import announcementModule from '@/store-modules/announcement.module';
 import cashFlowModule from '@/store-modules/cash-flow.module';
-import userCriteriaModule from '@/store-modules/user-criteria.module';
+import userModule from '@/store-modules/user.module';
 import unsavedChangesFlagModule from '@/store-modules/unsaved-changes-flag.module';
 import criterionModule from '@/store-modules/criterion-library.module';
+import analysisMethodModule from '@/store-modules/analysis-method.module';
 
 Vue.use(Vuex);
 
@@ -45,8 +46,9 @@ export default new Vuex.Store({
         pollingModule,
         announcementModule,
         cashFlowModule,
-        userCriteriaModule,
+        userModule,
         unsavedChangesFlagModule,
-        criterionModule
+        criterionModule,
+        analysisMethodModule
     }
 });

@@ -1,5 +1,3 @@
-using System;
-using BridgeCareCore.Services.LegacySimulationSynchronization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -8,53 +6,17 @@ namespace BridgeCareCore
 {
     public class Program
     {
-        public static void Main(string[] args)
-        {
-            var host = CreateHostBuilder(args).Build();
-            /*try
-            {
-                _backgroundTaskQueue.QueueBackgroundWorkItem(async (cancellationToken) =>
-                {
-                    await _hubContext
-                        .Clients
-                        .All
-                        .SendAsync("BroadcastDataMigration", "Starting data migration...");
-
-                    using (var scope = _host.Services.CreateScope())
-                    {
-                        var _legacySimulationSynchronizer = scope.ServiceProvider.GetRequiredService<LegacySimulationSynchronizer>();
-                        _legacySimulationSynchronizer.SynchronizeLegacySimulation(legacySimulationId);
-                    }
-
-                    await _hubContext
-                        .Clients
-                        .All
-                        .SendAsync("BroadcastDataMigration", "Finished data migration");
-                });
-
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                _logger.Error($"{e.Message}::{e.StackTrace}");
-                await _hubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastDataMigration", $"{e.Message}::{e.StackTrace}");
-                return StatusCode(500, e);
-            }*/
-            host.Run();
-        }
+        public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((hostcontext, config) =>
+                .ConfigureAppConfiguration((hostContext, config) =>
                 {
-                    var env = hostcontext.HostingEnvironment;
-#if MSSQLDEBUG
-                    config.AddJsonFile("coreConnection.Development.json", optional: true, reloadOnChange: true);
+                    config.AddJsonFile("esec.json", true, true);
+#if MsSqlDebug
+                    config.AddJsonFile("coreConnection.Development.json", true, true);
 #else
-                    config.AddJsonFile("coreConnection.json", optional: true, reloadOnChange: true);
+                    config.AddJsonFile("coreConnection.json", true, true);
 #endif
                 })
                 .ConfigureWebHostDefaults(webBuilder =>

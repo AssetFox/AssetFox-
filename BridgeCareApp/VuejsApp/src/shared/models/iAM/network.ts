@@ -5,8 +5,7 @@ export interface Network {
     name: string;
     createdDate?: Date;
     lastModifiedDate?: Date;
-    assignmentStatus?: string;
-    networkId: number;
+    status?: string;
 }
 
 export const emptyNetwork: Network = {
@@ -14,8 +13,7 @@ export const emptyNetwork: Network = {
     name: '',
     createdDate: new Date(),
     lastModifiedDate: new Date(),
-    assignmentStatus: '',
-    networkId: 0
+    status: ''
 };
 
 export interface NetworkCreationData {

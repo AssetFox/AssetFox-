@@ -21,16 +21,14 @@ namespace BridgeCare.Controllers
         /// <summary>
         /// API endpoint for validating an equation
         /// </summary>
-        /// <param name="model">ValidateEquationModel</param>
+        /// <param name="validationParametersModel">ValidateEquationModel</param>
         /// <returns>IHttpActionResult</returns>
         [HttpPost]
         [Route("api/ValidateEquation")]
         [ModelValidation("The equation data is invalid.")]
         [RestrictAccess]
-        public IHttpActionResult ValidateEquation(ValidateEquationModel model)
-        {
-            return Ok(repo.ValidateEquation(model, db));
-        }
+        public IHttpActionResult ValidateEquation(EquationValidationParametersModel validationParametersModel) =>
+            Ok(repo.ValidateEquation(validationParametersModel, db));
 
         /// <summary>
         /// API endpoint for validating a criteria
@@ -41,7 +39,7 @@ namespace BridgeCare.Controllers
         [Route("api/ValidateCriteria")]
         [ModelValidation("The criteria data is invalid.")]
         [RestrictAccess]
-        public IHttpActionResult ValidateCriteria([FromBody]ValidateCriteriaModel model) =>
-            Ok(repo.ValidateCriteria(model.Criteria, db));
+        public IHttpActionResult ValidateCriteria([FromBody]ValidationParameterModel model) =>
+            Ok(repo.ValidateCriteria(model.Expression, db));
     }
 }

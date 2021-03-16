@@ -58,7 +58,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Name = entity.Name,
                 CreatedDate = entity.CreatedDate,
-                LastModifiedDate = entity.LastModifiedDate
+                LastModifiedDate = entity.LastModifiedDate,
+                Status = entity.NetworkRollupDetail != null ? entity.NetworkRollupDetail.Status : "N/A"
             };
 
         public static SimulationAnalysisDomains.Network ToSimulationAnalysisDomain(this NetworkEntity entity, Explorer explorer)

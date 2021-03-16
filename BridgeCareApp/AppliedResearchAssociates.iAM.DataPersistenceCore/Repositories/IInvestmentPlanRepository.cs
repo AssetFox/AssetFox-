@@ -13,6 +13,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         Task<InvestmentPlanDTO> ScenarioInvestmentPlan(Guid simulationId);
 
-        void UpsertInvestmentPlan(InvestmentPlanDTO dto, Guid simulationId);
+        void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, InvestmentPlanDTO dto);
+
+        void UpsertInvestmentPlan(InvestmentPlanDTO dto, Guid simulationId, UserInfoDTO userInfo);
     }
 }

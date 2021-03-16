@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
@@ -10,5 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void JoinAttributesWithEquationsAndCriteria(Explorer explorer);
 
         Explorer GetExplorer();
+
+        Task<List<AttributeDTO>> Attributes();
     }
 }

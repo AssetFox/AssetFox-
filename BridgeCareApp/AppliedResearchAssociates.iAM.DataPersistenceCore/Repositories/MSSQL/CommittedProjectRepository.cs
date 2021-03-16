@@ -5,7 +5,6 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
-using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using MoreLinq;
@@ -81,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             //_unitOfWork.Context.CommittedProject.Add(committedProjectEntities[0]);
 
-            foreach(var item in committedProjectEntities)
+            foreach (var item in committedProjectEntities)
             {
                 _unitOfWork.Context.CommittedProject.Add(item);
             }
@@ -107,9 +106,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetSimulationCommittedProjects(Simulation simulation)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Name == simulation.Name))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
-                throw new RowNotInTableException($"No simulation found having nme {simulation.Name}");
+                throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
             }
 
             _unitOfWork.Context.CommittedProject
@@ -117,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Section)
                 .ThenInclude(_ => _.Facility)
                 .Include(_ => _.CommittedProjectConsequences)
-                .Where(_ => _.Simulation.Name == simulation.Name)
+                .Where(_ => _.Simulation.Id == simulation.Id)
                 .ForEach(_ => _.CreateCommittedProject(simulation));
         }
     }

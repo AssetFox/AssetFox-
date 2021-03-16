@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Logging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
@@ -24,6 +25,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetAllNetworks")]
+        [Authorize]
         public async Task<IActionResult> AllNetworks()
         {
             try
@@ -40,6 +42,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CreateNetwork/{networkName}")]
+        [Authorize]
         public IActionResult CreateNetwork(string networkName)
         {
             try
@@ -70,11 +73,6 @@ namespace BridgeCareCore.Controllers
                 _log.Error($"CreateNetwork Error => { e.Message}::{ e.StackTrace}");
                 return StatusCode(500, $"{e.Message}::{e.StackTrace}");
             }
-        }
-
-        public class NetworkName
-        {
-            internal string name { get; set; }
         }
     }
 }

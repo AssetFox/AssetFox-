@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new PerformanceCurveController(_testHelper.UnitOfDataPersistenceWork);
+            _controller = new PerformanceCurveController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
         }
 
         public PerformanceCurveLibraryEntity TestPerformanceCurveLibrary { get; } = new PerformanceCurveLibraryEntity
@@ -68,15 +68,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnGet()
+        public async void ShouldReturnOkResultOnGet()
         {
             try
             {
                 // Act
-                var result = _controller.PerformanceCurveLibraries();
+                var result = await _controller.PerformanceCurveLibraries();
 
                 // Assert
-              Assert.IsType<OkObjectResult>(result.Result);
+                Assert.IsType<OkObjectResult>(result);
             }
             finally
             {
@@ -86,16 +86,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnPost()
+        public async void ShouldReturnOkResultOnPost()
         {
             try
             {
                 // Act
-                var result = _controller
+                var result = await _controller
                     .UpsertPerformanceCurveLibrary(Guid.Empty, TestPerformanceCurveLibrary.ToDto());
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -105,15 +105,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnDelete()
+        public async void ShouldReturnOkResultOnDelete()
         {
             try
             {
                 // Act
-                var result = _controller.DeletePerformanceCurveLibrary(Guid.Empty);
+                var result = await _controller.DeletePerformanceCurveLibrary(Guid.Empty);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -123,7 +123,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldGetAllPerformanceCurveLibrariesWithPerformanceCurves()
+        public async void ShouldGetAllPerformanceCurveLibrariesWithPerformanceCurves()
         {
             try
             {
@@ -131,10 +131,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 SetupForGet();
 
                 // Act
-                var result = _controller.PerformanceCurveLibraries();
+                var result = await _controller.PerformanceCurveLibraries();
 
                 // Assert
-                var okObjResult = result.Result as OkObjectResult;
+                var okObjResult = result as OkObjectResult;
                 Assert.NotNull(okObjResult.Value);
 
                 var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType(okObjResult.Value,
@@ -154,14 +154,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldModifyPerformanceCurveData()
+        public async void ShouldModifyPerformanceCurveData()
         {
             try
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType(
-                    (_controller.PerformanceCurveLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.PerformanceCurveLibraries();
+                var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<PerformanceCurveLibraryDTO>));
 
                 var performanceCurveLibraryDTO = dtos[0];
@@ -173,11 +173,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.UpsertPerformanceCurveLibrary(_testHelper.TestSimulation.Id,
+                    await _controller.UpsertPerformanceCurveLibrary(_testHelper.TestSimulation.Id,
                         performanceCurveLibraryDTO);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 var performanceCurveLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.PerformanceCurveLibrary
                     .Include(_ => _.PerformanceCurves)
@@ -222,8 +222,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType(
-                    (_controller.PerformanceCurveLibraries().Result as OkObjectResult).Value,
+                var getResult = await _controller.PerformanceCurveLibraries();
+                var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<PerformanceCurveLibraryDTO>));
 
                 var performanceCurveLibraryDTO = dtos[0];

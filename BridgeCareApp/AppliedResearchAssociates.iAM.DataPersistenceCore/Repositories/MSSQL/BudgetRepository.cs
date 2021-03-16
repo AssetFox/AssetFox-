@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
-using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -123,11 +122,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList());
         }
 
-        public void UpsertBudgetLibrary(BudgetLibraryDTO dto, Guid simulationId)
+        public void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, BudgetLibraryDTO dto)
         {
-            var entity = dto.ToEntity();
+            if (simulationId != Guid.Empty)
+            {
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                {
+                    throw new RowNotInTableException($"No simulation found having id {dto.Id}");
+                }
 
-            _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ =>
+                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
+                }
+            }
+
+            UpsertBudgetLibrary(dto, simulationId, userInfo);
+            UpsertOrDeleteBudgets(dto.Budgets, dto.Id, userInfo);
+        }
+
+        public void UpsertBudgetLibrary(BudgetLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
+        {
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+
+            var budgetLibraryEntity = dto.ToEntity();
+
+            _unitOfDataPersistenceWork.Context.Upsert(budgetLibraryEntity, dto.Id, userEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -138,23 +159,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfDataPersistenceWork.Context.Delete<BudgetLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
-                _unitOfDataPersistenceWork.Context.BudgetLibrarySimulation.Add(
-                    new BudgetLibrarySimulationEntity { BudgetLibraryId = dto.Id, SimulationId = simulationId });
+                _unitOfDataPersistenceWork.Context.AddEntity(
+                    new BudgetLibrarySimulationEntity { BudgetLibraryId = dto.Id, SimulationId = simulationId },
+                    userEntity?.Id);
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId)
+        public void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId, UserInfoDTO userInfo)
         {
             if (!_unitOfDataPersistenceWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
             {
                 throw new RowNotInTableException($"No budget library found having id {libraryId}.");
             }
 
-            var entities = budgets.Select(_ => _.ToEntity(libraryId)).ToList();
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
-            var entityIds = entities.Select(_ => _.Id).ToList();
+            var budgetEntities = budgets.Select(_ => _.ToEntity(libraryId)).ToList();
+
+            var entityIds = budgetEntities.Select(_ => _.Id).ToList();
 
             var existingEntityIds = _unitOfDataPersistenceWork.Context.Budget
                 .Where(_ => _.BudgetLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id).ToList();
@@ -168,11 +190,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(budgetEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(budgetEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryBudgetEntity>(_ =>
@@ -180,7 +202,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var budgetAmountsPerBudgetId = budgets.ToDictionary(_ => _.Id, _ => _.BudgetAmounts);
 
-            _unitOfDataPersistenceWork.BudgetAmountRepo.UpsertOrDeleteBudgetAmounts(budgetAmountsPerBudgetId, libraryId);
+            _unitOfDataPersistenceWork.BudgetAmountRepo.UpsertOrDeleteBudgetAmounts(budgetAmountsPerBudgetId, libraryId, userEntity?.Id);
 
             if (budgets.Any(_ =>
                 _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
@@ -192,17 +214,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         new CriterionLibraryBudgetEntity { CriterionLibraryId = _.CriterionLibrary.Id, BudgetId = _.Id })
                     .ToList();
 
-                if (IsRunningFromXUnit)
-                {
-                    _unitOfDataPersistenceWork.Context.CriterionLibraryBudget.AddRange(criterionLibraryJoinsToAdd);
-                }
-                else
-                {
-                    _unitOfDataPersistenceWork.Context.BulkInsert(criterionLibraryJoinsToAdd);
-                }
+                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void DeleteBudgetLibrary(Guid libraryId)
@@ -212,11 +225,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            var libraryToDelete = _unitOfDataPersistenceWork.Context.BudgetLibrary.Single(_ => _.Id == libraryId);
-
-            _unitOfDataPersistenceWork.Context.BudgetLibrary.Remove(libraryToDelete);
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.Delete<BudgetLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

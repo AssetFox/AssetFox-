@@ -1,6 +1,4 @@
-﻿
-
-//using AppliedResearchAssociates.iAM.Segmentation;
+﻿//using AppliedResearchAssociates.iAM.Segmentation;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 {

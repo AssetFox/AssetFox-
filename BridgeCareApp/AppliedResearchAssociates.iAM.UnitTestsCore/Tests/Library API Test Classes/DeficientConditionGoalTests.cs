@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new DeficientConditionGoalController(_testHelper.UnitOfDataPersistenceWork);
+            _controller = new DeficientConditionGoalController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
         }
 
         public DeficientConditionGoalLibraryEntity TestDeficientConditionGoalLibrary { get; } = new DeficientConditionGoalLibraryEntity
@@ -61,15 +61,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnGet()
+        public async void ShouldReturnOkResultOnGet()
         {
             try
             {
                 // Act
-                var result = _controller.DeficientConditionGoalLibraries();
+                var result = await _controller.DeficientConditionGoalLibraries();
 
                 // Assert
-                Assert.IsType<OkObjectResult>(result.Result);
+                Assert.IsType<OkObjectResult>(result);
             }
             finally
             {
@@ -79,16 +79,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnPost()
+        public async void ShouldReturnOkResultOnPost()
         {
             try
             {
                 // Act
-                var result = _controller
+                var result = await _controller
                     .UpsertDeficientConditionGoalLibrary(Guid.Empty, TestDeficientConditionGoalLibrary.ToDto());
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -98,15 +98,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnDelete()
+        public async void ShouldReturnOkResultOnDelete()
         {
             try
             {
                 // Act
-                var result = _controller.DeleteDeficientConditionGoalLibrary(Guid.Empty);
+                var result = await _controller.DeleteDeficientConditionGoalLibrary(Guid.Empty);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldGetAllDeficientConditionGoalLibrariesWithDeficientConditionGoals()
+        public async void ShouldGetAllDeficientConditionGoalLibrariesWithDeficientConditionGoals()
         {
             try
             {
@@ -124,10 +124,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 SetupForGet();
 
                 // Act
-                var result = _controller.DeficientConditionGoalLibraries();
+                var result = await _controller.DeficientConditionGoalLibraries();
 
                 // Assert
-                var okObjResult = result.Result as OkObjectResult;
+                var okObjResult = result as OkObjectResult;
                 Assert.NotNull(okObjResult.Value);
 
                 var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(okObjResult.Value,
@@ -147,15 +147,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldModifyDeficientConditionGoalData()
+        public async void ShouldModifyDeficientConditionGoalData()
         {
             try
             {
                 // Arrange
                 SetupForUpsertOrDelete();
+                var getResult = await _controller.DeficientConditionGoalLibraries();
                 var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(
-                    (_controller.DeficientConditionGoalLibraries().Result as OkObjectResult).Value,
-                    typeof(List<DeficientConditionGoalLibraryDTO>));
+                    (getResult as OkObjectResult).Value, typeof(List<DeficientConditionGoalLibraryDTO>));
 
                 var deficientConditionGoalLibraryDTO = dtos[0];
                 deficientConditionGoalLibraryDTO.Description = "Updated Description";
@@ -164,12 +164,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                     _testHelper.TestCriterionLibrary.ToDto();
 
                 // Act
-                var result =
-                    _controller.UpsertDeficientConditionGoalLibrary(_testHelper.TestSimulation.Id,
-                        deficientConditionGoalLibraryDTO);
+                var result = await _controller.UpsertDeficientConditionGoalLibrary(_testHelper.TestSimulation.Id,
+                    deficientConditionGoalLibraryDTO);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 var deficientConditionGoalLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.DeficientConditionGoalLibrary
                     .Include(_ => _.DeficientConditionGoals)
@@ -208,9 +207,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Arrange
                 SetupForUpsertOrDelete();
+                var getResult = await _controller.DeficientConditionGoalLibraries();
                 var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(
-                    (_controller.DeficientConditionGoalLibraries().Result as OkObjectResult).Value,
-                    typeof(List<DeficientConditionGoalLibraryDTO>));
+                    (getResult as OkObjectResult).Value, typeof(List<DeficientConditionGoalLibraryDTO>));
 
                 var deficientConditionGoalLibraryDTO = dtos[0];
                 deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary =
@@ -220,10 +219,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                     deficientConditionGoalLibraryDTO);
 
                 // Act
-                var result = _controller.DeleteDeficientConditionGoalLibrary(DeficientConditionGoalLibraryId);
+                var result = await _controller.DeleteDeficientConditionGoalLibrary(DeficientConditionGoalLibraryId);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == DeficientConditionGoalLibraryId));
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.DeficientConditionGoal.Any(_ => _.Id == DeficientConditionGoalId));

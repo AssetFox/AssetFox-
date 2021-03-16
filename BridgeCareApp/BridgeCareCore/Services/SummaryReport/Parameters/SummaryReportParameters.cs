@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Interfaces.SummaryReport;
@@ -58,6 +57,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
         }
 
         #region
+
         private void FillData(ExcelWorksheet worksheet, ParametersModel parametersModel)
         {
             var bpnValueCellTracker = new Dictionary<string, string>();
@@ -404,7 +404,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             foreach (var budgets in simulation.InvestmentPlan.Budgets)
             {
                 var i = 0;
-                foreach(var item in budgets.YearlyAmounts)
+                foreach (var item in budgets.YearlyAmounts)
                 {
                     if (!investmentGrid.ContainsKey(startYear + i))
                     {
@@ -414,7 +414,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
                     }
                     else
                     {
-                        if(!investmentGrid[startYear + i].ContainsKey(budgets.Name))
+                        if (!investmentGrid[startYear + i].ContainsKey(budgets.Name))
                         {
                             investmentGrid[startYear + i].Add(budgets.Name, item.Value);
                         }
@@ -482,6 +482,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             }
             _excelHelper.ApplyBorder(worksheet.Cells[rowToApplyBorder, 1, startingRowInvestment + 3, 5]);
         }
+
         #endregion
     }
 }

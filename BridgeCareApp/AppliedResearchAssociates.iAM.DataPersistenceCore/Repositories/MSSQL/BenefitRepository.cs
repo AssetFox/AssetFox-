@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 
@@ -33,6 +35,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfDataPersistenceWork.Context.Benefit.Add(benefit.ToEntity(analysisMethodId, attributeEntity?.Id));
             _unitOfDataPersistenceWork.Context.SaveChanges();
+        }
+
+        public void UpsertBenefit(BenefitDTO dto, Guid analysisMethodId, Guid? userId = null)
+        {
+            if (!_unitOfDataPersistenceWork.Context.AnalysisMethod.Any(_ => _.Id == analysisMethodId))
+            {
+                throw new RowNotInTableException($"No simulation analysis method found having id {analysisMethodId}.");
+            }
+
+            if (string.IsNullOrEmpty(dto.Attribute))
+            {
+                throw new InvalidOperationException("Benefit must have an attribute.");
+            }
+
+            if (!_unitOfDataPersistenceWork.Context.Attribute.Any(_ => _.Name == dto.Attribute))
+            {
+                throw new RowNotInTableException($"No attribute found having name {dto.Attribute}.");
+            }
+
+            var attributeEntity = _unitOfDataPersistenceWork.Context.Attribute.Single(_ => _.Name == dto.Attribute);
+
+            var benefitEntity = dto.ToEntity(analysisMethodId, attributeEntity.Id);
+
+            _unitOfDataPersistenceWork.Context.Upsert(benefitEntity, _ => _.Id == dto.Id, userId);
         }
     }
 }

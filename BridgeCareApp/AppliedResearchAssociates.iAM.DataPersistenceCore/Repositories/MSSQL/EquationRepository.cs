@@ -16,38 +16,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public EquationRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
-        public void CreateEquations(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, string joinEntity)
+        public void CreateEquations(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, string joinEntity, Guid? userId = null)
         {
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.Equation.AddRange(equationEntityPerJoinEntityId.Values.ToList());
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(equationEntityPerJoinEntityId.Values.ToList());
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.BulkAddAll(equationEntityPerJoinEntityId.Values.ToList(), userId);
 
             switch (joinEntity)
             {
             case DataPersistenceConstants.EquationJoinEntities.PerformanceCurve:
-                JoinEquationsWithPerformanceCurves(equationEntityPerJoinEntityId);
+                JoinEquationsWithPerformanceCurves(equationEntityPerJoinEntityId, userId);
                 break;
 
             case DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence:
-                JoinEquationsWithTreatmentConsequences(equationEntityPerJoinEntityId);
+                JoinEquationsWithTreatmentConsequences(equationEntityPerJoinEntityId, userId);
                 break;
 
             case DataPersistenceConstants.EquationJoinEntities.TreatmentCost:
-                JoinEquationsWithTreatmentCosts(equationEntityPerJoinEntityId);
+                JoinEquationsWithTreatmentCosts(equationEntityPerJoinEntityId, userId);
                 break;
 
             default:
                 throw new InvalidOperationException("Unable to determine equation join entity type.");
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void CreateEquations(List<EquationEntity> equationEntities)
@@ -64,52 +53,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        private void JoinEquationsWithPerformanceCurves(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId)
+        private void JoinEquationsWithPerformanceCurves(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, Guid? userId = null)
         {
             var performanceCurveEquationJoinEntities = equationEntityPerJoinEntityId
                 .Select(_ => new PerformanceCurveEquationEntity { EquationId = _.Value.Id, PerformanceCurveId = _.Key })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.PerformanceCurveEquation.AddRange(performanceCurveEquationJoinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(performanceCurveEquationJoinEntities);
-            }
+            _unitOfDataPersistenceWork.Context.BulkAddAll(performanceCurveEquationJoinEntities, userId);
         }
 
-        private void JoinEquationsWithTreatmentConsequences(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId)
+        private void JoinEquationsWithTreatmentConsequences(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, Guid? userId = null)
         {
             var treatmentConsequenceEquationJoinEntities = equationEntityPerJoinEntityId
                 .Select(_ => new ConditionalTreatmentConsequenceEquationEntity { EquationId = _.Value.Id, ConditionalTreatmentConsequenceId = _.Key })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.TreatmentConsequenceEquation.AddRange(treatmentConsequenceEquationJoinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(treatmentConsequenceEquationJoinEntities);
-            }
+            _unitOfDataPersistenceWork.Context.BulkAddAll(treatmentConsequenceEquationJoinEntities, userId);
         }
 
-        private void JoinEquationsWithTreatmentCosts(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId)
+        private void JoinEquationsWithTreatmentCosts(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, Guid? userId = null)
         {
             var treatmentCostEquationJoinEntities = equationEntityPerJoinEntityId
                 .Select(_ => new TreatmentCostEquationEntity { EquationId = _.Value.Id, TreatmentCostId = _.Key })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.TreatmentCostEquation.AddRange(treatmentCostEquationJoinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(treatmentCostEquationJoinEntities);
-            }
+            _unitOfDataPersistenceWork.Context.BulkAddAll(treatmentCostEquationJoinEntities, userId);
         }
     }
 }

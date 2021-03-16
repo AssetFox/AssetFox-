@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug</Configurations>
+    <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug;Test</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

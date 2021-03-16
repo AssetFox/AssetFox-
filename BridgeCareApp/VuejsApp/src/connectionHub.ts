@@ -1,6 +1,7 @@
 import { HubConnectionBuilder, LogLevel, HttpTransportType } from '@microsoft/signalr';
 import { coreAxiosInstance } from './shared/utils/axios-instance';
 import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
+import {SimulationReportDetail} from '@/shared/models/iAM/simulation-report-detail';
 
 export default {
     install(Vue: any) {
@@ -19,8 +20,8 @@ export default {
                 statusHub.$emit('assignedData-status-event', {status, percentage});
             });
 
-            connection.on('BroadcastSummaryReportGenerationStatus', (status, scenarioId) => {
-                statusHub.$emit('summaryReportGeneration-status-event', {status, scenarioId});
+            connection.on('BroadcastSummaryReportGenerationStatus', (simulationReportDetail: SimulationReportDetail) => {
+                statusHub.$emit('summaryReportGeneration-status-event', {simulationReportDetail});
             });
 
             connection.on('BroadcastDataMigration', (status) => {

@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
                 Context.Database.SetCommandTimeout(1800);
             }
 
-            Connection = new SqlConnection(Config.GetConnectionString("BridgeCareConnex"));
+            Connection = new Microsoft.Data.SqlClient.SqlConnection(Config.GetConnectionString("BridgeCareConnex"));
             LegacyConnection = new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
         }
 
@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IAMContext Context { get; }
 
-        public SqlConnection Connection { get; }
+        public Microsoft.Data.SqlClient.SqlConnection Connection { get; }
 
         public SqlConnection LegacyConnection { get; }
 
@@ -74,6 +74,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ITreatmentCostRepository _treatmentCostRepo;
         private ITreatmentSchedulingRepository _treatmentSchedulingRepo;
         private ITreatmentSupersessionRepository _treatmentSupersessionRepo;
+        private IUserRepository _userRepo;
+        private ISimulationReportDetailRepository _simulationReportDetailRepo;
 
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
 
@@ -142,6 +144,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ITreatmentSchedulingRepository TreatmentSchedulingRepo => _treatmentSchedulingRepo ??= new TreatmentSchedulingRepository(this);
 
         public ITreatmentSupersessionRepository TreatmentSupersessionRepo => _treatmentSupersessionRepo ??= new TreatmentSupersessionRepository(this);
+
+        public IUserRepository UserRepo => _userRepo ??= new UserRepository(this);
+
+        public ISimulationReportDetailRepository SimulationReportDetailRepo => _simulationReportDetailRepo ??= new SimulationReportDetailRepository(this);
 
         public IDbContextTransaction DbContextTransaction
         {

@@ -39,7 +39,7 @@ export default class CommittedProjectsService {
      * Deletes a scenario's committed projects
      * @param selectedScenarioId The scenario id used to find the committed projects that will be deleted
      */
-    static DeleteCommittedProjects(selectedScenarioId: number): AxiosPromise {
+    static DeleteCommittedProjects(selectedScenarioId: string): AxiosPromise {
         return axiosInstance.delete(`/api/DeleteCommittedProjects/${selectedScenarioId}`);
     }
 }

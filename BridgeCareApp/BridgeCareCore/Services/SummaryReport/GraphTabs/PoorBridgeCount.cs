@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
 
@@ -13,6 +12,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         {
             _stackedColumnChartCommon = stackedColumnChartCommon;
         }
+
         public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalPoorBridgesCountSectionYearsRow, int simulationYearsCount)
         {
             _stackedColumnChartCommon.SetWorksheetProperties(worksheet);
@@ -25,6 +25,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
 
             chart.Locked = true;
         }
+
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPoorBridgesCountSectionYearsRow, int count, ExcelChart chart)
         {
             CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorBridgesCountSectionYearsRow, count, chart, totalPoorBridgesCountSectionYearsRow + 1, Properties.Resources.BridgeCare, Color.Blue);

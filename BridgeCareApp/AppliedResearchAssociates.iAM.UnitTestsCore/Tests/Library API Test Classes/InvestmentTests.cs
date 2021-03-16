@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new InvestmentController(_testHelper.UnitOfDataPersistenceWork);
+            _controller = new InvestmentController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
         }
 
         public BudgetLibraryEntity TestBudgetLibrary { get; } = new BudgetLibraryEntity
@@ -83,15 +83,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnGet()
+        public async void ShouldReturnOkResultOnGet()
         {
             try
             {
                 // Act
-                var result = _controller.GetInvestment(Guid.Empty);
+                var result = await _controller.GetInvestment(Guid.Empty);
 
                 // Assert
-                Assert.IsType<OkObjectResult>(result.Result);
+                Assert.IsType<OkObjectResult>(result);
             }
             finally
             {
@@ -101,12 +101,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnPost()
+        public async void ShouldReturnOkResultOnPost()
         {
             try
             {
                 // Act
-                var result = _controller
+                var result = await _controller
                     .UpsertInvestment(Guid.Empty,
                         new UpsertInvestmentDataDTO
                         {
@@ -115,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                         });
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -125,15 +125,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldReturnOkResultOnDelete()
+        public async void ShouldReturnOkResultOnDelete()
         {
             try
             {
                 // Act
-                var result = _controller.DeleteBudgetLibrary(Guid.Empty);
+                var result = await _controller.DeleteBudgetLibrary(Guid.Empty);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
             }
             finally
             {
@@ -143,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldGetInvestmentData()
+        public async void ShouldGetInvestmentData()
         {
             try
             {
@@ -151,10 +151,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 SetupForGet();
 
                 // Act
-                var result = _controller.GetInvestment(Guid.Empty);
+                var result = await _controller.GetInvestment(Guid.Empty);
 
                 // Assert
-                var okObjResult = result.Result as OkObjectResult;
+                var okObjResult = result as OkObjectResult;
                 Assert.NotNull(okObjResult.Value);
 
                 var dto = (InvestmentDTO)Convert.ChangeType(okObjResult.Value, typeof(InvestmentDTO));
@@ -174,7 +174,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldGetAllInvestmentData()
+        public async void ShouldGetAllInvestmentData()
         {
             try
             {
@@ -182,10 +182,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 SetupForGetAll();
 
                 // Act
-                var result = _controller.GetInvestment(_testHelper.TestSimulation.Id);
+                var result = await _controller.GetInvestment(_testHelper.TestSimulation.Id);
 
                 // Assert
-                var okObjResult = result.Result as OkObjectResult;
+                var okObjResult = result as OkObjectResult;
                 Assert.NotNull(okObjResult.Value);
 
                 var dto = (InvestmentDTO)Convert.ChangeType(okObjResult.Value, typeof(InvestmentDTO));
@@ -205,15 +205,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         }
 
         [Fact]
-        public void ShouldModifyInvestmentData()
+        public async void ShouldModifyInvestmentData()
         {
             try
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dto = (InvestmentDTO)Convert.ChangeType(
-                    (_controller.GetInvestment(_testHelper.TestSimulation.Id).Result as OkObjectResult).Value,
-                    typeof(InvestmentDTO));
+                var getResult = await _controller.GetInvestment(_testHelper.TestSimulation.Id);
+                var dto = (InvestmentDTO)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(InvestmentDTO));
 
                 var addOrUpdateInvestmentDTO = new UpsertInvestmentDataDTO
                 {
@@ -231,10 +230,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Act
                 var result =
-                    _controller.UpsertInvestment(_testHelper.TestSimulation.Id, addOrUpdateInvestmentDTO);
+                    await _controller.UpsertInvestment(_testHelper.TestSimulation.Id, addOrUpdateInvestmentDTO);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 var budgetLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.BudgetLibrary
                     .Include(_ => _.Budgets)
@@ -279,9 +278,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var dto = (InvestmentDTO)Convert.ChangeType(
-                    (_controller.GetInvestment(_testHelper.TestSimulation.Id).Result as OkObjectResult).Value,
-                    typeof(InvestmentDTO));
+                var getResult = await _controller.GetInvestment(_testHelper.TestSimulation.Id);
+                var dto = (InvestmentDTO)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(InvestmentDTO));
 
                 var addOrUpdateInvestmentDTO = new UpsertInvestmentDataDTO
                 {
@@ -296,10 +294,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 await _controller.UpsertInvestment(_testHelper.TestSimulation.Id, addOrUpdateInvestmentDTO);
 
                 // Act
-                var result = _controller.DeleteBudgetLibrary(BudgetLibraryId);
+                var result = await _controller.DeleteBudgetLibrary(BudgetLibraryId);
 
                 // Assert
-                Assert.IsType<OkResult>(result.Result);
+                Assert.IsType<OkResult>(result);
 
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetLibrary.Any(_ => _.Id == BudgetLibraryId));
                 Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.Budget.Any(_ => _.Id == BudgetId));

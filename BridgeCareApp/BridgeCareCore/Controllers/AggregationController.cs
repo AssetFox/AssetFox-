@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -32,6 +33,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
+        [Authorize]
         public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
             var broadcastingMessage = "Starting data assignment";

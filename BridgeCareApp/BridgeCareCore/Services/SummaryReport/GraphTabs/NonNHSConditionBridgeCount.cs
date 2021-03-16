@@ -13,6 +13,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         {
             _stackedColumnChartCommon = stackedColumnChartCommon ?? throw new ArgumentNullException(nameof(stackedColumnChartCommon));
         }
+
         internal void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int nonNHSBridgeCountPercentSectionYearsRow, int simulationYearsCount)
         {
             _stackedColumnChartCommon.SetWorksheetProperties(worksheet);
@@ -26,6 +27,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             chart.AdjustPositionAndSize();
             chart.Locked = true;
         }
+
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int nonNHSBridgeCountPercentRow, int count, ExcelChart chart)
         {
             CreateSeries(bridgeWorkSummaryWorkSheet, nonNHSBridgeCountPercentRow, count, chart, nonNHSBridgeCountPercentRow + 3, Properties.Resources.Poor, Color.Red);
@@ -34,6 +36,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
 
             CreateSeries(bridgeWorkSummaryWorkSheet, nonNHSBridgeCountPercentRow, count, chart, nonNHSBridgeCountPercentRow + 1, Properties.Resources.Good, Color.FromArgb(0, 176, 80));
         }
+
         private void CreateSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int nonNHSBridgeCountPercentRow, int count, ExcelChart chart, int fromRow, string header, Color color)
         {
             var serie = bridgeWorkSummaryWorkSheet.Cells[fromRow, 2, fromRow, count + 2];

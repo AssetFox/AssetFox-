@@ -13,19 +13,19 @@ namespace BridgeCare.DataAccessLayer
     public class ValidationRepository : IValidationRepository
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(ValidationRepository));
-        public EquationValidationResult ValidateEquation(ValidateEquationModel model, BridgeCareContext db)
+        public ValidationResult ValidateEquation(EquationValidationParametersModel validationParametersModel, BridgeCareContext db)
         {
             CalculateEvaluate calcEval = new CalculateEvaluate();
 
-            if (model.IsPiecewise)
-                return checkPiecewise(model.Equation);
+            if (validationParametersModel.IsPiecewise)
+                return checkPiecewise(validationParametersModel.Expression);
 
             try
             {
-                string equation = model.Equation.Trim();
-                equation = checkAttributes(equation, model.IsFunction, db);
+                string equation = validationParametersModel.Expression.Trim();
+                equation = checkAttributes(equation, validationParametersModel.IsFunction, db);
 
-                if (model.IsFunction)
+                if (validationParametersModel.IsFunction)
                     calcEval.BuildFunctionClass(equation, "double", null);
                 else
                     calcEval.BuildTemporaryClass(equation, true);
@@ -34,13 +34,13 @@ namespace BridgeCare.DataAccessLayer
             }
             catch (Exception e)
             {
-                return new EquationValidationResult(false, e.Message);
+                return new ValidationResult(false, e.Message);
             }
 
-            return new EquationValidationResult(true, "Success");
+            return new ValidationResult(true, "Success");
         }
 
-        public CriteriaValidationResult ValidateCriteria(string data, BridgeCareContext db)
+        public CriterionValidationResult ValidateCriteria(string data, BridgeCareContext db)
         {
             string criteria = data.Replace("|", "'").ToUpper();
             criteria = checkAttributes(criteria, true, db);
@@ -92,7 +92,7 @@ namespace BridgeCare.DataAccessLayer
             return target;
         }
 
-        private EquationValidationResult checkPiecewise(string piecewise)
+        private ValidationResult checkPiecewise(string piecewise)
         {
             Dictionary<int, double> ageValues = new Dictionary<int, double>();
             piecewise = piecewise.Trim();
@@ -117,13 +117,13 @@ namespace BridgeCare.DataAccessLayer
                 catch
                 {
                     log.Error($"Failure to convert TIME,CONDITION pair to (int,double): {commaDelimitedPair}");
-                    return new EquationValidationResult(false, $"Failure to convert TIME,CONDITION pair to (int,double): {commaDelimitedPair}");
+                    return new ValidationResult(false, $"Failure to convert TIME,CONDITION pair to (int,double): {commaDelimitedPair}");
                 }
 
                 if (age < 0)
                 {
                     log.Error("Values for TIME must be 0 or greater");
-                    return new EquationValidationResult(false, "Values for TIME must be 0 or greater");
+                    return new ValidationResult(false, "Values for TIME must be 0 or greater");
                 }
 
                 if (!ageValues.ContainsKey(age))
@@ -133,25 +133,25 @@ namespace BridgeCare.DataAccessLayer
                 else
                 {
                     log.Error("Only unique integer values for TIME are allowed");
-                    return new EquationValidationResult(false, "Only unique integer values for TIME are allowed");
+                    return new ValidationResult(false, "Only unique integer values for TIME are allowed");
                 }
             }
 
             if (ageValues.Count < 1)
             {
                 log.Error("At least one TIME,CONDITION pair must be entered");
-                return new EquationValidationResult(false, "At least one TIME,CONDITION pair must be entered");
+                return new ValidationResult(false, "At least one TIME,CONDITION pair must be entered");
             }
 
-            return new EquationValidationResult(true, "Success");
+            return new ValidationResult(true, "Success");
         }
 
-        public CriteriaValidationResult NumberOfHits(string criteria, BridgeCareContext db)
+        public CriterionValidationResult NumberOfHits(string criteria, BridgeCareContext db)
         {
             if (criteria == "" || criteria == null)
             {
                 log.Error("There is no criteria created");
-                return new CriteriaValidationResult(false, 0, "There is no criteria created");
+                return new CriterionValidationResult(false, 0, "There is no criteria created");
             }
             // create the sql select statement
             var strNetworkID = db.NETWORKS.FirstOrDefault().NETWORKID.ToString();
@@ -184,18 +184,18 @@ namespace BridgeCare.DataAccessLayer
                 // close the connection
                 connection.Close();
                 // return the results
-                return new CriteriaValidationResult((int)count > 0, (int)count, (int)count > 0 ? "Success" : "Invalid");
+                return new CriterionValidationResult((int)count > 0, (int)count, (int)count > 0 ? "Success" : "Invalid");
             }
             catch (SqlException e)
             {
                 var message = $"Failed SQL Query: {strSelect}, Error Message: {e.Message}";
                 log.Error(message);
-                return new CriteriaValidationResult(false, 0, message);
+                return new CriterionValidationResult(false, 0, message);
             }
             catch (Exception e2)
             {
                 log.Error(e2.Message);
-                return new CriteriaValidationResult(false, 0, e2.Message);
+                return new CriterionValidationResult(false, 0, e2.Message);
             }
         }
 

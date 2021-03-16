@@ -118,9 +118,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void SimulationPerformanceCurves(Simulation simulation)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Name == simulation.Name))
+            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
-                throw new RowNotInTableException($"No simulation found having name {simulation.Name}");
+                throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
             }
 
             _unitOfDataPersistenceWork.Context.PerformanceCurve
@@ -132,15 +132,58 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.PerformanceCurveLibrary)
                 .ThenInclude(_ => _.PerformanceCurveLibrarySimulationJoins)
                 .Where(_ => _.PerformanceCurveLibrary.PerformanceCurveLibrarySimulationJoins
-                    .SingleOrDefault(__ => __.Simulation.Name == simulation.Name) != null)
+                    .SingleOrDefault(__ => __.Simulation.Id == simulation.Id) != null)
                 .ForEach(_ => _.CreatePerformanceCurve(simulation));
         }
 
-        public void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto, Guid simulationId)
+        public Task<List<PerformanceCurveLibraryDTO>> PerformanceCurveLibrariesWithPerformanceCurves()
         {
+            if (!_unitOfDataPersistenceWork.Context.PerformanceCurveLibrary.Any())
+            {
+                return Task.Factory.StartNew(() => new List<PerformanceCurveLibraryDTO>());
+            }
+
+            return Task.Factory.StartNew(() => _unitOfDataPersistenceWork.Context.PerformanceCurveLibrary
+                .Include(_ => _.PerformanceCurves)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.PerformanceCurves)
+                .ThenInclude(_ => _.CriterionLibraryPerformanceCurveJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.PerformanceCurves)
+                .ThenInclude(_ => _.PerformanceCurveEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.PerformanceCurveLibrarySimulationJoins)
+                .Select(_ => _.ToDto())
+                .ToList());
+        }
+
+        public void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, PerformanceCurveLibraryDTO dto)
+        {
+            if (simulationId != Guid.Empty)
+            {
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                {
+                    throw new RowNotInTableException($"No simulation found having id {dto.Id}");
+                }
+
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ =>
+                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
+                }
+            }
+
+            UpsertPerformanceCurveLibrary(dto, simulationId, userInfo);
+            UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id, userInfo);
+        }
+
+        public void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
+        {
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+
             var performanceCurveLibraryEntity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.Upsert(performanceCurveLibraryEntity, dto.Id);
+            _unitOfDataPersistenceWork.Context.Upsert(performanceCurveLibraryEntity, dto.Id, userEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -151,17 +194,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfDataPersistenceWork.Context.Delete<PerformanceCurveLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
-                _unitOfDataPersistenceWork.Context.PerformanceCurveLibrarySimulation.Add(new PerformanceCurveLibrarySimulationEntity
+                _unitOfDataPersistenceWork.Context.AddEntity(new PerformanceCurveLibrarySimulationEntity
                 {
                     PerformanceCurveLibraryId = performanceCurveLibraryEntity.Id,
                     SimulationId = simulationId
-                });
+                }, userEntity?.Id);
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public void UpsertOrDeletePerformanceCurves(List<PerformanceCurveDTO> performanceCurves, Guid libraryId)
+        public void UpsertOrDeletePerformanceCurves(List<PerformanceCurveDTO> performanceCurves, Guid libraryId, UserInfoDTO userInfo)
         {
             if (!_unitOfDataPersistenceWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == libraryId))
             {
@@ -172,6 +213,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new InvalidOperationException("All performance curves must have an attribute.");
             }
+
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute.ToList();
             var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
@@ -205,20 +248,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {"add", _ => !existingEntityIds.Contains(_.Id)}
             };
 
-            var equationIds = _unitOfDataPersistenceWork.Context.PerformanceCurveEquation
-                .Where(_ => _.PerformanceCurve.PerformanceCurveLibraryId == libraryId)
-                .Select(_ => _.EquationId).ToList();
+            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ =>
+                _.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == libraryId);
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(performanceCurveEntities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(performanceCurveEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(performanceCurveEntities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(performanceCurveEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
-
-            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ => equationIds.Contains(_.Id));
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryPerformanceCurveEntity>(_ =>
                 _.PerformanceCurve.PerformanceCurveLibraryId == libraryId);
@@ -230,7 +270,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .ToDictionary(_ => _.Id, _ => _.Equation.ToEntity());
 
                 _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntityPerPerformanceCurveEntityId,
-                    DataPersistenceConstants.EquationJoinEntities.PerformanceCurve);
+                    DataPersistenceConstants.EquationJoinEntities.PerformanceCurve, userEntity?.Id);
             }
 
             if (performanceCurves.Any(_ =>
@@ -247,38 +287,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                     .ToList();
 
-                if (IsRunningFromXUnit)
-                {
-                    _unitOfDataPersistenceWork.Context.CriterionLibraryPerformanceCurve.AddRange(curveCriterionJoinsToAdd);
-                }
-                else
-                {
-                    _unitOfDataPersistenceWork.Context.BulkInsert(curveCriterionJoinsToAdd);
-                }
+                _unitOfDataPersistenceWork.Context.BulkAddAll(curveCriterionJoinsToAdd, userEntity?.Id);
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
-        }
-
-        public Task<List<PerformanceCurveLibraryDTO>> PerformanceCurveLibrariesWithPerformanceCurves()
-        {
-            if (!_unitOfDataPersistenceWork.Context.PerformanceCurveLibrary.Any())
-            {
-                return Task.Factory.StartNew(() => new List<PerformanceCurveLibraryDTO>());
-            }
-
-            return Task.Factory.StartNew(() => _unitOfDataPersistenceWork.Context.PerformanceCurveLibrary
-                .Include(_ => _.PerformanceCurves)
-                .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.PerformanceCurves)
-                .ThenInclude(_ => _.CriterionLibraryPerformanceCurveJoin)
-                .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.PerformanceCurves)
-                .ThenInclude(_ => _.PerformanceCurveEquationJoin)
-                .ThenInclude(_ => _.Equation)
-                .Include(_ => _.PerformanceCurveLibrarySimulationJoins)
-                .Select(_ => _.ToDto())
-                .ToList());
         }
 
         public void DeletePerformanceCurveLibrary(Guid libraryId)
@@ -288,27 +298,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            var libraryToDelete = _unitOfDataPersistenceWork.Context.PerformanceCurveLibrary.Single(_ => _.Id == libraryId);
+            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ =>
+                _.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == libraryId);
 
-            _unitOfDataPersistenceWork.Context.PerformanceCurveLibrary.Remove(libraryToDelete);
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
-
-            var equationsToDelete = _unitOfDataPersistenceWork.Context.Equation
-                .Where(_ => _.AttributeEquationCriterionLibraryJoin == null && _.ConditionalTreatmentConsequenceEquationJoin == null &&
-                            _.PerformanceCurveEquationJoin == null && _.TreatmentCostEquationJoin == null)
-                .ToList();
-
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.Equation.RemoveRange(equationsToDelete);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkDelete(equationsToDelete);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.Delete<PerformanceCurveLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

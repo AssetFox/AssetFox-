@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Interfaces.SummaryReport;
 using OfficeOpenXml;
@@ -14,6 +13,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             _excelHelper = excelHelper;
         }
+
         public void CheckConditions(int parallelBridge, string treatment, TreatmentCause previousYearCause,
             TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
         {
@@ -51,6 +51,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 _excelHelper.SetTextColor(range, Color.Black);
             }
         }
+
         private void ParallelBridgeCashFlow(int isParallel, TreatmentCause projectPickType, ExcelRange range)
         {
             if (isParallel == 1 && projectPickType == TreatmentCause.CashFlowProject)
@@ -60,6 +61,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 return;
             }
         }
+
         private void ParallelBridgeMPMS(int isParallel, TreatmentCause projectPickType, ExcelRange range)
         {
             if (isParallel == 1 && projectPickType == TreatmentCause.CommittedProject)
@@ -68,6 +70,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 _excelHelper.SetTextColor(range, Color.White);
             }
         }
+
         private void CashFlowedBridge(TreatmentCause projectPickType, ExcelRange range)
         {
             if (projectPickType == TreatmentCause.CashFlowProject)

@@ -117,11 +117,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList());
         }
 
-        public void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId)
+        public void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, BudgetPriorityLibraryDTO dto)
         {
-            var entity = dto.ToEntity();
+            if (simulationId != Guid.Empty)
+            {
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                {
+                    throw new RowNotInTableException($"No simulation found having id {dto.Id}");
+                }
 
-            _unitOfDataPersistenceWork.Context.Upsert(entity, dto.Id);
+                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ =>
+                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
+                }
+            }
+
+            UpsertBudgetPriorityLibrary(dto, simulationId, userInfo);
+            UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id, userInfo);
+        }
+
+        public void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
+        {
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+
+            var budgetPriorityLibraryEntity = dto.ToEntity();
+
+            _unitOfDataPersistenceWork.Context.Upsert(budgetPriorityLibraryEntity, dto.Id, userEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -132,28 +154,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfDataPersistenceWork.Context.Delete<BudgetPriorityLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
-                _unitOfDataPersistenceWork.Context.BudgetPriorityLibrarySimulation.Add(new BudgetPriorityLibrarySimulationEntity
+                _unitOfDataPersistenceWork.Context.AddEntity(new BudgetPriorityLibrarySimulationEntity
                 {
                     BudgetPriorityLibraryId = dto.Id,
                     SimulationId = simulationId
-                });
+                }, userEntity?.Id);
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
-        public void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId)
+        public void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId, UserInfoDTO userInfo)
         {
             if (!_unitOfDataPersistenceWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == libraryId))
             {
                 throw new RowNotInTableException($"No budget priority library found having id {libraryId}.");
             }
 
-            var entities = budgetPriorities
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+
+            var budgetPriorityEntities = budgetPriorities
                 .Select(_ => _.ToEntity(libraryId))
                 .ToList();
 
-            var entityIds = entities.Select(_ => _.Id).ToList();
+            var entityIds = budgetPriorityEntities.Select(_ => _.Id).ToList();
 
             var existingEntityIds = _unitOfDataPersistenceWork.Context.BudgetPriority
                 .Where(_ => _.BudgetPriorityLibraryId == libraryId && entityIds.Contains(_.Id))
@@ -168,11 +190,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.UpsertOrDelete(budgetPriorityEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(entities, predicatesPerCrudOperation);
+                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(budgetPriorityEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryBudgetPriorityEntity>(_ =>
@@ -182,7 +204,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 var percentagePairsPerPriorityId = budgetPriorities.Where(_ => _.BudgetPercentagePairs.Any())
                     .ToDictionary(_ => _.Id, _ => _.BudgetPercentagePairs);
-                _unitOfDataPersistenceWork.BudgetPercentagePairRepo.UpsertOrDeleteBudgetPercentagePairs(percentagePairsPerPriorityId, libraryId);
+                _unitOfDataPersistenceWork.BudgetPercentagePairRepo.UpsertOrDeleteBudgetPercentagePairs(percentagePairsPerPriorityId, libraryId, userEntity?.Id);
             }
 
             if (budgetPriorities.Any(_ =>
@@ -199,17 +221,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                     .ToList();
 
-                if (IsRunningFromXUnit)
-                {
-                    _unitOfDataPersistenceWork.Context.CriterionLibraryBudgetPriority.AddRange(criterionJoinsToAdd);
-                }
-                else
-                {
-                    _unitOfDataPersistenceWork.Context.BulkInsert(criterionJoinsToAdd);
-                }
+                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionJoinsToAdd, userEntity?.Id);
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void DeleteBudgetPriorityLibrary(Guid libraryId)
@@ -219,11 +232,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            var libraryToDelete = _unitOfDataPersistenceWork.Context.BudgetPriorityLibrary.Single(_ => _.Id == libraryId);
-
-            _unitOfDataPersistenceWork.Context.BudgetPriorityLibrary.Remove(libraryToDelete);
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.Delete<BudgetPriorityLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

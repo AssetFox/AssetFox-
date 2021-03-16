@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework; //using AppliedResearchAssociates.iAM.Aggregation;
+
 //using AppliedResearchAssociates.iAM.Segmentation;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -100,6 +101,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             Aggregator.AssignAttributeDataToSegments(data, networkSegments);
         }*/
-
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
@@ -20,6 +18,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             _excelHelper = excelHelper;
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
         }
+
         internal void FillCostOfBridgeWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             List<YearsData> costForBridgeBudgets, List<string> nonCulvertTreatments,
             Dictionary<int, double> totalBudgetPerYearForBridgeWork)
@@ -31,8 +30,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             currentCell.Row += 1;
             var startOfBridgeBudget = currentCell.Row;
             currentCell.Column = 1;
-           // var uniqueTreatments = new Dictionary<string, int>();
-            // Fill Bridge Budget
+            // var uniqueTreatments = new Dictionary<string, int>(); Fill Bridge Budget
             var treatmentTracker = new Dictionary<string, int>();
             foreach (var treatment in nonCulvertTreatments)
             {
@@ -56,18 +54,18 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 //}
                 //else
                 //{
-                    var cellToEnterCost = item.Year - startYear;
-                    var cellValue = worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value;
-                    var totalAmount = 0.0;
-                    if (cellValue != null)
-                    {
-                        totalAmount = (double)cellValue;
-                    }
-                    totalAmount += item.Amount;
-                    worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
+                var cellToEnterCost = item.Year - startYear;
+                var cellValue = worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value;
+                var totalAmount = 0.0;
+                if (cellValue != null)
+                {
+                    totalAmount = (double)cellValue;
+                }
+                totalAmount += item.Amount;
+                worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
                 //}
             }
-            
+
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.BridgeTotal;
 
             foreach (var totalBridgeBudget in totalBudgetPerYearForBridgeWork)

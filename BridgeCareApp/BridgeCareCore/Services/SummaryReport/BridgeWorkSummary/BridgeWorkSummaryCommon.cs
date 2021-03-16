@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
@@ -65,6 +62,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         #region Private methods
+
         private void AddMergeSectionHeader(ExcelWorksheet worksheet, string headerText, int yearsCount, CurrentCell currentCell)
         {
             var row = currentCell.Row;
@@ -78,6 +76,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             ++row;
             UpdateCurrentCell(currentCell, row, column);
         }
+
         private void AddYearsHeaderRow(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell)
         {
             var row = currentCell.Row;
@@ -92,6 +91,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             }
             currentCell.Column = column - 1;
         }
+
         private void AddWorkTypeHeader(ExcelWorksheet worksheet, CurrentCell currentCell, string workTypeName)
         {
             var WorkTypeHeader = workTypeName;
@@ -107,6 +107,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             column++;
             UpdateCurrentCell(currentCell, row, column);
         }
+
         private void AddMergeBridgeSectionHeader(ExcelWorksheet worksheet, string headerText, int mergeColumns, CurrentCell currentCell)
         {
             var row = currentCell.Row + 1;
@@ -120,6 +121,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             ++row;
             UpdateCurrentCell(currentCell, row, column);
         }
+
         private void AddBridgeYearsHeaderRow(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell, bool showPrevYearHeader)
         {
             var row = currentCell.Row;
@@ -141,7 +143,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper.ApplyBorder(cells);
         }
 
-        #endregion
-
+        #endregion Private methods
     }
 }

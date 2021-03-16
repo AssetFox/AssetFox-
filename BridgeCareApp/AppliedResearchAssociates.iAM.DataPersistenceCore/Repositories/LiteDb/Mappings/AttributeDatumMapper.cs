@@ -1,6 +1,5 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Mappings

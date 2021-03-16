@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
@@ -32,8 +30,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             currentCell.Row += 1;
             var startOfCommittedBudget = currentCell.Row;
             currentCell.Column = 1;
-            // var uniqueTreatments = new Dictionary<string, int>();
-            // Fill Committed Budget
+            // var uniqueTreatments = new Dictionary<string, int>(); Fill Committed Budget
             var treatmentTracker = new Dictionary<string, int>();
             foreach (var treatment in committedTreatments)
             {

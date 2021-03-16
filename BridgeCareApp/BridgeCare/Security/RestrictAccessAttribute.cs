@@ -31,7 +31,7 @@ namespace BridgeCare.Security
             ValidateRole = role => true;
         }
 
-        /*protected override bool IsAuthorized(HttpActionContext httpContext)
+        protected override bool IsAuthorized(HttpActionContext httpContext)
         {
             if (!TryGetAuthorization(httpContext.Request.Headers, out string accessToken))
             {
@@ -56,7 +56,7 @@ namespace BridgeCare.Security
             httpContext.Request.Headers.Add("Email", userInformation.Email);
 
             return ValidateRole(userInformation.Role);
-        }*/
+        }
 
         /// <summary>
         ///     Attempts to get an authorization parameter from an HTTP request's headers

@@ -356,6 +356,12 @@ connection.config
 /Deployment/configurations/bamsdev/esec.config
 /Deployment/configurations/bamssyst/esec.config
 /Deployment/configurations/iam-deploy/esec.config
+/Deployment/configurations/v2iam-deploy/esec.config
+/Deployment/configurations/bams/esec.json
+/Deployment/configurations/bamsdev/esec.json
+/Deployment/configurations/bamssyst/esec.json
+/Deployment/configurations/iam-deploy/esec.json
+/Deployment/configurations/v2iam-deploy/esec.json
 
 # Deployment logs
 /Deployment/npmLogs/*

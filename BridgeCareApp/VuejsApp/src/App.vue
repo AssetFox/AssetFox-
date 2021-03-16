@@ -90,11 +90,6 @@
           <span v-if="selectedScenarioHasStatus">{{ selectedScenario.status }}</span>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-<!--        <v-toolbar-title class="white&#45;&#45;text">
-          <v-btn round class="pink white&#45;&#45;text" @click="onJobQueue()">
-            <v-icon right>star</v-icon>
-          </v-btn>
-        </v-toolbar-title>-->
         <v-toolbar-title class="white--text" v-if="authenticated">
           <span class="font-weight-light">Hello, </span>
           <span>{{ username }}</span>
@@ -429,17 +424,6 @@ export default class AppComponent extends Vue {
       this.$router.push(route);
     }
   }
-
-  /*async onJobQueue() {
-    await ReportsService.getJobList()
-        .then((response: AxiosResponse) => {
-          if (!hasValue(response)) {
-            this.setErrorMessageAction({message: 'unauthorized access'});
-          } else {
-            window.open(process.env.VUE_APP_URL + '/hangfire/');
-          }
-        });
-  }*/
 }
 </script>
 

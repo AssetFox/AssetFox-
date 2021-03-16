@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 var result = _controller.PerformanceCurveLibraries();
 
                 // Assert
-                Assert.IsType<OkObjectResult>(result.Result);
+              Assert.IsType<OkObjectResult>(result.Result);
             }
             finally
             {

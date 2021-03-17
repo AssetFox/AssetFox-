@@ -49,7 +49,7 @@ const mutations = {
             updatedScenario.runTime = simulationAnalysisDetail.runTime;
 
             state.scenarios = update(
-                findIndex(propEq('simulationId', updatedScenario.id), state.scenarios),
+                findIndex(propEq('id', updatedScenario.id), state.scenarios),
                 updatedScenario,
                 state.scenarios
             );
@@ -61,7 +61,7 @@ const mutations = {
             updatedScenario.reportStatus = simulationReportDetail.status;
 
             state.scenarios = update(
-                findIndex(propEq('simulationId', updatedScenario.id), state.scenarios),
+                findIndex(propEq('id', updatedScenario.id), state.scenarios),
                 updatedScenario,
                 state.scenarios
             );

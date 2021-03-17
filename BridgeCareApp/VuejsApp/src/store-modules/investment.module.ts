@@ -106,17 +106,7 @@ const actions = {
                     commit('selectedBudgetLibraryMutator', library.id);
                     commit('investmentPlanMutator', payload.investmentPlan);
 
-                    const hasLibraryToUpdate: boolean = any(propEq('id', library.id), state.budgetLibraries);
-                    let message: string = '';
-                    if (payload.scenarioId !== getBlankGuid()) {
-                        message = 'Updated investmentModule data';
-                    } else if (hasLibraryToUpdate) {
-                        message = 'Updated budget library';
-                    } else {
-                        message = 'Added budget library';
-                    }
-
-                    dispatch('setSuccessMessage', {message: message});
+                    dispatch('setSuccessMessage', {message: 'Upsertted investment data'});
                 }
             });
     },

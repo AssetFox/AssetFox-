@@ -333,7 +333,10 @@ export default class InvestmentEditor extends Vue {
 
   @Watch('stateInvestmentPlan')
   onStateInvestmentPlanChanged() {
-    this.investmentPlan = clone(this.stateInvestmentPlan);
+    this.investmentPlan = {
+      ...this.stateInvestmentPlan,
+      id: this.stateInvestmentPlan.id === this.uuidNIL ? getNewGuid() : this.stateInvestmentPlan.id
+    };
   }
 
   @Watch('investmentPlan')

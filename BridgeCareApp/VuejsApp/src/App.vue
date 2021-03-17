@@ -172,7 +172,7 @@ export default class AppComponent extends Vue {
   @Action('setWarningMessage') setWarningMessageAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('setInfoMessage') setInfoMessageAction: any;
-  @Action('pollEvents') pollEventsAction: any;
+  //@Action('pollEvents') pollEventsAction: any;
   @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
   @Action('getAllUsers') getAllUsersAction: any;
 
@@ -370,8 +370,8 @@ export default class AppComponent extends Vue {
     window.setInterval(this.checkBrowserTokensAction, 30000);
 
     // Generate a polling session id, and begin polling once per 5 seconds
-    this.generatePollingSessionIdAction();
-    window.setInterval(this.pollEventsAction, 5000);
+    /*this.generatePollingSessionIdAction();
+    window.setInterval(this.pollEventsAction, 5000);*/
   }
 
   onAlertResult(submit: boolean) {

@@ -54,32 +54,23 @@ namespace BridgeCareCore.Services
             {
                 throw new RowNotInTableException($"No network found having id");
             }
-            else
+
+            var explorerNetworkFacilities = simulation.Network.Facilities.Select(_ => _.Name).ToHashSet();
+            var explorerNetworkSections = simulation.Network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
+            var facilities = _unitOfWork.Context.Facility.Select(_ => _.Name).ToHashSet();
+            var sections = _unitOfWork.Context.Section.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
+            if (!explorerNetworkFacilities.SetEquals(facilities) || !explorerNetworkSections.SetEquals(sections))
             {
                 _unitOfWork.NetworkRepo.DeleteNetworkData();
                 sendRealTimeMessage("Creating the network's facilities and sections...");
                 _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
             }
-            //if (!_unitOfWork.NetworkRepo.CheckPennDotNetworkHasData())
-            //{
-            //    _unitOfWork.NetworkRepo.DeleteNetworkData();
-
-            // sendRealTimeMessage("Creating the network's facilities and sections...");
-
-            //    _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
-            //}
 
             return Task.CompletedTask;
         }
 
         private Task SynchronizeLegacySimulation(Simulation simulation)
         {
-            _unitOfWork.SimulationRepo.DeleteSimulationAndAllRelatedData();
-
-            // TODO: hard-coding simulation id for alpha 1
-            simulation.Id = new Guid(DataPersistenceConstants.TestSimulationId);
-            simulation.Name = $"*{simulation.Name} Alpha 1";
-
             sendRealTimeMessage("Joining attributes with equations and criteria...");
 
             _unitOfWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(simulation.Network.Explorer);

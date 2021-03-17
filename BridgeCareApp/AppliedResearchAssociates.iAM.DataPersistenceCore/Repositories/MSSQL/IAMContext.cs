@@ -178,6 +178,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<SimulationReportDetailEntity> SimulationReportDetail { get; set; }
 
+        public virtual DbSet<BenefitQuantifierEntity> BenefitQuantifier { get; set; }
+
         private class MigrationConnection
         {
             public string BridgeCareConnex { get; set; }
@@ -1460,6 +1462,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.Simulation)
                     .WithOne(p => p.SimulationReportDetail)
                     .HasForeignKey<SimulationReportDetailEntity>(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<BenefitQuantifierEntity>(entity =>
+            {
+                entity.HasKey(e => e.NetworkId);
+
+                entity.HasIndex(e => e.NetworkId);
+
+                entity.HasIndex(e => e.EquationId);
+
+                entity.HasOne(d => d.Network)
+                    .WithOne(p => p.BenefitQuantifier)
+                    .HasForeignKey<BenefitQuantifierEntity>(d => d.NetworkId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Equation)
+                    .WithOne(p => p.BenefitQuantifier)
+                    .HasForeignKey<BenefitQuantifierEntity>(d => d.EquationId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }

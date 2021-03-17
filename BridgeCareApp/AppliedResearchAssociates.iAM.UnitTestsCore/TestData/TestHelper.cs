@@ -40,7 +40,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             Config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
-                .AddJsonFile("testEsec.json")
                 .Build();
 
             MockEsecSecurity = new MockEsecSecurity();

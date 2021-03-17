@@ -73,12 +73,21 @@ namespace BridgeCareCore.Services.SummaryReport
 
             var initialSectionValues = reportOutputData.InitialSectionSummaries[0].ValuePerNumericAttribute;
 
+            var reportDetailDto = new SimulationReportDetailDTO
+            {
+                SimulationId = simulationId,
+                Status = "Starting report generation..."
+            };
+            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+            SendRealTimeMessage(reportDetailDto);
+
             foreach (var item in requiredSections)
             {
                 if (!initialSectionValues.ContainsKey(item))
                 {
-                    var broadcastingMessage = $"The attribute {item} not found in initial section";
-                    sendRealTimeMessage(broadcastingMessage, simulationId);
+                    reportDetailDto.Status = $"The attribute {item} not found in initial section";
+                    UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+                    SendRealTimeMessage(reportDetailDto);
                     throw new KeyNotFoundException($"The attribute {item} not found in initial section");
                 }
             }
@@ -89,8 +98,9 @@ namespace BridgeCareCore.Services.SummaryReport
             {
                 if (!sectionValueAttribute.ContainsKey(item))
                 {
-                    var broadcastingMessage = $"The attribute {item} not found in sections";
-                    sendRealTimeMessage(broadcastingMessage, simulationId);
+                    reportDetailDto.Status = $"The attribute {item} not found in sections";
+                    UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+                    SendRealTimeMessage(reportDetailDto);
                     throw new KeyNotFoundException($"The attribute {item} not found in sections");
                 }
             }
@@ -123,9 +133,9 @@ namespace BridgeCareCore.Services.SummaryReport
 
             // Simulation parameters TAB
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
-
-            var broadcastingMessage = $"Creating Bridge Data TAB";
-            SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
+            reportDetailDto.Status = $"Creating Bridge Data TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+            SendRealTimeMessage(reportDetailDto);
 
             // Bridge Data TAB
             var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
@@ -134,9 +144,9 @@ namespace BridgeCareCore.Services.SummaryReport
             // Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel,
                 simulationId, networkId);
-
-            broadcastingMessage = $"Creating Unfunded recommendations TAB";
-            SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
+            reportDetailDto.Status = $"Creating Unfunded recommendations TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+            SendRealTimeMessage(reportDetailDto);
             // Unfunded Recommendations TAB
             var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");
             _unfundedRecommendations.Fill(unfundedRecommendationWorksheet, reportOutputData);
@@ -144,22 +154,22 @@ namespace BridgeCareCore.Services.SummaryReport
             // Simulation Legend TAB
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add("Legend");
             _summaryReportGlossary.Fill(shortNameWorksheet);
-
-            broadcastingMessage = $"Creating Bridge work summary TAB";
-            SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
+            reportDetailDto.Status = $"Creating Bridge work summary TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+            SendRealTimeMessage(reportDetailDto);
             // Bridge work summary TAB
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
                 simulationYears, workSummaryModel, yearlyBudgetAmount);
-
-            broadcastingMessage = $"Creating Bridge work summary By Budget TAB";
-            SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
+            reportDetailDto.Status = $"Creating Bridge work summary By Budget TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+            SendRealTimeMessage(reportDetailDto);
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
-
-            broadcastingMessage = $"Creating Graph TABs";
-            SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
+            reportDetailDto.Status = $"Creating Graph TABs";
+            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+            SendRealTimeMessage(reportDetailDto);
 
             _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
@@ -173,16 +183,14 @@ namespace BridgeCareCore.Services.SummaryReport
             return bin;
         }
 
-        private void SendRealTimeMessage(string message, Guid simulationId, UserInfoDTO userInfo)
-        {
-            var dto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = message };
-
+        private void SendRealTimeMessage(SimulationReportDetailDTO dto) =>
             _hubContext
-                        .Clients
-                        .All
-                        .SendAsync("BroadcastSummaryReportGenerationStatus", dto);
+                .Clients
+                .All
+                .SendAsync("BroadcastSummaryReportGenerationStatus", dto);
 
+        private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto,
+            UserInfoDTO userInfo) =>
             _unitOfDataPersistenceWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto, userInfo);
-        }
     }
 }

@@ -38,15 +38,16 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<FileResult> GenerateSummaryReport(Guid networkId, Guid simulationId)
         {
-            var broadcastingMessage = "Starting report generation";
             var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
+            var reportDetailDto = new SimulationReportDetailDTO
+            {
+                SimulationId = simulationId, Status = "Starting report generation..."
+            };
 
             try
             {
-                await _hubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastSummaryReportGenerationStatus", broadcastingMessage, simulationId);
+                UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+                SendRealTimeMessage(reportDetailDto);
 
                 var response = await Task.Factory.StartNew(() => _summaryReportGenerator.GenerateReport(networkId, simulationId, userInfo));
 
@@ -59,29 +60,28 @@ namespace BridgeCareCore.Controllers
                     FileDownloadName = "SummaryReportTestData.xlsx"
                 };
 
-                broadcastingMessage = "Finished generating the summary report.";
-                SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
+                reportDetailDto.Status = "Finished generating the summary report.";
+                UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+                SendRealTimeMessage(reportDetailDto);
 
                 return fileContentResult;
             }
             catch (Exception e)
             {
-                broadcastingMessage = $"Error::{e.Message}";
-                SendRealTimeMessage(broadcastingMessage, simulationId, userInfo);
+                reportDetailDto.Status = $"Error::{e.Message}";
+                UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
+                SendRealTimeMessage(reportDetailDto);
                 throw;
             }
         }
 
-        private void SendRealTimeMessage(string message, Guid simulationId, UserInfoDTO userInfo)
-        {
-            var dto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = message };
-
+        private void SendRealTimeMessage(SimulationReportDetailDTO dto) =>
             _hubContext
                 .Clients
                 .All
                 .SendAsync("BroadcastSummaryReportGenerationStatus", dto);
 
+        private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto, UserInfoDTO userInfo) =>
             _unitOfDataPersistenceWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto, userInfo);
-        }
     }
 }

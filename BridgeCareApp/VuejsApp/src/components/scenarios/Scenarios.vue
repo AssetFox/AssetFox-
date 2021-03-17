@@ -71,10 +71,10 @@
             </v-text-field>
           </v-flex>
           <v-flex xs4 v-if="isAdmin">
-            <v-btn @click="onStartDataMigration()"
+            <v-btn @click="showMigrateLegacySimulationDialog = true"
                    class="ara-light-gray-bg"
                    round>
-              Migrate Alpha 1 Test Scenario
+              Migrate Legacy Simulation
             </v-btn>
           </v-flex>
         </v-card-title>
@@ -311,7 +311,7 @@
 
     <CreateScenarioDialog :showDialog="showCreateScenarioDialog" @submit="onCreateScenarioDialogSubmit"/>
 
-
+    <MigrateLegacySimulationDialog :showDialog="showMigrateLegacySimulationDialog" @submit="onMigrateLegacySimulationSubmit"/>
   </v-layout>
 </template>
 
@@ -339,9 +339,11 @@ import CreateNetworkDialog from '@/components/scenarios/scenarios-dialogs/Create
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import {emptyShareScenarioDialogData, ShareScenarioDialogData} from '@/shared/models/modals/share-scenario-dialog-data';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import MigrateLegacySimulationDialog from '@/components/scenarios/scenarios-dialogs/MigrateLegacySimulationDialog.vue';
 
 @Component({
   components: {
+    MigrateLegacySimulationDialog,
     ConfirmCloneScenarioAlert: Alert,
     ConfirmDeleteAlert: Alert,
     ConfirmRollupAlert: Alert,
@@ -423,6 +425,7 @@ export default class Scenarios extends Vue {
   networkDataAssignmentStatus: string = '';
   networkDataAssignmentPercentage = 0;
   rules: InputValidationRules = rules;
+  showMigrateLegacySimulationDialog: boolean = false;
 
   @Watch('authenticated')
   onAuthenticatedChanged() {
@@ -685,6 +688,14 @@ export default class Scenarios extends Vue {
         scenario: scenario,
         networkId: this.networks[0].id
       });
+    }
+  }
+
+  onMigrateLegacySimulationSubmit(legacySimulationId: number) {
+    this.showMigrateLegacySimulationDialog = false;
+
+    if (!isNil(legacySimulationId)) {
+      this.migrateLegacySimulationDataAction({simulationId: legacySimulationId, networkId: 'D7B54881-DD44-4F93-8250-3D4A630A4D3B'});
     }
   }
 }

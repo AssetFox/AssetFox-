@@ -1,4 +1,5 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings
@@ -8,7 +9,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static BenefitQuantifierDTO ToDto(this BenefitQuantifierEntity entity) =>
             new BenefitQuantifierDTO
             {
-                NetworkId = entity.NetworkId, Equation = entity.Equation?.ToDto() ?? new EquationDTO()
+                NetworkId = entity.NetworkId,
+                Equation = entity.Equation?.ToDto() ?? new EquationDTO {Id = Guid.NewGuid()}
             };
 
         public static BenefitQuantifierEntity ToEntity(this BenefitQuantifierDTO dto) =>

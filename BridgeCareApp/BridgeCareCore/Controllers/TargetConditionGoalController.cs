@@ -27,7 +27,7 @@ namespace BridgeCareCore.Controllers
         {
             _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
                                          throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-            _esecSecurity = esecSecurity;
+            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
             _targetConditionGoalUpsertMethods = CreateUpsertMethods();
         }
 

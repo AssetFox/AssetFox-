@@ -76,6 +76,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ITreatmentSupersessionRepository _treatmentSupersessionRepo;
         private IUserRepository _userRepo;
         private ISimulationReportDetailRepository _simulationReportDetailRepo;
+        private IBenefitQuantifierRepository _benefitQuantifierRepo;
 
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
 
@@ -148,6 +149,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public IUserRepository UserRepo => _userRepo ??= new UserRepository(this);
 
         public ISimulationReportDetailRepository SimulationReportDetailRepo => _simulationReportDetailRepo ??= new SimulationReportDetailRepository(this);
+
+        public IBenefitQuantifierRepository BenefitQuantifierRepo => _benefitQuantifierRepo ??= new BenefitQuantifierRepository(this);
 
         public IDbContextTransaction DbContextTransaction
         {

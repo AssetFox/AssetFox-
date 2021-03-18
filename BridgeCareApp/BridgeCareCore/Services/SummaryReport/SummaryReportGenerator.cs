@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.Parameters;
@@ -126,8 +127,30 @@ namespace BridgeCareCore.Services.SummaryReport
             }
             var pennDotReportAData = _pennDotReportARepository.GetPennDotReportAData(brKeys);
 
-            var yearlyBudgetAmount = _yearlyInvestmentRepository.GetYearlyBudgetAmount(simulationId, simulationYears[0], simulationYears.Count);
             var simulationYearsCount = simulationYears.Count;
+
+            var explorer = _unitOfDataPersistenceWork.AttributeRepo.GetExplorer();
+            var network = _unitOfDataPersistenceWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
+            _unitOfDataPersistenceWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+
+            var simulation = network.Simulations.First();
+            _unitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+            _unitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
+            _unitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+
+            var yearlyBudgetAmount = new Dictionary<string, Budget>();
+            foreach (var budget in simulation.InvestmentPlan.Budgets)
+            {
+                if (!yearlyBudgetAmount.ContainsKey(budget.Name))
+                {
+                    yearlyBudgetAmount.Add(budget.Name, budget);
+                }
+                else
+                {
+                    yearlyBudgetAmount[budget.Name] = budget;
+                }
+            }
 
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
@@ -142,8 +165,7 @@ namespace BridgeCareCore.Services.SummaryReport
             var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, pennDotReportAData);
 
             // Filling up parameters tab
-            _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel,
-                simulationId, networkId);
+            _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
             reportDetailDto.Status = $"Creating Unfunded recommendations TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
             SendRealTimeMessage(reportDetailDto);

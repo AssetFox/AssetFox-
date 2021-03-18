@@ -35,20 +35,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
-            var culvertTreatments = new List<string>();
-            var nonCulvertTreatments = new List<string>();
-
-            var singleSection = reportOutputData.Years[0].Sections[0];
-            culvertTreatments = singleSection.TreatmentOptions.Select(_ => _.TreatmentName)
-                .Union(singleSection.TreatmentRejections.Select(r => r.TreatmentName)).ToList()
-                .FindAll(_ => _.Contains("culvert", StringComparison.OrdinalIgnoreCase));
-            culvertTreatments.Sort();
-
-            nonCulvertTreatments = singleSection.TreatmentOptions.Select(_ => _.TreatmentName)
-                .Union(singleSection.TreatmentRejections.Select(r => r.TreatmentName)).ToList()
-                .FindAll(_ => !_.Contains("culvert", StringComparison.OrdinalIgnoreCase));
-            nonCulvertTreatments.Sort();
-
             // setting up model to store data. This will be used to fill up Bridge Work Summary By
             // Budget TAB
             var workSummaryByBudgetData = new List<WorkSummaryByBudgetModel>();
@@ -171,11 +157,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 var amount = totalSpent.Sum(_ => _.amount);
                 if (amount > 0)
                 {
-                    _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget, totalBudgetPerYearForCulvert,
-                        culvertTreatments, simulationYears);
+                    _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget, totalBudgetPerYearForCulvert, simulationYears);
 
-                    _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, nonCulvertTreatments,
-                        totalBudgetPerYearForBridgeWork);
+                    _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, totalBudgetPerYearForBridgeWork);
 
                     _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets,
                         committedTreatments, totalBudgetPerYearForMPMS);

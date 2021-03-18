@@ -41,10 +41,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
             var treatments = new SortedSet<string>();
-            //var singleSection = reportOutputData.Years[0].Sections[0];
-            //treatments = (SortedSet<string>)singleSection.TreatmentOptions.Select(_ => _.TreatmentName)
-            //    .Union(singleSection.TreatmentRejections.Select(r => r.TreatmentName));
-            //treatments.Sort();
 
             // cache to store total cost per treatment for a given year along with count of culvert
             // and non-culvert bridges

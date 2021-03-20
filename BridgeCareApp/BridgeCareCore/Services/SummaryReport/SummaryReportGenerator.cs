@@ -18,10 +18,8 @@ namespace BridgeCareCore.Services.SummaryReport
 {
     public class SummaryReportGenerator : ISummaryReportGenerator
     {
-        private readonly IYearlyInvestmentRepository _yearlyInvestmentRepository;
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
-        private readonly IPennDotReportARepository _pennDotReportARepository;
         private readonly IUnfundedRecommendations _unfundedRecommendations;
         private readonly IBridgeWorkSummary _bridgeWorkSummary;
         private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
@@ -33,10 +31,8 @@ namespace BridgeCareCore.Services.SummaryReport
 
         public SummaryReportGenerator(IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
-            IPennDotReportARepository pennDotReportARepository,
             IUnfundedRecommendations unfundedRecommendations,
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
-            IYearlyInvestmentRepository yearlyInvestmentRepository,
             SummaryReportGlossary summaryReportGlossary, SummaryReportParameters summaryReportParameters,
             IHubContext<BridgeCareHub> hub,
             IAddGraphsInTabs addGraphsInTabs,
@@ -44,11 +40,9 @@ namespace BridgeCareCore.Services.SummaryReport
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _bridgeDataForSummaryReport = bridgeDataForSummaryReport ?? throw new ArgumentNullException(nameof(bridgeDataForSummaryReport));
-            _pennDotReportARepository = pennDotReportARepository ?? throw new ArgumentNullException(nameof(pennDotReportARepository));
             _unfundedRecommendations = unfundedRecommendations ?? throw new ArgumentNullException(nameof(unfundedRecommendations));
             _bridgeWorkSummary = bridgeWorkSummary ?? throw new ArgumentNullException(nameof(bridgeWorkSummary));
             _bridgeWorkSummaryByBudget = workSummaryByBudget ?? throw new ArgumentNullException(nameof(workSummaryByBudget));
-            _yearlyInvestmentRepository = yearlyInvestmentRepository ?? throw new ArgumentNullException(nameof(yearlyInvestmentRepository));
             _summaryReportGlossary = summaryReportGlossary ?? throw new ArgumentNullException(nameof(summaryReportGlossary));
             _summaryReportParameters = summaryReportParameters ?? throw new ArgumentNullException(nameof(summaryReportParameters));
             _hubContext = hub ?? throw new ArgumentNullException(nameof(hub));
@@ -118,14 +112,11 @@ namespace BridgeCareCore.Services.SummaryReport
                     (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
                     );
             }
-            var brKeys = new List<int>();
             var simulationYears = new List<int>();
             foreach (var item in reportOutputData.Years)
             {
-                brKeys = item.Sections.Select(_ => Convert.ToInt32(_.FacilityName)).ToList();
                 simulationYears.Add(item.Year);
             }
-            var pennDotReportAData = _pennDotReportARepository.GetPennDotReportAData(brKeys);
 
             var simulationYearsCount = simulationYears.Count;
 
@@ -162,7 +153,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
             // Bridge Data TAB
             var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
-            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, pennDotReportAData);
+            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData);
 
             // Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);

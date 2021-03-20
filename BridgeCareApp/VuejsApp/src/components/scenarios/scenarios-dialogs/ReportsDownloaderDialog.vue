@@ -13,7 +13,7 @@
           </v-flex>
           <v-progress-linear :indeterminate="true" v-if="isDownloading"></v-progress-linear>
           <v-flex>
-            <span class="grey--text" v-if="isDownloading">Downloading...</span>
+            <span class="grey--text" v-if="isDownloading">Downloading... You can close this window, it will not stop the report generation</span>
           </v-flex>
         </v-layout>
       </v-card-title>

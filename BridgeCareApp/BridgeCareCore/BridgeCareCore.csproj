@@ -7,15 +7,15 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LiteDbDebug|AnyCPU'">
-    <DefineConstants>TRACE;LiteDbDebug</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;LiteDbDebug</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MsSqlDebug|AnyCPU'">
-    <DefineConstants>TRACE;MsSqlDebug</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;MsSqlDebug</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -25,7 +25,7 @@
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|AnyCPU'">
-    <DefineConstants>TRACE;Test</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;Test</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

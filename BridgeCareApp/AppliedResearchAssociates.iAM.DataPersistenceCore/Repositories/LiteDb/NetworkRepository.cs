@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
     {
         public NetworkRepository(ILiteDbContext context) : base(context) { }
 
-        public void CreateNetwork(DataAssignment.Networking.Network datum)
+        public void CreateNetwork(DataAssignment.Networking.Network datum, UserInfoDTO userInfo)
         {
             var locationCollection = Context.Database.GetCollection<LocationEntity>("LOCATIONS");
             locationCollection.InsertBulk(datum.MaintainableAssets.Select(_ => _.Location.ToEntity()));

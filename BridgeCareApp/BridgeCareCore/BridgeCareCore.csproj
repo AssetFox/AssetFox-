@@ -65,6 +65,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="coreConnections.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="esec.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="MetaData\AttributeMetaData\metaData.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -3,8 +3,11 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Logging;
+using BridgeCareCore.Security;
+using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,12 +18,14 @@ namespace BridgeCareCore.Controllers
     public class NetworkController : ControllerBase
     {
         private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly IEsecSecurity _esecSecurity;
         private readonly ILog _log;
 
-        public NetworkController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog log)
+        public NetworkController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog log, IEsecSecurity esecSecurity)
         {
             _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _log = log ?? throw new ArgumentNullException(nameof(log));
+            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
         }
 
         [HttpGet]
@@ -47,6 +52,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
                 // get network definition attribute from json file
                 var attribute = _unitOfDataPersistenceWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
 
@@ -62,7 +68,7 @@ namespace BridgeCareCore.Controllers
                 network.Name = networkName;
 
                 // insert network domain data into the data source
-                _unitOfDataPersistenceWork.NetworkRepo.CreateNetwork(network);
+                _unitOfDataPersistenceWork.NetworkRepo.CreateNetwork(network, userInfo);
 
                 // [TODO] Create DTO to return network information necessary to be stored in the UI
                 // for future reference.
@@ -72,6 +78,31 @@ namespace BridgeCareCore.Controllers
             {
                 _log.Error($"CreateNetwork Error => { e.Message}::{ e.StackTrace}");
                 return StatusCode(500, $"{e.Message}::{e.StackTrace}");
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertBenefitQuantifier")]
+        [Authorize]
+        public async Task<IActionResult> UpsertBenefitQuantifier([FromBody] BenefitQuantifierDTO dto)
+        {
+            try
+            {
+                var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
+                _unitOfDataPersistenceWork.BeginTransaction();
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfDataPersistenceWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto, userInfo);
+                });
+
+                _unitOfDataPersistenceWork.Commit();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _unitOfDataPersistenceWork.Rollback();
+                Console.WriteLine(e);
+                return BadRequest(e);
             }
         }
     }

@@ -38,10 +38,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return new NetworkEntity
             {
                 Id = domain.Id,
-                Name = domain.Name,
+                Name = domain.Name/*,
                 MaintainableAssets = domain.MaintainableAssets.Any()
                     ? domain.MaintainableAssets.Select(d => d.ToEntity(domain.Id)).ToList()
-                    : new List<MaintainableAssetEntity>()
+                    : new List<MaintainableAssetEntity>()*/
             };
         }
 
@@ -59,7 +59,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = entity.Name,
                 CreatedDate = entity.CreatedDate,
                 LastModifiedDate = entity.LastModifiedDate,
-                Status = entity.NetworkRollupDetail != null ? entity.NetworkRollupDetail.Status : "N/A"
+                Status = entity.NetworkRollupDetail != null ? entity.NetworkRollupDetail.Status : "N/A",
+                BenefitQuantifier = entity.BenefitQuantifier != null
+                    ? entity.BenefitQuantifier.ToDto()
+                    : new BenefitQuantifierDTO {NetworkId = entity.Id, Equation = new EquationDTO {Id = Guid.NewGuid()}}
             };
 
         public static SimulationAnalysisDomains.Network ToSimulationAnalysisDomain(this NetworkEntity entity, Explorer explorer)

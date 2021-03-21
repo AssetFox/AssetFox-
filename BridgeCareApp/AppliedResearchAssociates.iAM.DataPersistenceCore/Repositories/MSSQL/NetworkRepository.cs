@@ -24,8 +24,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public NetworkRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
-        public void CreateNetwork(DataAssignment.Networking.Network network)
+        public void CreateNetwork(DataAssignment.Networking.Network network, UserInfoDTO userInfo)
         {
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+
             // prevent EF from attempting to create the network's child entities (create them
             // separately as part of a bulk insert)
             var networkEntity = new NetworkEntity
@@ -33,28 +35,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 Id = new Guid(DataPersistenceConstants.PennDotNetworkId),
                 Name = network.Name
             };
-            _unitOfDataPersistenceWork.Context.Upsert(networkEntity, networkEntity.Id);
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.AddEntity(networkEntity, userEntity?.Id);
 
             // convert maintainable assets and all child domains to entities
             var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity(network.Id)).ToList();
+            var maintainableAssetLocationEntities = network.MaintainableAssets.Select(_ => _.Location.ToEntity(_.Id, "MaintainableAssetEntity")).ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.MaintainableAsset.AddRange(maintainableAssetEntities);
-                _unitOfDataPersistenceWork.Context.SaveChanges();
-                _unitOfDataPersistenceWork.Context.MaintainableAssetLocation.AddRange(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
-            }
-            else
-            {
-                // bulk insert maintainable assets
-                _unitOfDataPersistenceWork.Context.BulkInsert(maintainableAssetEntities);
-                _unitOfDataPersistenceWork.Context.SaveChanges();
-                // bulk insert maintainable asset locations
-                _unitOfDataPersistenceWork.Context.BulkInsert(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList());
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.AddAll(maintainableAssetEntities, userEntity?.Id);
+            _unitOfDataPersistenceWork.Context.AddAll(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList(), userEntity?.Id);
         }
 
         public void CreateNetwork(Network network)
@@ -73,8 +61,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return Task.Factory.StartNew(() => new List<NetworkDTO>());
             }
 
-            return Task.Factory.StartNew(() =>
-                _unitOfDataPersistenceWork.Context.Network.Select(_ => _.ToDto()).ToList());
+            return Task.Factory.StartNew(() => _unitOfDataPersistenceWork.Context.Network
+                .Include(_ => _.BenefitQuantifier)
+                .ThenInclude(_ => _.Equation)
+                .Select(_ => _.ToDto())
+                .ToList());
         }
 
         public NetworkEntity GetPennDotNetwork()

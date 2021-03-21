@@ -44,6 +44,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
+            var equationEntity = dto.Equation.ToEntity();
+
+            _unitOfDataPersistenceWork.Context.Upsert(equationEntity, equationEntity.Id, userEntity?.Id);
+
             var benefitQuantifierEntity = dto.ToEntity();
 
             _unitOfDataPersistenceWork.Context.Upsert(benefitQuantifierEntity, _ => _.NetworkId == dto.NetworkId,
@@ -52,9 +56,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteBenefitQuantifier(Guid networkId)
         {
-            _unitOfDataPersistenceWork.Context.Delete<EquationEntity>(_ => _.BenefitQuantifier.NetworkId == networkId);
+            _unitOfDataPersistenceWork.Context.DeleteEntity<EquationEntity>(_ => _.BenefitQuantifier.NetworkId == networkId);
 
-            _unitOfDataPersistenceWork.Context.Delete<BenefitQuantifierEntity>(_ => _.NetworkId == networkId);
+            _unitOfDataPersistenceWork.Context.DeleteEntity<BenefitQuantifierEntity>(_ => _.NetworkId == networkId);
         }
     }
 }

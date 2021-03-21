@@ -13,11 +13,7 @@ namespace BridgeCareCore
                 .ConfigureAppConfiguration((hostContext, config) =>
                 {
                     config.AddJsonFile("esec.json", true, true);
-#if MsSqlDebug
-                    config.AddJsonFile("coreConnection.Development.json", true, true);
-#else
-                    config.AddJsonFile("coreConnection.json", true, true);
-#endif
+                    config.AddJsonFile("coreConnections.json", true, true);
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

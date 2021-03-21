@@ -38,12 +38,21 @@ namespace AppliedResearchAssociates.iAM.Domains
             {
                 var actualAge = scope.GetNumber(Explorer.AgeAttribute.Name);
 
-                if (curve == null || previousAge <= 0 || actualAge <= previousAge)
+                if (curve == null || previousAge <= 0 || actualAge < previousAge)
                 {
-                    return ValueVersusAge.Interpolate(actualAge);
+                    var value = ValueVersusAge.Interpolate(actualAge);
+                    if(value == 4.167)
+                    {
+                        var test = 0;
+                    }
+                    return value;
                 }
                 else
                 {
+                    if(previousAge == actualAge)
+                    {
+                        previousAge--;
+                    }
                     var previousValue = scope.GetNumber(curve.Attribute.Name);
                     var apparentPreviousAge = AgeVersusValue.Interpolate(previousValue);
 
@@ -51,12 +60,22 @@ namespace AppliedResearchAssociates.iAM.Domains
                     {
                         var shiftFactor = apparentPreviousAge / previousAge;
                         var shiftedAge = actualAge * shiftFactor;
-                        return ValueVersusAge.Interpolate(shiftedAge);
+                        var value1 = ValueVersusAge.Interpolate(shiftedAge);
+                        if (value1 == 4.167)
+                        {
+                            var test = 0;
+                        }
+                        return value1;
                     }
 
                     var ageDifference = actualAge - previousAge;
                     var apparentAge = apparentPreviousAge + ageDifference;
-                    return ValueVersusAge.Interpolate(apparentAge);
+                    var value2 = ValueVersusAge.Interpolate(apparentAge);
+                    if (value2 == 4.167)
+                    {
+                        var test = 0;
+                    }
+                    return value2;
                 }
             }
 

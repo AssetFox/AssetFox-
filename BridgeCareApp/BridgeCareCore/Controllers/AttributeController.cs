@@ -55,5 +55,27 @@ namespace BridgeCareCore.Controllers
                 return BadRequest(e);
             }
         }
+
+        [HttpPost]
+        [Route("CreateAttributes")]
+        [Authorize]
+        public async Task<IActionResult> CreateAttributes()
+        {
+            try
+            {
+                // get all the configurable attributes
+                var configurableAttributes = _unitOfDataPersistenceWork.AttributeMetaDataRepo.GetAllAttributes();
+
+                // insert/update configurable attributes
+                _unitOfDataPersistenceWork.AttributeRepo.UpsertAttributes(configurableAttributes);
+                _unitOfDataPersistenceWork.Context.SaveChanges();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e);
+            }
+        }
     }
 }

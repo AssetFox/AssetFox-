@@ -40,11 +40,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             #region Initial work to set some data, which will be used throughout the Work summary TAB
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
-            var treatments = new List<string>();
-            var singleSection = reportOutputData.Years[0].Sections[0];
-            treatments = singleSection.TreatmentOptions.Select(_ => _.TreatmentName)
-                .Union(singleSection.TreatmentRejections.Select(r => r.TreatmentName)).ToList();
-            treatments.Sort();
+            var treatments = new SortedSet<string>();
 
             // cache to store total cost per treatment for a given year along with count of culvert
             // and non-culvert bridges
@@ -92,6 +88,23 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                         var newCostAndCount = (treatmentCost, bridgeCount);
                         costPerTreatmentPerYear[yearData.Year][section.AppliedTreatment] = newCostAndCount;
                     }
+
+
+                    section.TreatmentOptions.ForEach(_ =>
+                    {
+                        if (!treatments.Contains(_.TreatmentName))
+                        {
+                            treatments.Add(_.TreatmentName);
+                        }
+                    });
+
+                    section.TreatmentRejections.ForEach(_ =>
+                    {
+                        if (!treatments.Contains(_.TreatmentName))
+                        {
+                            treatments.Add(_.TreatmentName);
+                        }
+                    });
                 }
             }
 

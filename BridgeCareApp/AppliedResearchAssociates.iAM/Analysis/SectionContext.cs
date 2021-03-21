@@ -202,10 +202,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     ApplyPerformanceCurves();
                     ApplyPassiveTreatment(year);
                 }
-
-                SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
-                SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
             }
+
+            SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
+            SetHistoricalValues(SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
         }
 
         public override void SetNumber(string key, double value)
@@ -233,8 +233,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 SimulationRunner.Fail("Section area is being mutated. The analysis does not support this.");
             }
 
-            if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key))
+            if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key, KeyComparer))
             {
+                if(Section.Name == "66003002003006")
+                {
+                    var testc = 0;
+                }
                 PreviousAge = GetNumber(key);
             }
 

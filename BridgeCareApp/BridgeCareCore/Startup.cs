@@ -96,9 +96,7 @@ namespace BridgeCareCore
             services.AddScoped<UnitOfDataPersistenceWork>();
 
             // Repository for legacy database
-            services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
-            services.AddScoped<IPennDotReportARepository, PennDotReportARepository>();
-            services.AddScoped<IYearlyInvestmentRepository, YearlyInvestmentRepository>();
+            //services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
 #elif LiteDbDebug
             // LITE DB SCOPINGS
             services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));

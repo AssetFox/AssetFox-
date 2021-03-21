@@ -14,7 +14,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             _excelHelper = excelHelper;
         }
 
-        public void CheckConditions(int parallelBridge, string treatment, TreatmentCause previousYearCause,
+        public void CheckConditions(int parallelBridge, string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
             TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
         {
             if (treatment != null && treatment.ToLower() != Properties.Resources.NoTreatment)
@@ -25,7 +25,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 CashFlowedBridge(treatmentCause, rangeForCashFlow);
 
                 if (index != 1 && treatmentCause == TreatmentCause.CommittedProject
-                    && previousYearCause == TreatmentCause.CommittedProject)
+                    && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != Properties.Resources.NoTreatment)
                 {
                     var rangeWithPreviousColumn = worksheet.Cells[row, column - 1];
                     CommittedForConsecutiveYears(rangeWithPreviousColumn);

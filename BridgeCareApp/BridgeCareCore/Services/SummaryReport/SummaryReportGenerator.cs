@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.Parameters;
@@ -17,10 +18,8 @@ namespace BridgeCareCore.Services.SummaryReport
 {
     public class SummaryReportGenerator : ISummaryReportGenerator
     {
-        private readonly IYearlyInvestmentRepository _yearlyInvestmentRepository;
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
-        private readonly IPennDotReportARepository _pennDotReportARepository;
         private readonly IUnfundedRecommendations _unfundedRecommendations;
         private readonly IBridgeWorkSummary _bridgeWorkSummary;
         private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
@@ -32,10 +31,8 @@ namespace BridgeCareCore.Services.SummaryReport
 
         public SummaryReportGenerator(IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
-            IPennDotReportARepository pennDotReportARepository,
             IUnfundedRecommendations unfundedRecommendations,
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
-            IYearlyInvestmentRepository yearlyInvestmentRepository,
             SummaryReportGlossary summaryReportGlossary, SummaryReportParameters summaryReportParameters,
             IHubContext<BridgeCareHub> hub,
             IAddGraphsInTabs addGraphsInTabs,
@@ -43,11 +40,9 @@ namespace BridgeCareCore.Services.SummaryReport
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _bridgeDataForSummaryReport = bridgeDataForSummaryReport ?? throw new ArgumentNullException(nameof(bridgeDataForSummaryReport));
-            _pennDotReportARepository = pennDotReportARepository ?? throw new ArgumentNullException(nameof(pennDotReportARepository));
             _unfundedRecommendations = unfundedRecommendations ?? throw new ArgumentNullException(nameof(unfundedRecommendations));
             _bridgeWorkSummary = bridgeWorkSummary ?? throw new ArgumentNullException(nameof(bridgeWorkSummary));
             _bridgeWorkSummaryByBudget = workSummaryByBudget ?? throw new ArgumentNullException(nameof(workSummaryByBudget));
-            _yearlyInvestmentRepository = yearlyInvestmentRepository ?? throw new ArgumentNullException(nameof(yearlyInvestmentRepository));
             _summaryReportGlossary = summaryReportGlossary ?? throw new ArgumentNullException(nameof(summaryReportGlossary));
             _summaryReportParameters = summaryReportParameters ?? throw new ArgumentNullException(nameof(summaryReportParameters));
             _hubContext = hub ?? throw new ArgumentNullException(nameof(hub));
@@ -117,17 +112,36 @@ namespace BridgeCareCore.Services.SummaryReport
                     (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
                     );
             }
-            var brKeys = new List<int>();
             var simulationYears = new List<int>();
             foreach (var item in reportOutputData.Years)
             {
-                brKeys = item.Sections.Select(_ => Convert.ToInt32(_.FacilityName)).ToList();
                 simulationYears.Add(item.Year);
             }
-            var pennDotReportAData = _pennDotReportARepository.GetPennDotReportAData(brKeys);
 
-            var yearlyBudgetAmount = _yearlyInvestmentRepository.GetYearlyBudgetAmount(simulationId, simulationYears[0], simulationYears.Count);
             var simulationYearsCount = simulationYears.Count;
+
+            var explorer = _unitOfDataPersistenceWork.AttributeRepo.GetExplorer();
+            var network = _unitOfDataPersistenceWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
+            _unitOfDataPersistenceWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+
+            var simulation = network.Simulations.First();
+            _unitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+            _unitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
+            _unitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+
+            var yearlyBudgetAmount = new Dictionary<string, Budget>();
+            foreach (var budget in simulation.InvestmentPlan.Budgets)
+            {
+                if (!yearlyBudgetAmount.ContainsKey(budget.Name))
+                {
+                    yearlyBudgetAmount.Add(budget.Name, budget);
+                }
+                else
+                {
+                    yearlyBudgetAmount[budget.Name] = budget;
+                }
+            }
 
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
@@ -139,11 +153,10 @@ namespace BridgeCareCore.Services.SummaryReport
 
             // Bridge Data TAB
             var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
-            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, pennDotReportAData);
+            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData);
 
             // Filling up parameters tab
-            _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel,
-                simulationId, networkId);
+            _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
             reportDetailDto.Status = $"Creating Unfunded recommendations TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
             SendRealTimeMessage(reportDetailDto);

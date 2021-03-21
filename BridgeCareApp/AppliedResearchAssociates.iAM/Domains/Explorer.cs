@@ -78,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         private T Add<T>(string name, T attribute, ICollection<T> attributes, CalculateEvaluateParameterType parameterType) where T : Attribute
         {
-            if (AllAttributes.Any(a => a.Name == name))
+            if (AllAttributes.Any(a => string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new ArgumentException("Name is already taken by another attribute.", nameof(name));
             }

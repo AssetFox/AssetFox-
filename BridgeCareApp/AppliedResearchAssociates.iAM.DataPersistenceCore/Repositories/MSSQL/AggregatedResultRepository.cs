@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return !maintainableAssets.Any()
                 ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")
-                : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToDomain());
+                : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToList().ToDomain());
         }
 
         private void DeleteAggregatedResults(Guid networkId)

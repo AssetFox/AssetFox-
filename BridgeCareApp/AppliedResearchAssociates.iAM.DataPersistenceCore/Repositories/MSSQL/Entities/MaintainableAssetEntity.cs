@@ -16,6 +16,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid NetworkId { get; set; }
 
+        public string Facility { get; set; }
+
+        public string Section { get; set; }
+
+        public double Area { get; set; }
+
+        public string AreaUnit { get; set; }
+
         public virtual NetworkEntity Network { get; set; }
 
         public virtual MaintainableAssetLocationEntity MaintainableAssetLocation { get; set; }

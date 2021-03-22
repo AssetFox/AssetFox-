@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -17,38 +17,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class NetworkRepository : INetworkRepository
     {
-        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public NetworkRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public NetworkRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public void CreateNetwork(DataAssignment.Networking.Network network, UserInfoDTO userInfo)
         {
             var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
-            // prevent EF from attempting to create the network's child entities (create them
-            // separately as part of a bulk insert)
-            var networkEntity = new NetworkEntity
-            {
-                Id = new Guid(DataPersistenceConstants.PennDotNetworkId),
-                Name = network.Name
-            };
-            _unitOfDataPersistenceWork.Context.AddEntity(networkEntity, userEntity?.Id);
+            _unitOfDataPersistenceWork.Context.AddEntity(network.ToEntity(), userEntity?.Id);
 
-            // convert maintainable assets and all child domains to entities
-            var maintainableAssetEntities = network.MaintainableAssets.Select(_ => _.ToEntity(network.Id)).ToList();
-            var maintainableAssetLocationEntities = network.MaintainableAssets.Select(_ => _.Location.ToEntity(_.Id, "MaintainableAssetEntity")).ToList();
-
-            _unitOfDataPersistenceWork.Context.AddAll(maintainableAssetEntities, userEntity?.Id);
-            _unitOfDataPersistenceWork.Context.AddAll(maintainableAssetEntities.Select(_ => _.MaintainableAssetLocation).ToList(), userEntity?.Id);
+            _unitOfDataPersistenceWork.MaintainableAssetRepo.CreateMaintainableAssets(
+                network.MaintainableAssets.ToList(), network.Id, userEntity?.Id);
         }
 
-        public void CreateNetwork(Network network)
+        public void CreateNetwork(Network network, UserInfoDTO userInfo)
         {
-            _unitOfDataPersistenceWork.Context.Network.Add(network.ToEntity());
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+
+            _unitOfDataPersistenceWork.Context.AddEntity(network.ToEntity(), userEntity?.Id);
+
+            _unitOfDataPersistenceWork.MaintainableAssetRepo.CreateMaintainableAssets(network.Facilities.ToList(),
+                network.Id);
         }
 
         public List<DataAssignment.Networking.Network> GetAllNetworks() =>
@@ -165,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     ForEachExtension.ForEach(networkEntity.Facilities, facility => facility.Sections = sectionsDict[facility.Id]);
                 }
             }
-            return networkEntity.ToSimulationAnalysisDomain(explorer);
+            return networkEntity.ToDomain(explorer);
         }
 
         public void DeleteNetworkData()

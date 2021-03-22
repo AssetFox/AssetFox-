@@ -42,7 +42,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertBenefitQuantifier/")]
+        [Route("UpsertBenefitQuantifier")]
         [Authorize]
         public async Task<IActionResult> UpsertBenefitQuantifier([FromBody] BenefitQuantifierDTO dto)
         {

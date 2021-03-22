@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
@@ -171,7 +171,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (dto.Users.Any())
             {
-                _unitOfDataPersistenceWork.Context.BulkAddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(),
+                _unitOfDataPersistenceWork.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(),
                     user?.Id);
             }
         }
@@ -402,13 +402,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 simulationEntity.Name = dto.Name;
 
-                _unitOfDataPersistenceWork.Context.Update(simulationEntity, dto.Id, user?.Id);
+                _unitOfDataPersistenceWork.Context.UpdateEntity(simulationEntity, dto.Id, user?.Id);
             }
 
             if (dto.Users.Any())
             {
                 _unitOfDataPersistenceWork.Context.DeleteAll<SimulationUserEntity>(_ => _.SimulationId == dto.Id);
-                _unitOfDataPersistenceWork.Context.BulkAddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(), user?.Id);
+                _unitOfDataPersistenceWork.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(), user?.Id);
             }
         }
 

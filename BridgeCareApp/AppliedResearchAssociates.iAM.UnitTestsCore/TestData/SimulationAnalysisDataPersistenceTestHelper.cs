@@ -1,11 +1,9 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAccess;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Services;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
@@ -20,9 +18,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public Simulation StandAloneSimulation { get; set; }
 
-        public SimulationAnalysisDataPersistenceTestHelper() : base()
+        public SimulationAnalysisDataPersistenceTestHelper()
         {
-            _sqlConnection = new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
+            _sqlConnection = UnitOfDataPersistenceWork.LegacyConnection;
             _sqlConnection.Open();
             _dataAccessor = new DataAccessor(_sqlConnection, null);
         }
@@ -82,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
             var committedProject = StandAloneSimulation.CommittedProjects
                 .GetAdd(new CommittedProject(StandAloneSimulation.Network.Sections.First(), StandAloneSimulation.InvestmentPlan.FirstYearOfAnalysisPeriod));
-            committedProject.Name = $"Committed Project Test";
+            committedProject.Name = "Committed Project Test";
             committedProject.Budget = budget;
             selectableTreatment.Consequences.DistinctBy(_ => _.Attribute).ForEach(_ =>
             {

@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +16,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class BudgetAmountRepository : IBudgetAmountRepository
     {
-        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
         public BudgetAmountRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
@@ -51,16 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 });
             });
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.BudgetAmount.AddRange(budgetAmountEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(budgetAmountEntities);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.AddAll(budgetAmountEntities);
         }
 
         public void UpsertOrDeleteBudgetAmounts(Dictionary<Guid, List<BudgetAmountDTO>> budgetAmountsPerBudgetId, Guid libraryId, Guid? userId = null)
@@ -80,14 +68,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {"add", _ => !existingEntityIds.Contains(_.Id)}
             };
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, userId);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, userId);
-            }
+            _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, userId);
         }
     }
 }

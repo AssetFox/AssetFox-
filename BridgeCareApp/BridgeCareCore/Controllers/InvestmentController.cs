@@ -87,14 +87,13 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-                _unitOfDataPersistenceWork.BeginTransaction();
-                await Task.Factory.StartNew(() =>
-                {
+                await Task.Factory.StartNew(() => { 
+                    var userInfo = _esecSecurity.GetUserInformation(Request);
+                    _unitOfDataPersistenceWork.BeginTransaction();
                     _investmentUpsertMethods[userInfo.Role](userInfo.ToDto(), simulationId, data);
+                    _unitOfDataPersistenceWork.Commit();
                 });
-
-                _unitOfDataPersistenceWork.Commit();
+                
                 return Ok();
             }
             catch (UnauthorizedAccessException e)

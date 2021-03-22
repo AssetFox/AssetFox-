@@ -23,6 +23,12 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
             return new AggregatedResult<T>(Guid.NewGuid(), this, aggregationRule.Apply(specifiedData, attribute));
         }
 
+        // TODO: side effect => mutate (get area equation; calculate spatial weighting)
+        public void AssignSpatialWeighting()
+        {
+            // run spatial weighting equation to assign SpatialWeighting value here
+        }
+
         public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
         {
             foreach (var datum in attributeData)
@@ -43,6 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
         public List<IAttributeDatum> AssignedData { get; } = new List<IAttributeDatum>();
         public Guid Id { get; }
         public Guid NetworkId { get; }
+        //public SpatialWeighting SpatialWeighting { get; set; }
         public Location Location { get; }
     }
 }

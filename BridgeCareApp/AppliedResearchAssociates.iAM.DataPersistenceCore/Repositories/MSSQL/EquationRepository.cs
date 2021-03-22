@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateEquations(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, string joinEntity, Guid? userId = null)
         {
-            _unitOfDataPersistenceWork.Context.BulkAddAll(equationEntityPerJoinEntityId.Values.ToList(), userId);
+            _unitOfDataPersistenceWork.Context.AddAll(equationEntityPerJoinEntityId.Values.ToList(), userId);
 
             switch (joinEntity)
             {
@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => new PerformanceCurveEquationEntity { EquationId = _.Value.Id, PerformanceCurveId = _.Key })
                 .ToList();
 
-            _unitOfDataPersistenceWork.Context.BulkAddAll(performanceCurveEquationJoinEntities, userId);
+            _unitOfDataPersistenceWork.Context.AddAll(performanceCurveEquationJoinEntities, userId);
         }
 
         private void JoinEquationsWithTreatmentConsequences(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, Guid? userId = null)
@@ -68,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => new ConditionalTreatmentConsequenceEquationEntity { EquationId = _.Value.Id, ConditionalTreatmentConsequenceId = _.Key })
                 .ToList();
 
-            _unitOfDataPersistenceWork.Context.BulkAddAll(treatmentConsequenceEquationJoinEntities, userId);
+            _unitOfDataPersistenceWork.Context.AddAll(treatmentConsequenceEquationJoinEntities, userId);
         }
 
         private void JoinEquationsWithTreatmentCosts(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, Guid? userId = null)
@@ -77,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => new TreatmentCostEquationEntity { EquationId = _.Value.Id, TreatmentCostId = _.Key })
                 .ToList();
 
-            _unitOfDataPersistenceWork.Context.BulkAddAll(treatmentCostEquationJoinEntities, userId);
+            _unitOfDataPersistenceWork.Context.AddAll(treatmentCostEquationJoinEntities, userId);
         }
     }
 }

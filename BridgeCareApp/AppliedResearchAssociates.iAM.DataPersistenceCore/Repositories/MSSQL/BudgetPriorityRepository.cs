@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -16,15 +16,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class BudgetPriorityRepository : IBudgetPriorityRepository
     {
-        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public BudgetPriorityRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
-        {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-        }
+        public BudgetPriorityRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public void CreateBudgetPriorityLibrary(string name, Guid simulationId)
         {
@@ -66,16 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToEntity(simulationEntity.BudgetPriorityLibrarySimulationJoin.BudgetPriorityLibraryId))
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.BudgetPriority.AddRange(budgetPriorityEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(budgetPriorityEntities);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.AddAll(budgetPriorityEntities);
 
             if (budgetPriorities.Any(_ => !_.Criterion.ExpressionIsBlank))
             {
@@ -152,7 +139,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                 }
 
-                _unitOfDataPersistenceWork.Context.Delete<BudgetPriorityLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
+                _unitOfDataPersistenceWork.Context.DeleteEntity<BudgetPriorityLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
                 _unitOfDataPersistenceWork.Context.AddEntity(new BudgetPriorityLibrarySimulationEntity
                 {
@@ -188,14 +175,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {"add", _ => !existingEntityIds.Contains(_.Id)}
             };
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(budgetPriorityEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(budgetPriorityEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
+            _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(budgetPriorityEntities, predicatesPerCrudOperation, userEntity?.Id);
 
             _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryBudgetPriorityEntity>(_ =>
                 _.BudgetPriority.BudgetPriorityLibraryId == libraryId);
@@ -221,7 +201,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                     .ToList();
 
-                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionJoinsToAdd, userEntity?.Id);
+                _unitOfDataPersistenceWork.Context.AddAll(criterionJoinsToAdd, userEntity?.Id);
             }
         }
 
@@ -232,7 +212,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            _unitOfDataPersistenceWork.Context.Delete<BudgetPriorityLibraryEntity>(_ => _.Id == libraryId);
+            _unitOfDataPersistenceWork.Context.DeleteEntity<BudgetPriorityLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

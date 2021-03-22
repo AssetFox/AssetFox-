@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +16,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class BudgetRepository : IBudgetRepository
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
         public BudgetRepository(UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
@@ -34,15 +31,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var budgetLibraryEntity = new BudgetLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
-            _unitOfDataPersistenceWork.Context.BudgetLibrary.Add(budgetLibraryEntity);
+            _unitOfDataPersistenceWork.Context.AddEntity(budgetLibraryEntity);
 
-            _unitOfDataPersistenceWork.Context.BudgetLibrarySimulation.Add(new BudgetLibrarySimulationEntity
+            _unitOfDataPersistenceWork.Context.AddEntity(new BudgetLibrarySimulationEntity
             {
                 BudgetLibraryId = budgetLibraryEntity.Id,
                 SimulationId = simulationId
             });
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void CreateBudgets(List<Budget> budgets, Guid simulationId)
@@ -65,8 +60,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToEntity(simulationEntity.BudgetLibrarySimulationJoin.BudgetLibraryId))
                 .ToList();
 
-            _unitOfDataPersistenceWork.Context.Budget.AddRange(budgetEntities);
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.AddAll(budgetEntities);
 
             var budgetAmountsPerBudgetId = budgets
                 .Where(_ => _.YearlyAmounts.Any())
@@ -157,7 +151,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                 }
 
-                _unitOfDataPersistenceWork.Context.Delete<BudgetLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
+                _unitOfDataPersistenceWork.Context.DeleteEntity<BudgetLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
                 _unitOfDataPersistenceWork.Context.AddEntity(
                     new BudgetLibrarySimulationEntity { BudgetLibraryId = dto.Id, SimulationId = simulationId },
@@ -178,31 +172,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entityIds = budgetEntities.Select(_ => _.Id).ToList();
 
+            _unitOfDataPersistenceWork.Context.DeleteAll<BudgetEntity>(_ =>
+                _.BudgetLibraryId == libraryId && !entityIds.Contains(_.Id));
+
             var existingEntityIds = _unitOfDataPersistenceWork.Context.Budget
                 .Where(_ => _.BudgetLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id).ToList();
 
-            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<BudgetEntity, bool>>>
-            {
-                {"delete", _ => _.BudgetLibraryId == libraryId && !entityIds.Contains(_.Id)},
-                {"update", _ => existingEntityIds.Contains(_.Id)},
-                {"add", _ => !existingEntityIds.Contains(_.Id)}
-            };
+            _unitOfDataPersistenceWork.Context.UpdateAll(
+                budgetEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(), userEntity?.Id);
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(budgetEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(budgetEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
-
-            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryBudgetEntity>(_ =>
-                _.Budget.BudgetLibraryId == libraryId);
+            _unitOfDataPersistenceWork.Context.AddAll(
+                budgetEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), userEntity?.Id);
 
             var budgetAmountsPerBudgetId = budgets.ToDictionary(_ => _.Id, _ => _.BudgetAmounts);
 
-            _unitOfDataPersistenceWork.BudgetAmountRepo.UpsertOrDeleteBudgetAmounts(budgetAmountsPerBudgetId, libraryId, userEntity?.Id);
+            _unitOfDataPersistenceWork.BudgetAmountRepo.UpsertOrDeleteBudgetAmounts(budgetAmountsPerBudgetId, libraryId,
+                userEntity?.Id);
+
+            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryBudgetEntity>(_ =>
+                _.Budget.BudgetLibraryId == libraryId);
 
             if (budgets.Any(_ =>
                 _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
@@ -214,7 +202,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         new CriterionLibraryBudgetEntity { CriterionLibraryId = _.CriterionLibrary.Id, BudgetId = _.Id })
                     .ToList();
 
-                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
+                _unitOfDataPersistenceWork.Context.AddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
             }
         }
 
@@ -225,7 +213,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            _unitOfDataPersistenceWork.Context.Delete<BudgetLibraryEntity>(_ => _.Id == libraryId);
+            _unitOfDataPersistenceWork.Context.DeleteEntity<BudgetLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

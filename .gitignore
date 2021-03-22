@@ -378,7 +378,7 @@ iAM-legacy/DatabaseManager.dll
 /BridgeCareApp/BridgeCareNodeApp/logs/nodeCombinedLogs.log
 
 # core connection file
-/BridgeCareApp/BridgeCareCore/coreConnection.json
+/BridgeCareApp/BridgeCareCore/coreConnections.json
 /BridgeCareApp/AppliedResearchAssociates.iAM.DataPersistenceCore/Repositories/MSSQL/migrationConnection.json
 
 # esec file

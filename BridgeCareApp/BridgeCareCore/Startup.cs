@@ -174,9 +174,9 @@ namespace BridgeCareCore
 
         private static void UpdateDatabase(IApplicationBuilder app)
         {
-            using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
-            var unitOfWork = serviceScope.ServiceProvider.GetRequiredService<UnitOfDataPersistenceWork>();
-            unitOfWork.Context.Database.Migrate();
+            using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()?.CreateScope();
+            var unitOfWork = serviceScope?.ServiceProvider.GetRequiredService<UnitOfDataPersistenceWork>();
+            unitOfWork?.Context.Database.Migrate();
         }
     }
 }

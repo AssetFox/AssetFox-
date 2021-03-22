@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -159,7 +159,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                 }
 
-                _unitOfDataPersistenceWork.Context.Delete<TargetConditionGoalLibrarySimulationEntity>(_ =>
+                _unitOfDataPersistenceWork.Context.DeleteEntity<TargetConditionGoalLibrarySimulationEntity>(_ =>
                     _.SimulationId == simulationId);
 
                 _unitOfDataPersistenceWork.Context.AddEntity(
@@ -241,7 +241,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             TargetConditionGoalId = _.Id
                         }).ToList();
 
-                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
+                _unitOfDataPersistenceWork.Context.AddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
             }
         }
 
@@ -252,7 +252,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            _unitOfDataPersistenceWork.Context.Delete<TargetConditionGoalLibraryEntity>(_ => _.Id == libraryId);
+            _unitOfDataPersistenceWork.Context.DeleteEntity<TargetConditionGoalLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

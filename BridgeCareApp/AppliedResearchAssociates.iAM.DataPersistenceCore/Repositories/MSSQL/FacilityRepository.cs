@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
@@ -28,7 +28,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var facilityEntities = facilities.Select(_ => _.ToEntity()).ToList();
+            var existingFacilities = _unitOfWork.Context.Facility.Select(_ => _.Name).ToList();
+            var existingSections = _unitOfWork.Context.Section.Select(_ => $"{_.Name}{_.Area}").ToList();
+
+            var facilityEntities = facilities.Where(_ => !existingFacilities.Contains(_.Name)).Select(_ => _.ToEntity())
+                .ToList();
 
             if (IsRunningFromXUnit)
             {
@@ -41,10 +45,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.SaveChanges();
 
-            if (facilities.Any(_ => _.Sections.Any()))
+            if (facilities.Any(_ => _.Sections.Any(__ => !existingSections.Contains($"{__.Name}{__.Area}"))))
             {
-                var sections = facilities.Where(_ => _.Sections.Any())
-                    .SelectMany(_ => _.Sections).ToList();
+                var sections = facilities.Where(_ => _.Sections.Any(__ => !existingSections.Contains($"{__.Name}{__.Area}")))
+                    .SelectMany(_ => _.Sections.Where(__ => !existingSections.Contains($"{__.Name}{__.Area}"))).ToList();
 
                 _unitOfWork.SectionRepo.CreateSections(sections);
             }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -12,9 +14,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public MaintainableAssetRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public MaintainableAssetRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
-        public IEnumerable<MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId)
+        public List<MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId)
         {
             if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == networkId))
             {
@@ -32,7 +36,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return !maintainableAssets.Any()
                 ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")
-                : maintainableAssets.Select(_ => _.ToDomain());
+                : maintainableAssets.Select(_ => _.ToDomain()).ToList();
+        }
+
+        public void CreateMaintainableAssets(List<Facility> facilities, Guid networkId)
+        {
+            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == networkId))
+            {
+                throw new RowNotInTableException($"No network found having id {networkId}");
+            }
+
+
+        }
+
+        public void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId, Guid? userId = null)
+        {
+            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == networkId))
+            {
+                throw new RowNotInTableException($"No network found having id {networkId}");
+            }
+
+            var maintainableAssetEntities = maintainableAssets.Select(_ => _.ToEntity(networkId)).ToList();
+
+            _unitOfDataPersistenceWork.Context.AddAll(maintainableAssetEntities, userId);
+
+            var maintainableAssetLocationEntities = maintainableAssets
+                .Select(_ => _.Location.ToEntity(_.Id, "MaintainableAssetEntity")).ToList();
+
+            _unitOfDataPersistenceWork.Context.AddAll(maintainableAssetLocationEntities, userId);
         }
     }
 }

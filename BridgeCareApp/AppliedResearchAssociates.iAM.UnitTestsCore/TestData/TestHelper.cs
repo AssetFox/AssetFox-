@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public Mock<IHubContext<BridgeCareHub>> MockHubContext { get; set; }
 
-        public TestHelper(string dbName = "IAMv2")
+        public TestHelper()
         {
             Config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -49,11 +49,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
 
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
-                .UseInMemoryDatabase(dbName)
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .UseSqlServer(Config.GetConnectionString("BridgeCareConnex"))
                 .Options);
 
             UnitOfDataPersistenceWork = new UnitOfDataPersistenceWork(Config, DbContext);
+
+            UnitOfDataPersistenceWork.Context.Database.EnsureCreated();
         }
 
         public NetworkEntity TestNetwork { get; } = new NetworkEntity

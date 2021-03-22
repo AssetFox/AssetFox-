@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -276,7 +276,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                 }
 
-                _unitOfDataPersistenceWork.Context.Delete<TreatmentLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
+                _unitOfDataPersistenceWork.Context.DeleteEntity<TreatmentLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
                 _unitOfDataPersistenceWork.Context.AddEntity(
                     new TreatmentLibrarySimulationEntity { TreatmentLibraryId = dto.Id, SimulationId = simulationId },
@@ -354,7 +354,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _.BudgetIds.Select(budgetId =>
                         new SelectableTreatmentBudgetEntity { SelectableTreatmentId = _.Id, BudgetId = budgetId })).ToList();
 
-                _unitOfDataPersistenceWork.Context.BulkAddAll(treatmentBudgetJoinsToAdd, userEntity?.Id);
+                _unitOfDataPersistenceWork.Context.AddAll(treatmentBudgetJoinsToAdd, userEntity?.Id);
             }
 
             if (treatments.Any(_ =>
@@ -370,7 +370,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             SelectableTreatmentId = _.Id
                         }).ToList();
 
-                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
+                _unitOfDataPersistenceWork.Context.AddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
             }
         }
 
@@ -386,7 +386,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
                     .TreatmentLibraryId == libraryId);
 
-            _unitOfDataPersistenceWork.Context.Delete<TreatmentLibraryEntity>(_ => _.Id == libraryId);
+            _unitOfDataPersistenceWork.Context.DeleteEntity<TreatmentLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

@@ -163,6 +163,9 @@ namespace BridgeCareCore.Controllers
                     }
                 }
 
+                // TODO: assign spatial weighting using MaintainableAsset.AssignSpatialWeighting
+                // maintainableAssets.Select(_ => _.AssignSpatialWeighting());
+
                 broadcastingMessage = $"Finished aggregating attribute data. Saving it to the datasource...";
                 HubContext
                        .Clients

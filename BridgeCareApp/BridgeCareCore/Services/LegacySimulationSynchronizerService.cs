@@ -1,69 +1,85 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BridgeCareCore.Services
 {
     public class LegacySimulationSynchronizerService
     {
-        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
-        private const int NetworkId = 13;
+        private const int LegacyNetworkId = 13;
 
         private readonly IHubContext<BridgeCareHub> _hubContext;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public LegacySimulationSynchronizerService(IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfWork)
+        public LegacySimulationSynchronizerService(IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
             _hubContext = hub;
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
-        private DataAccessor GetDataAccessor() => new DataAccessor(_unitOfWork.LegacyConnection, null);
+        private DataAccessor GetDataAccessor() => new DataAccessor(_unitOfDataPersistenceWork.LegacyConnection, null);
 
         private void SynchronizeExplorerData()
         {
             sendRealTimeMessage("Upserting attributes...");
 
-            _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
+            _unitOfDataPersistenceWork.AttributeRepo.UpsertAttributes(_unitOfDataPersistenceWork.AttributeMetaDataRepo
+                .GetAllAttributes().ToList());
         }
 
-        private void SynchronizeNetwork(Simulation simulation)
+        private void SynchronizeNetwork(Network network)
         {
-            var network = _unitOfWork.NetworkRepo.GetPennDotNetwork();
-
-            if (network == null)
+            if (_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == network.Id))
             {
-                sendRealTimeMessage("Creating the network...");
-
-                _unitOfWork.NetworkRepo.CreateNetwork(simulation.Network);
+                return;
             }
+
+            sendRealTimeMessage("Creating the network...");
+
+            _unitOfDataPersistenceWork.NetworkRepo.CreateNetwork(network);
         }
 
-        private Task SynchronizeLegacyNetworkData(Simulation simulation)
+        private Task SynchronizeNetworkData(Network network)
         {
-            if (_unitOfWork.NetworkRepo.GetPennDotNetwork() == null)
+            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == network.Id))
             {
                 throw new RowNotInTableException($"No network found having id");
             }
 
-            var explorerNetworkFacilities = simulation.Network.Facilities.Select(_ => _.Name).ToHashSet();
-            var explorerNetworkSections = simulation.Network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
-            var facilities = _unitOfWork.Context.Facility.Select(_ => _.Name).ToHashSet();
-            var sections = _unitOfWork.Context.Section.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
-            if (!explorerNetworkFacilities.SetEquals(facilities) || !explorerNetworkSections.SetEquals(sections))
+            _unitOfDataPersistenceWork.MaintainableAssetRepo.CreateMaintainableAssets(network.Facilities.ToList(),
+                network.Id);
+
+            var networkFacilityNames = network.Facilities.Select(_ => _.Name).ToHashSet();
+            var networkSectionNamesAndAreas = network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
+            var locationNames = new HashSet<string>();
+            var assetNamesAndAreas = new HashSet<string>();
+            _unitOfDataPersistenceWork.Context
+                .MaintainableAssetLocation
+                .Include(_ => _.MaintainableAsset)
+                .ToList()
+                .ForEach(_ =>
+                {
+                    var facilitySectionName = _.LocationIdentifier.Split("/");
+                    locationNames.Add(facilitySectionName[0]);
+                    assetNamesAndAreas.Add($"{facilitySectionName[1]}{_.MaintainableAsset.Area}");
+                });
+
+            if (!networkFacilityNames.SetEquals(locationNames) || !networkSectionNamesAndAreas.SetEquals(assetNamesAndAreas))
             {
-                _unitOfWork.NetworkRepo.DeleteNetworkData();
+                _unitOfDataPersistenceWork.NetworkRepo.DeleteNetworkData();
                 sendRealTimeMessage("Creating the network's facilities and sections...");
-                _unitOfWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
+                _unitOfDataPersistenceWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
             }
 
             return Task.CompletedTask;
@@ -73,54 +89,61 @@ namespace BridgeCareCore.Services
         {
             sendRealTimeMessage("Joining attributes with equations and criteria...");
 
-            _unitOfWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(simulation.Network.Explorer);
+            _unitOfDataPersistenceWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(simulation.Network.Explorer);
 
             sendRealTimeMessage("Inserting simulation data...");
 
-            _unitOfWork.SimulationRepo.CreateSimulation(simulation);
-            _unitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
-            _unitOfWork.AnalysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Id);
-            _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
-            _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
-            _unitOfWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
-            _unitOfWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
+            _unitOfDataPersistenceWork.SimulationRepo.CreateSimulation(simulation);
+            _unitOfDataPersistenceWork.InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
+            _unitOfDataPersistenceWork.AnalysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Id);
+            _unitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
+            _unitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
+            _unitOfDataPersistenceWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
+            _unitOfDataPersistenceWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
 
-            _unitOfWork.CommittedProjectRepo.CreateCommittedProjects(simulation.CommittedProjects.ToList(), simulation.Id);
+            _unitOfDataPersistenceWork.CommittedProjectRepo.CreateCommittedProjects(simulation.CommittedProjects.ToList(), simulation.Id);
 
             return Task.CompletedTask;
         }
 
-        public async Task Synchronize(int simulationId)
+        public async Task Synchronize(int simulationId, UserInfoDTO userInfo)
         {
             try
             {
-                using var transaction = _unitOfWork.DbContextTransaction;
-
                 var dataAccessor = GetDataAccessor();
-                _unitOfWork.LegacyConnection.Open();
-                var simulation = dataAccessor.GetStandAloneSimulation(NetworkId, simulationId);
-                simulation.Network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
-                _unitOfWork.LegacyConnection.Close();
+                _unitOfDataPersistenceWork.LegacyConnection.Open();
+
+                var network = dataAccessor.GetExplorer().Networks.FirstOrDefault();
+                if (network != null)
+                {
+                    network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
+                }
+                
+                var simulation = dataAccessor.GetStandAloneSimulation(LegacyNetworkId, simulationId);
+
+                _unitOfDataPersistenceWork.LegacyConnection.Close();
+
+                _unitOfDataPersistenceWork.BeginTransaction();
 
                 SynchronizeExplorerData();
 
-                SynchronizeNetwork(simulation);
+                SynchronizeNetwork(network);
 
-                await SynchronizeLegacyNetworkData(simulation);
+                await SynchronizeNetworkData(simulation);
 
                 await SynchronizeLegacySimulation(simulation);
 
-                _unitOfWork.Commit();
+                _unitOfDataPersistenceWork.Commit();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
+                _unitOfDataPersistenceWork.Rollback();
                 throw;
             }
             finally
             {
-                _unitOfWork.Connection.Close();
-                _unitOfWork.LegacyConnection.Close();
+                _unitOfDataPersistenceWork.Connection.Close();
+                _unitOfDataPersistenceWork.LegacyConnection.Close();
             }
         }
 

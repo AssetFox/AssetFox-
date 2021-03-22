@@ -1,12 +1,6 @@
 {
   "ConnectionStrings": {
-    //"BridgeCareLegacyConnex": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
-    //"BridgeCareConnex": "data source=RMD-PPATORN2-LT\\SQLSERVER2014;initial catalog=IAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
-
-    "bridgecarelegacyconnex": "data source=52.177.117.86,56242\\SQL2014;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework",
-    "bridgecareconnex": "data source=52.177.117.86,56242\\SQL2014;initial catalog=IAMV2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework"
-
-    //"bridgecareconnex": "data source=localhost;initial catalog=IAMv2;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework"
-    //"bridgecarelegacyconnex": "data source=localhost;initial catalog=DbBackup;persist security info=True;user id=sa;password=20Pikachu^;MultipleActiveResultSets=True;App=EntityFramework"
+    "BridgeCareConnex": "data source=23.100.121.85,1401;initial catalog=IAMv2Test;persist security info=True;user id=ppator1;password=GaS3WHBZ9F5K;MultipleActiveResultSets=True;App=EntityFramework",
+    "BridgeCareLegacyConnex": "data source=23.100.121.85,1401;initial catalog=BridgeCare_New;persist security info=True;user id=ppator1;password=GaS3WHBZ9F5K;MultipleActiveResultSets=True;App=EntityFramework"
   }
 }

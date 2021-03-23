@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Reporting.Concrete;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -36,12 +35,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 IReport generatedReport;
                 try
                 {
-                    generatedReport = (IReport)Activator.CreateInstance(_reportLookup[reportName], _dataRepository);
+                    generatedReport = (IReport)Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName);
                 }
                 catch
                 {
                     generatedReport = new FailureReport();
-                    await generatedReport.Run($"{reportName} did not have a constructor with a repository parameter.");
+                    await generatedReport.Run($"{reportName} did not have a constructor with repository and name parameters.");
                 }
                 return generatedReport;
             }

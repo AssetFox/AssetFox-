@@ -47,12 +47,6 @@ import Vue from 'vue';
                 return;
             }
 
-            this.getUserCriteriaFilterAction().then(() => {
-                if(!this.currentUserCriteriaFilter.hasAccess){
-                    this.onRoleFailure();
-                }
-            });
-
             this.getUserTokensAction(code).then(() => {
                 if (!this.authenticated) {
                     this.onAuthenticationFailure();

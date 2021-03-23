@@ -31,15 +31,22 @@ namespace BridgeCareCore.Controllers
         /// Uses the authorization token to determine user identity
         /// </summary>
         /// <returns>IHttpActionResult</returns>
-        //[HttpGet]
-        //[Route("api/GetUserCriteria")]
-        ////[RestrictAccess]
-        //[Authorize]
-        //public IActionResult GetUserCriteria()
-        //{
-        //    var userInformation = _esecSecurity.GetUserInformation(Request);
-        //    return Ok(repo.GetOwnUserCriteria(userInformation));
-        //}
+        [HttpGet]
+        [Route("api/GetUserCriteria")]
+        //[RestrictAccess]
+        [Authorize]
+        public IActionResult GetUserCriteria()
+        {
+            var userInformation = _esecSecurity.GetUserInformation(Request);
+            var data = new UserInfoDTO
+            {
+                Email = userInformation.Email,
+                Roles = userInformation.Role,
+                Sub = userInformation.Name
+            };
+            var adminCheckConst = SecurityConstants.Policy.BAMSAdmin;
+            return Ok(repo.GetOwnUserCriteria(data, adminCheckConst));
+        }
 
         /// <summary>
         /// API endpoint for fetching all users' criteria settings.

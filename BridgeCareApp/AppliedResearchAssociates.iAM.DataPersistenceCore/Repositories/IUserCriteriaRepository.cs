@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IUserCriteriaRepository
     {
-        public UserCriteriaDTO GetOwnUserCriteria(UserInfoDTO userInformation);
+        public UserCriteriaDTO GetOwnUserCriteria(UserInfoDTO userInformation, string adminCheckConst);
         public List<UserCriteriaDTO> GetAllUserCriteria();
         public void SaveUserCriteria(UserCriteriaDTO model);
         public void DeleteUser(Guid userCriteriaId);

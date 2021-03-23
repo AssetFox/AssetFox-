@@ -42,7 +42,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             return result;
         }
-        public UserCriteriaDTO GetOwnUserCriteria(UserInfoDTO userInformation) => throw new NotImplementedException();
+        public UserCriteriaDTO GetOwnUserCriteria(UserInfoDTO userInformation, string adminCheckConst)
+        {
+            // First time login
+            if (!_unitOfDataPersistenceWork.Context.User.Any(u => u.Username == userInformation.Sub))
+            {
+                var newUser = GenerateDefaultUser(userInformation, adminCheckConst);
+                _unitOfDataPersistenceWork.Context.User.Add(newUser);
+
+                // if the newly logged in user is an admin
+                var newCriteriaFilter = new UserCriteriaFilterEntity();
+                if (newUser.HasInventoryAccess)
+                {
+                    newCriteriaFilter = GenerateDefaultCriteriaForAdmin(newUser);
+                    _unitOfDataPersistenceWork.Context.UserCriteria.Add(newCriteriaFilter);
+                }
+                _unitOfDataPersistenceWork.Context.SaveChanges();
+
+                // user does not have admin access, so don't enter the data in userCriteria_Filter table and return an empty object
+                if (!newUser.HasInventoryAccess)
+                {
+                    return new UserCriteriaDTO { UserName = userInformation.Sub };
+                }
+                return newCriteriaFilter.ToDto();
+            }
+            var currUser = _unitOfDataPersistenceWork.Context.User.FirstOrDefault(_ => _.Username == userInformation.Sub);
+            var userCriteria = _unitOfDataPersistenceWork.Context.UserCriteria.SingleOrDefault(criteria => criteria.UserEntityJoin.Username == userInformation.Sub);
+
+            if(userCriteria == null) // user is present in the user table, but doesn't have data in UserCriteria_Filter table (no inventory access)
+            {
+                return new UserCriteriaDTO{ UserName = userInformation.Sub };
+            }
+            userCriteria.UserEntityJoin = currUser;
+            return userCriteria.ToDto();
+        }
+
         public void SaveUserCriteria(UserCriteriaDTO model)
         {
             var user = _unitOfDataPersistenceWork.Context.User.FirstOrDefault(s => s.Username == model.UserName);
@@ -72,6 +106,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfDataPersistenceWork.Context.Update(userCriteria);
             }
             _unitOfDataPersistenceWork.Context.SaveChanges();
+        }
+
+        private UserEntity GenerateDefaultUser(UserInfoDTO userInformation, string adminCheckConst)
+        {
+            var newUser = new UserEntity
+            {
+                Id = Guid.NewGuid(),
+                Username = userInformation.Sub,
+                HasInventoryAccess = userInformation.Roles == adminCheckConst ? true : false
+            };
+            return newUser;
+        }
+        private UserCriteriaFilterEntity GenerateDefaultCriteriaForAdmin(UserEntity newUser)
+        {
+            var newUserCriteriaFilter = new UserCriteriaFilterEntity
+            {
+                UserCriteriaId = Guid.NewGuid(),
+                HasCriteria = false, // because this user is admin, HasCriteria is set to false. Meaning, the user doesn't have any criteria filter
+                CreatedBy = newUser.Id,
+                LastModifiedBy = newUser.Id,
+                CreatedDate = DateTime.Now,
+                LastModifiedDate = DateTime.Now,
+                UserId = newUser.Id,
+                UserEntityJoin = newUser
+            };
+            return newUserCriteriaFilter;
         }
     }
 }

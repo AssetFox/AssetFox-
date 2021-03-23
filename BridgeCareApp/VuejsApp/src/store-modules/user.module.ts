@@ -4,11 +4,12 @@ import UserService from '@/services/user.service';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
-import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import { emptyUserCriteriaFilter, UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 
 const state = {
     users: [] as User[],
-    usersCriteriaFilter: [] as UserCriteriaFilter[]
+    usersCriteriaFilter: [] as UserCriteriaFilter[],
+    currentUserCriteriaFilter: clone(emptyUserCriteriaFilter) as UserCriteriaFilter
 };
 
 const mutations = {
@@ -27,6 +28,9 @@ const mutations = {
 /////////////////////
     usersCriteriaFilterMutator(state: any, usersFilter: UserCriteriaFilter[]) {
         state.usersCriteriaFilter = clone(usersFilter);
+    },
+    currentUserCriteriaFilterMutator(state: any, currentUsersFilter: UserCriteriaFilter){
+        state.currentUserCriteriaFilter = clone(currentUsersFilter);
     },
     updatedusersCriteriaFilterMutator(state: any, userFilter: UserCriteriaFilter) {
 
@@ -95,11 +99,17 @@ const actions = {
             });
     },
 //////////////////////////////
-    async getUserCriteriaFilter({commit}: any) {
+    async getUserCriteriaFilter({commit, dispatch}: any) {
+        const message = 'You do not have access to any bridge data. \
+        Please contact an administrator to gain access to the data you need.';
         await UserService.getUserCriteriaFilterData()
-            .then((response: AxiosResponse<any[]>) => {
+            .then((response: AxiosResponse<any>) => {
                 if (hasValue(response, 'data')) {
-                    commit('usersCriteriaFilterMutator', response.data as UserCriteriaFilter[]);
+                    if (!response.data.hasAccess) {
+                        dispatch('setInfoMessage', {message});
+                    }
+                    commit('currentUserCriteriaFilterMutator', response.data as UserCriteriaFilter);
+                    commit('checkedForRoleMutator', response.data.hasAccess);
                 }
             });
     },

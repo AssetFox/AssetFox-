@@ -203,7 +203,6 @@ import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDi
             this.selectedUser = userFilter;
             var currentUser = this.stateUsers.filter((user: User) => user.id == userFilter.userId)[0];
 
-            // TODO: use actual criterion library object id
             this.criteriaFilterEditorDialogData = {
                 showDialog: true,
                 userId: currentUser.id,

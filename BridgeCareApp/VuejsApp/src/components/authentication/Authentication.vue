@@ -15,14 +15,16 @@
 </template>
 
 <script lang="ts">
-    import Vue from 'vue';
-    import {Component} from 'vue-property-decorator';
+    import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import Vue from 'vue';
+    import {Component, Watch} from 'vue-property-decorator';
     import {Action, State} from 'vuex-class';
 
     @Component
     export default class Authentication extends Vue {
         @State(state => state.authenticationModule.authenticated) authenticated: boolean;
         @State(state => state.authenticationModule.hasRole) hasRole: boolean;
+        @State(state => state.userModule.usersCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
         @Action('setSuccessMessage') setSuccessMessageAction: any;
         @Action('setErrorMessage') setErrorMessageAction: any;
@@ -30,6 +32,8 @@
         @Action('getUserInfo') getUserInfoAction: any;
         @Action('getNetworks') getNetworksAction: any;
         @Action('getAttributes') getAttributesAction: any;
+
+        @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
 
         mounted() {
             const code: string = this.$route.query.code as string;
@@ -42,6 +46,12 @@
                 window.location.href = `http://localhost:8080/Authentication/?code=${code}`;
                 return;
             }
+
+            this.getUserCriteriaFilterAction().then(() => {
+                if(!this.currentUserCriteriaFilter.hasAccess){
+                    this.onRoleFailure();
+                }
+            });
 
             this.getUserTokensAction(code).then(() => {
                 if (!this.authenticated) {

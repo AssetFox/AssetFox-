@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Reporting;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IReportIndexRepository
     {
-        bool Add(IReport report);
-        IReport Get(Guid reportId);
+        bool Add(ReportIndex report);
+        ReportIndex Get(Guid reportId);
         bool DeleteReport(Guid reportId);
         bool DeleteAllScenarioReports(Guid scenarioId);
         /// <summary>

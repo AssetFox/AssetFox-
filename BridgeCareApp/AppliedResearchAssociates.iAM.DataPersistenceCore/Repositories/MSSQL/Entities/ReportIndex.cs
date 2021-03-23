@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
-namespace AppliedResearchAssociates.iAM.Reporting
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
     /// <summary>
     /// Domain object representing record in data persistence for report data that should be persisted
     /// </summary>
-    public class ReportIndex
+    public class ReportIndex : BaseEntity
     {
         public Guid ID { get; set; }
         public Guid? SimulationID { get; set; }

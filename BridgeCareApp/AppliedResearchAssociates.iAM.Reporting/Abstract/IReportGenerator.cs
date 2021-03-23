@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Threading.Tasks;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -14,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// </summary>
         /// <param name="reportName">Name of the object to create</param>
         /// <returns>A report object based on the provided name</returns>
-        IReport Generate(string reportName);
+        Task<IReport> Generate(string reportName);
 
         /// <summary>
         /// Removes old reports from the repository (if any exist)

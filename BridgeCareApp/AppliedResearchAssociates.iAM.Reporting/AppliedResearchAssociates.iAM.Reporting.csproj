@@ -4,4 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj" />
+  </ItemGroup>
+
 </Project>

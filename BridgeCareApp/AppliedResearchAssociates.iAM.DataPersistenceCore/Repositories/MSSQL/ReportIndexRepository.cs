@@ -83,5 +83,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public ReportIndex Get(Guid reportId) => _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.ID == reportId);
+        public List<ReportIndex> GetAllForScenario(Guid simulationId) => _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == simulationId).ToList();
     }
 }

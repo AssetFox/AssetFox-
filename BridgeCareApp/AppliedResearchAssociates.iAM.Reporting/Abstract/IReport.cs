@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// <remarks>
         /// Populated after the Run method is successfully invoked
         /// </remarks>
-        string Results { get; set; }
+        string Results { get; }
 
         /// <summary>
         /// Describes the format of the results field

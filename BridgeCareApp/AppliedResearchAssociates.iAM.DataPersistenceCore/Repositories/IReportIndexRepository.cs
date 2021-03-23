@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
@@ -8,6 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         bool Add(ReportIndex report);
         ReportIndex Get(Guid reportId);
+        List<ReportIndex> GetAllForScenario(Guid scenarioId);
         bool DeleteReport(Guid reportId);
         bool DeleteAllScenarioReports(Guid scenarioId);
         /// <summary>

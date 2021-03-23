@@ -4,11 +4,15 @@ using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Moq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Reporting;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
+
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
 {
@@ -20,13 +24,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
 
         public ReportGeneratorTests()
         {
-            var mockedRepo = new Mock<UnitOfDataPersistenceWork>((new Mock<IConfiguration>()).Object, (new Mock<IAMContext>()).Object);
-            _testRepo = mockedRepo.Object;
+            var mockedContext = new Mock<IAMContext>();
+            var testReportIndexList = TestDataForReportIndex.SimpleRepo().AsQueryable();
 
-            _testReportLibrary = new Dictionary<string, Type>();
-            _testReportLibrary.Add("Test Report File", typeof(TestReportFile));
-            _testReportLibrary.Add("Test HTML File", typeof(TestHTMLFile));
-            _testReportLibrary.Add("Bad Report", typeof(TestBadReport));
+            // From https://docs.microsoft.com/en-us/ef/ef6/fundamentals/testing/mocking?redirectedfrom=MSDN
+            var mockedReportIndexSet = new Mock<DbSet<ReportIndex>>();
+            mockedReportIndexSet.As<IQueryable<ReportIndex>>().Setup(_ => _.Provider).Returns(testReportIndexList.Provider);
+            mockedReportIndexSet.As<IQueryable<ReportIndex>>().Setup(_ => _.Expression).Returns(testReportIndexList.Expression);
+            mockedReportIndexSet.As<IQueryable<ReportIndex>>().Setup(_ => _.ElementType).Returns(testReportIndexList.ElementType);
+            mockedReportIndexSet.As<IQueryable<ReportIndex>>().Setup(_ => _.GetEnumerator()).Returns(testReportIndexList.GetEnumerator());
+
+            mockedContext.Setup(_ => _.ReportIndex).Returns(mockedReportIndexSet.Object);
+            var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, mockedContext.Object);
+            _testRepo = mockedRepo;
+
+            _testReportLibrary = TestDataForReportIndex.SimpleReportLibrary();
 
             _generator = new DictionaryBasedReportGenerator(_testRepo, _testReportLibrary);
         }
@@ -34,6 +46,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         [Fact]
         public async Task GeneratorCanGenerateReportInLibrary()
         {
+            // Arrange
             string goodReport = "Test Report File";
 
             // Act
@@ -48,6 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         [Fact]
         public async Task GeneratorReturnsFailureReportWhenReportNotInLibrary()
         {
+            // Arrange
             string badReport = "Some missing report";
 
             // Act
@@ -62,6 +76,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         [Fact]
         public async Task GeneeratorReturnsFailureReportWhenReportIsMissingProperConstructor()
         {
+            // Arrange
             string badReport = "Bad Report";
 
             // Act
@@ -72,97 +87,56 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             Assert.Equal("Failure Report", report.ReportTypeName);
             Assert.True(report.Errors.Count() > 0);
         }
-    }
 
-    // Test Reports
-    public class TestReportFile : IReport
-    {
-        private List<string> _blankErrorList = new List<string>();
-        private Guid _id = new Guid("344b305f-ba15-4dfe-bb00-ac7b7de84d3c");
-        private Guid _sid = new Guid("2319a829-8df7-4ad7-86a1-00dceb1fadaa");
-        private UnitOfDataPersistenceWork _repo;
-        private string _reportName;
-
-        public TestReportFile(UnitOfDataPersistenceWork repository, string name)
+        [Fact]
+        public void GeneratorReturnsAllScenarioReports()
         {
-            _repo = repository;
-            _reportName = name;
+            // Arrange
+            Guid scenarioId = new Guid("be82f095-c108-4ab7-af7e-cb7ecd18ede2");
+
+            // Act
+            var reportList = _generator.GetAllReportsForScenario(scenarioId);
+
+            // Assert
+            Assert.Equal(2, reportList.Count());
         }
 
-        public Guid ID { get => _id; set { } }
-        public Guid? SimulationID { get => _sid; set { } }
-        public string Results { get => $"C:\\fakepath\\filename.xlsx"; set { } }
-
-        public ReportType Type => ReportType.File;
-
-        public string ReportTypeName => _reportName;
-
-        public List<string> Errors => _blankErrorList;
-
-        public bool IsComplete => true;
-
-        public string Status => "Report finished running";
-
-        public Task Run(string parameters) => throw new NotImplementedException();
-    }
-
-    public class TestHTMLFile : IReport
-    {
-        private List<string> _blankErrorList = new List<string>();
-        private Guid _id = new Guid("d1999649-36ad-4e33-b7c2-e2afbea9b5fa");
-        private UnitOfDataPersistenceWork _repo;
-        private string _reportName;
-
-        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name)
+        [Fact]
+        public void GeneratorHandlesAScenarioWithoutReports()
         {
-            _repo = repository;
-            _reportName = name;
+            // Arrange
+            Guid scenarioId = new Guid("be82f095-aaaa-aaaa-aaaa-cb7ecd18ede2"); // Should not exist in demo repo
+
+            // Act
+            var reportList = _generator.GetAllReportsForScenario(scenarioId);
+
+            // Assert
+            Assert.Equal(0, reportList.Count());
         }
 
-        public Guid ID { get => _id; set { } }
-        public Guid? SimulationID { get => null; set { } }
-        public string Results { get => $"<p>Hello, World!</p>"; set { } }
-
-        public ReportType Type => ReportType.HTML;
-
-        public string ReportTypeName => _reportName;
-
-        public List<string> Errors => _blankErrorList;
-
-        public bool IsComplete => true;
-
-        public string Status => "Report finished running";
-
-        public Task Run(string parameters) => throw new NotImplementedException();
-    }
-
-    public class TestBadReport : IReport
-    {
-        private List<string> _blankErrorList = new List<string>();
-        private Guid _id = new Guid("d1999649-36ad-4e33-b7c2-e2afbea9b5fa");
-        private UnitOfDataPersistenceWork _repo;
-        private string _reportName;
-
-        public TestBadReport(UnitOfDataPersistenceWork repository)
+        [Fact]
+        public async Task GeneratorSuccessfullyReturnsASpecificReport()
         {
-            _repo = repository;
-            _reportName = String.Empty;
+            // Arrange
+            Guid reportId = new Guid("b32ecb1e-297f-4caa-9608-f28ab61cbd91");
+
+            // Act
+            var report = await _generator.GetExisting(reportId);
+
+            // Assert
+            Assert.Equal("0951aaad-eddd-462d-ab8d-99ed3829019f", report.SimulationID.ToString());
         }
 
-        public Guid ID { get => _id; set { } }
-        public Guid? SimulationID { get => null; set { } }
-        public string Results { get => $"<p>Hello, World!</p>"; set { } }
+        [Fact]
+        public async Task GeneratorHandlesNotFindingASpecificReport()
+        {
+            // Arrange
+            Guid reportId = new Guid("be82f095-aaaa-aaaa-aaaa-cb7ecd18ede2"); // Should not exist in demo repo
 
-        public ReportType Type => ReportType.HTML;
-
-        public string ReportTypeName => _reportName;
-
-        public List<string> Errors => _blankErrorList;
-
-        public bool IsComplete => true;
-
-        public string Status => "Report finished running";
-
-        public Task Run(string parameters) => throw new NotImplementedException();
+            // Act
+            var report = await _generator.GetExisting(reportId);
+        }
     }
+
+    
 }

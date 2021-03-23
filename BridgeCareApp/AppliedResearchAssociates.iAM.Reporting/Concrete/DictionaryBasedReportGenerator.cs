@@ -23,6 +23,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// <returns>Report object</returns>
         public async Task<IReport> Generate(string reportName)
         {
+            return await Generate(reportName, "", "", "");
+        }
+
+        /// <summary>
+        /// Specific generator used to recreate reports from data persistence
+        /// </summary>
+        private async Task<IReport> Generate(string reportName, string existingResults, string id, string simulation)
+        {
             if (!_reportLookup.ContainsKey(reportName))
             {
                 var failure = new FailureReport();
@@ -35,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 IReport generatedReport;
                 try
                 {
-                    generatedReport = (IReport)Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName);
+                    generatedReport = (IReport)Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName, existingResults, id, simulation);
                 }
                 catch
                 {
@@ -58,6 +66,41 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public void Cleanup()
         {
             _dataRepository.ReportIndexRepository.DeleteExpiredReports();
+        }
+
+        public List<ReportListItem> GetAllReportsForScenario(Guid simulationId)
+        {
+            var reportList = _dataRepository.ReportIndexRepository.GetAllForScenario(simulationId);
+            var itemList = new List<ReportListItem>();
+            foreach (var item in reportList)
+            {
+                var listEntry = new ReportListItem()
+                {
+                    ReportId = item.ID,
+                    ReportName = item.ReportTypeName
+                };
+                itemList.Add(listEntry);
+            }
+            return itemList;
+        }
+
+        public async Task<IReport> GetExisting(Guid reportId)
+        {
+            IReport validReport;
+            var reportInformation = _dataRepository.ReportIndexRepository.Get(reportId);
+            if (reportInformation == null) return null;
+
+            if (_reportLookup.ContainsKey(reportInformation.ReportTypeName))
+            {
+                validReport = await Generate(reportInformation.ReportTypeName, reportInformation.Result, reportInformation.ID.ToString(), reportInformation.SimulationID.ToString());
+                validReport.ID = reportInformation.ID;
+                validReport.SimulationID = reportInformation.SimulationID;
+                return validReport;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

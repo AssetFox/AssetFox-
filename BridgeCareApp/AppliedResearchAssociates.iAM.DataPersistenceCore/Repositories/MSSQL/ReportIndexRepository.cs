@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public bool Add(ReportIndex report)
         {
             // Ensure required fields are present
-            if (report.ID == null || String.IsNullOrEmpty(report.ReportTypeName))
+            if (report.ID == Guid.Empty || String.IsNullOrEmpty(report.ReportTypeName))
             {
                 throw new ArgumentException($"Report does not have required values");
             }
@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public bool DeleteAllScenarioReports(Guid scenarioId)
         {
             var scenarioReports = _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == scenarioId);
-            if (scenarioReports != null)
+            if (scenarioReports.Count() > 0)
             {
                 _unitOfDataPersistenceWork.Context.ReportIndex.RemoveRange(scenarioReports);
                 _unitOfDataPersistenceWork.Context.SaveChanges();

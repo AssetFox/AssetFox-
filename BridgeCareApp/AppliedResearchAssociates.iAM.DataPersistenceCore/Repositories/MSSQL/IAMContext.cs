@@ -178,6 +178,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<SimulationReportDetailEntity> SimulationReportDetail { get; set; }
 
+        public virtual DbSet<UserCriteriaFilterEntity> UserCriteria { get; set; }
+
         private class MigrationConnection
         {
             public string BridgeCareConnex { get; set; }
@@ -1461,6 +1463,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithOne(p => p.SimulationReportDetail)
                     .HasForeignKey<SimulationReportDetailEntity>(d => d.SimulationId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<UserCriteriaFilterEntity>(entity =>
+            {
+                entity.HasKey(e => e.UserCriteriaId);
+
+                entity.ToTable("UserCriteria_Filter");
+
+                entity.HasIndex(e => e.UserCriteriaId).IsUnique();
+
+                entity.HasOne(d => d.UserEntityJoin)
+                .WithOne(p => p.UserCriteriaFilterJoin)
+                .HasForeignKey<UserCriteriaFilterEntity>(f => f.UserId);
+
             });
         }
     }

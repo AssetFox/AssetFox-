@@ -4,9 +4,11 @@ import UserService from '@/services/user.service';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
+import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 
 const state = {
-    users: [] as User[]
+    users: [] as User[],
+    usersCriteriaFilter: [] as UserCriteriaFilter[]
 };
 
 const mutations = {
@@ -21,7 +23,48 @@ const mutations = {
     },
     deletedUserMutator(state: any, id: string) {
         state.users = reject(propEq('id', id), state.users);
-    }
+    },
+/////////////////////
+    usersCriteriaFilterMutator(state: any, usersFilter: UserCriteriaFilter[]) {
+        state.usersCriteriaFilter = clone(usersFilter);
+    },
+    updatedusersCriteriaFilterMutator(state: any, userFilter: UserCriteriaFilter) {
+
+        var criteriaIndex = findIndex(propEq('userId', userFilter.userId), state.usersCriteriaFilter);
+        if(criteriaIndex != -1){
+            state.usersCriteriaFilter[criteriaIndex].criteria = userFilter.criteria;
+            state.usersCriteriaFilter[criteriaIndex].hasAccess = userFilter.hasAccess;
+            state.usersCriteriaFilter[criteriaIndex].hasCriteria = userFilter.hasCriteria;
+        }
+        else{
+            state.usersCriteriaFilter.push(userFilter);
+        }
+
+        var index = findIndex(propEq('id', userFilter.userId), state.users);
+        if(index != -1){
+            var data = state.users[index];
+            data.hasInventoryAccess = userFilter.hasAccess;
+            state.users = update(index,
+                data, state.users
+            );
+        }
+    },
+    deletedusersCriteriaFilterMutator(state: any, id: string) {
+
+        var index = findIndex(propEq('criteriaId', id), state.usersCriteriaFilter);
+        var currUserFilter = state.usersCriteriaFilter[index];
+
+        state.usersCriteriaFilter = reject(propEq('criteriaId', id), state.usersCriteriaFilter);
+
+        var index = findIndex(propEq('id', currUserFilter.userId), state.users);
+        if(index != -1){
+            var data = state.users[index];
+            data.hasInventoryAccess = false;
+            state.users = update(index,
+                data, state.users
+            );
+        }
+    },
 };
 
 const actions = {
@@ -48,6 +91,42 @@ const actions = {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     commit('deletedUserMutator', payload.userId);
                     dispatch('setSuccessMessage', {message: 'Deleted user'});
+                }
+            });
+    },
+//////////////////////////////
+    async getUserCriteriaFilter({commit}: any) {
+        await UserService.getUserCriteriaFilterData()
+            .then((response: AxiosResponse<any[]>) => {
+                if (hasValue(response, 'data')) {
+                    commit('usersCriteriaFilterMutator', response.data as UserCriteriaFilter[]);
+                }
+            });
+    },
+
+    async getAllUserCriteriaFilter({commit}: any) {
+        await UserService.getAllUsersCriteriaFilterData()
+            .then((response: AxiosResponse<any[]>) => {
+                if (hasValue(response, 'data')) {
+                    commit('usersCriteriaFilterMutator', response.data as UserCriteriaFilter[]);
+                }
+            });
+    },
+    async updateUserCriteriaFilter({commit, dispatch}: any, payload: any) {
+        await UserService.updateUserCriteriaFilterData(payload.userCriteriaFilter)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    commit('updatedusersCriteriaFilterMutator', payload.userCriteriaFilter);
+                    dispatch('setSuccessMessage', {message: 'Updated user criteria filter'});
+                }
+            });
+    },
+    async deleteUserCriteriaFilter({commit, dispatch}: any, payload: any) {
+        await UserService.deleteUserCriteriaFilterData(payload.userCriteriaId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    commit('deletedusersCriteriaFilterMutator', payload.userCriteriaId);
+                    dispatch('setSuccessMessage', {message: 'Deleted user criteria filter'});
                 }
             });
     }

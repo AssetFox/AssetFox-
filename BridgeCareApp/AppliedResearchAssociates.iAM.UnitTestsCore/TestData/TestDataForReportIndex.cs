@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -56,29 +55,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
     {
         private List<string> _blankErrorList = new List<string>();
         private Guid _id;
-        private Guid _sid;
+        private Guid? _sid;
         private UnitOfDataPersistenceWork _repo;
         private string _reportName;
 
-        public TestReportFile(UnitOfDataPersistenceWork repository, string name, string existingResults, string id, string scenario)
+        public TestReportFile(UnitOfDataPersistenceWork repository, string name, ReportIndex results)
         {
             _repo = repository;
             _reportName = name;
-            if (String.IsNullOrEmpty(id))
+            Guid? _newSid = new Guid("2319a829-8df7-4ad7-86a1-00dceb1fadaa");
+
+            if (results == null)
             {
                 _id = new Guid("344b305f-ba15-4dfe-bb00-ac7b7de84d3c");
+                _sid = _newSid;
             }
             else
             {
-                _id = new Guid(id);
-            }
-            if (String.IsNullOrEmpty(scenario))
-            {
-                _sid = new Guid("2319a829-8df7-4ad7-86a1-00dceb1fadaa");
-            }
-            else
-            {
-                _sid = new Guid(scenario);
+                _id = results.ID;
+                _sid = results.SimulationID == null ? _newSid : results.SimulationID;
             }
         }
 
@@ -107,21 +102,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         private UnitOfDataPersistenceWork _repo;
         private string _reportName;
 
-        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name, string existingResults, string id, string scenario)
+        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name, ReportIndex results)
         {
             _repo = repository;
             _reportName = name;
-            if (String.IsNullOrEmpty(id))
+
+            if (results == null)
             {
                 _id = new Guid("d1999649-36ad-4e33-b7c2-e2afbea9b5fa");
             }
             else
             {
-                _id = new Guid(id);
-            }
-            if (!String.IsNullOrEmpty(scenario))
-            {
-                _sid = new Guid(scenario);
+                _id = results.ID;
+                _sid = results.SimulationID == null ? null : results.SimulationID;
             }
         }
 

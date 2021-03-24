@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace AppliedResearchAssociates.iAM.Reporting
@@ -23,13 +24,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// <returns>Report object</returns>
         public async Task<IReport> Generate(string reportName)
         {
-            return await Generate(reportName, "", "", "");
+            return await Generate(reportName, null);
         }
 
         /// <summary>
         /// Specific generator used to recreate reports from data persistence
         /// </summary>
-        private async Task<IReport> Generate(string reportName, string existingResults, string id, string simulation)
+        private async Task<IReport> Generate(string reportName, ReportIndex results)
         {
             if (!_reportLookup.ContainsKey(reportName))
             {
@@ -43,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 IReport generatedReport;
                 try
                 {
-                    generatedReport = (IReport)Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName, existingResults, id, simulation);
+                    generatedReport = (IReport)Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName, results);
                 }
                 catch
                 {
@@ -92,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             if (_reportLookup.ContainsKey(reportInformation.ReportTypeName))
             {
-                validReport = await Generate(reportInformation.ReportTypeName, reportInformation.Result, reportInformation.ID.ToString(), reportInformation.SimulationID.ToString());
+                validReport = await Generate(reportInformation.ReportTypeName, reportInformation);
                 validReport.ID = reportInformation.ID;
                 validReport.SimulationID = reportInformation.SimulationID;
                 return validReport;

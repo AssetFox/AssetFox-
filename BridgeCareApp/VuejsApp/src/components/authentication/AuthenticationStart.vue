@@ -34,8 +34,6 @@
         @State(state => state.authenticationModule.hasRole) hasRole: boolean;
         @State(state => state.authenticationModule.checkedForRole) checkedForRole: boolean;
 
-        @State(state => state.userModule.usersCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
-
         onRedirect() {
             if (!this.authenticated) {
                 var href: string = `${oidcConfig.authorizationEndpoint}?response_type=code&scope=openid&scope=BAMS`;
@@ -60,13 +58,7 @@
                 this.$router.push('/NoRole/');
             }
         }
-        
-        // @Watch('currentUserCriteriaFilter')
-        // onCurrentUserCriteriaFilter(){
-        //     if(!this.currentUserCriteriaFilter.hasAccess){
-        //         this.$router.push('/NoRole/');
-        //     }
-        // }
+
         mounted() {
             this.onRedirect();
         }

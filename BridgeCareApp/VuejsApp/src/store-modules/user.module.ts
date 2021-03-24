@@ -16,13 +16,17 @@ const mutations = {
     usersMutator(state: any, users: User[]) {
         state.users = clone(users);
     },
-    updatedUserMutator(state: any, user: User) {
-        state.users = update(
-            findIndex(propEq('id', user.id), state.users),
-            user, state.users
-        );
-    },
+    // updatedUserMutator(state: any, user: User) {
+    //     state.users = update(
+    //         findIndex(propEq('id', user.id), state.users),
+    //         user, state.users
+    //     );
+    // },
     deletedUserMutator(state: any, id: string) {
+
+        // this is to delete the user entry from criteria filter. Because the user is getting deleted from the system
+        state.usersCriteriaFilter = reject(propEq('userId', id), state.usersCriteriaFilter);
+
         state.users = reject(propEq('id', id), state.users);
     },
 /////////////////////
@@ -53,7 +57,7 @@ const mutations = {
             );
         }
     },
-    deletedusersCriteriaFilterMutator(state: any, id: string) {
+    revokeUsersCriteriaFilterMutator(state: any, id: string) {
 
         var index = findIndex(propEq('criteriaId', id), state.usersCriteriaFilter);
         var currUserFilter = state.usersCriteriaFilter[index];
@@ -80,15 +84,15 @@ const actions = {
                 }
             });
     },
-    async updateUser({commit, dispatch}: any, payload: any) {
-        await UserService.updateUser(payload.user)
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    commit('updatedUserMutator', payload.user);
-                    dispatch('setSuccessMessage', {message: 'Updated user'});
-                }
-            });
-    },
+    // async updateUser({commit, dispatch}: any, payload: any) {
+    //     await UserService.updateUser(payload.user)
+    //         .then((response: AxiosResponse) => {
+    //             if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+    //                 commit('updatedUserMutator', payload.user);
+    //                 dispatch('setSuccessMessage', {message: 'Updated user'});
+    //             }
+    //         });
+    // },
     async deleteUser({commit, dispatch}: any, payload: any) {
         await UserService.deleteUser(payload.userId)
             .then((response: AxiosResponse) => {
@@ -109,7 +113,6 @@ const actions = {
                         dispatch('setInfoMessage', {message});
                     }
                     commit('currentUserCriteriaFilterMutator', response.data as UserCriteriaFilter);
-                    commit('checkedForRoleMutator', response.data.hasAccess);
                 }
             });
     },
@@ -131,11 +134,11 @@ const actions = {
                 }
             });
     },
-    async deleteUserCriteriaFilter({commit, dispatch}: any, payload: any) {
-        await UserService.deleteUserCriteriaFilterData(payload.userCriteriaId)
+    async revokeUserCriteriaFilter({commit, dispatch}: any, payload: any) {
+        await UserService.revokeUserCriteriaFilterData(payload.userCriteriaId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    commit('deletedusersCriteriaFilterMutator', payload.userCriteriaId);
+                    commit('revokeUsersCriteriaFilterMutator', payload.userCriteriaId);
                     dispatch('setSuccessMessage', {message: 'Deleted user criteria filter'});
                 }
             });

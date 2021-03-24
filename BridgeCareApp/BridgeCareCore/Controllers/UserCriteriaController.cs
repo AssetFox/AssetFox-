@@ -16,12 +16,10 @@ namespace BridgeCareCore.Controllers
     public class UserCriteriaController : ControllerBase
     {
         private readonly IUserCriteriaRepository repo;
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly IEsecSecurity _esecSecurity;
 
-        public UserCriteriaController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity,IUserCriteriaRepository repo)
+        public UserCriteriaController(IEsecSecurity esecSecurity,IUserCriteriaRepository repo)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork;
             _esecSecurity = esecSecurity;
             this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
         }
@@ -79,12 +77,22 @@ namespace BridgeCareCore.Controllers
         /// <param name="username">User's username</param>
         /// <returns>IHttpActionResult</returns>
         [HttpDelete]
-        [Route("api/DeleteUser/{userCriteriaId}")]
+        [Route("api/RevokeUserAccess/{userCriteriaId}")]
         //[RestrictAccess(Role.ADMINISTRATOR)]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public IActionResult DeleteUser(Guid userCriteriaId)
+        public IActionResult RevokeUserAccess(Guid userCriteriaId)
         {
-            repo.DeleteUser(userCriteriaId);
+            repo.RevokeUserAccess(userCriteriaId);
+            return Ok();
+        }
+
+        [HttpDelete]
+        [Route("api/DeleteUser/{userId}")]
+        //[RestrictAccess(Role.ADMINISTRATOR)]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        public IActionResult DeleteUser(Guid userId)
+        {
+            repo.DeleteUser(userId);
             return Ok();
         }
     }

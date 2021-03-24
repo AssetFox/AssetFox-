@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
                                          throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
-        public void DeleteUser(Guid userCriteriaId)
+        public void RevokeUserAccess(Guid userCriteriaId)
         {
             var criteriaToBedeleted = _unitOfDataPersistenceWork.Context.UserCriteria.FirstOrDefault(_ => _.UserCriteriaId == userCriteriaId);
             var userToBeChanged = _unitOfDataPersistenceWork.Context.User.FirstOrDefault(_ => _.Id == criteriaToBedeleted.UserId);
@@ -132,6 +132,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 UserEntityJoin = newUser
             };
             return newUserCriteriaFilter;
+        }
+
+        public void DeleteUser(Guid userId)
+        {
+            _unitOfDataPersistenceWork.Context.Delete<UserCriteriaFilterEntity>(_ => _.UserId == userId);
+            _unitOfDataPersistenceWork.Context.Delete<UserEntity>(_ => _.Id == userId);
+            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
     }
 }

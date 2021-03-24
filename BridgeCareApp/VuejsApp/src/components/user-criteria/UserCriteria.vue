@@ -124,7 +124,6 @@
     import {emptyUser, User} from '@/shared/models/iAM/user';
     import {itemsAreEqual} from '@/shared/utils/equals-utils';
     import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
-    import {CriterionLibrary} from '@/shared/models/iAM/criteria';
 import { emptyUserCriteriaFilter, UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDialog.vue';
 
@@ -138,13 +137,13 @@ import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDi
         @State(state => state.userModule.usersCriteriaFilter) stateUsersCriteriaFilter: UserCriteriaFilter[];
 
         @Action('getAllUsers') getAllUserCriteriaAction: any;
-        @Action('updateUser') setUserCriteriaAction: any;
+        //@Action('updateUser') setUserCriteriaAction: any;
         @Action('deleteUser') deleteUserAction: any;
 
         @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
         @Action('getAllUserCriteriaFilter') getAllUserCriteriaFilterAction: any;
         @Action('updateUserCriteriaFilter') updateUserCriteriaFilterAction: any;
-        @Action('deleteUserCriteriaFilter') deleteUserCriteriaFilterAction: any;
+        @Action('revokeUserCriteriaFilter') revokeUserCriteriaFilterAction: any;
 
         beforeDeleteAlertData: AlertData = {...emptyAlertData};
         userCriteriaGridHeaders: object[] = [
@@ -156,8 +155,8 @@ import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDi
         unassignedUsers: User[] = [];
         assignedUsers: User[] = [];
 
-        assignedUsersCriteriaFilter: UserCriteriaFilter[]; //= [{...emptyUserCriteriaFilter}];
-        unassignedUsersCriteriaFilter: UserCriteriaFilter[]; //= [{...emptyUserCriteriaFilter}];
+        assignedUsersCriteriaFilter: UserCriteriaFilter[];
+        unassignedUsersCriteriaFilter: UserCriteriaFilter[];
 
         criteriaFilterEditorDialogData: CriterionFilterEditorDialogData = {...emptyCriterionFilterEditorDialogData};
         selectedUser: UserCriteriaFilter = {...emptyUserCriteriaFilter};
@@ -233,18 +232,7 @@ import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDi
                 hasAccess: false,
                 hasCriteria: false
             };
-            this.deleteUserCriteriaFilterAction({userCriteriaId : userCriteriaFilter.criteriaId});
-
-            // Currently we have 2 objects User and UserCriteriaFilter. Therefore, we have two calls to different actions
-            var currUser = this.stateUsers.filter((user: User) => user.id == targetUser.userId)[0];
-            const userCriteria = {
-                ...currUser,
-                criteria: undefined,
-                hasAccess: false,
-                hasCriteria: false
-            };
-
-            this.setUserCriteriaAction({currUser});
+            this.revokeUserCriteriaFilterAction({userCriteriaId : userCriteriaFilter.criteriaId});
         }
 
         onGiveUnrestrictedAccess(targetUser: UserCriteriaFilter) {
@@ -258,16 +246,6 @@ import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDi
                 userFilterCriteria.criteriaId = getNewGuid();
             }
             this.updateUserCriteriaFilterAction({userCriteriaFilter : userFilterCriteria});
-
-            // Currently we have 2 objects User and UserCriteriaFilter. Therefore, we have two calls to different actions
-            var currUser = this.stateUsers.filter((user: User) => user.id == targetUser.userId)[0];
-            const userCriteria = {
-                ...currUser,
-                criteria: undefined,
-                hasAccess: true,
-                hasCriteria: false
-            };
-            this.setUserCriteriaAction({currUser});
         }
 
         onDeleteUser(user: UserCriteriaFilter) {
@@ -284,12 +262,10 @@ import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDi
         onSubmitDeleteUserResponse(doDelete: boolean) {
             this.beforeDeleteAlertData = {...emptyAlertData};
 
-            if (doDelete && !itemsAreEqual(this.selectedUser, emptyUserCriteriaFilter) && this.selectedUser.hasAccess) {
-                this.deleteUserCriteriaFilterAction({userCriteriaId: this.selectedUser.criteriaId})
-                .then(() => this.selectedUser = {...emptyUserCriteriaFilter});
+            if (doDelete && !itemsAreEqual(this.selectedUser, emptyUserCriteriaFilter)) {
 
-                // this.deleteUserAction({user: this.selectedUser.username})
-                //     .then(() => this.selectedUser = {...emptyUser});
+                this.deleteUserAction({userId: this.selectedUser.userId})
+                    .then(() => this.selectedUser = {...emptyUserCriteriaFilter});
             }
         }
     }

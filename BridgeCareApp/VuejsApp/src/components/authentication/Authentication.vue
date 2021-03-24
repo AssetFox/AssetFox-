@@ -24,7 +24,7 @@ import Vue from 'vue';
     export default class Authentication extends Vue {
         @State(state => state.authenticationModule.authenticated) authenticated: boolean;
         @State(state => state.authenticationModule.hasRole) hasRole: boolean;
-        @State(state => state.userModule.usersCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
+        @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
         @Action('setSuccessMessage') setSuccessMessageAction: any;
         @Action('setErrorMessage') setErrorMessageAction: any;
@@ -52,11 +52,14 @@ import Vue from 'vue';
                     this.onAuthenticationFailure();
                 } else {
                     this.getUserInfoAction().then(() => {
-                        if (!this.hasRole) {
+
+                        this.getUserCriteriaFilterAction().then(() => {
+                           if (!this.hasRole || !this.currentUserCriteriaFilter.hasAccess) {
                             this.onRoleFailure();
                         } else {
                             this.onAuthenticationSuccess();
-                        }
+                        } 
+                        });
                     });
                 }
             });

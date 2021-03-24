@@ -381,6 +381,7 @@ import {sortByProperty} from '@/shared/utils/sorter-utils';
 import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
 import ValidationService from '@/services/validation.service';
 import {EquationValidationParameters, ValidationResult} from '@/shared/models/iAM/expression-validation';
+import { emptyUserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 
 @Component
 export default class EquationEditorDialog extends Vue {
@@ -809,7 +810,8 @@ export default class EquationEditorDialog extends Vue {
     const equationValidationParameters: EquationValidationParameters = {
       expression: this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression,
       /*isFunction: !this.isPiecewise,*/
-      isPiecewise: this.isPiecewise
+      isPiecewise: this.isPiecewise,
+      currentUserCriteriaFilter: {...emptyUserCriteriaFilter}
     };
 
     ValidationService.getEquationValidationResult(equationValidationParameters)

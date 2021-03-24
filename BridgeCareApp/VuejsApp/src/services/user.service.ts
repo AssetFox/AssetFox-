@@ -12,12 +12,12 @@ export default class UserService {
         return coreAxiosInstance.get(`${API.User}/GetAllUsers`);
     }
 
-    static updateUser(userCriteria: User): AxiosPromise {
-        return axiosInstance.post('/api/SetUserCriteria', userCriteria);
-    }
+    // static updateUser(userCriteria: User): AxiosPromise {
+    //     return axiosInstance.post('/api/SetUserCriteria', userCriteria);
+    // }
 
-    static deleteUser(username: string): AxiosPromise {
-        return axiosInstance.delete(`/api/DeleteUser/${username}`);
+    static deleteUser(userId: string): AxiosPromise {
+        return coreAxiosInstance.delete(`/api/DeleteUser/${userId}`);
     }
 
     ////////////////////
@@ -34,8 +34,8 @@ export default class UserService {
         return coreAxiosInstance.post('/api/SetUserCriteria', userCriteria);
     }
 
-    static deleteUserCriteriaFilterData(userCriteriaId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`/api/DeleteUser/${userCriteriaId}`);
+    static revokeUserCriteriaFilterData(userCriteriaId: string): AxiosPromise {
+        return coreAxiosInstance.delete(`/api/RevokeUserAccess/${userCriteriaId}`);
     }
     
 }

@@ -31,10 +31,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
         public List<UserCriteriaDTO> GetAllUserCriteria()
         {
-            // Need to write a entity to dto conversion extension method
             var result = new List<UserCriteriaDTO>();
             var data = _unitOfDataPersistenceWork.Context.UserCriteria
-                .Include(_ => _.UserEntityJoin)
+                .Include(_ => _.User)
                 .Select(_ => _).ToList();
             foreach (var item in data)
             {
@@ -67,13 +66,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return newCriteriaFilter.ToDto();
             }
             var currUser = _unitOfDataPersistenceWork.Context.User.FirstOrDefault(_ => _.Username == userInformation.Sub);
-            var userCriteria = _unitOfDataPersistenceWork.Context.UserCriteria.SingleOrDefault(criteria => criteria.UserEntityJoin.Username == userInformation.Sub);
+            var userCriteria = _unitOfDataPersistenceWork.Context.UserCriteria.SingleOrDefault(criteria => criteria.User.Username == userInformation.Sub);
 
             if(userCriteria == null) // user is present in the user table, but doesn't have data in UserCriteria_Filter table (no inventory access)
             {
                 return new UserCriteriaDTO{ UserName = userInformation.Sub };
             }
-            userCriteria.UserEntityJoin = currUser;
+            userCriteria.User = currUser;
             return userCriteria.ToDto();
         }
 
@@ -81,25 +80,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var user = _unitOfDataPersistenceWork.Context.User.FirstOrDefault(s => s.Username == model.UserName);
             var userCriteria = new UserCriteriaFilterEntity{
-                UserEntityJoin = user
+                User = user
             };
-            if (!_unitOfDataPersistenceWork.Context.UserCriteria.Any(criteria => criteria.UserEntityJoin.Username == model.UserName))
+            if (!_unitOfDataPersistenceWork.Context.UserCriteria.Any(criteria => criteria.User.Username == model.UserName))
             {
                 userCriteria.Criteria = model.Criteria;
-                userCriteria.UserEntityJoin.Username = model.UserName;
-                userCriteria.UserEntityJoin.HasInventoryAccess = model.HasAccess;
+                userCriteria.User.Username = model.UserName;
+                userCriteria.User.HasInventoryAccess = model.HasAccess;
                 userCriteria.HasCriteria = model.HasCriteria;
                 userCriteria.UserCriteriaId = model.CriteriaId;
                 _unitOfDataPersistenceWork.Context.Add(userCriteria);
             }
             else
             {
-                userCriteria = _unitOfDataPersistenceWork.Context.UserCriteria.Single(criteria => criteria.UserEntityJoin.Username == model.UserName);
-                userCriteria.UserEntityJoin = user;
+                userCriteria = _unitOfDataPersistenceWork.Context.UserCriteria.Single(criteria => criteria.User.Username == model.UserName);
+                userCriteria.User = user;
 
                 userCriteria.Criteria = model.Criteria;
                 userCriteria.HasCriteria = model.HasCriteria;
-                userCriteria.UserEntityJoin.HasInventoryAccess = model.HasAccess;
+                userCriteria.User.HasInventoryAccess = model.HasAccess;
 
                 _unitOfDataPersistenceWork.Context.Update(userCriteria);
             }
@@ -127,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 CreatedDate = DateTime.Now,
                 LastModifiedDate = DateTime.Now,
                 UserId = newUser.Id,
-                UserEntityJoin = newUser
+                User = newUser
             };
             return newUserCriteriaFilter;
         }

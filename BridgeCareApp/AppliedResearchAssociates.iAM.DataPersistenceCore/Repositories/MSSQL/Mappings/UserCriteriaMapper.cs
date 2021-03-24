@@ -11,9 +11,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static UserCriteriaDTO ToDto(this UserCriteriaFilterEntity entity) =>
             new UserCriteriaDTO
             {
-                UserName = entity.UserEntityJoin.Username,
+                UserName = entity.User.Username,
                 Criteria = entity.Criteria,
-                HasAccess = entity.UserEntityJoin.HasInventoryAccess,
+                HasAccess = entity.User.HasInventoryAccess,
                 CriteriaId = entity.UserCriteriaId,
                 UserId = entity.UserId,
                 HasCriteria = entity.HasCriteria

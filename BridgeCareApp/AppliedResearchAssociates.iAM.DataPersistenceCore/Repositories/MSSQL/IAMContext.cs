@@ -1473,7 +1473,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasIndex(e => e.UserCriteriaId).IsUnique();
 
-                entity.HasOne(d => d.UserEntityJoin)
+                entity.HasOne(d => d.User)
                 .WithOne(p => p.UserCriteriaFilterJoin)
                 .HasForeignKey<UserCriteriaFilterEntity>(f => f.UserId);
 

@@ -14,6 +14,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public string Criteria { get; set; }
         public bool HasCriteria { get; set; }
 
-        public virtual UserEntity UserEntityJoin { get; set; }
+        public virtual UserEntity User { get; set; }
     }
 }

@@ -11,10 +11,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private Dictionary<string, Type> _reportLookup;
         private UnitOfDataPersistenceWork _dataRepository;
 
-        public DictionaryBasedReportGenerator(UnitOfDataPersistenceWork dataRepository, Dictionary<string, Type> lookup)
+        public DictionaryBasedReportGenerator(UnitOfDataPersistenceWork dataRepository, ReportLookupLibrary lookupLibrary)
         {
             _dataRepository = dataRepository;
-            _reportLookup = lookup;
+            _reportLookup = lookupLibrary.Lookup;
         }
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
 {
     public class ReportGeneratorTests
     {
-        private Dictionary<string, Type> _testReportLibrary;
+        private ReportLookupLibrary _testReportLibrary;
         private UnitOfDataPersistenceWork _testRepo;
         private DictionaryBasedReportGenerator _generator;
 
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, mockedContext.Object);
             _testRepo = mockedRepo;
 
-            _testReportLibrary = TestDataForReportIndex.SimpleReportLibrary();
+            _testReportLibrary = new ReportLookupLibrary(TestDataForReportIndex.SimpleReportLibrary());
 
             _generator = new DictionaryBasedReportGenerator(_testRepo, _testReportLibrary);
         }

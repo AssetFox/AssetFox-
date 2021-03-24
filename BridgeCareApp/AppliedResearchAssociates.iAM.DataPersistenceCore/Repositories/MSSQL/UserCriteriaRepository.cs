@@ -95,12 +95,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             else
             {
                 userCriteria = _unitOfDataPersistenceWork.Context.UserCriteria.Single(criteria => criteria.UserEntityJoin.Username == model.UserName);
-                //user = _unitOfDataPersistenceWork.Context.User.FirstOrDefault(s => s.Username == model.Username);
                 userCriteria.UserEntityJoin = user;
 
                 userCriteria.Criteria = model.Criteria;
                 userCriteria.HasCriteria = model.HasCriteria;
-                //userCriteria.UserEntityJoin.Username = model.UserName;
                 userCriteria.UserEntityJoin.HasInventoryAccess = model.HasAccess;
 
                 _unitOfDataPersistenceWork.Context.Update(userCriteria);

@@ -26,7 +26,6 @@
     import {Component, Watch} from 'vue-property-decorator';
     import {State} from 'vuex-class';
     import oidcConfig from '@/oidc-config';
-    import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 
     @Component
     export default class AuthenticationStart extends Vue {

@@ -137,10 +137,8 @@ import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDi
         @State(state => state.userModule.usersCriteriaFilter) stateUsersCriteriaFilter: UserCriteriaFilter[];
 
         @Action('getAllUsers') getAllUserCriteriaAction: any;
-        //@Action('updateUser') setUserCriteriaAction: any;
         @Action('deleteUser') deleteUserAction: any;
 
-        @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
         @Action('getAllUserCriteriaFilter') getAllUserCriteriaFilterAction: any;
         @Action('updateUserCriteriaFilter') updateUserCriteriaFilterAction: any;
         @Action('revokeUserCriteriaFilter') revokeUserCriteriaFilterAction: any;

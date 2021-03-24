@@ -60,18 +60,8 @@ import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 export default class CriterionFilterEditorDialog extends Vue {
   @Prop() dialogData: CriterionFilterEditorDialogData;
 
-  //@State(state => state.criterionModule.criterionLibraries) stateCriterionLibraries: CriterionLibrary[];
-  //@State(state => state.criterionModule.selectedCriterionLibrary) stateSelectedCriterionLibrary: CriterionLibrary;
-  @State(state => state.criterionModule.selectedCriterionIsValid) stateSelectedCriterionIsValid: boolean;
-  //@State(state => state.)
-
-  //@Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-  //@Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
-  //@Action('setSelectedCriterionIsValid') setSelectedCriterionIsValidAction: any;
-  //@Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
   @Action('updateUserCriteriaFilter') updateUserCriteriaFilterAction: any;
 
-  //criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary = clone(emptyCriterionLibrary);
   uuidNIL: string = getBlankGuid();
   hasUnsavedChanges: boolean = false;
   hasUnsavedChangesAlertData: AlertData = clone(emptyAlertData);
@@ -89,16 +79,12 @@ export default class CriterionFilterEditorDialog extends Vue {
     const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
 
     if (this.dialogData.showDialog) {
-    //   if (!hasValue(this.stateCriterionLibraries)) {
-    //     this.getCriterionLibrariesAction();
-    //   }
     
     this.criteriaEditorData = {
         ...this.criteriaEditorData,
         mergedCriteriaExpression: this.dialogData.criteria,
         isLibraryContext: true
         };
-      //this.setSelectedCriterionIsValidAction({isValid: false});
 
       if (hasValue(htmlTag)) {
         htmlTag[0].setAttribute('style', 'overflow:hidden;');
@@ -114,46 +100,10 @@ export default class CriterionFilterEditorDialog extends Vue {
     }
   }
 
-//   @Watch('criterionLibraryEditorSelectedCriterionLibrary')
-//   onCriterionLibraryEditorSelectedCriterionLibraryChanged() {
-//     this.hasUnsavedChanges = hasUnsavedChangesCore(
-//         'criterion-library', this.criterionLibraryEditorSelectedCriterionLibrary, this.stateSelectedCriterionLibrary
-//     );
-//   }
-
-//   @Watch('selectedCriterionLibrary')
-//   onSelectedCriterionLibraryChanged() {
-//     this.hasSelectedCriterionLibrary = this.selectedCriterionLibrary.id !== this.uuidNIL;
-
-//     this.criteriaEditorData = {
-//       ...this.criteriaEditorData,
-//       mergedCriteriaExpression: this.selectedCriterionLibrary.mergedCriteriaExpression
-//     };
-
-//     if (this.isLibraryContext) {
-//       this.setHasUnsavedChangesAction({
-//         value: hasUnsavedChangesCore(
-//             'criterion-library', this.selectedCriterionLibrary, this.stateSelectedCriterionLibrary
-//         )
-//       });
-//     } else {
-//       this.$emit('submit', this.selectedCriterionLibrary);
-//     }
-//   }
-
-//   onSubmitSelectedCriterionLibrary(criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary) {
-//     this.criterionLibraryEditorSelectedCriterionLibrary = clone(criterionLibraryEditorSelectedCriterionLibrary);
-//   }
-
     onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
         this.canUpdateOrCreate = result.validated;
 
-// TODO: if critera editor is sending a valid criteria, then update the userCriteria Table
         if (result.validated) {
-        // this.selectedCriterionLibrary = {
-        //     ...this.selectedCriterionLibrary,
-        //     mergedCriteriaExpression: result.criteria!
-        // };
 
         var tempL : UserCriteriaFilter = {userId : this.dialogData.userId, 
                 userName: this.dialogData.userName, 
@@ -162,15 +112,7 @@ export default class CriterionFilterEditorDialog extends Vue {
                 criteria: result.criteria, 
                 criteriaId: this.dialogData.criteriaId}; 
         this.resultForParentComponent = tempL;
-
-        //this.updateUserCriteriaFilterAction({userCriteriaFilter : tempL})
-        //this.setSelectedCriterionIsValidAction({isValid: true});
-        } else {
-        //this.setSelectedCriterionIsValidAction({isValid: false});
         }
-        // this.$emit('submitCriteriaEditorDialogResult', {criteriaId: this.dialogData.criteriaId, userId: this.dialogData.userId,
-        // userName: this.dialogData.userName, hasCriteria: this.dialogData.hasCriteria, hasAccess: this.dialogData.hasAccess,
-        // criteria: result.criteria});
     }
     
   onBeforeSubmit(submit: boolean) {

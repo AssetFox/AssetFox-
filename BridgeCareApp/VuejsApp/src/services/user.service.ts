@@ -4,9 +4,6 @@ import {API, axiosInstance, coreAxiosInstance} from '@/shared/utils/axios-instan
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 
 export default class UserService {
-    // static getOwnUserData(): AxiosPromise {
-    //     return axiosInstance.get('/api/GetUserCriteria');
-    // }
 
     static getAllUsers(): AxiosPromise {
         return coreAxiosInstance.get(`${API.User}/GetAllUsers`);

@@ -17,7 +17,7 @@
 <script lang="ts">
     import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import Vue from 'vue';
-    import {Component, Watch} from 'vue-property-decorator';
+    import {Component} from 'vue-property-decorator';
     import {Action, State} from 'vuex-class';
 
     @Component

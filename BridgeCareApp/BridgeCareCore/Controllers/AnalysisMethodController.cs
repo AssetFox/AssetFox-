@@ -11,21 +11,21 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using AnalysisMethodGetMethod = Func<UserInfoDTO, Guid, AnalysisMethodDTO>;
-    using AnalysisMethodUpsertMethod = Action<UserInfoDTO, Guid, AnalysisMethodDTO>;
+    using AnalysisMethodGetMethod = Func<Guid, AnalysisMethodDTO>;
+    using AnalysisMethodUpsertMethod = Action<Guid, AnalysisMethodDTO>;
 
     [Route("api/[controller]")]
     [ApiController]
     public class AnalysisMethodController : ControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IEsecSecurity _esecSecurity;
         private readonly IReadOnlyDictionary<string, AnalysisMethodGetMethod> _analysisMethodGetMethods;
         private readonly IReadOnlyDictionary<string, AnalysisMethodUpsertMethod> _analysisMethodUpsertMethods;
 
-        public AnalysisMethodController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
+        public AnalysisMethodController(UnitOfDataPersistenceWork unitOfWork, IEsecSecurity esecSecurity)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork;
+            _unitOfWork = unitOfWork;
             _esecSecurity = esecSecurity;
             _analysisMethodGetMethods = CreateGetMethods();
             _analysisMethodUpsertMethods = CreateUpsertMethods();
@@ -33,12 +33,11 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, AnalysisMethodGetMethod> CreateGetMethods()
         {
-            AnalysisMethodDTO GetAny(UserInfoDTO userInfo, Guid simulationId) =>
-                _unitOfDataPersistenceWork.AnalysisMethodRepo.GetAnalysisMethod(simulationId);
+            AnalysisMethodDTO GetAny(Guid simulationId) =>
+                _unitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationId);
 
-            AnalysisMethodDTO GetPermitted(UserInfoDTO userInfo, Guid simulationId) =>
-                _unitOfDataPersistenceWork.AnalysisMethodRepo.GetPermittedAnalysisMethod(userInfo,
-                    simulationId);
+            AnalysisMethodDTO GetPermitted(Guid simulationId) =>
+                _unitOfWork.AnalysisMethodRepo.GetPermittedAnalysisMethod(simulationId);
 
             return new Dictionary<string, AnalysisMethodGetMethod>
             {
@@ -51,12 +50,11 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, AnalysisMethodUpsertMethod> CreateUpsertMethods()
         {
-            void UpsertAny(UserInfoDTO userInfo, Guid simulationId, AnalysisMethodDTO dto) =>
-                _unitOfDataPersistenceWork.AnalysisMethodRepo.UpsertAnalysisMethod(simulationId, dto, userInfo);
+            void UpsertAny(Guid simulationId, AnalysisMethodDTO dto) =>
+                _unitOfWork.AnalysisMethodRepo.UpsertAnalysisMethod(simulationId, dto);
 
-            void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, AnalysisMethodDTO dto) =>
-                _unitOfDataPersistenceWork.AnalysisMethodRepo.UpsertPermittedAnalysisMethod(userInfo,
-                    simulationId, dto);
+            void UpsertPermitted(Guid simulationId, AnalysisMethodDTO dto) =>
+                _unitOfWork.AnalysisMethodRepo.UpsertPermittedAnalysisMethod(simulationId, dto);
 
             return new Dictionary<string, AnalysisMethodUpsertMethod>
             {
@@ -75,8 +73,10 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var userInfo = _esecSecurity.GetUserInformation(Request);
+                _unitOfWork.SetUser(userInfo.Name);
+
                 var result = await Task.Factory.StartNew(() =>
-                    _analysisMethodGetMethods[userInfo.Role](userInfo.ToDto(), simulationId));
+                    _analysisMethodGetMethods[userInfo.Role](simulationId));
                 return Ok(result);
             }
             catch (Exception e)
@@ -94,17 +94,20 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var userInfo = _esecSecurity.GetUserInformation(Request);
-                _unitOfDataPersistenceWork.BeginTransaction();
+                _unitOfWork.SetUser(userInfo.Name);
+
                 await Task.Factory.StartNew(() =>
                 {
-                    _analysisMethodUpsertMethods[userInfo.Role](userInfo.ToDto(), simulationId, dto);
+                    _unitOfWork.BeginTransaction();
+                    _analysisMethodUpsertMethods[userInfo.Role](simulationId, dto);
+                    _unitOfWork.Commit();
                 });
-                _unitOfDataPersistenceWork.Commit();
+                
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
+                _unitOfWork.Rollback();
                 Console.WriteLine(e);
                 return BadRequest(e);
             }

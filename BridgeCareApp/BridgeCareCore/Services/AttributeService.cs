@@ -10,16 +10,16 @@ namespace BridgeCareCore.Services
 {
     public class AttributeService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public AttributeService(UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork =
+        public AttributeService(UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfWork =
             unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
         {
             var attributeSelectValuesResults = new List<AttributeSelectValuesResult>();
 
-            var validAttributes = _unitOfDataPersistenceWork.Context.Attribute.Select(_ => _.Name)
+            var validAttributes = _unitOfWork.Context.Attribute.Select(_ => _.Name)
                 .Where(_ => attributeNames.Contains(_)).ToList();
 
             if (!validAttributes.Any())
@@ -29,7 +29,7 @@ namespace BridgeCareCore.Services
 
             var attributesWithValues = new List<string>();
 
-            using var sqlConnection = new SqlConnection(_unitOfDataPersistenceWork.LegacyConnection.ConnectionString);
+            using var sqlConnection = new SqlConnection(_unitOfWork.LegacyConnection.ConnectionString);
             sqlConnection.Open();
 
             var attributeCountSelects =

@@ -1,32 +1,26 @@
 ﻿using System;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Transactions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using AttributeDatumRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.AttributeDatumRepository;
+using IsolationLevel = System.Data.IsolationLevel;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 {
     public class UnitOfDataPersistenceWork : IDisposable
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         public UnitOfDataPersistenceWork(IConfiguration config, IAMContext context)
         {
             Config = config ?? throw new ArgumentNullException(nameof(config));
 
             Context = context ?? throw new ArgumentNullException(nameof(context));
-            if (!IsRunningFromXUnit)
-            {
-                Context.Database.SetCommandTimeout(1800);
-            }
 
-            Connection = new Microsoft.Data.SqlClient.SqlConnection(Config.GetConnectionString("BridgeCareConnex"));
             LegacyConnection = new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
         }
 
@@ -34,13 +28,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IAMContext Context { get; }
 
-        public Microsoft.Data.SqlClient.SqlConnection Connection { get; }
-
         public SqlConnection LegacyConnection { get; }
 
         // REPOSITORIES
         private IAggregatedResultRepository _aggregatedResultRepo;
-
         private IAnalysisMethodRepository _analysisMethodRepo;
         private IAttributeDatumRepository _attributeDatumRepo;
         private IAttributeMetaDataRepository _attributeMetaDataRepo;
@@ -149,18 +140,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public ISimulationReportDetailRepository SimulationReportDetailRepo => _simulationReportDetailRepo ??= new SimulationReportDetailRepository(this);
 
-        public IDbContextTransaction DbContextTransaction
+        public UserEntity UserEntity { get; private set; }
+
+        public IDbContextTransaction DbContextTransaction { get; private set; }
+
+        public void BeginTransaction()
         {
-            get => _dbContextTransaction;
-            private set => _dbContextTransaction = value;
+            DbContextTransaction = Context.Database.BeginTransaction();
         }
 
-        public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
+        public void SetUser(string username) =>
+            UserEntity = Context.User.SingleOrDefault(_ => _.Username == username);
 
         public void Commit()
         {
             if (DbContextTransaction != null)
             {
+                Context.SaveChanges();
                 DbContextTransaction.Commit();
                 DbContextTransaction.Dispose();
             }
@@ -177,8 +173,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         // DISPOSE PROPERTIES & METHODS
         private bool _disposed = false;
-
-        private IDbContextTransaction _dbContextTransaction;
 
         protected virtual void Dispose(bool disposing)
         {

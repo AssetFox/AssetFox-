@@ -8,6 +8,8 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Security;
+using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -20,15 +22,17 @@ namespace BridgeCareCore.Controllers
     public class AggregationController : ControllerBase
     {
         private readonly ILogger<NetworkController> _logger;
-        private readonly IHubContext<BridgeCareHub> HubContext;
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly IHubContext<BridgeCareHub> _hubContext;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IEsecSecurity _esecSecurity;
 
         public AggregationController(
-            ILogger<NetworkController> logger, IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+            ILogger<NetworkController> logger, IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            HubContext = hub ?? throw new ArgumentNullException(nameof(hub));
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _hubContext = hub ?? throw new ArgumentNullException(nameof(hub));
+            _unitOfWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
         }
 
         [HttpPost]
@@ -40,16 +44,18 @@ namespace BridgeCareCore.Controllers
             var percentage = 0.0;
             try
             {
-                await HubContext
+                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
+
+                await _hubContext
                     .Clients
                     .All
                     .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
 
                 // Get/create configurable attributes
-                var configurationAttributes = _unitOfDataPersistenceWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
+                var configurationAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
 
                 // get all maintainable assets in the network with their assigned data (if any) and locations
-                var maintainableAssets = _unitOfDataPersistenceWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId)
+                var maintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId)
                     .ToList();
 
                 // Create list of attribute ids we are allowed to update with assigned data.
@@ -79,7 +85,7 @@ namespace BridgeCareCore.Controllers
                     {
                         broadcastingMessage = $"Assigning attribute data";
                         percentage = Math.Round((i / totalAssests) * 100, 1);
-                        _ = HubContext
+                        _ = _hubContext
                        .Clients
                        .All
                        .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
@@ -90,12 +96,12 @@ namespace BridgeCareCore.Controllers
                 }
 
                 broadcastingMessage = $"Finished assigning attribute data. Saving it to the datasource...";
-                await HubContext
+                await _hubContext
                         .Clients
                         .All
                         .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 // update the maintainable assets assigned data in the data source
-                var updatedRecordsCount = _unitOfDataPersistenceWork.AttributeDatumRepo.UpdateAssignedData(maintainableAssets);
+                var updatedRecordsCount = _unitOfWork.AttributeDatumRepo.UpdateAssignedData(maintainableAssets);
 
                 AggregateData(networkId, maintainableAssets);
 
@@ -105,7 +111,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 broadcastingMessage = "An error has occured while assigning data";
-                await HubContext
+                await _hubContext
                             .Clients
                             .All
                             .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
@@ -119,7 +125,7 @@ namespace BridgeCareCore.Controllers
             var percentage = 0.0;
             try
             {
-                HubContext
+                _hubContext
                    .Clients
                    .All
                    .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
@@ -136,7 +142,7 @@ namespace BridgeCareCore.Controllers
                     {
                         broadcastingMessage = $"Aggregating data";
                         percentage = Math.Round((i / totalAssests) * 100, 1);
-                        _ = HubContext
+                        _ = _hubContext
                        .Clients
                        .All
                        .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
@@ -164,15 +170,15 @@ namespace BridgeCareCore.Controllers
                 }
 
                 broadcastingMessage = $"Finished aggregating attribute data. Saving it to the datasource...";
-                HubContext
+                _hubContext
                        .Clients
                        .All
                        .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
                 // create aggregated data records in the data source
-                var createdRecordsCount = _unitOfDataPersistenceWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
+                var createdRecordsCount = _unitOfWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
 
                 broadcastingMessage = $"Successfully aggregated the data";
-                HubContext
+                _hubContext
                        .Clients
                        .All
                        .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);
@@ -180,7 +186,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 broadcastingMessage = "An error has occured while aggregating data";
-                HubContext
+                _hubContext
                            .Clients
                            .All
                            .SendAsync("BroadcastAssignDataStatus", broadcastingMessage, percentage);

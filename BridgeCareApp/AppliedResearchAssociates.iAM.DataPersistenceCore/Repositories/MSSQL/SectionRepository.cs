@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
@@ -12,46 +13,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class SectionRepository : ISectionRepository
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public SectionRepository(UnitOfDataPersistenceWork unitOfWork)
-        {
+        public SectionRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        }
 
         public void CreateSections(List<Section> sections)
         {
-            var attributeNames = sections
+            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
+            var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
+            var sectionAttributeNames = sections
                 .SelectMany(_ => _.HistoricalAttributes.Select(__ => __.Name))
                 .Distinct().ToList();
-
-            var attributeEntities = _unitOfWork.Context.Attribute
-                .Where(_ => attributeNames.Contains(_.Name)).ToList();
-
-            if (!attributeEntities.Any())
+            if (!sectionAttributeNames.All(sectionAttributeName => attributeNames.Contains(sectionAttributeName)))
             {
-                throw new RowNotInTableException("No attributes found for section attribute value histories.");
-            }
-
-            var attributeNamesFromDataSource = attributeEntities.Select(_ => _.Name).ToList();
-            if (!attributeNames.All(attributeName => attributeNamesFromDataSource.Contains(attributeName)))
-            {
-                var attributeNamesNotFound = attributeNames.Except(attributeNamesFromDataSource).ToList();
-                if (attributeNamesNotFound.Count() == 1)
+                var missingAttributes = sectionAttributeNames.Except(attributeNames).ToList();
+                if (missingAttributes.Count == 1)
                 {
-                    throw new RowNotInTableException($"No attribute found having name {attributeNamesNotFound[0]}.");
+                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
                 }
 
-                throw new RowNotInTableException($"No attributes found having names: {string.Join(", ", attributeNamesNotFound)}.");
+                throw new RowNotInTableException(
+                    $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
             }
 
             var attributeIdPerName = attributeEntities.ToDictionary(_ => _.Name, _ => _.Id);
 
-            var numericAttributeValueHistoryPerSectionIdAttributeIdTuple = new Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<double>>();
-            var textAttributeValueHistoryPerSectionIdAttributeIdTuple = new Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<string>>();
+            var numericAttributeValueHistoryPerSectionIdAttributeIdTuple =
+                new Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<double>>();
+            var textAttributeValueHistoryPerSectionIdAttributeIdTuple =
+                new Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<string>>();
 
             var sectionEntities = sections.Select(_ =>
             {
@@ -80,25 +71,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return entity;
             }).ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfWork.Context.Section.AddRange(sectionEntities);
-            }
-            else
-            {
-                _unitOfWork.Context.BulkInsertOrUpdate(sectionEntities);
-            }
-
-            _unitOfWork.Context.SaveChanges();
+            _unitOfWork.Context.AddAll(sectionEntities, _unitOfWork.UserEntity?.Id);
 
             if (numericAttributeValueHistoryPerSectionIdAttributeIdTuple.Any())
             {
-                _unitOfWork.AttributeValueHistoryRepo.CreateNumericAttributeValueHistories(numericAttributeValueHistoryPerSectionIdAttributeIdTuple);
+                _unitOfWork.AttributeValueHistoryRepo.CreateNumericAttributeValueHistories(
+                    numericAttributeValueHistoryPerSectionIdAttributeIdTuple);
             }
 
             if (textAttributeValueHistoryPerSectionIdAttributeIdTuple.Any())
             {
-                _unitOfWork.AttributeValueHistoryRepo.CreateTextAttributeValueHistories(textAttributeValueHistoryPerSectionIdAttributeIdTuple);
+                _unitOfWork.AttributeValueHistoryRepo.CreateTextAttributeValueHistories(
+                    textAttributeValueHistoryPerSectionIdAttributeIdTuple);
             }
         }
     }

@@ -17,13 +17,13 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class PerformanceCurveController : ControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IEsecSecurity _esecSecurity;
         private readonly IReadOnlyDictionary<string, PerformanceCurveUpsertMethod> _performanceCurveUpsertMethods;
 
         public PerformanceCurveController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+            _unitOfWork = unitOfDataPersistenceWork ??
                                          throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
             _performanceCurveUpsertMethods = CreateUpsertMethods();
@@ -33,14 +33,14 @@ namespace BridgeCareCore.Controllers
         {
             void UpsertAny(UserInfoDTO userInfo, Guid simulationId, PerformanceCurveLibraryDTO dto)
             {
-                _unitOfDataPersistenceWork.PerformanceCurveRepo
+                _unitOfWork.PerformanceCurveRepo
                     .UpsertPerformanceCurveLibrary(dto, simulationId, userInfo);
-                _unitOfDataPersistenceWork.PerformanceCurveRepo
+                _unitOfWork.PerformanceCurveRepo
                     .UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id, userInfo);
             }
 
             void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, PerformanceCurveLibraryDTO dto) =>
-                _unitOfDataPersistenceWork.PerformanceCurveRepo.UpsertPermitted(userInfo, simulationId, dto);
+                _unitOfWork.PerformanceCurveRepo.UpsertPermitted(userInfo, simulationId, dto);
 
             return new Dictionary<string, PerformanceCurveUpsertMethod>
             {
@@ -56,7 +56,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.PerformanceCurveRepo
+                var result = await _unitOfWork.PerformanceCurveRepo
                     .PerformanceCurveLibrariesWithPerformanceCurves();
                 return Ok(result);
             }
@@ -75,24 +75,24 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var userInfo = _esecSecurity.GetUserInformation(Request);
-                _unitOfDataPersistenceWork.BeginTransaction();
+                _unitOfWork.BeginTransaction();
                 await Task.Factory.StartNew(() =>
                 {
                     _performanceCurveUpsertMethods[userInfo.Role](userInfo.ToDto(), simulationId, dto);
                 });
 
-                _unitOfDataPersistenceWork.Commit();
+                _unitOfWork.Commit();
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                _unitOfDataPersistenceWork.Rollback();
+                _unitOfWork.Rollback();
                 Console.WriteLine(e);
                 return Unauthorized(e);
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
+                _unitOfWork.Rollback();
                 Console.WriteLine(e);
                 return BadRequest(e);
             }
@@ -105,14 +105,14 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfDataPersistenceWork.BeginTransaction();
-                await Task.Factory.StartNew(() => _unitOfDataPersistenceWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(libraryId));
-                _unitOfDataPersistenceWork.Commit();
+                _unitOfWork.BeginTransaction();
+                await Task.Factory.StartNew(() => _unitOfWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(libraryId));
+                _unitOfWork.Commit();
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
+                _unitOfWork.Rollback();
                 Console.WriteLine(e);
                 return BadRequest(e);
             }

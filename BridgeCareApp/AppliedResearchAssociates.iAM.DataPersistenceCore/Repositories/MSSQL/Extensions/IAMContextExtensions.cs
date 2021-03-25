@@ -11,9 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public static class IAMContextExtensions
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         public static void AddEntity<T>(this IAMContext context, T entity, Guid? userId = null) where T : class
         {
             if (entity == null)
@@ -33,36 +30,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             context.SaveChanges();
         }
 
-        public static void BulkAddAll<T>(this IAMContext context, List<T> entities, Guid? userId = null) where T : class
+        public static void AddAll<T>(this IAMContext context, List<T> entities, Guid? userId = null) where T : class
         {
             if (!entities.Any())
             {
                 return;
             }
 
-            entities.ForEach(entity =>
+            if (userId.HasValue)
             {
-                if (userId.HasValue)
+                entities.ForEach(entity =>
                 {
+
                     SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
 
                     SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
-                }
-            });
+                });
+            }
 
-            if (IsRunningFromXUnit)
-            {
-                context.Set<T>().AddRange(entities);
-            }
-            else
-            {
-                context.BulkInsert(entities);
-            }
+            context.BulkInsert(entities);
 
             context.SaveChanges();
         }
 
-        public static void Update<T>(this IAMContext context, T entity, Guid key, Guid? userId = null) where T : class
+        public static void UpdateEntity<T>(this IAMContext context, T entity, Guid key, Guid? userId = null) where T : class
         {
             if (entity == null)
             {
@@ -88,6 +79,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
 
             context.Entry(existingEntity).CurrentValues.SetValues(entity);
+
+            context.SaveChanges();
+        }
+
+        public static void UpdateAll<T>(this IAMContext context, List<T> entities, Guid? userId = null) where T : class
+        {
+            if (!entities.Any())
+            {
+                return;
+            }
+
+            var propsToExclude = new List<string> { "CreatedDate", "CreatedBy" };
+            var config = new BulkConfig { PropertiesToExclude = propsToExclude };
+
+            if (userId.HasValue)
+            {
+                entities.ForEach(entity =>
+                {
+                    SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
+                });
+            }
+
+            context.BulkUpdate(entities, config);
 
             context.SaveChanges();
         }
@@ -220,7 +234,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             context.SaveChanges();
         }
 
-        public static void Delete<T>(this IAMContext context, Expression<Func<T, bool>> predicate) where T : class
+        public static void DeleteEntity<T>(this IAMContext context, Expression<Func<T, bool>> predicate) where T : class
         {
             var entities = context.Set<T>();
 
@@ -240,14 +254,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             var entitiesToDelete = entities.Where(predicate).ToList();
             if (entitiesToDelete.Any())
             {
-                if (IsRunningFromXUnit)
-                {
-                    entities.RemoveRange(entitiesToDelete);
-                }
-                else
-                {
-                    context.BulkDelete(entitiesToDelete);
-                }
+                context.BulkDelete(entitiesToDelete);
             }
 
             context.SaveChanges();

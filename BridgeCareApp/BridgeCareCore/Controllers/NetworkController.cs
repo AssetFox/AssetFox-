@@ -14,12 +14,12 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class NetworkController : ControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly ILog _log;
 
         public NetworkController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog log)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
@@ -30,7 +30,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.NetworkRepo.Networks();
+                var result = await _unitOfWork.NetworkRepo.Networks();
                 return Ok(result);
             }
             catch (Exception e)
@@ -48,7 +48,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 // get network definition attribute from json file
-                var attribute = _unitOfDataPersistenceWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
+                var attribute = _unitOfWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
 
                 // throw an exception if not network definition attribute is present
                 if (attribute == null)
@@ -62,7 +62,7 @@ namespace BridgeCareCore.Controllers
                 network.Name = networkName;
 
                 // insert network domain data into the data source
-                _unitOfDataPersistenceWork.NetworkRepo.CreateNetwork(network);
+                _unitOfWork.NetworkRepo.CreateNetwork(network);
 
                 // [TODO] Create DTO to return network information necessary to be stored in the UI
                 // for future reference.

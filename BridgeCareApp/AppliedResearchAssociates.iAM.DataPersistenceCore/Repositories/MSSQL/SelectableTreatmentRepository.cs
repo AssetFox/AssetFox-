@@ -20,41 +20,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public SelectableTreatmentRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
-        {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-        }
+        public SelectableTreatmentRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+            _unitOfWork = unitOfWork ??
+                                         throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateTreatmentLibrary(string name, Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having name {simulationId}.");
             }
 
             var treatmentLibraryEntity = new TreatmentLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
-            _unitOfDataPersistenceWork.Context.TreatmentLibrary.Add(treatmentLibraryEntity);
+            _unitOfWork.Context.AddEntity(treatmentLibraryEntity);
 
-            _unitOfDataPersistenceWork.Context.TreatmentLibrarySimulation.Add(new TreatmentLibrarySimulationEntity
+            _unitOfWork.Context.AddEntity(new TreatmentLibrarySimulationEntity
             {
                 TreatmentLibraryId = treatmentLibraryEntity.Id,
                 SimulationId = simulationId
             });
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void CreateSelectableTreatments(List<SelectableTreatment> selectableTreatments, Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            var simulationEntity = _unitOfDataPersistenceWork.Context.Simulation
+            var simulationEntity = _unitOfWork.Context.Simulation
                 .Include(_ => _.TreatmentLibrarySimulationJoin)
                 .Single(_ => _.Id == simulationId);
 
@@ -67,16 +64,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToEntity(simulationEntity.TreatmentLibrarySimulationJoin.TreatmentLibraryId))
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.SelectableTreatment.AddRange(treatmentEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(treatmentEntities);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.AddAll(treatmentEntities);
 
             if (selectableTreatments.Any(_ => _.Budgets.Any()))
             {
@@ -93,7 +81,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Where(_ => _.Consequences.Any())
                     .ToDictionary(_ => _.Id, _ => _.Consequences.ToList());
 
-                _unitOfDataPersistenceWork.TreatmentConsequenceRepo.CreateTreatmentConsequences(consequencesPerTreatmentId, simulationEntity.Name);
+                _unitOfWork.TreatmentConsequenceRepo.CreateTreatmentConsequences(
+                    consequencesPerTreatmentId, simulationEntity.Name);
             }
 
             if (selectableTreatments.Any(_ => _.Costs.Any()))
@@ -102,7 +91,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Where(_ => _.Costs.Any())
                     .ToDictionary(_ => _.Id, _ => _.Costs.ToList());
 
-                _unitOfDataPersistenceWork.TreatmentCostRepo.CreateTreatmentCosts(costsPerTreatmentId, simulationEntity.Name);
+                _unitOfWork.TreatmentCostRepo.CreateTreatmentCosts(costsPerTreatmentId,
+                    simulationEntity.Name);
             }
 
             if (selectableTreatments.Any(_ => _.FeasibilityCriteria.Any(__ => !__.ExpressionIsBlank)))
@@ -111,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Where(_ => _.FeasibilityCriteria.Any(__ => !__.ExpressionIsBlank))
                     .ToDictionary(_ => _.FeasibilityCriteria.ToList()[0].Expression, _ => new List<Guid> { _.Id });
 
-                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(entityIdsPerExpression,
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(entityIdsPerExpression,
                     DataPersistenceConstants.CriterionLibraryJoinEntities.SelectableTreatment, simulationEntity.Name);
             }
 
@@ -121,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Where(_ => _.Schedulings.Any())
                     .ToDictionary(_ => _.Id, _ => _.Schedulings.ToList());
 
-                _unitOfDataPersistenceWork.TreatmentSchedulingRepo.CreateTreatmentSchedulings(schedulingsPerTreatmentId);
+                _unitOfWork.TreatmentSchedulingRepo.CreateTreatmentSchedulings(schedulingsPerTreatmentId);
             }
 
             if (selectableTreatments.Any(_ => _.Supersessions.Any()))
@@ -130,7 +120,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Where(_ => _.Supersessions.Any())
                     .ToDictionary(_ => _.Id, _ => _.Supersessions.ToList());
 
-                _unitOfDataPersistenceWork.TreatmentSupersessionRepo.CreateTreatmentSupersessions(supersessionsPerTreatmentId, simulationEntity.Name);
+                _unitOfWork.TreatmentSupersessionRepo.CreateTreatmentSupersessions(
+                    supersessionsPerTreatmentId, simulationEntity.Name);
             }
         }
 
@@ -141,7 +132,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             budgetIdsPerTreatmentId.Keys.ForEach(treatmentId =>
             {
                 var budgetIds = budgetIdsPerTreatmentId[treatmentId];
-                var budgetEntities = _unitOfDataPersistenceWork.Context.Budget
+                var budgetEntities = _unitOfWork.Context.Budget
                     .Where(_ => budgetIds.Contains(_.Id))
                     .ToList();
 
@@ -157,60 +148,79 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }));
             });
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.TreatmentBudget.AddRange(treatmentBudgetJoins);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(treatmentBudgetJoins);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.AddAll(treatmentBudgetJoins);
         }
 
         public void GetSimulationTreatments(Simulation simulation)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulation.Id}.");
             }
 
-            _unitOfDataPersistenceWork.Context.SelectableTreatment
-                .Include(_ => _.TreatmentBudgetJoins)
+            var simulationEntity = _unitOfWork.Context.Simulation
+                .Include(_ => _.TreatmentLibrarySimulationJoin)
+                .ThenInclude(_ => _.TreatmentLibrary)
+                .ThenInclude(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentBudgetJoins)
                 .ThenInclude(_ => _.Budget)
                 .ThenInclude(_ => _.BudgetAmounts)
-                .Include(_ => _.TreatmentConsequences)
+                .Include(_ => _.TreatmentLibrarySimulationJoin)
+                .ThenInclude(_ => _.TreatmentLibrary)
+                .ThenInclude(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.TreatmentConsequences)
+                .Include(_ => _.TreatmentLibrarySimulationJoin)
+                .ThenInclude(_ => _.TreatmentLibrary)
+                .ThenInclude(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
                 .ThenInclude(_ => _.Equation)
-                .Include(_ => _.TreatmentConsequences)
+                .Include(_ => _.TreatmentLibrarySimulationJoin)
+                .ThenInclude(_ => _.TreatmentLibrary)
+                .ThenInclude(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.TreatmentCosts)
+                .Include(_ => _.TreatmentLibrarySimulationJoin)
+                .ThenInclude(_ => _.TreatmentLibrary)
+                .ThenInclude(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
-                .Include(_ => _.TreatmentCosts)
+                .Include(_ => _.TreatmentLibrarySimulationJoin)
+                .ThenInclude(_ => _.TreatmentLibrary)
+                .ThenInclude(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
+                .Include(_ => _.TreatmentLibrarySimulationJoin)
+                .ThenInclude(_ => _.TreatmentLibrary)
+                .ThenInclude(_ => _.Treatments)
+                .ThenInclude(_ => _.CriterionLibrarySelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.TreatmentSchedulings)
-                .Include(_ => _.TreatmentSupersessions)
-                .Where(_ => _.TreatmentLibrary.TreatmentLibrarySimulationJoins.SingleOrDefault(__ =>
-                    __.Simulation.Id == simulation.Id) != null)
-                .ForEach(_ => _.CreateSelectableTreatment(simulation));
+                .Include(_ => _.TreatmentLibrarySimulationJoin)
+                .ThenInclude(_ => _.TreatmentLibrary)
+                .ThenInclude(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentSchedulings)
+                .Include(_ => _.TreatmentLibrarySimulationJoin)
+                .ThenInclude(_ => _.TreatmentLibrary)
+                .ThenInclude(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentSupersessions)
+                .Single(_ => _.Id == simulation.Id);
+
+            simulationEntity.TreatmentLibrarySimulationJoin?.TreatmentLibrary?.Treatments?.ForEach(_ =>
+                _.CreateSelectableTreatment(simulation));
         }
 
         public Task<List<TreatmentLibraryDTO>> TreatmentLibrariesWithTreatments()
         {
-            if (!_unitOfDataPersistenceWork.Context.SelectableTreatment.Any())
+            if (!_unitOfWork.Context.SelectableTreatment.Any())
             {
                 return Task.Factory.StartNew(() => new List<TreatmentLibraryDTO>());
             }
 
-            return Task.Factory.StartNew(() => _unitOfDataPersistenceWork.Context.TreatmentLibrary
+            return Task.Factory.StartNew(() => _unitOfWork.Context.TreatmentLibrary
                 .Include(_ => _.Treatments)
                 .ThenInclude(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)
@@ -245,12 +255,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (simulationId != Guid.Empty)
             {
-                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
                     throw new RowNotInTableException($"No simulation found having id {dto.Id}");
                 }
 
-                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ =>
+                if (!_unitOfWork.Context.Simulation.Any(_ =>
                     _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
@@ -263,22 +273,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertTreatmentLibrary(TreatmentLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
         {
-            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var treatmentLibraryEntity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.Upsert(treatmentLibraryEntity, dto.Id, userEntity?.Id);
+            _unitOfWork.Context.Upsert(treatmentLibraryEntity, dto.Id, userEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
-                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
                     throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                 }
 
-                _unitOfDataPersistenceWork.Context.Delete<TreatmentLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
+                _unitOfWork.Context.DeleteEntity<TreatmentLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
-                _unitOfDataPersistenceWork.Context.AddEntity(
+                _unitOfWork.Context.AddEntity(
                     new TreatmentLibrarySimulationEntity { TreatmentLibraryId = dto.Id, SimulationId = simulationId },
                     userEntity?.Id);
             }
@@ -286,18 +296,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId, UserInfoDTO userInfo)
         {
-            if (!_unitOfDataPersistenceWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
+            if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
             {
                 throw new RowNotInTableException($"No treatment library found having id {libraryId}.");
             }
 
-            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var selectableTreatmentEntities = treatments.Select(_ => _.ToEntity(libraryId)).ToList();
 
             var entityIds = selectableTreatmentEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfDataPersistenceWork.Context.SelectableTreatment
+            var existingEntityIds = _unitOfWork.Context.SelectableTreatment
                 .Where(_ => _.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
                 .ToList();
 
@@ -308,44 +318,44 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {"add", _ => !existingEntityIds.Contains(_.Id)}
             };
 
-            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ =>
+            _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
                 _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
                 _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
                     .TreatmentLibraryId == libraryId);
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(selectableTreatmentEntities, predicatesPerCrudOperation, userEntity?.Id);
+                _unitOfWork.Context.UpsertOrDelete(selectableTreatmentEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(selectableTreatmentEntities, predicatesPerCrudOperation, userEntity?.Id);
+                _unitOfWork.Context.BulkUpsertOrDelete(selectableTreatmentEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
 
-            _unitOfDataPersistenceWork.Context.DeleteAll<SelectableTreatmentBudgetEntity>(_ =>
+            _unitOfWork.Context.DeleteAll<SelectableTreatmentBudgetEntity>(_ =>
                 _.SelectableTreatment.TreatmentLibraryId == libraryId);
 
-            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
+            _unitOfWork.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
                 _.SelectableTreatment.TreatmentLibraryId == libraryId);
 
-            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryTreatmentCostEntity>(_ =>
+            _unitOfWork.Context.DeleteAll<CriterionLibraryTreatmentCostEntity>(_ =>
                 _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId);
 
-            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
+            _unitOfWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
                 _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId);
 
             if (treatments.Any(_ => _.Costs.Any()))
             {
                 var costsPerTreatmentId =
                     treatments.Where(_ => _.Costs.Any()).ToList().ToDictionary(_ => _.Id, _ => _.Costs);
-                _unitOfDataPersistenceWork.TreatmentCostRepo.UpsertOrDeleteTreatmentCosts(costsPerTreatmentId, libraryId, userEntity?.Id);
+                _unitOfWork.TreatmentCostRepo.UpsertOrDeleteTreatmentCosts(costsPerTreatmentId, libraryId);
             }
 
             if (treatments.Any(_ => _.Consequences.Any()))
             {
                 var consequencesPerTreatmentId = treatments.Where(_ => _.Consequences.Any()).ToList()
                     .ToDictionary(_ => _.Id, _ => _.Consequences);
-                _unitOfDataPersistenceWork.TreatmentConsequenceRepo.UpsertOrDeleteTreatmentConsequences(consequencesPerTreatmentId, libraryId, userEntity?.Id);
+                _unitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteTreatmentConsequences(consequencesPerTreatmentId, libraryId);
             }
 
             if (treatments.Any(_ => _.BudgetIds.Any()))
@@ -354,7 +364,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _.BudgetIds.Select(budgetId =>
                         new SelectableTreatmentBudgetEntity { SelectableTreatmentId = _.Id, BudgetId = budgetId })).ToList();
 
-                _unitOfDataPersistenceWork.Context.BulkAddAll(treatmentBudgetJoinsToAdd, userEntity?.Id);
+                _unitOfWork.Context.AddAll(treatmentBudgetJoinsToAdd, userEntity?.Id);
             }
 
             if (treatments.Any(_ =>
@@ -370,23 +380,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             SelectableTreatmentId = _.Id
                         }).ToList();
 
-                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
             }
         }
 
         public void DeleteTreatmentLibrary(Guid libraryId)
         {
-            if (!_unitOfDataPersistenceWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
+            if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
             {
                 return;
             }
 
-            _unitOfDataPersistenceWork.Context.DeleteAll<EquationEntity>(_ =>
+            _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
                 _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
                 _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
                     .TreatmentLibraryId == libraryId);
 
-            _unitOfDataPersistenceWork.Context.Delete<TreatmentLibraryEntity>(_ => _.Id == libraryId);
+            _unitOfWork.Context.DeleteEntity<TreatmentLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

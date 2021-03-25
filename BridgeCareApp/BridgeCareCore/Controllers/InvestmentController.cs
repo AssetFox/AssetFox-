@@ -37,7 +37,7 @@ namespace BridgeCareCore.Controllers
                 _unitOfDataPersistenceWork.BudgetRepo
                     .UpsertOrDeleteBudgets(data.BudgetLibrary.Budgets, data.BudgetLibrary.Id, userInfo);
                 _unitOfDataPersistenceWork.InvestmentPlanRepo
-                    .UpsertInvestmentPlan(data.InvestmentPlan, simulationId, userInfo);
+                    .UpsertInvestmentPlan(data.InvestmentPlan, simulationId);
             }
 
             void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, UpsertInvestmentDataDTO data)

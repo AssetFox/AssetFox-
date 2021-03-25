@@ -10,6 +10,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateTreatmentConsequences(Dictionary<Guid, List<ConditionalTreatmentConsequence>> consequencesPerTreatmentId, string simulationName);
 
         void UpsertOrDeleteTreatmentConsequences(
-            Dictionary<Guid, List<TreatmentConsequenceDTO>> treatmentConsequencePerTreatmentId, Guid libraryId, Guid? userId = null);
+            Dictionary<Guid, List<TreatmentConsequenceDTO>> treatmentConsequencePerTreatmentId, Guid libraryId);
     }
 }

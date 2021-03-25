@@ -15,7 +15,7 @@ namespace BridgeCareCore
                     config.AddJsonFile("esec.json", true, true);
 #if MsSqlDebug
                     config.AddJsonFile("coreConnection.Development.json", true, true);
-#else
+#elif Release
                     config.AddJsonFile("coreConnection.json", true, true);
 #endif
                 })

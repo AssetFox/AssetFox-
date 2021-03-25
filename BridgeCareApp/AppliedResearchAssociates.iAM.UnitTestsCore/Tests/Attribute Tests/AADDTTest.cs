@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attribute_Tests
 
         public IConfiguration Config { get; set; }
 
-        public UnitOfDataPersistenceWork UnitOfDataPersistenceWork { get; set; }
+        public UnitOfDataPersistenceWork UnitOfWork { get; set; }
 
         public AADDTTest()
         {
@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attribute_Tests
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options);
 
-            UnitOfDataPersistenceWork = new UnitOfDataPersistenceWork(Config, DbContext);
+            UnitOfWork = new UnitOfDataPersistenceWork(Config, DbContext);
         }
 
         [Fact]
@@ -87,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attribute_Tests
                 // Arrange
 
                 // Act
-                var maintainableAssets = UnitOfDataPersistenceWork.MaintainableAssetRepo
+                var maintainableAssets = UnitOfWork.MaintainableAssetRepo
                         .GetAllInNetworkWithAssignedDataAndLocations(NetworkId).ToList();
 
                 // Create list of attribute ids we are allowed to update with assigned data.
@@ -120,7 +120,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attribute_Tests
             {
                 // Cleanup
                 //_testHelper.CleanUp();
-                UnitOfDataPersistenceWork.Dispose();
+                UnitOfWork.Dispose();
             }
         }
         private void AggregateData(Guid networkId, List<MaintainableAsset> maintainableAssets)
@@ -167,7 +167,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attribute_Tests
                     p => p.NumericValue,
                     (key, g) => new { Year = key, Average = g.Average(_ => _.Value)}).ToList();
                 // create aggregated data records in the data source
-                //var createdRecordsCount = _testHelper.UnitOfDataPersistenceWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
+                //var createdRecordsCount = _testHelper.UnitOfWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
             }
             catch (Exception e)
             {

@@ -8,6 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void CreateBenefit(Benefit benefit, Guid analysisMethodId);
 
-        void UpsertBenefit(BenefitDTO dto, Guid analysisMethodId, Guid? userId = null);
+        void UpsertBenefit(BenefitDTO dto, Guid analysisMethodId);
     }
 }

@@ -7,22 +7,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class BenefitMapper
     {
-        public static BenefitEntity ToEntity(this Benefit domain, Guid analysisMethodId, Guid? attributeId)
-        {
-            var benefitEntity = new BenefitEntity
+        public static BenefitEntity ToEntity(this Benefit domain, Guid analysisMethodId, Guid attributeId) =>
+            new BenefitEntity
             {
                 Id = domain.Id,
                 AnalysisMethodId = analysisMethodId,
-                Limit = domain.Limit
+                Limit = domain.Limit,
+                AttributeId = attributeId
             };
-
-            if (attributeId != null)
-            {
-                benefitEntity.AttributeId = attributeId;
-            }
-
-            return benefitEntity;
-        }
 
         public static BenefitEntity ToEntity(this BenefitDTO dto, Guid analysisMethodId, Guid attributeId) =>
             new BenefitEntity

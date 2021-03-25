@@ -19,18 +19,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public BudgetAmountRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public BudgetAmountRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateBudgetAmounts(Dictionary<Guid, List<BudgetAmount>> budgetAmountsPerBudgetEntityId, Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            var simulationEntity = _unitOfDataPersistenceWork.Context.Simulation
+            var simulationEntity = _unitOfWork.Context.Simulation
                 .Include(_ => _.InvestmentPlan)
                 .Single(_ => _.Id == simulationId);
 
@@ -51,25 +51,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 });
             });
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.BudgetAmount.AddRange(budgetAmountEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(budgetAmountEntities);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.AddAll(budgetAmountEntities);
         }
 
-        public void UpsertOrDeleteBudgetAmounts(Dictionary<Guid, List<BudgetAmountDTO>> budgetAmountsPerBudgetId, Guid libraryId, Guid? userId = null)
+        public void UpsertOrDeleteBudgetAmounts(Dictionary<Guid, List<BudgetAmountDTO>> budgetAmountsPerBudgetId, Guid libraryId)
         {
             var budgetAmountEntities = budgetAmountsPerBudgetId.SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key))).ToList();
 
             var entityIds = budgetAmountEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfDataPersistenceWork.Context.BudgetAmount
+            var existingEntityIds = _unitOfWork.Context.BudgetAmount
                 .Where(_ => _.Budget.BudgetLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
                 .ToList();
 
@@ -82,11 +73,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, userId);
+                _unitOfWork.Context.UpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, userId);
+                _unitOfWork.Context.BulkUpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
             }
         }
     }

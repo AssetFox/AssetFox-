@@ -120,7 +120,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IMaintainableAssetRepository MaintainableAssetRepo => _maintainableAssetRepo ??= new MaintainableAssetRepository(this);
 
-        public INetworkRepository NetworkRepo => _networkRepo ??= new NetworkRepository(this);
+        public virtual INetworkRepository NetworkRepo => _networkRepo ??= new NetworkRepository(this);
 
         public IPerformanceCurveRepository PerformanceCurveRepo => _performanceCurveRepo ??= new PerformanceCurveRepository(this);
 

@@ -59,21 +59,21 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
         }
 
-        private bool Validate(InventoryParameters parameters)
-        {
-            if (parameters.BRKey < 1 && String.IsNullOrEmpty(parameters.BMSID))
-            {
-                // No parameters provided
-                return false;
-            }
+        //private bool Validate(InventoryParameters parameters)
+        //{
+        //    if (parameters.BRKey < 1 && String.IsNullOrEmpty(parameters.BMSID))
+        //    {
+        //        // No parameters provided
+        //        return false;
+        //    }
 
-            if (parameters.BRKey > 0 && !String.IsNullOrEmpty(parameters.BMSID))
-            {
-                // Both parameters provided.  Check to see if they are the same asset
-                _repository.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(_networkId).Where(_ => _.)
-            }
+        //    if (parameters.BRKey > 0 && !String.IsNullOrEmpty(parameters.BMSID))
+        //    {
+        //        // Both parameters provided.  Check to see if they are the same asset
+        //        _repository.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(_networkId).Where(_ => _.)
+        //    }
 
-            // Check if asset actually exists
-        }
+        //    // Check if asset actually exists
+        //}
     }
 }

@@ -8,12 +8,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 {
     public class TestDataForPennDOTAssetDataRepo
     {
-        public NetworkEntity TestNetwork { get; set; }
-        public List<AttributeEntity> AttributeLibrary { get; set; }
+        private List<AttributeEntity> _attributeLibrary;
+
+        public NetworkEntity TestNetwork { get; private set; }
+        public IQueryable<AttributeEntity> AttributeLibrary => _attributeLibrary.AsQueryable();
+        public IQueryable<SectionEntity> SectionLibrary => TestNetwork.Facilities.SelectMany(_ => _.Sections).AsQueryable();
 
         public TestDataForPennDOTAssetDataRepo()
         {
-            AttributeLibrary = CreateTestAttributes();
+            _attributeLibrary = CreateTestAttributes();
             TestNetwork = CreateTestNetwork();
         }
 
@@ -147,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         private void AssignBRKey(SectionEntity section, double value)
         {
-            var brkeyAttribute = AttributeLibrary.FirstOrDefault(_ => _.Name == "BRKey");
+            var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BRKey");
             var newNumericAttribute = new NumericAttributeValueHistoryEntity()
             {
                 Year = 2020,
@@ -163,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         private void AssignBMSID(SectionEntity section, string value)
         {
-            var bmsidAttribute = AttributeLibrary.FirstOrDefault(_ => _.Name == "BMSID");
+            var bmsidAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BMSID");
             var newtextAttribute = new TextAttributeValueHistoryEntity()
             {
                 Year = 2020,
@@ -179,7 +182,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         private void AssignLength(SectionEntity section, double value)
         {
-            var lengthAttribute = AttributeLibrary.FirstOrDefault(_ => _.Name == "Length");
+            var lengthAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "Length");
             var newNumericAttribute = new NumericAttributeValueHistoryEntity()
             {
                 Year = 2020,
@@ -195,7 +198,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         private void AssignName(SectionEntity section, string value)
         {
-            var nameAttribute = AttributeLibrary.FirstOrDefault(_ => _.Name == "Name");
+            var nameAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "Name");
             var newtextAttribute = new TextAttributeValueHistoryEntity()
             {
                 Year = 2020,

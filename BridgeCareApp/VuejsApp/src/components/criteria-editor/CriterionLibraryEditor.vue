@@ -199,7 +199,9 @@ export default class CriterionLibraryEditor extends Vue {
   onShowCreateCriterionLibraryDialog(createAsNew: boolean) {
     this.createCriterionLibraryDialogData = {
       showDialog: true,
-      mergedCriteriaExpression: createAsNew ? this.selectedCriterionLibrary.mergedCriteriaExpression : ''
+      mergedCriteriaExpression: createAsNew ? 
+      (this.selectedCriterionLibrary.mergedCriteriaExpression != null ? this.selectedCriterionLibrary.mergedCriteriaExpression : '')
+       : ''
     };
   }
 

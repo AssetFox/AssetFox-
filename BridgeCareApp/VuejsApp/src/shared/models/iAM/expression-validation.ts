@@ -1,4 +1,4 @@
-import { UserCriteriaFilter } from "./user-criteria-filter";
+import { UserCriteriaFilter } from './user-criteria-filter';
 
 export interface ValidationResult {
     isValid: boolean;

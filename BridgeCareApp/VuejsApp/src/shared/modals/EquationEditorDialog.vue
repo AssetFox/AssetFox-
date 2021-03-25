@@ -426,7 +426,7 @@ export default class EquationEditorDialog extends Vue {
   editedDataPointProperty: string = '';
   editedDataPoint: TimeConditionDataPoint = clone(emptyTimeConditionDataPoint);
   piecewiseRegex: RegExp = /(\(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*\))/;
-  multipleDataPointsRegex: RegExp = /(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*)/
+  multipleDataPointsRegex: RegExp = /(\d+(\.{1}\d+)*,\d+(\.{1}\d+)*)/;
   uuidNIL: string = getBlankGuid();
 
   /**

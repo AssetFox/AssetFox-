@@ -129,7 +129,7 @@ export default class CriterionFilterEditorDialog extends Vue {
         heading: 'Unsaved Changes',
         message: 'The selected criterion library has unsaved changes. Click "Update Library" or "Create as New Library" to save changes.',
         choice: false
-    }
+    };
   }
 
   onCloseHasUnsavedChangesAlert() {

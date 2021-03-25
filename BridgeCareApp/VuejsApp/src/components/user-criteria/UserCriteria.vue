@@ -217,7 +217,7 @@ import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDi
                 if(userCriteriaFilter.criteriaId == ''){
                 userCriteriaFilter.criteriaId = getNewGuid();
             }
-            this.updateUserCriteriaFilterAction({userCriteriaFilter : userCriteriaFilter})
+            this.updateUserCriteriaFilterAction({userCriteriaFilter : userCriteriaFilter});
             }
             
             this.selectedUser = {...emptyUserCriteriaFilter};

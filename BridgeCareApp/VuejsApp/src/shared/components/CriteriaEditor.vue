@@ -199,7 +199,9 @@ export default class CriteriaEditor extends Vue {
 
   @Watch('criteriaEditorData')
   onCriteriaEditorDataChanged() {
-    const mainCriteria: Criteria = parseCriteriaString(this.criteriaEditorData.mergedCriteriaExpression) as Criteria;
+    const mainCriteria: Criteria = parseCriteriaString(
+      this.criteriaEditorData.mergedCriteriaExpression != null ? this.criteriaEditorData.mergedCriteriaExpression : ''
+      ) as Criteria;
 
     const parsedSubCriteria: string[] | null = parseCriteriaJson(this.getMainCriteria());
     const mergedCriteriaExpression: string | null = hasValue(parsedSubCriteria) ? parsedSubCriteria!.join('') : null;

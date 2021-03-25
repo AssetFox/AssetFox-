@@ -4,9 +4,9 @@ import {clone} from 'ramda';
 export interface UserCriteriaFilter {
     criteriaId: string;
     userId: string;
-    userName: string,
-    hasCriteria: boolean,
-    hasAccess: boolean,
+    userName: string;
+    hasCriteria: boolean;
+    hasAccess: boolean;
     criteria: string | null;
 }
 

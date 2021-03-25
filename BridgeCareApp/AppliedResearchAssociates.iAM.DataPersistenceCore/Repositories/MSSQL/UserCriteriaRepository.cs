@@ -68,9 +68,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var currUser = _unitOfDataPersistenceWork.Context.User.FirstOrDefault(_ => _.Username == userInformation.Sub);
             var userCriteria = _unitOfDataPersistenceWork.Context.UserCriteria.SingleOrDefault(criteria => criteria.User.Username == userInformation.Sub);
 
-            if(userCriteria == null) // user is present in the user table, but doesn't have data in UserCriteria_Filter table (no inventory access)
+            if(userCriteria == null) // user is present in the user table, but doesn't have data in UserCriteria_Filter table
             {
-                return new UserCriteriaDTO{ UserName = userInformation.Sub };
+                if (currUser.HasInventoryAccess) // It means, the user is admin, so add an entry in UserCriteria_Filter table
+                {
+                     var newCriteriaFilter = GenerateDefaultCriteriaForAdmin(currUser);
+                    _unitOfDataPersistenceWork.Context.UserCriteria.Add(newCriteriaFilter);
+                    _unitOfDataPersistenceWork.Context.SaveChanges();
+
+                    return newCriteriaFilter.ToDto();
+                }
+
+                return new UserCriteriaDTO { UserName = userInformation.Sub, HasAccess = currUser.HasInventoryAccess };
             }
             userCriteria.User = currUser;
             return userCriteria.ToDto();

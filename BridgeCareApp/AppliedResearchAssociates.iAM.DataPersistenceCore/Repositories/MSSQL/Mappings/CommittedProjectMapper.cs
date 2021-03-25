@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
@@ -30,7 +29,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Year = domain.Year
             };
         }
-            
 
         public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation)
         {

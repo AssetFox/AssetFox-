@@ -41,7 +41,8 @@ namespace BridgeCareCore.Controllers
             var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
             var reportDetailDto = new SimulationReportDetailDTO
             {
-                SimulationId = simulationId, Status = "Starting report generation..."
+                SimulationId = simulationId,
+                Status = "Starting report generation..."
             };
 
             try

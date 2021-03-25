@@ -2,21 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
-using BridgeCareCore.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
-using NUnit.Framework;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attribute_Tests
@@ -51,6 +47,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attribute_Tests
 
             IsAscending = true
         };
+
         private static readonly Guid NetworkId = Guid.Parse("D7B54881-DD44-4F93-8250-3D4A630A4D3B"); //7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed
         //D7B54881-DD44-4F93-8250-3D4A630A4D3B
 
@@ -123,6 +120,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attribute_Tests
                 UnitOfWork.Dispose();
             }
         }
+
         private void AggregateData(Guid networkId, List<MaintainableAsset> maintainableAssets)
         {
             try
@@ -165,7 +163,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attribute_Tests
 
                 var yearAndAverageValue = entities.GroupBy(p => p.Year,
                     p => p.NumericValue,
-                    (key, g) => new { Year = key, Average = g.Average(_ => _.Value)}).ToList();
+                    (key, g) => new { Year = key, Average = g.Average(_ => _.Value) }).ToList();
                 // create aggregated data records in the data source
                 //var createdRecordsCount = _testHelper.UnitOfWork.AggregatedResultRepo.CreateAggregatedResults(aggregatedResults);
             }

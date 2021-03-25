@@ -9,7 +9,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {

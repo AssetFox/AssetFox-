@@ -18,7 +18,6 @@ namespace BridgeCareCore.Controllers
         private readonly IEsecSecurity _esecSecurity;
         private readonly ILog _logger;
 
-
         public LegacySimulationSynchronizationController(
             LegacySimulationSynchronizerService legacySimulationSynchronizerService, IEsecSecurity esecSecurity,
             ILog logger, IHubContext<BridgeCareHub> hubContext) : base(hubContext)
@@ -47,7 +46,7 @@ namespace BridgeCareCore.Controllers
 
                     SendRealTimeMessage("BroadcastDataMigration", "Finished data migration...");
                 });
-                
+
                 return Ok();
             }
             catch (Exception e)

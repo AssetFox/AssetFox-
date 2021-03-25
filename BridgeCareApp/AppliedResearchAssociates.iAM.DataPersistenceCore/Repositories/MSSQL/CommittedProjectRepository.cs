@@ -51,7 +51,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             Sections = facility.Sections.Select(section => new SectionEntity
                             {
-                                Id = section.Id, Name = section.Name, Area = section.Area
+                                Id = section.Id,
+                                Name = section.Name,
+                                Area = section.Area
                             }).ToList()
                         }).ToList()
                     },
@@ -60,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         BudgetLibrary = new BudgetLibraryEntity
                         {
                             Budgets = simulation.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets
-                                .Select(budget => new BudgetEntity {Id = budget.Id, Name = budget.Name})
+                                .Select(budget => new BudgetEntity { Id = budget.Id, Name = budget.Name })
                                 .ToList()
                         }
                     }

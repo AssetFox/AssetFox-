@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Transactions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -9,7 +8,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using AttributeDatumRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.AttributeDatumRepository;
-using IsolationLevel = System.Data.IsolationLevel;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 {
@@ -32,6 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         // REPOSITORIES
         private IAggregatedResultRepository _aggregatedResultRepo;
+
         private IAnalysisMethodRepository _analysisMethodRepo;
         private IAttributeDatumRepository _attributeDatumRepo;
         private IAttributeMetaDataRepository _attributeMetaDataRepo;

@@ -2,7 +2,6 @@
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
@@ -24,7 +23,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (benefit.Attribute == null || string.IsNullOrEmpty(benefit.Attribute.Name))
             {
-
                 throw new InvalidOperationException("Analysis method benefit must have an attribute.");
             }
 

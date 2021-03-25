@@ -41,7 +41,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             {
                 entities.ForEach(entity =>
                 {
-
                     SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
 
                     SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);

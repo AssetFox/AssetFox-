@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -102,7 +101,7 @@ namespace BridgeCareCore.Controllers
                     _analysisMethodUpsertMethods[userInfo.Role](simulationId, dto);
                     _unitOfWork.Commit();
                 });
-                
+
                 return Ok();
             }
             catch (Exception e)

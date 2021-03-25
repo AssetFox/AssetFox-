@@ -34,31 +34,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributeId = Guid.Empty;
 
             var assets = (from ma in _unitOfWork.Context.MaintainableAsset
-                join mal in _unitOfWork.Context.MaintainableAssetLocation on ma.Id equals mal.MaintainableAssetId
-                join ad in _unitOfWork.Context.AttributeDatum on ma.Id equals ad.MaintainableAssetId
-                where ad.AttributeId == attributeId
-                select new MaintainableAssetEntity
-                {
-                    Id = ma.Id,
-                    NetworkId = ma.NetworkId,
-                    MaintainableAssetLocation =
-                        new MaintainableAssetLocationEntity(mal.Id, mal.Discriminator, mal.LocationIdentifier)
-                        {
-                            MaintainableAssetId = mal.MaintainableAssetId
-                        },
-                    AssignedData = (from adSub in _unitOfWork.Context.AttributeDatum
-                        where adSub.MaintainableAssetId == ma.Id
-                        select new AttributeDatumEntity
-                        {
-                            Id = adSub.Id,
-                            TimeStamp = adSub.TimeStamp,
-                            NumericValue = adSub.NumericValue,
-                            TextValue = adSub.TextValue,
-                            Discriminator = adSub.Discriminator,
-                            AttributeId = adSub.AttributeId,
-                            MaintainableAssetId = adSub.MaintainableAssetId
-                        }).ToList()
-                });
+                          join mal in _unitOfWork.Context.MaintainableAssetLocation on ma.Id equals mal.MaintainableAssetId
+                          join ad in _unitOfWork.Context.AttributeDatum on ma.Id equals ad.MaintainableAssetId
+                          where ad.AttributeId == attributeId
+                          select new MaintainableAssetEntity
+                          {
+                              Id = ma.Id,
+                              NetworkId = ma.NetworkId,
+                              MaintainableAssetLocation =
+                                  new MaintainableAssetLocationEntity(mal.Id, mal.Discriminator, mal.LocationIdentifier)
+                                  {
+                                      MaintainableAssetId = mal.MaintainableAssetId
+                                  },
+                              AssignedData = (from adSub in _unitOfWork.Context.AttributeDatum
+                                              where adSub.MaintainableAssetId == ma.Id
+                                              select new AttributeDatumEntity
+                                              {
+                                                  Id = adSub.Id,
+                                                  TimeStamp = adSub.TimeStamp,
+                                                  NumericValue = adSub.NumericValue,
+                                                  TextValue = adSub.TextValue,
+                                                  Discriminator = adSub.Discriminator,
+                                                  AttributeId = adSub.AttributeId,
+                                                  MaintainableAssetId = adSub.MaintainableAssetId
+                                              }).ToList()
+                          });
 
             return !maintainableAssets.Any()
                 ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")

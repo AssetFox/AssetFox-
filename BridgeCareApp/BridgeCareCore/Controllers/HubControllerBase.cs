@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using BridgeCareCore.Hubs;
+﻿using BridgeCareCore.Hubs;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Controllers

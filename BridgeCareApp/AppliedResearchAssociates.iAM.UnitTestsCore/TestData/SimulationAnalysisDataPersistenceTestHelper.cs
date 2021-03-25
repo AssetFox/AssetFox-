@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public void ReduceNumberOfFacilitiesAndSections(Simulation simulation)
         {
-            var facilities = new List<Facility>{simulation.Network.Facilities.First(_ => _.Sections.Any())};
+            var facilities = new List<Facility> { simulation.Network.Facilities.First(_ => _.Sections.Any()) };
             simulation.Network.ClearFacilities();
             simulation.CommittedProjects.Clear();
             ReUpFacilitiesSectionsAndHistories(facilities, simulation.Network);

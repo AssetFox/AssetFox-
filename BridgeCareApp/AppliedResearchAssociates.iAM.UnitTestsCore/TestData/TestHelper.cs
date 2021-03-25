@@ -9,7 +9,6 @@ using BridgeCareCore.Hubs;
 using BridgeCareCore.Logging;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Moq;
 

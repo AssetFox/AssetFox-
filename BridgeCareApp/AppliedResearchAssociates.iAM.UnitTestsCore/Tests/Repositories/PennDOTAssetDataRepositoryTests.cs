@@ -54,11 +54,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public void GeneratesKeyPropertiesDictionaryWithNumericKey()
         {
             // Arrange
-            var keyFields = new List<string>() { "BRKey", "BMSID" };
             var checkGuid = new Guid("8f80c690-3088-4084-b0e5-a8e070000a06");
 
             // Act
-            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo);
+            var repo = new PennDOTAssetDataRepository(_testRepo);
 
             // Assert
             Assert.Equal(2, repo.KeyProperties.Count());
@@ -68,36 +67,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         }
 
         [Fact]
-        public void HandlesMissingKeyInAttributeRepository()
-        {
-            // Arrange
-            var keyFields = new List<string>() { "Dummy" };
-
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => new PennDOTAssetDataRepository(keyFields, _testRepo));
-
-        }
-
-        [Fact]
-        public void HandlesNoDataForExistingAttribute()
-        {
-            // Arrange
-            var keyFields = new List<string>() { "NoData" };
-
-            // Act
-            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo);
-
-            // Assert
-            Assert.Equal(1, repo.KeyProperties.Count());
-            Assert.Equal(0, repo.KeyProperties["NoData"].Count());
-        }
-
-        [Fact]
         public void ReturnsSegmeentData()
         {
             // Arrange
-            var keyFields = new List<string>() { "BRKey", "BMSID" };
-            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo);
+            var repo = new PennDOTAssetDataRepository(_testRepo);
 
             // Act
             var testSegment = repo.GetAssetAttributes("BRKey", "2");
@@ -115,8 +88,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public void HandlesUnmatchedKey()
         {
             // Arrange
-            var keyFields = new List<string>() { "BRKey", "BMSID" };
-            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo);
+            var repo = new PennDOTAssetDataRepository(_testRepo);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => repo.GetAssetAttributes("Dummy", "0"));
@@ -128,8 +100,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             // Should the system also remove the asset from KeyProperties if not found?  I think so.
 
             // Arrange
-            var keyFields = new List<string>() { "BRKey", "BMSID" };
-            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo);
+            var repo = new PennDOTAssetDataRepository(_testRepo);
 
             // Act
             var testSegment = repo.GetAssetAttributes("BRKey", "100");

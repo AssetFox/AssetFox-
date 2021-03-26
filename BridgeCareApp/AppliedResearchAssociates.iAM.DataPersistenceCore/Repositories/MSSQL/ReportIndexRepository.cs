@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return true;
         }
 
-        public bool DeleteAllScenarioReports(Guid simulationId)
+        public bool DeleteAllSimulationReports(Guid simulationId)
         {
             var scenarioReports = _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == simulationId);
             if (scenarioReports.Count() > 0)

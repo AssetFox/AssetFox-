@@ -4,6 +4,7 @@ using System.Text;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -11,14 +12,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         UnitOfWork.UnitOfDataPersistenceWork _unitofwork;
 
-        public PennDOTAssetDataRepository(List<string> keyFields, UnitOfWork.UnitOfDataPersistenceWork uow)
+        public PennDOTAssetDataRepository(UnitOfWork.UnitOfDataPersistenceWork uow)
         {
             _unitofwork = uow;
             var network = _unitofwork.NetworkRepo.GetPennDotNetwork();
             var sectionList = network.Facilities.SelectMany(_ => _.Sections);
 
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
-            foreach (var key in keyFields)
+            foreach (var key in DataPersistenceConstants.PennDOTKeyFields.Keys)
             {
                 var keyAttribute = _unitofwork.Context.Attribute.FirstOrDefault(_ => _.Name == key);
                 var keyValues = new List<KeySegmentDatum>();

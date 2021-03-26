@@ -157,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IReportIndexRepository ReportIndexRepository => _reportIndexRepo ??= new ReportIndexRepository(this);
 
-        public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTAssetDataRepository(new List<string>() { "BRKey", "BMSID" }, this);
+        public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTAssetDataRepository(this);
 
         public IDbContextTransaction DbContextTransaction
         {

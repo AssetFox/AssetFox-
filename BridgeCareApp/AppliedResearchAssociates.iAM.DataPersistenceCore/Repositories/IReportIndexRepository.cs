@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         ReportIndexEntity Get(Guid reportId);
         List<ReportIndexEntity> GetAllForScenario(Guid scenarioId);
         bool DeleteReport(Guid reportId);
-        bool DeleteAllScenarioReports(Guid scenarioId);
+        bool DeleteAllSimulationReports(Guid scenarioId);
         /// <summary>
         /// Deletes any ReportIndex with an ExpirationDate before the current date
         /// </summary>

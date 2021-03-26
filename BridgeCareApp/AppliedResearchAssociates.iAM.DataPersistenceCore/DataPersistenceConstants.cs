@@ -45,5 +45,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
                 {TreatmentSupersession, "Treatment Supersession"}
             };
         }
+
+        public static class PennDOTKeyFields
+        {
+            public static readonly List<string> Keys = new List<string>()
+            {
+                "BRKey",
+                "BMSID"
+            };
+        }
     }
 }

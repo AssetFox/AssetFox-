@@ -126,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             var testScenario = new Guid("be82f095-c108-4ab7-af7e-cb7ecd18ede2");
 
             // Act
-            var returnVal = repo.DeleteAllScenarioReports(testScenario);
+            var returnVal = repo.DeleteAllSimulationReports(testScenario);
 
             // Assert
             _mockedReportIndexSet.Verify(_ => _.RemoveRange(It.IsAny<IList<ReportIndexEntity>>()), Times.Once());
@@ -142,7 +142,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             var testScenario = new Guid("be82f095-aaaa-aaaa-aaaa-cb7ecd18ede2");
 
             // Act
-            var returnVal = repo.DeleteAllScenarioReports(testScenario);
+            var returnVal = repo.DeleteAllSimulationReports(testScenario);
 
             // Assert
             _mockedReportIndexSet.Verify(_ => _.RemoveRange(It.IsAny<IList<ReportIndexEntity>>()), Times.Never());

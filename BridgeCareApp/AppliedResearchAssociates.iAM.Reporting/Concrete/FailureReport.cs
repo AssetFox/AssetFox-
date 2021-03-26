@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public FailureReport()
         {
-            _id = new Guid();
+            _id = Guid.NewGuid();
             _errorList = new List<string>();
             _isComplete = false;
         }

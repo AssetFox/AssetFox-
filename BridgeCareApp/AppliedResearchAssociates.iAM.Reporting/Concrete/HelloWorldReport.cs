@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public HelloWorldReport(UnitOfDataPersistenceWork repository, string name, ReportIndex results)
         {
-            _id = new Guid();
+            _id = Guid.NewGuid();
             _errorList = new List<string>();
             _reportTypeName = name;
         }

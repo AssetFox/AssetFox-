@@ -126,23 +126,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
             attributeLibrary.Add(new AttributeEntity()
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Name = "BRKey"
             });
             attributeLibrary.Add(new AttributeEntity()
             {
-                Id = new Guid(),
+                Id =Guid.NewGuid(),
                 Name = "BMSID"
             });
             attributeLibrary.Add(new AttributeEntity()
             {
-                Id = new Guid(),
+                Id =Guid.NewGuid(),
                 Name = "Length"
             });
             attributeLibrary.Add(new AttributeEntity()
             {
-                Id = new Guid(),
+                Id =Guid.NewGuid(),
                 Name = "Name"
+            });
+            attributeLibrary.Add(new AttributeEntity()
+            {
+                Id = Guid.NewGuid(),
+                Name = "NoData"
             });
 
             return attributeLibrary;
@@ -155,7 +160,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             {
                 Year = 2020,
                 Value = value,
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 SectionId = section.Id,
                 AttributeId = brkeyAttribute.Id,
                 Attribute = brkeyAttribute,
@@ -171,7 +176,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             {
                 Year = 2020,
                 Value = value,
-                Id = new Guid(),
+                Id =Guid.NewGuid(),
                 SectionId = section.Id,
                 AttributeId = bmsidAttribute.Id,
                 Attribute = bmsidAttribute,
@@ -187,7 +192,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             {
                 Year = 2020,
                 Value = value,
-                Id = new Guid(),
+                Id =Guid.NewGuid(),
                 SectionId = section.Id,
                 AttributeId = lengthAttribute.Id,
                 Attribute = lengthAttribute,
@@ -203,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             {
                 Year = 2020,
                 Value = value,
-                Id = new Guid(),
+                Id =Guid.NewGuid(),
                 SectionId = section.Id,
                 AttributeId = nameAttribute.Id,
                 Attribute = nameAttribute,

@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             ReportTypeName = name;
             // results is ignored for this report
 
-            ID = new Guid();
+            ID = Guid.NewGuid();
             Errors = new List<string>();
             Status = "Report definition created.";
             Results = String.Empty;

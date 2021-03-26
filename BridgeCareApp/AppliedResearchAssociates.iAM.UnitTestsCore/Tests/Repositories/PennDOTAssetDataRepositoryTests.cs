@@ -63,55 +63,79 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             // Assert
             Assert.Equal(2, repo.KeyProperties.Count());
             Assert.Equal(5, repo.KeyProperties["BRKey"].Count());
-            Assert.NotNull(repo.KeyProperties["BRKey"].FirstOrDefault(_ => _.SegmentId == checkGuid));
-        }
-
-        [Fact]
-        public void GeneratesKeyPropertiesDictionaryWithStringKey()
-        {
-
+            Assert.NotNull(repo.KeyProperties["BRKey"].FirstOrDefault(_ => _.KeyValue.Value == "2").SegmentId == checkGuid);
+            Assert.NotNull(repo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256").SegmentId == checkGuid);
         }
 
         [Fact]
         public void HandlesMissingKeyInAttributeRepository()
         {
+            // Arrange
+            var keyFields = new List<string>() { "Dummy" };
+
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object));
 
         }
 
         [Fact]
         public void HandlesNoDataForExistingAttribute()
         {
+            // Arrange
+            var keyFields = new List<string>() { "NoData" };
 
+            // Act
+            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object);
+
+            // Assert
+            Assert.Equal(1, repo.KeyProperties.Count());
+            Assert.Equal(0, repo.KeyProperties["NoData"].Count());
         }
 
         [Fact]
         public void ReturnsSegmeentData()
         {
+            // Arrange
+            var keyFields = new List<string>() { "BRKey", "BMSID" };
+            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object);
 
+            // Act
+            var testSegment = repo.GetAssetAttributes("BRKey", "2");
+
+            // Assert
+            Assert.Equal(1, testSegment.Where(_ => _.Name == "BRKey").Count());
+            Assert.Equal(2, testSegment.First(_ => _.Name == "BRKey").NumericValue);
+            Assert.Equal("2", testSegment.First(_ => _.Name == "BRKey").Value);
+            Assert.Equal(15.4, testSegment.First(_ => _.Name == "Length").NumericValue);
+            Assert.Equal("13401256", testSegment.First(_ => _.Name == "BMSID").Value);
+            Assert.Equal("First B", testSegment.First(_ => _.Name == "Name").TextValue);
         }
 
         [Fact]
         public void HandlesUnmatchedKey()
         {
+            // Arrange
+            var keyFields = new List<string>() { "BRKey", "BMSID" };
+            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object);
 
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => repo.GetAssetAttributes("Dummy", "0"));
         }
 
         [Fact]
         public void HandlesNoSegmentFound()
         {
             // Should the system also remove the asset from KeyProperties if not found?  I think so.
-        }
 
-        [Fact]
-        public void HandlesOnlyTextAttributes()
-        {
+            // Arrange
+            var keyFields = new List<string>() { "BRKey", "BMSID" };
+            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object);
 
-        }
+            // Act
+            var testSegment = repo.GetAssetAttributes("BRKey", "100");
 
-        [Fact]
-        public void HandlesOnlyNumericAttributes()
-        {
-
+            // Assert
+            Assert.Equal(0, testSegment.Count());
         }
     }
 }

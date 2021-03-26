@@ -32,18 +32,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
 
                 var sectionsWithNumericKeys = sectionList
-                    .Where(_ => _.NumericAttributeValueHistories.Where(_ => _.Id == keyAttribute.Id).Count() > 0);
+                    .Where(_ => _.NumericAttributeValueHistories.Any(_ => _.AttributeId == keyAttribute.Id));
                 IEnumerable<SectionEntity> sectionsWithTextKeys = new List<SectionEntity>();
                 if (sectionsWithNumericKeys.Count() < 1)
                 {
                     // Only look in the text values if the numeric values are missing
                     sectionsWithTextKeys = sectionList
-                        .Where(_ => _.TextAttributeValueHistories.Where(_ => _.Id == keyAttribute.Id).Count() > 0);
+                        .Where(_ => _.TextAttributeValueHistories.Any(_ => _.AttributeId == keyAttribute.Id));
 
                     foreach (var section in sectionsWithTextKeys)
                     {
                         var lastValue = section.TextAttributeValueHistories
-                            .Where(_ => _.Id == keyAttribute.Id)
+                            .Where(_ => _.AttributeId == keyAttribute.Id)
                             .OrderByDescending(_ => _.Year)
                             .First()
                             .Value;
@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     foreach (var section in sectionsWithNumericKeys)
                     {
                         var lastValue = section.NumericAttributeValueHistories
-                            .Where(_ => _.Id == keyAttribute.Id)
+                            .Where(_ => _.AttributeId == keyAttribute.Id)
                             .OrderByDescending(_ => _.Year)
                             .First()
                             .Value;

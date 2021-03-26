@@ -114,6 +114,7 @@ namespace BridgeCareCore
             // Setup reporting
             var reportLookup = new Dictionary<string, Type>();
             reportLookup.Add("HelloWorld", typeof(HelloWorldReport));
+            reportLookup.Add("InventoryLookup", typeof(InventoryReport));
 
             services.AddSingleton(service => new ReportLookupLibrary(reportLookup));
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();

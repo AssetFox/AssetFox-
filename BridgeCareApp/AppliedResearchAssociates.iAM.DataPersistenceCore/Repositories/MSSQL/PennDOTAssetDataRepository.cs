@@ -9,18 +9,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class PennDOTAssetDataRepository : IAssetData
     {
-        UnitOfWork.UnitOfDataPersistenceWork _repository;
+        UnitOfWork.UnitOfDataPersistenceWork _unitofwork;
 
-        public PennDOTAssetDataRepository(List<string> keyFields, UnitOfWork.UnitOfDataPersistenceWork repository)
+        public PennDOTAssetDataRepository(List<string> keyFields, UnitOfWork.UnitOfDataPersistenceWork uow)
         {
-            _repository = repository;
-            var network = _repository.NetworkRepo.GetPennDotNetwork();
+            _unitofwork = uow;
+            var network = _unitofwork.NetworkRepo.GetPennDotNetwork();
             var sectionList = network.Facilities.SelectMany(_ => _.Sections);
 
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
             foreach (var key in keyFields)
             {
-                var keyAttribute = _repository.Context.Attribute.FirstOrDefault(_ => _.Name == key);
+                var keyAttribute = _unitofwork.Context.Attribute.FirstOrDefault(_ => _.Name == key);
                 var keyValues = new List<KeySegmentDatum>();
                 if (keyAttribute == null)
                 {
@@ -88,7 +88,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var lookupSource = KeyProperties[keyName];
             var targetSegment = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
             if (targetSegment == null) return new List<SegmentAttributeDatum>();
-            var segment = _repository.Context.Section.FirstOrDefault(_ => _.Id == targetSegment.SegmentId);
+            var segment = _unitofwork.Context.Section.FirstOrDefault(_ => _.Id == targetSegment.SegmentId);
             if (segment == null) return new List<SegmentAttributeDatum>();
 
             // Populate the return value list

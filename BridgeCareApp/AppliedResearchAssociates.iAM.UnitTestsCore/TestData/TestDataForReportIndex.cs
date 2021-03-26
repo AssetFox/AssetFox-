@@ -18,28 +18,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             return testReportLibrary;
         }
 
-        public static List<ReportIndex> SimpleRepo()
+        public static List<ReportIndexEntity> SimpleRepo()
         {
-            var simpleRepo = new List<ReportIndex>();
-            simpleRepo.Add(new ReportIndex()
+            var simpleRepo = new List<ReportIndexEntity>();
+            simpleRepo.Add(new ReportIndexEntity()
             {
-                ID = new Guid("e7ddde4b-d8cc-45b4-ab9e-dd513a233734"),
+                Id = new Guid("e7ddde4b-d8cc-45b4-ab9e-dd513a233734"),
                 SimulationID = new Guid("be82f095-c108-4ab7-af7e-cb7ecd18ede2"),
                 ReportTypeName = "Test HTML File",
                 Result = "<p>Hello workd!</p>",
                 ExpirationDate = DateTime.Now.AddDays(2)
             });
-            simpleRepo.Add(new ReportIndex()
+            simpleRepo.Add(new ReportIndexEntity()
             {
-                ID = new Guid("7a406cd1-6857-4288-9d93-9cc7ebd38fdf"),
+                Id = new Guid("7a406cd1-6857-4288-9d93-9cc7ebd38fdf"),
                 SimulationID = new Guid("be82f095-c108-4ab7-af7e-cb7ecd18ede2"),
                 ReportTypeName = "Test Report File",
                 Result = "<p>Hello workd!</p>",
                 ExpirationDate = DateTime.Now.AddDays(2)
             });
-            simpleRepo.Add(new ReportIndex()
+            simpleRepo.Add(new ReportIndexEntity()
             {
-                ID = new Guid("b32ecb1e-297f-4caa-9608-f28ab61cbd91"),
+                Id = new Guid("b32ecb1e-297f-4caa-9608-f28ab61cbd91"),
                 SimulationID = new Guid("0951aaad-eddd-462d-ab8d-99ed3829019f"),
                 ReportTypeName = "Test HTML File",
                 Result = "<p>Hello workd!</p>",
@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         private UnitOfDataPersistenceWork _repo;
         private string _reportName;
 
-        public TestReportFile(UnitOfDataPersistenceWork repository, string name, ReportIndex results)
+        public TestReportFile(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results)
         {
             _repo = repository;
             _reportName = name;
@@ -72,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             }
             else
             {
-                _id = results.ID;
+                _id = results.Id;
                 _sid = results.SimulationID == null ? _newSid : results.SimulationID;
             }
         }
@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         private UnitOfDataPersistenceWork _repo;
         private string _reportName;
 
-        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name, ReportIndex results)
+        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results)
         {
             _repo = repository;
             _reportName = name;
@@ -113,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             }
             else
             {
-                _id = results.ID;
+                _id = results.Id;
                 _sid = results.SimulationID == null ? null : results.SimulationID;
             }
         }

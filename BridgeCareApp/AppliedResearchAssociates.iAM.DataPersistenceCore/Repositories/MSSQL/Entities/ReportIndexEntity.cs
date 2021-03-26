@@ -6,9 +6,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     /// <summary>
     /// Domain object representing record in data persistence for report data that should be persisted
     /// </summary>
-    public class ReportIndex : BaseEntity
+    public class ReportIndexEntity : BaseEntity
     {
-        public Guid ID { get; set; }
+        public Guid Id { get; set; }
         public Guid? SimulationID { get; set; }
         public string ReportTypeName { get; set; }
         public string Result { get; set; }

@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private InventoryParameters _failedQuery = new InventoryParameters() { BRKey = -1, BMSID = String.Empty };
 
-        public InventoryReport(UnitOfDataPersistenceWork repository, string name, ReportIndex results)
+        public InventoryReport(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results)
         {
             _repository = repository;
             ReportTypeName = name;

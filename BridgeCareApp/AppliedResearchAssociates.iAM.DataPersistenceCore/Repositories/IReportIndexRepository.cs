@@ -7,9 +7,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IReportIndexRepository
     {
-        bool Add(ReportIndex report);
-        ReportIndex Get(Guid reportId);
-        List<ReportIndex> GetAllForScenario(Guid scenarioId);
+        bool Add(ReportIndexEntity report);
+        ReportIndexEntity Get(Guid reportId);
+        List<ReportIndexEntity> GetAllForScenario(Guid scenarioId);
         bool DeleteReport(Guid reportId);
         bool DeleteAllScenarioReports(Guid scenarioId);
         /// <summary>

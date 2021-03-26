@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// <summary>
         /// Specific generator used to recreate reports from data persistence
         /// </summary>
-        private async Task<IReport> Generate(string reportName, ReportIndex results)
+        private async Task<IReport> Generate(string reportName, ReportIndexEntity results)
         {
             if (!_reportLookup.ContainsKey(reportName))
             {
@@ -77,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 var listEntry = new ReportListItem()
                 {
-                    ReportId = item.ID,
+                    ReportId = item.Id,
                     ReportName = item.ReportTypeName
                 };
                 itemList.Add(listEntry);
@@ -94,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             if (_reportLookup.ContainsKey(reportInformation.ReportTypeName))
             {
                 validReport = await Generate(reportInformation.ReportTypeName, reportInformation);
-                validReport.ID = reportInformation.ID;
+                validReport.ID = reportInformation.Id;
                 validReport.SimulationID = reportInformation.SimulationID;
                 return validReport;
             }

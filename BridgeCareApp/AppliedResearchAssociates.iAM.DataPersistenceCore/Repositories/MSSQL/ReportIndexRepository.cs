@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -17,39 +18,37 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
-        public bool Add(ReportIndex report)
+        public bool Add(ReportIndexEntity report)
         {
             // Ensure required fields are present
-            if (report.ID == Guid.Empty || String.IsNullOrEmpty(report.ReportTypeName))
+            if (report.Id == Guid.Empty || String.IsNullOrEmpty(report.ReportTypeName))
             {
                 throw new ArgumentException($"Report does not have required values");
             }
 
             // Remove the old report if it exists
-            if (_unitOfDataPersistenceWork.Context.ReportIndex.Any(_ => _.ID == report.ID))
+            if (_unitOfDataPersistenceWork.Context.ReportIndex.Any(_ => _.Id == report.Id))
             {
-                var oldReport = _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.ID == report.ID);
+                var oldReport = _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.Id == report.Id);
                 if (oldReport != null)
                 {
-                    _unitOfDataPersistenceWork.Context.ReportIndex.Remove(oldReport);
-                    _unitOfDataPersistenceWork.Context.SaveChanges();
+                    _unitOfDataPersistenceWork.Context.Delete<ReportIndexEntity>(_ => _.Id == oldReport.Id);
                 }
             }
 
             // Add the new report
-            _unitOfDataPersistenceWork.Context.ReportIndex.Add(report);
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfDataPersistenceWork.Context.AddEntity(report, report.Id);
 
             return true;
         }
 
-        public bool DeleteAllScenarioReports(Guid scenarioId)
+        public bool DeleteAllScenarioReports(Guid simulationId)
         {
-            var scenarioReports = _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == scenarioId);
+            var scenarioReports = _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == simulationId);
             if (scenarioReports.Count() > 0)
             {
-                _unitOfDataPersistenceWork.Context.ReportIndex.RemoveRange(scenarioReports);
-                _unitOfDataPersistenceWork.Context.SaveChanges();
+                //_unitOfDataPersistenceWork.Context.ReportIndex.RemoveRange(scenarioReports);
+                _unitOfDataPersistenceWork.Context.DeleteAll<ReportIndexEntity>(_ => _.SimulationID == simulationId);
                 return true;
             }
             return false;
@@ -58,31 +57,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public bool DeleteExpiredReports()
         {
-            var expiredReports = _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.ExpirationDate < DateTime.Now);
-            if (expiredReports != null)
-            {
-                _unitOfDataPersistenceWork.Context.ReportIndex.RemoveRange(expiredReports);
-                _unitOfDataPersistenceWork.Context.SaveChanges();
-                return true;
-            }
-
-            return false;
+            _unitOfDataPersistenceWork.Context.DeleteAll<ReportIndexEntity>(_ => _.ExpirationDate < DateTime.Now);
+            return true;
         }
 
         public bool DeleteReport(Guid reportId)
         {
-            var specificReport = _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.ID == reportId);
-            if (specificReport != null)
-            {
-                _unitOfDataPersistenceWork.Context.ReportIndex.Remove(specificReport);
-                _unitOfDataPersistenceWork.Context.SaveChanges();
-                return true;
-            }
-
-            return false;
+            _unitOfDataPersistenceWork.Context.Delete<ReportIndexEntity>(_ => _.Id == reportId);
+            return true;
         }
 
-        public ReportIndex Get(Guid reportId) => _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.ID == reportId);
-        public List<ReportIndex> GetAllForScenario(Guid simulationId) => _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == simulationId).ToList();
+        public ReportIndexEntity Get(Guid reportId) => _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.Id == reportId);
+        public List<ReportIndexEntity> GetAllForScenario(Guid simulationId) => _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == simulationId).ToList();
     }
 }

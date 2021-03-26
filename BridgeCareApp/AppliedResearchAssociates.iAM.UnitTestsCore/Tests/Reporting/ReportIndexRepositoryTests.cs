@@ -15,9 +15,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
     public class ReportIndexRepositoryTests
     {
         private UnitOfDataPersistenceWork _testRepo;
-        private IQueryable<ReportIndex> _testReportIndexList;
+        private IQueryable<ReportIndexEntity> _testReportIndexList;
         private Mock<IAMContext> _mockedContext;
-        private Mock<DbSet<ReportIndex>> _mockedReportIndexSet;
+        private Mock<DbSet<ReportIndexEntity>> _mockedReportIndexSet;
 
         public ReportIndexRepositoryTests()
         {
@@ -25,13 +25,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             _testReportIndexList = TestDataForReportIndex.SimpleRepo().AsQueryable();
 
             // From https://docs.microsoft.com/en-us/ef/ef6/fundamentals/testing/mocking?redirectedfrom=MSDN
-            _mockedReportIndexSet = new Mock<DbSet<ReportIndex>>();
-            _mockedReportIndexSet.As<IQueryable<ReportIndex>>().Setup(_ => _.Provider).Returns(_testReportIndexList.Provider);
-            _mockedReportIndexSet.As<IQueryable<ReportIndex>>().Setup(_ => _.Expression).Returns(_testReportIndexList.Expression);
-            _mockedReportIndexSet.As<IQueryable<ReportIndex>>().Setup(_ => _.ElementType).Returns(_testReportIndexList.ElementType);
-            _mockedReportIndexSet.As<IQueryable<ReportIndex>>().Setup(_ => _.GetEnumerator()).Returns(_testReportIndexList.GetEnumerator());
+            _mockedReportIndexSet = new Mock<DbSet<ReportIndexEntity>>();
+            _mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.Provider).Returns(_testReportIndexList.Provider);
+            _mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.Expression).Returns(_testReportIndexList.Expression);
+            _mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.ElementType).Returns(_testReportIndexList.ElementType);
+            _mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.GetEnumerator()).Returns(_testReportIndexList.GetEnumerator());
 
             _mockedContext.Setup(_ => _.ReportIndex).Returns(_mockedReportIndexSet.Object);
+            _mockedContext.Setup(_ => _.Set<ReportIndexEntity>()).Returns(_mockedReportIndexSet.Object);
             var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, _mockedContext.Object);
             _testRepo = mockedRepo;
         }
@@ -40,9 +41,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         public void AddSuccessfullyInsertsNewReport()
         {
             // Arrange
-            var newReport = new ReportIndex()
+            var newReport = new ReportIndexEntity()
             {
-                ID = new Guid("5ef4090a-77d6-4ed9-9fe1-6a938e043137"),
+                Id = new Guid("5ef4090a-77d6-4ed9-9fe1-6a938e043137"),
                 SimulationID = new Guid("0951aaad-eddd-462d-ab8d-99ed3829019f"),
                 ReportTypeName = "Test Report File",
                 Result = "C:\\fakepath\\report.xlsx",
@@ -54,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             repo.Add(newReport);
 
             // Assert
-            _mockedReportIndexSet.Verify(_ => _.Add(It.IsAny<ReportIndex>()), Times.Once());
+            _mockedReportIndexSet.Verify(_ => _.Add(It.IsAny<ReportIndexEntity>()), Times.Once());
             _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
         }
 
@@ -62,9 +63,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         public void AddSuccessfullyReplacesExistingReport()
         {
             // Arrange
-            var newReport = new ReportIndex()
+            var newReport = new ReportIndexEntity()
             {
-                ID = new Guid("7a406cd1-6857-4288-9d93-9cc7ebd38fdf"),
+                Id = new Guid("7a406cd1-6857-4288-9d93-9cc7ebd38fdf"),
                 SimulationID = new Guid("be82f095-c108-4ab7-af7e-cb7ecd18ede2"),
                 ReportTypeName = "Test Report File",
                 Result = "C:\\fakepath\\report.xlsx",
@@ -76,8 +77,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             repo.Add(newReport);
 
             // Assert
-            _mockedReportIndexSet.Verify(_ => _.Remove(It.IsAny<ReportIndex>()), Times.Once());
-            _mockedReportIndexSet.Verify(_ => _.Add(It.IsAny<ReportIndex>()), Times.Once());
+            _mockedReportIndexSet.Verify(_ => _.Remove(It.IsAny<ReportIndexEntity>()), Times.Once());
+            _mockedReportIndexSet.Verify(_ => _.Add(It.IsAny<ReportIndexEntity>()), Times.Once());
             _mockedContext.Verify(_ => _.SaveChanges(), Times.Exactly(2));
         }
 
@@ -85,9 +86,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         public void AddHandlesMissingId()
         {
             // Arrange
-            var newReport = new ReportIndex()
+            var newReport = new ReportIndexEntity()
             {
-                ID = Guid.Empty,
+                Id = Guid.Empty,
                 SimulationID = null,
                 ReportTypeName = "Test Report File",
                 Result = "C:\\fakepath\\report.xlsx",
@@ -103,9 +104,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         public void AddHandlesMissingreportType()
         {
             // Arrange
-            var newReport = new ReportIndex()
+            var newReport = new ReportIndexEntity()
             {
-                ID = new Guid("5ef4090a-77d6-4ed9-9fe1-6a938e043137"),
+                Id = new Guid("5ef4090a-77d6-4ed9-9fe1-6a938e043137"),
                 SimulationID = new Guid("0951aaad-eddd-462d-ab8d-99ed3829019f"),
                 ReportTypeName = "",
                 Result = "C:\\fakepath\\report.xlsx",
@@ -128,7 +129,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             var returnVal = repo.DeleteAllScenarioReports(testScenario);
 
             // Assert
-            _mockedReportIndexSet.Verify(_ => _.RemoveRange(It.IsAny<IQueryable<ReportIndex>>()), Times.Once());
+            _mockedReportIndexSet.Verify(_ => _.RemoveRange(It.IsAny<IList<ReportIndexEntity>>()), Times.Once());
             _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
             Assert.True(returnVal);
         }
@@ -144,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             var returnVal = repo.DeleteAllScenarioReports(testScenario);
 
             // Assert
-            _mockedReportIndexSet.Verify(_ => _.RemoveRange(It.IsAny<IQueryable<ReportIndex>>()), Times.Never());
+            _mockedReportIndexSet.Verify(_ => _.RemoveRange(It.IsAny<IList<ReportIndexEntity>>()), Times.Never());
             _mockedContext.Verify(_ => _.SaveChanges(), Times.Never());
             Assert.False(returnVal);
         }
@@ -159,7 +160,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             var returnVal = repo.DeleteExpiredReports();
 
             // Assert
-            _mockedReportIndexSet.Verify(_ => _.RemoveRange(It.IsAny<IQueryable<ReportIndex>>()), Times.Once());
+            _mockedReportIndexSet.Verify(_ => _.RemoveRange(It.IsAny<IList<ReportIndexEntity>>()), Times.Once());
             _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
             Assert.True(returnVal);
         }
@@ -175,9 +176,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             var returnVal = repo.DeleteReport(testReport);
 
             // Assert
-            _mockedReportIndexSet.Verify(_ => _.Remove(It.IsAny<ReportIndex>()), Times.Once());
-            _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
-            Assert.True(returnVal);
+            _mockedReportIndexSet.Verify(_ => _.Remove(It.IsAny<ReportIndexEntity>()), Times.Once());
         }
 
         [Fact]
@@ -191,9 +190,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             var returnVal = repo.DeleteReport(testReport);
 
             // Assert
-            _mockedReportIndexSet.Verify(_ => _.RemoveRange(It.IsAny<IQueryable<ReportIndex>>()), Times.Never());
-            _mockedContext.Verify(_ => _.SaveChanges(), Times.Never());
-            Assert.False(returnVal);
+            _mockedReportIndexSet.Verify(_ => _.Remove(It.IsAny<ReportIndexEntity>()), Times.Never());
         }
     }
 }

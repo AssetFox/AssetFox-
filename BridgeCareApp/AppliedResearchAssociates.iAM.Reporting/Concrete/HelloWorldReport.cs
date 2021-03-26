@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private List<string> _errorList;
         private string _reportTypeName;
 
-        public HelloWorldReport(UnitOfDataPersistenceWork repository, string name, ReportIndex results)
+        public HelloWorldReport(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results)
         {
             _id = Guid.NewGuid();
             _errorList = new List<string>();

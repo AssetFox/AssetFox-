@@ -180,7 +180,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<UserCriteriaFilterEntity> UserCriteria { get; set; }
 
-        public virtual DbSet<ReportIndex> ReportIndex { get; set; }
+        public virtual DbSet<ReportIndexEntity> ReportIndex { get; set; }
 
         private class MigrationConnection
         {
@@ -1481,12 +1481,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             });
 
-            modelBuilder.Entity<ReportIndex>(entity =>
+            modelBuilder.Entity<ReportIndexEntity>(entity =>
             {
-                entity.HasKey(e => e.ID);
-
-                entity.HasIndex(e => e.ID).IsUnique();
-
                 entity.Property(e => e.ReportTypeName).IsRequired();
             });
         }

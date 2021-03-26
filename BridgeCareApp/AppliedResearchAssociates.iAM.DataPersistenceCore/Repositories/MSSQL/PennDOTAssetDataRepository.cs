@@ -10,12 +10,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class PennDOTAssetDataRepository : IAssetData
     {
         UnitOfWork.UnitOfDataPersistenceWork _repository;
-        ILogger<PennDOTAssetDataRepository> _log;
 
-        public PennDOTAssetDataRepository(List<string> keyFields, UnitOfWork.UnitOfDataPersistenceWork repository, ILogger<PennDOTAssetDataRepository> log)
+        public PennDOTAssetDataRepository(List<string> keyFields, UnitOfWork.UnitOfDataPersistenceWork repository)
         {
             _repository = repository;
-            _log = log;
             var network = _repository.NetworkRepo.GetPennDotNetwork();
             var sectionList = network.Facilities.SelectMany(_ => _.Sections);
 
@@ -26,9 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var keyValues = new List<KeySegmentDatum>();
                 if (keyAttribute == null)
                 {
-                    var e = new ArgumentException();
-                    _log.LogError(e, $"Unable to kind key {key}");
-                    throw e;
+                    throw new ArgumentException();
                 }
 
                 var sectionsWithNumericKeys = sectionList

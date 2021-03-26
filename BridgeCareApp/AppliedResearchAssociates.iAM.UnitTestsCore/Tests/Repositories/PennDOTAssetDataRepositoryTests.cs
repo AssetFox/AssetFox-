@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var checkGuid = new Guid("8f80c690-3088-4084-b0e5-a8e070000a06");
 
             // Act
-            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object);
+            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo);
 
             // Assert
             Assert.Equal(2, repo.KeyProperties.Count());
@@ -74,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var keyFields = new List<string>() { "Dummy" };
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object));
+            Assert.Throws<ArgumentException>(() => new PennDOTAssetDataRepository(keyFields, _testRepo));
 
         }
 
@@ -85,7 +85,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var keyFields = new List<string>() { "NoData" };
 
             // Act
-            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object);
+            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo);
 
             // Assert
             Assert.Equal(1, repo.KeyProperties.Count());
@@ -97,7 +97,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             // Arrange
             var keyFields = new List<string>() { "BRKey", "BMSID" };
-            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object);
+            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo);
 
             // Act
             var testSegment = repo.GetAssetAttributes("BRKey", "2");
@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             // Arrange
             var keyFields = new List<string>() { "BRKey", "BMSID" };
-            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object);
+            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => repo.GetAssetAttributes("Dummy", "0"));
@@ -129,7 +129,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 
             // Arrange
             var keyFields = new List<string>() { "BRKey", "BMSID" };
-            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo, _mockedLogger.Object);
+            var repo = new PennDOTAssetDataRepository(keyFields, _testRepo);
 
             // Act
             var testSegment = repo.GetAssetAttributes("BRKey", "100");

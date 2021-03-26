@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -77,6 +78,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IUserRepository _userRepo;
         private ISimulationReportDetailRepository _simulationReportDetailRepo;
         private IReportIndexRepository _reportIndexRepo;
+        private IAssetData _assetDataRepository;
 
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
 
@@ -151,6 +153,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ISimulationReportDetailRepository SimulationReportDetailRepo => _simulationReportDetailRepo ??= new SimulationReportDetailRepository(this);
 
         public IReportIndexRepository ReportIndexRepository => _reportIndexRepo ??= new ReportIndexRepository(this);
+
+        public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTAssetDataRepository(new List<string>() { "BRKey", "BMSID" }, this);
 
         public IDbContextTransaction DbContextTransaction
         {

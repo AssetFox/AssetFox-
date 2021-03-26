@@ -77,6 +77,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ITreatmentSupersessionRepository _treatmentSupersessionRepo;
         private IUserRepository _userRepo;
         private ISimulationReportDetailRepository _simulationReportDetailRepo;
+        private IUserCriteriaRepository _userCriteriaRepo;
         private IReportIndexRepository _reportIndexRepo;
         private IAssetData _assetDataRepository;
 
@@ -151,6 +152,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public IUserRepository UserRepo => _userRepo ??= new UserRepository(this);
 
         public ISimulationReportDetailRepository SimulationReportDetailRepo => _simulationReportDetailRepo ??= new SimulationReportDetailRepository(this);
+
+        public IUserCriteriaRepository UserCriteriaRepo => _userCriteriaRepo ??= new UserCriteriaRepository(this);
 
         public IReportIndexRepository ReportIndexRepository => _reportIndexRepo ??= new ReportIndexRepository(this);
 

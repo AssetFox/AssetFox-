@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -41,7 +42,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _expressionValidationService.ValidateCriterion(model.Expression));
+                var result = await Task.Factory.StartNew(() => _expressionValidationService.ValidateCriterion(model.Expression, model.CurrentUserCriteriaFilter));
                 return Ok(result);
                 //return Ok();
             }

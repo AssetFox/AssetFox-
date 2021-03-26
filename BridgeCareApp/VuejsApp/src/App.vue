@@ -175,6 +175,7 @@ export default class AppComponent extends Vue {
   //@Action('pollEvents') pollEventsAction: any;
   @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
   @Action('getAllUsers') getAllUsersAction: any;
+  @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
 
   drawer: boolean = false;
   alertDialogData: AlertData = clone(emptyAlertData);
@@ -393,6 +394,8 @@ export default class AppComponent extends Vue {
     this.getNetworksAction();
     this.getAttributesAction();
     this.getAllUsersAction();
+
+    this.getUserCriteriaFilterAction();
   }
 
   /**

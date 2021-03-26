@@ -91,6 +91,7 @@ namespace BridgeCareCore
             services.AddScoped<AttributeService>();
             services.AddSingleton<IAuthorizationHandler, RestrictAccessHandler>();
             services.AddScoped<ExpressionValidationService>();
+            services.AddScoped<IUserCriteriaRepository, UserCriteriaRepository>();
 
 #if MsSqlDebug || Release || Test
             // SQL SERVER SCOPINGS

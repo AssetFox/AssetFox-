@@ -144,7 +144,8 @@ import {SelectItem} from '@/shared/models/vue/select-item';
 import {Network} from '@/shared/models/iAM/network';
 import {isEqual} from '@/shared/utils/has-unsaved-changes-helper';
 import ValidationService from '@/services/validation.service';
-import {CriterionValidationResult} from '@/shared/models/iAM/expression-validation';
+import {CriterionValidationResult, ValidationParameter} from '@/shared/models/iAM/expression-validation';
+import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 
 @Component({
   components: {VueQueryBuilder}
@@ -155,6 +156,7 @@ export default class CriteriaEditor extends Vue {
   @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
   @State(state => state.attributeModule.attributesSelectValues) stateAttributesSelectValues: AttributeSelectValues[];
   @State(state => state.networkModule.networks) stateNetworks: Network[];
+  @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
   @Action('getAttributes') getAttributesAction: any;
   @Action('getAttributeSelectValues') getAttributeSelectValuesAction: any;
@@ -197,7 +199,9 @@ export default class CriteriaEditor extends Vue {
 
   @Watch('criteriaEditorData')
   onCriteriaEditorDataChanged() {
-    const mainCriteria: Criteria = parseCriteriaString(this.criteriaEditorData.mergedCriteriaExpression) as Criteria;
+    const mainCriteria: Criteria = parseCriteriaString(
+      this.criteriaEditorData.mergedCriteriaExpression != null ? this.criteriaEditorData.mergedCriteriaExpression : ''
+      ) as Criteria;
 
     const parsedSubCriteria: string[] | null = parseCriteriaJson(this.getMainCriteria());
     const mergedCriteriaExpression: string | null = hasValue(parsedSubCriteria) ? parsedSubCriteria!.join('') : null;
@@ -394,7 +398,8 @@ export default class CriteriaEditor extends Vue {
     const parsedCriteria = parseCriteriaJson(this.getMainCriteria());
 
     if (parsedCriteria) {
-      ValidationService.getCriterionValidationResult({expression: parsedCriteria.join('')})
+      var validationParameter = {expression: parsedCriteria.join(''), currentUserCriteriaFilter : this.currentUserCriteriaFilter} as ValidationParameter;
+      ValidationService.getCriterionValidationResult(validationParameter)
           .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
               const result: CriterionValidationResult = response.data as CriterionValidationResult;
@@ -448,7 +453,8 @@ export default class CriteriaEditor extends Vue {
       return;
     }
 
-    ValidationService.getCriterionValidationResult({expression: criteria})
+    var validationParameter = {expression: criteria, currentUserCriteriaFilter : this.currentUserCriteriaFilter} as ValidationParameter;
+    ValidationService.getCriterionValidationResult(validationParameter)
         .then((response: AxiosResponse) => {
           this.resetSubCriteriaValidationProperties();
 

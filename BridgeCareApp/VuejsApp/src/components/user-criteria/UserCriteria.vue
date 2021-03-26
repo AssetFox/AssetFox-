@@ -2,7 +2,7 @@
     <v-layout column style="width: 66%; margin: auto">
         <v-flex xs12>
             <v-card class="test1">
-                <div v-if="unassignedUsers.length > 0">
+                <div v-if="unassignedUsersCriteriaFilter.length > 0">
                     <v-card-title class="userCriteriaTableHeader">
                         Unassigned Users
                     </v-card-title>
@@ -10,10 +10,10 @@
                         The following users have no access to any inventory items.
                     </v-card-text>
                     <v-divider style="margin: 0"/>
-                    <div v-for="user in unassignedUsers">
+                    <div v-for="user in unassignedUsersCriteriaFilter">
                         <v-layout row class="unassigned-user-layout">
                             <v-flex class="unassigned-user-layout-username-flex" xs3>
-                                {{user.username}}
+                                {{user.userName}}
                             </v-flex>
                             <v-flex style="padding: 0" xs4>
                                 <v-btn @click="onEditCriteria(user)" class="ara-blue-bg white--text"
@@ -43,23 +43,23 @@
                 </v-card-title>
                 <div>
                     <v-data-table :headers="userCriteriaGridHeaders"
-                                  :items="assignedUsers"
+                                  :items="assignedUsersCriteriaFilter"
                                   :items-per-page="5"
                                   class="elevation-1"
                                   hide-actions>
                         <template slot="items" slot-scope="props">
-                            <td style="width: 10%; font-size: 1.2em; padding-top: 0.4em">{{ props.item.username }}</td>
+                            <td style="width: 10%; font-size: 1.2em; padding-top: 0.4em">{{ props.item.userName }}</td>
                             <td style="width: 25%">
                                 <v-layout align-center style="flex-wrap:nowrap; margin-left: 0">
                                     <v-menu bottom
                                             min-height="500px" min-width="500px" v-if="props.item.hasCriteria">
                                         <template slot="activator">
-                                            <v-text-field class="sm-txt" :value="props.item.criterionLibrary" readonly
+                                            <v-text-field class="sm-txt" :value="props.item.criteria" readonly
                                                           style="width: 25em" type="text"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
-                                                <v-textarea :value="props.item.criterionLibrary" full-width no-resize outline
+                                                <v-textarea :value="props.item.criteria" full-width no-resize outline
                                                             readonly
                                                             rows="5">
                                                 </v-textarea>
@@ -103,7 +103,7 @@
             </v-card>
         </v-flex>
 
-        <CriteriaEditorDialog :dialogData="criteriaEditorDialogData"
+        <CriteriaFilterEditorDialog :dialogData="criteriaFilterEditorDialogData"
                               @submitCriteriaEditorDialogResult="onSubmitCriteria"/>
 
         <Alert :dialogData="beforeDeleteAlertData" @submit="onSubmitDeleteUserResponse"/>
@@ -116,28 +116,32 @@
     import {Action, State} from 'vuex-class';
     import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
     import Alert from '@/shared/modals/Alert.vue';
-    import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
     import {
-        CriterionLibraryEditorDialogData,
-        emptyCriterionLibraryEditorDialogData
-    } from '@/shared/models/modals/criterion-library-editor-dialog-data';
-    import {isNil} from 'ramda';
+        CriterionFilterEditorDialogData,
+        emptyCriterionFilterEditorDialogData
+    } from '@/shared/models/modals/criterion-filter-editor-dialog-data';
+    import {forEach, isNil} from 'ramda';
     import {emptyUser, User} from '@/shared/models/iAM/user';
     import {itemsAreEqual} from '@/shared/utils/equals-utils';
-    import {getBlankGuid} from '@/shared/utils/uuid-utils';
-    import {CriterionLibrary} from '@/shared/models/iAM/criteria';
+    import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
+import { emptyUserCriteriaFilter, UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import CriterionFilterEditorDialog from '@/shared/modals/CriterionFilterEditorDialog.vue';
 
     @Component({
         components: {
-            CriteriaEditorDialog: CriterionLibraryEditorDialog, Alert
+            CriteriaFilterEditorDialog: CriterionFilterEditorDialog, Alert
         }
     })
     export default class UserCriteriaEditor extends Vue {
         @State(state => state.userModule.users) stateUsers: User[];
+        @State(state => state.userModule.usersCriteriaFilter) stateUsersCriteriaFilter: UserCriteriaFilter[];
 
         @Action('getAllUsers') getAllUserCriteriaAction: any;
-        @Action('updateUser') setUserCriteriaAction: any;
         @Action('deleteUser') deleteUserAction: any;
+
+        @Action('getAllUserCriteriaFilter') getAllUserCriteriaFilterAction: any;
+        @Action('updateUserCriteriaFilter') updateUserCriteriaFilterAction: any;
+        @Action('revokeUserCriteriaFilter') revokeUserCriteriaFilterAction: any;
 
         beforeDeleteAlertData: AlertData = {...emptyAlertData};
         userCriteriaGridHeaders: object[] = [
@@ -148,11 +152,18 @@
 
         unassignedUsers: User[] = [];
         assignedUsers: User[] = [];
-        criteriaEditorDialogData: CriterionLibraryEditorDialogData = {...emptyCriterionLibraryEditorDialogData};
-        selectedUser: User = {...emptyUser};
+
+        assignedUsersCriteriaFilter: UserCriteriaFilter[];
+        unassignedUsersCriteriaFilter: UserCriteriaFilter[];
+
+        criteriaFilterEditorDialogData: CriterionFilterEditorDialogData = {...emptyCriterionFilterEditorDialogData};
+        selectedUser: UserCriteriaFilter = {...emptyUserCriteriaFilter};
         uuidNIL: string = getBlankGuid();
 
         created() {
+            this.criteriaFilterEditorDialogData = {...emptyCriterionFilterEditorDialogData};
+            this.unassignedUsersCriteriaFilter =  [{...emptyUserCriteriaFilter}];
+            this.assignedUsersCriteriaFilter = [{...emptyUserCriteriaFilter}];
             this.getAllUserCriteriaAction();
         }
 
@@ -160,62 +171,88 @@
         onUserCriteriaChanged() {
             this.unassignedUsers = this.stateUsers.filter((user: User) => !user.hasInventoryAccess);
             this.assignedUsers = this.stateUsers.filter((user: User) => user.hasInventoryAccess);
+
+            this.unassignedUsersCriteriaFilter =  [{...emptyUserCriteriaFilter}];
+            this.unassignedUsers.forEach((value) => {
+                var tempL : UserCriteriaFilter = {userId : value.id, 
+                userName: value.username, 
+                hasAccess: value.hasInventoryAccess, 
+                hasCriteria: false, 
+                criteria: '', 
+                criteriaId: ''};
+                this.unassignedUsersCriteriaFilter.push(tempL);
+            });
+            this.unassignedUsersCriteriaFilter.shift(); // removes the 1st element, which is always bank in this case
             this.$forceUpdate();
         }
 
-        onEditCriteria(user: User) {
-            this.selectedUser = user;
+        @Watch('stateUsersCriteriaFilter')
+        onUserCriteriaFilterChanged() {
+            this.assignedUsersCriteriaFilter = this.stateUsersCriteriaFilter;
+            this.$forceUpdate();
+        }
 
-            // TODO: use actual criterion library object id
-            this.criteriaEditorDialogData = {
+        mounted() {
+            this.getAllUserCriteriaFilterAction();
+        }
+
+        onEditCriteria(userFilter: UserCriteriaFilter) {
+            this.selectedUser = userFilter;
+            var currentUser = this.stateUsers.filter((user: User) => user.id == userFilter.userId)[0];
+
+            this.criteriaFilterEditorDialogData = {
                 showDialog: true,
-                libraryId: user.criterionLibrary.id
+                userId: currentUser.id,
+                criteriaId: userFilter.criteriaId,
+                criteria: userFilter.criteria,
+                userName: currentUser.username,
+                hasCriteria: userFilter.hasCriteria,
+                hasAccess: userFilter.hasAccess
             };
         }
 
-        onSubmitCriteria(criterionLibrary: CriterionLibrary) {
-            this.criteriaEditorDialogData = {...emptyCriterionLibraryEditorDialogData};
-
-            if (!isNil(criterionLibrary) && this.selectedUser.id !== getBlankGuid()) {
-                const userCriteria = {
-                    ...this.selectedUser,
-                    criterionLibrary,
-                    hasAccess: true,
-                    hasCriteria: true
-                };
-                this.setUserCriteriaAction({userCriteria});
+        onSubmitCriteria(userCriteriaFilter: UserCriteriaFilter) {
+            this.criteriaFilterEditorDialogData = {...emptyCriterionFilterEditorDialogData};
+            if(userCriteriaFilter != null){
+                if(userCriteriaFilter.criteriaId == ''){
+                userCriteriaFilter.criteriaId = getNewGuid();
             }
-
-            this.selectedUser = {...emptyUser};
+            this.updateUserCriteriaFilterAction({userCriteriaFilter : userCriteriaFilter});
+            }
+            
+            this.selectedUser = {...emptyUserCriteriaFilter};
         }
 
-        onRevokeAccess(targetUser: User) {
-            const userCriteria = {
+        onRevokeAccess(targetUser: UserCriteriaFilter) {
+            const userCriteriaFilter = {
                 ...targetUser,
                 criteria: undefined,
                 hasAccess: false,
                 hasCriteria: false
             };
-            this.setUserCriteriaAction({userCriteria});
+            this.revokeUserCriteriaFilterAction({userCriteriaId : userCriteriaFilter.criteriaId});
         }
 
-        onGiveUnrestrictedAccess(targetUser: User) {
-            const userCriteria = {
+        onGiveUnrestrictedAccess(targetUser: UserCriteriaFilter) {
+            const userFilterCriteria = {
                 ...targetUser,
-                criteria: undefined,
+                criteria: '',
                 hasAccess: true,
                 hasCriteria: false
             };
-            this.setUserCriteriaAction({userCriteria});
+            if(userFilterCriteria.criteriaId == ''){
+                userFilterCriteria.criteriaId = getNewGuid();
+            }
+            this.updateUserCriteriaFilterAction({userCriteriaFilter : userFilterCriteria});
         }
 
-        onDeleteUser(user: User) {
+        onDeleteUser(user: UserCriteriaFilter) {
             this.selectedUser = user;
 
             this.beforeDeleteAlertData = {
                 choice: true,
                 heading: 'Delete User',
-                message: `Are you sure you want to delete user ${this.selectedUser.username}?`,
+                message: `Are you sure you want to delete user ${this.selectedUser.userName}?`,
                 showDialog: true
             };
         }
@@ -223,9 +260,10 @@
         onSubmitDeleteUserResponse(doDelete: boolean) {
             this.beforeDeleteAlertData = {...emptyAlertData};
 
-            if (doDelete && !itemsAreEqual(this.selectedUser, emptyUser)) {
-                this.deleteUserAction({user: this.selectedUser.username})
-                    .then(() => this.selectedUser = {...emptyUser});
+            if (doDelete && !itemsAreEqual(this.selectedUser, emptyUserCriteriaFilter)) {
+
+                this.deleteUserAction({userId: this.selectedUser.userId})
+                    .then(() => this.selectedUser = {...emptyUserCriteriaFilter});
             }
         }
     }

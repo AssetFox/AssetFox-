@@ -4,14 +4,19 @@
       <v-card-text>
         <v-layout justify-center column>
           <div>
-            <CriterionLibraryEditor :dialogLibraryId="dialogData.libraryId"
-                                    @submit="onSubmitSelectedCriterionLibrary" />
+            <v-layout justify-center>
+        <v-flex xs10>
+          <CriteriaEditor :criteriaEditorData="criteriaEditorData"
+                          @submitCriteriaEditorResult="onSubmitCriteriaEditorResult"/>
+        </v-flex>
+      </v-layout>
           </div>
         </v-layout>
       </v-card-text>
       <v-card-actions>
         <v-layout justify-space-between row>
-          <v-btn :disabled="stateSelectedCriterionLibrary.id === uuidNIL || !stateSelectedCriterionIsValid"
+          <!-- <v-btn :disabled="stateSelectedCriterionLibrary.id === uuidNIL || !stateSelectedCriterionIsValid" -->
+            <v-btn
                  class="ara-blue-bg white--text"
                  @click="onBeforeSubmit(true)">
             Save
@@ -32,7 +37,7 @@
 import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {Action, State} from 'vuex-class';
-import {CriterionLibraryEditorDialogData} from '../models/modals/criterion-library-editor-dialog-data';
+import {CriterionFilterEditorDialogData} from '../models/modals/criterion-filter-editor-dialog-data';
 import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
 import {hasValue} from '@/shared/utils/has-value-util';
 import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
@@ -41,26 +46,32 @@ import {clone} from 'ramda';
 import {hasUnsavedChangesCore} from '@/shared/utils/has-unsaved-changes-helper';
 import Alert from '@/shared/modals/Alert.vue';
 import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
+import CriteriaEditor from '@/shared/components/CriteriaEditor.vue';
+import {
+  CriteriaEditorData,
+  CriteriaEditorResult,
+  emptyCriteriaEditorData
+} from '@/shared/models/iAM/criteria';
+import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 
 @Component({
-  components: {CriterionLibraryEditor, HasUnsavedChangesAlert: Alert}
+  components: {CriterionLibraryEditor, HasUnsavedChangesAlert: Alert, CriteriaEditor}
 })
-export default class CriterionLibraryEditorDialog extends Vue {
-  @Prop() dialogData: CriterionLibraryEditorDialogData;
+export default class CriterionFilterEditorDialog extends Vue {
+  @Prop() dialogData: CriterionFilterEditorDialogData;
 
-  @State(state => state.criterionModule.criterionLibraries) stateCriterionLibraries: CriterionLibrary[];
-  @State(state => state.criterionModule.selectedCriterionLibrary) stateSelectedCriterionLibrary: CriterionLibrary;
-  @State(state => state.criterionModule.selectedCriterionIsValid) stateSelectedCriterionIsValid: boolean;
+  @Action('updateUserCriteriaFilter') updateUserCriteriaFilterAction: any;
 
-  @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-  @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
-  @Action('setSelectedCriterionIsValid') setSelectedCriterionIsValidAction: any;
-  @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-
-  criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary = clone(emptyCriterionLibrary);
   uuidNIL: string = getBlankGuid();
   hasUnsavedChanges: boolean = false;
   hasUnsavedChangesAlertData: AlertData = clone(emptyAlertData);
+
+  resultForParentComponent: UserCriteriaFilter;
+
+   criteriaEditorData: CriteriaEditorData = {
+    ...emptyCriteriaEditorData,
+    isLibraryContext: true
+  };
 
   @Watch('dialogData')
   onDialogDataChanged() {
@@ -68,11 +79,12 @@ export default class CriterionLibraryEditorDialog extends Vue {
     const criteriaEditorCard: HTMLCollection = document.getElementsByClassName('criteria-editor-card') as HTMLCollection;
 
     if (this.dialogData.showDialog) {
-      if (!hasValue(this.stateCriterionLibraries)) {
-        this.getCriterionLibrariesAction();
-      }
-
-      this.setSelectedCriterionIsValidAction({isValid: false});
+    
+    this.criteriaEditorData = {
+        ...this.criteriaEditorData,
+        mergedCriteriaExpression: this.dialogData.criteria,
+        isLibraryContext: true
+        };
 
       if (hasValue(htmlTag)) {
         htmlTag[0].setAttribute('style', 'overflow:hidden;');
@@ -88,17 +100,21 @@ export default class CriterionLibraryEditorDialog extends Vue {
     }
   }
 
-  @Watch('criterionLibraryEditorSelectedCriterionLibrary')
-  onCriterionLibraryEditorSelectedCriterionLibraryChanged() {
-    this.hasUnsavedChanges = hasUnsavedChangesCore(
-        'criterion-library', this.criterionLibraryEditorSelectedCriterionLibrary, this.stateSelectedCriterionLibrary
-    );
-  }
+    onSubmitCriteriaEditorResult(result: CriteriaEditorResult) {
+        this.canUpdateOrCreate = result.validated;
 
-  onSubmitSelectedCriterionLibrary(criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary) {
-    this.criterionLibraryEditorSelectedCriterionLibrary = clone(criterionLibraryEditorSelectedCriterionLibrary);
-  }
+        if (result.validated) {
 
+        var tempL : UserCriteriaFilter = {userId : this.dialogData.userId, 
+                userName: this.dialogData.userName, 
+                hasAccess: true, 
+                hasCriteria: true, 
+                criteria: result.criteria, 
+                criteriaId: this.dialogData.criteriaId}; 
+        this.resultForParentComponent = tempL;
+        }
+    }
+    
   onBeforeSubmit(submit: boolean) {
     if (this.hasUnsavedChanges) {
       this.onShowHasUnsavedChangesAlert();
@@ -122,9 +138,11 @@ export default class CriterionLibraryEditorDialog extends Vue {
 
   onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.stateSelectedCriterionLibrary);
+      this.dialogData.showDialog = false;
+      this.$emit('submitCriteriaEditorDialogResult', this.resultForParentComponent);
     } else {
-      this.$emit('submit', null);
+      this.dialogData.showDialog = false;
+      this.$emit('submitCriteriaEditorDialogResult', null);
     }
   }
 }

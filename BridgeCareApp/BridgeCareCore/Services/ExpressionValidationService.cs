@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
@@ -128,7 +129,7 @@ namespace BridgeCareCore.Services
             };
         }
 
-        public CriterionValidationResult ValidateCriterion(string mergedCriteriaExpression)
+        public CriterionValidationResult ValidateCriterion(string mergedCriteriaExpression, UserCriteriaDTO currentUserCriteriaFilter)
         {
             var expression = mergedCriteriaExpression.Replace("|", "'").ToUpper();
             /*expression = CheckAttributes(expression);
@@ -157,7 +158,7 @@ namespace BridgeCareCore.Services
                 return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = e.Message };
             }
 
-            return GetResultsCount(expression);
+            return GetResultsCount(expression, currentUserCriteriaFilter);
         }
 
         private void CheckAttributes(string target)
@@ -183,20 +184,29 @@ namespace BridgeCareCore.Services
             throw new InvalidOperationException("Unsupported Attribute " + target.Substring(start + 1, end - 1));
         }
 
-        public CriterionValidationResult GetResultsCount(string expression)
+        public CriterionValidationResult GetResultsCount(string expression, UserCriteriaDTO currentUserCriteriaFilter)
         {
             if (string.IsNullOrEmpty(expression))
             {
                 _log.Error("There is no criteria created");
                 return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = "There is no criterion expression." };
             }
-
             //oracle chokes on non-space whitespace
             var whiteSpaceMechanic = new Regex(@"\s+");
+
+            // Appending the criteria filtering clause for non-admin users
+            if (currentUserCriteriaFilter.HasCriteria)
+            {
+                currentUserCriteriaFilter.Criteria = "(" + currentUserCriteriaFilter.Criteria + ")";
+                
+                expression += $" AND { currentUserCriteriaFilter.Criteria }";
+            }
+
             // modify the expression replacing all special characters and white space
             var modifiedExpression = whiteSpaceMechanic.Replace(expression.Replace("[", "").Replace("]", "").Replace("@", ""), " ");
             // parameterize the predicate and add it to the select
             var parameterizedData = ParameterizeExpression(modifiedExpression);
+
             var strSelect = $"SELECT COUNT(*) FROM SECTION_13 INNER JOIN SEGMENT_13_NS0 ON SECTION_13.SECTIONID = SEGMENT_13_NS0.SECTIONID WHERE {parameterizedData.ParameterString}";
             // create a sql connection
             using var connection = _unitOfWork.LegacyConnection;

@@ -606,7 +606,7 @@ export default class Scenarios extends Vue {
     const scenario: Scenario = {
       ...this.shareScenarioDialogData.scenario,
       users: []
-    }
+    };
 
     this.shareScenarioDialogData = clone(emptyShareScenarioDialogData);
 

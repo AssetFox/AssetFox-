@@ -6,6 +6,7 @@
         {
             public const string Admin = "UserIsAdmin";
             public const string AdminOrDistrictEngineer = "UserIsAdminOrDistrictEngineer";
+            public const string BAMSAdmin = "PD-BAMS-Administrator";
         }
     }
 }

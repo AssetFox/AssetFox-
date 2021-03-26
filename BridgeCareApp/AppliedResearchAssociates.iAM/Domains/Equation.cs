@@ -40,12 +40,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
                 if (curve == null || previousAge <= 0 || actualAge < previousAge)
                 {
-                    var value = ValueVersusAge.Interpolate(actualAge);
-                    if(value == 4.167)
-                    {
-                        var test = 0;
-                    }
-                    return value;
+                    return ValueVersusAge.Interpolate(actualAge);
                 }
                 else
                 {
@@ -60,22 +55,12 @@ namespace AppliedResearchAssociates.iAM.Domains
                     {
                         var shiftFactor = apparentPreviousAge / previousAge;
                         var shiftedAge = actualAge * shiftFactor;
-                        var value1 = ValueVersusAge.Interpolate(shiftedAge);
-                        if (value1 == 4.167)
-                        {
-                            var test = 0;
-                        }
-                        return value1;
+                        return ValueVersusAge.Interpolate(shiftedAge);
                     }
 
                     var ageDifference = actualAge - previousAge;
                     var apparentAge = apparentPreviousAge + ageDifference;
-                    var value2 = ValueVersusAge.Interpolate(apparentAge);
-                    if (value2 == 4.167)
-                    {
-                        var test = 0;
-                    }
-                    return value2;
+                    return ValueVersusAge.Interpolate(apparentAge);
                 }
             }
 

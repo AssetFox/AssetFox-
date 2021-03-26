@@ -13,5 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public string ReportTypeName { get; set; }
         public string Result { get; set; }
         public DateTime? ExpirationDate { get; set; }
+
+        public virtual SimulationEntity Simulation { get; set; }
     }
 }

@@ -1484,6 +1484,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             modelBuilder.Entity<ReportIndexEntity>(entity =>
             {
                 entity.Property(e => e.ReportTypeName).IsRequired();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.SimulationReports)
+                    .HasForeignKey(d => d.SimulationID)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

@@ -8,6 +8,6 @@ namespace BridgeCareCore.Interfaces.SummaryReport
 {
     public interface IBridgeDataForSummaryReport
     {
-        WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, SortedSet<PennDotReportAEntity> pennDotReportAData);
+        WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData);
     }
 }

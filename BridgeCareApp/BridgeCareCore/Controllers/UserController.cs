@@ -12,10 +12,10 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public UserController(UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+            _unitOfWork = unitOfDataPersistenceWork ??
                                          throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
 
         [HttpGet]
@@ -25,7 +25,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.UserRepo.GetAllUsers();
+                var result = await _unitOfWork.UserRepo.GetAllUsers();
                 return Ok(result);
             }
             catch (Exception e)

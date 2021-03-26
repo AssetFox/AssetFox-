@@ -9,7 +9,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
-using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -19,63 +18,55 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public DeficientConditionGoalRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+        public DeficientConditionGoalRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public void CreateDeficientConditionGoalLibrary(string name, Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             var deficientConditionGoalLibraryEntity = new DeficientConditionGoalLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
-            _unitOfDataPersistenceWork.Context.DeficientConditionGoalLibrary.Add(deficientConditionGoalLibraryEntity);
+            _unitOfWork.Context.AddEntity(deficientConditionGoalLibraryEntity);
 
-            _unitOfDataPersistenceWork.Context.DeficientConditionGoalLibrarySimulation.Add(new DeficientConditionGoalLibrarySimulationEntity
+            _unitOfWork.Context.AddEntity(new DeficientConditionGoalLibrarySimulationEntity
             {
                 DeficientConditionGoalLibraryId = deficientConditionGoalLibraryEntity.Id,
                 SimulationId = simulationId
             });
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
         }
 
         public void CreateDeficientConditionGoals(List<DeficientConditionGoal> deficientConditionGoals, Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _unitOfDataPersistenceWork.Context.Simulation
+            var simulationEntity = _unitOfWork.Context.Simulation
                 .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
                 .Single(_ => _.Id == simulationId);
 
-            var attributeNames = deficientConditionGoals.Select(_ => _.Attribute.Name).Distinct().ToList();
-            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute.Where(_ => attributeNames.Contains(_.Name)).ToList();
-
-            if (!attributeEntities.Any())
+            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
+            var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
+            if (!deficientConditionGoals.All(_ => attributeNames.Contains(_.Attribute.Name)))
             {
-                throw new RowNotInTableException("Could not find matching attributes for given performance curves.");
-            }
-
-            var attributeNamesFromDataSource = attributeEntities.Select(_ => _.Name).ToList();
-            if (!attributeNames.All(ruleName => attributeNamesFromDataSource.Contains(ruleName)))
-            {
-                var attributeNamesNotFound = attributeNames.Except(attributeNamesFromDataSource).ToList();
-                if (attributeNamesNotFound.Count() == 1)
+                var missingAttributes =
+                    deficientConditionGoals.Select(_ => _.Attribute.Name).Except(attributeNames).ToList();
+                if (missingAttributes.Count == 1)
                 {
-                    throw new RowNotInTableException($"No attribute found having name {attributeNamesNotFound[0]}.");
+                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
                 }
 
                 throw new RowNotInTableException(
-                    $"No attributes found found having names: {string.Join(", ", attributeNamesNotFound)}.");
+                    $"No attributes found having the names: {string.Join(", ", missingAttributes)}.");
             }
 
             var deficientConditionGoalEntities = deficientConditionGoals
@@ -83,16 +74,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     attributeEntities.Single(__ => __.Name == _.Attribute.Name).Id))
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.DeficientConditionGoal.AddRange(deficientConditionGoalEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(deficientConditionGoalEntities);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.AddAll(deficientConditionGoalEntities);
 
             if (deficientConditionGoals.Any(_ => !_.Criterion.ExpressionIsBlank))
             {
@@ -101,19 +83,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.Criterion.Expression, _ => _)
                     .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
 
-                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(deficientIdsPerExpression,
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(deficientIdsPerExpression,
                     DataPersistenceConstants.CriterionLibraryJoinEntities.DeficientConditionGoal, simulationEntity.Name);
             }
         }
 
         public Task<List<DeficientConditionGoalLibraryDTO>> DeficientConditionGoalLibrariesWithDeficientConditionGoals()
         {
-            if (!_unitOfDataPersistenceWork.Context.DeficientConditionGoalLibrary.Any())
+            if (!_unitOfWork.Context.DeficientConditionGoalLibrary.Any())
             {
                 return Task.Factory.StartNew(() => new List<DeficientConditionGoalLibraryDTO>());
             }
 
-            return Task.Factory.StartNew(() => _unitOfDataPersistenceWork.Context.DeficientConditionGoalLibrary
+            return Task.Factory.StartNew(() => _unitOfWork.Context.DeficientConditionGoalLibrary
                 .Include(_ => _.DeficientConditionGoals)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.DeficientConditionGoals)
@@ -128,12 +110,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (simulationId != Guid.Empty)
             {
-                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
                     throw new RowNotInTableException($"No simulation found having id {dto.Id}");
                 }
 
-                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ =>
+                if (!_unitOfWork.Context.Simulation.Any(_ =>
                     _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
@@ -146,22 +128,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
         {
-            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var deficientConditionGoalLibraryEntity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.Upsert(deficientConditionGoalLibraryEntity, dto.Id, userEntity?.Id);
+            _unitOfWork.Context.Upsert(deficientConditionGoalLibraryEntity, dto.Id, userEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
-                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
                     throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                 }
 
-                _unitOfDataPersistenceWork.Context.DeleteEntity<DeficientConditionGoalLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
+                _unitOfWork.Context.DeleteEntity<DeficientConditionGoalLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
 
-                _unitOfDataPersistenceWork.Context.AddEntity(
+                _unitOfWork.Context.AddEntity(
                     new DeficientConditionGoalLibrarySimulationEntity
                     {
                         DeficientConditionGoalLibraryId = dto.Id,
@@ -173,7 +155,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertOrDeleteDeficientConditionGoals(List<DeficientConditionGoalDTO> deficientConditionGoals,
             Guid libraryId, UserInfoDTO userInfo)
         {
-            if (!_unitOfDataPersistenceWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId))
+            if (!_unitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId))
             {
                 throw new RowNotInTableException($"No deficient condition goal library found having id {libraryId}.");
             }
@@ -183,9 +165,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new InvalidOperationException("All deficient condition goals must have an attribute.");
             }
 
-            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
+            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
-            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute.ToList();
+            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
             var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
             if (!deficientConditionGoals.All(_ => attributeNames.Contains(_.Attribute)))
             {
@@ -205,7 +187,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entityIds = deficientConditionGoalEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfDataPersistenceWork.Context.DeficientConditionGoal
+            var existingEntityIds = _unitOfWork.Context.DeficientConditionGoal
                 .Where(_ => _.DeficientConditionGoalLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
@@ -219,14 +201,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(deficientConditionGoalEntities, predicatesPerCrudOperation, userEntity?.Id);
+                _unitOfWork.Context.UpsertOrDelete(deficientConditionGoalEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(deficientConditionGoalEntities, predicatesPerCrudOperation, userEntity?.Id);
+                _unitOfWork.Context.BulkUpsertOrDelete(deficientConditionGoalEntities, predicatesPerCrudOperation, userEntity?.Id);
             }
 
-            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryDeficientConditionGoalEntity>(_ =>
+            _unitOfWork.Context.DeleteAll<CriterionLibraryDeficientConditionGoalEntity>(_ =>
                 _.DeficientConditionGoal.DeficientConditionGoalLibraryId == libraryId);
 
             if (deficientConditionGoals.Any((_ =>
@@ -242,18 +224,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             DeficientConditionGoalId = _.Id
                         }).ToList();
 
-                _unitOfDataPersistenceWork.Context.AddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
             }
         }
 
         public void DeleteDeficientConditionGoalLibrary(Guid libraryId)
         {
-            if (!_unitOfDataPersistenceWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId))
+            if (!_unitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId))
             {
                 return;
             }
 
-            _unitOfDataPersistenceWork.Context.DeleteEntity<DeficientConditionGoalLibraryEntity>(_ => _.Id == libraryId);
+            _unitOfWork.Context.DeleteEntity<DeficientConditionGoalLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

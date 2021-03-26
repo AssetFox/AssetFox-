@@ -96,13 +96,13 @@ order by networkid
                                     numberAttribute.Minimum = reader.GetNullableDouble(5);
                                     numberAttribute.Maximum = reader.GetNullableDouble(6);
 
-                                    if (numberAttribute.Minimum > numberAttribute.Maximum)
+                                    /*if (numberAttribute.Minimum > numberAttribute.Maximum)
                                     {
                                         /*var swap = numberAttribute.Minimum;
                                         numberAttribute.Minimum = numberAttribute.Maximum;
-                                        numberAttribute.Maximum = swap;*/
+                                        numberAttribute.Maximum = swap;#1#
                                         numberAttribute.Maximum = null;
-                                    }
+                                    }*/
                                 }
                                 break;
 

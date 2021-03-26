@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
-using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
@@ -17,42 +16,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AttributeRepository : IAttributeRepository
     {
-        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
-
-        public AttributeRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
-        {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-        }
+        public AttributeRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+            _unitOfWork = unitOfWork ??
+                                         throw new ArgumentNullException(nameof(unitOfWork));
 
         public void UpsertAttributes(List<DataMinerAttribute> attributes)
         {
-            if (IsRunningFromXUnit)
-            {
-                attributes.ForEach(_ =>
-                {
-                    var entity = _.ToEntity();
-                    _unitOfDataPersistenceWork.Context.Upsert(entity, entity.Id);
-                });
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsertOrUpdate(attributes.Select(_ => _.ToEntity()).ToList());
-            }
+            var attributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
+            var existingAttributeIds = _unitOfWork.Context.Attribute.Select(_ => _.Id).ToList();
 
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            var entitiesToUpdate = attributeEntities.Where(_ => existingAttributeIds.Contains(_.Id)).ToList();
+            var entitiesToAdd = attributeEntities.Where(_ => !existingAttributeIds.Contains(_.Id)).ToList();
+
+            _unitOfWork.Context.UpdateAll(entitiesToUpdate, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.AddAll(entitiesToAdd, _unitOfWork.UserEntity?.Id);
         }
 
         public void JoinAttributesWithEquationsAndCriteria(Explorer explorer)
         {
             var calculatedFieldNames = explorer.CalculatedFields.Select(_ => _.Name).ToList();
 
-            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute
+            var attributeEntities = _unitOfWork.Context.Attribute
                 .Where(_ => calculatedFieldNames.Contains(_.Name)).ToList();
 
-            var existingJoins = _unitOfDataPersistenceWork.Context.AttributeEquationCriterionLibrary
+            var existingJoins = _unitOfWork.Context.AttributeEquationCriterionLibrary
                 .Include(_ => _.Attribute)
                 .Include(_ => _.Equation)
                 .Include(_ => _.CriterionLibrary)
@@ -70,27 +59,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 calculatedField.ValueSources.ForEach(valueSource =>
                 {
                     var joinTuple = (attributeName: attributeEntity.Name, equationExpression: valueSource.Equation.Expression, criterionExpression: valueSource.Criterion.Expression ?? string.Empty);
-
-                    if (!existingJoins.Contains(joinTuple))
+                    var doesNotHaveCurrentTuple = !existingJoins.Any(_ => _.attributeName == joinTuple.attributeName &&
+                                                                          _.equationExpression == joinTuple.equationExpression &&
+                                                                          _.criterionExpression == joinTuple.criterionExpression);
+                    if (doesNotHaveCurrentTuple)
                     {
                         var newJoinEntity = new AttributeEquationCriterionLibraryEntity { AttributeId = attributeEntity.Id, };
 
-                        var equationEntity =
-                            _unitOfDataPersistenceWork.Context.Equation.SingleOrDefault(_ =>
-                                _.Expression == valueSource.Equation.Expression);
-
-                        if (equationEntity == null)
-                        {
-                            equationEntity = valueSource.Equation.ToEntity();
-                            equationEntities.Add(equationEntity);
-                        }
+                        var equationEntity = valueSource.Equation.ToEntity();
+                        equationEntities.Add(equationEntity);
 
                         newJoinEntity.EquationId = equationEntity.Id;
 
                         if (!valueSource.Criterion.ExpressionIsBlank)
                         {
-                            var criterionLibraryEntity = _unitOfDataPersistenceWork.Context.CriterionLibrary.Any(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
-                                ? _unitOfDataPersistenceWork.Context.CriterionLibrary.Single(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression)
+                            var criterionLibraryEntity = _unitOfWork.Context.CriterionLibrary
+                                .Any(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression && _.Name.Contains("Explorer Attribute Criterion Library"))
+                                ? _unitOfWork.Context.CriterionLibrary
+                                    .First(_ => _.MergedCriteriaExpression == valueSource.Criterion.Expression && _.Name.Contains("Explorer Attribute Criterion Library"))
                                 : GetCriterionLibraryEntity(valueSource.Criterion.Expression, criterionLibraryEntities);
 
                             newJoinEntity.CriterionLibraryId = criterionLibraryEntity.Id;
@@ -103,55 +89,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (equationEntities.Any())
             {
-                _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntities);
+                _unitOfWork.Context.AddAll(equationEntities, _unitOfWork.UserEntity?.Id);
             }
 
             if (criterionLibraryEntities.Any())
             {
-                _unitOfDataPersistenceWork.CriterionLibraryRepo.CreateCriterionLibraries(criterionLibraryEntities);
+                _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
             }
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.AttributeEquationCriterionLibrary.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private CriterionLibraryEntity GetCriterionLibraryEntity(string expression, List<CriterionLibraryEntity> criterionLibraryEntities)
         {
-            var criterionLibraryEntity = _unitOfDataPersistenceWork.Context.CriterionLibrary
-                .SingleOrDefault(_ => _.MergedCriteriaExpression == expression && _.Name.Contains("Explorer Attribute"));
+            var criterionLibraryNames = _unitOfWork.Context.CriterionLibrary
+                .Where(_ => _.Name.Contains("Explorer Attribute"))
+                .Select(_ => _.Name).ToList();
 
-            if (criterionLibraryEntity == null)
+            var newCriterionLibraryName = $"Explorer Attribute Criterion Library";
+            if (criterionLibraryNames.Contains(newCriterionLibraryName))
             {
-                var criterionLibraryNames = _unitOfDataPersistenceWork.Context.CriterionLibrary
-                    .Where(_ => _.Name.Contains("Explorer Attribute"))
-                    .Select(_ => _.Name).ToList();
-
-                var newCriterionLibraryName = $"Explorer Attribute Criterion Library";
-                if (criterionLibraryNames.Contains(newCriterionLibraryName))
+                var version = 2;
+                while (criterionLibraryNames.Contains($"{newCriterionLibraryName} v{version}"))
                 {
-                    var version = 2;
-                    while (criterionLibraryNames.Contains($"{newCriterionLibraryName} v{version}"))
-                    {
-                        version++;
-                    }
-                    newCriterionLibraryName = $"{newCriterionLibraryName} v{version}";
+                    version++;
                 }
-
-                criterionLibraryEntity = new CriterionLibraryEntity
-                {
-                    Id = Guid.NewGuid(),
-                    Name = newCriterionLibraryName,
-                    MergedCriteriaExpression = expression
-                };
+                newCriterionLibraryName = $"{newCriterionLibraryName} v{version}";
             }
+
+            var criterionLibraryEntity = new CriterionLibraryEntity
+            {
+                Id = Guid.NewGuid(),
+                Name = newCriterionLibraryName,
+                MergedCriteriaExpression = expression
+            };
 
             criterionLibraryEntities.Add(criterionLibraryEntity);
 
@@ -160,12 +131,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Explorer GetExplorer()
         {
-            if (!_unitOfDataPersistenceWork.Context.Attribute.Any())
+            if (!_unitOfWork.Context.Attribute.Any())
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
 
-            var attributes = _unitOfDataPersistenceWork.Context.Attribute
+            var attributes = _unitOfWork.Context.Attribute
                 .Include(_ => _.AttributeEquationCriterionLibraryJoins)
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.AttributeEquationCriterionLibraryJoins)
@@ -216,13 +187,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Task<List<AttributeDTO>> Attributes()
         {
-            if (!_unitOfDataPersistenceWork.Context.Attribute.Any())
+            if (!_unitOfWork.Context.Attribute.Any())
             {
                 throw new RowNotInTableException("Found not attributes.");
             }
 
             return Task.Factory.StartNew(() =>
-                _unitOfDataPersistenceWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList());
+                _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList());
         }
     }
 }

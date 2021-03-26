@@ -313,7 +313,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid>("AnalysisMethodId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AttributeId")
+                    b.Property<Guid>("AttributeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CreatedBy")
@@ -824,9 +824,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid>("SectionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("SelectableTreatmentEntityId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("ShadowForAnyTreatment")
                         .HasColumnType("int");
 
@@ -844,8 +841,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasIndex("BudgetId");
 
                     b.HasIndex("SectionId");
-
-                    b.HasIndex("SelectableTreatmentEntityId");
 
                     b.HasIndex("SimulationId");
 
@@ -2650,7 +2645,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
                         .WithMany("Benefits")
                         .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AnalysisMethod");
+
+                    b.Navigation("Attribute");
 
                     b.Navigation("AnalysisMethod");
 
@@ -2839,10 +2839,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", null)
-                        .WithMany("CommittedProjects")
-                        .HasForeignKey("SelectableTreatmentEntityId");
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
                         .WithMany("CommittedProjects")
@@ -3577,6 +3573,305 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .HasForeignKey("TreatmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("SelectableTreatment");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", b =>
+                {
+                    b.Navigation("Benefit");
+
+                    b.Navigation("CriterionLibraryAnalysisMethodJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", b =>
+                {
+                    b.Navigation("AttributeDatumLocation");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", b =>
+                {
+                    b.Navigation("AggregatedResults");
+
+                    b.Navigation("AnalysisMethods");
+
+                    b.Navigation("AttributeData");
+
+                    b.Navigation("AttributeEquationCriterionLibraryJoins");
+
+                    b.Navigation("Benefits");
+
+                    b.Navigation("DeficientConditionGoals");
+
+                    b.Navigation("NumericAttributeValueHistories");
+
+                    b.Navigation("PerformanceCurves");
+
+                    b.Navigation("RemainingLifeLimits");
+
+                    b.Navigation("TextAttributeValueHistories");
+
+                    b.Navigation("TreatmentConsequences");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", b =>
+                {
+                    b.Navigation("BudgetAmounts");
+
+                    b.Navigation("BudgetPercentagePairs");
+
+                    b.Navigation("CommittedProjects");
+
+                    b.Navigation("CriterionLibraryBudgetJoin");
+
+                    b.Navigation("TreatmentBudgetJoins");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibraryEntity", b =>
+                {
+                    b.Navigation("BudgetLibrarySimulationJoins");
+
+                    b.Navigation("Budgets");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityEntity", b =>
+                {
+                    b.Navigation("BudgetPercentagePairs");
+
+                    b.Navigation("CriterionLibraryBudgetPriorityJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityLibraryEntity", b =>
+                {
+                    b.Navigation("BudgetPriorities");
+
+                    b.Navigation("BudgetPriorityLibrarySimulationJoins");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleEntity", b =>
+                {
+                    b.Navigation("CashFlowDistributionRules");
+
+                    b.Navigation("CriterionLibraryCashFlowRuleJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibraryEntity", b =>
+                {
+                    b.Navigation("CashFlowRuleLibrarySimulationJoins");
+
+                    b.Navigation("CashFlowRules");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", b =>
+                {
+                    b.Navigation("CommittedProjectConsequences");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEntity", b =>
+                {
+                    b.Navigation("ConditionalTreatmentConsequenceEquationJoin");
+
+                    b.Navigation("CriterionLibraryConditionalTreatmentConsequenceJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", b =>
+                {
+                    b.Navigation("AttributeEquationCriterionLibraryJoins");
+
+                    b.Navigation("CriterionLibraryAnalysisMethodJoins");
+
+                    b.Navigation("CriterionLibraryBudgetJoins");
+
+                    b.Navigation("CriterionLibraryBudgetPriorityJoins");
+
+                    b.Navigation("CriterionLibraryCashFlowRuleJoins");
+
+                    b.Navigation("CriterionLibraryDeficientConditionGoalJoins");
+
+                    b.Navigation("CriterionLibraryPerformanceCurveJoins");
+
+                    b.Navigation("CriterionLibraryRemainingLifeLimitJoins");
+
+                    b.Navigation("CriterionLibrarySelectableTreatmentJoins");
+
+                    b.Navigation("CriterionLibraryTargetConditionGoalJoins");
+
+                    b.Navigation("CriterionLibraryTreatmentConsequenceJoins");
+
+                    b.Navigation("CriterionLibraryTreatmentCostJoins");
+
+                    b.Navigation("CriterionLibraryTreatmentSupersessionJoins");
+
+                    b.Navigation("CriterionLibraryUserJoins");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalEntity", b =>
+                {
+                    b.Navigation("CriterionLibraryDeficientConditionGoalJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalLibraryEntity", b =>
+                {
+                    b.Navigation("DeficientConditionGoalLibrarySimulationJoins");
+
+                    b.Navigation("DeficientConditionGoals");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", b =>
+                {
+                    b.Navigation("AttributeEquationCriterionLibraryJoin");
+
+                    b.Navigation("ConditionalTreatmentConsequenceEquationJoin");
+
+                    b.Navigation("PerformanceCurveEquationJoin");
+
+                    b.Navigation("TreatmentCostEquationJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.FacilityEntity", b =>
+                {
+                    b.Navigation("Sections");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
+                {
+                    b.Navigation("AggregatedResults");
+
+                    b.Navigation("AssignedData");
+
+                    b.Navigation("MaintainableAssetLocation");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", b =>
+                {
+                    b.Navigation("Facilities");
+
+                    b.Navigation("MaintainableAssets");
+
+                    b.Navigation("NetworkRollupDetail");
+
+                    b.Navigation("Simulations");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEntity", b =>
+                {
+                    b.Navigation("CriterionLibraryPerformanceCurveJoin");
+
+                    b.Navigation("PerformanceCurveEquationJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibraryEntity", b =>
+                {
+                    b.Navigation("PerformanceCurveLibrarySimulationJoins");
+
+                    b.Navigation("PerformanceCurves");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitEntity", b =>
+                {
+                    b.Navigation("CriterionLibraryRemainingLifeLimitJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibraryEntity", b =>
+                {
+                    b.Navigation("RemainingLifeLimitLibrarySimulationJoins");
+
+                    b.Navigation("RemainingLifeLimits");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", b =>
+                {
+                    b.Navigation("CommittedProjects");
+
+                    b.Navigation("NumericAttributeValueHistories");
+
+                    b.Navigation("TextAttributeValueHistories");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", b =>
+                {
+                    b.Navigation("CriterionLibrarySelectableTreatmentJoin");
+
+                    b.Navigation("TreatmentBudgetJoins");
+
+                    b.Navigation("TreatmentConsequences");
+
+                    b.Navigation("TreatmentCosts");
+
+                    b.Navigation("TreatmentSchedulings");
+
+                    b.Navigation("TreatmentSupersessions");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", b =>
+                {
+                    b.Navigation("AnalysisMethod");
+
+                    b.Navigation("BudgetLibrarySimulationJoin");
+
+                    b.Navigation("BudgetPriorityLibrarySimulationJoin");
+
+                    b.Navigation("CashFlowRuleLibrarySimulationJoin");
+
+                    b.Navigation("CommittedProjects");
+
+                    b.Navigation("DeficientConditionGoalLibrarySimulationJoin");
+
+                    b.Navigation("InvestmentPlan");
+
+                    b.Navigation("PerformanceCurveLibrarySimulationJoin");
+
+                    b.Navigation("RemainingLifeLimitLibrarySimulationJoin");
+
+                    b.Navigation("SimulationAnalysisDetail");
+
+                    b.Navigation("SimulationOutput");
+
+                    b.Navigation("SimulationReportDetail");
+
+                    b.Navigation("SimulationUserJoins");
+
+                    b.Navigation("TargetConditionGoalLibrarySimulationJoin");
+
+                    b.Navigation("TreatmentLibrarySimulationJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalEntity", b =>
+                {
+                    b.Navigation("CriterionLibraryTargetConditionGoalJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalLibraryEntity", b =>
+                {
+                    b.Navigation("TargetConditionGoalLibrarySimulationJoins");
+
+                    b.Navigation("TargetConditionGoals");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentCostEntity", b =>
+                {
+                    b.Navigation("CriterionLibraryTreatmentCostJoin");
+
+                    b.Navigation("TreatmentCostEquationJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentLibraryEntity", b =>
+                {
+                    b.Navigation("TreatmentLibrarySimulationJoins");
+
+                    b.Navigation("Treatments");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentSupersessionEntity", b =>
+                {
+                    b.Navigation("CriterionLibraryTreatmentSupersessionJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", b =>
+                {
+                    b.Navigation("CriterionLibraryUserJoin");
+
+                    b.Navigation("SimulationUserJoins");
 
                     b.Navigation("SelectableTreatment");
                 });

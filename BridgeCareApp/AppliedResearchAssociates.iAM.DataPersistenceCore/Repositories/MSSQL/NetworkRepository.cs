@@ -17,14 +17,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class NetworkRepository : INetworkRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public NetworkRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public NetworkRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ??
+                                         throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateNetwork(DataAssignment.Networking.Network network, UserInfoDTO userInfo)
         {
+            // prevent EF from attempting to create the network's child entities (create them
+            // separately as part of a bulk insert)
+            var networkEntity = new NetworkEntity
+            {
+                Id = new Guid(DataPersistenceConstants.PennDotNetworkId),
+                Name = network.Name
+            };
+            _unitOfWork.Context.Upsert(networkEntity, networkEntity.Id);
+            _unitOfWork.Context.SaveChanges();
             var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             _unitOfDataPersistenceWork.Context.AddEntity(network.ToEntity(), userEntity?.Id);
@@ -37,23 +45,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
-            _unitOfDataPersistenceWork.Context.AddEntity(network.ToEntity(), userEntity?.Id);
+            _unitOfWork.Context.AddEntity(network.ToEntity(), userEntity?.Id);
 
             _unitOfDataPersistenceWork.MaintainableAssetRepo.CreateMaintainableAssets(network.Facilities.ToList(),
                 network.Id);
         }
 
+        public void CreateNetwork(Network network) =>
+            _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);
+
         public List<DataAssignment.Networking.Network> GetAllNetworks() =>
-            _unitOfDataPersistenceWork.Context.Network.Select(_ => _.ToDomain()).ToList();
+            _unitOfWork.Context.Network.Select(_ => _.ToDomain()).ToList();
 
         public Task<List<NetworkDTO>> Networks()
         {
-            if (!_unitOfDataPersistenceWork.Context.Network.Any())
+            if (!_unitOfWork.Context.Network.Any())
             {
                 return Task.Factory.StartNew(() => new List<NetworkDTO>());
             }
 
-            return Task.Factory.StartNew(() => _unitOfDataPersistenceWork.Context.Network
+            return Task.Factory.StartNew(() => _unitOfWork.Context.Network
                 .Include(_ => _.BenefitQuantifier)
                 .ThenInclude(_ => _.Equation)
                 .Select(_ => _.ToDto())
@@ -64,23 +75,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var penndotNetworkId = new Guid(DataPersistenceConstants.PennDotNetworkId);
 
-            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == penndotNetworkId))
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == penndotNetworkId))
             {
                 return null;
             }
 
-            return _unitOfDataPersistenceWork.Context.Network
+            return _unitOfWork.Context.Network
                 .Single(_ => _.Id == penndotNetworkId);
         }
 
         public bool CheckPennDotNetworkHasData()
         {
             var penndotNetworkId = new Guid(DataPersistenceConstants.PennDotNetworkId);
-            var facilityCount = _unitOfDataPersistenceWork.Context.Facility.Count(_ => _.NetworkId == penndotNetworkId);
-            var sectionCount = _unitOfDataPersistenceWork.Context.Section.Count(_ => _.Facility.NetworkId == penndotNetworkId);
-            var numericAttributeValueHistoryCount = _unitOfDataPersistenceWork.Context.NumericAttributeValueHistory
+            var facilityCount = _unitOfWork.Context.Facility.Count(_ => _.NetworkId == penndotNetworkId);
+            var sectionCount = _unitOfWork.Context.Section.Count(_ => _.Facility.NetworkId == penndotNetworkId);
+            var numericAttributeValueHistoryCount = _unitOfWork.Context.NumericAttributeValueHistory
                 .Count(_ => _.Section.Facility.NetworkId == penndotNetworkId);
-            var textAttributeValueHistoryCount = _unitOfDataPersistenceWork.Context.TextAttributeValueHistory
+            var textAttributeValueHistoryCount = _unitOfWork.Context.TextAttributeValueHistory
                 .Count(_ => _.Section.Facility.NetworkId == penndotNetworkId);
 
             return facilityCount > 0 && sectionCount > 0 && numericAttributeValueHistoryCount > 0 &&
@@ -89,31 +100,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Domains.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true)
         {
-            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == networkId))
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var networkEntity = _unitOfDataPersistenceWork.Context.Network
+            var networkEntity = _unitOfWork.Context.Network
                 .Single(_ => _.Id == networkId);
+
             if (areFacilitiesRequired)
             {
-                var facilityEntities = _unitOfDataPersistenceWork.Context.Facility
+                var facilityEntities = _unitOfWork.Context.Facility
                     .Where(_ => _.Network.Id == networkId).ToList();
 
                 if (facilityEntities.Any())
                 {
                     networkEntity.Facilities = ToHashSetExtension.ToHashSet(facilityEntities);
 
-                    var sectionEntities = _unitOfDataPersistenceWork.Context.Section
+                    var sectionEntities = _unitOfWork.Context.Section
                         .Where(_ => _.Facility.Network.Id == networkId).ToList();
 
                     if (sectionEntities.Any())
                     {
-                        var numericAttributeValueHistoryEntities = _unitOfDataPersistenceWork.Context.NumericAttributeValueHistory
+                        var numericAttributeValueHistoryEntities = _unitOfWork.Context.NumericAttributeValueHistory
                             .Where(_ => _.Section.Facility.Network.Id == networkId).ToList();
 
-                        var textAttributeValueHistoryEntities = _unitOfDataPersistenceWork.Context.TextAttributeValueHistory
+                        var textAttributeValueHistoryEntities = _unitOfWork.Context.TextAttributeValueHistory
                             .Where(_ => _.Section.Facility.Network.Id == networkId).ToList();
 
                         if (numericAttributeValueHistoryEntities.Any() || textAttributeValueHistoryEntities.Any())
@@ -122,7 +134,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             var textValueHistoryAttributeIds = textAttributeValueHistoryEntities.Select(_ => _.AttributeId).Distinct();
                             var attributeIds = numericValueHistoryAttributeIds.Union(textValueHistoryAttributeIds);
 
-                            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute.Where(_ => attributeIds.Contains(_.Id)).ToList();
+                            var attributeEntities = _unitOfWork.Context.Attribute.Where(_ => attributeIds.Contains(_.Id)).ToList();
 
                             ForEachExtension.ForEach(numericAttributeValueHistoryEntities,
                                 entity => entity.Attribute = attributeEntities.Single(_ => _.Id == entity.AttributeId));
@@ -164,8 +176,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.Facility.ToList()
-                    .ForEach(_ => _unitOfDataPersistenceWork.Context.Entry(_).State = EntityState.Deleted);
+                _unitOfWork.Context.Facility.ToList()
+                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
             }
             else
             {
@@ -177,7 +189,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Connection.Open();
                 command.ExecuteNonQuery();
                 _unitOfWork.Connection.Close();*/
-                _unitOfDataPersistenceWork.Context.Database.ExecuteSqlRaw(
+                _unitOfWork.Context.Database.ExecuteSqlRaw(
                     "ALTER TABLE [dbo].[CommittedProject] DROP CONSTRAINT[FK_CommittedProject_Section_SectionId];" +
                     "ALTER TABLE [dbo].[NumericAttributeValueHistory] DROP CONSTRAINT[FK_NumericAttributeValueHistory_Section_SectionId];" +
                     "ALTER TABLE [dbo].[TextAttributeValueHistory] DROP CONSTRAINT[FK_TextAttributeValueHistory_Section_SectionId];" +
@@ -198,7 +210,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     "ALTER TABLE [dbo].[Section] WITH NOCHECK ADD CONSTRAINT[FK_Section_Facility_FacilityId] FOREIGN KEY([FacilityId]) REFERENCES[dbo].[Facility]([Id]) ON DELETE CASCADE; ALTER TABLE[dbo].[Section] CHECK CONSTRAINT[FK_Section_Facility_FacilityId];");
             }
 
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.SaveChanges();
         }
     }
 }

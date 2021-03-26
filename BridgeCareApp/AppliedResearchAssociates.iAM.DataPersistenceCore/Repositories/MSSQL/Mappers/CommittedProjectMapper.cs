@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
@@ -8,19 +7,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class CommittedProjectMapper
     {
-        public static CommittedProjectEntity ToEntity(this CommittedProject domain, Guid simulationId) =>
-            new CommittedProjectEntity
+        public static CommittedProjectEntity ToEntity(this CommittedProject domain, SimulationEntity simulation)
+        {
+            var budget =
+                simulation.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.Single(_ => _.Name == domain.Budget.Name);
+            var facility = simulation.Network.Facilities.Single(_ =>
+                _.Sections.Any(__ => $"{__.Name}{__.Area}" == $"{domain.Section.Name}{domain.Section.Area}"));
+            var section =
+                facility.Sections.Single(_ => $"{_.Name}{_.Area}" == $"{domain.Section.Name}{domain.Section.Area}");
+
+            return new CommittedProjectEntity
             {
                 Id = domain.Id,
-                SimulationId = simulationId,
-                BudgetId = domain.Budget.Id,
-                SectionId = domain.Section.Id,
+                SimulationId = simulation.Id,
+                BudgetId = budget.Id,
+                SectionId = section.Id,
                 Name = domain.Name,
                 ShadowForAnyTreatment = domain.ShadowForAnyTreatment,
                 ShadowForSameTreatment = domain.ShadowForSameTreatment,
                 Cost = domain.Cost,
                 Year = domain.Year
             };
+        }
 
         public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation)
         {

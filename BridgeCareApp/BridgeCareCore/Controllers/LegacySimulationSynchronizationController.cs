@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Logging;
-using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,20 +12,22 @@ namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LegacySimulationSynchronizationController : ControllerBase
+    public class LegacySimulationSynchronizationController : HubControllerBase
     {
-        private readonly IHubContext<BridgeCareHub> _hubContext;
         private readonly LegacySimulationSynchronizerService _legacySimulationSynchronizerService;
-        private readonly ILog _logger;
         private readonly IEsecSecurity _esecSecurity;
+        private readonly ILog _logger;
 
-        public LegacySimulationSynchronizationController(IHubContext<BridgeCareHub> hub,
-            LegacySimulationSynchronizerService legacySimulationSynchronizerService, ILog logger, IEsecSecurity esecSecurity)
+        public LegacySimulationSynchronizationController(
+            LegacySimulationSynchronizerService legacySimulationSynchronizerService, IEsecSecurity esecSecurity,
+            ILog logger, IHubContext<BridgeCareHub> hubContext) : base(hubContext)
         {
-            _hubContext = hub ?? throw new ArgumentNullException(nameof(hub));
             _legacySimulationSynchronizerService = legacySimulationSynchronizerService ??
                                                    throw new ArgumentNullException(
                                                        nameof(legacySimulationSynchronizerService));
+            _esecSecurity = esecSecurity ??
+                                                   throw new ArgumentNullException(
+                                                       nameof(esecSecurity));
             _logger = logger;
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
         }
@@ -38,25 +39,22 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
+                var userInfo = _esecSecurity.GetUserInformation(Request);
 
-                await _hubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastDataMigration", "Starting data migration...");
+                SendRealTimeMessage("BroadcastDataMigration", "Starting data migration...");
 
-                await _legacySimulationSynchronizerService.Synchronize(simulationId, userInfo);
+                await Task.Factory.StartNew(() =>
+                {
+                    _legacySimulationSynchronizerService.Synchronize(simulationId, userInfo.Name);
 
-                await _hubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastDataMigration", "Finished data migration...");
+                    SendRealTimeMessage("BroadcastDataMigration", "Finished data migration...");
+                });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _logger.Error($"{e.Message}::{e.StackTrace}");
+                _logger?.Error($"{e.Message}::{e.StackTrace}");
                 return StatusCode(500, $"Error => {e.Message}::{e.StackTrace}");
             }
         }

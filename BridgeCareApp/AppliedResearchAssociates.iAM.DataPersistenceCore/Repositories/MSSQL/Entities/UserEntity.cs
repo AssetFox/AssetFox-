@@ -19,6 +19,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual CriterionLibraryUserEntity CriterionLibraryUserJoin { get; set; }
 
+        public virtual UserCriteriaFilterEntity UserCriteriaFilterJoin { get; set; }
+
         public ICollection<SimulationUserEntity> SimulationUserJoins { get; set; }
     }
 }

@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new PerformanceCurveController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
+            _controller = new PerformanceCurveController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
         }
 
         public PerformanceCurveLibraryEntity TestPerformanceCurveLibrary { get; } = new PerformanceCurveLibraryEntity
@@ -53,18 +53,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         private void SetupForGet()
         {
-            _testHelper.UnitOfDataPersistenceWork.Context.PerformanceCurveLibrary.Add(TestPerformanceCurveLibrary);
-            var attribute = _testHelper.UnitOfDataPersistenceWork.Context.Attribute.First();
+            _testHelper.UnitOfWork.Context.PerformanceCurveLibrary.Add(TestPerformanceCurveLibrary);
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
             TestPerformanceCurve.AttributeId = attribute.Id;
-            _testHelper.UnitOfDataPersistenceWork.Context.PerformanceCurve.Add(TestPerformanceCurve);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.PerformanceCurve.Add(TestPerformanceCurve);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void SetupForUpsertOrDelete()
         {
             SetupForGet();
-            _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         [Fact]
@@ -179,7 +179,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                var performanceCurveLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.PerformanceCurveLibrary
+                var performanceCurveLibraryEntity = _testHelper.UnitOfWork.Context.PerformanceCurveLibrary
                     .Include(_ => _.PerformanceCurves)
                     .ThenInclude(_ => _.CriterionLibraryPerformanceCurveJoin)
                     .ThenInclude(_ => _.CriterionLibrary)
@@ -239,19 +239,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result.Result);
 
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == PerformanceCurveLibraryId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.PerformanceCurve.Any(_ => _.Id == PerformanceCurveId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.PerformanceCurveLibrarySimulation.Any(_ =>
+                Assert.True(!_testHelper.UnitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == PerformanceCurveLibraryId));
+                Assert.True(!_testHelper.UnitOfWork.Context.PerformanceCurve.Any(_ => _.Id == PerformanceCurveId));
+                Assert.True(!_testHelper.UnitOfWork.Context.PerformanceCurveLibrarySimulation.Any(_ =>
                     _.PerformanceCurveLibraryId == PerformanceCurveLibraryId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibraryPerformanceCurve.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibraryPerformanceCurve.Any(_ =>
                         _.PerformanceCurveId == PerformanceCurveId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.PerformanceCurveEquation.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.PerformanceCurveEquation.Any(_ =>
                         _.PerformanceCurveId == PerformanceCurveId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.Equation.Any(_ => _.Id == EquationId));
+                Assert.True(!_testHelper.UnitOfWork.Context.Equation.Any(_ => _.Id == EquationId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.Attribute.Any(_ => _.PerformanceCurves.Any()));
+                    !_testHelper.UnitOfWork.Context.Attribute.Any(_ => _.PerformanceCurves.Any()));
             }
             finally
             {

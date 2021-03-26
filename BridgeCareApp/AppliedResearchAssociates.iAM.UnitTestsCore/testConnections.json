@@ -1,6 +1,0 @@
-{
-  "ConnectionStrings": {
-    "BridgeCareConnex": "data source=23.100.121.85,1401;initial catalog=IAMv2Test;persist security info=True;user id=ppator1;password=GaS3WHBZ9F5K;MultipleActiveResultSets=True;App=EntityFramework",
-    "BridgeCareLegacyConnex": "data source=23.100.121.85,1401;initial catalog=BridgeCare_New;persist security info=True;user id=ppator1;password=GaS3WHBZ9F5K;MultipleActiveResultSets=True;App=EntityFramework"
-  }
-}

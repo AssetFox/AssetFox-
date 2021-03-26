@@ -31,14 +31,14 @@ export interface CriteriaValidationResult {
 export interface CriterionLibrary {
     id: string;
     name: string;
-    mergedCriteriaExpression: string;
+    mergedCriteriaExpression: string | null;
     description: string;
     owner?: string;
     shared?: boolean;
 }
 
 export interface CriteriaEditorData {
-    mergedCriteriaExpression: string;
+    mergedCriteriaExpression: string | null;
     isLibraryContext: boolean;
 }
 

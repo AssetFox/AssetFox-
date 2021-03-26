@@ -11,6 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
             Dictionary<Guid, List<CashFlowDistributionRule>> distributionRulesPerCashFlowRuleEntityId);
 
         void UpsertOrDeleteCashFlowDistributionRules(
-            Dictionary<Guid, List<CashFlowDistributionRuleDTO>> distributionRulesPerCashFlowRuleId, Guid libraryId, Guid? userId = null);
+            Dictionary<Guid, List<CashFlowDistributionRuleDTO>> distributionRulesPerCashFlowRuleId, Guid libraryId);
     }
 }

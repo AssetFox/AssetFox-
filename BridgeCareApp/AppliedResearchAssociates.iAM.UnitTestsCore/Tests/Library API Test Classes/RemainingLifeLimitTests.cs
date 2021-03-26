@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new RemainingLifeLimitController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
+            _controller = new RemainingLifeLimitController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
         }
 
         public RemainingLifeLimitLibraryEntity TestRemainingLifeLimitLibrary { get; } = new RemainingLifeLimitLibraryEntity
@@ -44,18 +44,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         private void SetupForGet()
         {
-            _testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Add(TestRemainingLifeLimitLibrary);
-            var attribute = _testHelper.UnitOfDataPersistenceWork.Context.Attribute.First();
+            _testHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Add(TestRemainingLifeLimitLibrary);
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
             TestRemainingLifeLimit.AttributeId = attribute.Id;
-            _testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimit.Add(TestRemainingLifeLimit);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.RemainingLifeLimit.Add(TestRemainingLifeLimit);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void SetupForUpsertOrDelete()
         {
             SetupForGet();
-            _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         [Fact]
@@ -169,7 +169,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                var remainingLifeLimitLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary
+                var remainingLifeLimitLibraryEntity = _testHelper.UnitOfWork.Context.RemainingLifeLimitLibrary
                     .Include(_ => _.RemainingLifeLimits)
                     .ThenInclude(_ => _.CriterionLibraryRemainingLifeLimitJoin)
                     .ThenInclude(_ => _.CriterionLibrary)
@@ -222,14 +222,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == RemainingLifeLimitLibraryId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimit.Any(_ => _.Id == RemainingLifeLimitId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimitLibrarySimulation.Any(_ =>
+                Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == RemainingLifeLimitLibraryId));
+                Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimit.Any(_ => _.Id == RemainingLifeLimitId));
+                Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimitLibrarySimulation.Any(_ =>
                     _.RemainingLifeLimitLibraryId == RemainingLifeLimitLibraryId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibraryRemainingLifeLimit.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any(_ =>
                         _.RemainingLifeLimitId == RemainingLifeLimitId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.Attribute.Any(_ => _.RemainingLifeLimits.Any()));
+                Assert.True(!_testHelper.UnitOfWork.Context.Attribute.Any(_ => _.RemainingLifeLimits.Any()));
             }
             finally
             {

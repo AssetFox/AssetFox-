@@ -7,15 +7,15 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LiteDbDebug|AnyCPU'">
-    <DefineConstants>TRACE;LiteDbDebug</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;LiteDbDebug</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MsSqlDebug|AnyCPU'">
-    <DefineConstants>TRACE;MsSqlDebug</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;MsSqlDebug</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -25,7 +25,7 @@
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|AnyCPU'">
-    <DefineConstants>TRACE;Test</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;Test</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -71,10 +71,7 @@
     <Content Update="esec.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="MetaData\AttributeMetaData\metaData.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="MetaData\NetworkDefinitionRules\definitionRules.json">
+    <Content Update="coreConnection.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="nlog.config">
@@ -93,6 +90,11 @@
     <None Update="DownloadedNewReports\df71ac9b-b90a-425c-a519-7b2d6b531ddc\SummaryReportTestData.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="MetaData\AttributeMetaData\" />
+    <Folder Include="MetaData\NetworkDefinitionRules\" />
   </ItemGroup>
 
 

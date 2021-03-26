@@ -9,8 +9,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class IAMContext : DbContext
     {
-        public static readonly bool IsRunningFromNUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("nunit.framework"));
+        public static readonly bool IsRunningFromXunit = AppDomain.CurrentDomain.GetAssemblies()
+            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
         public IAMContext() { }
 
@@ -18,10 +18,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!IsRunningFromNUnit)
+            if (!IsRunningFromXunit)
             {
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Repositories\\MSSQL", "migrationConnection.json");
-                string contents = File.ReadAllText(filePath);
+                var contents = File.ReadAllText(filePath);
                 var migrationConnection = JsonConvert
                     .DeserializeAnonymousType(contents, new { ConnectionStrings = default(MigrationConnection) })
                     .ConnectionStrings;
@@ -180,6 +180,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<BenefitQuantifierEntity> BenefitQuantifier { get; set; }
 
+        public virtual DbSet<UserCriteriaFilterEntity> UserCriteria { get; set; }
+
         private class MigrationConnection
         {
             public string BridgeCareConnex { get; set; }
@@ -323,7 +325,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.Attribute)
                     .WithMany(p => p.Benefits)
                     .HasForeignKey(d => d.AttributeId)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<BudgetEntity>(entity =>
@@ -1482,6 +1484,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithOne(p => p.BenefitQuantifier)
                     .HasForeignKey<BenefitQuantifierEntity>(d => d.EquationId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<UserCriteriaFilterEntity>(entity =>
+            {
+                entity.HasKey(e => e.UserCriteriaId);
+
+                entity.ToTable("UserCriteria_Filter");
+
+                entity.HasIndex(e => e.UserCriteriaId).IsUnique();
+
+                entity.HasOne(d => d.User)
+                .WithOne(p => p.UserCriteriaFilterJoin)
+                .HasForeignKey<UserCriteriaFilterEntity>(f => f.UserId);
+
             });
         }
     }

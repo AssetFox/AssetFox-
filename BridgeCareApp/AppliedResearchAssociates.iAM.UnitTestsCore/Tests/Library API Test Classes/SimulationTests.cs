@@ -28,22 +28,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
             var simulationAnalysis =
-                new SimulationAnalysisService(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockHubContext.Object);
-            _controller = new SimulationController(simulationAnalysis, _testHelper.UnitOfDataPersistenceWork, _testHelper.Logger, _testHelper.MockEsecSecurity);
+                new SimulationAnalysisService(_testHelper.UnitOfWork, _testHelper.MockHubContext.Object);
+            _controller = new SimulationController(simulationAnalysis, _testHelper.UnitOfWork, _testHelper.Logger, _testHelper.MockEsecSecurity);
         }
-
-        public UserEntity TestUser { get; } = new UserEntity
-        {
-            Id = UserId,
-            Username = "pdsystbamsusr02",
-            HasInventoryAccess = true
-        };
 
         private void SetupForClone()
         {
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(TestUser);
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new SimulationUserEntity
+            _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
+            _testHelper.UnitOfWork.Context.AddEntity(new SimulationUserEntity
             {
                 SimulationId = _testHelper.TestSimulation.Id,
                 UserId = UserId,
@@ -54,106 +47,106 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             });
 
             var analysisMethodId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new AnalysisMethodEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new AnalysisMethodEntity
             {
                 Id = analysisMethodId,
                 SimulationId = _testHelper.TestSimulation.Id,
             });
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new BenefitEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new BenefitEntity
             {
                 Id = Guid.NewGuid(),
                 AnalysisMethodId = analysisMethodId,
-                AttributeId = _testHelper.UnitOfDataPersistenceWork.Context.Attribute.First().Id
+                AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id
             });
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new CriterionLibraryAnalysisMethodEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new CriterionLibraryAnalysisMethodEntity
             {
                 CriterionLibraryId = _testHelper.TestCriterionLibrary.Id,
                 AnalysisMethodId = analysisMethodId
             });
 
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new InvestmentPlanEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new InvestmentPlanEntity
             {
                 Id = Guid.NewGuid(),
                 SimulationId = _testHelper.TestSimulation.Id
             });
 
             var budgetLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
+            _testHelper.UnitOfWork.Context.AddEntity(
                 new BudgetLibraryEntity { Id = budgetLibraryId, Name = "Test Name" });
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new BudgetLibrarySimulationEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new BudgetLibrarySimulationEntity
             {
                 BudgetLibraryId = budgetLibraryId,
                 SimulationId = _testHelper.TestSimulation.Id
             });
 
             var budgetPriorityLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
+            _testHelper.UnitOfWork.Context.AddEntity(
                 new BudgetPriorityLibraryEntity { Id = budgetPriorityLibraryId, Name = "Test Name" });
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new BudgetPriorityLibrarySimulationEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new BudgetPriorityLibrarySimulationEntity
             {
                 BudgetPriorityLibraryId = budgetPriorityLibraryId,
                 SimulationId = _testHelper.TestSimulation.Id
             });
 
             var cashFlowRuleLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
+            _testHelper.UnitOfWork.Context.AddEntity(
                 new CashFlowRuleLibraryEntity { Id = cashFlowRuleLibraryId, Name = "Test Name" });
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new CashFlowRuleLibrarySimulationEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new CashFlowRuleLibrarySimulationEntity
             {
                 CashFlowRuleLibraryId = cashFlowRuleLibraryId,
                 SimulationId = _testHelper.TestSimulation.Id
             });
 
             var deficientConditionGoalLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
+            _testHelper.UnitOfWork.Context.AddEntity(
                 new DeficientConditionGoalLibraryEntity { Id = deficientConditionGoalLibraryId, Name = "Test Name" });
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new DeficientConditionGoalLibrarySimulationEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new DeficientConditionGoalLibrarySimulationEntity
             {
                 DeficientConditionGoalLibraryId = deficientConditionGoalLibraryId,
                 SimulationId = _testHelper.TestSimulation.Id
             });
 
             var performanceCurveLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
+            _testHelper.UnitOfWork.Context.AddEntity(
                 new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "Test Name" });
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new PerformanceCurveLibrarySimulationEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new PerformanceCurveLibrarySimulationEntity
             {
                 PerformanceCurveLibraryId = performanceCurveLibraryId,
                 SimulationId = _testHelper.TestSimulation.Id
             });
 
             var remainingLifeLimitLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
+            _testHelper.UnitOfWork.Context.AddEntity(
                 new RemainingLifeLimitLibraryEntity { Id = remainingLifeLimitLibraryId, Name = "Test Name" });
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new RemainingLifeLimitLibrarySimulationEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new RemainingLifeLimitLibrarySimulationEntity
             {
                 RemainingLifeLimitLibraryId = remainingLifeLimitLibraryId,
                 SimulationId = _testHelper.TestSimulation.Id
             });
 
             var targetConditionGoalLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
+            _testHelper.UnitOfWork.Context.AddEntity(
                 new TargetConditionGoalLibraryEntity { Id = targetConditionGoalLibraryId, Name = "Test Name" });
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new TargetConditionGoalLibrarySimulationEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new TargetConditionGoalLibrarySimulationEntity
             {
                 TargetConditionGoalLibraryId = targetConditionGoalLibraryId,
                 SimulationId = _testHelper.TestSimulation.Id
             });
 
             var treatmentLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(
+            _testHelper.UnitOfWork.Context.AddEntity(
                 new TreatmentLibraryEntity { Id = treatmentLibraryId, Name = "Test Name" });
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new TreatmentLibrarySimulationEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new TreatmentLibrarySimulationEntity
             {
                 TreatmentLibraryId = treatmentLibraryId,
                 SimulationId = _testHelper.TestSimulation.Id
             });
 
             var budgetId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new BudgetEntity { Id = budgetId, BudgetLibraryId = budgetLibraryId });
+            _testHelper.UnitOfWork.Context.AddEntity(new BudgetEntity { Id = budgetId, BudgetLibraryId = budgetLibraryId });
 
             var facilityId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new FacilityEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new FacilityEntity
             {
                 Id = Guid.NewGuid(),
                 NetworkId = _testHelper.TestNetwork.Id,
@@ -161,7 +154,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             });
 
             var sectionId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new SectionEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new SectionEntity
             {
                 Id = sectionId,
                 FacilityId = facilityId,
@@ -170,7 +163,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             });
 
             var committedProjectId = Guid.NewGuid();
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new CommittedProjectEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new CommittedProjectEntity
             {
                 Id = committedProjectId,
                 SimulationId = _testHelper.TestSimulation.Id,
@@ -179,10 +172,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 Name = "Test Name"
             });
 
-            _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(new CommittedProjectConsequenceEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new CommittedProjectConsequenceEntity
             {
                 Id = Guid.NewGuid(),
-                AttributeId = _testHelper.UnitOfDataPersistenceWork.Context.Attribute.First().Id,
+                AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id,
                 CommittedProjectId = committedProjectId,
                 ChangeValue = "+1"
             });
@@ -292,7 +285,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(TestUser);
+                _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
 
                 var newSimulationDTO = _testHelper.TestSimulation.ToDto(null);
                 newSimulationDTO.Id = Guid.NewGuid();
@@ -300,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 {
                     new SimulationUserDTO
                     {
-                        UserId = TestUser.Id, Username = TestUser.Username, CanModify = true, IsOwner = true
+                        UserId = _testHelper.TestUser.Id, Username = _testHelper.TestUser.Username, CanModify = true, IsOwner = true
                     }
                 };
 
@@ -308,7 +301,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 var result = await _controller.CreateSimulation(_testHelper.TestNetwork.Id, newSimulationDTO);
                 var dto = (SimulationDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(SimulationDTO));
 
-                var simulationEntity = _testHelper.UnitOfDataPersistenceWork.Context.Simulation
+                var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
                     .Include(_ => _.SimulationUserJoins)
                     .ThenInclude(_ => _.User)
                     .SingleOrDefault(_ => _.Id == dto.Id);
@@ -334,7 +327,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(TestUser);
+                _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
 
                 var getResult = await _controller.GetSimulations(_testHelper.TestNetwork.Id);
                 var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
@@ -346,7 +339,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 {
                     new SimulationUserDTO
                     {
-                        UserId = TestUser.Id, Username = TestUser.Username, CanModify = true, IsOwner = true
+                        UserId = _testHelper.TestUser.Id, Username = _testHelper.TestUser.Username, CanModify = true, IsOwner = true
                     }
                 };
 
@@ -355,7 +348,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 var dto = (SimulationDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(SimulationDTO));
 
                 // Assert
-                var simulationEntity = _testHelper.UnitOfDataPersistenceWork.Context.Simulation
+                var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
                     .Include(_ => _.SimulationUserJoins)
                     .ThenInclude(_ => _.User)
                     .Single(_ => _.Id == dto.Id);
@@ -379,7 +372,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             try
             {
                 // Arrange
-                _testHelper.UnitOfDataPersistenceWork.Context.AddEntity(TestUser);
+                _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
 
                 var getResult = await _controller.GetSimulations(_testHelper.TestNetwork.Id);
                 var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
@@ -390,7 +383,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 {
                     new SimulationUserDTO
                     {
-                        UserId = TestUser.Id, Username = TestUser.Username, CanModify = true, IsOwner = true
+                        UserId = _testHelper.TestUser.Id, Username = _testHelper.TestUser.Username, CanModify = true, IsOwner = true
                     }
                 };
 
@@ -401,8 +394,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Assert
 
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationDTO.Id));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.SimulationUser.Any(_ => _.UserId == simulationDTO.Users[0].UserId));
+                Assert.True(!_testHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == simulationDTO.Id));
+                Assert.True(!_testHelper.UnitOfWork.Context.SimulationUser.Any(_ => _.UserId == simulationDTO.Users[0].UserId));
             }
             finally
             {
@@ -427,7 +420,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 Assert.NotNull(okObjResult.Value);
                 var dto = (SimulationDTO)Convert.ChangeType(okObjResult.Value, typeof(SimulationDTO));
 
-                var originalSimulation = _testHelper.UnitOfDataPersistenceWork.Context.Simulation
+                var originalSimulation = _testHelper.UnitOfWork.Context.Simulation
                     .Include(_ => _.AnalysisMethod)
                     .ThenInclude(_ => _.Benefit)
                     .Include(_ => _.AnalysisMethod)
@@ -446,7 +439,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                     .Include(_ => _.SimulationUserJoins)
                     .Single(_ => _.Id == _testHelper.TestSimulation.Id);
 
-                var clonedSimulation = _testHelper.UnitOfDataPersistenceWork.Context.Simulation
+                var clonedSimulation = _testHelper.UnitOfWork.Context.Simulation
                     .Include(_ => _.AnalysisMethod)
                     .ThenInclude(_ => _.Benefit)
                     .Include(_ => _.AnalysisMethod)

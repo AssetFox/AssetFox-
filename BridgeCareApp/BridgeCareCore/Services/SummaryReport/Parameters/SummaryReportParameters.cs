@@ -22,19 +22,8 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
-        internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel,
-            Guid simulationId, Guid networkId)
+        internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel, Simulation simulation)
         {
-            var explorer = _unitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-            var network = _unitOfDataPersistenceWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
-            _unitOfDataPersistenceWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
-
-            var simulation = network.Simulations.First();
-            _unitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _unitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
-            _unitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
-
             // Simulation Name format
             _excelHelper.MergeCells(worksheet, 1, 1, 1, 2);
             _excelHelper.MergeCells(worksheet, 1, 3, 1, 10);

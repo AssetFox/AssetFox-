@@ -22,13 +22,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new CriterionLibraryController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
+            _controller = new CriterionLibraryController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
         }
 
         private void Setup()
         {
-            _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         [Fact]
@@ -143,12 +143,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 Assert.IsType<OkResult>(updateResult);
                 Assert.IsType<OkResult>(addResult);
 
-                var updatedCriterionLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary
+                var updatedCriterionLibraryEntity = _testHelper.UnitOfWork.Context.CriterionLibrary
                     .Single(_ => _.Id == _testHelper.TestCriterionLibrary.Id);
                 Assert.Equal(criterionLibraryDTO.Description, updatedCriterionLibraryEntity.Description);
 
                 var newCriterionLibraryEntity =
-                    _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Single(_ =>
+                    _testHelper.UnitOfWork.Context.CriterionLibrary.Single(_ =>
                         _.Id == newCriterionLibraryDTO.Id);
                 Assert.NotNull(newCriterionLibraryEntity);
             }
@@ -174,7 +174,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 Assert.IsType<OkResult>(result);
 
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibrary.Any(_ =>
                         _.Id == _testHelper.TestCriterionLibrary.Id));
             }
             finally

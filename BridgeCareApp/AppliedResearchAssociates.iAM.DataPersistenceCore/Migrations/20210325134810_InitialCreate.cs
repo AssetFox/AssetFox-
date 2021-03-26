@@ -11,21 +11,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Attribute",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    DataType = table.Column<string>(nullable: false),
-                    AggregationRuleType = table.Column<string>(nullable: false),
-                    Command = table.Column<string>(nullable: false),
-                    ConnectionType = table.Column<int>(nullable: false),
-                    DefaultValue = table.Column<string>(nullable: true),
-                    Minimum = table.Column<double>(nullable: true),
-                    Maximum = table.Column<double>(nullable: true),
-                    IsCalculated = table.Column<bool>(nullable: false),
-                    IsAscending = table.Column<bool>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    DataType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AggregationRuleType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Command = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ConnectionType = table.Column<int>(type: "int", nullable: false),
+                    DefaultValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Minimum = table.Column<double>(type: "float", nullable: true),
+                    Maximum = table.Column<double>(type: "float", nullable: true),
+                    IsCalculated = table.Column<bool>(type: "bit", nullable: false),
+                    IsAscending = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -36,13 +36,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "BudgetLibrary",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -53,13 +53,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "BudgetPriorityLibrary",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -70,13 +70,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CashFlowRuleLibrary",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -87,14 +87,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    MergedCriteriaExpression = table.Column<string>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MergedCriteriaExpression = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -105,13 +105,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "DeficientConditionGoalLibrary",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -122,12 +122,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Equation",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Expression = table.Column<string>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Expression = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -138,12 +138,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Network",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -154,13 +154,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "PerformanceCurveLibrary",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -171,13 +171,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "RemainingLifeLimitLibrary",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -188,13 +188,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TargetConditionGoalLibrary",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -205,13 +205,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentLibrary",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -222,13 +222,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "User",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Username = table.Column<string>(nullable: true),
-                    HasInventoryAccess = table.Column<bool>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HasInventoryAccess = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -239,13 +239,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Budget",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    BudgetLibraryId = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BudgetLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -262,14 +262,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "BudgetPriority",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    BudgetPriorityLibraryId = table.Column<Guid>(nullable: false),
-                    PriorityLevel = table.Column<int>(nullable: false),
-                    Year = table.Column<int>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BudgetPriorityLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PriorityLevel = table.Column<int>(type: "int", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -286,13 +286,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CashFlowRule",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    CashFlowRuleLibraryId = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CashFlowRuleLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -309,16 +309,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "DeficientConditionGoal",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: false),
-                    DeficientConditionGoalLibraryId = table.Column<Guid>(nullable: false),
-                    AllowedDeficientPercentage = table.Column<double>(nullable: false),
-                    DeficientLimit = table.Column<double>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeficientConditionGoalLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AllowedDeficientPercentage = table.Column<double>(type: "float", nullable: false),
+                    DeficientLimit = table.Column<double>(type: "float", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -341,13 +341,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Attribute_Equation_CriterionLibrary",
                 columns: table => new
                 {
-                    AttributeId = table.Column<Guid>(nullable: false),
-                    EquationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    CriterionLibraryId = table.Column<Guid>(nullable: true)
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EquationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -376,13 +376,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Facility",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    NetworkId = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -399,12 +399,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "MaintainableAsset",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    NetworkId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -421,12 +421,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "NetworkRollupDetail",
                 columns: table => new
                 {
-                    NetworkId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Status = table.Column<string>(nullable: true)
+                    NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -443,14 +443,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Simulation",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    NetworkId = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    NumberOfYearsOfTreatmentOutlook = table.Column<int>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NumberOfYearsOfTreatmentOutlook = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -467,15 +467,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "PerformanceCurve",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    PerformanceCurveLibraryId = table.Column<Guid>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Shift = table.Column<bool>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PerformanceCurveLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Shift = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -498,14 +498,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "RemainingLifeLimit",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: false),
-                    RemainingLifeLimitLibraryId = table.Column<Guid>(nullable: false),
-                    Value = table.Column<double>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RemainingLifeLimitLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Value = table.Column<double>(type: "float", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -528,16 +528,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TargetConditionGoal",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: false),
-                    TargetConditionGoalLibraryId = table.Column<Guid>(nullable: false),
-                    Target = table.Column<double>(nullable: false),
-                    Year = table.Column<int>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TargetConditionGoalLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Target = table.Column<double>(type: "float", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -560,16 +560,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "SelectableTreatment",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    ShadowForAnyTreatment = table.Column<int>(nullable: false),
-                    ShadowForSameTreatment = table.Column<int>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    TreatmentLibraryId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TreatmentLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ShadowForAnyTreatment = table.Column<int>(type: "int", nullable: false),
+                    ShadowForSameTreatment = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -586,8 +586,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_User",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    UserId = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -610,14 +610,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "BudgetAmount",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    BudgetId = table.Column<Guid>(nullable: false),
-                    Year = table.Column<int>(nullable: false),
-                    Value = table.Column<decimal>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BudgetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    Value = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -634,12 +634,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_Budget",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    BudgetId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BudgetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -662,14 +662,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "BudgetPercentagePair",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    BudgetId = table.Column<Guid>(nullable: false),
-                    BudgetPriorityId = table.Column<Guid>(nullable: false),
-                    Percentage = table.Column<decimal>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BudgetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BudgetPriorityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Percentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -692,12 +692,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_BudgetPriority",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    BudgetPriorityId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BudgetPriorityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -720,15 +720,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CashFlowDistributionRule",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    CashFlowRuleId = table.Column<Guid>(nullable: false),
-                    DurationInYears = table.Column<int>(nullable: false),
-                    CostCeiling = table.Column<decimal>(nullable: false),
-                    YearlyPercentages = table.Column<string>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CashFlowRuleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DurationInYears = table.Column<int>(type: "int", nullable: false),
+                    CostCeiling = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    YearlyPercentages = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -745,12 +745,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_CashFlowRule",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    CashFlowRuleId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CashFlowRuleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -773,12 +773,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_DeficientConditionGoal",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    DeficientConditionGoalId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeficientConditionGoalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -801,15 +801,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Section",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    FacilityId = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Area = table.Column<double>(nullable: false),
-                    AreaUnit = table.Column<string>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FacilityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Area = table.Column<double>(type: "float", nullable: false),
+                    AreaUnit = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -826,17 +826,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "AggregatedResult",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Discriminator = table.Column<string>(nullable: false),
-                    Year = table.Column<int>(nullable: false),
-                    TextValue = table.Column<string>(nullable: true),
-                    NumericValue = table.Column<double>(nullable: true),
-                    MaintainableAssetId = table.Column<Guid>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    TextValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NumericValue = table.Column<double>(type: "float", nullable: true),
+                    MaintainableAssetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -859,17 +859,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "AttributeDatum",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Discriminator = table.Column<string>(nullable: false),
-                    TimeStamp = table.Column<DateTime>(nullable: false),
-                    NumericValue = table.Column<double>(nullable: true),
-                    TextValue = table.Column<string>(nullable: true),
-                    AttributeId = table.Column<Guid>(nullable: false),
-                    MaintainableAssetId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NumericValue = table.Column<double>(type: "float", nullable: true),
+                    TextValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MaintainableAssetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -892,17 +892,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "MaintainableAssetLocation",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Discriminator = table.Column<string>(nullable: false),
-                    LocationIdentifier = table.Column<string>(nullable: false),
-                    Start = table.Column<double>(nullable: true),
-                    End = table.Column<double>(nullable: true),
-                    Direction = table.Column<int>(nullable: true),
-                    MaintainableAssetId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MaintainableAssetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LocationIdentifier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Start = table.Column<double>(type: "float", nullable: true),
+                    End = table.Column<double>(type: "float", nullable: true),
+                    Direction = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -919,19 +919,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "AnalysisMethod",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    OptimizationStrategy = table.Column<int>(nullable: false),
-                    SpendingStrategy = table.Column<int>(nullable: false),
-                    ShouldApplyMultipleFeasibleCosts = table.Column<bool>(nullable: false),
-                    ShouldDeteriorateDuringCashFlow = table.Column<bool>(nullable: false),
-                    ShouldUseExtraFundsAcrossBudgets = table.Column<bool>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OptimizationStrategy = table.Column<int>(type: "int", nullable: false),
+                    SpendingStrategy = table.Column<int>(type: "int", nullable: false),
+                    ShouldApplyMultipleFeasibleCosts = table.Column<bool>(type: "bit", nullable: false),
+                    ShouldDeteriorateDuringCashFlow = table.Column<bool>(type: "bit", nullable: false),
+                    ShouldUseExtraFundsAcrossBudgets = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -954,12 +954,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "BudgetLibrary_Simulation",
                 columns: table => new
                 {
-                    BudgetLibraryId = table.Column<Guid>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    BudgetLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -982,12 +982,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "BudgetPriorityLibrary_Simulation",
                 columns: table => new
                 {
-                    BudgetPriorityLibraryId = table.Column<Guid>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    BudgetPriorityLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1010,12 +1010,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CashFlowRuleLibrary_Simulation",
                 columns: table => new
                 {
-                    CashFlowRuleLibraryId = table.Column<Guid>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CashFlowRuleLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1038,12 +1038,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "DeficientConditionGoalLibrary_Simulation",
                 columns: table => new
                 {
-                    DeficientConditionGoalLibraryId = table.Column<Guid>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    DeficientConditionGoalLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1066,16 +1066,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "InvestmentPlan",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    FirstYearOfAnalysisPeriod = table.Column<int>(nullable: false),
-                    InflationRatePercentage = table.Column<double>(nullable: false),
-                    MinimumProjectCostLimit = table.Column<decimal>(nullable: false),
-                    NumberOfYearsInAnalysisPeriod = table.Column<int>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FirstYearOfAnalysisPeriod = table.Column<int>(type: "int", nullable: false),
+                    InflationRatePercentage = table.Column<double>(type: "float", nullable: false),
+                    MinimumProjectCostLimit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    NumberOfYearsInAnalysisPeriod = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1092,12 +1092,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "PerformanceCurveLibrary_Simulation",
                 columns: table => new
                 {
-                    PerformanceCurveLibraryId = table.Column<Guid>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    PerformanceCurveLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1120,12 +1120,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "RemainingLifeLimitLibrary_Simulation",
                 columns: table => new
                 {
-                    RemainingLifeLimitLibraryId = table.Column<Guid>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    RemainingLifeLimitLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1148,14 +1148,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Simulation_User",
                 columns: table => new
                 {
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    UserId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    CanModify = table.Column<bool>(nullable: false),
-                    IsOwner = table.Column<bool>(nullable: false)
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CanModify = table.Column<bool>(type: "bit", nullable: false),
+                    IsOwner = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1178,14 +1178,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "SimulationAnalysisDetail",
                 columns: table => new
                 {
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    LastRun = table.Column<DateTime>(nullable: false),
-                    Status = table.Column<string>(nullable: true),
-                    RunTime = table.Column<string>(nullable: true)
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastRun = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RunTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1202,12 +1202,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "SimulationOutput",
                 columns: table => new
                 {
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Output = table.Column<string>(nullable: true)
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Output = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1224,12 +1224,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "SimulationReportDetail",
                 columns: table => new
                 {
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Status = table.Column<string>(nullable: true)
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1246,12 +1246,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TargetConditionGoalLibrary_Simulation",
                 columns: table => new
                 {
-                    TargetConditionGoalLibraryId = table.Column<Guid>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    TargetConditionGoalLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1274,12 +1274,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentLibrary_Simulation",
                 columns: table => new
                 {
-                    TreatmentLibraryId = table.Column<Guid>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    TreatmentLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1302,12 +1302,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_PerformanceCurve",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    PerformanceCurveId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PerformanceCurveId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1330,12 +1330,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "PerformanceCurve_Equation",
                 columns: table => new
                 {
-                    PerformanceCurveId = table.Column<Guid>(nullable: false),
-                    EquationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    PerformanceCurveId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EquationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1358,12 +1358,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_RemainingLifeLimit",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    RemainingLifeLimitId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RemainingLifeLimitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1386,12 +1386,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_TargetConditionGoal",
                 columns: table => new
                 {
-                    TargetConditionGoalId = table.Column<Guid>(nullable: false),
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    TargetConditionGoalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1414,12 +1414,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_Treatment",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    SelectableTreatmentId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SelectableTreatmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1442,12 +1442,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Treatment_Budget",
                 columns: table => new
                 {
-                    SelectableTreatmentId = table.Column<Guid>(nullable: false),
-                    BudgetId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    SelectableTreatmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BudgetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1470,14 +1470,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentConsequence",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: false),
-                    ChangeValue = table.Column<string>(nullable: true),
-                    SelectableTreatmentId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SelectableTreatmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ChangeValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1500,12 +1500,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentCost",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    TreatmentId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TreatmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1522,13 +1522,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentScheduling",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    TreatmentId = table.Column<Guid>(nullable: false),
-                    OffsetToFutureYear = table.Column<int>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TreatmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OffsetToFutureYear = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1545,12 +1545,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentSupersession",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    TreatmentId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TreatmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1567,20 +1567,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CommittedProject",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    ShadowForAnyTreatment = table.Column<int>(nullable: false),
-                    ShadowForSameTreatment = table.Column<int>(nullable: false),
-                    SimulationId = table.Column<Guid>(nullable: false),
-                    BudgetId = table.Column<Guid>(nullable: false),
-                    SectionId = table.Column<Guid>(nullable: false),
-                    Cost = table.Column<double>(nullable: false),
-                    Year = table.Column<int>(nullable: false),
-                    SelectableTreatmentEntityId = table.Column<Guid>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BudgetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SectionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Cost = table.Column<double>(type: "float", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ShadowForAnyTreatment = table.Column<int>(type: "int", nullable: false),
+                    ShadowForSameTreatment = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1598,12 +1597,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_CommittedProject_SelectableTreatment_SelectableTreatmentEntityId",
-                        column: x => x.SelectableTreatmentEntityId,
-                        principalTable: "SelectableTreatment",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_CommittedProject_Simulation_SimulationId",
                         column: x => x.SimulationId,
                         principalTable: "Simulation",
@@ -1615,15 +1608,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "NumericAttributeValueHistory",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    SectionId = table.Column<Guid>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: false),
-                    Year = table.Column<int>(nullable: false),
-                    Value = table.Column<double>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    Value = table.Column<double>(type: "float", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SectionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1646,15 +1639,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TextAttributeValueHistory",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    SectionId = table.Column<Guid>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: false),
-                    Year = table.Column<int>(nullable: false),
-                    Value = table.Column<string>(nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SectionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1677,17 +1670,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "AttributeDatumLocation",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    Discriminator = table.Column<string>(nullable: false),
-                    LocationIdentifier = table.Column<string>(nullable: false),
-                    Start = table.Column<double>(nullable: true),
-                    End = table.Column<double>(nullable: true),
-                    Direction = table.Column<int>(nullable: true),
-                    AttributeDatumId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttributeDatumId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LocationIdentifier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Start = table.Column<double>(type: "float", nullable: true),
+                    End = table.Column<double>(type: "float", nullable: true),
+                    Direction = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1704,14 +1697,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "Benefit",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    AnalysisMethodId = table.Column<Guid>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: true),
-                    Limit = table.Column<double>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AnalysisMethodId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Limit = table.Column<double>(type: "float", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1727,19 +1720,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         column: x => x.AttributeId,
                         principalTable: "Attribute",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "CriterionLibrary_AnalysisMethod",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    AnalysisMethodId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AnalysisMethodId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1762,26 +1755,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_TreatmentConsequence",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    ConditionalTreatmentConsequenceId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ConditionalTreatmentConsequenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CriterionLibrary_TreatmentConsequence", x => new { x.CriterionLibraryId, x.ConditionalTreatmentConsequenceId });
                     table.ForeignKey(
-                        name: "FK_CriterionLibrary_TreatmentConsequence_TreatmentConsequence_ConditionalTreatmentConsequenceId",
-                        column: x => x.ConditionalTreatmentConsequenceId,
-                        principalTable: "TreatmentConsequence",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_CriterionLibrary_TreatmentConsequence_CriterionLibrary_CriterionLibraryId",
                         column: x => x.CriterionLibraryId,
                         principalTable: "CriterionLibrary",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CriterionLibrary_TreatmentConsequence_TreatmentConsequence_ConditionalTreatmentConsequenceId",
+                        column: x => x.ConditionalTreatmentConsequenceId,
+                        principalTable: "TreatmentConsequence",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1790,26 +1783,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentConsequence_Equation",
                 columns: table => new
                 {
-                    ConditionalTreatmentConsequenceId = table.Column<Guid>(nullable: false),
-                    EquationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    ConditionalTreatmentConsequenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EquationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TreatmentConsequence_Equation", x => new { x.ConditionalTreatmentConsequenceId, x.EquationId });
                     table.ForeignKey(
-                        name: "FK_TreatmentConsequence_Equation_TreatmentConsequence_ConditionalTreatmentConsequenceId",
-                        column: x => x.ConditionalTreatmentConsequenceId,
-                        principalTable: "TreatmentConsequence",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_TreatmentConsequence_Equation_Equation_EquationId",
                         column: x => x.EquationId,
                         principalTable: "Equation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TreatmentConsequence_Equation_TreatmentConsequence_ConditionalTreatmentConsequenceId",
+                        column: x => x.ConditionalTreatmentConsequenceId,
+                        principalTable: "TreatmentConsequence",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1818,12 +1811,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_TreatmentCost",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    TreatmentCostId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TreatmentCostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1846,12 +1839,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentCost_Equation",
                 columns: table => new
                 {
-                    TreatmentCostId = table.Column<Guid>(nullable: false),
-                    EquationId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    TreatmentCostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EquationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1874,12 +1867,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CriterionLibrary_TreatmentSupersession",
                 columns: table => new
                 {
-                    CriterionLibraryId = table.Column<Guid>(nullable: false),
-                    TreatmentSupersessionId = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false)
+                    CriterionLibraryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TreatmentSupersessionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1902,14 +1895,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "CommittedProjectConsequence",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(nullable: false),
-                    CreatedBy = table.Column<Guid>(nullable: false),
-                    LastModifiedBy = table.Column<Guid>(nullable: false),
-                    AttributeId = table.Column<Guid>(nullable: false),
-                    ChangeValue = table.Column<string>(nullable: false),
-                    CommittedProjectId = table.Column<Guid>(nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CommittedProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AttributeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ChangeValue = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -2075,11 +2068,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "IX_CommittedProject_SectionId",
                 table: "CommittedProject",
                 column: "SectionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CommittedProject_SelectableTreatmentEntityId",
-                table: "CommittedProject",
-                column: "SelectableTreatmentEntityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CommittedProject_SimulationId",

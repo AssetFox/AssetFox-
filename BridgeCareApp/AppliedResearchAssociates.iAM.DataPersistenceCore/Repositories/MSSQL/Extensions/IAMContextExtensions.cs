@@ -37,15 +37,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 return;
             }
 
-            entities.ForEach(entity =>
+            if (userId.HasValue)
             {
-                if (userId.HasValue)
+                entities.ForEach(entity =>
                 {
                     SetPropertyValue(entity, BaseEntityProperty.CreatedBy, userId.Value);
 
                     SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
-                }
-            });
+                });
+            }
 
             context.BulkInsert(entities);
 
@@ -92,13 +92,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             var propsToExclude = new List<string> { "CreatedDate", "CreatedBy" };
             var config = new BulkConfig { PropertiesToExclude = propsToExclude };
 
-            entities.ForEach(entity =>
+            if (userId.HasValue)
             {
-                if (userId.HasValue)
+                entities.ForEach(entity =>
                 {
                     SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
-                }
-            });
+                });
+            }
 
             context.BulkUpdate(entities, config);
 

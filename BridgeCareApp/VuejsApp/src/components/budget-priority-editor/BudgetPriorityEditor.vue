@@ -410,7 +410,7 @@ export default class BudgetPriorityEditor extends Vue {
           id: budgetPriority.id,
           priorityLevel: budgetPriority.priorityLevel.toString(),
           year: hasValue(budgetPriority.year) ? budgetPriority.year!.toString() : '',
-          criteria: budgetPriority.criterionLibrary.mergedCriteriaExpression
+          criteria: budgetPriority.criterionLibrary.mergedCriteriaExpression != null ? budgetPriority.criterionLibrary.mergedCriteriaExpression : ''
         };
 
         if (hasValue(budgetPriority.budgetPercentagePairs)) {

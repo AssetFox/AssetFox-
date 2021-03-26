@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
@@ -12,12 +13,12 @@ namespace BridgeCareCore.Services
 {
     public class ExpressionValidationService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly ILog _log;
 
         public ExpressionValidationService(UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog log)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _log = log ?? throw new ArgumentNullException(nameof(_log));
         }
 
@@ -32,7 +33,7 @@ namespace BridgeCareCore.Services
             {
                 var expression = model.Expression.Trim();
                 CheckAttributes(expression);
-                var attributes = _unitOfDataPersistenceWork.Context.Attribute.ToList();
+                var attributes = _unitOfWork.Context.Attribute.ToList();
                 var compiler = new CalculateEvaluateCompiler();
                 foreach (var attribute in attributes.Where(_ => expression.Contains(_.Name)))
                 {
@@ -128,7 +129,7 @@ namespace BridgeCareCore.Services
             };
         }
 
-        public CriterionValidationResult ValidateCriterion(string mergedCriteriaExpression)
+        public CriterionValidationResult ValidateCriterion(string mergedCriteriaExpression, UserCriteriaDTO currentUserCriteriaFilter)
         {
             var expression = mergedCriteriaExpression.Replace("|", "'").ToUpper();
             /*expression = CheckAttributes(expression);
@@ -137,7 +138,7 @@ namespace BridgeCareCore.Services
             try
             {
                 CheckAttributes(expression);
-                var attributes = _unitOfDataPersistenceWork.Context.Attribute.ToList();
+                var attributes = _unitOfWork.Context.Attribute.ToList();
                 var compiler = new CalculateEvaluateCompiler();
                 foreach (var attribute in attributes.Where(_ => expression.Contains(_.Name)))
                 {
@@ -157,12 +158,12 @@ namespace BridgeCareCore.Services
                 return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = e.Message };
             }
 
-            return GetResultsCount(expression);
+            return GetResultsCount(expression, currentUserCriteriaFilter);
         }
 
         private void CheckAttributes(string target)
         {
-            var attributes = _unitOfDataPersistenceWork.Context.Attribute.ToList();
+            var attributes = _unitOfWork.Context.Attribute.ToList();
             target = target.Replace('[', '?');
             foreach (var allowedAttribute in attributes.Where(allowedAttribute => target.IndexOf("?" + allowedAttribute.Name + "]", StringComparison.Ordinal) >= 0))
             {
@@ -183,23 +184,32 @@ namespace BridgeCareCore.Services
             throw new InvalidOperationException("Unsupported Attribute " + target.Substring(start + 1, end - 1));
         }
 
-        public CriterionValidationResult GetResultsCount(string expression)
+        public CriterionValidationResult GetResultsCount(string expression, UserCriteriaDTO currentUserCriteriaFilter)
         {
             if (string.IsNullOrEmpty(expression))
             {
                 _log.Error("There is no criteria created");
                 return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = "There is no criterion expression." };
             }
-
             //oracle chokes on non-space whitespace
             var whiteSpaceMechanic = new Regex(@"\s+");
+
+            // Appending the criteria filtering clause for non-admin users
+            if (currentUserCriteriaFilter.HasCriteria)
+            {
+                currentUserCriteriaFilter.Criteria = "(" + currentUserCriteriaFilter.Criteria + ")";
+                
+                expression += $" AND { currentUserCriteriaFilter.Criteria }";
+            }
+
             // modify the expression replacing all special characters and white space
             var modifiedExpression = whiteSpaceMechanic.Replace(expression.Replace("[", "").Replace("]", "").Replace("@", ""), " ");
             // parameterize the predicate and add it to the select
             var parameterizedData = ParameterizeExpression(modifiedExpression);
+
             var strSelect = $"SELECT COUNT(*) FROM SECTION_13 INNER JOIN SEGMENT_13_NS0 ON SECTION_13.SECTIONID = SEGMENT_13_NS0.SECTIONID WHERE {parameterizedData.ParameterString}";
             // create a sql connection
-            using var connection = _unitOfDataPersistenceWork.LegacyConnection;
+            using var connection = _unitOfWork.LegacyConnection;
             try
             {
                 // open the connection
@@ -253,7 +263,7 @@ namespace BridgeCareCore.Services
             var predicates = new List<string>();
             var spacedString = 0;
             var indexForSpacedString = 0;
-            var attributes = _unitOfDataPersistenceWork.Context.Attribute.Select(_ => _.Name).ToList();
+            var attributes = _unitOfWork.Context.Attribute.Select(_ => _.Name).ToList();
 
             while (startingIndex < expression.Length)
             {

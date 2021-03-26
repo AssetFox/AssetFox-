@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new TargetConditionGoalController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
+            _controller = new TargetConditionGoalController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
         }
 
         public TargetConditionGoalLibraryEntity TestTargetConditionGoalLibrary { get; } = new TargetConditionGoalLibraryEntity
@@ -45,18 +45,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         private void SetupForGet()
         {
-            _testHelper.UnitOfDataPersistenceWork.Context.TargetConditionGoalLibrary.Add(TestTargetConditionGoalLibrary);
-            var attribute = _testHelper.UnitOfDataPersistenceWork.Context.Attribute.First();
+            _testHelper.UnitOfWork.Context.TargetConditionGoalLibrary.Add(TestTargetConditionGoalLibrary);
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
             TestTargetConditionGoal.AttributeId = attribute.Id;
-            _testHelper.UnitOfDataPersistenceWork.Context.TargetConditionGoal.Add(TestTargetConditionGoal);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.TargetConditionGoal.Add(TestTargetConditionGoal);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void SetupForUpsertOrDelete()
         {
             SetupForGet();
-            _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         [Fact]
@@ -170,7 +170,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                var targetConditionGoalLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.TargetConditionGoalLibrary
+                var targetConditionGoalLibraryEntity = _testHelper.UnitOfWork.Context.TargetConditionGoalLibrary
                     .Include(_ => _.TargetConditionGoals)
                     .ThenInclude(_ => _.CriterionLibraryTargetConditionGoalJoin)
                     .ThenInclude(_ => _.CriterionLibrary)
@@ -223,12 +223,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.TargetConditionGoalLibrary.Any(_ => _.Id == TargetConditionGoalLibraryId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.TargetConditionGoal.Any(_ => _.Id == TargetConditionGoalId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.TargetConditionGoalLibrarySimulation.Any(_ =>
+                Assert.True(!_testHelper.UnitOfWork.Context.TargetConditionGoalLibrary.Any(_ => _.Id == TargetConditionGoalLibraryId));
+                Assert.True(!_testHelper.UnitOfWork.Context.TargetConditionGoal.Any(_ => _.Id == TargetConditionGoalId));
+                Assert.True(!_testHelper.UnitOfWork.Context.TargetConditionGoalLibrarySimulation.Any(_ =>
                     _.TargetConditionGoalLibraryId == TargetConditionGoalLibraryId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibraryTargetConditionGoal.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibraryTargetConditionGoal.Any(_ =>
                         _.TargetConditionGoalId == TargetConditionGoalId));
             }
             finally

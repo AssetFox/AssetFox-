@@ -38,12 +38,16 @@ namespace AppliedResearchAssociates.iAM.Domains
             {
                 var actualAge = scope.GetNumber(Explorer.AgeAttribute.Name);
 
-                if (curve == null || previousAge <= 0 || actualAge <= previousAge)
+                if (curve == null || previousAge <= 0 || actualAge < previousAge)
                 {
                     return ValueVersusAge.Interpolate(actualAge);
                 }
                 else
                 {
+                    if(previousAge == actualAge)
+                    {
+                        previousAge--;
+                    }
                     var previousValue = scope.GetNumber(curve.Attribute.Name);
                     var apparentPreviousAge = AgeVersusValue.Interpolate(previousValue);
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy.Entities;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
@@ -34,8 +33,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             _highlightWorkDoneCells = highlightWorkDoneCells ?? throw new ArgumentNullException(nameof(highlightWorkDoneCells));
         }
 
-        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
-            SortedSet<PennDotReportAEntity> pennDotReportAData)
+        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
         {
             // Add data to excel.
             var headers = GetHeaders();
@@ -52,7 +50,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             }
 
             AddBridgeDataModelsCells(worksheet, reportOutputData, currentCell);
-            AddDynamicDataCells(worksheet, reportOutputData, pennDotReportAData, currentCell);
+            AddDynamicDataCells(worksheet, reportOutputData, currentCell);
 
             worksheet.Cells.AutoFitColumns();
             var spacerBeforeFirstYear = SpacerColumnNumbers[0] - 11;
@@ -77,7 +75,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         #region Private Methods
 
         private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults,
-            SortedSet<PennDotReportAEntity> pennDotReportAData,
             CurrentCell currentCell)
         {
             var initialRow = 4;
@@ -101,39 +98,22 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             }
             var poorOnOffColumnStart = outputResults.Years.Count + column + 2;
             var index = 1; // to track the initial section from rest of the years
+
+            var isInitialYear = true;
             foreach (var yearlySectionData in outputResults.Years)
             {
                 PoorOnOffCount.Add(yearlySectionData.Year, (on: 0, off: 0));
                 row = initialRow;
 
                 // Add work done cells
-                var sectionsAndReportAData = yearlySectionData.Sections.Zip(pennDotReportAData, (n, w) => new { section = n, reportAData = w });
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
+                var previousYearTreatment = Properties.Resources.NoTreatment;
                 var i = 0;
-                foreach (var data in sectionsAndReportAData)
+                foreach (var section in yearlySectionData.Sections)
                 {
-                    TrackDataForParametersTAB(data.reportAData);
-                    // Work done in a year
-                    var range = worksheet.Cells[row, column];
-                    setColor(data.reportAData.Parallel_Struct, data.section.AppliedTreatment, previousYearCause, data.section.TreatmentCause,
-                        yearlySectionData.Year, index, worksheet, row, column);
+                    TrackDataForParametersTAB(section.ValuePerNumericAttribute, section.ValuePerTextAttribute);
 
-                    if (abbreviatedTreatmentNames.ContainsKey(data.section.AppliedTreatment))
-                    {
-                        range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[data.section.AppliedTreatment])
-                            || data.section.AppliedTreatment.ToLower() == Properties.Resources.NoTreatment
-                            ? "--" : abbreviatedTreatmentNames[data.section.AppliedTreatment];
-                    }
-                    else
-                    {
-                        range.Value = data.section.AppliedTreatment.ToLower() == Properties.Resources.NoTreatment ? "--" :
-                            data.section.AppliedTreatment.ToLower();
-                    }
-                    if (!range.Value.Equals("--"))
-                    {
-                        workDoneData[i]++;
-                    }
-
+                    var thisYrMinc = section.ValuePerNumericAttribute["MINCOND"];
                     // poor on off Rate
                     var prevYrMinc = 0.0;
                     if (index == 1)
@@ -144,8 +124,34 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     {
                         prevYrMinc = previousYearSectionMinC[i];
                     }
+                    if (section.TreatmentCause == TreatmentCause.CommittedProject && !isInitialYear)
+                    {
+                        var prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
+                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                        previousYearCause = prevYearSection.TreatmentCause;
+                        previousYearTreatment = prevYearSection.AppliedTreatment;
+                    }
 
-                    var thisYrMinc = data.section.ValuePerNumericAttribute["MINCOND"];
+                    setColor(0, section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
+                        yearlySectionData.Year, index, worksheet, row, column); // TODO : Get the value of parallel structure. Right now 0 is a dummy value
+
+                    // Work done in a year
+                    var range = worksheet.Cells[row, column];
+                    if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
+                    {
+                        range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[section.AppliedTreatment])
+                            || section.AppliedTreatment.ToLower() == Properties.Resources.NoTreatment
+                            ? "--" : abbreviatedTreatmentNames[section.AppliedTreatment];
+                    }
+                    else
+                    {
+                        range.Value = section.AppliedTreatment.ToLower() == Properties.Resources.NoTreatment ? "--" :
+                            section.AppliedTreatment.ToLower();
+                    }
+                    if (!range.Value.Equals("--"))
+                    {
+                        workDoneData[i]++;
+                    }
 
                     worksheet.Cells[row, poorOnOffColumnStart].Value = prevYrMinc < 5 ? (thisYrMinc >= 5 ? "Off" : "--") :
                         (thisYrMinc < 5 ? "On" : "--");
@@ -160,7 +166,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                         onOffCount.off += 1;
                     }
                     PoorOnOffCount[yearlySectionData.Year] = onOffCount;
-                    previousYearCause = data.section.TreatmentCause;
                     previousYearSectionMinC[i] = thisYrMinc;
                     i++;
                     row++;
@@ -169,6 +174,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                 poorOnOffColumnStart++;
                 column++;
+                isInitialYear = false;
             }
 
             // work done information
@@ -337,10 +343,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             currentCell.Column = columnNo;
         }
 
-        private void setColor(int parallelBridge, string treatment, TreatmentCause previousYearCause,
+        private void setColor(int parallelBridge, string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
            TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
         {
-            _highlightWorkDoneCells.CheckConditions(parallelBridge, treatment, previousYearCause, treatmentCause, year, index, worksheet, row, column);
+            _highlightWorkDoneCells.CheckConditions(parallelBridge, treatment, previousYearTreatment, previousYearCause, treatmentCause, year, index, worksheet, row, column);
         }
 
         private List<string> GetHeaders()
@@ -503,7 +509,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
         private int EnterValueEqualsCulv(ExcelWorksheet worksheet, int row, int column, Dictionary<string, double> numericAttribute)
         {
-            numericAttribute["MINCOND"] = numericAttribute["CULV"];
+            numericAttribute["MINCOND"] = numericAttribute["CULV_SEEDED"];
             worksheet.Cells[row, ++column].Value = numericAttribute["MINCOND"];
             if (numericAttribute["MINCOND"] <= 3.5)
             {
@@ -515,7 +521,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
         private int EnterMinDeckSuperSub(ExcelWorksheet worksheet, int row, int column, Dictionary<string, double> numericAttribute)
         {
-            var minValue = Math.Min(numericAttribute["DECK"], Math.Min(numericAttribute["SUP"], numericAttribute["SUB"]));
+            var minValue = Math.Min(numericAttribute["DECK_SEEDED"], Math.Min(numericAttribute["SUP_SEEDED"], numericAttribute["SUB_SEEDED"]));
             worksheet.Cells[row, ++column].Value = minValue;
             numericAttribute["MINCOND"] = minValue;
             if (numericAttribute["MINCOND"] <= 3.5)
@@ -560,24 +566,24 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             }
         }
 
-        private void TrackDataForParametersTAB(PennDotReportAEntity reportAData)
+        private void TrackDataForParametersTAB(Dictionary<string, double> valuePerNumericAttribute, Dictionary<string, string> valuePerTextAttribute)
         {
             // Track status for parameters TAB
-            if (!_parametersModel.Status.Contains(reportAData.Post_Status.ToLower()))
+            if (!_parametersModel.Status.Contains(valuePerTextAttribute["POST_STATUS"].ToLower()))
             {
-                _parametersModel.Status.Add(reportAData.Post_Status.ToLower());
+                _parametersModel.Status.Add(valuePerTextAttribute["POST_STATUS"].ToLower());
             }
             // Track P3 for parameters TAB
-            if (reportAData.P3_Bridge > 0 && _parametersModel.P3 != 1)
+            if (valuePerNumericAttribute["P3"] > 0 && _parametersModel.P3 != 1)
             {
-                _parametersModel.P3 = reportAData.P3_Bridge;
+                _parametersModel.P3 = (int)valuePerNumericAttribute["P3"];
             }
-            if (!_parametersModel.OwnerCode.Contains(reportAData.Owner_Code))
+            if (!_parametersModel.OwnerCode.Contains(valuePerTextAttribute["OWNER_CODE"]))
             {
-                _parametersModel.OwnerCode.Add(reportAData.Owner_Code);
+                _parametersModel.OwnerCode.Add(valuePerTextAttribute["OWNER_CODE"]);
             }
 
-            int.TryParse(reportAData.StructureLength, out var structureLength);
+            var structureLength = (int)valuePerNumericAttribute["LENGTH"];
 
             if (structureLength > 20 && _parametersModel.LengthGreaterThan20 != "Y")
             {
@@ -587,9 +593,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             {
                 _parametersModel.LengthBetween8and20 = "Y";
             }
-            if (!_parametersModel.FunctionalClass.Contains(reportAData.FUNC_CLASS))
+            if (!_parametersModel.FunctionalClass.Contains(valuePerTextAttribute["FUNC_CLASS"]))
             {
-                _parametersModel.FunctionalClass.Add(reportAData.FUNC_CLASS);
+                _parametersModel.FunctionalClass.Add(valuePerTextAttribute["FUNC_CLASS"]);
             }
         }
 

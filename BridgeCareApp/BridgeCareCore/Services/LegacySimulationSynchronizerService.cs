@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
@@ -32,7 +31,7 @@ namespace BridgeCareCore.Services
 
         private void SynchronizeExplorerData()
         {
-            sendRealTimeMessage("Upserting attributes...");
+            SendRealTimeMessage("Upserting attributes...");
 
             _unitOfDataPersistenceWork.AttributeRepo.UpsertAttributes(_unitOfDataPersistenceWork.AttributeMetaDataRepo
                 .GetAllAttributes().ToList());
@@ -40,100 +39,109 @@ namespace BridgeCareCore.Services
 
         private void SynchronizeNetwork(Network network)
         {
-            if (_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == network.Id))
+            if (_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
             {
                 return;
             }
 
-            sendRealTimeMessage("Creating the network...");
+            SendRealTimeMessage("Creating the network...");
 
-            _unitOfDataPersistenceWork.NetworkRepo.CreateNetwork(network);
+            _unitOfWork.NetworkRepo.CreateNetwork(network);
         }
 
-        private Task SynchronizeNetworkData(Network network)
+        private void SynchronizeLegacyNetworkData(Network network, Guid? userId = null)
         {
-            if (!_unitOfDataPersistenceWork.Context.Network.Any(_ => _.Id == network.Id))
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
             {
-                throw new RowNotInTableException($"No network found having id");
+                throw new RowNotInTableException($"No network found having id {network.Id}.");
             }
 
-            _unitOfDataPersistenceWork.MaintainableAssetRepo.CreateMaintainableAssets(network.Facilities.ToList(),
-                network.Id);
-
-            var networkFacilityNames = network.Facilities.Select(_ => _.Name).ToHashSet();
-            var networkSectionNamesAndAreas = network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
-            var locationNames = new HashSet<string>();
-            var assetNamesAndAreas = new HashSet<string>();
-            _unitOfDataPersistenceWork.Context
-                .MaintainableAssetLocation
-                .Include(_ => _.MaintainableAsset)
-                .ToList()
-                .ForEach(_ =>
-                {
-                    var facilitySectionName = _.LocationIdentifier.Split("/");
-                    locationNames.Add(facilitySectionName[0]);
-                    assetNamesAndAreas.Add($"{facilitySectionName[1]}{_.MaintainableAsset.Area}");
-                });
-
-            if (!networkFacilityNames.SetEquals(locationNames) || !networkSectionNamesAndAreas.SetEquals(assetNamesAndAreas))
+            var explorerNetworkFacilityNames = network.Facilities.Select(_ => _.Name).ToHashSet();
+            var explorerNetworkSectionNamesAndAreas = network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
+            var facilityNames = _unitOfWork.Context.Facility.Select(_ => _.Name).ToHashSet();
+            var sectionNamesAndAreas = _unitOfWork.Context.Section.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
+            if (!explorerNetworkFacilityNames.SetEquals(facilityNames) || !explorerNetworkSectionNamesAndAreas.SetEquals(sectionNamesAndAreas))
             {
                 _unitOfDataPersistenceWork.NetworkRepo.DeleteNetworkData();
-                sendRealTimeMessage("Creating the network's facilities and sections...");
-                _unitOfDataPersistenceWork.FacilityRepo.CreateFacilities(simulation.Network.Facilities.ToList(), simulation.Network.Id);
+                SendRealTimeMessage("Creating the network's facilities and sections...");
+                _unitOfDataPersistenceWork.FacilityRepo.CreateFacilities(network.Facilities.ToList(), network.Id);
+            }
+        }
+
+        private void SynchronizeLegacySimulation(Simulation simulation)
+        {
+            if (simulation.Network.Explorer.CalculatedFields.Any())
+            {
+                SendRealTimeMessage("Joining attributes with equations and criteria...");
+
+                _unitOfDataPersistenceWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(simulation.Network.Explorer);
             }
 
-            return Task.CompletedTask;
+            SendRealTimeMessage("Inserting simulation data...");
+
+            _unitOfWork.SimulationRepo.CreateSimulation(simulation);
+
+            if (simulation.InvestmentPlan != null)
+            {
+                _unitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
+            }
+
+            if (simulation.AnalysisMethod != null)
+            {
+                _unitOfWork.AnalysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Id);
+            }
+
+            if (simulation.PerformanceCurves.Any())
+            {
+                _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
+                _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
+            }
+
+            if (simulation.CommittedProjects.Any())
+            {
+                _unitOfWork.CommittedProjectRepo.CreateCommittedProjects(simulation.CommittedProjects.ToList(), simulation.Id);
+            }
+
+            if (simulation.Treatments.Any())
+            {
+                _unitOfWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
+                _unitOfWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
+            }
         }
 
-        private Task SynchronizeLegacySimulation(Simulation simulation)
-        {
-            sendRealTimeMessage("Joining attributes with equations and criteria...");
-
-            _unitOfDataPersistenceWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(simulation.Network.Explorer);
-
-            sendRealTimeMessage("Inserting simulation data...");
-
-            _unitOfDataPersistenceWork.SimulationRepo.CreateSimulation(simulation);
-            _unitOfDataPersistenceWork.InvestmentPlanRepo.CreateInvestmentPlan(simulation.InvestmentPlan, simulation.Id);
-            _unitOfDataPersistenceWork.AnalysisMethodRepo.CreateAnalysisMethod(simulation.AnalysisMethod, simulation.Id);
-            _unitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
-            _unitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
-            _unitOfDataPersistenceWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
-            _unitOfDataPersistenceWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
-
-            _unitOfDataPersistenceWork.CommittedProjectRepo.CreateCommittedProjects(simulation.CommittedProjects.ToList(), simulation.Id);
-
-            return Task.CompletedTask;
-        }
-
-        public async Task Synchronize(int simulationId, UserInfoDTO userInfo)
+        public void Synchronize(int simulationId, string username)
         {
             try
             {
-                var dataAccessor = GetDataAccessor();
-                _unitOfDataPersistenceWork.LegacyConnection.Open();
+                _unitOfWork.SetUser(username);
 
-                var network = dataAccessor.GetExplorer().Networks.FirstOrDefault();
-                if (network != null)
-                {
-                    network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
-                }
-                
+                var dataAccessor = GetDataAccessor();
+                _unitOfWork.LegacyConnection.Open();
+
                 var simulation = dataAccessor.GetStandAloneSimulation(LegacyNetworkId, simulationId);
 
-                _unitOfDataPersistenceWork.LegacyConnection.Close();
+                _unitOfWork.LegacyConnection.Close();
 
-                _unitOfDataPersistenceWork.BeginTransaction();
+                if (simulation != null)
+                {
+                    var network = simulation.Network;
+                    if (network != null)
+                    {
+                        network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
+                    }
 
-                SynchronizeExplorerData();
+                    _unitOfWork.BeginTransaction();
 
-                SynchronizeNetwork(network);
+                    SynchronizeExplorerData();
 
-                await SynchronizeNetworkData(simulation);
+                    SynchronizeNetwork(network);
 
-                await SynchronizeLegacySimulation(simulation);
+                    SynchronizeLegacyNetworkData(network);
 
-                _unitOfDataPersistenceWork.Commit();
+                    SynchronizeLegacySimulation(simulation);
+
+                    _unitOfDataPersistenceWork.Commit();
+                }
             }
             catch (Exception e)
             {
@@ -142,20 +150,14 @@ namespace BridgeCareCore.Services
             }
             finally
             {
-                _unitOfDataPersistenceWork.Connection.Close();
-                _unitOfDataPersistenceWork.LegacyConnection.Close();
+                _unitOfWork.LegacyConnection.Close();
             }
         }
 
-        private void sendRealTimeMessage(string message)
-        {
-            if (!IsRunningFromXUnit)
-            {
-                _hubContext
-                    .Clients
-                    .All
-                    .SendAsync("BroadcastDataMigration", message);
-            }
-        }
+        private void SendRealTimeMessage(string message) =>
+            _hubContext?
+                .Clients?
+                .All?
+                .SendAsync("BroadcastDataMigration", message);
     }
 }

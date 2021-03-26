@@ -88,6 +88,7 @@ namespace BridgeCareCore
             services.AddScoped<AttributeService>();
             services.AddSingleton<IAuthorizationHandler, RestrictAccessHandler>();
             services.AddScoped<ExpressionValidationService>();
+            services.AddScoped<IUserCriteriaRepository, UserCriteriaRepository>();
 
 #if MsSqlDebug || Release || Test
             // SQL SERVER SCOPINGS
@@ -96,9 +97,7 @@ namespace BridgeCareCore
             services.AddScoped<UnitOfDataPersistenceWork>();
 
             // Repository for legacy database
-            services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
-            services.AddScoped<IPennDotReportARepository, PennDotReportARepository>();
-            services.AddScoped<IYearlyInvestmentRepository, YearlyInvestmentRepository>();
+            //services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
 #elif LiteDbDebug
             // LITE DB SCOPINGS
             services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
@@ -146,7 +145,7 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILog logger)
         {
-            UpdateDatabase(app);
+            //UpdateDatabase(app);
 
             if (env.IsDevelopment())
             {
@@ -174,9 +173,11 @@ namespace BridgeCareCore
 
         private static void UpdateDatabase(IApplicationBuilder app)
         {
-            using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()?.CreateScope();
-            var unitOfWork = serviceScope?.ServiceProvider.GetRequiredService<UnitOfDataPersistenceWork>();
-            unitOfWork?.Context.Database.Migrate();
+            using var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope();
+            using var context = serviceScope.ServiceProvider.GetService<IAMContext>();
+            context.Database.Migrate();
         }
     }
 }

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -30,16 +31,42 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _unitOfWork.Context.Simulation
+            /*var simulationEntity = _unitOfWork.Context.Simulation
                 .Include(_ => _.Network)
                 .ThenInclude(_ => _.Facilities)
                 .ThenInclude(_ => _.Sections)
-                .ThenInclude(_ => _.CommittedProjects)
-                .Include(_ => _.CommittedProjects)
                 .Include(_ => _.BudgetLibrarySimulationJoin)
                 .ThenInclude(_ => _.BudgetLibrary)
                 .ThenInclude(_ => _.Budgets)
-                .Single(_ => _.Id == simulationId);
+                .Single(_ => _.Id == simulationId);*/
+
+            var simulationEntity = _unitOfWork.Context.Simulation
+                .Where(_ => _.Id == simulationId)
+                .Select(simulation => new SimulationEntity
+                {
+                    Id = simulation.Id,
+                    Network = new NetworkEntity
+                    {
+                        Facilities = simulation.Network.Facilities.Select(facility => new FacilityEntity
+                        {
+                            Sections = facility.Sections.Select(section => new SectionEntity
+                            {
+                                Id = section.Id,
+                                Name = section.Name,
+                                Area = section.Area
+                            }).ToList()
+                        }).ToList()
+                    },
+                    BudgetLibrarySimulationJoin = new BudgetLibrarySimulationEntity
+                    {
+                        BudgetLibrary = new BudgetLibraryEntity
+                        {
+                            Budgets = simulation.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets
+                                .Select(budget => new BudgetEntity { Id = budget.Id, Name = budget.Name })
+                                .ToList()
+                        }
+                    }
+                }).Single();
 
             if (!simulationEntity.Network.Facilities.Any(_ => _.Sections.Any()))
             {
@@ -51,56 +78,39 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No budgets found for simulation having id {simulationId}");
             }
 
-            var attributeNames = committedProjects.SelectMany(_ => _.Consequences.Select(_ => _.Attribute.Name))
-                .Distinct().ToList();
-            var attributeEntities = _unitOfWork.Context.Attribute
-                .Where(_ => attributeNames.Contains(_.Name)).ToList();
+            var committedProjectEntities = committedProjects
+                .Select(_ => _.ToEntity(simulationEntity)).ToList();
 
-            if (!attributeEntities.Any())
-            {
-                throw new RowNotInTableException("No attributes found for committed project consequences.");
-            }
+            _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
 
-            var attributeNamesFromDataSource = attributeEntities.Select(_ => _.Name).ToList();
-            if (!attributeNames.All(attributeName => attributeNamesFromDataSource.Contains(attributeName)))
+            if (committedProjects.Any(_ => _.Consequences.Any()))
             {
-                var attributeNamesNotFound = attributeNames.Except(attributeNamesFromDataSource).ToList();
-                if (attributeNamesNotFound.Count() == 1)
+                var allConsequences = committedProjects.Where(_ => _.Consequences.Any()).SelectMany(_ => _.Consequences)
+                    .ToList();
+                var attributeEntities = _unitOfWork.Context.Attribute.ToList();
+                var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
+                if (!allConsequences.All(_ => attributeNames.Contains(_.Attribute.Name)))
                 {
-                    throw new RowNotInTableException($"No attribute found having name {attributeNamesNotFound[0]}.");
+                    var missingAttributes = allConsequences.Select(_ => _.Attribute.Name)
+                        .Except(attributeNames).ToList();
+                    if (missingAttributes.Count == 1)
+                    {
+                        throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
+                    }
+
+                    throw new RowNotInTableException(
+                        $"No attributes found having the names: {string.Join(", ", missingAttributes)}.");
                 }
 
-                throw new RowNotInTableException($"No attributes found having names: {string.Join(", ", attributeNamesNotFound)}.");
-            }
+                var attributeIdPerName = attributeEntities.ToDictionary(_ => _.Name, _ => _.Id);
 
-            var attributeIdPerName = attributeEntities.ToDictionary(_ => _.Name, _ => _.Id);
+                var consequenceAttributeIdTuplePerProjectId = committedProjects
+                    .Where(_ => _.Consequences.Any())
+                    .ToDictionary(_ => _.Id,
+                        _ => _.Consequences.Select(__ => (attributeIdPerName[__.Attribute.Name], __)).ToList());
 
-            var committedProjectEntities = committedProjects
-                .Select(_ => _.ToEntity(simulationEntity.Id)).ToList();
-
-            //_unitOfWork.Context.CommittedProject.Add(committedProjectEntities[0]);
-
-            foreach (var item in committedProjectEntities)
-            {
-                _unitOfWork.Context.CommittedProject.Add(item);
-            }
-            if (IsRunningFromXUnit)
-            {
-                _unitOfWork.Context.CommittedProject.AddRange(committedProjectEntities);
-            }
-            else
-            {
-                //_unitOfWork.Context.BulkInsertOrUpdate(committedProjectEntities);
-            }
-
-            _unitOfWork.Context.SaveChanges();
-
-            var consequencePerAttributeIdPerProjectId = committedProjects
-                .ToDictionary(_ => _.Id, _ => _.Consequences.Select(__ => (attributeIdPerName[__.Attribute.Name], __)).ToList());
-
-            if (consequencePerAttributeIdPerProjectId.Values.Any())
-            {
-                _unitOfWork.CommittedProjectConsequenceRepo.CreateCommittedProjectConsequences(consequencePerAttributeIdPerProjectId);
+                _unitOfWork.CommittedProjectConsequenceRepo.CreateCommittedProjectConsequences(
+                    consequenceAttributeIdTuplePerProjectId);
             }
         }
 
@@ -116,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Section)
                 .ThenInclude(_ => _.Facility)
                 .Include(_ => _.CommittedProjectConsequences)
-                .Where(_ => _.Simulation.Id == simulation.Id)
+                .Where(_ => _.SimulationId == simulation.Id)
                 .ForEach(_ => _.CreateCommittedProject(simulation));
         }
     }

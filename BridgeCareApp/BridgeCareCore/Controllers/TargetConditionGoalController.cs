@@ -17,7 +17,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class TargetConditionGoalController : ControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IEsecSecurity _esecSecurity;
 
         private readonly IReadOnlyDictionary<string, TargetConditionGoalUpsertMethod>
@@ -25,7 +25,7 @@ namespace BridgeCareCore.Controllers
 
         public TargetConditionGoalController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+            _unitOfWork = unitOfDataPersistenceWork ??
                                          throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
             _targetConditionGoalUpsertMethods = CreateUpsertMethods();
@@ -35,15 +35,15 @@ namespace BridgeCareCore.Controllers
         {
             void UpsertAny(UserInfoDTO userInfo, Guid simulationId, TargetConditionGoalLibraryDTO dto)
             {
-                _unitOfDataPersistenceWork.TargetConditionGoalRepo
+                _unitOfWork.TargetConditionGoalRepo
                     .UpsertTargetConditionGoalLibrary(dto, simulationId, userInfo);
-                _unitOfDataPersistenceWork.TargetConditionGoalRepo
+                _unitOfWork.TargetConditionGoalRepo
                     .UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id, userInfo);
             }
 
             void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, TargetConditionGoalLibraryDTO dto)
             {
-                _unitOfDataPersistenceWork.TargetConditionGoalRepo.UpsertPermitted(userInfo, simulationId, dto);
+                _unitOfWork.TargetConditionGoalRepo.UpsertPermitted(userInfo, simulationId, dto);
             }
 
             return new Dictionary<string, TargetConditionGoalUpsertMethod>
@@ -62,7 +62,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.TargetConditionGoalRepo
+                var result = await _unitOfWork.TargetConditionGoalRepo
                     .TargetConditionGoalLibrariesWithTargetConditionGoals();
                 return Ok(result);
             }
@@ -81,24 +81,24 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var userInfo = _esecSecurity.GetUserInformation(Request);
-                _unitOfDataPersistenceWork.BeginTransaction();
+                _unitOfWork.BeginTransaction();
                 await Task.Factory.StartNew(() =>
                 {
                     _targetConditionGoalUpsertMethods[userInfo.Role](userInfo.ToDto(), simulationId, dto);
                 });
 
-                _unitOfDataPersistenceWork.Commit();
+                _unitOfWork.Commit();
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                _unitOfDataPersistenceWork.Rollback();
+                _unitOfWork.Rollback();
                 Console.WriteLine(e);
                 return Unauthorized(e);
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
+                _unitOfWork.Rollback();
                 Console.WriteLine(e);
                 return BadRequest(e);
             }
@@ -111,15 +111,15 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfDataPersistenceWork.BeginTransaction();
-                await Task.Factory.StartNew(() => _unitOfDataPersistenceWork.TargetConditionGoalRepo
+                _unitOfWork.BeginTransaction();
+                await Task.Factory.StartNew(() => _unitOfWork.TargetConditionGoalRepo
                     .DeleteTargetConditionGoalLibrary(libraryId));
-                _unitOfDataPersistenceWork.Commit();
+                _unitOfWork.Commit();
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
+                _unitOfWork.Rollback();
                 Console.WriteLine(e);
                 return BadRequest(e);
             }

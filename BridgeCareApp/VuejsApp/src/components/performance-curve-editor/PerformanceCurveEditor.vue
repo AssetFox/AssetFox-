@@ -348,7 +348,7 @@ export default class PerformanceCurveEditor extends Vue {
           name: item.name,
           attribute: item.attribute,
           equation: item.equation.expression,
-          criterion: item.criterionLibrary.mergedCriteriaExpression
+          criterion: item.criterionLibrary.mergedCriteriaExpression != null ? item.criterionLibrary.mergedCriteriaExpression : ''
         }));
   }
 

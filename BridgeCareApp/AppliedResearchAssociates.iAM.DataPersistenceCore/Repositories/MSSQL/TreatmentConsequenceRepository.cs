@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
-using EFCore.BulkExtensions;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -18,12 +17,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public TreatmentConsequenceRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
-        {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-        }
+        public TreatmentConsequenceRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+            _unitOfWork = unitOfWork ??
+                                         throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateTreatmentConsequences(Dictionary<Guid, List<ConditionalTreatmentConsequence>> consequencesPerTreatmentId, string simulationName)
         {
@@ -31,26 +29,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var equationEntityPerConsequenceEntityId = new Dictionary<Guid, EquationEntity>();
             var consequenceEntityIdsPerExpression = new Dictionary<string, List<Guid>>();
 
-            var attributeNames = consequencesPerTreatmentId.Values
-                .SelectMany(_ => _.Select(__ => __.Attribute.Name).Distinct()).ToList();
-            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute
-                .Where(_ => attributeNames.Contains(_.Name)).ToList();
-
-            if (!attributeEntities.Any())
+            var allConsequences = consequencesPerTreatmentId.Values.SelectMany(_ => _).ToList();
+            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
+            var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
+            if (!allConsequences.All(_ => attributeNames.Contains(_.Attribute.Name)))
             {
-                throw new RowNotInTableException("No attributes found for treatment consequences.");
-            }
-
-            var attributeNamesFromDataSource = attributeEntities.Select(_ => _.Name).ToList();
-            if (!attributeNames.All(attributeName => attributeNamesFromDataSource.Contains(attributeName)))
-            {
-                var attributeNamesNotFound = attributeNames.Except(attributeNamesFromDataSource).ToList();
-                if (attributeNamesNotFound.Count() == 1)
+                var missingAttributes = allConsequences.Select(_ => _.Attribute.Name)
+                    .Except(attributeNames).ToList();
+                if (missingAttributes.Count == 1)
                 {
-                    throw new RowNotInTableException($"No attribute found having name {attributeNamesNotFound[0]}.");
+                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
                 }
 
-                throw new RowNotInTableException($"No attributes found having names: {string.Join(", ", attributeNamesNotFound)}.");
+                throw new RowNotInTableException(
+                    $"No attributes found having the names: {string.Join(", ", missingAttributes)}.");
             }
 
             consequencesPerTreatmentId.Keys.ForEach(treatmentId =>
@@ -87,36 +79,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 consequenceEntities.AddRange(entities);
             });
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.TreatmentConsequence.AddRange(consequenceEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(consequenceEntities);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.AddAll(consequenceEntities);
 
             if (equationEntityPerConsequenceEntityId.Values.Any())
             {
-                _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntityPerConsequenceEntityId,
+                _unitOfWork.EquationRepo.CreateEquations(equationEntityPerConsequenceEntityId,
                     DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence);
             }
 
             if (consequenceEntityIdsPerExpression.Values.Any())
             {
-                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(consequenceEntityIdsPerExpression,
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(consequenceEntityIdsPerExpression,
                     DataPersistenceConstants.CriterionLibraryJoinEntities.ConditionalTreatmentConsequence, simulationName);
             }
         }
 
         public void UpsertOrDeleteTreatmentConsequences(Dictionary<Guid, List<TreatmentConsequenceDTO>> treatmentConsequencePerTreatmentId,
-            Guid libraryId, Guid? userId = null)
+            Guid libraryId)
         {
             var treatmentConsequences = treatmentConsequencePerTreatmentId.SelectMany(_ => _.Value.ToList()).ToList();
 
-            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute.ToList();
+            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
             var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
             if (!treatmentConsequences.All(_ => attributeNames.Contains(_.Attribute)))
             {
@@ -138,7 +121,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entityIds = conditionalTreatmentConsequenceEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfDataPersistenceWork.Context.TreatmentConsequence
+            var existingEntityIds = _unitOfWork.Context.TreatmentConsequence
                 .Where(_ => _.SelectableTreatment.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
@@ -151,11 +134,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(conditionalTreatmentConsequenceEntities, predicatesPerCrudOperation, userId);
+                _unitOfWork.Context.UpsertOrDelete(conditionalTreatmentConsequenceEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(conditionalTreatmentConsequenceEntities, predicatesPerCrudOperation, userId);
+                _unitOfWork.Context.BulkUpsertOrDelete(conditionalTreatmentConsequenceEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
             }
 
             if (treatmentConsequences.Any(_ =>
@@ -166,8 +149,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 !string.IsNullOrEmpty(_.Equation.Expression))
                     .ToDictionary(_ => _.Id, _ => _.Equation.ToEntity());
 
-                _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntitiesPerJoinEntityId,
-                    DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence, userId);
+                _unitOfWork.EquationRepo.CreateEquations(equationEntitiesPerJoinEntityId,
+                    DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence);
             }
 
             if (treatmentConsequences.Any(_ =>
@@ -183,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             ConditionalTreatmentConsequenceId = _.Id
                         }).ToList();
 
-                _unitOfDataPersistenceWork.Context.AddAll(criterionLibraryJoinsToAdd, userId);
+                _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }
         }
     }

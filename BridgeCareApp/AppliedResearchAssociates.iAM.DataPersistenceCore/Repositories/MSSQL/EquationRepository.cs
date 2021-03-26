@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using EFCore.BulkExtensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -12,26 +11,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public EquationRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public EquationRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateEquations(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, string joinEntity, Guid? userId = null)
+        public void CreateEquations(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, string joinEntity)
         {
-            _unitOfDataPersistenceWork.Context.AddAll(equationEntityPerJoinEntityId.Values.ToList(), userId);
+            _unitOfWork.Context.AddAll(equationEntityPerJoinEntityId.Values.ToList(), _unitOfWork.UserEntity?.Id);
 
             switch (joinEntity)
             {
             case DataPersistenceConstants.EquationJoinEntities.PerformanceCurve:
-                JoinEquationsWithPerformanceCurves(equationEntityPerJoinEntityId, userId);
+                JoinEquationsWithPerformanceCurves(equationEntityPerJoinEntityId);
                 break;
 
             case DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence:
-                JoinEquationsWithTreatmentConsequences(equationEntityPerJoinEntityId, userId);
+                JoinEquationsWithTreatmentConsequences(equationEntityPerJoinEntityId);
                 break;
 
             case DataPersistenceConstants.EquationJoinEntities.TreatmentCost:
-                JoinEquationsWithTreatmentCosts(equationEntityPerJoinEntityId, userId);
+                JoinEquationsWithTreatmentCosts(equationEntityPerJoinEntityId);
                 break;
 
             default:
@@ -41,43 +40,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateEquations(List<EquationEntity> equationEntities)
         {
-            if (IsRunningFromXUnit)
-            {
-                equationEntities.ForEach(entity => _unitOfDataPersistenceWork.Context.Upsert(entity, entity.Id));
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsertOrUpdate(equationEntities);
-            }
+            _unitOfWork.Context.AddAll(equationEntities);
 
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.SaveChanges();
         }
 
-        private void JoinEquationsWithPerformanceCurves(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, Guid? userId = null)
+        private void JoinEquationsWithPerformanceCurves(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId)
         {
             var performanceCurveEquationJoinEntities = equationEntityPerJoinEntityId
                 .Select(_ => new PerformanceCurveEquationEntity { EquationId = _.Value.Id, PerformanceCurveId = _.Key })
                 .ToList();
 
-            _unitOfDataPersistenceWork.Context.AddAll(performanceCurveEquationJoinEntities, userId);
+            _unitOfWork.Context.AddAll(performanceCurveEquationJoinEntities, _unitOfWork.UserEntity?.Id);
         }
 
-        private void JoinEquationsWithTreatmentConsequences(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, Guid? userId = null)
+        private void JoinEquationsWithTreatmentConsequences(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId)
         {
             var treatmentConsequenceEquationJoinEntities = equationEntityPerJoinEntityId
                 .Select(_ => new ConditionalTreatmentConsequenceEquationEntity { EquationId = _.Value.Id, ConditionalTreatmentConsequenceId = _.Key })
                 .ToList();
 
-            _unitOfDataPersistenceWork.Context.AddAll(treatmentConsequenceEquationJoinEntities, userId);
+            _unitOfWork.Context.AddAll(treatmentConsequenceEquationJoinEntities, _unitOfWork.UserEntity?.Id);
         }
 
-        private void JoinEquationsWithTreatmentCosts(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId, Guid? userId = null)
+        private void JoinEquationsWithTreatmentCosts(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId)
         {
             var treatmentCostEquationJoinEntities = equationEntityPerJoinEntityId
                 .Select(_ => new TreatmentCostEquationEntity { EquationId = _.Value.Id, TreatmentCostId = _.Key })
                 .ToList();
 
-            _unitOfDataPersistenceWork.Context.AddAll(treatmentCostEquationJoinEntities, userId);
+            _unitOfWork.Context.AddAll(treatmentCostEquationJoinEntities, _unitOfWork.UserEntity?.Id);
         }
     }
 }

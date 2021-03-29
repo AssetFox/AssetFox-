@@ -48,6 +48,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual SimulationReportDetailEntity SimulationReportDetail { get; set; }
 
+        public virtual ICollection<ReportIndexEntity> SimulationReports { get; set; }
+
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
 
         public virtual ICollection<SimulationUserEntity> SimulationUserJoins { get; set; }

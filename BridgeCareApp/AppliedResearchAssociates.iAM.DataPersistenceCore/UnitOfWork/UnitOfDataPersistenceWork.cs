@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -77,6 +78,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IUserRepository _userRepo;
         private ISimulationReportDetailRepository _simulationReportDetailRepo;
         private IUserCriteriaRepository _userCriteriaRepo;
+        private IReportIndexRepository _reportIndexRepo;
+        private IAssetData _assetDataRepository;
 
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
 
@@ -120,7 +123,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IMaintainableAssetRepository MaintainableAssetRepo => _maintainableAssetRepo ??= new MaintainableAssetRepository(this);
 
-        public INetworkRepository NetworkRepo => _networkRepo ??= new NetworkRepository(this);
+        public virtual INetworkRepository NetworkRepo => _networkRepo ??= new NetworkRepository(this);
 
         public IPerformanceCurveRepository PerformanceCurveRepo => _performanceCurveRepo ??= new PerformanceCurveRepository(this);
 
@@ -151,6 +154,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ISimulationReportDetailRepository SimulationReportDetailRepo => _simulationReportDetailRepo ??= new SimulationReportDetailRepository(this);
 
         public IUserCriteriaRepository UserCriteriaRepo => _userCriteriaRepo ??= new UserCriteriaRepository(this);
+
+        public IReportIndexRepository ReportIndexRepository => _reportIndexRepo ??= new ReportIndexRepository(this);
+
+        public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTAssetDataRepository(this);
 
         public IDbContextTransaction DbContextTransaction
         {

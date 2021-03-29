@@ -379,10 +379,18 @@ iAM-legacy/DatabaseManager.dll
 
 # core connection file
 /BridgeCareApp/BridgeCareCore/coreConnection.json
+/BridgeCareApp/BridgeCareCore/coreConnection.Development.json
 /BridgeCareApp/AppliedResearchAssociates.iAM.DataPersistenceCore/Repositories/MSSQL/migrationConnection.json
+
+# test connection file
+/BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestCore/testConnections.json
 
 # esec file
 /BridgeCareApp/BridgeCareCore/esec.json
+
+# meta data files
+/BridgeCareApp/BridgeCareCore/MetaData/AttributeMetaData/metaData.json
+/BridgeCareApp/BridgeCareCore/MetaData/NetworkDefinitionRules/definitionRules.json
 
 # Generated Excel and json files
 /BridgeCareApp/BridgeCareCore/DownloadedNewReports/*

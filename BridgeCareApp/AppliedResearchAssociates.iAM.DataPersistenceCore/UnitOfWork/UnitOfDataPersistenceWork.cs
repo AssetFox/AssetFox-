@@ -149,14 +149,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTAssetDataRepository(this);
 
+        
         public UserEntity UserEntity { get; private set; }
 
         public IDbContextTransaction DbContextTransaction { get; private set; }
 
-        public void BeginTransaction()
-        {
-            DbContextTransaction = Context.Database.BeginTransaction();
-        }
+        public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
 
         public void SetUser(string username) =>
             UserEntity = Context.User.SingleOrDefault(_ => _.Username == username);

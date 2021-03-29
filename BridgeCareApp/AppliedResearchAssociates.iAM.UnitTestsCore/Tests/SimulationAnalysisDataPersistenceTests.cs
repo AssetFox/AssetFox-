@@ -14,6 +14,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public class SimulationAnalysisDataPersistenceTests
     {
         private readonly SimulationAnalysisDataPersistenceTestHelper _testHelper;
+        private const int SimulationId = 1171;
+        private const int SimulationIdWithCommitted = 1260;
 
         public SimulationAnalysisDataPersistenceTests() => _testHelper = new SimulationAnalysisDataPersistenceTestHelper();
 
@@ -23,15 +25,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
-                _testHelper.SetupAll();
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                _testHelper.CreateAttributes();
 
                 // Act
+                _testHelper.UnitOfWork.BeginTransaction();
                 _testHelper.CreateAttributeCriteriaAndEquationJoins();
-                _testHelper.UnitOfDataPersistenceWork.Commit();
+                _testHelper.UnitOfWork.Commit();
 
                 // Assert
                 var explorer = _testHelper.StandAloneSimulation.Network.Explorer;
-                var dataSourceExplorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
+                var dataSourceExplorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
                 AssertExplorerProperties(explorer, dataSourceExplorer);
             }
             finally
@@ -99,15 +103,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
-                _testHelper.SetupForNetwork();
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                _testHelper.CreateAttributes();
+                _testHelper.ReduceNumberOfFacilitiesAndSections(_testHelper.StandAloneSimulation);
 
                 // Act
+                _testHelper.UnitOfWork.BeginTransaction();
                 _testHelper.CreateNetwork();
-                _testHelper.UnitOfDataPersistenceWork.Commit();
+                _testHelper.UnitOfWork.Commit();
 
                 // Assert
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var dataSourceNetwork = _testHelper.UnitOfDataPersistenceWork.NetworkRepo.GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
+                var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var dataSourceNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
                 AssertNetworkProperties(_testHelper.StandAloneSimulation.Network, dataSourceNetwork);
             }
             finally
@@ -187,17 +194,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                _testHelper.ReduceNumberOfFacilitiesAndSections(_testHelper.StandAloneSimulation);
                 _testHelper.SetupForSimulation();
 
                 // Act
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.CreateSimulation(_testHelper.StandAloneSimulation);
-                _testHelper.UnitOfDataPersistenceWork.Commit();
+                _testHelper.UnitOfWork.BeginTransaction();
+                _testHelper.UnitOfWork.SimulationRepo.CreateSimulation(_testHelper.StandAloneSimulation);
+                _testHelper.UnitOfWork.Commit();
 
                 // Assert
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var dataSourceNetwork = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
+                var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var dataSourceNetwork = _testHelper.UnitOfWork.NetworkRepo
                     .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
+                _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulations = dataSourceNetwork.Simulations.ToList();
                 AssertSimulationProperties(_testHelper.StandAloneSimulation, dataSourceSimulations);
             }
@@ -222,20 +232,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
-                _testHelper.SetupForAnalysisMethod();
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                _testHelper.ReduceNumberOfFacilitiesAndSections(_testHelper.StandAloneSimulation);
+                _testHelper.SetupWithInvestmentPlan();
 
                 // Act
-                _testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.CreateAnalysisMethod(_testHelper.StandAloneSimulation.AnalysisMethod, _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.Commit();
+                _testHelper.UnitOfWork.BeginTransaction();
+                _testHelper.UnitOfWork.AnalysisMethodRepo.CreateAnalysisMethod(_testHelper.StandAloneSimulation.AnalysisMethod, _testHelper.StandAloneSimulation.Id);
+                _testHelper.UnitOfWork.Commit();
 
                 // Assert
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var dataSourceNetwork = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
+                var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var dataSourceNetwork = _testHelper.UnitOfWork.NetworkRepo
                     .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
+                _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
-                _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
-                _testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(dataSourceSimulation);
+                _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
+                _testHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(dataSourceSimulation);
                 var dataSourceAnalysisMethod = dataSourceSimulation.AnalysisMethod;
                 AssertAnalysisMethodProperties(_testHelper.StandAloneSimulation.AnalysisMethod, dataSourceAnalysisMethod);
             }
@@ -350,20 +363,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
-                _testHelper.SetupForPerformanceCurves();
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                _testHelper.ReduceNumberOfFacilitiesAndSections(_testHelper.StandAloneSimulation);
+                _testHelper.SetupForAll();
 
                 // Act
-                _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{_testHelper.StandAloneSimulation.Name} Performance Curve Library", _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurves(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.Commit();
+                _testHelper.UnitOfWork.BeginTransaction();
+                _testHelper.UnitOfWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{_testHelper.StandAloneSimulation.Name} Performance Curve Library", _testHelper.StandAloneSimulation.Id);
+                _testHelper.UnitOfWork.PerformanceCurveRepo.CreatePerformanceCurves(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), _testHelper.StandAloneSimulation.Id);
+                _testHelper.UnitOfWork.Commit();
 
                 // Assert
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var dataSourceNetwork = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
+                var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var dataSourceNetwork = _testHelper.UnitOfWork.NetworkRepo
                     .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
+                _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
-                _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(dataSourceSimulation);
+                _testHelper.UnitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(dataSourceSimulation);
                 var dataSourcePerformanceCurves = dataSourceSimulation.PerformanceCurves.ToList();
                 AssertPerformanCurveProperties(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), dataSourcePerformanceCurves);
             }
@@ -400,7 +416,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
-                _testHelper.SetupForSimulationOutput();
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                _testHelper.ReduceNumberOfFacilitiesAndSections(_testHelper.StandAloneSimulation);
+                _testHelper.SetupForAll();
 
                 var runner = new SimulationRunner(_testHelper.StandAloneSimulation);
                 var simulationIsRunning = true;
@@ -420,16 +438,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 }
 
                 // Act
-                _testHelper.UnitOfDataPersistenceWork.SimulationOutputRepo.CreateSimulationOutput(_testHelper.StandAloneSimulation.Id, _testHelper.StandAloneSimulation.Results);
-                _testHelper.UnitOfDataPersistenceWork.Commit();
+                _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(_testHelper.StandAloneSimulation.Id, _testHelper.StandAloneSimulation.Results);
+                _testHelper.UnitOfWork.Commit();
 
                 // Assert
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var dataSourceNetwork = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
+                var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var dataSourceNetwork = _testHelper.UnitOfWork.NetworkRepo
                     .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
+                _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
-                _testHelper.UnitOfDataPersistenceWork.SimulationOutputRepo.GetSimulationOutput(dataSourceSimulation);
+                _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(dataSourceSimulation);
                 AssertSimulationOutput(_testHelper.StandAloneSimulation.Results, dataSourceSimulation.Results);
             }
             finally
@@ -453,19 +471,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
-                _testHelper.SetupForInvestmentPlan();
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                _testHelper.ReduceNumberOfFacilitiesAndSections(_testHelper.StandAloneSimulation);
+                _testHelper.SetupForAll();
 
                 // Act
-                _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.CreateInvestmentPlan(_testHelper.StandAloneSimulation.InvestmentPlan, _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.Commit();
+                _testHelper.UnitOfWork.BeginTransaction();
+                _testHelper.UnitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(_testHelper.StandAloneSimulation.InvestmentPlan, _testHelper.StandAloneSimulation.Id);
+                _testHelper.UnitOfWork.Commit();
 
                 // Assert
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var dataSourceNetwork = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
+                var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var dataSourceNetwork = _testHelper.UnitOfWork.NetworkRepo
                     .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
+                _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
-                _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
+                _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
                 var dataSourceInvestmentPlan = dataSourceSimulation.InvestmentPlan;
                 AssertInvestmentPlanProperties(_testHelper.StandAloneSimulation.InvestmentPlan, dataSourceInvestmentPlan);
             }
@@ -539,20 +560,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
-                _testHelper.SetupForCommittedProjects();
+                _testHelper.SetStandAloneSimulation(SimulationIdWithCommitted);
+                _testHelper.ReduceNumberOfFacilitiesAndSectionsWithCommittedProjects(_testHelper.StandAloneSimulation);
+                _testHelper.SetupWithInvestmentPlan();
 
                 // Act
-                _testHelper.UnitOfDataPersistenceWork.CommittedProjectRepo.CreateCommittedProjects(_testHelper.StandAloneSimulation.CommittedProjects.ToList(), _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.Commit();
+                _testHelper.UnitOfWork.BeginTransaction();
+                _testHelper.UnitOfWork.CommittedProjectRepo.CreateCommittedProjects(
+                    _testHelper.StandAloneSimulation.CommittedProjects.ToList(), _testHelper.StandAloneSimulation.Id);
+                _testHelper.UnitOfWork.Commit();
 
                 // Assert
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var dataSourceNetwork = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
+                var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var dataSourceNetwork = _testHelper.UnitOfWork.NetworkRepo
                     .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
+                _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
-                _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
-                _testHelper.UnitOfDataPersistenceWork.CommittedProjectRepo.GetSimulationCommittedProjects(dataSourceSimulation);
+                _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
+                _testHelper.UnitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(dataSourceSimulation);
                 AssertCommittedProjectProperties(_testHelper.StandAloneSimulation.CommittedProjects.ToList(), dataSourceSimulation.CommittedProjects.ToList());
             }
             finally
@@ -604,22 +629,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                _testHelper.ReduceNumberOfFacilitiesAndSections(_testHelper.StandAloneSimulation);
                 _testHelper.SetupForSelectableTreatments();
 
                 // Act
-                _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo
+                _testHelper.UnitOfWork.BeginTransaction();
+                _testHelper.UnitOfWork.SelectableTreatmentRepo
                     .CreateTreatmentLibrary($"{_testHelper.StandAloneSimulation.Name} Simulation Treatment Library", _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.CreateSelectableTreatments(_testHelper.StandAloneSimulation.Treatments.ToList(), _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.Commit();
+                _testHelper.UnitOfWork.SelectableTreatmentRepo.CreateSelectableTreatments(_testHelper.StandAloneSimulation.Treatments.ToList(), _testHelper.StandAloneSimulation.Id);
+                _testHelper.UnitOfWork.Commit();
 
                 // Assert
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var dataSourceNetwork = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
+                var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var dataSourceNetwork = _testHelper.UnitOfWork.NetworkRepo
                     .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
+                _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
-                _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
-                _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(dataSourceSimulation);
+                _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
+                _testHelper.UnitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(dataSourceSimulation);
                 AssertSelectableTreatmentProperties(_testHelper.StandAloneSimulation.Treatments.ToList(), dataSourceSimulation.Treatments.ToList());
             }
             finally
@@ -722,314 +750,108 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void TestFullSimulationAnalysisIntegrationWithoutCommittedProjectsSchedulingsOrSupersessions()
+        public void TestLegacySimulationSynchronizerWithSimulationHavingCommittedProjects()
         {
             var testOutputHelper = new TestOutputHelper();
 
             try
             {
                 // Arrange
-                _testHelper.SetupForFullSimulationAnalysisIntegration();
+                _testHelper.SetStandAloneSimulation(SimulationIdWithCommitted);
+                _testHelper.ReduceNumberOfFacilitiesAndSectionsWithCommittedProjects(_testHelper.StandAloneSimulation);
 
                 // Act
-                _testHelper.CreateAttributeCriteriaAndEquationJoins();
-                _testHelper.CreateNetwork();
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.CreateSimulation(_testHelper.StandAloneSimulation);
-                _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.CreateInvestmentPlan(_testHelper.StandAloneSimulation.InvestmentPlan, _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.CreateAnalysisMethod(_testHelper.StandAloneSimulation.AnalysisMethod, _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{_testHelper.StandAloneSimulation.Name} Performance Curve Library", _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurves(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{_testHelper.StandAloneSimulation.Name} Simulation Treatment Library", _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.CreateSelectableTreatments(_testHelper.StandAloneSimulation.Treatments.ToList(), _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.Commit();
+                _testHelper.SynchronizeLegacySimulationWithCommittedProjects(SimulationIdWithCommitted);
 
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var network = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
-                    .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(network);
-                network.Simulations.ForEach(simulation =>
-                {
-                    _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
-                });
-
-                // Assert
-                AssertExplorerProperties(_testHelper.StandAloneSimulation.Network.Explorer, explorer);
-                AssertNetworkProperties(_testHelper.StandAloneSimulation.Network, network);
-                AssertSimulationProperties(_testHelper.StandAloneSimulation, network.Simulations.ToList());
-                var dataSourceSimulation = network.Simulations.ToList().First();
-                AssertInvestmentPlanProperties(_testHelper.StandAloneSimulation.InvestmentPlan, dataSourceSimulation.InvestmentPlan);
-                AssertAnalysisMethodProperties(_testHelper.StandAloneSimulation.AnalysisMethod, dataSourceSimulation.AnalysisMethod);
-                AssertPerformanCurveProperties(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), dataSourceSimulation.PerformanceCurves.ToList());
-                AssertSelectableTreatmentProperties(_testHelper.StandAloneSimulation.Treatments.ToList(), dataSourceSimulation.Treatments.ToList());
-
-                var simulation = _testHelper.StandAloneSimulation;
-                simulation.ClearResults();
-                var runner = new SimulationRunner(simulation);
-                var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) =>
-                {
-                    if (eventArgs.Message == "Simulation complete.")
-                    {
-                        simulationIsRunning = false;
-                    }
-                };
-                runner.Run();
-
-                while (simulationIsRunning)
-                {
-                    testOutputHelper.WriteLine("Simulation is running...");
-                }
-
-                dataSourceSimulation.ClearResults();
-                var dataSourceRunner = new SimulationRunner(dataSourceSimulation);
-                var dataSourceSimulationIsRunning = true;
-                dataSourceRunner.Information += (sender, eventArgs) =>
-                {
-                    if (eventArgs.Message == "Simulation complete.")
-                    {
-                        dataSourceSimulationIsRunning = false;
-                    }
-                };
-                dataSourceRunner.Run();
-
-                while (dataSourceSimulationIsRunning)
-                {
-                    testOutputHelper.WriteLine("Data source simulation is running...");
-                }
-
-                var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
-                var simulationOutputString = JsonConvert.SerializeObject(simulation.Results, settings);
-                var dataSourceSimulationOutput = JsonConvert.SerializeObject(dataSourceSimulation.Results, settings);
-                Assert.Equal(simulationOutputString, dataSourceSimulationOutput);
-            }
-            finally
-            {
-                // CleanUp
-                _testHelper.CleanUp();
-            }
-        }
-
-        [Fact]
-        public void TestFullSimulationAnalysisIntegrationWithoutCommittedProjectsWithSchedulingsAndSupersessions()
-        {
-            var testOutputHelper = new TestOutputHelper();
-
-            try
-            {
-                // Arrange
-                _testHelper.SetupForFullSimulationAnalysisIntegration();
-
-                // Act
-                _testHelper.CreateAttributeCriteriaAndEquationJoins();
-                _testHelper.CreateNetwork();
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.CreateSimulation(_testHelper.StandAloneSimulation);
-                _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.CreateInvestmentPlan(_testHelper.StandAloneSimulation.InvestmentPlan, _testHelper.StandAloneSimulation.Id);
-                _testHelper.AddTreatmentSchedulings();
-                _testHelper.AddTreatmentSupersessions();
-                _testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.CreateAnalysisMethod(_testHelper.StandAloneSimulation.AnalysisMethod, _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{_testHelper.StandAloneSimulation.Name} Performance Curve Library", _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurves(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{_testHelper.StandAloneSimulation.Name} Simulation Treatment Library", _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.CreateSelectableTreatments(_testHelper.StandAloneSimulation.Treatments.ToList(), _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.Commit();
-
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var network = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
-                    .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(network);
-                network.Simulations.ForEach(simulation =>
-                {
-                    _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
-                });
-
-                // Assert
-                AssertExplorerProperties(_testHelper.StandAloneSimulation.Network.Explorer, explorer);
-                AssertNetworkProperties(_testHelper.StandAloneSimulation.Network, network);
-                AssertSimulationProperties(_testHelper.StandAloneSimulation, network.Simulations.ToList());
-                var dataSourceSimulation = network.Simulations.ToList().First();
-                AssertInvestmentPlanProperties(_testHelper.StandAloneSimulation.InvestmentPlan, dataSourceSimulation.InvestmentPlan);
-                AssertAnalysisMethodProperties(_testHelper.StandAloneSimulation.AnalysisMethod, dataSourceSimulation.AnalysisMethod);
-                AssertPerformanCurveProperties(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), dataSourceSimulation.PerformanceCurves.ToList());
-                AssertSelectableTreatmentProperties(_testHelper.StandAloneSimulation.Treatments.ToList(), dataSourceSimulation.Treatments.ToList());
-
-                var simulation = _testHelper.StandAloneSimulation;
-                simulation.ClearResults();
-                var runner = new SimulationRunner(simulation);
-                var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) =>
-                {
-                    if (eventArgs.Message == "Simulation complete.")
-                    {
-                        simulationIsRunning = false;
-                    }
-                };
-                runner.Run();
-
-                while (simulationIsRunning)
-                {
-                    testOutputHelper.WriteLine("Simulation is running...");
-                }
-
-                dataSourceSimulation.ClearResults();
-                var dataSourceRunner = new SimulationRunner(dataSourceSimulation);
-                var dataSourceSimulationIsRunning = true;
-                dataSourceRunner.Information += (sender, eventArgs) =>
-                {
-                    if (eventArgs.Message == "Simulation complete.")
-                    {
-                        dataSourceSimulationIsRunning = false;
-                    }
-                };
-                dataSourceRunner.Run();
-
-                while (dataSourceSimulationIsRunning)
-                {
-                    testOutputHelper.WriteLine("Data source simulation is running...");
-                }
-
-                var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
-                var simulationOutputString = JsonConvert.SerializeObject(simulation.Results, settings);
-                var dataSourceSimulationOutput = JsonConvert.SerializeObject(dataSourceSimulation.Results, settings);
-                Assert.Equal(simulationOutputString, dataSourceSimulationOutput);
-            }
-            finally
-            {
-                // CleanUp
-                _testHelper.CleanUp();
-            }
-        }
-
-        [Fact]
-        public void TestFullSimulationAnalysisIntegrationWithCommittedProjectsSchedulingsAndSupersessions()
-        {
-            var testOutputHelper = new TestOutputHelper();
-
-            try
-            {
-                // Arrange
-                _testHelper.SetupForFullSimulationAnalysisIntegration();
-
-                // Act
-                _testHelper.CreateAttributeCriteriaAndEquationJoins();
-                _testHelper.CreateNetwork();
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.CreateSimulation(_testHelper.StandAloneSimulation);
-                _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.CreateInvestmentPlan(_testHelper.StandAloneSimulation.InvestmentPlan, _testHelper.StandAloneSimulation.Id);
-                _testHelper.AddCommittedProjects();
-                _testHelper.AddTreatmentSchedulings();
-                _testHelper.AddTreatmentSupersessions();
-                _testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.CreateAnalysisMethod(_testHelper.StandAloneSimulation.AnalysisMethod, _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{_testHelper.StandAloneSimulation.Name} Performance Curve Library", _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.CreatePerformanceCurves(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.CommittedProjectRepo.CreateCommittedProjects(_testHelper.StandAloneSimulation.CommittedProjects.ToList(), _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{_testHelper.StandAloneSimulation.Name} Simulation Treatment Library", _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.CreateSelectableTreatments(_testHelper.StandAloneSimulation.Treatments.ToList(), _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfDataPersistenceWork.Commit();
-
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var network = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
-                    .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(network);
-                network.Simulations.ForEach(simulation =>
-                {
-                    _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
-                });
-
-                // Assert
-                AssertExplorerProperties(_testHelper.StandAloneSimulation.Network.Explorer, explorer);
-                AssertNetworkProperties(_testHelper.StandAloneSimulation.Network, network);
-                AssertSimulationProperties(_testHelper.StandAloneSimulation, network.Simulations.ToList());
-                var dataSourceSimulation = network.Simulations.ToList().First();
-                AssertInvestmentPlanProperties(_testHelper.StandAloneSimulation.InvestmentPlan, dataSourceSimulation.InvestmentPlan);
-                AssertAnalysisMethodProperties(_testHelper.StandAloneSimulation.AnalysisMethod, dataSourceSimulation.AnalysisMethod);
-                AssertPerformanCurveProperties(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), dataSourceSimulation.PerformanceCurves.ToList());
-                AssertSelectableTreatmentProperties(_testHelper.StandAloneSimulation.Treatments.ToList(), dataSourceSimulation.Treatments.ToList());
-
-                var simulation = _testHelper.StandAloneSimulation;
-                simulation.ClearResults();
-                var runner = new SimulationRunner(simulation);
-                var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) =>
-                {
-                    if (eventArgs.Message == "Simulation complete.")
-                    {
-                        simulationIsRunning = false;
-                    }
-                };
-                runner.Run();
-
-                while (simulationIsRunning)
-                {
-                    testOutputHelper.WriteLine("Simulation is running...");
-                }
-
-                dataSourceSimulation.ClearResults();
-                var dataSourceRunner = new SimulationRunner(dataSourceSimulation);
-                var dataSourceSimulationIsRunning = true;
-                dataSourceRunner.Information += (sender, eventArgs) =>
-                {
-                    if (eventArgs.Message == "Simulation complete.")
-                    {
-                        dataSourceSimulationIsRunning = false;
-                    }
-                };
-                dataSourceRunner.Run();
-
-                while (dataSourceSimulationIsRunning)
-                {
-                    testOutputHelper.WriteLine("Data source simulation is running...");
-                }
-
-                var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
-                var simulationOutputString = JsonConvert.SerializeObject(simulation.Results, settings);
-                var dataSourceSimulationOutput = JsonConvert.SerializeObject(dataSourceSimulation.Results, settings);
-                Assert.Equal(simulationOutputString, dataSourceSimulationOutput);
-            }
-            finally
-            {
-                // CleanUp
-                _testHelper.CleanUp();
-            }
-        }
-
-        [Fact]
-        public void TestLegacySimulationSynchronization()
-        {
-            var testOutputHelper = new TestOutputHelper();
-
-            try
-            {
-                // Arrange
-                _testHelper.SetupForLegacySimulationSynchronization();
-
-                // Act
-                _testHelper.SynchronizeLegacySimulation();
-
-                // Assert
-                var explorer = _testHelper.UnitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-                var networks = _testHelper.UnitOfDataPersistenceWork.NetworkRepo.GetAllNetworks();
+                var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var networks = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
                 _testHelper.StandAloneSimulation.Network.Id = networks.First().Id;
-                var network = _testHelper.UnitOfDataPersistenceWork.NetworkRepo
+                var network = _testHelper.UnitOfWork.NetworkRepo
                     .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
-                _testHelper.UnitOfDataPersistenceWork.SimulationRepo.GetAllInNetwork(network);
+                _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(network);
                 network.Simulations.ForEach(simulation =>
                 {
-                    _testHelper.UnitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
-                    _testHelper.UnitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+                    _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+                    _testHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+                    _testHelper.UnitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
+                    _testHelper.UnitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+                    _testHelper.UnitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
                 });
 
+                var simulation = _testHelper.StandAloneSimulation;
+                simulation.ClearResults();
+                var runner = new SimulationRunner(simulation);
+                var simulationIsRunning = true;
+                runner.Information += (sender, eventArgs) =>
+                {
+                    if (eventArgs.Message == "Simulation complete.")
+                    {
+                        simulationIsRunning = false;
+                    }
+                };
+                runner.Run();
+
+                while (simulationIsRunning)
+                {
+                    testOutputHelper.WriteLine("Simulation is running...");
+                }
+
+                network.Simulations.First().ClearResults();
+                var dataSourceRunner = new SimulationRunner(network.Simulations.First());
+                var dataSourceSimulationIsRunning = true;
+                dataSourceRunner.Information += (sender, eventArgs) =>
+                {
+                    if (eventArgs.Message == "Simulation complete.")
+                    {
+                        dataSourceSimulationIsRunning = false;
+                    }
+                };
+                dataSourceRunner.Run();
+
+                while (dataSourceSimulationIsRunning)
+                {
+                    testOutputHelper.WriteLine("Data source simulation is running...");
+                }
+
                 // Assert
+                AssertSimulationOutputsEqual(simulation.Results, network.Simulations.First().Results);
+            }
+            finally
+            {
+                // CleanUp
+                _testHelper.CleanUp();
+            }
+        }
+
+        [Fact]
+        public void TestLegacySimulationSynchronizerWithSimulationHavingNoCommittedProjects()
+        {
+            var testOutputHelper = new TestOutputHelper();
+
+            try
+            {
+                // Arrange
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                _testHelper.ReduceNumberOfFacilitiesAndSections(_testHelper.StandAloneSimulation);
+
+                // Act
+                _testHelper.SynchronizeLegacySimulation(SimulationId);
+
+                var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var networks = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
+                _testHelper.StandAloneSimulation.Network.Id = networks.First().Id;
+                var network = _testHelper.UnitOfWork.NetworkRepo
+                    .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
+                _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(network);
+                network.Simulations.ForEach(simulation =>
+                {
+                    _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+                    _testHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+                    _testHelper.UnitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
+                    _testHelper.UnitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+                    _testHelper.UnitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+                });
+
                 var dataSourceSimulation = network.Simulations.ToList().First();
 
                 var simulation = _testHelper.StandAloneSimulation;
@@ -1067,16 +889,114 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     testOutputHelper.WriteLine("Data source simulation is running...");
                 }
 
-                var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
-                var simulationOutputString = JsonConvert.SerializeObject(simulation.Results, settings);
-                var dataSourceSimulationOutput = JsonConvert.SerializeObject(dataSourceSimulation.Results, settings);
-                Assert.Equal(simulationOutputString, dataSourceSimulationOutput);
+                // Assert
+                AssertSimulationOutputsEqual(simulation.Results, dataSourceSimulation.Results);
             }
             finally
             {
                 // CleanUp
                 _testHelper.CleanUp();
             }
+        }
+
+        private void AssertSimulationOutputsEqual(SimulationOutput output, SimulationOutput dataSourceOutput)
+        {
+            var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
+            var simulationOutputString =
+                JsonConvert.SerializeObject(SortAllSimulationOutputProperties(output), settings);
+            var dataSourceSimulationOutputString =
+                JsonConvert.SerializeObject(SortAllSimulationOutputProperties(dataSourceOutput), settings);
+            Assert.Equal(simulationOutputString, dataSourceSimulationOutputString);
+        }
+
+        private SimulationOutput SortAllSimulationOutputProperties(SimulationOutput output)
+        {
+            var simulationOutput = new SimulationOutput { InitialConditionOfNetwork = output.InitialConditionOfNetwork };
+
+            var years = output.Years.OrderBy(_ => _.Year).Select(year =>
+            {
+                var sections = year.Sections.OrderBy(_ => _.SectionName).Select(section =>
+                {
+                    var valuePerNumAttr = section.ValuePerNumericAttribute.OrderBy(_ => _.Key)
+                        .ToDictionary(_ => _.Key, _ => _.Value);
+                    section.ValuePerNumericAttribute.Clear();
+                    section.ValuePerNumericAttribute.CopyFrom(valuePerNumAttr);
+
+                    var valuePerTxtAttr = section.ValuePerTextAttribute.OrderBy(_ => _.Key)
+                        .ToDictionary(_ => _.Key, _ => _.Value);
+                    section.ValuePerTextAttribute.Clear();
+                    section.ValuePerTextAttribute.CopyFrom(valuePerTxtAttr);
+
+                    var treatmentConsiderations = section.TreatmentConsiderations.OrderBy(_ => _.TreatmentName)
+                        .Select(treatmentConsiderationDetail =>
+                        {
+                            var budgetUsages = treatmentConsiderationDetail.BudgetUsages.OrderBy(_ => _.BudgetName);
+                            treatmentConsiderationDetail.BudgetUsages.Clear();
+                            treatmentConsiderationDetail.BudgetUsages.AddRange(budgetUsages);
+
+                            var cashFlowConsiderations =
+                                treatmentConsiderationDetail.CashFlowConsiderations.OrderBy(_ => _.CashFlowRuleName);
+                            treatmentConsiderationDetail.CashFlowConsiderations.Clear();
+                            treatmentConsiderationDetail.CashFlowConsiderations.AddRange(cashFlowConsiderations);
+                            return treatmentConsiderationDetail;
+                        });
+                    section.TreatmentConsiderations.Clear();
+                    section.TreatmentConsiderations.AddRange(treatmentConsiderations);
+
+                    var treatmentOptions = section.TreatmentOptions.OrderBy(_ => _.TreatmentName);
+                    section.TreatmentOptions.Clear();
+                    section.TreatmentOptions.AddRange(treatmentOptions);
+
+                    var treatmentRejections = section.TreatmentRejections.OrderBy(_ => _.TreatmentName);
+                    section.TreatmentRejections.Clear();
+                    section.TreatmentRejections.AddRange(treatmentRejections);
+
+                    var treatmentSchedulingCollisions =
+                        section.TreatmentSchedulingCollisions.OrderBy(_ => _.NameOfUnscheduledTreatment);
+                    section.TreatmentSchedulingCollisions.Clear();
+                    section.TreatmentSchedulingCollisions.AddRange(treatmentSchedulingCollisions);
+
+                    return section;
+                }).ToList();
+                year.Sections.Clear();
+                year.Sections.AddRange(sections);
+
+                var budgets = year.Budgets.OrderBy(_ => _.BudgetName);
+                year.Budgets.Clear();
+                year.Budgets.AddRange(budgets);
+
+                var deficientConditionGoals = year.DeficientConditionGoals.OrderBy(_ => _.GoalName);
+                year.DeficientConditionGoals.Clear();
+                year.DeficientConditionGoals.AddRange(deficientConditionGoals);
+
+                var targetConditionGoals = year.TargetConditionGoals.OrderBy(_ => _.GoalName);
+                year.TargetConditionGoals.Clear();
+                year.TargetConditionGoals.AddRange(targetConditionGoals);
+
+                return year;
+            }).ToList();
+            simulationOutput.Years.Clear();
+            simulationOutput.Years.AddRange(years);
+
+            var initialSectionSummaries = output.InitialSectionSummaries.OrderBy(_ => _.SectionName).Select(
+                sectionSummary =>
+                {
+                    var valuePerNumAttr = sectionSummary.ValuePerNumericAttribute.OrderBy(_ => _.Key)
+                        .ToDictionary(_ => _.Key, _ => _.Value);
+                    sectionSummary.ValuePerNumericAttribute.Clear();
+                    sectionSummary.ValuePerNumericAttribute.CopyFrom(valuePerNumAttr);
+
+                    var valuePerTxtAttr = sectionSummary.ValuePerTextAttribute.OrderBy(_ => _.Key)
+                        .ToDictionary(_ => _.Key, _ => _.Value);
+                    sectionSummary.ValuePerTextAttribute.Clear();
+                    sectionSummary.ValuePerTextAttribute.CopyFrom(valuePerTxtAttr);
+
+                    return sectionSummary;
+                });
+            simulationOutput.InitialSectionSummaries.Clear();
+            simulationOutput.InitialSectionSummaries.AddRange(initialSectionSummaries);
+
+            return simulationOutput;
         }
     }
 }

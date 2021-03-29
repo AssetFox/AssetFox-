@@ -25,11 +25,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         public BudgetPriorityTests()
         {
-            _testHelper = new TestHelper("IAMv2bp");
+            _testHelper = new TestHelper();
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new BudgetPriorityController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
+            _controller = new BudgetPriorityController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
         }
 
         public BudgetPriorityLibraryEntity TestBudgetPriorityLibrary { get; } = new BudgetPriorityLibraryEntity
@@ -63,19 +63,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         private void SetupForGet()
         {
-            _testHelper.UnitOfDataPersistenceWork.Context.BudgetPriorityLibrary.Add(TestBudgetPriorityLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.BudgetPriority.Add(TestBudgetPriority);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.BudgetPriorityLibrary.Add(TestBudgetPriorityLibrary);
+            _testHelper.UnitOfWork.Context.BudgetPriority.Add(TestBudgetPriority);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void SetupForUpsertOrDelete()
         {
             SetupForGet();
-            _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.BudgetLibrary.Add(TestBudgetLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.Budget.Add(TestBudget);
-            _testHelper.UnitOfDataPersistenceWork.Context.BudgetPercentagePair.Add(TestBudgetPercentagePair);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.BudgetLibrary.Add(TestBudgetLibrary);
+            _testHelper.UnitOfWork.Context.Budget.Add(TestBudget);
+            _testHelper.UnitOfWork.Context.BudgetPercentagePair.Add(TestBudgetPercentagePair);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         [Fact]
@@ -190,7 +190,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                var budgetPriorityLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.BudgetPriorityLibrary
+                var budgetPriorityLibraryEntity = _testHelper.UnitOfWork.Context.BudgetPriorityLibrary
                     .Include(_ => _.BudgetPriorities)
                     .ThenInclude(_ => _.CriterionLibraryBudgetPriorityJoin)
                     .ThenInclude(_ => _.CriterionLibrary)
@@ -245,14 +245,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == BudgetPriorityLibraryId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetPriority.Any(_ => _.Id == BudgetPriorityId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetPriorityLibrarySimulation.Any(_ =>
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == BudgetPriorityLibraryId));
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriority.Any(_ => _.Id == BudgetPriorityId));
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriorityLibrarySimulation.Any(_ =>
                     _.BudgetPriorityLibraryId == BudgetPriorityLibraryId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
                         _.BudgetPriorityId == BudgetPriorityId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetPercentagePair.Any(_ => _.Id == BudgetPercentagePairId));
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPercentagePair.Any(_ => _.Id == BudgetPercentagePairId));
             }
             finally
             {

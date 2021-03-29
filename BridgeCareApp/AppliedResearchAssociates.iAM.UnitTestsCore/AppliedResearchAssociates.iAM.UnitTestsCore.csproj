@@ -45,14 +45,4 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="testConnections.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Mocks\" />
-  </ItemGroup>
-
 </Project>

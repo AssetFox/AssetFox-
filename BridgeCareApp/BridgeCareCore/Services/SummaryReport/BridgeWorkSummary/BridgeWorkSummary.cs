@@ -89,7 +89,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                         costPerTreatmentPerYear[yearData.Year][section.AppliedTreatment] = newCostAndCount;
                     }
 
-
                     section.TreatmentOptions.ForEach(_ =>
                     {
                         if (!treatments.Contains(_.TreatmentName))

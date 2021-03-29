@@ -23,11 +23,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         public InvestmentTests()
         {
-            _testHelper = new TestHelper("IAMv2i");
+            _testHelper = new TestHelper();
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new InvestmentController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
+            _controller = new InvestmentController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
         }
 
         public BudgetLibraryEntity TestBudgetLibrary { get; } = new BudgetLibraryEntity
@@ -62,24 +62,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         private void SetupForGet()
         {
-            _testHelper.UnitOfDataPersistenceWork.Context.BudgetLibrary.Add(TestBudgetLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.Budget.Add(TestBudget);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.BudgetLibrary.Add(TestBudgetLibrary);
+            _testHelper.UnitOfWork.Context.Budget.Add(TestBudget);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void SetupForGetAll()
         {
             SetupForGet();
             TestInvestmentPlan.SimulationId = _testHelper.TestSimulation.Id;
-            _testHelper.UnitOfDataPersistenceWork.Context.InvestmentPlan.Add(TestInvestmentPlan);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.InvestmentPlan.Add(TestInvestmentPlan);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void SetupForUpsertOrDelete()
         {
             SetupForGetAll();
-            _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         [Fact]
@@ -235,7 +235,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                var budgetLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.BudgetLibrary
+                var budgetLibraryEntity = _testHelper.UnitOfWork.Context.BudgetLibrary
                     .Include(_ => _.Budgets)
                     .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
                     .ThenInclude(_ => _.CriterionLibrary)
@@ -258,7 +258,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 Assert.Equal(addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].BudgetAmounts[0].Value,
                     budgetAmountEntity.Value);
 
-                var investmentPlanEntity = _testHelper.UnitOfDataPersistenceWork.Context.InvestmentPlan
+                var investmentPlanEntity = _testHelper.UnitOfWork.Context.InvestmentPlan
                     .Single(_ => _.Id == InvestmentPlanId);
                 Assert.Equal(addOrUpdateInvestmentDTO.InvestmentPlan.MinimumProjectCostLimit,
                     investmentPlanEntity.MinimumProjectCostLimit);
@@ -299,15 +299,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetLibrary.Any(_ => _.Id == BudgetLibraryId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.Budget.Any(_ => _.Id == BudgetId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetLibrarySimulation.Any(_ =>
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == BudgetLibraryId));
+                Assert.True(!_testHelper.UnitOfWork.Context.Budget.Any(_ => _.Id == BudgetId));
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetLibrarySimulation.Any(_ =>
                     _.BudgetLibraryId == BudgetLibraryId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibraryBudget.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ =>
                         _.BudgetId == BudgetId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.BudgetAmount.Any(_ => _.Id == BudgetAmountId));
+                    !_testHelper.UnitOfWork.Context.BudgetAmount.Any(_ => _.Id == BudgetAmountId));
             }
             finally
             {

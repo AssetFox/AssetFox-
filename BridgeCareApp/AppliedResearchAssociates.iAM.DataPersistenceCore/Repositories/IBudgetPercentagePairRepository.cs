@@ -9,6 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void CreateBudgetPercentagePairs(Dictionary<Guid, List<(Guid budgetId, BudgetPercentagePair percentagePair)>> percentagePairPerBudgetIdPerPriorityId);
 
-        void UpsertOrDeleteBudgetPercentagePairs(Dictionary<Guid, List<BudgetPercentagePairDTO>> percentagePairsPerPriorityId, Guid libraryId, Guid? userId = null);
+        void UpsertOrDeleteBudgetPercentagePairs(Dictionary<Guid, List<BudgetPercentagePairDTO>> percentagePairsPerPriorityId, Guid libraryId);
     }
 }

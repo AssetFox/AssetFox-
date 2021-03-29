@@ -5,22 +5,26 @@ using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
-namespace BridgeCareCore.Services
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
 {
-    public class LegacySimulationSynchronizerService
+    public class MockLegacySimulationSynchronizerService
     {
         private const int LegacyNetworkId = 13;
 
         private readonly IHubContext<BridgeCareHub> _hubContext;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly SimulationAnalysisDataPersistenceTestHelper _testHelper;
 
-        public LegacySimulationSynchronizerService(IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfWork)
+        public MockLegacySimulationSynchronizerService(IHubContext<BridgeCareHub> hub,
+            UnitOfDataPersistenceWork unitOfWork, SimulationAnalysisDataPersistenceTestHelper testHelper)
         {
             _hubContext = hub;
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfWork = unitOfWork;
+            _testHelper = testHelper;
         }
 
         private DataAccessor GetDataAccessor() => new DataAccessor(_unitOfWork.LegacyConnection, null);
@@ -32,7 +36,7 @@ namespace BridgeCareCore.Services
             _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
         }
 
-        private void SynchronizeNetwork(Network network)
+        private void SynchronizeNetwork(Network network, Guid? userId = null)
         {
             if (_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
             {
@@ -51,10 +55,10 @@ namespace BridgeCareCore.Services
                 throw new RowNotInTableException($"No network found having id {network.Id}.");
             }
 
-            var explorerNetworkFacilityNames = network.Facilities.Select(_ => _.Name).ToHashSet();
-            var explorerNetworkSectionNamesAndAreas = network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
-            var facilityNames = _unitOfWork.Context.Facility.Select(_ => _.Name).ToHashSet();
-            var sectionNamesAndAreas = _unitOfWork.Context.Section.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
+            var explorerNetworkFacilityNames = Enumerable.ToHashSet(network.Facilities.Select(_ => _.Name));
+            var explorerNetworkSectionNamesAndAreas = Enumerable.ToHashSet(network.Sections.Select(_ => $"{_.Name}{_.Area}"));
+            var facilityNames = Enumerable.ToHashSet(_unitOfWork.Context.Facility.Select(_ => _.Name));
+            var sectionNamesAndAreas = Enumerable.ToHashSet(_unitOfWork.Context.Section.Select(_ => $"{_.Name}{_.Area}"));
             if (!explorerNetworkFacilityNames.SetEquals(facilityNames) || !explorerNetworkSectionNamesAndAreas.SetEquals(sectionNamesAndAreas))
             {
                 _unitOfWork.NetworkRepo.DeleteNetworkData();
@@ -71,7 +75,7 @@ namespace BridgeCareCore.Services
 
                 _unitOfWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(simulation.Network.Explorer);
             }
-            
+
             SendRealTimeMessage("Inserting simulation data...");
 
             _unitOfWork.SimulationRepo.CreateSimulation(simulation);
@@ -104,7 +108,7 @@ namespace BridgeCareCore.Services
             }
         }
 
-        public void Synchronize(int simulationId, string username)
+        public void Synchronize(int simulationId, string username, bool withCommittedProjects = false)
         {
             try
             {
@@ -114,6 +118,14 @@ namespace BridgeCareCore.Services
                 _unitOfWork.LegacyConnection.Open();
 
                 var simulation = dataAccessor.GetStandAloneSimulation(LegacyNetworkId, simulationId);
+                if (withCommittedProjects)
+                {
+                    _testHelper.ReduceNumberOfFacilitiesAndSectionsWithCommittedProjects(simulation);
+                }
+                else
+                {
+                    _testHelper.ReduceNumberOfFacilitiesAndSections(simulation);
+                }
 
                 _unitOfWork.LegacyConnection.Close();
 

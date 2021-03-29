@@ -7,7 +7,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
 using AppliedResearchAssociates.iAM.Domains;
-using EFCore.BulkExtensions;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -17,11 +16,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public TreatmentCostRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public TreatmentCostRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+            _unitOfWork = unitOfWork ??
+                                         throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateTreatmentCosts(Dictionary<Guid, List<TreatmentCost>> treatmentCostsPerTreatmentId, string simulationName)
         {
@@ -62,38 +61,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 costEntities.AddRange(entities);
             });
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.TreatmentCost.AddRange(costEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(costEntities);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.AddAll(costEntities);
 
             if (equationEntityPerCostEntityId.Values.Any())
             {
-                _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntityPerCostEntityId,
+                _unitOfWork.EquationRepo.CreateEquations(equationEntityPerCostEntityId,
                     DataPersistenceConstants.EquationJoinEntities.TreatmentCost);
             }
 
             if (costEntityIdsPerExpression.Values.Any())
             {
-                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(costEntityIdsPerExpression,
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(costEntityIdsPerExpression,
                     DataPersistenceConstants.EquationJoinEntities.TreatmentCost, simulationName);
             }
         }
 
-        public void UpsertOrDeleteTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> treatmentCostPerTreatmentId, Guid libraryId, Guid? userId = null)
+        public void UpsertOrDeleteTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> treatmentCostPerTreatmentId, Guid libraryId)
         {
             var treatmentCostEntities = treatmentCostPerTreatmentId.SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key)))
                 .ToList();
 
             var entityIds = treatmentCostEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfDataPersistenceWork.Context.TreatmentCost
+            var existingEntityIds = _unitOfWork.Context.TreatmentCost
                 .Where(_ => _.SelectableTreatment.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
@@ -106,11 +96,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (IsRunningFromXUnit)
             {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(treatmentCostEntities, predicatesPerCrudOperation, userId);
+                _unitOfWork.Context.UpsertOrDelete(treatmentCostEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
             }
             else
             {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(treatmentCostEntities, predicatesPerCrudOperation, userId);
+                _unitOfWork.Context.BulkUpsertOrDelete(treatmentCostEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
             }
 
             var treatmentCosts = treatmentCostPerTreatmentId.SelectMany(_ => _.Value).ToList();
@@ -123,8 +113,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 !string.IsNullOrEmpty(_.Equation.Expression))
                     .ToDictionary(_ => _.Id, _ => _.Equation.ToEntity());
 
-                _unitOfDataPersistenceWork.EquationRepo.CreateEquations(equationEntityPerTreatmentCostId,
-                    DataPersistenceConstants.EquationJoinEntities.TreatmentCost, userId);
+                _unitOfWork.EquationRepo.CreateEquations(equationEntityPerTreatmentCostId,
+                    DataPersistenceConstants.EquationJoinEntities.TreatmentCost);
             }
 
             if (treatmentCosts.Any(_ =>
@@ -140,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             TreatmentCostId = _.Id
                         }).ToList();
 
-                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionLibraryJoinsToAdd, userId);
+                _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }
         }
     }

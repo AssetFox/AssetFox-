@@ -21,7 +21,7 @@ namespace BridgeCareCore.Controllers
         private readonly ISummaryReportGenerator _summaryReportGenerator;
         private readonly IHubContext<BridgeCareHub> _hubContext;
         private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public SummaryReportController(ISummaryReportGenerator summaryReportGenerator,
             ILogger<SummaryReportController> logger, IHubContext<BridgeCareHub> hub, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
@@ -30,7 +30,7 @@ namespace BridgeCareCore.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _hubContext = hub ?? throw new ArgumentNullException(nameof(hub));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         [HttpPost]
@@ -41,7 +41,8 @@ namespace BridgeCareCore.Controllers
             var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
             var reportDetailDto = new SimulationReportDetailDTO
             {
-                SimulationId = simulationId, Status = "Starting report generation..."
+                SimulationId = simulationId,
+                Status = "Starting report generation..."
             };
 
             try
@@ -82,6 +83,6 @@ namespace BridgeCareCore.Controllers
                 .SendAsync("BroadcastSummaryReportGenerationStatus", dto);
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto, UserInfoDTO userInfo) =>
-            _unitOfDataPersistenceWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto, userInfo);
+            _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto, userInfo);
     }
 }

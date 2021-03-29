@@ -317,7 +317,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 worksheet.Cells[row, column].Value = Convert.ToDouble(worksheet.Cells[budgetTotalRow, column].Value) - totalSpent;
                 row++;
 
-                if(totalSpent != 0)
+                if (totalSpent != 0)
                 {
                     worksheet.Cells[row, column].Formula = worksheet.Cells[committedTotalRow, column] + "/" + totalSpent;
                 }
@@ -330,11 +330,11 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 worksheet.Cells[row, column].Formula = 1 + "-" + worksheet.Cells[row - 1, column];
             }
             worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column] + ")";
-            if(worksheet.Cells[budgetTotalRow, column + 1].Value != null)
+            if (worksheet.Cells[budgetTotalRow, column + 1].Value != null)
             {
                 worksheet.Cells[startRow, column + 2].Formula = worksheet.Cells[startRow, column + 1] + "/" + worksheet.Cells[budgetTotalRow, column + 1];
             }
-            
+
             worksheet.Cells[startRow, column + 2].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow, column + 3].Value = "Percentage of Total Budget that was Unspent";
 

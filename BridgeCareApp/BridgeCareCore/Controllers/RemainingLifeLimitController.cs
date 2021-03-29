@@ -13,12 +13,12 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class RemainingLifeLimitController : ControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IEsecSecurity _esecSecurity;
 
         public RemainingLifeLimitController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
+            _unitOfWork = unitOfDataPersistenceWork ??
                                          throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
         }
@@ -30,7 +30,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.RemainingLifeLimitRepo
+                var result = await _unitOfWork.RemainingLifeLimitRepo
                     .RemainingLifeLimitLibrariesWithRemainingLifeLimits();
                 return Ok(result);
             }
@@ -49,21 +49,21 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
-                _unitOfDataPersistenceWork.BeginTransaction();
+                _unitOfWork.BeginTransaction();
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfDataPersistenceWork.RemainingLifeLimitRepo
+                    _unitOfWork.RemainingLifeLimitRepo
                         .UpsertRemainingLifeLimitLibrary(dto, simulationId, userInfo);
-                    _unitOfDataPersistenceWork.RemainingLifeLimitRepo
+                    _unitOfWork.RemainingLifeLimitRepo
                         .UpsertOrDeleteRemainingLifeLimits(dto.RemainingLifeLimits, dto.Id, userInfo);
                 });
 
-                _unitOfDataPersistenceWork.Commit();
+                _unitOfWork.Commit();
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
+                _unitOfWork.Rollback();
                 Console.WriteLine(e);
                 return BadRequest(e);
             }
@@ -76,15 +76,15 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfDataPersistenceWork.BeginTransaction();
-                await Task.Factory.StartNew(() => _unitOfDataPersistenceWork.RemainingLifeLimitRepo
+                _unitOfWork.BeginTransaction();
+                await Task.Factory.StartNew(() => _unitOfWork.RemainingLifeLimitRepo
                     .DeleteRemainingLifeLimitLibrary(libraryId));
-                _unitOfDataPersistenceWork.Commit();
+                _unitOfWork.Commit();
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
+                _unitOfWork.Rollback();
                 Console.WriteLine(e);
                 return BadRequest(e);
             }

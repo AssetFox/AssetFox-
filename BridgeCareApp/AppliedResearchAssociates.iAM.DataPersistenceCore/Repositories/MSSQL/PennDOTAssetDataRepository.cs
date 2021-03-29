@@ -109,7 +109,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var lookupSource = KeyProperties[keyName];
             var targetSegment = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
             if (targetSegment == null) return new List<SegmentAttributeDatum>();
-            var segment = _unitofwork.Context.Section.FirstOrDefault(_ => _.Id == targetSegment.SegmentId);
+            var segment = _unitofwork.Context.Section.Where(_ => _.Id == targetSegment.SegmentId)
+                .Include(_ => _.NumericAttributeValueHistories).ThenInclude(_ => _.Attribute)
+                .Include(_ => _.TextAttributeValueHistories).ThenInclude(_ => _.Attribute)
+                .FirstOrDefault();
             if (segment == null) return new List<SegmentAttributeDatum>();
 
             // Populate the return value list
@@ -123,6 +126,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 returnValueList.Add(new SegmentAttributeDatum(textAttribute.Attribute.Name, textAttribute.Value));
             }
+            // Add BMSID
+            returnValueList.Add(new SegmentAttributeDatum("BMSID", segment.Name));
 
             return returnValueList;
         }

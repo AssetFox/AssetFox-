@@ -34,6 +34,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private InventoryParameters _failedQuery = new InventoryParameters() { BRKey = -1, BMSID = String.Empty };
 
+        private List<SegmentAttributeDatum> segmentData;
+
         public InventoryReport(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results)
         {
             _repository = repository;
@@ -55,7 +57,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             if (!Validate(reportKeys)) return; // report failed due to validation
 
             // Check if asset actually exists
-            List<SegmentAttributeDatum> segmentData;
             string providedKey;
             if (reportKeys.BRKey < 1)
             {
@@ -65,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             else
             {
                 providedKey = $"BRKey:  {reportKeys.BRKey}";
-                segmentData = _repository.AssetDataRepository.GetAssetAttributes("BRKey", reportKeys.BRKey.ToString());
+                segmentData = _repository.AssetDataRepository.GetAssetAttributes("BRKey_", reportKeys.BRKey.ToString());
             }
             if (segmentData.Count() < 1)
             {
@@ -75,9 +76,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             var resultsString = new StringBuilder();
-            resultsString.Append($"<p>BRKey: {segmentData.First(_ => _.Name == "BRKey").Value}");
-            resultsString.Append($"<p>BMSID: {segmentData.First(_ => _.Name == "BMSID").Value}");
+            resultsString.Append($"<p>BRKey: {GetAttribute("BRKEY_")}</p>");
+            resultsString.Append($"<p>BMSID: {GetAttribute("BMSID")}</p>");
             Results = resultsString.ToString();
+            IsComplete = true;
             return;
         }
 
@@ -137,5 +139,24 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return true;
         }
 
+        private string GetAttribute(string attributeName)
+        {
+            try
+            {
+                return segmentData.First(_ => _.Name == attributeName).Value;
+            }
+            catch(Exception e)
+            {
+                Errors.Add($"Unable to find attribute {attributeName}");
+                return "";
+            }
+        }
+
+        private string CreateHTMLSection(string sectionName, List<string> attributes)
+        {
+            var sectionString = new StringBuilder($"<tr><th colspan=\"4\">{sectionName}</th><tr>");
+
+            return sectionString;
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace BridgeCareCore.Interfaces.Simulation
 {
     public interface ISimulationAnalysis
     {
-        Task CreateAndRunPermitted(UserInfoDTO userInfo, Guid networkId, Guid simulationId);
+        Task CreateAndRunPermitted(Guid networkId, Guid simulationId);
 
         Task CreateAndRun(Guid networkId, Guid simulationId);
     }

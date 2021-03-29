@@ -3,7 +3,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -21,11 +21,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         public AnalysisMethodTests()
         {
-            _testHelper = new TestHelper("IAMv2am");
+            _testHelper = new TestHelper();
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new AnalysisMethodController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
+            _controller = new AnalysisMethodController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object);
         }
 
         public AnalysisMethodEntity TestAnalysis { get; } = new AnalysisMethodEntity
@@ -48,15 +49,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         private void SetupForGet()
         {
             TestAnalysis.SimulationId = _testHelper.TestSimulation.Id;
-            _testHelper.UnitOfDataPersistenceWork.Context.AnalysisMethod.Add(TestAnalysis);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.AnalysisMethod.Add(TestAnalysis);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void SetupForUpsert()
         {
             SetupForGet();
-            _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         [Fact]
@@ -82,9 +83,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         {
             try
             {
+                // Arrange
+                var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
+                var dto = TestAnalysis.ToDto();
+                TestBenefit.Attribute = attributeEntity;
+                dto.Benefit = TestBenefit.ToDto();
+                dto.Benefit.Attribute = attributeEntity.Name;
+
                 // Act
                 var result =
-                    await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, TestAnalysis.ToDto());
+                    await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, dto);
 
                 // Assert
                 Assert.IsType<OkResult>(result);
@@ -129,17 +137,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             {
                 // Arrange
                 var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
-                var dto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
+                var analysisMethodDto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(AnalysisMethodDTO));
 
+                analysisMethodDto.Benefit = new BenefitDTO
+                {
+                    Id = Guid.NewGuid(),
+                    Limit = 0.0,
+                    Attribute = _testHelper.UnitOfWork.Context.Attribute.First().Name
+                };
+
                 // Act
-                await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, dto);
+                await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, analysisMethodDto);
 
                 // Assert
-                var analysisMethodEntity = _testHelper.UnitOfDataPersistenceWork.Context.AnalysisMethod
-                    .SingleOrDefault(_ => _.Id == dto.Id);
+                getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+                var upsertedAnalysisMethodDto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
+                    typeof(AnalysisMethodDTO));
 
-                Assert.NotNull(analysisMethodEntity);
+                Assert.Equal(analysisMethodDto.Id, upsertedAnalysisMethodDto.Id);
+                Assert.Equal(analysisMethodDto.Benefit.Id, upsertedAnalysisMethodDto.Benefit.Id);
             }
             finally
             {
@@ -158,7 +175,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
                 var dto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(AnalysisMethodDTO));
-                var attributeEntity = _testHelper.UnitOfDataPersistenceWork.Context.Attribute.First();
+                var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
                 dto.Attribute = attributeEntity.Name;
                 dto.CriterionLibrary = _testHelper.TestCriterionLibrary.ToDto();
                 TestBenefit.Attribute = attributeEntity;
@@ -170,7 +187,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 // Assert
                 var analysisMethodDto =
-                    _testHelper.UnitOfDataPersistenceWork.AnalysisMethodRepo.GetAnalysisMethod(_testHelper
+                    _testHelper.UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(_testHelper
                         .TestSimulation.Id);
 
                 Assert.Equal(dto.Id, analysisMethodDto.Id);

@@ -11,6 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
             string simulationName);
 
         void UpsertOrDeleteTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> treatmentCostPerTreatmentId,
-            Guid libraryId, Guid? userId = null);
+            Guid libraryId);
     }
 }

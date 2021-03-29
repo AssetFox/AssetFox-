@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
@@ -25,32 +25,31 @@ namespace BridgeCareCore.Services.SummaryReport
         private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
         private readonly SummaryReportGlossary _summaryReportGlossary;
         private readonly SummaryReportParameters _summaryReportParameters;
-        private readonly IHubContext<BridgeCareHub> _hubContext;
+        private readonly IHubService _hubService;
         private readonly IAddGraphsInTabs _addGraphsInTabs;
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public SummaryReportGenerator(IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
             IUnfundedRecommendations unfundedRecommendations,
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
             SummaryReportGlossary summaryReportGlossary, SummaryReportParameters summaryReportParameters,
-            IHubContext<BridgeCareHub> hub,
+            IHubService hubService,
             IAddGraphsInTabs addGraphsInTabs,
-            UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+            UnitOfDataPersistenceWork unitOfWork)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _bridgeDataForSummaryReport = bridgeDataForSummaryReport ?? throw new ArgumentNullException(nameof(bridgeDataForSummaryReport));
             _unfundedRecommendations = unfundedRecommendations ?? throw new ArgumentNullException(nameof(unfundedRecommendations));
             _bridgeWorkSummary = bridgeWorkSummary ?? throw new ArgumentNullException(nameof(bridgeWorkSummary));
             _bridgeWorkSummaryByBudget = workSummaryByBudget ?? throw new ArgumentNullException(nameof(workSummaryByBudget));
             _summaryReportGlossary = summaryReportGlossary ?? throw new ArgumentNullException(nameof(summaryReportGlossary));
             _summaryReportParameters = summaryReportParameters ?? throw new ArgumentNullException(nameof(summaryReportParameters));
-            _hubContext = hub ?? throw new ArgumentNullException(nameof(hub));
+            _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             _addGraphsInTabs = addGraphsInTabs ?? throw new ArgumentNullException(nameof(addGraphsInTabs));
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public byte[] GenerateReport(Guid networkId, Guid simulationId, UserInfoDTO userInfo)
+        public byte[] GenerateReport(Guid networkId, Guid simulationId)
         {
             var requiredSections = new HashSet<string>()
             {
@@ -64,26 +63,20 @@ namespace BridgeCareCore.Services.SummaryReport
                 $"{Properties.Resources.CulvDurationN}"
             };
 
-            var reportOutputData = _unitOfDataPersistenceWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
 
             var initialSectionValues = reportOutputData.InitialSectionSummaries[0].ValuePerNumericAttribute;
 
-            var reportDetailDto = new SimulationReportDetailDTO
-            {
-                SimulationId = simulationId,
-                Status = "Starting report generation..."
-            };
-            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
-            SendRealTimeMessage(reportDetailDto);
+            var reportDetailDto = new SimulationReportDetailDTO {SimulationId = simulationId};
 
             foreach (var item in requiredSections)
             {
                 if (!initialSectionValues.ContainsKey(item))
                 {
-                    reportDetailDto.Status = $"The attribute {item} not found in initial section";
-                    UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
-                    SendRealTimeMessage(reportDetailDto);
-                    throw new KeyNotFoundException($"The attribute {item} not found in initial section");
+                    reportDetailDto.Status = $"{item} was not found in initial section";
+                    UpdateSimulationAnalysisDetail(reportDetailDto);
+                    _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+                    throw new KeyNotFoundException($"{item} was not found in initial section");
                 }
             }
 
@@ -93,10 +86,10 @@ namespace BridgeCareCore.Services.SummaryReport
             {
                 if (!sectionValueAttribute.ContainsKey(item))
                 {
-                    reportDetailDto.Status = $"The attribute {item} not found in sections";
-                    UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
-                    SendRealTimeMessage(reportDetailDto);
-                    throw new KeyNotFoundException($"The attribute {item} not found in sections");
+                    reportDetailDto.Status = $"{item} was not found in sections";
+                    UpdateSimulationAnalysisDetail(reportDetailDto);
+                    _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+                    throw new KeyNotFoundException($"{item} was not found in sections");
                 }
             }
 
@@ -120,15 +113,15 @@ namespace BridgeCareCore.Services.SummaryReport
 
             var simulationYearsCount = simulationYears.Count;
 
-            var explorer = _unitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-            var network = _unitOfDataPersistenceWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
-            _unitOfDataPersistenceWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
+            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
             var simulation = network.Simulations.First();
-            _unitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _unitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
-            _unitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+            _unitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
+            _unitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             foreach (var budget in simulation.InvestmentPlan.Budgets)
@@ -148,8 +141,8 @@ namespace BridgeCareCore.Services.SummaryReport
             // Simulation parameters TAB
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
             reportDetailDto.Status = $"Creating Bridge Data TAB";
-            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
-            SendRealTimeMessage(reportDetailDto);
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             // Bridge Data TAB
             var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
@@ -157,9 +150,9 @@ namespace BridgeCareCore.Services.SummaryReport
 
             // Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
-            reportDetailDto.Status = $"Creating Unfunded recommendations TAB";
-            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
-            SendRealTimeMessage(reportDetailDto);
+            reportDetailDto.Status = $"Creating Unfunded Recommendations TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             // Unfunded Recommendations TAB
             var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");
             _unfundedRecommendations.Fill(unfundedRecommendationWorksheet, reportOutputData);
@@ -167,22 +160,22 @@ namespace BridgeCareCore.Services.SummaryReport
             // Simulation Legend TAB
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add("Legend");
             _summaryReportGlossary.Fill(shortNameWorksheet);
-            reportDetailDto.Status = $"Creating Bridge work summary TAB";
-            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
-            SendRealTimeMessage(reportDetailDto);
+            reportDetailDto.Status = $"Creating Bridge Work Summary TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             // Bridge work summary TAB
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
                 simulationYears, workSummaryModel, yearlyBudgetAmount);
-            reportDetailDto.Status = $"Creating Bridge work summary By Budget TAB";
-            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
-            SendRealTimeMessage(reportDetailDto);
+            reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
             reportDetailDto.Status = $"Creating Graph TABs";
-            UpdateSimulationAnalysisDetail(reportDetailDto, userInfo);
-            SendRealTimeMessage(reportDetailDto);
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
@@ -196,14 +189,7 @@ namespace BridgeCareCore.Services.SummaryReport
             return bin;
         }
 
-        private void SendRealTimeMessage(SimulationReportDetailDTO dto) =>
-            _hubContext
-                .Clients
-                .All
-                .SendAsync("BroadcastSummaryReportGenerationStatus", dto);
-
-        private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto,
-            UserInfoDTO userInfo) =>
-            _unitOfDataPersistenceWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto, userInfo);
+        private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) =>
+            _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
     }
 }

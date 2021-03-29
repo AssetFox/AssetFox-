@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var oldReport = _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.Id == report.Id);
                 if (oldReport != null)
                 {
-                    _unitOfDataPersistenceWork.Context.Delete<ReportIndexEntity>(_ => _.Id == oldReport.Id);
+                    _unitOfDataPersistenceWork.Context.DeleteEntity<ReportIndexEntity>(_ => _.Id == oldReport.Id);
                 }
             }
 
@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public bool DeleteReport(Guid reportId)
         {
-            _unitOfDataPersistenceWork.Context.Delete<ReportIndexEntity>(_ => _.Id == reportId);
+            _unitOfDataPersistenceWork.Context.DeleteEntity<ReportIndexEntity>(_ => _.Id == reportId);
             return true;
         }
 

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -28,11 +29,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         public TreatmentTests()
         {
-            _testHelper = new TestHelper("IAMv2t");
+            _testHelper = new TestHelper();
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new TreatmentController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
+            _controller = new TreatmentController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object);
         }
 
         public TreatmentLibraryEntity TestTreatmentLibrary { get; } = new TreatmentLibraryEntity
@@ -93,24 +95,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         private void SetupForGet()
         {
-            _testHelper.UnitOfDataPersistenceWork.Context.TreatmentLibrary.Add(TestTreatmentLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.SelectableTreatment.Add(TestTreatment);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.TreatmentLibrary.Add(TestTreatmentLibrary);
+            _testHelper.UnitOfWork.Context.SelectableTreatment.Add(TestTreatment);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void SetupForUpsertOrDelete()
         {
             SetupForGet();
             //_testHelper.UnitOfDataPersistenceWork.Context.TreatmentCost.Add(TestTreatmentCost);
-            var attribute = _testHelper.UnitOfDataPersistenceWork.Context.Attribute.First();
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
             TestTeatmentConsequence.AttributeId = attribute.Id;
             //_testHelper.UnitOfDataPersistenceWork.Context.TreatmentConsequence.Add(TestTeatmentConsequence);
-            _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.BudgetLibrary.Add(TestBudgetLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.Budget.Add(TestBudget);
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.BudgetLibrary.Add(TestBudgetLibrary);
+            _testHelper.UnitOfWork.Context.Budget.Add(TestBudget);
             TestTreatmentBudget.SelectableTreatmentId = TreatmentId;
             TestTreatmentBudget.BudgetId = BudgetId;
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         [Fact]
@@ -210,90 +212,55 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
                 var criterionLibraryDTO = _testHelper.TestCriterionLibrary.ToDto();
 
-                var treatmentLibraryDTO = dtos[0];
-                treatmentLibraryDTO.Description = "Updated Description";
-                treatmentLibraryDTO.Treatments[0].Name = "Updated Name";
-                treatmentLibraryDTO.Treatments[0].CriterionLibrary = criterionLibraryDTO;
+                var dto = dtos[0];
+                dto.Description = "Updated Description";
+                dto.Treatments[0].Name = "Updated Name";
+                dto.Treatments[0].CriterionLibrary = criterionLibraryDTO;
                 var costDTO = TestTreatmentCost.ToDto();
                 costDTO.CriterionLibrary = criterionLibraryDTO;
                 costDTO.Equation = TestCostEquation.ToDto();
-                treatmentLibraryDTO.Treatments[0].Costs.Add(costDTO);
+                dto.Treatments[0].Costs.Add(costDTO);
                 var consequenceDTO = TestTeatmentConsequence.ToDto();
                 consequenceDTO.CriterionLibrary = criterionLibraryDTO;
                 consequenceDTO.Equation = TestConsequenceEquation.ToDto();
                 var attribute =
-                    _testHelper.UnitOfDataPersistenceWork.Context.Attribute.Single(_ =>
+                    _testHelper.UnitOfWork.Context.Attribute.Single(_ =>
                         _.Id == TestTeatmentConsequence.AttributeId);
                 consequenceDTO.Attribute = attribute.Name;
-                treatmentLibraryDTO.Treatments[0].Consequences.Add(consequenceDTO);
-                treatmentLibraryDTO.Treatments[0].BudgetIds.Add(BudgetId);
+                dto.Treatments[0].Consequences.Add(consequenceDTO);
+                dto.Treatments[0].BudgetIds.Add(BudgetId);
 
                 // Act
-                var result =
-                    await _controller.UpsertTreatmentLibrary(_testHelper.TestSimulation.Id, treatmentLibraryDTO);
+                await _controller.UpsertTreatmentLibrary(_testHelper.TestSimulation.Id, dto);
 
                 // Assert
-                Assert.IsType<OkResult>(result);
+                var timer = new Timer {Interval = 5000};
+                timer.Elapsed += delegate
+                {
+                    var modifiedDto =
+                        _testHelper.UnitOfWork.SelectableTreatmentRepo.TreatmentLibrariesWithTreatments()[0];
+                    Assert.Equal(dto.Description, modifiedDto.Description);
+                    Assert.Single(modifiedDto.AppliedScenarioIds);
+                    Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
 
-                var treatmentLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.TreatmentLibrary
-                    .Include(_ => _.Treatments)
-                    .ThenInclude(_ => _.TreatmentCosts)
-                    .ThenInclude(_ => _.TreatmentCostEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.Treatments)
-                    .ThenInclude(_ => _.TreatmentCosts)
-                    .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.Treatments)
-                    .ThenInclude(_ => _.TreatmentConsequences)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.Treatments)
-                    .ThenInclude(_ => _.TreatmentConsequences)
-                    .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.Treatments)
-                    .ThenInclude(_ => _.TreatmentConsequences)
-                    .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.Treatments)
-                    .ThenInclude(_ => _.TreatmentBudgetJoins)
-                    .ThenInclude(_ => _.Budget)
-                    .Include(_ => _.Treatments)
-                    .ThenInclude(_ => _.CriterionLibrarySelectableTreatmentJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.TreatmentLibrarySimulationJoins)
-                    .Single(_ => _.Id == TreatmentLibraryId);
+                    Assert.Equal(dto.Treatments[0].Name, modifiedDto.Treatments[0].Name);
+                    Assert.Equal(dto.Treatments[0].CriterionLibrary.Id,
+                        modifiedDto.Treatments[0].CriterionLibrary.Id);
+                    Assert.True(modifiedDto.Treatments[0].Costs.Any());
 
-                Assert.Equal(treatmentLibraryDTO.Description, treatmentLibraryEntity.Description);
-                Assert.Single(treatmentLibraryEntity.TreatmentLibrarySimulationJoins);
-                var treatmentLibrarySimulationJoin = treatmentLibraryEntity.TreatmentLibrarySimulationJoins.ToList()[0];
-                Assert.Equal(_testHelper.TestSimulation.Id, treatmentLibrarySimulationJoin.SimulationId);
-                var treatmentEntity = treatmentLibraryEntity.Treatments.ToList()[0];
-                Assert.Equal(treatmentLibraryDTO.Treatments[0].Name, treatmentEntity.Name);
-                Assert.NotNull(treatmentEntity.CriterionLibrarySelectableTreatmentJoin);
-                Assert.Equal(treatmentLibraryDTO.Treatments[0].CriterionLibrary.Id,
-                    treatmentEntity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.Id);
-                Assert.True(treatmentEntity.TreatmentCosts.Any());
+                    Assert.Equal(dto.Treatments[0].Costs[0].CriterionLibrary.Id,
+                        modifiedDto.Treatments[0].Costs[0].CriterionLibrary.Id);
+                    Assert.Equal(dto.Treatments[0].Costs[0].Equation.Id,
+                        modifiedDto.Treatments[0].Costs[0].Equation.Id);
 
-                var costEntity = treatmentEntity.TreatmentCosts.ToList()[0];
-                Assert.NotNull(costEntity.CriterionLibraryTreatmentCostJoin);
-                Assert.NotNull(costEntity.TreatmentCostEquationJoin);
-                Assert.Equal(treatmentLibraryDTO.Treatments[0].Costs[0].CriterionLibrary.Id,
-                    costEntity.CriterionLibraryTreatmentCostJoin.CriterionLibrary.Id);
-                Assert.Equal(treatmentLibraryDTO.Treatments[0].Costs[0].Equation.Id,
-                    costEntity.TreatmentCostEquationJoin.Equation.Id);
+                    Assert.Equal(dto.Treatments[0].Costs[0].CriterionLibrary.Id,
+                        modifiedDto.Treatments[0].Consequences[0].CriterionLibrary.Id);
+                    Assert.Equal(dto.Treatments[0].Consequences[0].Equation.Id,
+                        modifiedDto.Treatments[0].Consequences[0].Equation.Id);
 
-                var consequenceEntity = treatmentEntity.TreatmentConsequences.ToList()[0];
-                Assert.NotNull(consequenceEntity.CriterionLibraryConditionalTreatmentConsequenceJoin);
-                Assert.NotNull(consequenceEntity.ConditionalTreatmentConsequenceEquationJoin);
-                Assert.Equal(treatmentLibraryDTO.Treatments[0].Costs[0].CriterionLibrary.Id,
-                    consequenceEntity.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.Id);
-                Assert.Equal(treatmentLibraryDTO.Treatments[0].Consequences[0].Equation.Id,
-                    consequenceEntity.ConditionalTreatmentConsequenceEquationJoin.Equation.Id);
-
-                Assert.Single(treatmentEntity.TreatmentBudgetJoins);
-                Assert.Equal(treatmentLibraryDTO.Treatments[0].BudgetIds[0],
-                    treatmentEntity.TreatmentBudgetJoins.ToList()[0].BudgetId);
+                    Assert.Equal(dto.Treatments[0].BudgetIds[0],
+                        modifiedDto.Treatments[0].BudgetIds[0]);
+                };
             }
             finally
             {
@@ -325,7 +292,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 consequenceDTO.CriterionLibrary = criterionLibraryDTO;
                 consequenceDTO.Equation = TestConsequenceEquation.ToDto();
                 var attribute =
-                    _testHelper.UnitOfDataPersistenceWork.Context.Attribute.Single(_ =>
+                    _testHelper.UnitOfWork.Context.Attribute.Single(_ =>
                         _.Id == TestTeatmentConsequence.AttributeId);
                 consequenceDTO.Attribute = attribute.Name;
                 treatmentLibraryDTO.Treatments[0].Consequences.Add(consequenceDTO);
@@ -339,32 +306,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.TreatmentLibrary.Any(_ => _.Id == TreatmentLibraryId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.SelectableTreatment.Any(_ => _.Id == TreatmentId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.TreatmentLibrarySimulation.Any(_ =>
+                Assert.True(!_testHelper.UnitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == TreatmentLibraryId));
+                Assert.True(!_testHelper.UnitOfWork.Context.SelectableTreatment.Any(_ => _.Id == TreatmentId));
+                Assert.True(!_testHelper.UnitOfWork.Context.TreatmentLibrarySimulation.Any(_ =>
                     _.TreatmentLibraryId == TreatmentLibraryId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrarySelectableTreatment.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibrarySelectableTreatment.Any(_ =>
                         _.SelectableTreatmentId == TreatmentId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibraryTreatmentCost.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibraryTreatmentCost.Any(_ =>
                         _.TreatmentCostId == CostId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibraryTreatmentConsequence.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibraryTreatmentConsequence.Any(_ =>
                         _.ConditionalTreatmentConsequenceId == ConsequenceId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.TreatmentCost.Any(_ => _.Id == CostId));
+                    !_testHelper.UnitOfWork.Context.TreatmentCost.Any(_ => _.Id == CostId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.TreatmentConsequence.Any(_ => _.Id == ConsequenceId));
+                    !_testHelper.UnitOfWork.Context.TreatmentConsequence.Any(_ => _.Id == ConsequenceId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.TreatmentCostEquation.Any(_ => _.TreatmentCostId == CostId));
+                    !_testHelper.UnitOfWork.Context.TreatmentCostEquation.Any(_ => _.TreatmentCostId == CostId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.TreatmentConsequenceEquation.Any(_ => _.ConditionalTreatmentConsequenceId == ConsequenceId));
+                    !_testHelper.UnitOfWork.Context.TreatmentConsequenceEquation.Any(_ => _.ConditionalTreatmentConsequenceId == ConsequenceId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.Equation.Any(_ => _.Id == CostEquationId));
+                    !_testHelper.UnitOfWork.Context.Equation.Any(_ => _.Id == CostEquationId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.Equation.Any(_ => _.Id == ConsequenceEquationId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.TreatmentBudget.Any());
+                    !_testHelper.UnitOfWork.Context.Equation.Any(_ => _.Id == ConsequenceEquationId));
+                Assert.True(!_testHelper.UnitOfWork.Context.TreatmentBudget.Any());
             }
             finally
             {

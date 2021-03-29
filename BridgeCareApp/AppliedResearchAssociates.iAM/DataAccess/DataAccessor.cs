@@ -12,9 +12,6 @@ namespace AppliedResearchAssociates.iAM.DataAccess
 {
     public sealed class DataAccessor
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         public DataAccessor(IDbConnection connection, Action<TimeSpan, string> onProgress)
         {
             Connection = connection ?? throw new ArgumentNullException(nameof(connection));
@@ -99,13 +96,13 @@ order by networkid
                                     numberAttribute.Minimum = reader.GetNullableDouble(5);
                                     numberAttribute.Maximum = reader.GetNullableDouble(6);
 
-                                    if (numberAttribute.Minimum > numberAttribute.Maximum)
+                                    /*if (numberAttribute.Minimum > numberAttribute.Maximum)
                                     {
                                         /*var swap = numberAttribute.Minimum;
                                         numberAttribute.Minimum = numberAttribute.Maximum;
-                                        numberAttribute.Maximum = swap;*/
+                                        numberAttribute.Maximum = swap;#1#
                                         numberAttribute.Maximum = null;
-                                    }
+                                    }*/
                                 }
                                 break;
 
@@ -200,32 +197,19 @@ order by networkid
 
             using (var command = Connection.CreateCommand())
             {
-                command.CommandText = IsRunningFromXUnit
-                    ? $@"
-                        select top (1) facility, section, area, units, sectionid
-                        from section_{networkId}
-                        order by sectionid
+                command.CommandText = $@"
+select facility, section, area, units, sectionid
+from section_{networkId}
+order by sectionid
 
-                        select *
-                        from segment_{networkId}_ns0
-                        where sectionid in (select top (1) sectionid from section_{networkId} order by sectionid)
+select *
+from segment_{networkId}_ns0
 
-                        select simulationid, simulation, jurisdiction, analysis, budget_constraint, weighting, benefit_variable, benefit_limit, use_cumulative_cost, use_across_budget
-                        from simulations
-                        where networkid = {networkId}
-                        order by simulationid"
-                    : $@"
-                        select facility, section, area, units, sectionid
-                        from section_{networkId}
-                        order by sectionid
-
-                        select *
-                        from segment_{networkId}_ns0
-
-                        select simulationid, simulation, jurisdiction, analysis, budget_constraint, weighting, benefit_variable, benefit_limit, use_cumulative_cost, use_across_budget
-                        from simulations
-                        where networkid = {networkId}
-                        order by simulationid";
+select simulationid, simulation, jurisdiction, analysis, budget_constraint, weighting, benefit_variable, benefit_limit, use_cumulative_cost, use_across_budget
+from simulations
+where networkid = {networkId}
+order by simulationid
+";
 
                 using (var reader = command.ExecuteReader())
                 {

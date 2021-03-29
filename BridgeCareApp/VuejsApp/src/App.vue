@@ -142,6 +142,7 @@ import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 import {clone} from 'ramda';
 import {emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import { Hub } from '@/connectionHub';
 
 @Component({
   components: {Alert, Spinner}
@@ -242,7 +243,7 @@ export default class AppComponent extends Vue {
         message: this.warningMessage,
         position: 'topRight',
         closeOnClick: true,
-        timeout: 3000
+        timeout: 5000
       });
       this.setWarningMessageAction({message: ''});
     }
@@ -256,7 +257,7 @@ export default class AppComponent extends Vue {
         message: this.errorMessage,
         position: 'topRight',
         closeOnClick: true,
-        timeout: 3000
+        timeout: false
       });
       this.setErrorMessageAction({message: ''});
     }
@@ -270,7 +271,7 @@ export default class AppComponent extends Vue {
         message: this.infoMessage,
         position: 'topRight',
         closeOnClick: true,
-        timeout: 3000
+        timeout: 5000
       });
       this.setInfoMessageAction({message: ''});
     }
@@ -330,7 +331,7 @@ export default class AppComponent extends Vue {
         error.response.headers = setContentTypeCharset(error.response.headers);
       }
       this.setIsBusyAction({isBusy: false});
-      this.setErrorMessageAction({message: getErrorMessage(error)});
+      //this.setErrorMessageAction({message: getErrorMessage(error)});
     };
     // set axios response handler to use success & error handlers
     axiosInstance.interceptors.response.use(
@@ -373,6 +374,18 @@ export default class AppComponent extends Vue {
     // Generate a polling session id, and begin polling once per 5 seconds
     /*this.generatePollingSessionIdAction();
     window.setInterval(this.pollEventsAction, 5000);*/
+  }
+
+  mounted() {
+    this.$statusHub.$on(Hub.BroadcastEventType.BroadcastErrorEvent, this.onSetErrorMessage)
+  }
+
+  beforeDestroy() {
+    this.$statusHub.$off(Hub.BroadcastEventType.BroadcastErrorEvent, this.onSetErrorMessage)
+  }
+
+  onSetErrorMessage(data: any) {
+    this.setErrorMessageAction({message: data.error});
   }
 
   onAlertResult(submit: boolean) {

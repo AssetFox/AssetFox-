@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid BudgetId { get; set; }
 
-        public Guid SectionId { get; set; }
+        public Guid MaintainableAssetId { get; set; }
 
         public double Cost { get; set; }
 
@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual BudgetEntity Budget { get; set; }
 
-        public virtual SectionEntity Section { get; set; }
+        public virtual MaintainableAssetEntity MaintainableAsset { get; set; }
 
         public virtual ICollection<CommittedProjectConsequenceEntity> CommittedProjectConsequences { get; set; }
     }

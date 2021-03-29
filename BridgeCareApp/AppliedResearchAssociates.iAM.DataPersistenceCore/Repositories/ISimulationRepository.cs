@@ -14,21 +14,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void GetSimulationInNetwork(Guid simulationId, Network network);
 
-        void DeleteSimulationAndAllRelatedData();
+        List<SimulationDTO> GetAllInNetwork(Guid networkId);
 
-        Task<List<SimulationDTO>> GetAllInNetwork(Guid networkId);
+        void CreateSimulation(Guid networkId, SimulationDTO dto);
 
-        void CreateSimulation(Guid networkId, SimulationDTO dto, UserInfoDTO userInfo);
+        SimulationDTO GetSimulation(Guid simulationId);
 
-        Task<SimulationDTO> GetSimulation(Guid simulationId);
+        SimulationDTO CloneSimulation(Guid simulationId);
 
-        Task<SimulationDTO> CloneSimulation(Guid simulationId, UserInfoDTO userInfo);
+        void UpdatePermittedSimulation(SimulationDTO dto);
 
-        void UpdatePermittedSimulation(UserInfoDTO userInfo, SimulationDTO dto);
+        void UpdateSimulation(SimulationDTO dto);
 
-        void UpdateSimulation(SimulationDTO dto, UserInfoDTO userInfo);
-
-        void DeletePermittedSimulation(UserInfoDTO userInfo, Guid simulationId);
+        void DeletePermittedSimulation(Guid simulationId);
 
         void DeleteSimulation(Guid simulationId);
     }

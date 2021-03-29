@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.Simulation;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Logging;
@@ -92,6 +93,7 @@ namespace BridgeCareCore
             services.AddSingleton<IAuthorizationHandler, RestrictAccessHandler>();
             services.AddScoped<ExpressionValidationService>();
             services.AddScoped<IUserCriteriaRepository, UserCriteriaRepository>();
+            services.AddScoped<IHubService, HubService>();
 
 #if MsSqlDebug || Release || Test
             // SQL SERVER SCOPINGS
@@ -157,6 +159,8 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILog logger)
         {
+            //UpdateDatabase(app);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -183,15 +187,11 @@ namespace BridgeCareCore
 
         private static void UpdateDatabase(IApplicationBuilder app)
         {
-            using (var serviceScope = app.ApplicationServices
+            using var serviceScope = app.ApplicationServices
                 .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope())
-            {
-                using (var context = serviceScope.ServiceProvider.GetService<IAMContext>())
-                {
-                    context.Database.Migrate();
-                }
-            }
+                .CreateScope();
+            using var context = serviceScope.ServiceProvider.GetService<IAMContext>();
+            context.Database.Migrate();
         }
     }
 }

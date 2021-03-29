@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -9,5 +10,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         int CreateAggregatedResults(List<IAggregatedResult> aggregatedResults);
 
         IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId);
+
+        void CreateAggregatedResults<T>(
+            Dictionary<(Guid maintainableAssetId, Guid attributeId), AttributeValueHistory<T>>
+                attributeValueHistoryPerMaintainableAssetIdAttributeIdTuple);
     }
 }

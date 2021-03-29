@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -22,11 +23,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         public RemainingLifeLimitTests()
         {
-            _testHelper = new TestHelper("IAMv2rll");
+            _testHelper = new TestHelper();
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new RemainingLifeLimitController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
+            _controller = new RemainingLifeLimitController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object);
         }
 
         public RemainingLifeLimitLibraryEntity TestRemainingLifeLimitLibrary { get; } = new RemainingLifeLimitLibraryEntity
@@ -44,18 +46,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         private void SetupForGet()
         {
-            _testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Add(TestRemainingLifeLimitLibrary);
-            var attribute = _testHelper.UnitOfDataPersistenceWork.Context.Attribute.First();
+            _testHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Add(TestRemainingLifeLimitLibrary);
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
             TestRemainingLifeLimit.AttributeId = attribute.Id;
-            _testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimit.Add(TestRemainingLifeLimit);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.RemainingLifeLimit.Add(TestRemainingLifeLimit);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void SetupForUpsertOrDelete()
         {
             SetupForGet();
-            _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         [Fact]
@@ -155,41 +157,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<RemainingLifeLimitLibraryDTO>));
 
-                var remainingLifeLimitLibraryDTO = dtos[0];
-                remainingLifeLimitLibraryDTO.Description = "Updated Description";
-                remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].Value = 2.0;
-                remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].CriterionLibrary =
+                var dto = dtos[0];
+                dto.Description = "Updated Description";
+                dto.RemainingLifeLimits[0].Value = 2.0;
+                dto.RemainingLifeLimits[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
                 // Act
-                var result =
-                    await _controller.UpsertRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
-                        remainingLifeLimitLibraryDTO);
+                await _controller.UpsertRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
+                        dto);
 
                 // Assert
-                Assert.IsType<OkResult>(result);
+                var timer = new Timer {Interval = 5000};
+                timer.Elapsed += delegate
+                {
+                    var modifiedDto = _testHelper.UnitOfWork.RemainingLifeLimitRepo
+                        .RemainingLifeLimitLibrariesWithRemainingLifeLimits()[0];
+                    Assert.Equal(dto.Description, modifiedDto.Description);
+                    Assert.Single(modifiedDto.AppliedScenarioIds);
+                    Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
 
-                var remainingLifeLimitLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary
-                    .Include(_ => _.RemainingLifeLimits)
-                    .ThenInclude(_ => _.CriterionLibraryRemainingLifeLimitJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.RemainingLifeLimits)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.RemainingLifeLimitLibrarySimulationJoins)
-                    .Single(_ => _.Id == RemainingLifeLimitLibraryId);
-
-                Assert.Equal(remainingLifeLimitLibraryDTO.Description, remainingLifeLimitLibraryEntity.Description);
-                Assert.Single(remainingLifeLimitLibraryEntity.RemainingLifeLimitLibrarySimulationJoins);
-                var remainingLifeLimitLibrarySimulationJoin =
-                    remainingLifeLimitLibraryEntity.RemainingLifeLimitLibrarySimulationJoins.ToList()[0];
-                Assert.Equal(_testHelper.TestSimulation.Id, remainingLifeLimitLibrarySimulationJoin.SimulationId);
-                var remainingLifeLimitEntity = remainingLifeLimitLibraryEntity.RemainingLifeLimits.ToList()[0];
-                Assert.Equal(remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].Value, remainingLifeLimitEntity.Value);
-                Assert.NotNull(remainingLifeLimitEntity.CriterionLibraryRemainingLifeLimitJoin);
-                Assert.Equal(remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].CriterionLibrary.Id,
-                    remainingLifeLimitEntity.CriterionLibraryRemainingLifeLimitJoin.CriterionLibrary.Id);
-                Assert.NotNull(remainingLifeLimitEntity.Attribute);
-                Assert.Equal(remainingLifeLimitEntity.Attribute.Name, remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].Attribute);
+                    Assert.Equal(dto.RemainingLifeLimits[0].Value, modifiedDto.RemainingLifeLimits[0].Value);
+                    Assert.Equal(dto.RemainingLifeLimits[0].CriterionLibrary.Id,
+                        modifiedDto.RemainingLifeLimits[0].CriterionLibrary.Id);
+                    Assert.Equal(dto.RemainingLifeLimits[0].Attribute, modifiedDto.RemainingLifeLimits[0].Attribute);
+                };
             }
             finally
             {
@@ -222,14 +214,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == RemainingLifeLimitLibraryId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimit.Any(_ => _.Id == RemainingLifeLimitId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.RemainingLifeLimitLibrarySimulation.Any(_ =>
+                Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == RemainingLifeLimitLibraryId));
+                Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimit.Any(_ => _.Id == RemainingLifeLimitId));
+                Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimitLibrarySimulation.Any(_ =>
                     _.RemainingLifeLimitLibraryId == RemainingLifeLimitLibraryId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibraryRemainingLifeLimit.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any(_ =>
                         _.RemainingLifeLimitId == RemainingLifeLimitId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.Attribute.Any(_ => _.RemainingLifeLimits.Any()));
+                Assert.True(!_testHelper.UnitOfWork.Context.Attribute.Any(_ => _.RemainingLifeLimits.Any()));
             }
             finally
             {

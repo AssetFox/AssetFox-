@@ -16,5 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual TreatmentCostEquationEntity TreatmentCostEquationJoin { get; set; }
 
         public virtual AttributeEquationCriterionLibraryEntity AttributeEquationCriterionLibraryJoin { get; set; }
+
+        public virtual BenefitQuantifierEntity BenefitQuantifier { get; set; }
     }
 }

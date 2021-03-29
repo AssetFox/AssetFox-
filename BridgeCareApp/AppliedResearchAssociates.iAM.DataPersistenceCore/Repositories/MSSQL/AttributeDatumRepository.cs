@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
@@ -11,20 +11,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AttributeDatumRepository : IAttributeDatumRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public AttributeDatumRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+        public AttributeDatumRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public int UpdateAssignedData(List<MaintainableAsset> maintainableAssets)
         {
             // get all the configurable attributes
-            var configurableAttributes = _unitOfDataPersistenceWork.AttributeMetaDataRepo.GetAllAttributes();
+            var configurableAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes();
 
             // insert/update configurable attributes
-            _unitOfDataPersistenceWork.AttributeRepo.UpsertAttributes(configurableAttributes);
+            _unitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
 
             // get the attribute ids off of the assigned data on the maintainable assets that have
             // not been modified yet
@@ -41,8 +41,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 // use a raw sql query to delete AssignedData
                 var query =
                     $"DELETE FROM dbo.AttributeDatum WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAsset WHERE NetworkId = '{maintainableAssets.First().NetworkId}') AND AttributeId IN ('{string.Join("','", attributeIdsToBeUpdatedWithAssignedData)}')";
-                _unitOfDataPersistenceWork.Context.Database.ExecuteSqlRaw(query);
-                _unitOfDataPersistenceWork.Context.SaveChanges();
+                _unitOfWork.Context.Database.ExecuteSqlRaw(query);
+                _unitOfWork.Context.SaveChanges();
             }
 
             // convert any assigned data to their equivalent entity object types
@@ -56,9 +56,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return 0;
             }
 
-            _unitOfDataPersistenceWork.Context.BulkInsertOrUpdate(assignedData);
-            _unitOfDataPersistenceWork.Context.BulkInsertOrUpdate(assignedData.Select(_ => _.AttributeDatumLocation).ToList());
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.BulkInsertOrUpdate(assignedData);
+            _unitOfWork.Context.BulkInsertOrUpdate(assignedData.Select(_ => _.AttributeDatumLocation).ToList());
+            _unitOfWork.Context.SaveChanges();
 
             return assignedData.Count();
         }

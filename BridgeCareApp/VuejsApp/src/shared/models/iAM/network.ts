@@ -1,4 +1,16 @@
 ﻿import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
+import {clone} from 'ramda';
+
+export interface BenefitQuantifier {
+    networkId: string;
+    equation: Equation;
+}
+
+export const emptyBenefitQuantifier: BenefitQuantifier = {
+    networkId: getBlankGuid(),
+    equation: clone(emptyEquation)
+};
 
 export interface Network {
     id: string;
@@ -6,6 +18,7 @@ export interface Network {
     createdDate?: Date;
     lastModifiedDate?: Date;
     status?: string;
+    benefitQuantifier: BenefitQuantifier;
 }
 
 export const emptyNetwork: Network = {
@@ -13,7 +26,8 @@ export const emptyNetwork: Network = {
     name: '',
     createdDate: new Date(),
     lastModifiedDate: new Date(),
-    status: ''
+    status: '',
+    benefitQuantifier: clone(emptyBenefitQuantifier)
 };
 
 export interface NetworkCreationData {

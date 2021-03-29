@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using EFCore.BulkExtensions;
 using MoreLinq.Extensions;
 
@@ -13,23 +13,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class CriterionLibraryRepository : ICriterionLibraryRepository
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
-
-        public CriterionLibraryRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork) => _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public CriterionLibraryRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void JoinEntitiesWithCriteria(Dictionary<string, List<Guid>> entityIdsPerExpression, string joinEntity, string prependName) =>
             entityIdsPerExpression.Keys.ForEach(expression =>
             {
-                var criterionLibraryEntity = _unitOfDataPersistenceWork.Context.CriterionLibrary
+                var criterionLibraryEntity = _unitOfWork.Context.CriterionLibrary
                     .SingleOrDefault(_ => _.MergedCriteriaExpression == expression &&
                                           _.Name.Contains(DataPersistenceConstants.CriterionLibraryJoinEntities.NameConventionPerEntityType[joinEntity]));
 
                 if (criterionLibraryEntity == null)
                 {
-                    var criterionLibraryNames = _unitOfDataPersistenceWork.Context.CriterionLibrary
+                    var criterionLibraryNames = _unitOfWork.Context.CriterionLibrary
                         .Where(_ => _.Name.Contains(DataPersistenceConstants.CriterionLibraryJoinEntities.NameConventionPerEntityType[joinEntity]))
                         .Select(_ => _.Name).ToList();
 
@@ -51,8 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         MergedCriteriaExpression = expression
                     };
 
-                    _unitOfDataPersistenceWork.Context.CriterionLibrary.Add(criterionLibraryEntity);
-                    _unitOfDataPersistenceWork.Context.SaveChanges();
+                    _unitOfWork.Context.AddEntity(criterionLibraryEntity, _unitOfWork.UserEntity?.Id);
                 }
 
                 switch (joinEntity)
@@ -108,22 +104,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 default:
                     throw new InvalidOperationException("Unable to determine criterion library join entity type.");
                 }
-
-                _unitOfDataPersistenceWork.Context.SaveChanges();
             });
 
-        public void CreateCriterionLibraries(List<CriterionLibraryEntity> criterionLibraryEntities)
+        public void UpsertCriterionLibraries(List<CriterionLibraryEntity> criterionLibraryEntities)
         {
-            if (IsRunningFromXUnit)
-            {
-                criterionLibraryEntities.ForEach(entity => _unitOfDataPersistenceWork.Context.Upsert(entity, entity.Id));
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsertOrUpdate(criterionLibraryEntities);
-            }
+            var existingEntityIds = _unitOfWork.Context.CriterionLibrary.Select(_ => _.Id).ToList();
 
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.UpdateAll(
+                criterionLibraryEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(),
+                _unitOfWork.UserEntity?.Id);
+
+            _unitOfWork.Context.AddAll(
+                criterionLibraryEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(),
+                _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryAnalysisMethodJoin(Guid criterionLibraryId, Guid analysisMethodId)
@@ -134,7 +127,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 AnalysisMethodId = analysisMethodId
             };
 
-            _unitOfDataPersistenceWork.Context.CriterionLibraryAnalysisMethod.Add(joinEntity);
+            _unitOfWork.Context.AddEntity(joinEntity, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryBudgetJoins(Guid criterionLibraryId, List<Guid> budgetIds)
@@ -147,14 +140,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibraryBudget.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryBudgetPriorityJoins(Guid criterionLibraryId, List<Guid> budgetPriorityIds)
@@ -167,14 +153,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibraryBudgetPriority.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryCashFlowRuleJoins(Guid criterionLibraryId, List<Guid> cashFlowRuleIds)
@@ -187,14 +166,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibraryCashFlowRule.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryDeficientConditionGoalJoins(Guid criterionLibraryId, List<Guid> deficientConditionGoalIds)
@@ -207,14 +179,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibraryDeficientConditionGoal.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryPerformanceCurveJoins(Guid criterionLibraryId, List<Guid> performanceCurveIds)
@@ -227,14 +192,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibraryPerformanceCurve.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryRemainingLifeLimitJoins(Guid criterionLibraryId, List<Guid> remainingLifeLimitIds)
@@ -247,14 +205,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibraryRemainingLifeLimit.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryTargetConditionGoalJoins(Guid criterionLibraryId, List<Guid> targetConditionGoalIds)
@@ -267,14 +218,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibraryTargetConditionGoal.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryTreatmentConsequenceJoins(Guid criterionLibraryId, List<Guid> consequenceIds)
@@ -287,14 +231,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibraryTreatmentConsequence.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryTreatmentCostJoins(Guid criterionLibraryId, List<Guid> costIds)
@@ -307,14 +244,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibraryTreatmentCost.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibraryTreatmentSupersessionJoins(Guid criterionLibraryId, List<Guid> supersessionIds)
@@ -327,14 +257,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibraryTreatmentSupersession.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void CreateCriterionLibrarySelectableTreatmentJoins(Guid criterionLibraryId, List<Guid> treatmentIds)
@@ -347,14 +270,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibrarySelectableTreatment.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         public void JoinSelectableTreatmentEntitiesWithCriteria(
@@ -369,7 +285,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 expressionsPerSelectableTreatmentEntityId[entityId].ForEach(expression =>
                 {
-                    var criterionLibraryEntity = _unitOfDataPersistenceWork.Context.CriterionLibrary
+                    var criterionLibraryEntity = _unitOfWork.Context.CriterionLibrary
                         .SingleOrDefault(_ => _.MergedCriteriaExpression == expression &&
                                               _.Name.Contains(
                                                   DataPersistenceConstants.CriterionLibraryJoinEntities
@@ -379,7 +295,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (criterionLibraryEntity == null)
                     {
-                        var criterionLibraryNames = _unitOfDataPersistenceWork.Context.CriterionLibrary
+                        var criterionLibraryNames = _unitOfWork.Context.CriterionLibrary
                             .Where(_ => _.Name.Contains(
                                 DataPersistenceConstants.CriterionLibraryJoinEntities.NameConventionPerEntityType[
                                     DataPersistenceConstants.CriterionLibraryJoinEntities.SelectableTreatment]))
@@ -415,17 +331,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (criterionLibraryEntities.Any())
             {
-                if (IsRunningFromXUnit)
-                {
-                    _unitOfDataPersistenceWork.Context.CriterionLibrary.AddRange(criterionLibraryEntities);
-                }
-                else
-                {
-                    _unitOfDataPersistenceWork.Context.BulkInsert(criterionLibraryEntities);
-                }
+                _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
             }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
 
             CreateCriterionLibrarySelectableTreatmentJoins(criterionLibraryIdsPerSelectableTreatmentId);
         }
@@ -442,46 +349,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 )
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.CriterionLibrarySelectableTreatment.AddRange(joinEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(joinEntities);
-            }
-
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         public Task<List<CriterionLibraryDTO>> CriterionLibraries()
         {
-            if (!_unitOfDataPersistenceWork.Context.CriterionLibrary.Any())
+            if (!_unitOfWork.Context.CriterionLibrary.Any())
             {
                 return Task.Factory.StartNew(() => new List<CriterionLibraryDTO>());
             }
 
             return Task.Factory.StartNew(() =>
-                _unitOfDataPersistenceWork.Context.CriterionLibrary.Select(_ => _.ToDto()).ToList());
+                _unitOfWork.Context.CriterionLibrary.Select(_ => _.ToDto()).ToList());
         }
 
-        public void UpsertCriterionLibrary(CriterionLibraryDTO dto, UserInfoDTO userInfo)
-        {
-            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
-
-            var criterionLibraryEntity = dto.ToEntity();
-
-            _unitOfDataPersistenceWork.Context.Upsert(criterionLibraryEntity, dto.Id, userEntity?.Id);
-        }
+        public void UpsertCriterionLibrary(CriterionLibraryDTO dto) =>
+            _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
 
         public void DeleteCriterionLibrary(Guid libraryId)
         {
-            if (!_unitOfDataPersistenceWork.Context.CriterionLibrary.Any(_ => _.Id == libraryId))
+            if (!_unitOfWork.Context.CriterionLibrary.Any(_ => _.Id == libraryId))
             {
                 return;
             }
 
-            _unitOfDataPersistenceWork.Context.Delete<CriterionLibraryEntity>(_ => _.Id == libraryId);
+            _unitOfWork.Context.DeleteEntity<CriterionLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

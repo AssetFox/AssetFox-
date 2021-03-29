@@ -7,37 +7,31 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
-using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class RemainingLifeLimitRepository : IRemainingLifeLimitRepository
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
-
-        public RemainingLifeLimitRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
-        {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-        }
+        public RemainingLifeLimitRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateRemainingLifeLimitLibrary(string name, Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             var remainingLifeLimitLibraryEntity = new RemainingLifeLimitLibraryEntity { Id = Guid.NewGuid(), Name = name };
 
-            _unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Add(remainingLifeLimitLibraryEntity);
+            _unitOfWork.Context.AddEntity(remainingLifeLimitLibraryEntity);
 
-            _unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrarySimulation.Add(new RemainingLifeLimitLibrarySimulationEntity
+            _unitOfWork.Context.AddEntity(new RemainingLifeLimitLibrarySimulationEntity
             {
                 RemainingLifeLimitLibraryId = remainingLifeLimitLibraryEntity.Id,
                 SimulationId = simulationId
@@ -46,35 +40,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateRemainingLifeLimits(List<RemainingLifeLimit> remainingLifeLimits, Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _unitOfDataPersistenceWork.Context.Simulation
+            var simulationEntity = _unitOfWork.Context.Simulation
                 .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
                 .Single(_ => _.Id == simulationId);
 
-            var attributeNames = remainingLifeLimits.Select(_ => _.Attribute.Name).Distinct().ToList();
-            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute
-                .Where(_ => attributeNames.Contains(_.Name)).ToList();
-
-            if (!attributeEntities.Any())
+            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
+            var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
+            if (!remainingLifeLimits.All(_ => attributeNames.Contains(_.Attribute.Name)))
             {
-                throw new RowNotInTableException("Could not find matching attributes for given performance curves.");
-            }
-
-            var attributeNamesFromDataSource = attributeEntities.Select(_ => _.Name).ToList();
-            if (!attributeNames.All(ruleName => attributeNamesFromDataSource.Contains(ruleName)))
-            {
-                var attributeNamesNotFound = attributeNames.Except(attributeNamesFromDataSource).ToList();
-                if (attributeNamesNotFound.Count() == 1)
+                var missingAttributes = remainingLifeLimits.Select(_ => _.Attribute.Name)
+                    .Except(attributeNames).ToList();
+                if (missingAttributes.Count == 1)
                 {
-                    throw new RowNotInTableException($"No attribute found having name {attributeNamesNotFound[0]}.");
+                    throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
                 }
 
                 throw new RowNotInTableException(
-                    $"No attributes found found having names: {string.Join(", ", attributeNamesNotFound)}.");
+                    $"No attributes found having the names: {string.Join(", ", missingAttributes)}.");
             }
 
             var remainingLifeLimitEntities = remainingLifeLimits
@@ -82,14 +69,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     attributeEntities.Single(__ => __.Name == _.Attribute.Name).Id))
                 .ToList();
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.RemainingLifeLimit.AddRange(remainingLifeLimitEntities);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkInsert(remainingLifeLimitEntities);
-            }
+            _unitOfWork.Context.AddAll(remainingLifeLimitEntities);
 
             if (remainingLifeLimits.Any(_ => !_.Criterion.ExpressionIsBlank))
             {
@@ -98,59 +78,57 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .GroupBy(_ => _.Criterion.Expression, _ => _)
                     .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
 
-                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(limitIdsPerExpression,
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(limitIdsPerExpression,
                     DataPersistenceConstants.CriterionLibraryJoinEntities.RemainingLifeLimit, simulationEntity.Name);
             }
         }
 
-        public Task<List<RemainingLifeLimitLibraryDTO>> RemainingLifeLimitLibrariesWithRemainingLifeLimits()
+        public List<RemainingLifeLimitLibraryDTO> RemainingLifeLimitLibrariesWithRemainingLifeLimits()
         {
-            if (!_unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Any())
+            if (!_unitOfWork.Context.RemainingLifeLimitLibrary.Any())
             {
-                return Task.Factory.StartNew(() => new List<RemainingLifeLimitLibraryDTO>());
+                return new List<RemainingLifeLimitLibraryDTO>();
             }
 
-            return Task.Factory.StartNew(() => _unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary
+            return _unitOfWork.Context.RemainingLifeLimitLibrary
                 .Include(_ => _.RemainingLifeLimits)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.RemainingLifeLimits)
                 .ThenInclude(_ => _.CriterionLibraryRemainingLifeLimitJoin)
                 .Include(_ => _.RemainingLifeLimitLibrarySimulationJoins)
                 .Select(_ => _.ToDto())
-                .ToList());
+                .ToList();
         }
 
-        public void UpsertRemainingLifeLimitLibrary(RemainingLifeLimitLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
+        public void UpsertRemainingLifeLimitLibrary(RemainingLifeLimitLibraryDTO dto, Guid simulationId)
         {
-            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
-
             var remainingLifeLimitLibraryEntity = dto.ToEntity();
 
-            _unitOfDataPersistenceWork.Context.Upsert(remainingLifeLimitLibraryEntity, dto.Id, userEntity?.Id);
+            _unitOfWork.Context.Upsert(remainingLifeLimitLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
-                if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
                     throw new RowNotInTableException($"No simulation found having id {simulationId}.");
                 }
 
-                _unitOfDataPersistenceWork.Context.Delete<RemainingLifeLimitLibrarySimulationEntity>(_ =>
+                _unitOfWork.Context.DeleteEntity<RemainingLifeLimitLibrarySimulationEntity>(_ =>
                     _.SimulationId == simulationId);
 
-                _unitOfDataPersistenceWork.Context.AddEntity(
+                _unitOfWork.Context.AddEntity(
                     new RemainingLifeLimitLibrarySimulationEntity
                     {
                         RemainingLifeLimitLibraryId = remainingLifeLimitLibraryEntity.Id,
                         SimulationId = simulationId
-                    }, userEntity?.Id);
+                    }, _unitOfWork.UserEntity?.Id);
             }
         }
 
         public void UpsertOrDeleteRemainingLifeLimits(List<RemainingLifeLimitDTO> remainingLifeLimits,
-            Guid libraryId, UserInfoDTO userInfo)
+            Guid libraryId)
         {
-            if (!_unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == libraryId))
+            if (!_unitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == libraryId))
             {
                 throw new RowNotInTableException($"No remaining life limit library found having id {libraryId}.");
             }
@@ -160,9 +138,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new InvalidOperationException("All remaining life limits must have an attribute.");
             }
 
-            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
-
-            var attributeEntities = _unitOfDataPersistenceWork.Context.Attribute.ToList();
+            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
             var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
             if (!remainingLifeLimits.All(_ => attributeNames.Contains(_.Attribute)))
             {
@@ -182,27 +158,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entityIds = remainingLifeLimitEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfDataPersistenceWork.Context.RemainingLifeLimit
+            var existingEntityIds = _unitOfWork.Context.RemainingLifeLimit
                 .Where(_ => _.RemainingLifeLimitLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
                 .ToList();
 
-            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<RemainingLifeLimitEntity, bool>>>
-            {
-                {"delete", _ => _.RemainingLifeLimitLibraryId == libraryId && !entityIds.Contains(_.Id)},
-                {"update", _ => existingEntityIds.Contains(_.Id)},
-                {"add", _ => !existingEntityIds.Contains(_.Id)}
-            };
+            _unitOfWork.Context.DeleteAll<RemainingLifeLimitEntity>(_ =>
+                _.RemainingLifeLimitLibraryId == libraryId && !entityIds.Contains(_.Id));
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfDataPersistenceWork.Context.UpsertOrDelete(remainingLifeLimitEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
-            else
-            {
-                _unitOfDataPersistenceWork.Context.BulkUpsertOrDelete(remainingLifeLimitEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
+            _unitOfWork.Context.UpdateAll(remainingLifeLimitEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
 
-            _unitOfDataPersistenceWork.Context.DeleteAll<CriterionLibraryRemainingLifeLimitEntity>(_ =>
+            _unitOfWork.Context.AddAll(remainingLifeLimitEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
+
+            _unitOfWork.Context.DeleteAll<CriterionLibraryRemainingLifeLimitEntity>(_ =>
                 _.RemainingLifeLimit.RemainingLifeLimitLibraryId == libraryId);
 
             if (remainingLifeLimits.Any(_ =>
@@ -218,18 +185,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             RemainingLifeLimitId = _.Id
                         }).ToList();
 
-                _unitOfDataPersistenceWork.Context.BulkAddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }
         }
 
         public void DeleteRemainingLifeLimitLibrary(Guid libraryId)
         {
-            if (!_unitOfDataPersistenceWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == libraryId))
+            if (!_unitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == libraryId))
             {
                 return;
             }
 
-            _unitOfDataPersistenceWork.Context.Delete<RemainingLifeLimitLibraryEntity>(_ => _.Id == libraryId);
+            _unitOfWork.Context.DeleteEntity<RemainingLifeLimitLibraryEntity>(_ => _.Id == libraryId);
         }
     }
 }

@@ -19,6 +19,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual NetworkRollupDetailEntity NetworkRollupDetail { get; set; }
 
+        public virtual BenefitQuantifierEntity BenefitQuantifier { get; set; }
+
         public virtual ICollection<MaintainableAssetEntity> MaintainableAssets { get; set; }
 
         public virtual ICollection<SimulationEntity> Simulations { get; set; }

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
@@ -5,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.Simulation;
@@ -110,6 +113,15 @@ namespace BridgeCareCore
             services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository>();
             services.AddScoped<IMaintainableAssetRepository, LiteDb.MaintainableAssetRepository>();
 #endif
+
+            // Setup reporting
+            var reportLookup = new Dictionary<string, Type>();
+            reportLookup.Add("HelloWorld", typeof(HelloWorldReport));
+            reportLookup.Add("InventoryLookup", typeof(InventoryReport));
+
+            services.AddSingleton(service => new ReportLookupLibrary(reportLookup));
+            services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
+
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
                 builder

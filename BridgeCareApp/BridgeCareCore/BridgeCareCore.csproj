@@ -69,6 +69,7 @@
     <ProjectReference Include="..\AppliedResearchAssociates.CalculateEvaluate\AppliedResearchAssociates.CalculateEvaluate.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataAssignment\AppliedResearchAssociates.iAM.DataAssignment.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Reporting\AppliedResearchAssociates.iAM.Reporting.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -80,9 +81,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="coreConnections.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Update="esec.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>

@@ -182,6 +182,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<UserCriteriaFilterEntity> UserCriteria { get; set; }
 
+        public virtual DbSet<ReportIndexEntity> ReportIndex { get; set; }
+
         private class MigrationConnection
         {
             public string BridgeCareConnex { get; set; }
@@ -1498,6 +1500,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .WithOne(p => p.UserCriteriaFilterJoin)
                 .HasForeignKey<UserCriteriaFilterEntity>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ReportIndexEntity>(entity =>
+            {
+                entity.Property(e => e.ReportTypeName).IsRequired();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.SimulationReports)
+                    .HasForeignKey(d => d.SimulationID)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

@@ -65,8 +65,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
             else
             {
-                providedKey = $"BRKey:  {reportKeys.BRKey}";
-                segmentData = _repository.AssetDataRepository.GetAssetAttributes("BRKey_", reportKeys.BRKey.ToString());
+                providedKey = $"BRKEY:  {reportKeys.BRKey}";
+                segmentData = _repository.AssetDataRepository.GetAssetAttributes("BRKEY_", reportKeys.BRKey.ToString());
             }
             if (segmentData.Count() < 1)
             {
@@ -76,8 +76,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             var resultsString = new StringBuilder();
-            resultsString.Append($"<p>BRKey: {GetAttribute("BRKEY_")}</p>");
-            resultsString.Append($"<p>BMSID: {GetAttribute("BMSID")}</p>");
+            resultsString.Append("<table>");
+            resultsString.Append(CreateHTMLSection("Key Fields", new List<string>() { "BRKEY_", "BMSID" }));
+            resultsString.Append(CreateHTMLSection("Location", new List<string>() { "DISTRICT", "COUNTY", "MUNI_CODE", "FEATURE_INTERSECTED", "FEATURE_CARRIED", "LOCATION" }));
+            resultsString.Append("</table>");
             Results = resultsString.ToString();
             IsComplete = true;
             return;
@@ -113,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             if (parameters.BRKey > 0 && !String.IsNullOrEmpty(parameters.BMSID))
             {
                 // Both parameters provided.  Check to see if they are the same asset
-                var BRKeyGuid = _repository.AssetDataRepository.KeyProperties["BRKey"].FirstOrDefault(_ => _.KeyValue.Value == parameters.BRKey.ToString());
+                var BRKeyGuid = _repository.AssetDataRepository.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == parameters.BRKey.ToString());
                 if (BRKeyGuid == null)
                 {
                     // BRKey was not found
@@ -156,7 +158,22 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             var sectionString = new StringBuilder($"<tr><th colspan=\"4\">{sectionName}</th><tr>");
 
-            return sectionString;
+            for (int i = 0; i < attributes.Count(); i=i+2)
+            {
+                if (i == (attributes.Count() - 1))
+                {
+                    // The attribute list has an odd length, just do one element
+                    sectionString.Append($"<tr><td class=\"description\">{attributes[i]}</td><td class=\"data\">{GetAttribute(attributes[i])}</td></tr>");
+                }
+                else
+                {
+                    // Do two elements at a time
+                    sectionString.Append($"<tr><td class=\"description\">{attributes[i]}</td><td class=\"data\">{GetAttribute(attributes[i])}</td>");
+                    sectionString.Append($"<td class=\"description columnsplit\">{attributes[i+1]}</td><td class=\"data\">{GetAttribute(attributes[i+1])}</td></tr>");
+                }
+            }
+
+            return sectionString.ToString();
         }
     }
 }

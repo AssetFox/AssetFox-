@@ -9,15 +9,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
     public class TestDataForPennDOTAssetDataRepo
     {
         private List<AttributeEntity> _attributeLibrary;
+        private List<NumericAttributeValueHistoryEntity> _numericAttributes;
+        private List<TextAttributeValueHistoryEntity> _textAttributes;
 
         public NetworkEntity TestNetwork { get; private set; }
         public IQueryable<AttributeEntity> AttributeLibrary => _attributeLibrary.AsQueryable();
         public IQueryable<FacilityEntity> FacilityLibrary => TestNetwork.Facilities.AsQueryable();
         public IQueryable<SectionEntity> SectionLibrary => TestNetwork.Facilities.SelectMany(_ => _.Sections).AsQueryable();
+        public IQueryable<NumericAttributeValueHistoryEntity> NumericAttributes => _numericAttributes.AsQueryable();
+        public IQueryable<TextAttributeValueHistoryEntity> TextAttributes => _textAttributes.AsQueryable();
+
 
         public TestDataForPennDOTAssetDataRepo()
         {
             _attributeLibrary = CreateTestAttributes();
+            _numericAttributes = new List<NumericAttributeValueHistoryEntity>();
+            _textAttributes = new List<TextAttributeValueHistoryEntity>();
             TestNetwork = CreateTestNetwork();
         }
 
@@ -128,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             attributeLibrary.Add(new AttributeEntity()
             {
                 Id = Guid.NewGuid(),
-                Name = "BRKey_"
+                Name = "BRKEY_"
             });
             attributeLibrary.Add(new AttributeEntity()
             {
@@ -156,7 +163,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         private void AssignBRKey(SectionEntity section, double value)
         {
-            var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BRKey_");
+            var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BRKEY_");
             var newNumericAttribute = new NumericAttributeValueHistoryEntity()
             {
                 Year = 2020,
@@ -168,6 +175,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 Section = section
             };
             section.NumericAttributeValueHistories.Add(newNumericAttribute);
+            _numericAttributes.Add(newNumericAttribute);
         }
 
         private void AssignBMSID(SectionEntity section, string value)
@@ -201,6 +209,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 Section = section
             };
             section.NumericAttributeValueHistories.Add(newNumericAttribute);
+            _numericAttributes.Add(newNumericAttribute);
         }
 
         private void AssignName(SectionEntity section, string value)
@@ -217,6 +226,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 Section = section
             };
             section.TextAttributeValueHistories.Add(newtextAttribute);
+            _textAttributes.Add(newtextAttribute);
         }
     }
 }

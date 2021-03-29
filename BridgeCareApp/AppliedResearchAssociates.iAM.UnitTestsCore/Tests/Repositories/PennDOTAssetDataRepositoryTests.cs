@@ -19,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         private UnitOfDataPersistenceWork _testRepo;
         private Mock<IAMContext> _mockedContext;
         private Mock<DbSet<AttributeEntity>> _mockedAttributeEntitySet;
+        private Mock<DbSet<FacilityEntity>> _mockedFacilityEntitySet;
         private Mock<DbSet<SectionEntity>> _mockedSectionEntitySet;
         private Mock<ILogger<PennDOTAssetDataRepository>> _mockedLogger;
 
@@ -40,7 +41,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             _mockedSectionEntitySet.As<IQueryable<SectionEntity>>().Setup(_ => _.ElementType).Returns(_testData.SectionLibrary.ElementType);
             _mockedSectionEntitySet.As<IQueryable<SectionEntity>>().Setup(_ => _.GetEnumerator()).Returns(_testData.SectionLibrary.GetEnumerator());
 
+            _mockedFacilityEntitySet = new Mock<DbSet<FacilityEntity>>();
+            _mockedFacilityEntitySet.As<IQueryable<FacilityEntity>>().Setup(_ => _.Provider).Returns(_testData.FacilityLibrary.Provider);
+            _mockedFacilityEntitySet.As<IQueryable<FacilityEntity>>().Setup(_ => _.Expression).Returns(_testData.FacilityLibrary.Expression);
+            _mockedFacilityEntitySet.As<IQueryable<FacilityEntity>>().Setup(_ => _.ElementType).Returns(_testData.FacilityLibrary.ElementType);
+            _mockedFacilityEntitySet.As<IQueryable<FacilityEntity>>().Setup(_ => _.GetEnumerator()).Returns(_testData.FacilityLibrary.GetEnumerator());
+
             _mockedContext.Setup(_ => _.Attribute).Returns(_mockedAttributeEntitySet.Object);
+            _mockedContext.Setup(_ => _.Facility).Returns(_mockedFacilityEntitySet.Object);
             _mockedContext.Setup(_ => _.Section).Returns(_mockedSectionEntitySet.Object);
             var mockedRepo = new Mock<UnitOfDataPersistenceWork>((new Mock<IConfiguration>()).Object, _mockedContext.Object);
             //mockedRepo.Setup(_ => _.Context).Returns(_mockedContext.Object);
@@ -61,26 +69,43 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 
             // Assert
             Assert.Equal(2, repo.KeyProperties.Count());
-            Assert.Equal(5, repo.KeyProperties["BRKey"].Count());
-            Assert.NotNull(repo.KeyProperties["BRKey"].FirstOrDefault(_ => _.KeyValue.Value == "2").SegmentId == checkGuid);
+            Assert.Equal(5, repo.KeyProperties["BRKey_"].Count());
+            Assert.NotNull(repo.KeyProperties["BRKey_"].FirstOrDefault(_ => _.KeyValue.Value == "2").SegmentId == checkGuid);
             Assert.NotNull(repo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256").SegmentId == checkGuid);
         }
 
         [Fact]
-        public void ReturnsSegmeentData()
+        public void ReturnsSegmeentDataWithBRKey()
         {
             // Arrange
             var repo = new PennDOTAssetDataRepository(_testRepo);
 
             // Act
-            var testSegment = repo.GetAssetAttributes("BRKey", "2");
+            var testSegment = repo.GetAssetAttributes("BRKey_", "2");
 
             // Assert
-            Assert.Equal(1, testSegment.Where(_ => _.Name == "BRKey").Count());
-            Assert.Equal(2, testSegment.First(_ => _.Name == "BRKey").NumericValue);
-            Assert.Equal("2", testSegment.First(_ => _.Name == "BRKey").Value);
+            Assert.Equal(1, testSegment.Where(_ => _.Name == "BRKey_").Count());
+            Assert.Equal(2, testSegment.First(_ => _.Name == "BRKey_").NumericValue);
+            Assert.Equal("2", testSegment.First(_ => _.Name == "BRKey_").Value);
             Assert.Equal(15.4, testSegment.First(_ => _.Name == "Length").NumericValue);
-            Assert.Equal("13401256", testSegment.First(_ => _.Name == "BMSID").Value);
+            //Assert.Equal("13401256", testSegment.First(_ => _.Name == "BMSID").Value);
+            Assert.Equal("First B", testSegment.First(_ => _.Name == "Name").TextValue);
+        }
+
+        [Fact]
+        public void ReturnsSegmeentDataWithBMSID()
+        {
+            // Arrange
+            var repo = new PennDOTAssetDataRepository(_testRepo);
+
+            // Act
+            var testSegment = repo.GetAssetAttributes("BMSID", "13401256");
+
+            // Assert
+            Assert.Equal(1, testSegment.Where(_ => _.Name == "BRKey_").Count());
+            Assert.Equal(2, testSegment.First(_ => _.Name == "BRKey_").NumericValue);
+            Assert.Equal("2", testSegment.First(_ => _.Name == "BRKey_").Value);
+            Assert.Equal(15.4, testSegment.First(_ => _.Name == "Length").NumericValue);
             Assert.Equal("First B", testSegment.First(_ => _.Name == "Name").TextValue);
         }
 
@@ -103,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = new PennDOTAssetDataRepository(_testRepo);
 
             // Act
-            var testSegment = repo.GetAssetAttributes("BRKey", "100");
+            var testSegment = repo.GetAssetAttributes("BRKey_", "100");
 
             // Assert
             Assert.Equal(0, testSegment.Count());

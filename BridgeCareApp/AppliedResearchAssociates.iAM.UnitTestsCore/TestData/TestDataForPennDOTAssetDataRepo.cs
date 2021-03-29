@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public NetworkEntity TestNetwork { get; private set; }
         public IQueryable<AttributeEntity> AttributeLibrary => _attributeLibrary.AsQueryable();
+        public IQueryable<FacilityEntity> FacilityLibrary => TestNetwork.Facilities.AsQueryable();
         public IQueryable<SectionEntity> SectionLibrary => TestNetwork.Facilities.SelectMany(_ => _.Sections).AsQueryable();
 
         public TestDataForPennDOTAssetDataRepo()
@@ -127,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             attributeLibrary.Add(new AttributeEntity()
             {
                 Id = Guid.NewGuid(),
-                Name = "BRKey"
+                Name = "BRKey_"
             });
             attributeLibrary.Add(new AttributeEntity()
             {
@@ -155,7 +156,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         private void AssignBRKey(SectionEntity section, double value)
         {
-            var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BRKey");
+            var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BRKey_");
             var newNumericAttribute = new NumericAttributeValueHistoryEntity()
             {
                 Year = 2020,
@@ -171,18 +172,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         private void AssignBMSID(SectionEntity section, string value)
         {
-            var bmsidAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BMSID");
-            var newtextAttribute = new TextAttributeValueHistoryEntity()
-            {
-                Year = 2020,
-                Value = value,
-                Id =Guid.NewGuid(),
-                SectionId = section.Id,
-                AttributeId = bmsidAttribute.Id,
-                Attribute = bmsidAttribute,
-                Section = section
-            };
-            section.TextAttributeValueHistories.Add(newtextAttribute);
+            //var bmsidAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BMSID");
+            //var newtextAttribute = new TextAttributeValueHistoryEntity()
+            //{
+            //    Year = 2020,
+            //    Value = value,
+            //    Id =Guid.NewGuid(),
+            //    SectionId = section.Id,
+            //    AttributeId = bmsidAttribute.Id,
+            //    Attribute = bmsidAttribute,
+            //    Section = section
+            //};
+            //section.TextAttributeValueHistories.Add(newtextAttribute);
+            section.Name = value;
         }
 
         private void AssignLength(SectionEntity section, double value)

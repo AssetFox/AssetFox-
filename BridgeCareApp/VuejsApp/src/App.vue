@@ -331,7 +331,7 @@ export default class AppComponent extends Vue {
         error.response.headers = setContentTypeCharset(error.response.headers);
       }
       this.setIsBusyAction({isBusy: false});
-      this.setErrorMessageAction({message: getErrorMessage(error)});
+      //this.setErrorMessageAction({message: getErrorMessage(error)});
     };
     // set axios response handler to use success & error handlers
     axiosInstance.interceptors.response.use(
@@ -384,8 +384,8 @@ export default class AppComponent extends Vue {
     this.$statusHub.$off(Hub.BroadcastEventType.BroadcastErrorEvent, this.onSetErrorMessage)
   }
 
-  onSetErrorMessage(error: string) {
-    this.setErrorMessageAction({message: error});
+  onSetErrorMessage(data: any) {
+    this.setErrorMessageAction({message: data.error});
   }
 
   onAlertResult(submit: boolean) {

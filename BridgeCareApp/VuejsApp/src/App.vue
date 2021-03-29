@@ -256,7 +256,8 @@ export default class AppComponent extends Vue {
         title: 'Error',
         message: this.errorMessage,
         position: 'topRight',
-        closeOnClick: true
+        closeOnClick: true,
+        timeout: false
       });
       this.setErrorMessageAction({message: ''});
     }

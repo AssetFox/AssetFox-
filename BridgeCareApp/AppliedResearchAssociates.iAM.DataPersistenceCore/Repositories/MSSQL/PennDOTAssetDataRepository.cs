@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -16,6 +17,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             _unitofwork = uow;
             var network = _unitofwork.NetworkRepo.GetPennDotNetwork();
+            var facilities = _unitofwork.Context.Facility.Where(_ => _.NetworkId == network.Id).Include(_ => _.Sections).ToList();
+            network.Facilities = facilities;
             var sectionList = network.Facilities.SelectMany(_ => _.Sections);
 
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();

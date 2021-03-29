@@ -10,6 +10,14 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
+    /// <summary>
+    /// Creates HTML that reports on the values of all current attributes for a given asset (i.e., bridge)
+    /// </summary>
+    /// <remarks>
+    /// The parameters object of the run method should resolve to a AppliedResearchAssociates.iAM.Reporting.InventoryParameters object.
+    /// Use BRKey = 0 when that parameter is not known and an BMSID = String.Empty when that parameter is not known.  An error will occur
+    /// if you send both parameters as known values and they do not exist on the same asset.
+    /// </remarks>
     public class InventoryReport : IReport
     {
         private UnitOfDataPersistenceWork _repository;

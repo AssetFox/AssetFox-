@@ -37,7 +37,6 @@ namespace BridgeCareCore.Controllers
         //[Authorize]
         public async Task<IActionResult> GetHTML(string reportName)
         {
-            // var returnValue = Content("<p>Hellow world!</p>");
             // NOTE:  This might be useful:  https://weblog.west-wind.com/posts/2013/dec/13/accepting-raw-request-body-content-with-aspnet-web-api
 
             SendRealTimeMessage($"Starting to process {reportName}.");

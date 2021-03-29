@@ -2,25 +2,29 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RemainingLifeLimitController : ControllerBase
+    public class RemainingLifeLimitController : HubControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IEsecSecurity _esecSecurity;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public RemainingLifeLimitController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
+        public RemainingLifeLimitController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService) : base(hubService)
         {
-            _unitOfWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+
         }
 
         [HttpGet]
@@ -30,14 +34,14 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfWork.RemainingLifeLimitRepo
-                    .RemainingLifeLimitLibrariesWithRemainingLifeLimits();
+                var result = await Task.Factory.StartNew(() => _unitOfWork.RemainingLifeLimitRepo
+                    .RemainingLifeLimitLibrariesWithRemainingLifeLimits());
                 return Ok(result);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Remaining Life Limit error::{e.Message}");
+                throw;
             }
         }
 
@@ -48,24 +52,26 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
-                _unitOfWork.BeginTransaction();
+                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
+
                 await Task.Factory.StartNew(() =>
                 {
+                    _unitOfWork.BeginTransaction();
                     _unitOfWork.RemainingLifeLimitRepo
-                        .UpsertRemainingLifeLimitLibrary(dto, simulationId, userInfo);
+                        .UpsertRemainingLifeLimitLibrary(dto, simulationId);
                     _unitOfWork.RemainingLifeLimitRepo
-                        .UpsertOrDeleteRemainingLifeLimits(dto.RemainingLifeLimits, dto.Id, userInfo);
+                        .UpsertOrDeleteRemainingLifeLimits(dto.RemainingLifeLimits, dto.Id);
+                    _unitOfWork.Commit();
                 });
 
-                _unitOfWork.Commit();
+
                 return Ok();
             }
             catch (Exception e)
             {
                 _unitOfWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Remaining Life Limit error::{e.Message}");
+                throw;
             }
         }
 
@@ -76,17 +82,20 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfWork.BeginTransaction();
-                await Task.Factory.StartNew(() => _unitOfWork.RemainingLifeLimitRepo
-                    .DeleteRemainingLifeLimitLibrary(libraryId));
-                _unitOfWork.Commit();
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.RemainingLifeLimitRepo.DeleteRemainingLifeLimitLibrary(libraryId);
+                    _unitOfWork.Commit();
+                });
+
                 return Ok();
             }
             catch (Exception e)
             {
                 _unitOfWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Remaining Life Limit error::{e.Message}");
+                throw;
             }
         }
     }

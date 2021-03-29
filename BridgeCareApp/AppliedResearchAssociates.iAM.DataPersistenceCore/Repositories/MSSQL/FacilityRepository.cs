@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 
@@ -23,7 +23,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var facilityEntities = facilities.Select(_ => _.ToEntity()).ToList();
+            var existingFacilities = _unitOfWork.Context.Facility.Select(_ => _.Name).ToList();
+            var existingSections = _unitOfWork.Context.Section.Select(_ => $"{_.Name}{_.Area}").ToList();
+
+            var facilityEntities = facilities.Where(_ => !existingFacilities.Contains(_.Name)).Select(_ => _.ToEntity())
+                .ToList();
 
             _unitOfWork.Context.AddAll(facilityEntities, _unitOfWork.UserEntity?.Id);
 

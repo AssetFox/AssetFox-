@@ -11,7 +11,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public Guid UserCriteriaId { get; set; }
 
         public Guid UserId { get; set; }
+
         public string Criteria { get; set; }
+
         public bool HasCriteria { get; set; }
 
         public virtual UserEntity User { get; set; }

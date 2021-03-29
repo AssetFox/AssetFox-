@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
@@ -15,9 +15,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class SimulationRepository : ISimulationRepository
     {
-        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
         public SimulationRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
@@ -46,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             entities.ForEach(_ => _.CreateSimulation(network));
         }
 
-        public Task<List<SimulationDTO>> GetAllInNetwork(Guid networkId)
+        public List<SimulationDTO> GetAllInNetwork(Guid networkId)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
@@ -55,24 +52,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (!_unitOfWork.Context.Simulation.Any())
             {
-                return Task.Factory.StartNew(() => new List<SimulationDTO>());
+                return new List<SimulationDTO>();
             }
 
-            return Task.Factory.StartNew(() =>
-            {
-                var users = _unitOfWork.Context.User.ToList();
+            var users = _unitOfWork.Context.User.ToList();
 
-                var simulationEntities = _unitOfWork.Context.Simulation
-                    .Include(_ => _.SimulationAnalysisDetail)
-                    .Include(_ => _.SimulationReportDetail)
-                    .Include(_ => _.SimulationUserJoins)
-                    .ThenInclude(_ => _.User)
-                    .Where(_ => _.NetworkId == networkId)
-                    .ToList();
+            var simulationEntities = _unitOfWork.Context.Simulation
+                .Include(_ => _.SimulationAnalysisDetail)
+                .Include(_ => _.SimulationReportDetail)
+                .Include(_ => _.SimulationUserJoins)
+                .ThenInclude(_ => _.User)
+                .Where(_ => _.NetworkId == networkId)
+                .ToList();
 
-                return simulationEntities.Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
-                    .ToList();
-            });
+            return simulationEntities.Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
+                .ToList();
         }
 
         public void GetSimulationInNetwork(Guid simulationId, Network network)
@@ -92,286 +86,218 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             simulationEntity.CreateSimulation(network);
         }
 
-        public void DeleteSimulationAndAllRelatedData()
-        {
-            if (IsRunningFromXUnit)
-            {
-                _unitOfWork.Context.Simulation.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.Equation.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.CriterionLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.BudgetLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.BudgetPriorityLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.CashFlowRuleLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.DeficientConditionGoalLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.PerformanceCurveLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.RemainingLifeLimitLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.TargetConditionGoalLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-
-                _unitOfWork.Context.TreatmentLibrary.ToList()
-                    .ForEach(_ => _unitOfWork.Context.Entry(_).State = EntityState.Deleted);
-            }
-            else
-            {
-                /*var command = new SqlCommand("DeleteAllExceptNetworkDataForAlphaMigration", _unitOfWork.Connection)
-                {
-                    CommandTimeout = 1800, CommandType = CommandType.StoredProcedure
-                };
-                _unitOfWork.Connection.Open();
-                command.ExecuteNonQuery();
-                _unitOfWork.Connection.Close();*/
-                _unitOfWork.Context.Database.ExecuteSqlRaw(
-                    "DELETE FROM dbo.Simulation;" +
-                    "DELETE FROM dbo.Equation;" +
-                    "DELETE FROM dbo.CriterionLibrary;" +
-                    "DELETE FROM dbo.BudgetLibrary;" +
-                    "DELETE FROM dbo.BudgetPriorityLibrary;" +
-                    "DELETE FROM dbo.CashFlowRuleLibrary;" +
-                    "DELETE FROM dbo.DeficientConditionGoalLibrary;" +
-                    "DELETE FROM dbo.PerformanceCurveLibrary;" +
-                    "DELETE FROM dbo.RemainingLifeLimitLibrary;" +
-                    "DELETE FROM dbo.TargetConditionGoalLibrary;" +
-                    "DELETE FROM dbo.TreatmentLibrary;");
-            }
-
-            _unitOfWork.Context.SaveChanges();
-        }
-
-        public void CreateSimulation(Guid networkId, SimulationDTO dto, UserInfoDTO userInfo)
+        public void CreateSimulation(Guid networkId, SimulationDTO dto)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var user = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
-
             var simulationEntity = dto.ToEntity(networkId);
 
-            _unitOfWork.Context.AddEntity(simulationEntity, user?.Id);
+            _unitOfWork.Context.AddEntity(simulationEntity, _unitOfWork.UserEntity?.Id);
 
             if (dto.Users.Any())
             {
                 _unitOfWork.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(),
-                    user?.Id);
+                    _unitOfWork.UserEntity?.Id);
             }
         }
 
-        public Task<SimulationDTO> GetSimulation(Guid simulationId)
+        public SimulationDTO GetSimulation(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            return Task.Factory.StartNew(() =>
-            {
-                var users = _unitOfWork.Context.User.ToList();
+            var users = _unitOfWork.Context.User.ToList();
 
-                var simulationEntity = _unitOfWork.Context.Simulation
-                    .Include(_ => _.SimulationAnalysisDetail)
-                    .Include(_ => _.SimulationUserJoins)
-                    .ThenInclude(_ => _.User)
-                    .Single(_ => _.Id == simulationId);
+            var simulationEntity = _unitOfWork.Context.Simulation
+                .Include(_ => _.SimulationAnalysisDetail)
+                .Include(_ => _.SimulationUserJoins)
+                .ThenInclude(_ => _.User)
+                .Single(_ => _.Id == simulationId);
 
-                return simulationEntity.ToDto(users.FirstOrDefault(_ => _.Id == simulationEntity.CreatedBy));
-            });
+            return simulationEntity.ToDto(users.FirstOrDefault(_ => _.Id == simulationEntity.CreatedBy));
         }
 
-        public Task<SimulationDTO> CloneSimulation(Guid simulationId, UserInfoDTO userInfo)
+        public SimulationDTO CloneSimulation(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            return Task.Factory.StartNew(() =>
+            var simulationToClone = _unitOfWork.Context.Simulation.AsNoTracking()
+                .Include(_ => _.AnalysisMethod)
+                .ThenInclude(_ => _.Benefit)
+                .Include(_ => _.AnalysisMethod)
+                .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
+                .Include(_ => _.InvestmentPlan)
+                .Include(_ => _.BudgetLibrarySimulationJoin)
+                .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
+                .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
+                .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
+                .Include(_ => _.PerformanceCurveLibrarySimulationJoin)
+                .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
+                .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
+                .Include(_ => _.TreatmentLibrarySimulationJoin)
+                .Include(_ => _.CommittedProjects)
+                .ThenInclude(_ => _.CommittedProjectConsequences)
+                .Single(_ => _.Id == simulationId);
+
+            var newSimulationId = Guid.NewGuid();
+
+            simulationToClone.Id = newSimulationId;
+            _unitOfWork.Context
+                .ReInitializeAllEntityBaseProperties(simulationToClone, _unitOfWork.UserEntity?.Id);
+
+            if (simulationToClone.AnalysisMethod != null)
             {
-                var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
-
-                var simulationToClone = _unitOfWork.Context.Simulation.AsNoTracking()
-                    .Include(_ => _.AnalysisMethod)
-                    .ThenInclude(_ => _.Benefit)
-                    .Include(_ => _.AnalysisMethod)
-                    .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
-                    .Include(_ => _.InvestmentPlan)
-                    .Include(_ => _.BudgetLibrarySimulationJoin)
-                    .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
-                    .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
-                    .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
-                    .Include(_ => _.PerformanceCurveLibrarySimulationJoin)
-                    .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
-                    .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
-                    .Include(_ => _.TreatmentLibrarySimulationJoin)
-                    .Include(_ => _.CommittedProjects)
-                    .ThenInclude(_ => _.CommittedProjectConsequences)
-                    .Single(_ => _.Id == simulationId);
-
-                var newSimulationId = Guid.NewGuid();
-
-                simulationToClone.Id = newSimulationId;
+                var newAnalysisMethodId = Guid.NewGuid();
+                simulationToClone.AnalysisMethod.Id = newAnalysisMethodId;
+                simulationToClone.AnalysisMethod.SimulationId = newSimulationId;
                 _unitOfWork.Context
-                    .ReInitializeAllEntityBaseProperties(simulationToClone, userEntity?.Id);
+                    .ReInitializeAllEntityBaseProperties(simulationToClone.AnalysisMethod, _unitOfWork.UserEntity?.Id);
 
-                if (simulationToClone.AnalysisMethod != null)
+                if (simulationToClone.AnalysisMethod.Benefit != null)
                 {
-                    var newAnalysisMethodId = Guid.NewGuid();
-                    simulationToClone.AnalysisMethod.Id = newAnalysisMethodId;
-                    simulationToClone.AnalysisMethod.SimulationId = newSimulationId;
+                    simulationToClone.AnalysisMethod.Benefit.Id = Guid.NewGuid();
+                    simulationToClone.AnalysisMethod.Benefit.AnalysisMethodId = newAnalysisMethodId;
                     _unitOfWork.Context
-                        .ReInitializeAllEntityBaseProperties(simulationToClone.AnalysisMethod, userEntity?.Id);
-
-                    if (simulationToClone.AnalysisMethod.Benefit != null)
-                    {
-                        simulationToClone.AnalysisMethod.Benefit.Id = Guid.NewGuid();
-                        simulationToClone.AnalysisMethod.Benefit.AnalysisMethodId = newAnalysisMethodId;
-                        _unitOfWork.Context
-                            .ReInitializeAllEntityBaseProperties(simulationToClone.AnalysisMethod.Benefit,
-                                userEntity?.Id);
-                    }
-
-                    if (simulationToClone.AnalysisMethod.CriterionLibraryAnalysisMethodJoin != null)
-                    {
-                        simulationToClone.AnalysisMethod.CriterionLibraryAnalysisMethodJoin.AnalysisMethodId =
-                            newAnalysisMethodId;
-                        _unitOfWork.Context
-                            .ReInitializeAllEntityBaseProperties(
-                                simulationToClone.AnalysisMethod.CriterionLibraryAnalysisMethodJoin, userEntity?.Id);
-                    }
+                        .ReInitializeAllEntityBaseProperties(simulationToClone.AnalysisMethod.Benefit,
+                            _unitOfWork.UserEntity?.Id);
                 }
 
-                if (simulationToClone.InvestmentPlan != null)
+                if (simulationToClone.AnalysisMethod.CriterionLibraryAnalysisMethodJoin != null)
                 {
-                    simulationToClone.InvestmentPlan.Id = Guid.NewGuid();
-                    simulationToClone.InvestmentPlan.SimulationId = newSimulationId;
-                    _unitOfWork.Context
-                        .ReInitializeAllEntityBaseProperties(simulationToClone.InvestmentPlan, userEntity?.Id);
-                }
-
-                if (simulationToClone.BudgetLibrarySimulationJoin != null)
-                {
-                    simulationToClone.BudgetLibrarySimulationJoin.SimulationId = newSimulationId;
-                    _unitOfWork.Context
-                        .ReInitializeAllEntityBaseProperties(simulationToClone.BudgetLibrarySimulationJoin,
-                            userEntity?.Id);
-                }
-
-                if (simulationToClone.BudgetPriorityLibrarySimulationJoin != null)
-                {
-                    simulationToClone.BudgetPriorityLibrarySimulationJoin.SimulationId = newSimulationId;
-                    _unitOfWork.Context
-                        .ReInitializeAllEntityBaseProperties(simulationToClone.BudgetPriorityLibrarySimulationJoin,
-                            userEntity?.Id);
-                }
-
-                if (simulationToClone.CashFlowRuleLibrarySimulationJoin != null)
-                {
-                    simulationToClone.CashFlowRuleLibrarySimulationJoin.SimulationId = newSimulationId;
-                    _unitOfWork.Context
-                        .ReInitializeAllEntityBaseProperties(simulationToClone.CashFlowRuleLibrarySimulationJoin,
-                            userEntity?.Id);
-                }
-
-                if (simulationToClone.DeficientConditionGoalLibrarySimulationJoin != null)
-                {
-                    simulationToClone.DeficientConditionGoalLibrarySimulationJoin.SimulationId = newSimulationId;
+                    simulationToClone.AnalysisMethod.CriterionLibraryAnalysisMethodJoin.AnalysisMethodId =
+                        newAnalysisMethodId;
                     _unitOfWork.Context
                         .ReInitializeAllEntityBaseProperties(
-                            simulationToClone.DeficientConditionGoalLibrarySimulationJoin, userEntity?.Id);
+                            simulationToClone.AnalysisMethod.CriterionLibraryAnalysisMethodJoin,
+                            _unitOfWork.UserEntity?.Id);
                 }
+            }
 
-                if (simulationToClone.PerformanceCurveLibrarySimulationJoin != null)
+            if (simulationToClone.InvestmentPlan != null)
+            {
+                simulationToClone.InvestmentPlan.Id = Guid.NewGuid();
+                simulationToClone.InvestmentPlan.SimulationId = newSimulationId;
+                _unitOfWork.Context
+                    .ReInitializeAllEntityBaseProperties(simulationToClone.InvestmentPlan, _unitOfWork.UserEntity?.Id);
+            }
+
+            if (simulationToClone.BudgetLibrarySimulationJoin != null)
+            {
+                simulationToClone.BudgetLibrarySimulationJoin.SimulationId = newSimulationId;
+                _unitOfWork.Context
+                    .ReInitializeAllEntityBaseProperties(simulationToClone.BudgetLibrarySimulationJoin,
+                        _unitOfWork.UserEntity?.Id);
+            }
+
+            if (simulationToClone.BudgetPriorityLibrarySimulationJoin != null)
+            {
+                simulationToClone.BudgetPriorityLibrarySimulationJoin.SimulationId = newSimulationId;
+                _unitOfWork.Context
+                    .ReInitializeAllEntityBaseProperties(simulationToClone.BudgetPriorityLibrarySimulationJoin,
+                        _unitOfWork.UserEntity?.Id);
+            }
+
+            if (simulationToClone.CashFlowRuleLibrarySimulationJoin != null)
+            {
+                simulationToClone.CashFlowRuleLibrarySimulationJoin.SimulationId = newSimulationId;
+                _unitOfWork.Context
+                    .ReInitializeAllEntityBaseProperties(simulationToClone.CashFlowRuleLibrarySimulationJoin,
+                        _unitOfWork.UserEntity?.Id);
+            }
+
+            if (simulationToClone.DeficientConditionGoalLibrarySimulationJoin != null)
+            {
+                simulationToClone.DeficientConditionGoalLibrarySimulationJoin.SimulationId = newSimulationId;
+                _unitOfWork.Context
+                    .ReInitializeAllEntityBaseProperties(
+                        simulationToClone.DeficientConditionGoalLibrarySimulationJoin, _unitOfWork.UserEntity?.Id);
+            }
+
+            if (simulationToClone.PerformanceCurveLibrarySimulationJoin != null)
+            {
+                simulationToClone.PerformanceCurveLibrarySimulationJoin.SimulationId = newSimulationId;
+                _unitOfWork.Context
+                    .ReInitializeAllEntityBaseProperties(simulationToClone.PerformanceCurveLibrarySimulationJoin,
+                        _unitOfWork.UserEntity?.Id);
+            }
+
+            if (simulationToClone.RemainingLifeLimitLibrarySimulationJoin != null)
+            {
+                simulationToClone.RemainingLifeLimitLibrarySimulationJoin.SimulationId = newSimulationId;
+                _unitOfWork.Context
+                    .ReInitializeAllEntityBaseProperties(simulationToClone.RemainingLifeLimitLibrarySimulationJoin,
+                        _unitOfWork.UserEntity?.Id);
+            }
+
+            if (simulationToClone.TargetConditionGoalLibrarySimulationJoin != null)
+            {
+                simulationToClone.TargetConditionGoalLibrarySimulationJoin.SimulationId = newSimulationId;
+                _unitOfWork.Context
+                    .ReInitializeAllEntityBaseProperties(simulationToClone.TargetConditionGoalLibrarySimulationJoin,
+                        _unitOfWork.UserEntity?.Id);
+            }
+
+            if (simulationToClone.TreatmentLibrarySimulationJoin != null)
+            {
+                simulationToClone.TreatmentLibrarySimulationJoin.SimulationId = newSimulationId;
+                _unitOfWork.Context
+                    .ReInitializeAllEntityBaseProperties(simulationToClone.TreatmentLibrarySimulationJoin,
+                        _unitOfWork.UserEntity?.Id);
+            }
+
+            if (simulationToClone.CommittedProjects.Any())
+            {
+                simulationToClone.CommittedProjects.ForEach(committedProject =>
                 {
-                    simulationToClone.PerformanceCurveLibrarySimulationJoin.SimulationId = newSimulationId;
+                    committedProject.Id = Guid.NewGuid();
+                    committedProject.SimulationId = newSimulationId;
                     _unitOfWork.Context
-                        .ReInitializeAllEntityBaseProperties(simulationToClone.PerformanceCurveLibrarySimulationJoin,
-                            userEntity?.Id);
-                }
+                        .ReInitializeAllEntityBaseProperties(committedProject, _unitOfWork.UserEntity?.Id);
 
-                if (simulationToClone.RemainingLifeLimitLibrarySimulationJoin != null)
-                {
-                    simulationToClone.RemainingLifeLimitLibrarySimulationJoin.SimulationId = newSimulationId;
-                    _unitOfWork.Context
-                        .ReInitializeAllEntityBaseProperties(simulationToClone.RemainingLifeLimitLibrarySimulationJoin,
-                            userEntity?.Id);
-                }
-
-                if (simulationToClone.TargetConditionGoalLibrarySimulationJoin != null)
-                {
-                    simulationToClone.TargetConditionGoalLibrarySimulationJoin.SimulationId = newSimulationId;
-                    _unitOfWork.Context
-                        .ReInitializeAllEntityBaseProperties(simulationToClone.TargetConditionGoalLibrarySimulationJoin,
-                            userEntity?.Id);
-                }
-
-                if (simulationToClone.TreatmentLibrarySimulationJoin != null)
-                {
-                    simulationToClone.TreatmentLibrarySimulationJoin.SimulationId = newSimulationId;
-                    _unitOfWork.Context
-                        .ReInitializeAllEntityBaseProperties(simulationToClone.TreatmentLibrarySimulationJoin,
-                            userEntity?.Id);
-                }
-
-                if (simulationToClone.CommittedProjects.Any())
-                {
-                    simulationToClone.CommittedProjects.ForEach(committedProject =>
+                    if (committedProject.CommittedProjectConsequences.Any())
                     {
-                        committedProject.Id = Guid.NewGuid();
-                        committedProject.SimulationId = newSimulationId;
-                        _unitOfWork.Context
-                            .ReInitializeAllEntityBaseProperties(committedProject, userEntity?.Id);
-
-                        if (committedProject.CommittedProjectConsequences.Any())
+                        committedProject.CommittedProjectConsequences.ForEach(committedProjectConsequence =>
                         {
-                            committedProject.CommittedProjectConsequences.ForEach(committedProjectConsequence =>
-                            {
-                                committedProjectConsequence.Id = Guid.NewGuid();
-                                committedProjectConsequence.CommittedProjectId = committedProject.Id;
-                                _unitOfWork.Context
-                                    .ReInitializeAllEntityBaseProperties(committedProjectConsequence, userEntity?.Id);
-                            });
-                        }
-                    });
-                }
+                            committedProjectConsequence.Id = Guid.NewGuid();
+                            committedProjectConsequence.CommittedProjectId = committedProject.Id;
+                            _unitOfWork.Context
+                                .ReInitializeAllEntityBaseProperties(committedProjectConsequence,
+                                    _unitOfWork.UserEntity?.Id);
+                        });
+                    }
+                });
+            }
 
-                if (userEntity != null)
+            if (_unitOfWork.UserEntity != null)
+            {
+                simulationToClone.SimulationUserJoins = new List<SimulationUserEntity>
                 {
-                    simulationToClone.SimulationUserJoins = new List<SimulationUserEntity>{new SimulationUserEntity
+                    new SimulationUserEntity
                     {
                         SimulationId = newSimulationId,
-                        UserId = userEntity.Id,
+                        UserId = _unitOfWork.UserEntity.Id,
                         CanModify = true,
                         IsOwner = true,
-                        CreatedBy = userEntity.Id,
-                        LastModifiedBy = userEntity.Id
-                    }};
-                }
+                        CreatedBy = _unitOfWork.UserEntity.Id,
+                        LastModifiedBy = _unitOfWork.UserEntity.Id
+                    }
+                };
+            }
 
-                _unitOfWork.Context.AddEntity(simulationToClone);
+            _unitOfWork.Context.AddEntity(simulationToClone);
 
-                return simulationToClone.ToDto(userEntity);
-            });
+            return simulationToClone.ToDto(_unitOfWork.UserEntity);
         }
 
-        public void UpdatePermittedSimulation(UserInfoDTO userInfo, SimulationDTO dto)
+        public void UpdatePermittedSimulation(SimulationDTO dto)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == dto.Id))
             {
@@ -379,22 +305,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             if (!_unitOfWork.Context.Simulation.Any(_ =>
-                _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
             {
                 throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
             }
 
-            UpdateSimulation(dto, userInfo);
+            UpdateSimulation(dto);
         }
 
-        public void UpdateSimulation(SimulationDTO dto, UserInfoDTO userInfo)
+        public void UpdateSimulation(SimulationDTO dto)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == dto.Id))
             {
                 throw new RowNotInTableException($"No simulation found having id {dto.Id}");
             }
-
-            var user = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == dto.Id);
             if (simulationEntity.Name != dto.Name)
@@ -407,11 +331,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (dto.Users.Any())
             {
                 _unitOfWork.Context.DeleteAll<SimulationUserEntity>(_ => _.SimulationId == dto.Id);
-                _unitOfWork.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(), user?.Id);
+                _unitOfWork.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(),
+                    _unitOfWork.UserEntity?.Id);
             }
         }
 
-        public void DeletePermittedSimulation(UserInfoDTO userInfo, Guid simulationId)
+        public void DeletePermittedSimulation(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
@@ -419,7 +344,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             if (!_unitOfWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
             {
                 throw new UnauthorizedAccessException("You are not authorized to modify the simulation.");
             }
@@ -429,16 +354,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteSimulation(Guid simulationId)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId) &&
+                !_unitOfWork.Context.CommittedProject.Any(_ => _.SimulationId == null))
             {
                 return;
             }
 
-            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
 
-            _unitOfWork.Context.Simulation.Remove(simulationEntity);
-
-            _unitOfWork.Context.SaveChanges();
+            _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
         }
     }
 }

@@ -12,13 +12,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void CreateCashFlowRules(List<CashFlowRule> cashFlowRules, Guid simulationId);
 
-        Task<List<CashFlowRuleLibraryDTO>> CashFlowRuleLibrariesWithCashFlowRules();
+        List<CashFlowRuleLibraryDTO> CashFlowRuleLibrariesWithCashFlowRules();
 
-        void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, CashFlowRuleLibraryDTO dto);
+        void UpsertPermitted(Guid simulationId, CashFlowRuleLibraryDTO dto);
 
-        void UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo);
+        void UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto, Guid simulationId);
 
-        void UpsertOrDeleteCashFlowRules(List<CashFlowRuleDTO> cashFlowRules, Guid libraryId, UserInfoDTO userInfo);
+        void UpsertOrDeleteCashFlowRules(List<CashFlowRuleDTO> cashFlowRules, Guid libraryId);
 
         void DeleteCashFlowRuleLibrary(Guid libraryId);
     }

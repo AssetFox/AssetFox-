@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
 
@@ -88,14 +88,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public Task<List<DeficientConditionGoalLibraryDTO>> DeficientConditionGoalLibrariesWithDeficientConditionGoals()
+        public List<DeficientConditionGoalLibraryDTO> DeficientConditionGoalLibrariesWithDeficientConditionGoals()
         {
             if (!_unitOfWork.Context.DeficientConditionGoalLibrary.Any())
             {
-                return Task.Factory.StartNew(() => new List<DeficientConditionGoalLibraryDTO>());
+                return new List<DeficientConditionGoalLibraryDTO>();
             }
 
-            return Task.Factory.StartNew(() => _unitOfWork.Context.DeficientConditionGoalLibrary
+            return _unitOfWork.Context.DeficientConditionGoalLibrary
                 .Include(_ => _.DeficientConditionGoals)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.DeficientConditionGoals)
@@ -103,10 +103,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.DeficientConditionGoalLibrarySimulationJoins)
                 .Select(_ => _.ToDto())
-                .ToList());
+                .ToList();
         }
 
-        public void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, DeficientConditionGoalLibraryDTO dto)
+        public void UpsertPermitted(Guid simulationId, DeficientConditionGoalLibraryDTO dto)
         {
             if (simulationId != Guid.Empty)
             {
@@ -116,23 +116,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
 
                 if (!_unitOfWork.Context.Simulation.Any(_ =>
-                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
                 }
             }
 
-            UpsertDeficientConditionGoalLibrary(dto, simulationId, userInfo);
-            UpsertOrDeleteDeficientConditionGoals(dto.DeficientConditionGoals, dto.Id, userInfo);
+            UpsertDeficientConditionGoalLibrary(dto, simulationId);
+            UpsertOrDeleteDeficientConditionGoals(dto.DeficientConditionGoals, dto.Id);
         }
 
-        public void UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
+        public void UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto, Guid simulationId)
         {
-            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
-
             var deficientConditionGoalLibraryEntity = dto.ToEntity();
 
-            _unitOfWork.Context.Upsert(deficientConditionGoalLibraryEntity, dto.Id, userEntity?.Id);
+            _unitOfWork.Context.Upsert(deficientConditionGoalLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -148,12 +146,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         DeficientConditionGoalLibraryId = dto.Id,
                         SimulationId = simulationId
-                    }, userEntity?.Id);
+                    }, _unitOfWork.UserEntity?.Id);
             }
         }
 
         public void UpsertOrDeleteDeficientConditionGoals(List<DeficientConditionGoalDTO> deficientConditionGoals,
-            Guid libraryId, UserInfoDTO userInfo)
+            Guid libraryId)
         {
             if (!_unitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId))
             {
@@ -164,8 +162,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new InvalidOperationException("All deficient condition goals must have an attribute.");
             }
-
-            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var attributeEntities = _unitOfWork.Context.Attribute.ToList();
             var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
@@ -191,22 +187,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.DeficientConditionGoalLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
-            var predicatesPerCrudOperation =
-                new Dictionary<string, Expression<Func<DeficientConditionGoalEntity, bool>>>
-                {
-                    {"delete", _ => _.DeficientConditionGoalLibraryId == libraryId && !entityIds.Contains(_.Id)},
-                    {"update", _ => existingEntityIds.Contains(_.Id)},
-                    {"add", _ => !existingEntityIds.Contains(_.Id)}
-                };
+            _unitOfWork.Context.DeleteAll<DeficientConditionGoalEntity>(_ =>
+                _.DeficientConditionGoalLibraryId == libraryId && !entityIds.Contains(_.Id));
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfWork.Context.UpsertOrDelete(deficientConditionGoalEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
-            else
-            {
-                _unitOfWork.Context.BulkUpsertOrDelete(deficientConditionGoalEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
+            _unitOfWork.Context.UpdateAll(
+                deficientConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(),
+                _unitOfWork.UserEntity?.Id);
+
+            _unitOfWork.Context.UpdateAll(
+                deficientConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(),
+                _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryDeficientConditionGoalEntity>(_ =>
                 _.DeficientConditionGoal.DeficientConditionGoalLibraryId == libraryId);
@@ -224,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             DeficientConditionGoalId = _.Id
                         }).ToList();
 
-                _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }
         }
 

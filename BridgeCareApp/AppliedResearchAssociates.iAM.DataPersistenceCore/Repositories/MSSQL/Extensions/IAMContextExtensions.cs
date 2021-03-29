@@ -82,6 +82,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             context.SaveChanges();
         }
 
+        public static void UpdateEntity<T>(this IAMContext context, T entity, Expression<Func<T, bool>> predicate, Guid? userId = null) where T : class
+        {
+            if (entity == null)
+            {
+                return;
+            }
+
+            var existingEntity = context.Set<T>().SingleOrDefault(predicate);
+            if (existingEntity == null)
+            {
+                throw new RowNotInTableException($"No {typeof(T).Name} entry found.");
+            }
+
+            SetPropertyValue(entity, BaseEntityProperty.CreatedBy,
+                GetPropertyInfo<T>(BaseEntityProperty.CreatedBy).GetValue(existingEntity));
+
+            SetPropertyValue(entity, BaseEntityProperty.CreatedDate,
+                GetPropertyInfo<T>(BaseEntityProperty.CreatedDate).GetValue(existingEntity));
+
+            SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy,
+                userId ?? GetPropertyInfo<T>(BaseEntityProperty.LastModifiedBy)
+                    .GetValue(existingEntity));
+
+            SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
+
+            context.Entry(existingEntity).CurrentValues.SetValues(entity);
+
+            context.SaveChanges();
+        }
+
         public static void UpdateAll<T>(this IAMContext context, List<T> entities, Guid? userId = null) where T : class
         {
             if (!entities.Any())

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
@@ -13,87 +15,137 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    public class UserCriteriaController : ControllerBase
+    [Route("api/[controller]")]
+    [ApiController]
+    public class UserCriteriaController : HubControllerBase
     {
-        private readonly IUserCriteriaRepository repo;
         private readonly IEsecSecurity _esecSecurity;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public UserCriteriaController(IEsecSecurity esecSecurity,IUserCriteriaRepository repo)
+
+        public UserCriteriaController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService, IUserCriteriaRepository repo) : base(hubService)
         {
             _esecSecurity = esecSecurity;
-            this.repo = repo ?? throw new ArgumentNullException(nameof(repo));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        /// <summary>
-        /// API endpoint for fetching the current user's criteria settings.
-        /// Uses the authorization token to determine user identity
-        /// </summary>
-        /// <returns>IHttpActionResult</returns>
         [HttpGet]
-        [Route("api/GetUserCriteria")]
-        //[RestrictAccess]
+        [Route("GetUserCriteria")]
         [Authorize]
-        public IActionResult GetUserCriteria()
+        public async Task<IActionResult> GetUserCriteria()
         {
-            var userInformation = _esecSecurity.GetUserInformation(Request);
-            var data = new UserInfoDTO
+            try
             {
-                Email = userInformation.Email,
-                Roles = userInformation.Role,
-                Sub = userInformation.Name
-            };
-            var adminCheckConst = SecurityConstants.Policy.BAMSAdmin;
-            return Ok(repo.GetOwnUserCriteria(data, adminCheckConst));
+                var userInfo = _esecSecurity.GetUserInformation(Request);
+
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    _unitOfWork.BeginTransaction();
+                    var userCriteria =
+                        _unitOfWork.UserCriteriaRepo.GetOwnUserCriteria(userInfo.ToDto(),
+                            SecurityConstants.Role.BAMSAdmin);
+                    _unitOfWork.Commit();
+                    return userCriteria;
+                });
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
+                throw;
+            }
         }
 
-        /// <summary>
-        /// API endpoint for fetching all users' criteria settings.
-        /// </summary>
-        /// <returns>IHttpActionResult</returns>
         [HttpGet]
-        [Route("api/GetAllUserCriteria")]
-        //[RestrictAccess(Role.ADMINISTRATOR)]
+        [Route("GetAllUserCriteria")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public IActionResult GetAllUserCriteria() => Ok(repo.GetAllUserCriteria());
+        public async Task<IActionResult> GetAllUserCriteria()
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _unitOfWork.UserCriteriaRepo.GetAllUserCriteria());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
+                throw;
+            }
+        }
 
-        /// <summary>
-        /// API endpoint for modifying a user's criteria settings
-        /// </summary>
-        /// <param name="userCriteria">UserCriteriaModel</param>
-        /// <returns>IHttpActionResult</returns>
         [HttpPost]
-        [Route("api/SetUserCriteria")]
-        //[RestrictAccess(Role.ADMINISTRATOR)]
+        [Route("UpsertUserCriteria")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public IActionResult SetUserCriteria([FromBody] UserCriteriaDTO userCriteria)
+        public async Task<IActionResult> UpsertUserCriteria([FromBody] UserCriteriaDTO userCriteria)
         {
-            repo.SaveUserCriteria(userCriteria);
-            return Ok();
+            try
+            {
+                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
+
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.UserCriteriaRepo.UpsertUserCriteria(userCriteria);
+                    _unitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
+                throw;
+            }
         }
 
-        /// <summary>
-        /// API endpoint for deleting a user's criteria
-        /// </summary>
-        /// <param name="username">User's username</param>
-        /// <returns>IHttpActionResult</returns>
         [HttpDelete]
-        [Route("api/RevokeUserAccess/{userCriteriaId}")]
-        //[RestrictAccess(Role.ADMINISTRATOR)]
+        [Route("RevokeUserAccess/{userCriteriaId}")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public IActionResult RevokeUserAccess(Guid userCriteriaId)
+        public async Task<IActionResult> RevokeUserAccess(Guid userCriteriaId)
         {
-            repo.RevokeUserAccess(userCriteriaId);
-            return Ok();
+            try
+            {
+                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
+
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.UserCriteriaRepo.RevokeUserAccess(userCriteriaId);
+                    _unitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
+                throw;
+            }
         }
 
         [HttpDelete]
-        [Route("api/DeleteUser/{userId}")]
-        //[RestrictAccess(Role.ADMINISTRATOR)]
+        [Route("DeleteUser/{userId}")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public IActionResult DeleteUser(Guid userId)
+        public async Task<IActionResult> DeleteUser(Guid userId)
         {
-            repo.DeleteUser(userId);
-            return Ok();
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.UserCriteriaRepo.DeleteUser(userId);
+                    _unitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
+                throw;
+            }
         }
     }
 }

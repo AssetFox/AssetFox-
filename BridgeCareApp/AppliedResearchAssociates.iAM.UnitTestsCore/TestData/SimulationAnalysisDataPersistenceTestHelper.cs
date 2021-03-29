@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
@@ -22,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public SimulationAnalysisDataPersistenceTestHelper()
         {
-            _sqlConnection = new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
+            _sqlConnection = UnitOfWork.GetLegacyConnection();
             _sqlConnection.Open();
             _dataAccessor = new DataAccessor(_sqlConnection, null);
         }
@@ -126,8 +125,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         {
             UnitOfWork.NetworkRepo.CreateNetwork(StandAloneSimulation.Network);
 
-            UnitOfWork.FacilityRepo.CreateFacilities(StandAloneSimulation.Network.Facilities.ToList(),
-                StandAloneSimulation.Network.Id);
+            var sections = StandAloneSimulation.Network.Facilities.Where(_ => _.Sections.Any()).SelectMany(_ => _.Sections).ToList();
+            UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(sections, StandAloneSimulation.Network.Id);
         }
 
         public void CreateAttributeCriteriaAndEquationJoins() =>

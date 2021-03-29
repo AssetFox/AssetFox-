@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new InvestmentController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
+            _controller = new InvestmentController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object);
         }
 
         public BudgetLibraryEntity TestBudgetLibrary { get; } = new BudgetLibraryEntity
@@ -212,57 +214,48 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Arrange
                 SetupForUpsertOrDelete();
                 var getResult = await _controller.GetInvestment(_testHelper.TestSimulation.Id);
-                var dto = (InvestmentDTO)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(InvestmentDTO));
+                var investmentDto = (InvestmentDTO)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(InvestmentDTO));
 
-                var addOrUpdateInvestmentDTO = new UpsertInvestmentDataDTO
+                var dto = new UpsertInvestmentDataDTO
                 {
-                    BudgetLibrary = dto.BudgetLibraries[0],
-                    InvestmentPlan = dto.InvestmentPlan
+                    BudgetLibrary = investmentDto.BudgetLibraries[0],
+                    InvestmentPlan = investmentDto.InvestmentPlan
                 };
-                addOrUpdateInvestmentDTO.BudgetLibrary.Description = "Updated Description";
-                addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].Name = "Updated Name";
-                addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].BudgetAmounts
-                    .Add(TestBudgetAmount.ToDto("Updated Name"));
-                addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].BudgetAmounts[0].Value = 1000000;
-                addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].CriterionLibrary =
+                dto.BudgetLibrary.Description = "Updated Description";
+                dto.BudgetLibrary.Budgets[0].Name = "Updated Name";
+                dto.BudgetLibrary.Budgets[0].BudgetAmounts
+                    .Add(TestBudgetAmount.ToDto(dto.BudgetLibrary.Budgets[0].Name));
+                dto.BudgetLibrary.Budgets[0].BudgetAmounts[0].Value = 1000000;
+                dto.BudgetLibrary.Budgets[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
-                addOrUpdateInvestmentDTO.InvestmentPlan.MinimumProjectCostLimit = 1000000;
+                dto.InvestmentPlan.MinimumProjectCostLimit = 1000000;
 
                 // Act
-                var result =
-                    await _controller.UpsertInvestment(_testHelper.TestSimulation.Id, addOrUpdateInvestmentDTO);
+                await _controller.UpsertInvestment(_testHelper.TestSimulation.Id, dto);
 
                 // Assert
-                Assert.IsType<OkResult>(result);
+                var timer = new Timer {Interval = 5000};
+                timer.Elapsed += delegate
+                {
+                    var modifiedBudgetLibraryDto = _testHelper.UnitOfWork.BudgetRepo.BudgetLibrariesWithBudgets()[0];
+                    var modifiedInvestmentPlanDto =
+                        _testHelper.UnitOfWork.InvestmentPlanRepo.ScenarioInvestmentPlan(_testHelper.TestSimulation.Id);
 
-                var budgetLibraryEntity = _testHelper.UnitOfWork.Context.BudgetLibrary
-                    .Include(_ => _.Budgets)
-                    .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.Budgets)
-                    .ThenInclude(_ => _.BudgetAmounts)
-                    .Include(_ => _.BudgetLibrarySimulationJoins)
-                    .Single(_ => _.Id == BudgetLibraryId);
+                    Assert.Equal(dto.BudgetLibrary.Description, modifiedBudgetLibraryDto.Description);
+                    Assert.Single(modifiedBudgetLibraryDto.AppliedScenarioIds);
+                    Assert.Equal(_testHelper.TestSimulation.Id, modifiedBudgetLibraryDto.AppliedScenarioIds[0]);
 
-                Assert.Equal(addOrUpdateInvestmentDTO.BudgetLibrary.Description, budgetLibraryEntity.Description);
-                Assert.Single(budgetLibraryEntity.BudgetLibrarySimulationJoins);
-                var budgetLibrarySimulationJoin = budgetLibraryEntity.BudgetLibrarySimulationJoins.ToList()[0];
-                Assert.Equal(_testHelper.TestSimulation.Id, budgetLibrarySimulationJoin.SimulationId);
-                var budgetEntity = budgetLibraryEntity.Budgets.ToList()[0];
-                Assert.Equal(addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].Name, budgetEntity.Name);
-                Assert.NotNull(budgetEntity.CriterionLibraryBudgetJoin);
-                Assert.Equal(addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].CriterionLibrary.Id,
-                    budgetEntity.CriterionLibraryBudgetJoin.CriterionLibrary.Id);
-                Assert.True(budgetEntity.BudgetAmounts.Any());
-                var budgetAmountEntity = budgetEntity.BudgetAmounts.ToList()[0];
-                Assert.Equal(addOrUpdateInvestmentDTO.BudgetLibrary.Budgets[0].BudgetAmounts[0].Value,
-                    budgetAmountEntity.Value);
+                    Assert.Equal(dto.BudgetLibrary.Budgets[0].Name, modifiedBudgetLibraryDto.Budgets[0].Name);
+                    Assert.Equal(dto.BudgetLibrary.Budgets[0].CriterionLibrary.Id,
+                        modifiedBudgetLibraryDto.Budgets[0].CriterionLibrary.Id);
 
-                var investmentPlanEntity = _testHelper.UnitOfWork.Context.InvestmentPlan
-                    .Single(_ => _.Id == InvestmentPlanId);
-                Assert.Equal(addOrUpdateInvestmentDTO.InvestmentPlan.MinimumProjectCostLimit,
-                    investmentPlanEntity.MinimumProjectCostLimit);
-                Assert.Equal(_testHelper.TestSimulation.Id, investmentPlanEntity.SimulationId);
+                    Assert.True(modifiedBudgetLibraryDto.Budgets[0].BudgetAmounts.Any());
+                    Assert.Equal(dto.BudgetLibrary.Budgets[0].BudgetAmounts[0].Value,
+                        modifiedBudgetLibraryDto.Budgets[0].BudgetAmounts[0].Value);
+
+                    Assert.Equal(dto.InvestmentPlan.MinimumProjectCostLimit,
+                        modifiedInvestmentPlanDto.MinimumProjectCostLimit);
+                };
             }
             finally
             {

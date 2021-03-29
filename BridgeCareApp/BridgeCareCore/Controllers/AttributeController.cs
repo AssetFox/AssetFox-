@@ -2,22 +2,29 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AttributeController : ControllerBase
+    public class AttributeController : HubControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly IEsecSecurity _esecSecurity;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly AttributeService _attributeService;
 
-        public AttributeController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, AttributeService attributeService)
+        public AttributeController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            AttributeService attributeService, IHubService hubService) : base(hubService)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
         }
 
@@ -28,13 +35,13 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.AttributeRepo.Attributes();
+                var result = await _unitOfWork.AttributeRepo.Attributes();
                 return Ok(result);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
             }
         }
 
@@ -51,8 +58,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
             }
         }
 
@@ -63,18 +70,23 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                // get all the configurable attributes
-                var configurableAttributes = _unitOfDataPersistenceWork.AttributeMetaDataRepo.GetAllAttributes();
+                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
 
-                // insert/update configurable attributes
-                _unitOfDataPersistenceWork.AttributeRepo.UpsertAttributes(configurableAttributes);
-                _unitOfDataPersistenceWork.Context.SaveChanges();
+                await Task.Factory.StartNew(() =>
+                {
+                    var configurableAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes();
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
+                    _unitOfWork.Commit();
+                });
+
                 return Ok();
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _unitOfWork.Rollback();
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
             }
         }
     }

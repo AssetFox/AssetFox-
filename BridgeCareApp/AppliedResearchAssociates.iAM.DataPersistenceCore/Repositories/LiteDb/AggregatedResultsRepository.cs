@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Mappings;
+using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 {
@@ -44,10 +45,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
                 .Include(_ => _.MaintainableAssetEntity.LocationEntity)
                 .Find(_ => _.MaintainableAssetEntity.NetworkId == networkId).ToList();
 
-            var numericAggregatedResultEntities = result.Where(_ => _ is AggregatedResultEntity<double>).Select(_ => _.ToDomain<double>());
-            var textAggregatedResultEntities = result.Where(_ => _ is AggregatedResultEntity<string>).Select(_ => _.ToDomain<string>());
+            var numericAggregatedResultEntities = result.Where(_ => _ is AggregatedResultEntity<double>)
+                .Select(_ => _.ToDomain<double>());
+            var textAggregatedResultEntities = result.Where(_ => _ is AggregatedResultEntity<string>)
+                .Select(_ => _.ToDomain<string>());
 
             return numericAggregatedResultEntities.Concat(textAggregatedResultEntities);
         }
+
+        public void CreateAggregatedResults<T>(
+            Dictionary<(Guid maintainableAssetId, Guid attributeId), AttributeValueHistory<T>>
+                attributeValueHistoryPerMaintainableAssetIdAttributeIdTuple) => throw new NotImplementedException();
     }
 }

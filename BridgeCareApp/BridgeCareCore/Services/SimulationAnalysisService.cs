@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.Simulation;
 using Microsoft.AspNetCore.SignalR;
 
@@ -13,24 +14,24 @@ namespace BridgeCareCore.Services
 {
     public class SimulationAnalysisService : ISimulationAnalysis
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
-        private readonly IHubContext<BridgeCareHub> _hubContext;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IHubService _hubService;
 
-        public SimulationAnalysisService(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IHubContext<BridgeCareHub> hub)
+        public SimulationAnalysisService(UnitOfDataPersistenceWork unitOfWork, IHubService hubService)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-            _hubContext = hub ?? throw new ArgumentNullException(nameof(hub));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
         }
 
-        public Task CreateAndRunPermitted(UserInfoDTO userInfo, Guid networkId, Guid simulationId)
+        public Task CreateAndRunPermitted(Guid networkId, Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+            if (!_unitOfWork.Context.Simulation.Any(_ =>
+                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
             {
                 throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
             }
@@ -46,19 +47,19 @@ namespace BridgeCareCore.Services
                 LastRun = DateTime.Now,
                 Status = "Starting analysis..."
             };
-            _unitOfDataPersistenceWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
-            SendSimulationAnalysisDetail(simulationAnalysisDetail);
+            _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+            _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
-            var explorer = _unitOfDataPersistenceWork.AttributeRepo.GetExplorer();
-            var network = _unitOfDataPersistenceWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
-            _unitOfDataPersistenceWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
+            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
             var simulation = network.Simulations.Single(_ => _.Id == simulationId);
-            _unitOfDataPersistenceWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfDataPersistenceWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _unitOfDataPersistenceWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
-            _unitOfDataPersistenceWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
-            _unitOfDataPersistenceWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+            _unitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
+            _unitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+            _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
 
             var runner = new SimulationRunner(simulation);
 
@@ -66,8 +67,8 @@ namespace BridgeCareCore.Services
             {
                 simulationAnalysisDetail.Status = eventArgs.Message;
                 UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                SendRealTimeMessage(eventArgs.Message, simulationId);
-                SendSimulationAnalysisDetail(simulationAnalysisDetail);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
             runner.Information += (sender, eventArgs) =>
             {
@@ -75,7 +76,7 @@ namespace BridgeCareCore.Services
                 {
                     simulationAnalysisDetail.Status = eventArgs.Message;
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _unitOfDataPersistenceWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
+                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
                 }
                 else
                 {
@@ -83,12 +84,12 @@ namespace BridgeCareCore.Services
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
                 }
 
-                SendRealTimeMessage(eventArgs.Message, simulationId);
-                SendSimulationAnalysisDetail(simulationAnalysisDetail);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
             runner.Warning += (sender, eventArgs) =>
             {
-                SendRealTimeMessage(eventArgs.Message, simulationId);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
             };
 
             runner.Run();
@@ -103,19 +104,7 @@ namespace BridgeCareCore.Services
                 var interval = stopDateTime - simulationAnalysisDetail.LastRun;
                 simulationAnalysisDetail.RunTime = interval.Value.ToString(@"hh\:mm\:ss");
             }
-            _unitOfDataPersistenceWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
+            _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
         }
-
-        private void SendRealTimeMessage(string message, Guid simulationId) =>
-            _hubContext
-                .Clients
-                .All
-                .SendAsync("BroadcastScenarioStatusUpdate", message, simulationId);
-
-        private void SendSimulationAnalysisDetail(SimulationAnalysisDetailDTO simulationAnalysisDetail) =>
-            _hubContext
-                .Clients
-                .All
-                .SendAsync("BroadcastSimulationAnalysisDetail", simulationAnalysisDetail);
     }
 }

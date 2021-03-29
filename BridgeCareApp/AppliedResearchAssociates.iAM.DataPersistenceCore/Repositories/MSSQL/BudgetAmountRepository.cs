@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
@@ -15,9 +15,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class BudgetAmountRepository : IBudgetAmountRepository
     {
-        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
         public BudgetAmountRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -70,14 +67,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {"add", _ => !existingEntityIds.Contains(_.Id)}
             };
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfWork.Context.UpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
-            }
-            else
-            {
-                _unitOfWork.Context.BulkUpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
-            }
+            _unitOfWork.Context.BulkUpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
         }
     }
 }

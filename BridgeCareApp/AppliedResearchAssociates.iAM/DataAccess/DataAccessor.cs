@@ -208,7 +208,8 @@ from segment_{networkId}_ns0
 select simulationid, simulation, jurisdiction, analysis, budget_constraint, weighting, benefit_variable, benefit_limit, use_cumulative_cost, use_across_budget
 from simulations
 where networkid = {networkId}
-order by simulationid";
+order by simulationid
+";
 
                 using (var reader = command.ExecuteReader())
                 {

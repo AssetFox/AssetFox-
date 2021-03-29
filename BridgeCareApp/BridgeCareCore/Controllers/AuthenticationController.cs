@@ -6,11 +6,14 @@ using System.Net.Http.Headers;
 using System.Security.Authentication;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -18,20 +21,18 @@ namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthenticationController : ControllerBase
+    public class AuthenticationController : HubControllerBase
     {
-        private readonly ILog _log;
         private static IConfigurationSection _esecConfig;
         private static IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public AuthenticationController(ILog log, IConfiguration config, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+        public AuthenticationController(IConfiguration config, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork
+        , IHubService hubService) : base(hubService)
         {
-            _log = log ?? throw new ArgumentNullException(nameof(log));
             _esecConfig = config?.GetSection("EsecConfig") ?? throw new ArgumentNullException(nameof(config));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         /// <summary>
@@ -53,24 +54,24 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                throw;
             }
         }
 
+        // TODO: remove this method when user accounts are transferred to v2 database
         private void AddUser(UserInfoDTO userInfo)
         {
             try
             {
-                _unitOfDataPersistenceWork.BeginTransaction();
-                _unitOfDataPersistenceWork.UserRepo.AddUser(SecurityFunctions.ParseLdap(userInfo.Sub)[0],
+                _unitOfWork.BeginTransaction();
+                _unitOfWork.UserRepo.AddUser(SecurityFunctions.ParseLdap(userInfo.Sub)[0],
                     SecurityFunctions.ParseLdap(userInfo.Roles)[0]);
-                _unitOfDataPersistenceWork.Commit();
+                _unitOfWork.Commit();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
+                _unitOfWork.Rollback();
                 throw;
             }
         }
@@ -124,36 +125,44 @@ namespace BridgeCareCore.Controllers
         [Route("UserTokens/{code}")]
         public IActionResult GetUserTokens(string code)
         {
-            // These two lines should be removed as soon as the ESEC site's certificates start working
-            var handler = new HttpClientHandler
+            try
             {
-                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-            };
+                // These two lines should be removed as soon as the ESEC site's certificates start working
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
 
-            using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["EsecBaseAddress"]) };
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["EsecBaseAddress"]) };
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var formData = new List<KeyValuePair<string, string>>
+                var formData = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                    new KeyValuePair<string, string>("code", WebUtility.UrlDecode(code)),
+                    new KeyValuePair<string, string>("redirect_uri", _esecConfig["EsecRedirect"]),
+                    new KeyValuePair<string, string>("client_id", _esecConfig["EsecClientId"]),
+                    new KeyValuePair<string, string>("client_secret", _esecConfig["EsecClientSecret"])
+                };
+                HttpContent content = new FormUrlEncodedContent(formData);
+
+                var responseTask = client.PostAsync("token", content);
+                responseTask.Wait();
+
+                var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+
+                ValidateResponse(response);
+
+                var userTokens = JsonConvert.DeserializeObject<UserTokensDTO>(response);
+
+                return Ok(userTokens);
+            }
+            catch (Exception e)
             {
-                new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("code", WebUtility.UrlDecode(code)),
-                new KeyValuePair<string, string>("redirect_uri", _esecConfig["EsecRedirect"]),
-                new KeyValuePair<string, string>("client_id", _esecConfig["EsecClientId"]),
-                new KeyValuePair<string, string>("client_secret", _esecConfig["EsecClientSecret"])
-            };
-            HttpContent content = new FormUrlEncodedContent(formData);
-
-            var responseTask = client.PostAsync("token", content);
-            responseTask.Wait();
-
-            var response = responseTask.Result.Content.ReadAsStringAsync().Result;
-
-            ValidateResponse(response);
-
-            var userTokens = JsonConvert.DeserializeObject<UserTokensDTO>(response);
-
-            return Ok(userTokens);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                throw;
+            }
         }
 
         /// <summary>
@@ -165,33 +174,42 @@ namespace BridgeCareCore.Controllers
         [Route("RefreshToken/{refreshToken}")]
         public IActionResult GetRefreshToken(string refreshToken)
         {
-            // These two lines should be removed as soon as the ESEC site's certificates start working
-            var handler = new HttpClientHandler
+            try
             {
-                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-            };
+                // These two lines should be removed as soon as the ESEC site's certificates start working
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
 
-            using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["EsecBaseAddress"]) };
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["EsecBaseAddress"]) };
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var formData = new List<KeyValuePair<string, string>>
+                var formData = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", _esecConfig["EsecClientId"]),
+                    new KeyValuePair<string, string>("client_secret", _esecConfig["EsecClientSecret"])
+                };
+                HttpContent content = new FormUrlEncodedContent(formData);
+
+                var query = $"?grant_type=refresh_token&refresh_token={WebUtility.UrlDecode(refreshToken)}";
+
+                var responseTask = client.PostAsync("token" + query, content);
+                responseTask.Wait();
+
+                var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+
+                ValidateResponse(response);
+
+                return Ok(response);
+            }
+            catch (Exception e)
             {
-                new KeyValuePair<string, string>("client_id", _esecConfig["EsecClientId"]),
-                new KeyValuePair<string, string>("client_secret", _esecConfig["EsecClientSecret"])
-            };
-            HttpContent content = new FormUrlEncodedContent(formData);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                throw;
+            }
 
-            var query = $"?grant_type=refresh_token&refresh_token={WebUtility.UrlDecode(refreshToken)}";
-
-            var responseTask = client.PostAsync("token" + query, content);
-            responseTask.Wait();
-
-            var response = responseTask.Result.Content.ReadAsStringAsync().Result;
-
-            ValidateResponse(response);
-
-            return Ok(response);
         }
 
         /// <summary>
@@ -205,36 +223,44 @@ namespace BridgeCareCore.Controllers
         [Route("RevokeToken/Refresh/{token}")]
         public IActionResult RevokeToken(string token)
         {
-            // These two lines should be removed as soon as the ESEC site's certificates start working
-            var handler = new HttpClientHandler
+            try
             {
-                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-            };
+                // These two lines should be removed as soon as the ESEC site's certificates start working
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
 
-            using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["EsecBaseAddress"]) };
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["EsecBaseAddress"]) };
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var formData = new List<KeyValuePair<string, string>>
-            {
-                new KeyValuePair<string, string>("client_id", _esecConfig["EsecClientId"]),
-                new KeyValuePair<string, string>("client_secret", _esecConfig["EsecClientSecret"])
-            };
-            HttpContent content = new FormUrlEncodedContent(formData);
+                var formData = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", _esecConfig["EsecClientId"]),
+                    new KeyValuePair<string, string>("client_secret", _esecConfig["EsecClientSecret"])
+                };
+                HttpContent content = new FormUrlEncodedContent(formData);
 
-            var query = $"?token={WebUtility.UrlDecode(token)}";
+                var query = $"?token={WebUtility.UrlDecode(token)}";
 
-            var responseTask = client.PostAsync("revoke" + query, content);
-            responseTask.Wait();
-            if (responseTask.Result.StatusCode == HttpStatusCode.OK)
-            {
-                return Ok();
+                var responseTask = client.PostAsync("revoke" + query, content);
+                responseTask.Wait();
+                if (responseTask.Result.StatusCode == HttpStatusCode.OK)
+                {
+                    return Ok();
+                }
+
+                var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+                ValidateResponse(response);
+
+                return Ok(response);
             }
-
-            var response = responseTask.Result.Content.ReadAsStringAsync().Result;
-            ValidateResponse(response);
-
-            return Ok(response);
+            catch (Exception e)
+            {
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                throw;
+            }
         }
 
         /// <summary>
@@ -246,10 +272,18 @@ namespace BridgeCareCore.Controllers
         [Route("RevokeToken/Id")]
         public IActionResult RevokeIdToken()
         {
-            // A JWT is too large to store in the URL, so it is passed in the authorization header.
-            string idToken = Request.Headers["Authorization"];
-            _esecSecurity.RevokeToken(idToken);
-            return Ok();
+            try
+            {
+                // A JWT is too large to store in the URL, so it is passed in the authorization header.
+                string idToken = Request.Headers["Authorization"];
+                _esecSecurity.RevokeToken(idToken);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                throw;
+            }
         }
 
         /// <summary>
@@ -264,7 +298,6 @@ namespace BridgeCareCore.Controllers
                 return;
             }
 
-            _log.Error($"ESEC endpoint returned error - {responseJson["error"]}: {responseJson["error_description"]}");
             throw new AuthenticationException(responseJson["error_description"]);
         }
     }

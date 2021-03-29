@@ -17,19 +17,19 @@ namespace BridgeCareCore.Services
         private readonly IHubContext<BridgeCareHub> _hubContext;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public LegacySimulationSynchronizerService(IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfWork)
+        public LegacySimulationSynchronizerService(IHubContext<BridgeCareHub> hub, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
             _hubContext = hub;
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _unitOfWork = unitOfDataPersistenceWork ??
+                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
-
-        private DataAccessor GetDataAccessor() => new DataAccessor(_unitOfWork.LegacyConnection, null);
 
         private void SynchronizeExplorerData()
         {
             SendRealTimeMessage("Upserting attributes...");
 
-            _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
+            _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo
+                .GetAllAttributes().ToList());
         }
 
         private void SynchronizeNetwork(Network network)
@@ -44,22 +44,23 @@ namespace BridgeCareCore.Services
             _unitOfWork.NetworkRepo.CreateNetwork(network);
         }
 
-        private void SynchronizeLegacyNetworkData(Network network, Guid? userId = null)
+        private void SynchronizeLegacyNetworkData(Network network)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
             {
                 throw new RowNotInTableException($"No network found having id {network.Id}.");
             }
 
-            var explorerNetworkFacilityNames = network.Facilities.Select(_ => _.Name).ToHashSet();
-            var explorerNetworkSectionNamesAndAreas = network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
-            var facilityNames = _unitOfWork.Context.Facility.Select(_ => _.Name).ToHashSet();
-            var sectionNamesAndAreas = _unitOfWork.Context.Section.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
-            if (!explorerNetworkFacilityNames.SetEquals(facilityNames) || !explorerNetworkSectionNamesAndAreas.SetEquals(sectionNamesAndAreas))
+            var facilityNames = network.Facilities.Select(_ => _.Name).ToHashSet();
+            var sectionNamesAndAreas = network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
+            var assetFacilityNames = _unitOfWork.Context.MaintainableAsset.Select(_ => _.FacilityName).ToHashSet();
+            var assetSectionNamesAndAreas = _unitOfWork.Context.MaintainableAsset.Select(_ => $"{_.SectionName}{_.Area}").ToHashSet();
+            if (!assetFacilityNames.SetEquals(facilityNames) || !assetSectionNamesAndAreas.SetEquals(sectionNamesAndAreas))
             {
                 _unitOfWork.NetworkRepo.DeleteNetworkData();
-                SendRealTimeMessage("Creating the network's facilities and sections...");
-                _unitOfWork.FacilityRepo.CreateFacilities(network.Facilities.ToList(), network.Id);
+                SendRealTimeMessage("Creating the network's maintainable assets...");
+                var sections = network.Facilities.Where(_ => _.Sections.Any()).SelectMany(_ => _.Sections).ToList();
+                _unitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(sections, network.Id);
             }
         }
 
@@ -71,7 +72,7 @@ namespace BridgeCareCore.Services
 
                 _unitOfWork.AttributeRepo.JoinAttributesWithEquationsAndCriteria(simulation.Network.Explorer);
             }
-            
+
             SendRealTimeMessage("Inserting simulation data...");
 
             _unitOfWork.SimulationRepo.CreateSimulation(simulation);
@@ -110,12 +111,12 @@ namespace BridgeCareCore.Services
             {
                 _unitOfWork.SetUser(username);
 
-                var dataAccessor = GetDataAccessor();
-                _unitOfWork.LegacyConnection.Open();
+                using var legacyConnection = _unitOfWork.GetLegacyConnection();
+
+                var dataAccessor = new DataAccessor(legacyConnection, null);
+                legacyConnection.Open();
 
                 var simulation = dataAccessor.GetStandAloneSimulation(LegacyNetworkId, simulationId);
-
-                _unitOfWork.LegacyConnection.Close();
 
                 if (simulation != null)
                 {
@@ -138,14 +139,10 @@ namespace BridgeCareCore.Services
                     _unitOfWork.Commit();
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 _unitOfWork.Rollback();
                 throw;
-            }
-            finally
-            {
-                _unitOfWork.LegacyConnection.Close();
             }
         }
 

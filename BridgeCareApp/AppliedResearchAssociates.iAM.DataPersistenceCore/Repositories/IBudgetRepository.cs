@@ -12,15 +12,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void CreateBudgets(List<Budget> budgets, Guid simulationId);
 
-        Task<List<SimpleBudgetDetailDTO>> ScenarioSimpleBudgetDetails(Guid simulationId);
+        List<SimpleBudgetDetailDTO> ScenarioSimpleBudgetDetails(Guid simulationId);
 
-        Task<List<BudgetLibraryDTO>> BudgetLibrariesWithBudgets();
+        List<BudgetLibraryDTO> BudgetLibrariesWithBudgets();
 
-        void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, BudgetLibraryDTO dto);
+        void UpsertPermitted(Guid simulationId, BudgetLibraryDTO dto);
 
-        void UpsertBudgetLibrary(BudgetLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo);
+        void UpsertBudgetLibrary(BudgetLibraryDTO dto, Guid simulationId);
 
-        void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId, UserInfoDTO userInfo);
+        void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId);
 
         void DeleteBudgetLibrary(Guid libraryId);
     }

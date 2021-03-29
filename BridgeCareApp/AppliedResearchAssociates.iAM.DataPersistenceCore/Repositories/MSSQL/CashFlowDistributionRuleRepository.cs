@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -50,14 +50,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {"add", _ => !existingEntityIds.Contains(_.Id)}
             };
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfWork.Context.UpsertOrDelete(cashFlowDistributionRuleEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
-            }
-            else
-            {
-                _unitOfWork.Context.BulkUpsertOrDelete(cashFlowDistributionRuleEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
-            }
+            _unitOfWork.Context.BulkUpsertOrDelete(cashFlowDistributionRuleEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
         }
     }
 }

@@ -1,9 +1,10 @@
-import {Network} from '@/shared/models/iAM/network';
+import { BenefitQuantifier, Network } from '@/shared/models/iAM/network';
 import NetworkService from '../services/network.service';
-import {clone} from 'ramda';
-import {AxiosResponse} from 'axios';
-import {hasValue} from '@/shared/utils/has-value-util';
+import { any, clone, find, findIndex, propEq, update } from 'ramda';
+import { AxiosResponse } from 'axios';
+import { hasValue } from '@/shared/utils/has-value-util';
 import prepend from 'ramda/es/prepend';
+import { http2XX } from '@/shared/utils/http-utils';
 
 const state = {
     networks: [] as Network[]
@@ -15,6 +16,17 @@ const mutations = {
     },
     createdNetworkMutator(state: any, createdNetwork: Network) {
         state.newNetworks = prepend(createdNetwork, state.networks);
+    },
+    benefitQuantifierMutator(state: any, benefitQuantifier: BenefitQuantifier) {
+        if (any(propEq('id', benefitQuantifier.networkId), state.networks)) {
+            const network: Network = find(propEq('id', benefitQuantifier.networkId), state.networks) as Network;
+
+            state.networks = update(
+              findIndex(propEq('id', network.id), state.networks),
+              {...network, benefitQuantifier: benefitQuantifier},
+              state.networks
+            );
+        }
     }
 };
 
@@ -33,9 +45,18 @@ const actions = {
                 if (hasValue(response, 'data')) {
                     const network: Network = response.data;
                     commit('createdNetworkMutator', network);
-                    dispatch('setSuccessMessage', {message: 'Created network'});
+                    dispatch('setSuccessMessage', {message: 'Network created'});
                 }
             });
+    },
+    async upsertBenefitQuantifier({dispatch, commit}: any, payload: any) {
+        return await NetworkService.upsertBenefitQuantifier(payload.benefitQuantifier)
+          .then((response: AxiosResponse) => {
+              if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                  commit('benefitQuantifierMutator', payload.benefitQuantifier);
+                  dispatch('setSuccessMessage', {message: 'Benefit quantifier upsertted'});
+              }
+          });
     }
 };
 

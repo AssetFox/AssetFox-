@@ -6,7 +6,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
+using BridgeCareCore.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +35,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public ILog Logger { get; }
 
+        public Mock<HubService> MockHubService { get; }
+
         public Mock<IHubContext<BridgeCareHub>> MockHubContext { get; set; }
 
         public TestHelper()
@@ -47,6 +51,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             Logger = new LogNLog();
 
             MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
+
+            MockHubService = new Mock<HubService>(MockHubContext.Object);
 
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(Config.GetConnectionString("BridgeCareConnex"))

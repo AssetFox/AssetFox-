@@ -12,13 +12,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void CreateDeficientConditionGoals(List<DeficientConditionGoal> deficientConditionGoals, Guid simulationId);
 
-        Task<List<DeficientConditionGoalLibraryDTO>> DeficientConditionGoalLibrariesWithDeficientConditionGoals();
+        List<DeficientConditionGoalLibraryDTO> DeficientConditionGoalLibrariesWithDeficientConditionGoals();
 
-        void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, DeficientConditionGoalLibraryDTO dto);
+        void UpsertPermitted(Guid simulationId, DeficientConditionGoalLibraryDTO dto);
 
-        void UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo);
+        void UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto, Guid simulationId);
 
-        void UpsertOrDeleteDeficientConditionGoals(List<DeficientConditionGoalDTO> deficientConditionGoals, Guid libraryId, UserInfoDTO userInfo);
+        void UpsertOrDeleteDeficientConditionGoals(List<DeficientConditionGoalDTO> deficientConditionGoals, Guid libraryId);
 
         void DeleteDeficientConditionGoalLibrary(Guid libraryId);
     }

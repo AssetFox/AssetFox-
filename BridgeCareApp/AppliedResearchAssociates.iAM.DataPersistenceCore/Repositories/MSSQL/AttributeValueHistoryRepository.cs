@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             numericAttributeValueHistoryPerSectionIdAttributeIdTuple.Keys.ForEach(tuple =>
             {
                 var numericAttributeValueHistory = numericAttributeValueHistoryPerSectionIdAttributeIdTuple[tuple];
-                numericAttributeValueHistoryEntities.AddRange(numericAttributeValueHistory.ToEntity(tuple.sectionId, tuple.attributeId));
+                //numericAttributeValueHistoryEntities.AddRange(numericAttributeValueHistory.ToEntity(tuple.sectionId, tuple.attributeId));
             });
 
             _unitOfWork.Context.AddAll(numericAttributeValueHistoryEntities, _unitOfWork.UserEntity?.Id);
@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             textAttributeValueHistoryPerSectionIdAttributeIdTuple.Keys.ForEach(key =>
             {
                 var textAttributeValueHistory = textAttributeValueHistoryPerSectionIdAttributeIdTuple[key];
-                textAttributeValueHistoryEntities.AddRange(textAttributeValueHistory.ToEntity(key.sectionId, key.attributeId));
+                //textAttributeValueHistoryEntities.AddRange(textAttributeValueHistory.ToEntity(key.sectionId, key.attributeId));
             });
 
             _unitOfWork.Context.AddAll(textAttributeValueHistoryEntities, _unitOfWork.UserEntity?.Id);

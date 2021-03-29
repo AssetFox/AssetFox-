@@ -24,53 +24,70 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
             foreach (var key in DataPersistenceConstants.PennDOTKeyFields.Keys)
             {
-                var keyAttribute = _unitofwork.Context.Attribute.FirstOrDefault(_ => _.Name == key);
                 var keyValues = new List<KeySegmentDatum>();
-                if (keyAttribute == null)
-                {
-                    throw new ArgumentException();
-                }
 
-                var sectionsWithNumericKeys = sectionList
-                    .Where(_ => _.NumericAttributeValueHistories.Any(_ => _.AttributeId == keyAttribute.Id));
-                IEnumerable<SectionEntity> sectionsWithTextKeys = new List<SectionEntity>();
-                if (sectionsWithNumericKeys.Count() < 1)
+                // The special case of BMSID (which is contained in the segment name) has to be handled
+                if (key == "BMSID")
                 {
-                    // Only look in the text values if the numeric values are missing
-                    sectionsWithTextKeys = sectionList
-                        .Where(_ => _.TextAttributeValueHistories.Any(_ => _.AttributeId == keyAttribute.Id));
-
-                    foreach (var section in sectionsWithTextKeys)
+                    // This comes from section.Name, not a specific attribute.
+                    foreach (var section in sectionList)    
                     {
-                        var lastValue = section.TextAttributeValueHistories
-                            .Where(_ => _.AttributeId == keyAttribute.Id)
-                            .OrderByDescending(_ => _.Year)
-                            .First()
-                            .Value;
-
                         keyValues.Add(new KeySegmentDatum()
                         {
                             SegmentId = section.Id,
-                            KeyValue = new SegmentAttributeDatum(key, lastValue)
+                            KeyValue = new SegmentAttributeDatum(key, section.Name)
                         });
                     }
                 }
                 else
                 {
-                    // Use the numeric keys
-                    foreach (var section in sectionsWithNumericKeys)
+                    var keyAttribute = _unitofwork.Context.Attribute.FirstOrDefault(_ => _.Name == key);
+                    if (keyAttribute == null)
                     {
-                        var lastValue = section.NumericAttributeValueHistories
-                            .Where(_ => _.AttributeId == keyAttribute.Id)
-                            .OrderByDescending(_ => _.Year)
-                            .First()
-                            .Value;
+                        throw new ArgumentException();
+                    }
 
-                        keyValues.Add(new KeySegmentDatum()
+                    var sectionsWithNumericKeys = sectionList
+                        .Where(_ => _.NumericAttributeValueHistories.Any(_ => _.AttributeId == keyAttribute.Id));
+                    IEnumerable<SectionEntity> sectionsWithTextKeys = new List<SectionEntity>();
+                    if (sectionsWithNumericKeys.Count() < 1)
+                    {
+                        // Only look in the text values if the numeric values are missing
+                        sectionsWithTextKeys = sectionList
+                            .Where(_ => _.TextAttributeValueHistories.Any(_ => _.AttributeId == keyAttribute.Id));
+
+                        foreach (var section in sectionsWithTextKeys)
                         {
-                            SegmentId = section.Id,
-                            KeyValue = new SegmentAttributeDatum(key, lastValue.ToString())
-                        });
+                            var lastValue = section.TextAttributeValueHistories
+                                .Where(_ => _.AttributeId == keyAttribute.Id)
+                                .OrderByDescending(_ => _.Year)
+                                .First()
+                                .Value;
+
+                            keyValues.Add(new KeySegmentDatum()
+                            {
+                                SegmentId = section.Id,
+                                KeyValue = new SegmentAttributeDatum(key, lastValue)
+                            });
+                        }
+                    }
+                    else
+                    {
+                        // Use the numeric keys
+                        foreach (var section in sectionsWithNumericKeys)
+                        {
+                            var lastValue = section.NumericAttributeValueHistories
+                                .Where(_ => _.AttributeId == keyAttribute.Id)
+                                .OrderByDescending(_ => _.Year)
+                                .First()
+                                .Value;
+
+                            keyValues.Add(new KeySegmentDatum()
+                            {
+                                SegmentId = section.Id,
+                                KeyValue = new SegmentAttributeDatum(key, lastValue.ToString())
+                            });
+                        }
                     }
                 }
 

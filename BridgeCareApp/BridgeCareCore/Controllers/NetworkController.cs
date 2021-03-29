@@ -5,27 +5,29 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class NetworkController : ControllerBase
+    public class NetworkController : HubControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IEsecSecurity _esecSecurity;
-        private readonly ILog _log;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public NetworkController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog log, IEsecSecurity esecSecurity)
+        public NetworkController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService) : base(hubService)
         {
-            _unitOfWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-            _log = log ?? throw new ArgumentNullException(nameof(log));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         [HttpGet]
@@ -40,44 +42,50 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _log.Error($"GetAllNetworks Error => {e.Message}::{e.StackTrace}");
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Network error::{e.Message}");
+                throw;
             }
         }
 
         [HttpPost]
         [Route("CreateNetwork/{networkName}")]
         [Authorize]
-        public IActionResult CreateNetwork(string networkName)
+        public async Task<IActionResult> CreateNetwork(string networkName)
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
-                // get network definition attribute from json file
-                var attribute = _unitOfWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
+                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
 
-                // throw an exception if not network definition attribute is present
-                if (attribute == null)
+               var result = await Task.Factory.StartNew(() =>
                 {
-                    throw new InvalidOperationException("Network definition rules do not exist.");
-                }
+                    // get network definition attribute from json file
+                    var attribute = _unitOfWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
 
-                // create network domain model from attribute data created from the network attribute
-                var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
-                    AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
-                network.Name = networkName;
+                    // throw an exception if not network definition attribute is present
+                    if (attribute == null)
+                    {
+                        throw new InvalidOperationException("Network definition rules do not exist.");
+                    }
 
-                // insert network domain data into the data source
-                _unitOfWork.NetworkRepo.CreateNetwork(network, userInfo);
+                    // create network domain model from attribute data created from the network attribute
+                    var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
+                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
+                    network.Name = networkName;
 
-                // [TODO] Create DTO to return network information necessary to be stored in the UI
-                // for future reference.
-                return Ok(network.Id);
+                    // insert network domain data into the data source
+                    _unitOfWork.NetworkRepo.CreateNetwork(network);
+
+                    // [TODO] Create DTO to return network information necessary to be stored in the UI
+                    // for future reference.
+                    return network.Id;
+                });
+
+                return Ok(result);
             }
             catch (Exception e)
             {
-                _log.Error($"CreateNetwork Error => { e.Message}::{ e.StackTrace}");
-                return StatusCode(500, $"{e.Message}::{e.StackTrace}");
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Network error::{e.Message}");
+                throw;
             }
         }
 
@@ -88,21 +96,23 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request).ToDto();
-                _unitOfDataPersistenceWork.BeginTransaction();
+                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
+
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfDataPersistenceWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto, userInfo);
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto);
+                    _unitOfWork.Commit();
                 });
 
-                _unitOfDataPersistenceWork.Commit();
+
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _unitOfWork.Rollback();
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Network error::{e.Message}");
+                throw;
             }
         }
     }

@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface INetworkRepository
     {
-        void CreateNetwork(DataAssignment.Networking.Network network, UserInfoDTO userInfo);
+        void CreateNetwork(DataAssignment.Networking.Network network);
 
         void CreateNetwork(Network network);
 

@@ -1,4 +1,6 @@
 ﻿using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -6,14 +8,8 @@ namespace BridgeCareCore.Controllers
 {
     public class HubControllerBase : ControllerBase
     {
-        private readonly IHubContext<BridgeCareHub> _hubContext;
+        public readonly IHubService _hubService;
 
-        public HubControllerBase(IHubContext<BridgeCareHub> hubContext)
-        {
-            _hubContext = hubContext;
-        }
-
-        public void SendRealTimeMessage(string method, object arg) =>
-            _hubContext?.Clients?.All?.SendAsync(method, arg);
+        public HubControllerBase(IHubService hubService) => _hubService = hubService;
     }
 }

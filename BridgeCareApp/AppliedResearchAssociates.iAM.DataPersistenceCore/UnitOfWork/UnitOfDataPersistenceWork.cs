@@ -7,7 +7,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
-using AttributeDatumRepository = AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.AttributeDatumRepository;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 {
@@ -18,15 +17,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
             Config = config ?? throw new ArgumentNullException(nameof(config));
 
             Context = context ?? throw new ArgumentNullException(nameof(context));
-
-            LegacyConnection = new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
         }
 
         public IConfiguration Config { get; }
 
         public IAMContext Context { get; }
-
-        public SqlConnection LegacyConnection { get; }
 
         // REPOSITORIES
         private IAggregatedResultRepository _aggregatedResultRepo;
@@ -143,17 +138,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IBenefitQuantifierRepository BenefitQuantifierRepo => _benefitQuantifierRepo ??= new BenefitQuantifierRepository(this);
 
-        public IDbContextTransaction DbContextTransaction
         public IUserCriteriaRepository UserCriteriaRepo => _userCriteriaRepo ??= new UserCriteriaRepository(this);
 
         public UserEntity UserEntity { get; private set; }
 
         public IDbContextTransaction DbContextTransaction { get; private set; }
 
-        public void BeginTransaction()
-        {
-            DbContextTransaction = Context.Database.BeginTransaction();
-        }
+        public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
+
+        public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
 
         public void SetUser(string username) =>
             UserEntity = Context.User.SingleOrDefault(_ => _.Username == username);
@@ -178,9 +171,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         }
 
         // DISPOSE PROPERTIES & METHODS
-        private bool _disposed = false;
+        private bool _disposed;
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!_disposed)
             {

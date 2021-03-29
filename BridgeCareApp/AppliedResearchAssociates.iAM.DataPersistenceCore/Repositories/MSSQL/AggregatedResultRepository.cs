@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using MoreLinq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -55,6 +59,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.Database.ExecuteSqlRaw(
                 $"DELETE FROM dbo.AggregatedResult WHERE MaintainableAssetId IN (SELECT Id FROM dbo.MaintainableAsset WHERE NetworkId = '{networkId}')");
             _unitOfWork.Context.SaveChanges();
+        }
+
+        public void CreateAggregatedResults<T>(
+            Dictionary<(Guid maintainableAssetId, Guid attributeId), AttributeValueHistory<T>>
+                attributeValueHistoryPerMaintainableAssetIdAttributeIdTuple)
+        {
+
+            var aggregatedResultEntities = new List<AggregatedResultEntity>();
+
+            attributeValueHistoryPerMaintainableAssetIdAttributeIdTuple.Keys.ForEach(tuple =>
+            {
+                var attributeValueHistory = attributeValueHistoryPerMaintainableAssetIdAttributeIdTuple[tuple];
+                aggregatedResultEntities.AddRange(attributeValueHistory.ToEntity(tuple.maintainableAssetId, tuple.attributeId));
+            });
+
+            _unitOfWork.Context.AddAll(aggregatedResultEntities, _unitOfWork.UserEntity?.Id);
         }
     }
 }

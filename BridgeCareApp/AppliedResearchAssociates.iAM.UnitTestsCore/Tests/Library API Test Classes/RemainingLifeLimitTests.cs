@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -26,7 +27,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new RemainingLifeLimitController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
+            _controller = new RemainingLifeLimitController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object);
         }
 
         public RemainingLifeLimitLibraryEntity TestRemainingLifeLimitLibrary { get; } = new RemainingLifeLimitLibraryEntity
@@ -155,41 +157,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<RemainingLifeLimitLibraryDTO>));
 
-                var remainingLifeLimitLibraryDTO = dtos[0];
-                remainingLifeLimitLibraryDTO.Description = "Updated Description";
-                remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].Value = 2.0;
-                remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].CriterionLibrary =
+                var dto = dtos[0];
+                dto.Description = "Updated Description";
+                dto.RemainingLifeLimits[0].Value = 2.0;
+                dto.RemainingLifeLimits[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
                 // Act
-                var result =
-                    await _controller.UpsertRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
-                        remainingLifeLimitLibraryDTO);
+                await _controller.UpsertRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
+                        dto);
 
                 // Assert
-                Assert.IsType<OkResult>(result);
+                var timer = new Timer {Interval = 5000};
+                timer.Elapsed += delegate
+                {
+                    var modifiedDto = _testHelper.UnitOfWork.RemainingLifeLimitRepo
+                        .RemainingLifeLimitLibrariesWithRemainingLifeLimits()[0];
+                    Assert.Equal(dto.Description, modifiedDto.Description);
+                    Assert.Single(modifiedDto.AppliedScenarioIds);
+                    Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
 
-                var remainingLifeLimitLibraryEntity = _testHelper.UnitOfWork.Context.RemainingLifeLimitLibrary
-                    .Include(_ => _.RemainingLifeLimits)
-                    .ThenInclude(_ => _.CriterionLibraryRemainingLifeLimitJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.RemainingLifeLimits)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.RemainingLifeLimitLibrarySimulationJoins)
-                    .Single(_ => _.Id == RemainingLifeLimitLibraryId);
-
-                Assert.Equal(remainingLifeLimitLibraryDTO.Description, remainingLifeLimitLibraryEntity.Description);
-                Assert.Single(remainingLifeLimitLibraryEntity.RemainingLifeLimitLibrarySimulationJoins);
-                var remainingLifeLimitLibrarySimulationJoin =
-                    remainingLifeLimitLibraryEntity.RemainingLifeLimitLibrarySimulationJoins.ToList()[0];
-                Assert.Equal(_testHelper.TestSimulation.Id, remainingLifeLimitLibrarySimulationJoin.SimulationId);
-                var remainingLifeLimitEntity = remainingLifeLimitLibraryEntity.RemainingLifeLimits.ToList()[0];
-                Assert.Equal(remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].Value, remainingLifeLimitEntity.Value);
-                Assert.NotNull(remainingLifeLimitEntity.CriterionLibraryRemainingLifeLimitJoin);
-                Assert.Equal(remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].CriterionLibrary.Id,
-                    remainingLifeLimitEntity.CriterionLibraryRemainingLifeLimitJoin.CriterionLibrary.Id);
-                Assert.NotNull(remainingLifeLimitEntity.Attribute);
-                Assert.Equal(remainingLifeLimitEntity.Attribute.Name, remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].Attribute);
+                    Assert.Equal(dto.RemainingLifeLimits[0].Value, modifiedDto.RemainingLifeLimits[0].Value);
+                    Assert.Equal(dto.RemainingLifeLimits[0].CriterionLibrary.Id,
+                        modifiedDto.RemainingLifeLimits[0].CriterionLibrary.Id);
+                    Assert.Equal(dto.RemainingLifeLimits[0].Attribute, modifiedDto.RemainingLifeLimits[0].Attribute);
+                };
             }
             finally
             {

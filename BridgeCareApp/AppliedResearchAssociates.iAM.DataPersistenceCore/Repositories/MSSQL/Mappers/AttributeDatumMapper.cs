@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 entity.NumericValue = Convert.ToDouble(numericAttributeDatum.Value);
                 entity.AttributeDatumLocation =
                     (AttributeDatumLocationEntity)domain.Location.ToEntity(numericAttributeDatum.Id,
-                        "AttributeDatumEntity");
+                        typeof(AttributeDatumEntity));
                 return entity;
             }
 
@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 entity.TextValue = textAttributeDatum.Value;
                 entity.AttributeDatumLocation =
                     (AttributeDatumLocationEntity)domain.Location.ToEntity(textAttributeDatum.Id,
-                        "AttributeDatumEntity");
+                        typeof(AttributeDatumEntity));
                 return entity;
             }
 

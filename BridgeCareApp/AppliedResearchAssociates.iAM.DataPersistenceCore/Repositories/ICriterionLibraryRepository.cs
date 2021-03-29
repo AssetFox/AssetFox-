@@ -11,13 +11,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void JoinEntitiesWithCriteria(Dictionary<string, List<Guid>> entityIdsPerExpression, string joinEntity,
             string simulationName);
 
-        void CreateCriterionLibraries(List<CriterionLibraryEntity> criterionLibraryEntities);
+        void UpsertCriterionLibraries(List<CriterionLibraryEntity> criterionLibraryEntities);
 
         void JoinSelectableTreatmentEntitiesWithCriteria(Dictionary<Guid, List<string>> expressionsPerSelectableTreatmentEntityId, string prependName);
 
         Task<List<CriterionLibraryDTO>> CriterionLibraries();
 
-        void UpsertCriterionLibrary(CriterionLibraryDTO dto, UserInfoDTO userInfo);
+        void UpsertCriterionLibrary(CriterionLibraryDTO dto);
 
         void DeleteCriterionLibrary(Guid libraryId);
     }

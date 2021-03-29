@@ -25,7 +25,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new AnalysisMethodController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
+            _controller = new AnalysisMethodController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object);
         }
 
         public AnalysisMethodEntity TestAnalysis { get; } = new AnalysisMethodEntity
@@ -82,9 +83,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
         {
             try
             {
+                // Arrange
+                var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
+                var dto = TestAnalysis.ToDto();
+                TestBenefit.Attribute = attributeEntity;
+                dto.Benefit = TestBenefit.ToDto();
+                dto.Benefit.Attribute = attributeEntity.Name;
+
                 // Act
                 var result =
-                    await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, TestAnalysis.ToDto());
+                    await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, dto);
 
                 // Assert
                 Assert.IsType<OkResult>(result);

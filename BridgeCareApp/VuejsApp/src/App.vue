@@ -142,6 +142,7 @@ import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 import {clone} from 'ramda';
 import {emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import { Hub } from '@/connectionHub';
 
 @Component({
   components: {Alert, Spinner}
@@ -242,7 +243,7 @@ export default class AppComponent extends Vue {
         message: this.warningMessage,
         position: 'topRight',
         closeOnClick: true,
-        timeout: 3000
+        timeout: 5000
       });
       this.setWarningMessageAction({message: ''});
     }
@@ -255,8 +256,7 @@ export default class AppComponent extends Vue {
         title: 'Error',
         message: this.errorMessage,
         position: 'topRight',
-        closeOnClick: true,
-        timeout: 3000
+        closeOnClick: true
       });
       this.setErrorMessageAction({message: ''});
     }
@@ -270,7 +270,7 @@ export default class AppComponent extends Vue {
         message: this.infoMessage,
         position: 'topRight',
         closeOnClick: true,
-        timeout: 3000
+        timeout: 5000
       });
       this.setInfoMessageAction({message: ''});
     }
@@ -373,6 +373,18 @@ export default class AppComponent extends Vue {
     // Generate a polling session id, and begin polling once per 5 seconds
     /*this.generatePollingSessionIdAction();
     window.setInterval(this.pollEventsAction, 5000);*/
+  }
+
+  mounted() {
+    this.$statusHub.$on(Hub.BroadcastEventType.BroadcastErrorEvent, this.onSetErrorMessage)
+  }
+
+  beforeDestroy() {
+    this.$statusHub.$off(Hub.BroadcastEventType.BroadcastErrorEvent, this.onSetErrorMessage)
+  }
+
+  onSetErrorMessage(error: string) {
+    this.setErrorMessageAction({message: error});
   }
 
   onAlertResult(submit: boolean) {

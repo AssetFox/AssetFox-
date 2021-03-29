@@ -11,17 +11,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             var budget =
                 simulation.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.Single(_ => _.Name == domain.Budget.Name);
-            var facility = simulation.Network.Facilities.Single(_ =>
-                _.Sections.Any(__ => $"{__.Name}{__.Area}" == $"{domain.Section.Name}{domain.Section.Area}"));
-            var section =
-                facility.Sections.Single(_ => $"{_.Name}{_.Area}" == $"{domain.Section.Name}{domain.Section.Area}");
+
+            var maintainableAsset = simulation.Network.MaintainableAssets.Single(_ =>
+                $"{_.SectionName}{_.Area}" == $"{domain.Section.Name}{domain.Section.Area}");
 
             return new CommittedProjectEntity
             {
                 Id = domain.Id,
                 SimulationId = simulation.Id,
                 BudgetId = budget.Id,
-                SectionId = section.Id,
+                MaintainableAssetId = maintainableAsset.Id,
                 Name = domain.Name,
                 ShadowForAnyTreatment = domain.ShadowForAnyTreatment,
                 ShadowForSameTreatment = domain.ShadowForSameTreatment,
@@ -32,8 +31,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation)
         {
-            var facility = simulation.Network.Facilities.Single(_ => _.Id == entity.Section.Facility.Id);
-            var section = facility.Sections.Single(_ => _.Id == entity.Section.Id);
+            var facility = simulation.Network.Facilities
+                .Single(_ => _.Name == entity.MaintainableAsset.FacilityName);
+            var section = facility.Sections.Single(_ =>
+                $"{_.Name}{_.Area}" == $"{entity.MaintainableAsset.SectionName}{entity.MaintainableAsset.Area}");
 
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(section, entity.Year));
             committedProject.Id = entity.Id;

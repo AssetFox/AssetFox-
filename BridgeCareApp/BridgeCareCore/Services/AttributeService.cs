@@ -29,23 +29,23 @@ namespace BridgeCareCore.Services
 
             var attributesWithValues = new List<string>();
 
-            using var sqlConnection = new SqlConnection(_unitOfWork.LegacyConnection.ConnectionString);
+            using var sqlConnection = _unitOfWork.GetLegacyConnection();
             sqlConnection.Open();
 
             var attributeCountSelects =
                 validAttributes.Select(attribute => $"COUNT(DISTINCT({attribute})) AS {attribute}").ToList();
             var countsQuery = $"SELECT {string.Join(", ", attributeCountSelects)} FROM SEGMENT_13_NS0;";
 
-            var sqlCommand = new SqlCommand(countsQuery, sqlConnection);
+            using var countsSqlCommand = new SqlCommand(countsQuery, sqlConnection);
 
-            var reader = sqlCommand.ExecuteReader();
-            if (reader.HasRows)
+            using var countsReader = countsSqlCommand.ExecuteReader();
+            if (countsReader.HasRows)
             {
-                while (reader.Read())
+                while (countsReader.Read())
                 {
                     for (var i = 0; i < validAttributes.Count; i++)
                     {
-                        if (reader.GetInt32(i) > 100)
+                        if (countsReader.GetInt32(i) > 100)
                         {
                             attributeSelectValuesResults.Add(new AttributeSelectValuesResult
                             {
@@ -55,7 +55,7 @@ namespace BridgeCareCore.Services
                                 ResultType = "warning"
                             });
                         }
-                        else if (reader.GetInt32(i) == 0)
+                        else if (countsReader.GetInt32(i) == 0)
                         {
                             attributeSelectValuesResults.Add(new AttributeSelectValuesResult
                             {
@@ -81,11 +81,11 @@ namespace BridgeCareCore.Services
                     multipleAttributeValuesSelectQueries.Add($"SELECT DISTINCT(CAST({attribute} AS VARCHAR(255))) AS {attribute} FROM SEGMENT_13_NS0;");
                 });
 
-                sqlCommand = new SqlCommand(string.Join("", multipleAttributeValuesSelectQueries), sqlConnection);
+                using var sqlCommand = new SqlCommand(string.Join("", multipleAttributeValuesSelectQueries), sqlConnection);
 
                 var index = 0;
 
-                reader = sqlCommand.ExecuteReader();
+                using var reader = sqlCommand.ExecuteReader();
                 while (reader.HasRows)
                 {
                     var values = new List<string>();
@@ -111,9 +111,6 @@ namespace BridgeCareCore.Services
                     reader.NextResult();
                 }
             }
-
-            sqlCommand.Dispose();
-            sqlConnection.Close();
 
             return attributeSelectValuesResults;
         }

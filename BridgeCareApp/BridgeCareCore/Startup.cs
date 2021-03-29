@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.Simulation;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Logging;
@@ -89,6 +90,7 @@ namespace BridgeCareCore
             services.AddSingleton<IAuthorizationHandler, RestrictAccessHandler>();
             services.AddScoped<ExpressionValidationService>();
             services.AddScoped<IUserCriteriaRepository, UserCriteriaRepository>();
+            services.AddScoped<IHubService, HubService>();
 
 #if MsSqlDebug || Release || Test
             // SQL SERVER SCOPINGS

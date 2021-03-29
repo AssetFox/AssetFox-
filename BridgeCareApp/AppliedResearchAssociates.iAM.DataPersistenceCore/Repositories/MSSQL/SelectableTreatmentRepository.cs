@@ -212,14 +212,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.CreateSelectableTreatment(simulation));
         }
 
-        public Task<List<TreatmentLibraryDTO>> TreatmentLibrariesWithTreatments()
+        public List<TreatmentLibraryDTO> TreatmentLibrariesWithTreatments()
         {
             if (!_unitOfWork.Context.SelectableTreatment.Any())
             {
-                return Task.Factory.StartNew(() => new List<TreatmentLibraryDTO>());
+                return new List<TreatmentLibraryDTO>();
             }
 
-            return Task.Factory.StartNew(() => _unitOfWork.Context.TreatmentLibrary
+            return _unitOfWork.Context.TreatmentLibrary
                 .Include(_ => _.Treatments)
                 .ThenInclude(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)
@@ -247,10 +247,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.TreatmentLibrarySimulationJoins)
                 .Select(_ => _.ToDto())
-                .ToList());
+                .ToList();
         }
 
-        public void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, TreatmentLibraryDTO dto)
+        public void UpsertPermitted(Guid simulationId, TreatmentLibraryDTO dto)
         {
             if (simulationId != Guid.Empty)
             {
@@ -260,23 +260,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
 
                 if (!_unitOfWork.Context.Simulation.Any(_ =>
-                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
                 }
             }
 
-            UpsertTreatmentLibrary(dto, simulationId, userInfo);
-            UpsertOrDeleteTreatments(dto.Treatments, dto.Id, userInfo);
+            UpsertTreatmentLibrary(dto, simulationId);
+            UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
         }
 
-        public void UpsertTreatmentLibrary(TreatmentLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
+        public void UpsertTreatmentLibrary(TreatmentLibraryDTO dto, Guid simulationId)
         {
-            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
-
             var treatmentLibraryEntity = dto.ToEntity();
 
-            _unitOfWork.Context.Upsert(treatmentLibraryEntity, dto.Id, userEntity?.Id);
+            _unitOfWork.Context.Upsert(treatmentLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -289,18 +287,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.Context.AddEntity(
                     new TreatmentLibrarySimulationEntity { TreatmentLibraryId = dto.Id, SimulationId = simulationId },
-                    userEntity?.Id);
+                    _unitOfWork.UserEntity?.Id);
             }
         }
 
-        public void UpsertOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId, UserInfoDTO userInfo)
+        public void UpsertOrDeleteTreatments(List<TreatmentDTO> treatments, Guid libraryId)
         {
             if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
             {
                 throw new RowNotInTableException($"No treatment library found having id {libraryId}.");
             }
-
-            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var selectableTreatmentEntities = treatments.Select(_ => _.ToEntity(libraryId)).ToList();
 
@@ -310,26 +306,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
                 .ToList();
 
-            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<SelectableTreatmentEntity, bool>>>
-            {
-                {"delete", _ => _.TreatmentLibraryId == libraryId && !entityIds.Contains(_.Id)},
-                {"update", _ => existingEntityIds.Contains(_.Id)},
-                {"add", _ => !existingEntityIds.Contains(_.Id)}
-            };
+            _unitOfWork.Context.DeleteAll<SelectableTreatmentEntity>(_ =>
+                _.TreatmentLibraryId == libraryId && !entityIds.Contains(_.Id));
+
+            _unitOfWork.Context.UpdateAll(selectableTreatmentEntities.Where(_ => existingEntityIds.Contains(_.Id))
+                .ToList());
+
+            _unitOfWork.Context.UpdateAll(selectableTreatmentEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+                .ToList());
 
             _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
                 _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
                 _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
                     .TreatmentLibraryId == libraryId);
-
-            if (IsRunningFromXUnit)
-            {
-                _unitOfWork.Context.UpsertOrDelete(selectableTreatmentEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
-            else
-            {
-                _unitOfWork.Context.BulkUpsertOrDelete(selectableTreatmentEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
 
             _unitOfWork.Context.DeleteAll<SelectableTreatmentBudgetEntity>(_ =>
                 _.SelectableTreatment.TreatmentLibraryId == libraryId);
@@ -363,7 +352,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _.BudgetIds.Select(budgetId =>
                         new SelectableTreatmentBudgetEntity { SelectableTreatmentId = _.Id, BudgetId = budgetId })).ToList();
 
-                _unitOfWork.Context.AddAll(treatmentBudgetJoinsToAdd, userEntity?.Id);
+                _unitOfWork.Context.AddAll(treatmentBudgetJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }
 
             if (treatments.Any(_ =>
@@ -379,7 +368,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             SelectableTreatmentId = _.Id
                         }).ToList();
 
-                _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, userEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }
         }
 

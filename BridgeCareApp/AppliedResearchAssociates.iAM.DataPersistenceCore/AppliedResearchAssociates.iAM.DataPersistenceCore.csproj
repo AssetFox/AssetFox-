@@ -47,9 +47,6 @@
   <ItemGroup>
     <Folder Include="Repositories\MSSQLLegacy\Mappings\" />
     <Folder Include="Repositories\MSSQL\DTOs\Abstract\" />
-    <Folder Include="Repositories\MSSQL\Mappers\DataAssignmentMappers\" />
-    <Folder Include="Repositories\MSSQL\Mappers\RepoMappers\" />
-    <Folder Include="Repositories\MSSQL\Mappers\SimulationAnalysisMappers\" />
   </ItemGroup>
 
   <ItemGroup>

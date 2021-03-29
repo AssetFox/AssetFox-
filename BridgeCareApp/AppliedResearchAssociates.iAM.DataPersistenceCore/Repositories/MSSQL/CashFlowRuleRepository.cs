@@ -15,9 +15,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class CashFlowRuleRepository : ICashFlowRuleRepository
     {
-        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
         public CashFlowRuleRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -86,14 +83,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public Task<List<CashFlowRuleLibraryDTO>> CashFlowRuleLibrariesWithCashFlowRules()
+        public List<CashFlowRuleLibraryDTO> CashFlowRuleLibrariesWithCashFlowRules()
         {
             if (!_unitOfWork.Context.CashFlowRuleLibrary.Any())
             {
-                return Task.Factory.StartNew(() => new List<CashFlowRuleLibraryDTO>());
+                return new List<CashFlowRuleLibraryDTO>();
             }
 
-            return Task.Factory.StartNew(() => _unitOfWork.Context.CashFlowRuleLibrary
+            return _unitOfWork.Context.CashFlowRuleLibrary
                 .Include(_ => _.CashFlowRules)
                 .ThenInclude(_ => _.CriterionLibraryCashFlowRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
@@ -101,10 +98,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CashFlowDistributionRules)
                 .Include(_ => _.CashFlowRuleLibrarySimulationJoins)
                 .Select(_ => _.ToDto())
-                .ToList());
+                .ToList();
         }
 
-        public void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, CashFlowRuleLibraryDTO dto)
+        public void UpsertPermitted(Guid simulationId, CashFlowRuleLibraryDTO dto)
         {
             if (simulationId != Guid.Empty)
             {
@@ -114,23 +111,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
 
                 if (!_unitOfWork.Context.Simulation.Any(_ =>
-                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
                 }
             }
 
-            UpsertCashFlowRuleLibrary(dto, simulationId, userInfo);
-            UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id, userInfo);
+            UpsertCashFlowRuleLibrary(dto, simulationId);
+            UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
         }
 
-        public void UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
+        public void UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto, Guid simulationId)
         {
-            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
-
             var cashFlowRuleLibraryEntity = dto.ToEntity();
 
-            _unitOfWork.Context.Upsert(cashFlowRuleLibraryEntity, dto.Id, userEntity?.Id);
+            _unitOfWork.Context.Upsert(cashFlowRuleLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -145,20 +140,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     CashFlowRuleLibraryId = cashFlowRuleLibraryEntity.Id,
                     SimulationId = simulationId
-                }, userEntity?.Id);
+                }, _unitOfWork.UserEntity?.Id);
             }
-
-            _unitOfWork.Context.SaveChanges();
         }
 
-        public void UpsertOrDeleteCashFlowRules(List<CashFlowRuleDTO> cashFlowRules, Guid libraryId, UserInfoDTO userInfo)
+        public void UpsertOrDeleteCashFlowRules(List<CashFlowRuleDTO> cashFlowRules, Guid libraryId)
         {
             if (!_unitOfWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == libraryId))
             {
                 throw new RowNotInTableException($"No cash flow rule library found having id {libraryId}.");
             }
-
-            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var cashFlowRuleEntities = cashFlowRules
                 .Select(_ => _.ToEntity(libraryId))
@@ -170,21 +161,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.CashFlowRuleLibrary.Id == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
-            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<CashFlowRuleEntity, bool>>>
-            {
-                {"delete", _ => _.CashFlowRuleLibrary.Id == libraryId && !entityIds.Contains(_.Id)},
-                {"update", _ => existingEntityIds.Contains(_.Id)},
-                {"add", _ => !existingEntityIds.Contains(_.Id)}
-            };
+            _unitOfWork.Context.DeleteAll<CashFlowRuleEntity>(_ =>
+                _.CashFlowRuleLibrary.Id == libraryId && !entityIds.Contains(_.Id));
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfWork.Context.UpsertOrDelete(cashFlowRuleEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
-            else
-            {
-                _unitOfWork.Context.BulkUpsertOrDelete(cashFlowRuleEntities, predicatesPerCrudOperation, userEntity?.Id);
-            }
+            _unitOfWork.Context.UpdateAll(cashFlowRuleEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(),
+                _unitOfWork.UserEntity?.Id);
+
+            _unitOfWork.Context.AddAll(cashFlowRuleEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(),
+                _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryCashFlowRuleEntity>(_ =>
                 _.CashFlowRule.CashFlowRuleLibraryId == libraryId);
@@ -193,7 +177,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 var distributionRulesPerCashFlowRuleId = cashFlowRules.Where(_ => _.CashFlowDistributionRules.Any())
                     .ToDictionary(_ => _.Id, _ => _.CashFlowDistributionRules);
-                _unitOfWork.CashFlowDistributionRuleRepo.UpsertOrDeleteCashFlowDistributionRules(distributionRulesPerCashFlowRuleId, libraryId);
+                _unitOfWork.CashFlowDistributionRuleRepo.UpsertOrDeleteCashFlowDistributionRules(
+                    distributionRulesPerCashFlowRuleId, libraryId);
             }
 
             if (cashFlowRules.Any(_ =>
@@ -210,7 +195,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                     .ToList();
 
-                _unitOfWork.Context.AddAll(ruleCriterionJoinsToAdd, userEntity?.Id);
+                _unitOfWork.Context.AddAll(ruleCriterionJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }
         }
 

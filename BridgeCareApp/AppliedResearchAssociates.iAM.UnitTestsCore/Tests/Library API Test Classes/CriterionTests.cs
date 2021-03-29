@@ -22,7 +22,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new CriterionLibraryController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
+            _controller = new CriterionLibraryController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object);
         }
 
         private void Setup()

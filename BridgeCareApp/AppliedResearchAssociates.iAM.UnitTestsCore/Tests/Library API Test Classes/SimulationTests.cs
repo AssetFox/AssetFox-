@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
@@ -28,8 +29,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
             var simulationAnalysis =
-                new SimulationAnalysisService(_testHelper.UnitOfWork, _testHelper.MockHubContext.Object);
-            _controller = new SimulationController(simulationAnalysis, _testHelper.UnitOfWork, _testHelper.Logger, _testHelper.MockEsecSecurity);
+                new SimulationAnalysisService(_testHelper.UnitOfWork, _testHelper.MockHubService.Object);
+            _controller = new SimulationController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                simulationAnalysis, _testHelper.MockHubService.Object);
         }
 
         private void SetupForClone()
@@ -72,12 +74,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
             var budgetLibraryId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(
-                new BudgetLibraryEntity { Id = budgetLibraryId, Name = "Test Name" });
+                new BudgetLibraryEntity {Id = budgetLibraryId, Name = "Test Name"});
             _testHelper.UnitOfWork.Context.AddEntity(new BudgetLibrarySimulationEntity
             {
-                BudgetLibraryId = budgetLibraryId,
-                SimulationId = _testHelper.TestSimulation.Id
+                BudgetLibraryId = budgetLibraryId, SimulationId = _testHelper.TestSimulation.Id
             });
+
+            var budgetId = Guid.NewGuid();
+            _testHelper.UnitOfWork.Context.AddEntity(
+                new BudgetEntity {Id = budgetId, BudgetLibraryId = budgetLibraryId, Name = "Test Budget Name"});
 
             var budgetPriorityLibraryId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(
@@ -142,25 +147,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 SimulationId = _testHelper.TestSimulation.Id
             });
 
-            var budgetId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new BudgetEntity { Id = budgetId, BudgetLibraryId = budgetLibraryId });
-
-            var facilityId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new FacilityEntity
+            var maintainableAssetId = Guid.NewGuid();
+            _testHelper.UnitOfWork.Context.AddEntity(new MaintainableAssetEntity
             {
-                Id = Guid.NewGuid(),
+                Id = maintainableAssetId,
                 NetworkId = _testHelper.TestNetwork.Id,
-                Name = "Test Name"
+                FacilityName = "1",
+                SectionName = "0123456789",
+                Area = 4422,
+                AreaUnit = "ft^2"
             });
 
-            var sectionId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new SectionEntity
-            {
-                Id = sectionId,
-                FacilityId = facilityId,
-                Name = "Test Name",
-                AreaUnit = "SqFt"
-            });
+            _testHelper.UnitOfWork.Context.AddEntity(
+                new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation, "10123456789")
+                {
+                    MaintainableAssetId = maintainableAssetId
+                });
 
             var committedProjectId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(new CommittedProjectEntity
@@ -168,7 +170,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 Id = committedProjectId,
                 SimulationId = _testHelper.TestSimulation.Id,
                 BudgetId = budgetId,
-                SectionId = sectionId,
+                MaintainableAssetId = maintainableAssetId,
                 Name = "Test Name"
             });
 
@@ -298,8 +300,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 };
 
                 // Act
-                var result = await _controller.CreateSimulation(_testHelper.TestNetwork.Id, newSimulationDTO);
-                var dto = (SimulationDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(SimulationDTO));
+                var result = await _controller.CreateSimulation(_testHelper.TestNetwork.Id, newSimulationDTO) as OkObjectResult;
+                var dto = (SimulationDTO)Convert.ChangeType(result!.Value, typeof(SimulationDTO));
 
                 var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
                     .Include(_ => _.SimulationUserJoins)
@@ -378,8 +380,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<SimulationDTO>));
 
-                var simulationDTO = dtos[0];
-                simulationDTO.Users = new List<SimulationUserDTO>
+                var dto = dtos[0];
+                dto.Users = new List<SimulationUserDTO>
                 {
                     new SimulationUserDTO
                     {
@@ -387,15 +389,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                     }
                 };
 
-                await _controller.UpdateSimulation(simulationDTO);
+                await _controller.UpdateSimulation(dto);
 
                 // Act
-                var result = await _controller.DeleteSimulation(simulationDTO.Id);
+                await _controller.DeleteSimulation(dto.Id);
 
                 // Assert
 
-                Assert.True(!_testHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == simulationDTO.Id));
-                Assert.True(!_testHelper.UnitOfWork.Context.SimulationUser.Any(_ => _.UserId == simulationDTO.Users[0].UserId));
+                Assert.True(!_testHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == dto.Id));
+                Assert.True(!_testHelper.UnitOfWork.Context.SimulationUser.Any(_ => _.UserId == dto.Users[0].UserId));
             }
             finally
             {

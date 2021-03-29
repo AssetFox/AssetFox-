@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 using MoreLinq;
@@ -29,13 +30,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static void CreateFacility(this MaintainableAssetEntity entity, Network network)
         {
-            var facilitySectionName = entity.MaintainableAssetLocation.LocationIdentifier.Split("/");
-
             var facility = network.AddFacility();
-            facility.Id = entity.MaintainableAssetLocation.Id;
-            facility.Name = facilitySectionName[0];
+            facility.Id = Guid.NewGuid();
+            facility.Name = entity.FacilityName;
 
-            entity.CreateSection(facility, facilitySectionName[1]);
+            entity.CreateSection(facility);
         }
     }
 }

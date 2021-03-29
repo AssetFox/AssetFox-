@@ -12,7 +12,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
         {
             var maintainableAsset = new MaintainableAsset(
-                entity.Id, entity.NetworkId, entity.MaintainableAssetLocation.ToDomain(), entity.Area, entity.AreaUnit);
+                entity.Id, entity.NetworkId, entity.MaintainableAssetLocation.ToDomain())
+            {
+                SpatialWeighting = new SpatialWeighting(entity.Area, entity.AreaUnit)
+            };
 
             if (entity.AssignedData != null && entity.AssignedData.Any())
             {
@@ -41,13 +44,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static MaintainableAssetEntity ToEntity(this MaintainableAsset domain, Guid networkId) =>
             new MaintainableAssetEntity
             {
-                Id = domain.Id, NetworkId = networkId, Area = domain.Area, AreaUnit = domain.AreaUnit
+                Id = domain.Id,
+                NetworkId = networkId,
+                Area = domain.SpatialWeighting.Area,
+                AreaUnit = domain.SpatialWeighting.AreaUnit
             };
 
         public static MaintainableAssetEntity ToEntity(this Section section, Guid networkId) =>
             new MaintainableAssetEntity
             {
-                Id = section.Id, NetworkId = networkId, Area = section.Area, AreaUnit = section.AreaUnit
+                Id = section.Id,
+                NetworkId = networkId,
+                Area = section.Area,
+                AreaUnit = section.AreaUnit,
+                FacilityName = section.Facility.Name,
+                SectionName = section.Name
             };
     }
 }

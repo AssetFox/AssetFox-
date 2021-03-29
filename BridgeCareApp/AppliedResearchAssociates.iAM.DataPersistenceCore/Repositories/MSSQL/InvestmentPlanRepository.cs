@@ -105,11 +105,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .FillSimulationInvestmentPlan(simulation);
         }
 
-        public Task<InvestmentPlanDTO> ScenarioInvestmentPlan(Guid simulationId)
+        public InvestmentPlanDTO ScenarioInvestmentPlan(Guid simulationId)
         {
             if (simulationId == Guid.Empty)
             {
-                return Task.Factory.StartNew(() => new InvestmentPlanDTO());
+                return new InvestmentPlanDTO();
             }
 
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -117,16 +117,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            return Task.Factory.StartNew(() =>
-            {
-                var investmentPlan =
-                    _unitOfWork.Context.InvestmentPlan.SingleOrDefault(_ =>
-                        _.SimulationId == simulationId);
-                return investmentPlan != null ? investmentPlan.ToDto() : new InvestmentPlanDTO();
-            });
+            var investmentPlan =
+                _unitOfWork.Context.InvestmentPlan.SingleOrDefault(_ =>
+                    _.SimulationId == simulationId);
+            return investmentPlan != null ? investmentPlan.ToDto() : new InvestmentPlanDTO();
         }
 
-        public void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, InvestmentPlanDTO dto)
+        public void UpsertPermitted(Guid simulationId, InvestmentPlanDTO dto)
         {
             if (simulationId != Guid.Empty)
             {
@@ -136,7 +133,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
 
                 if (!_unitOfWork.Context.Simulation.Any(_ =>
-                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
                 }

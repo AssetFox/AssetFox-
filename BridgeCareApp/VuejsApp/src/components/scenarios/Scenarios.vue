@@ -375,6 +375,7 @@ import {
   emptyEquationEditorDialogData,
   EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
+import { Hub } from '@/connectionHub';
 
 @Component({
   components: {
@@ -497,17 +498,17 @@ export default class Scenarios extends Vue {
   mounted() {
     this.onAuthentication();
 
-    this.$statusHub.$on('assignedData-status-event', this.getDataAggregationStatus);
-    this.$statusHub.$on('DataMigration-status-event', this.getDataMigrationStatus);
-    this.$statusHub.$on('SimulationAnalysisDetail-status-event', this.getScenarioAnalysisDetailUpdate);
-    this.$statusHub.$on('summaryReportGeneration-status-event', this.getSummaryReportStatus);
+    this.$statusHub.$on(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, this.getDataAggregationStatus);
+    this.$statusHub.$on(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);
+    this.$statusHub.$on(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, this.getScenarioAnalysisDetailUpdate);
+    this.$statusHub.$on(Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent, this.getSummaryReportStatus);
   }
 
   beforeDestroy() {
-    this.$statusHub.$off('assignedData-status-event', this.getDataAggregationStatus);
-    this.$statusHub.$off('DataMigration-status-event', this.getDataMigrationStatus);
-    this.$statusHub.$off('SimulationAnalysisDetail-status-event', this.getScenarioAnalysisDetailUpdate);
-    this.$statusHub.$off('summaryReportGeneration-status-event', this.getSummaryReportStatus);
+    this.$statusHub.$off(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, this.getDataAggregationStatus);
+    this.$statusHub.$off(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);
+    this.$statusHub.$off(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, this.getScenarioAnalysisDetailUpdate);
+    this.$statusHub.$off(Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent, this.getSummaryReportStatus);
   }
 
   onAuthentication() {

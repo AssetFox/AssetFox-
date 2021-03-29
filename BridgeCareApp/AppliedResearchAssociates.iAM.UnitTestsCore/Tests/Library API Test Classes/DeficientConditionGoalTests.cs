@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -26,7 +27,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new DeficientConditionGoalController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
+            _controller = new DeficientConditionGoalController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object);
         }
 
         public DeficientConditionGoalLibraryEntity TestDeficientConditionGoalLibrary { get; } = new DeficientConditionGoalLibraryEntity
@@ -157,41 +159,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(
                     (getResult as OkObjectResult).Value, typeof(List<DeficientConditionGoalLibraryDTO>));
 
-                var deficientConditionGoalLibraryDTO = dtos[0];
-                deficientConditionGoalLibraryDTO.Description = "Updated Description";
-                deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].Name = "Updated Name";
-                deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary =
+                var dto = dtos[0];
+                dto.Description = "Updated Description";
+                dto.DeficientConditionGoals[0].Name = "Updated Name";
+                dto.DeficientConditionGoals[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
                 // Act
-                var result = await _controller.UpsertDeficientConditionGoalLibrary(_testHelper.TestSimulation.Id,
-                    deficientConditionGoalLibraryDTO);
+                await _controller.UpsertDeficientConditionGoalLibrary(_testHelper.TestSimulation.Id,
+                    dto);
 
                 // Assert
-                Assert.IsType<OkResult>(result);
+                var timer = new Timer {Interval = 5000};
+                timer.Elapsed += delegate
+                {
+                    var modifiedDto = _testHelper.UnitOfWork.DeficientConditionGoalRepo
+                        .DeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
+                    Assert.Equal(dto.Description, modifiedDto.Description);
+                    Assert.Single(modifiedDto.AppliedScenarioIds);
+                    Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
 
-                var deficientConditionGoalLibraryEntity = _testHelper.UnitOfWork.Context.DeficientConditionGoalLibrary
-                    .Include(_ => _.DeficientConditionGoals)
-                    .ThenInclude(_ => _.CriterionLibraryDeficientConditionGoalJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.DeficientConditionGoals)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.DeficientConditionGoalLibrarySimulationJoins)
-                    .Single(_ => _.Id == DeficientConditionGoalLibraryId);
-
-                Assert.Equal(deficientConditionGoalLibraryDTO.Description, deficientConditionGoalLibraryEntity.Description);
-                Assert.Single(deficientConditionGoalLibraryEntity.DeficientConditionGoalLibrarySimulationJoins);
-                var budgetPriorityLibrarySimulationJoin =
-                    deficientConditionGoalLibraryEntity.DeficientConditionGoalLibrarySimulationJoins.ToList()[0];
-                Assert.Equal(_testHelper.TestSimulation.Id, budgetPriorityLibrarySimulationJoin.SimulationId);
-                var deficientConditionGoalEntity = deficientConditionGoalLibraryEntity.DeficientConditionGoals.ToList()[0];
-                Assert.Equal(deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].Name, deficientConditionGoalEntity.Name);
-                Assert.NotNull(deficientConditionGoalEntity.CriterionLibraryDeficientConditionGoalJoin);
-                Assert.Equal(deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary.Id,
-                    deficientConditionGoalEntity.CriterionLibraryDeficientConditionGoalJoin.CriterionLibrary.Id);
-                Assert.NotNull(deficientConditionGoalEntity.Attribute);
-                Assert.Equal(deficientConditionGoalEntity.Attribute.Name,
-                    deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].Attribute);
+                    Assert.Equal(dto.DeficientConditionGoals[0].Name, modifiedDto.DeficientConditionGoals[0].Name);
+                    Assert.Equal(dto.DeficientConditionGoals[0].CriterionLibrary.Id,
+                        modifiedDto.DeficientConditionGoals[0].CriterionLibrary.Id);
+                    Assert.Equal(dto.DeficientConditionGoals[0].Attribute,
+                        modifiedDto.DeficientConditionGoals[0].Attribute);
+                };
             }
             finally
             {

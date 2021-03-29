@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 throw new NullReferenceException("Cannot map null Location entity to Location domain");
             }
 
-            if (entity.Discriminator == "LinearLocation")
+            if (entity.Discriminator == DataPersistenceConstants.LinearLocation)
             {
                 Route route;
                 if (entity.Direction.HasValue)
@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     entity.End ?? 0);
             }
 
-            if (entity.Discriminator == "SectionLocation")
+            if (entity.Discriminator == DataPersistenceConstants.SectionLocation)
             {
                 return new SectionLocation(entity.Id, entity.LocationIdentifier);
             }
@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             throw new InvalidOperationException("Cannot determine Location entity type");
         }
 
-        public static LocationEntity ToEntity(this Location domain, Guid parentId, string parentEntityType)
+        public static LocationEntity ToEntity(this Location domain, Guid parentId, Type parentEntityType)
         {
             if (domain == null)
             {
@@ -57,9 +57,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             LocationEntity entity;
 
-            if (parentEntityType == "MaintainableAssetEntity")
+            if (parentEntityType == typeof(MaintainableAssetEntity))
             {
-                entity = new MaintainableAssetLocationEntity(domain.Id, "SectionLocation", domain.LocationIdentifier)
+                entity = new MaintainableAssetLocationEntity(domain.Id, DataPersistenceConstants.SectionLocation, domain.LocationIdentifier)
                 {
                     MaintainableAssetId = parentId
                 };
@@ -67,9 +67,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 return entity;
             }
 
-            if (parentEntityType == "AttributeDatumEntity")
+            if (parentEntityType == typeof(AttributeDatumEntity))
             {
-                entity = new AttributeDatumLocationEntity(domain.Id, "SectionLocation", domain.LocationIdentifier)
+                entity = new AttributeDatumLocationEntity(domain.Id, DataPersistenceConstants.SectionLocation, domain.LocationIdentifier)
                 {
                     AttributeDatumId = parentId
                 };
@@ -89,18 +89,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             entity.Start = linearLocationDomain.Start;
             entity.End = linearLocationDomain.End;
-            entity.Discriminator = "LinearLocation";
+            entity.Discriminator = DataPersistenceConstants.LinearLocation;
 
-            if (linearLocationDomain.Route != null && linearLocationDomain.Route is DirectionalRoute directionalRoute)
+            if (linearLocationDomain.Route is DirectionalRoute directionalRoute)
             {
                 entity.Direction = directionalRoute.Direction;
             }
         }
 
-        public static LocationEntity ToEntity(this Facility facility, Guid maintainableAssetId, string locationIdentifier) =>
-            new MaintainableAssetLocationEntity(facility.Id, "SectionLocation", locationIdentifier)
+        public static LocationEntity CreateMaintainableAssetLocation(this MaintainableAssetEntity entity) =>
+            new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation, $"{entity.FacilityName}{entity.SectionName}")
             {
-                MaintainableAssetId = maintainableAssetId
+                MaintainableAssetId = entity.Id
             };
     }
 }

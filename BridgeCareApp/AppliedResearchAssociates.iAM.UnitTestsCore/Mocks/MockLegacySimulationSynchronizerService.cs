@@ -27,8 +27,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
             _testHelper = testHelper;
         }
 
-        private DataAccessor GetDataAccessor() => new DataAccessor(_unitOfWork.LegacyConnection, null);
-
         private void SynchronizeExplorerData()
         {
             SendRealTimeMessage("Upserting attributes...");
@@ -48,22 +46,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
             _unitOfWork.NetworkRepo.CreateNetwork(network);
         }
 
-        private void SynchronizeLegacyNetworkData(Network network, Guid? userId = null)
+        private void SynchronizeLegacyNetworkData(Network network)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
             {
                 throw new RowNotInTableException($"No network found having id {network.Id}.");
             }
 
-            var explorerNetworkFacilityNames = Enumerable.ToHashSet(network.Facilities.Select(_ => _.Name));
-            var explorerNetworkSectionNamesAndAreas = Enumerable.ToHashSet(network.Sections.Select(_ => $"{_.Name}{_.Area}"));
-            var facilityNames = Enumerable.ToHashSet(_unitOfWork.Context.Facility.Select(_ => _.Name));
-            var sectionNamesAndAreas = Enumerable.ToHashSet(_unitOfWork.Context.Section.Select(_ => $"{_.Name}{_.Area}"));
-            if (!explorerNetworkFacilityNames.SetEquals(facilityNames) || !explorerNetworkSectionNamesAndAreas.SetEquals(sectionNamesAndAreas))
+            var facilityNames = network.Facilities.Select(_ => _.Name).ToHashSet();
+            var sectionNamesAndAreas = network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
+            var assetFacilityNames = _unitOfWork.Context.MaintainableAsset.Select(_ => _.FacilityName).ToHashSet();
+            var assetSectionNamesAndAreas = _unitOfWork.Context.MaintainableAsset.Select(_ => $"{_.SectionName}{_.Area}").ToHashSet();
+            if (!assetFacilityNames.SetEquals(facilityNames) || !assetSectionNamesAndAreas.SetEquals(sectionNamesAndAreas))
             {
                 _unitOfWork.NetworkRepo.DeleteNetworkData();
-                SendRealTimeMessage("Creating the network's facilities and sections...");
-                _unitOfWork.FacilityRepo.CreateFacilities(network.Facilities.ToList(), network.Id);
+                SendRealTimeMessage("Creating the network's maintainable assets...");
+                var sections = network.Facilities.Where(_ => _.Sections.Any()).SelectMany(_ => _.Sections).ToList();
+                _unitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(sections, network.Id);
             }
         }
 
@@ -114,8 +113,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
             {
                 _unitOfWork.SetUser(username);
 
-                var dataAccessor = GetDataAccessor();
-                _unitOfWork.LegacyConnection.Open();
+                using var legacyConnection = _unitOfWork.GetLegacyConnection();
+
+                var dataAccessor = new DataAccessor(legacyConnection, null);
+                legacyConnection.Open();
 
                 var simulation = dataAccessor.GetStandAloneSimulation(LegacyNetworkId, simulationId);
                 if (withCommittedProjects)
@@ -126,8 +127,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
                 {
                     _testHelper.ReduceNumberOfFacilitiesAndSections(simulation);
                 }
-
-                _unitOfWork.LegacyConnection.Close();
 
                 if (simulation != null)
                 {
@@ -154,10 +153,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
             {
                 _unitOfWork.Rollback();
                 throw;
-            }
-            finally
-            {
-                _unitOfWork.LegacyConnection.Close();
             }
         }
 

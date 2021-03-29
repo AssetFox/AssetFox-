@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public SimulationAnalysisDataPersistenceTestHelper()
         {
-            _sqlConnection = UnitOfDataPersistenceWork.LegacyConnection;
+            _sqlConnection = UnitOfWork.GetLegacyConnection();
             _sqlConnection.Open();
             _dataAccessor = new DataAccessor(_sqlConnection, null);
         }
@@ -125,8 +125,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         {
             UnitOfWork.NetworkRepo.CreateNetwork(StandAloneSimulation.Network);
 
-            UnitOfWork.FacilityRepo.CreateFacilities(StandAloneSimulation.Network.Facilities.ToList(),
-                StandAloneSimulation.Network.Id);
+            var sections = StandAloneSimulation.Network.Facilities.Where(_ => _.Sections.Any()).SelectMany(_ => _.Sections).ToList();
+            UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(sections, StandAloneSimulation.Network.Id);
         }
 
         public void CreateAttributeCriteriaAndEquationJoins() =>

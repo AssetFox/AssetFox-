@@ -16,9 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid NetworkId { get; set; }
 
-        public string Facility { get; set; }
+        public string FacilityName { get; set; }
 
-        public string Section { get; set; }
+        public string SectionName { get; set; }
 
         public double Area { get; set; }
 
@@ -31,5 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<AggregatedResultEntity> AggregatedResults { get; set; }
 
         public virtual ICollection<AttributeDatumEntity> AssignedData { get; set; }
+
+        public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
     }
 }

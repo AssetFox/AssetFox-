@@ -198,7 +198,7 @@ namespace BridgeCareCore.Services
             if (currentUserCriteriaFilter.HasCriteria)
             {
                 currentUserCriteriaFilter.Criteria = "(" + currentUserCriteriaFilter.Criteria + ")";
-                
+
                 expression += $" AND { currentUserCriteriaFilter.Criteria }";
             }
 
@@ -209,23 +209,20 @@ namespace BridgeCareCore.Services
 
             var strSelect = $"SELECT COUNT(*) FROM SECTION_13 INNER JOIN SEGMENT_13_NS0 ON SECTION_13.SECTIONID = SEGMENT_13_NS0.SECTIONID WHERE {parameterizedData.ParameterString}";
             // create a sql connection
-            using var connection = _unitOfWork.LegacyConnection;
+            using var connection = _unitOfWork.GetLegacyConnection();
             try
             {
                 // open the connection
                 connection.Open();
                 // create a sql command with the select string and the connection
-                var cmd = new SqlCommand(strSelect, connection);
+                using var cmd = new SqlCommand(strSelect, connection);
                 // add the command parameters
                 cmd.Parameters.AddRange(parameterizedData.SqlParameters.ToArray());
                 // execute the query
-                var dataReader = cmd.ExecuteReader();
+                using var dataReader = cmd.ExecuteReader();
                 // get the returned count
                 var count = dataReader.HasRows && dataReader.Read() ? dataReader.GetValue(0) : 0;
-                // close the data reader
-                dataReader.Close();
-                // close the connection
-                connection.Close();
+
                 // return the results
                 return new CriterionValidationResult
                 {

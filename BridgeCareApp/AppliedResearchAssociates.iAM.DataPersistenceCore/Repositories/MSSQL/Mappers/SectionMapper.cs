@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AreaUnit = domain.AreaUnit
             };
 
-        public static void CreateSection(this SectionEntity entity, Facility facility)
+        /*public static void CreateSection(this SectionEntity entity, Facility facility)
         {
             var section = facility.AddSection();
             section.Id = entity.Id;
@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             /*if (entity.NumericAttributeValueHistoryMostRecentValues.Any())
             {
                 entity.NumericAttributeValueHistoryMostRecentValues.ToList().SetAttributeValueHistoryMostRecentValue(section);
-            }*/
+            }#1#
 
             if (entity.TextAttributeValueHistories.Any())
             {
@@ -42,26 +42,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             /*if (entity.TextAttributeValueHistoryMostRecentValues.Any())
             {
                 entity.TextAttributeValueHistoryMostRecentValues.ToList().SetAttributeValueHistoryMostRecentValue(section);
-            }*/
-        }
+            }#1#
+        }*/
 
-        public static void CreateSection(this MaintainableAssetEntity entity, Facility facility, string sectionName)
+        public static void CreateSection(this MaintainableAssetEntity entity, Facility facility)
         {
             var section = facility.AddSection();
             section.Id = entity.Id;
-            section.Name = sectionName;
+            section.Name = entity.SectionName;
             section.Area = entity.Area;
             section.AreaUnit = entity.AreaUnit;
 
-            if (entity.AggregatedResults.Any(_ => _.Discriminator == "NumericAggregatedResult"))
+            if (entity.AggregatedResults.Any(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
             {
-                entity.AggregatedResults.Where(_ => _.Discriminator == "NumericAggregatedResult").ToList()
+                entity.AggregatedResults
+                    .Where(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator)
+                    .ToList()
                     .SetNumericAttributeValueHistories(section);
             }
 
-            if (entity.AggregatedResults.Any(_ => _.Discriminator == "TextAggregatedResult"))
+            if (entity.AggregatedResults.Any(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
             {
-                entity.AggregatedResults.Where(_ => _.Discriminator == "TextAggregatedResult").ToList()
+                entity.AggregatedResults
+                    .Where(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator).ToList()
                     .SetTextAttributeValueHistories(section);
             }
         }

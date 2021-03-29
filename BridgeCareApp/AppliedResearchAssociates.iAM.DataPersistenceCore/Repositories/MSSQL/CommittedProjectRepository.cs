@@ -31,15 +31,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            /*var simulationEntity = _unitOfWork.Context.Simulation
-                .Include(_ => _.Network)
-                .ThenInclude(_ => _.Facilities)
-                .ThenInclude(_ => _.Sections)
-                .Include(_ => _.BudgetLibrarySimulationJoin)
-                .ThenInclude(_ => _.BudgetLibrary)
-                .ThenInclude(_ => _.Budgets)
-                .Single(_ => _.Id == simulationId);*/
-
             var simulationEntity = _unitOfWork.Context.Simulation
                 .Where(_ => _.Id == simulationId)
                 .Select(simulation => new SimulationEntity
@@ -47,14 +38,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Id = simulation.Id,
                     Network = new NetworkEntity
                     {
-                        Facilities = simulation.Network.Facilities.Select(facility => new FacilityEntity
+                        MaintainableAssets = simulation.Network.MaintainableAssets.Select(asset => new MaintainableAssetEntity
                         {
-                            Sections = facility.Sections.Select(section => new SectionEntity
-                            {
-                                Id = section.Id,
-                                Name = section.Name,
-                                Area = section.Area
-                            }).ToList()
+                            Id = asset.Id,
+                            SectionName = asset.SectionName,
+                            Area = asset.Area
                         }).ToList()
                     },
                     BudgetLibrarySimulationJoin = new BudgetLibrarySimulationEntity
@@ -68,9 +56,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     }
                 }).Single();
 
-            if (!simulationEntity.Network.Facilities.Any(_ => _.Sections.Any()))
+            if (!simulationEntity.Network.MaintainableAssets.Any())
             {
-                throw new RowNotInTableException($"No sections found for simulation having id {simulationId}");
+                throw new RowNotInTableException($"No maintainable assets found for simulation having id {simulationId}");
             }
 
             if (simulationEntity.BudgetLibrarySimulationJoin == null || !simulationEntity.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.Any())
@@ -122,11 +110,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfWork.Context.CommittedProject
-                .Include(_ => _.Budget)
-                .Include(_ => _.Section)
-                .ThenInclude(_ => _.Facility)
-                .Include(_ => _.CommittedProjectConsequences)
                 .Where(_ => _.SimulationId == simulation.Id)
+                .Select(project => new CommittedProjectEntity
+                {
+                    Id = project.Id,
+                    Name = project.Name,
+                    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
+                    ShadowForSameTreatment = project.ShadowForSameTreatment,
+                    Cost = project.Cost,
+                    Year = project.Year,
+                    MaintainableAsset =
+                        new MaintainableAssetEntity
+                        {
+                            FacilityName = project.MaintainableAsset.FacilityName,
+                            SectionName = project.MaintainableAsset.SectionName,
+                            Area = project.MaintainableAsset.Area
+                        },
+                    Budget = new BudgetEntity {Name = project.Budget.Name},
+                    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
+                        new CommittedProjectConsequenceEntity
+                        {
+                            Id = consequence.Id,
+                            ChangeValue = consequence.ChangeValue,
+                            Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
+                        }).ToList()
+                }).ToList()
                 .ForEach(_ => _.CreateCommittedProject(simulation));
         }
     }

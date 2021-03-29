@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -28,7 +29,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new PerformanceCurveController(_testHelper.UnitOfWork, _testHelper.MockEsecSecurity);
+            _controller = new PerformanceCurveController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object);
         }
 
         public PerformanceCurveLibraryEntity TestPerformanceCurveLibrary { get; } = new PerformanceCurveLibraryEntity
@@ -164,49 +166,34 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<PerformanceCurveLibraryDTO>));
 
-                var performanceCurveLibraryDTO = dtos[0];
-                performanceCurveLibraryDTO.Description = "Updated Description";
-                performanceCurveLibraryDTO.PerformanceCurves[0].Shift = true;
-                performanceCurveLibraryDTO.PerformanceCurves[0].CriterionLibrary =
+                var dto = dtos[0];
+                dto.Description = "Updated Description";
+                dto.PerformanceCurves[0].Shift = true;
+                dto.PerformanceCurves[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
-                performanceCurveLibraryDTO.PerformanceCurves[0].Equation = TestEquation.ToDto();
+                dto.PerformanceCurves[0].Equation = TestEquation.ToDto();
 
                 // Act
-                var result =
-                    await _controller.UpsertPerformanceCurveLibrary(_testHelper.TestSimulation.Id,
-                        performanceCurveLibraryDTO);
+                await _controller.UpsertPerformanceCurveLibrary(_testHelper.TestSimulation.Id, dto);
 
                 // Assert
-                Assert.IsType<OkResult>(result);
+                var timer = new Timer {Interval = 5000};
+                timer.Elapsed += delegate
+                {
+                    var modifiedDto = _testHelper.UnitOfWork.PerformanceCurveRepo
+                        .PerformanceCurveLibrariesWithPerformanceCurves()[0];
+                    Assert.Equal(dto.Description, modifiedDto.Description);
+                    Assert.Single(modifiedDto.AppliedScenarioIds);
+                    Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
 
-                var performanceCurveLibraryEntity = _testHelper.UnitOfWork.Context.PerformanceCurveLibrary
-                    .Include(_ => _.PerformanceCurves)
-                    .ThenInclude(_ => _.CriterionLibraryPerformanceCurveJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.PerformanceCurves)
-                    .ThenInclude(_ => _.PerformanceCurveEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.PerformanceCurves)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.PerformanceCurveLibrarySimulationJoins)
-                    .Single(_ => _.Id == PerformanceCurveLibraryId);
-
-                Assert.Equal(performanceCurveLibraryDTO.Description, performanceCurveLibraryEntity.Description);
-                Assert.Single(performanceCurveLibraryEntity.PerformanceCurveLibrarySimulationJoins);
-                var performanceCurveLibrarySimulationJoin =
-                    performanceCurveLibraryEntity.PerformanceCurveLibrarySimulationJoins.ToList()[0];
-                Assert.Equal(_testHelper.TestSimulation.Id, performanceCurveLibrarySimulationJoin.SimulationId);
-                var performanceCurveEntity = performanceCurveLibraryEntity.PerformanceCurves.ToList()[0];
-                Assert.Equal(performanceCurveLibraryDTO.PerformanceCurves[0].Shift, performanceCurveEntity.Shift);
-                Assert.NotNull(performanceCurveEntity.CriterionLibraryPerformanceCurveJoin);
-                Assert.Equal(performanceCurveLibraryDTO.PerformanceCurves[0].CriterionLibrary.Id,
-                    performanceCurveEntity.CriterionLibraryPerformanceCurveJoin.CriterionLibrary.Id);
-                Assert.NotNull(performanceCurveEntity.PerformanceCurveEquationJoin);
-                Assert.Equal(performanceCurveLibraryDTO.PerformanceCurves[0].Equation.Id,
-                    performanceCurveEntity.PerformanceCurveEquationJoin.Equation.Id);
-                Assert.NotNull(performanceCurveEntity.Attribute);
-                Assert.Equal(performanceCurveLibraryDTO.PerformanceCurves[0].Attribute,
-                    performanceCurveEntity.Attribute.Name);
+                    Assert.Equal(dto.PerformanceCurves[0].Shift, modifiedDto.PerformanceCurves[0].Shift);
+                    Assert.Equal(dto.PerformanceCurves[0].CriterionLibrary.Id,
+                        modifiedDto.PerformanceCurves[0].CriterionLibrary.Id);
+                    Assert.Equal(dto.PerformanceCurves[0].Equation.Id,
+                        modifiedDto.PerformanceCurves[0].Equation.Id);
+                    Assert.Equal(dto.PerformanceCurves[0].Attribute,
+                        modifiedDto.PerformanceCurves[0].Attribute);
+                };
             }
             finally
             {

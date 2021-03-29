@@ -9,8 +9,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         List<MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId);
 
-        void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId, Guid? userId = null);
+        void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId);
 
-        void CreateMaintainableAssets(List<Facility> facilities, Guid networkId, Guid? userId = null);
+        void CreateMaintainableAssets(List<Section> sections, Guid networkId);
     }
 }

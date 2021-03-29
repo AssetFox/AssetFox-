@@ -4,43 +4,44 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Controllers
 {
-    using BudgetPriorityUpsertMethod = Action<UserInfoDTO, Guid, BudgetPriorityLibraryDTO>;
+    using BudgetPriorityUpsertMethod = Action<Guid, BudgetPriorityLibraryDTO>;
 
     [Route("api/[controller]")]
     [ApiController]
-    public class BudgetPriorityController : ControllerBase
+    public class BudgetPriorityController : HubControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IEsecSecurity _esecSecurity;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IReadOnlyDictionary<string, BudgetPriorityUpsertMethod> _budgetPriorityUpsertMethods;
 
-        public BudgetPriorityController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
+        public BudgetPriorityController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService) : base(hubService)
         {
-            _unitOfWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _budgetPriorityUpsertMethods = CreateUpsertMethods();
         }
 
         private Dictionary<string, BudgetPriorityUpsertMethod> CreateUpsertMethods()
         {
-            void UpsertAny(UserInfoDTO userInfo, Guid simulationId, BudgetPriorityLibraryDTO dto)
+            void UpsertAny(Guid simulationId, BudgetPriorityLibraryDTO dto)
             {
-                _unitOfWork.BudgetPriorityRepo
-                    .UpsertBudgetPriorityLibrary(dto, simulationId, userInfo);
-                _unitOfWork.BudgetPriorityRepo
-                    .UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id, userInfo);
+                _unitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto, simulationId);
+                _unitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
             }
 
-            void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, BudgetPriorityLibraryDTO dto) =>
-                _unitOfWork.BudgetPriorityRepo.UpsertPermitted(userInfo, simulationId, dto);
+            void UpsertPermitted(Guid simulationId, BudgetPriorityLibraryDTO dto) =>
+                _unitOfWork.BudgetPriorityRepo.UpsertPermitted(simulationId, dto);
 
             return new Dictionary<string, BudgetPriorityUpsertMethod>
             {
@@ -56,14 +57,15 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfWork.BudgetPriorityRepo
-                    .BudgetPriorityLibrariesWithBudgetPriorities();
+                var result = await Task.Factory.StartNew(() => _unitOfWork.BudgetPriorityRepo
+                    .BudgetPriorityLibrariesWithBudgetPriorities());
+
                 return Ok(result);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                throw;
             }
         }
 
@@ -75,25 +77,28 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var userInfo = _esecSecurity.GetUserInformation(Request);
-                _unitOfWork.BeginTransaction();
+
+                _unitOfWork.SetUser(userInfo.Name);
+
                 await Task.Factory.StartNew(() =>
                 {
-                    _budgetPriorityUpsertMethods[userInfo.Role](userInfo.ToDto(), simulationId, dto);
+                    _unitOfWork.BeginTransaction();
+                    _budgetPriorityUpsertMethods[userInfo.Role](simulationId, dto);
+                    _unitOfWork.Commit();
                 });
-                _unitOfWork.Commit();
+
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
                 _unitOfWork.Rollback();
-                Console.WriteLine(e);
-                return Unauthorized(e);
+                return Unauthorized();
             }
             catch (Exception e)
             {
                 _unitOfWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                throw;
             }
         }
 
@@ -104,17 +109,20 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfWork.BeginTransaction();
-                await Task.Factory.StartNew(() => _unitOfWork.BudgetPriorityRepo
-                    .DeleteBudgetPriorityLibrary(libraryId));
-                _unitOfWork.Commit();
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.BudgetPriorityRepo.DeleteBudgetPriorityLibrary(libraryId);
+                    _unitOfWork.Commit();
+                });
+
                 return Ok();
             }
             catch (Exception e)
             {
                 _unitOfWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                throw;
             }
         }
     }

@@ -47,9 +47,13 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
         public void AssignAttributeDataFromDataSource(IEnumerable<IAttributeDatum> attributeData) => AssignedData.AddRange(attributeData);
 
         public List<IAttributeDatum> AssignedData { get; } = new List<IAttributeDatum>();
+
         public Guid Id { get; }
+
         public Guid NetworkId { get; }
-        //public SpatialWeighting SpatialWeighting { get; set; }
+
+        public SpatialWeighting SpatialWeighting { get; set; }
+
         public Location Location { get; }
     }
 }

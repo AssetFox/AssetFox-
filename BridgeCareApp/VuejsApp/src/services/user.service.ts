@@ -14,25 +14,25 @@ export default class UserService {
     // }
 
     static deleteUser(userId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`/api/DeleteUser/${userId}`);
+        return coreAxiosInstance.delete(`${API.UserCriteria}/DeleteUser/${userId}`);
     }
 
     ////////////////////
 
     static getUserCriteriaFilterData(): AxiosPromise {
-        return coreAxiosInstance.get('/api/GetUserCriteria');
+        return coreAxiosInstance.get(`${API.UserCriteria}/GetUserCriteria`);
     }
 
     static getAllUsersCriteriaFilterData(): AxiosPromise {
-        return coreAxiosInstance.get(`api/GetAllUserCriteria`);
+        return coreAxiosInstance.get(`${API.UserCriteria}/GetAllUserCriteria`);
     }
 
     static updateUserCriteriaFilterData(userCriteria: UserCriteriaFilter): AxiosPromise {
-        return coreAxiosInstance.post('/api/SetUserCriteria', userCriteria);
+        return coreAxiosInstance.post(`${API.UserCriteria}/UpsertUserCriteria`, userCriteria);
     }
 
     static revokeUserCriteriaFilterData(userCriteriaId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`/api/RevokeUserAccess/${userCriteriaId}`);
+        return coreAxiosInstance.delete(`${API.UserCriteria}/RevokeUserAccess/${userCriteriaId}`);
     }
     
 }

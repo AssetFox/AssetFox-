@@ -134,16 +134,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(facilities.Count(), dataSourceFacilities.Count());
             facilities.ForEach(facility =>
             {
-                var dataSourceFacility = dataSourceFacilities.SingleOrDefault(_ => _.Id == facility.Id);
+                var dataSourceFacility = dataSourceFacilities.SingleOrDefault(_ => _.Name == facility.Name);
                 Assert.NotNull(dataSourceFacility);
                 var sections = facility.Sections.ToList();
                 var dataSourceSections = dataSourceFacility.Sections.ToList();
                 Assert.Equal(sections.Count(), dataSourceSections.Count());
                 sections.ForEach(section =>
                 {
-                    var dataSourceSection = dataSourceSections.SingleOrDefault(_ => _.Id == section.Id);
+                    var dataSourceSection = dataSourceSections.SingleOrDefault(_ => $"{_.Name}{_.Area}" == $"{section.Name}{section.Area}");
                     Assert.NotNull(dataSourceSection);
-                    Assert.Equal(section.Area, dataSourceSection.Area);
                     Assert.Equal(section.AreaUnit, dataSourceSection.AreaUnit);
                     Assert.Equal(section.HistoricalAttributes.Count(), dataSourceSection.HistoricalAttributes.Count());
 

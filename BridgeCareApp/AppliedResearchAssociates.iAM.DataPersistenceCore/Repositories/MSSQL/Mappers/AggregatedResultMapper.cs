@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -39,18 +40,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             var aggregatedResults = new List<IAggregatedResult>();
 
-            if (entities.Any(_ => _.Discriminator == "NumericAggregatedResult"))
+            if (entities.Any(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
             {
-                var aggregatedData = entities.Where(_ => _.Discriminator == "NumericAggregatedResult")
+                var aggregatedData = entities.Where(_ =>
+                        _.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator)
                     .Select(_ => (_.Attribute.ToDomain(), (_.Year, _.NumericValue ?? 0)));
 
                 aggregatedResults.Add(new AggregatedResult<double>(Guid.NewGuid(),
                     entities.First().MaintainableAsset.ToDomain(), aggregatedData));
             }
 
-            if (entities.Any(_ => _.Discriminator == "TextAggregatedResult"))
+            if (entities.Any(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
             {
-                var aggregatedData = entities.Where(_ => _.Discriminator == "TextAggregatedResult")
+                var aggregatedData = entities.Where(_ =>
+                        _.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator)
                     .Select(_ => (_.Attribute.ToDomain(), (_.Year, _.TextValue ?? "")));
 
                 aggregatedResults.Add(new AggregatedResult<string>(Guid.NewGuid(),
@@ -58,6 +61,48 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
 
             return aggregatedResults;
+        }
+
+        public static List<AggregatedResultEntity> ToEntity<T>(this AttributeValueHistory<T> domain, Guid maintainableAssetId, Guid attributeId)
+        {
+            using var historyEnumerator = domain.GetEnumerator();
+            historyEnumerator.Reset();
+
+            var entities = new List<AggregatedResultEntity>();
+
+            while (historyEnumerator.MoveNext())
+            {
+                entities.Add(new AggregatedResultEntity
+                {
+                    Id = Guid.NewGuid(),
+                    MaintainableAssetId = maintainableAssetId,
+                    AttributeId = attributeId,
+                    Year = historyEnumerator.Current.Key,
+                    TextValue = typeof(T) == typeof(string) ? historyEnumerator.Current.Value.ToString() : null,
+                    NumericValue = typeof(T) == typeof(double) ? Convert.ToDouble(historyEnumerator.Current.Value) : (double?) null,
+                    Discriminator = typeof(T) == typeof(double)
+                        ? DataPersistenceConstants.AggregatedResultNumericDiscriminator
+                        : DataPersistenceConstants.AggregatedResultTextDiscriminator
+                });
+            }
+
+            if (!entities.Any())
+            {
+                entities.Add(new AggregatedResultEntity
+                {
+                    Id = Guid.NewGuid(),
+                    MaintainableAssetId = maintainableAssetId,
+                    AttributeId = attributeId,
+                    Year = 0,
+                    TextValue = typeof(T) == typeof(string) && domain.MostRecentValue != null ? domain.MostRecentValue.ToString() : null,
+                    NumericValue = typeof(T) == typeof(double) && domain.MostRecentValue != null ? Convert.ToDouble(domain.MostRecentValue) : (double?)null,
+                    Discriminator = typeof(T) == typeof(double)
+                        ? DataPersistenceConstants.AggregatedResultNumericDiscriminator
+                        : DataPersistenceConstants.AggregatedResultTextDiscriminator
+                });
+            }
+
+            return entities;
         }
     }
 }

@@ -17,10 +17,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public BudgetPriorityRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork)
-        {
+        public BudgetPriorityRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        }
 
         public void CreateBudgetPriorityLibrary(string name, Guid simulationId)
         {
@@ -83,14 +81,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public Task<List<BudgetPriorityLibraryDTO>> BudgetPriorityLibrariesWithBudgetPriorities()
+        public List<BudgetPriorityLibraryDTO> BudgetPriorityLibrariesWithBudgetPriorities()
         {
             if (!_unitOfWork.Context.BudgetPriorityLibrary.Any())
             {
-                return Task.Factory.StartNew(() => new List<BudgetPriorityLibraryDTO>());
+                return new List<BudgetPriorityLibraryDTO>();
             }
 
-            return Task.Factory.StartNew(() => _unitOfWork.Context.BudgetPriorityLibrary
+            return _unitOfWork.Context.BudgetPriorityLibrary
                 .Include(_ => _.BudgetPriorities)
                 .ThenInclude(_ => _.CriterionLibraryBudgetPriorityJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
@@ -99,10 +97,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Budget)
                 .Include(_ => _.BudgetPriorityLibrarySimulationJoins)
                 .Select(_ => _.ToDto())
-                .ToList());
+                .ToList();
         }
 
-        public void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, BudgetPriorityLibraryDTO dto)
+        public void UpsertPermitted(Guid simulationId, BudgetPriorityLibraryDTO dto)
         {
             if (simulationId != Guid.Empty)
             {
@@ -112,23 +110,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
 
                 if (!_unitOfWork.Context.Simulation.Any(_ =>
-                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
                 }
             }
 
-            UpsertBudgetPriorityLibrary(dto, simulationId, userInfo);
-            UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id, userInfo);
+            UpsertBudgetPriorityLibrary(dto, simulationId);
+            UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
         }
 
-        public void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId, UserInfoDTO userInfo)
+        public void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId)
         {
-            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
-
             var budgetPriorityLibraryEntity = dto.ToEntity();
 
-            _unitOfWork.Context.Upsert(budgetPriorityLibraryEntity, dto.Id, userEntity?.Id);
+            _unitOfWork.Context.Upsert(budgetPriorityLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
 
             if (simulationId != Guid.Empty)
             {
@@ -143,18 +139,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     BudgetPriorityLibraryId = dto.Id,
                     SimulationId = simulationId
-                }, userEntity?.Id);
+                }, _unitOfWork.UserEntity?.Id);
             }
         }
 
-        public void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId, UserInfoDTO userInfo)
+        public void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId)
         {
             if (!_unitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == libraryId))
             {
                 throw new RowNotInTableException($"No budget priority library found having id {libraryId}.");
             }
-
-            var userEntity = _unitOfWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var budgetPriorityEntities = budgetPriorities
                 .Select(_ => _.ToEntity(libraryId))
@@ -166,14 +160,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.BudgetPriorityLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
-            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<BudgetPriorityEntity, bool>>>
-            {
-                {"delete", _ => _.BudgetPriorityLibraryId == libraryId && !entityIds.Contains(_.Id)},
-                {"update", _ => existingEntityIds.Contains(_.Id)},
-                {"add", _ => !existingEntityIds.Contains(_.Id)}
-            };
+            _unitOfWork.Context.DeleteAll<BudgetPriorityEntity>(_ =>
+                _.BudgetPriorityLibraryId == libraryId && !entityIds.Contains(_.Id));
 
-            _unitOfWork.Context.BulkUpsertOrDelete(budgetPriorityEntities, predicatesPerCrudOperation, userEntity?.Id);
+            _unitOfWork.Context.UpdateAll(budgetPriorityEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
+
+            _unitOfWork.Context.AddAll(budgetPriorityEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryBudgetPriorityEntity>(_ =>
                 _.BudgetPriority.BudgetPriorityLibraryId == libraryId);
@@ -199,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     })
                     .ToList();
 
-                _unitOfWork.Context.AddAll(criterionJoinsToAdd, userEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }
         }
 

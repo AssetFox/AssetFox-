@@ -373,6 +373,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BenefitQuantifier",
+                columns: table => new
+                {
+                    NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EquationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BenefitQuantifier", x => x.NetworkId);
+                    table.ForeignKey(
+                        name: "FK_BenefitQuantifier_Equation_EquationId",
+                        column: x => x.EquationId,
+                        principalTable: "Equation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BenefitQuantifier_Network_NetworkId",
+                        column: x => x.NetworkId,
+                        principalTable: "Network",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Facility",
                 columns: table => new
                 {
@@ -401,6 +429,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FacilityName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SectionName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Area = table.Column<double>(type: "float", nullable: false),
+                    AreaUnit = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -600,6 +632,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_CriterionLibrary_User_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserCriteria_Filter",
+                columns: table => new
+                {
+                    UserCriteriaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Criteria = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HasCriteria = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserCriteria_Filter", x => x.UserCriteriaId);
+                    table.ForeignKey(
+                        name: "FK_UserCriteria_Filter_User_UserId",
                         column: x => x.UserId,
                         principalTable: "User",
                         principalColumn: "Id",
@@ -1570,9 +1626,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SimulationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BudgetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SectionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MaintainableAssetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Cost = table.Column<double>(type: "float", nullable: false),
                     Year = table.Column<int>(type: "int", nullable: false),
+                    SectionEntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -1591,8 +1648,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CommittedProject_Section_SectionId",
-                        column: x => x.SectionId,
+                        name: "FK_CommittedProject_MaintainableAsset_MaintainableAssetId",
+                        column: x => x.MaintainableAssetId,
+                        principalTable: "MaintainableAsset",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CommittedProject_Section_SectionEntityId",
+                        column: x => x.SectionEntityId,
                         principalTable: "Section",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -1601,7 +1664,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         column: x => x.SimulationId,
                         principalTable: "Simulation",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -1992,6 +2055,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 column: "AttributeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BenefitQuantifier_EquationId",
+                table: "BenefitQuantifier",
+                column: "EquationId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BenefitQuantifier_NetworkId",
+                table: "BenefitQuantifier",
+                column: "NetworkId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Budget_BudgetLibraryId",
                 table: "Budget",
                 column: "BudgetLibraryId");
@@ -2065,9 +2139,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 column: "BudgetId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CommittedProject_SectionId",
+                name: "IX_CommittedProject_MaintainableAssetId",
                 table: "CommittedProject",
-                column: "SectionId");
+                column: "MaintainableAssetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CommittedProject_SectionEntityId",
+                table: "CommittedProject",
+                column: "SectionEntityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CommittedProject_SimulationId",
@@ -2483,6 +2562,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "IX_TreatmentSupersession_TreatmentId",
                 table: "TreatmentSupersession",
                 column: "TreatmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserCriteria_Filter_UserCriteriaId",
+                table: "UserCriteria_Filter",
+                column: "UserCriteriaId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserCriteria_Filter_UserId",
+                table: "UserCriteria_Filter",
+                column: "UserId",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -2498,6 +2589,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             migrationBuilder.DropTable(
                 name: "Benefit");
+
+            migrationBuilder.DropTable(
+                name: "BenefitQuantifier");
 
             migrationBuilder.DropTable(
                 name: "BudgetAmount");
@@ -2617,6 +2711,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentScheduling");
 
             migrationBuilder.DropTable(
+                name: "UserCriteria_Filter");
+
+            migrationBuilder.DropTable(
                 name: "AttributeDatum");
 
             migrationBuilder.DropTable(
@@ -2650,9 +2747,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "PerformanceCurve");
 
             migrationBuilder.DropTable(
-                name: "User");
-
-            migrationBuilder.DropTable(
                 name: "TreatmentConsequence");
 
             migrationBuilder.DropTable(
@@ -2662,10 +2756,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentCost");
 
             migrationBuilder.DropTable(
-                name: "MaintainableAsset");
+                name: "User");
 
             migrationBuilder.DropTable(
                 name: "Budget");
+
+            migrationBuilder.DropTable(
+                name: "MaintainableAsset");
 
             migrationBuilder.DropTable(
                 name: "Section");

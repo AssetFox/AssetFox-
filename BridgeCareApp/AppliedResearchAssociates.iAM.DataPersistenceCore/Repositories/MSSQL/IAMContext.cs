@@ -513,7 +513,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasIndex(e => e.BudgetId);
 
-                entity.HasIndex(e => e.SectionId);
+                entity.HasIndex(e => e.MaintainableAssetId);
 
                 entity.Property(e => e.Name).IsRequired();
 
@@ -527,20 +527,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
+                entity.HasOne(d => d.MaintainableAsset)
+                    .WithMany(p => p.CommittedProjects)
+                    .HasForeignKey(d => d.MaintainableAssetId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.CommittedProjects)
                     .HasForeignKey(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.ClientCascade);
 
                 entity.HasOne(d => d.Budget)
                     .WithMany(p => p.CommittedProjects)
                     .HasForeignKey(d => d.BudgetId)
                     .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Section)
-                    .WithMany(p => p.CommittedProjects)
-                    .HasForeignKey(d => d.SectionId)
-                    .OnDelete(DeleteBehavior.ClientCascade);
             });
 
             modelBuilder.Entity<CommittedProjectConsequenceEntity>(entity =>
@@ -1496,8 +1496,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.User)
                 .WithOne(p => p.UserCriteriaFilterJoin)
-                .HasForeignKey<UserCriteriaFilterEntity>(f => f.UserId);
-
+                .HasForeignKey<UserCriteriaFilterEntity>(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

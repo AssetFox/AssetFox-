@@ -4,6 +4,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ISimulationReportDetailRepository
     {
-        void UpsertSimulationReportDetail(SimulationReportDetailDTO dto, UserInfoDTO userInfo);
+        void UpsertSimulationReportDetail(SimulationReportDetailDTO dto);
     }
 }

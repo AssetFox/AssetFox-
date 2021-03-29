@@ -27,6 +27,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
             networkCollection.Insert(datum.ToEntity());
         }
 
+        public void CreateNetwork(DataAssignment.Networking.Network network) => throw new NotImplementedException();
+
         public void CreateNetwork(Network network) => throw new NotImplementedException();
 
         public Task<List<NetworkDTO>> Networks() => throw new NotImplementedException();

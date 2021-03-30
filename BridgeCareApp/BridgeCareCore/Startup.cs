@@ -94,6 +94,7 @@ namespace BridgeCareCore
             services.AddScoped<ExpressionValidationService>();
             services.AddScoped<IUserCriteriaRepository, UserCriteriaRepository>();
             services.AddScoped<IHubService, HubService>();
+            services.AddScoped<IAssetData, PennDOTAssetDataRepository>();
 
 #if MsSqlDebug || Release || Test
             // SQL SERVER SCOPINGS

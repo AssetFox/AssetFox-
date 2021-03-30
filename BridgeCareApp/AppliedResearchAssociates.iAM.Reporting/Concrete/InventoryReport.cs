@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         private const string DEFAULT_VALUE = "N";
 
-        private UnitOfDataPersistenceWork _repository;
+        private UnitOfDataPersistenceWork _unitofwork;
         private Guid _networkId;
 
         public Guid ID { get; set; }
@@ -39,9 +39,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private List<SegmentAttributeDatum> segmentData;
         private InventoryParameters segmentIds;
 
-        public InventoryReport(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results)
+        public InventoryReport(UnitOfDataPersistenceWork uow, string name, ReportIndexEntity results)
         {
-            _repository = repository;
+            _unitofwork = uow;
             ReportTypeName = name;
             // results is ignored for this report
 
@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Report definition created.";
             Results = String.Empty;
             IsComplete = false;
-            _networkId = _repository.NetworkRepo.GetPennDotNetwork().Id;
+            _networkId = _unitofwork.NetworkRepo.GetPennDotNetwork().Id;
         }
 
         public async Task Run(string parameters)
@@ -64,12 +64,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             if (segmentIds.BRKey < 1)
             {
                 providedKey = $"BMSID: {segmentIds.BMSID}";
-                segmentData = _repository.AssetDataRepository.GetAssetAttributes("BMSID", segmentIds.BMSID);
+                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BMSID", segmentIds.BMSID);
             }
             else
             {
                 providedKey = $"BRKEY:  {segmentIds.BRKey}";
-                segmentData = _repository.AssetDataRepository.GetAssetAttributes("BRKEY_", segmentIds.BRKey.ToString());
+                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BRKEY_", segmentIds.BRKey.ToString());
             }
             if (segmentData.Count() < 1)
             {
@@ -127,14 +127,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             if (parameters.BRKey > 0 && !String.IsNullOrEmpty(parameters.BMSID))
             {
                 // Both parameters provided.  Check to see if they are the same asset
-                var BRKeyGuid = _repository.AssetDataRepository.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == parameters.BRKey.ToString());
+                var BRKeyGuid = _unitofwork.AssetDataRepository.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == parameters.BRKey.ToString());
                 if (BRKeyGuid == null)
                 {
                     // BRKey was not found
                     Errors.Add($"Unable to find BRKey {parameters.BRKey}.  Did not attempt to find {parameters.BMSID}");
                     return false;
                 }
-                var BMSIDGuid = _repository.AssetDataRepository.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == parameters.BMSID);
+                var BMSIDGuid = _unitofwork.AssetDataRepository.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == parameters.BMSID);
                 if (BMSIDGuid == null)
                 {
                     // BMSID was not found
@@ -174,11 +174,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 Dictionary<int, SegmentAttributeDatum> attrubuteValueHistory;
                 if (segmentIds.BRKey < 1)
                 {
-                    attrubuteValueHistory = _repository.AssetDataRepository.GetAttributeValueHistory("BMSID", segmentIds.BMSID, attributeName);
+                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BMSID", segmentIds.BMSID, attributeName);
                 }
                 else
                 {
-                    attrubuteValueHistory = _repository.AssetDataRepository.GetAttributeValueHistory("BRKEY_", segmentIds.BRKey.ToString(), attributeName);
+                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BRKEY_", segmentIds.BRKey.ToString(), attributeName);
                 }
                 if (attrubuteValueHistory.Count < 2) return DEFAULT_VALUE;  // The default value is returned if there is either no values OR one value (the previous value is still unknown)
 

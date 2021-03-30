@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
-using Microsoft.Extensions.Logging;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
+    /// <summary>
+    /// This is the data repository for pulling data from the Facility-Section-AttributeValueHistory database schema
+    /// </summary>
+    /// <remarks>
+    /// Not compatiable with databases running the latest schema!  Kept for reference.
+    /// </remarks>
     public class PennDOTAssetDataRepository : IAssetData
     {
         UnitOfWork.UnitOfDataPersistenceWork _unitofwork;

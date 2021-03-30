@@ -51,7 +51,8 @@ namespace BridgeCareCore.Controllers
                     var configurationAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
 
                     // get all maintainable assets in the network with their assigned data (if any) and locations
-                    var maintainableAssets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId)
+                    var maintainableAssets = _unitOfWork.MaintainableAssetRepo
+                        .GetAllInNetworkWithAssignedDataAndLocations(networkId)
                         .ToList();
 
                     // Create list of attribute ids we are allowed to update with assigned data.
@@ -70,6 +71,9 @@ namespace BridgeCareCore.Controllers
                     var attributeIdsToBeUpdatedWithAssignedData = configurationAttributes.Select(_ => _.Id)
                         .Intersect(networkAttributeIds).Distinct().ToList();
 
+                    // get the network benefit quantifier equation
+                    var benefitQuantifierEquation = _unitOfWork.BenefitQuantifierRepo.GetBenefitQuantifier(networkId);
+
                     var totalAssests = (double)maintainableAssets.Count;
                     var i = 0.0;
                     // loop over maintainable assets and remove assigned data that has an attribute id
@@ -85,6 +89,7 @@ namespace BridgeCareCore.Controllers
                         i++;
                         maintainableAsset.AssignedData.RemoveAll(_ => attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
                         maintainableAsset.AssignAttributeData(attributeData);
+                        maintainableAsset.AssignSpatialWeighting(configurationAttributes, benefitQuantifierEquation.Equation.Expression);
                     }
 
                     _hubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,
@@ -92,6 +97,9 @@ namespace BridgeCareCore.Controllers
 
                     // update the maintainable assets assigned data in the data source
                     var updatedRecordsCount = _unitOfWork.AttributeDatumRepo.UpdateAssignedData(maintainableAssets);
+
+                    // update the maintainable assets spatial weighting values
+                    _unitOfWork.MaintainableAssetRepo.UpdateMaintainableAssetsSpatialWeighting(maintainableAssets);
 
                     AggregateData(networkId, maintainableAssets);
 

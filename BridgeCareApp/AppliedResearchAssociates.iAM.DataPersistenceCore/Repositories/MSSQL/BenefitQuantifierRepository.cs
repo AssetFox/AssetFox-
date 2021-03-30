@@ -6,6 +6,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -31,7 +32,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 };
             }
 
-            return _unitOfWork.Context.BenefitQuantifier.Single(_ => _.NetworkId == networkId).ToDto();
+            return _unitOfWork.Context.BenefitQuantifier
+                .Include(_ => _.Equation)
+                .Single(_ => _.NetworkId == networkId).ToDto();
         }
 
         public void UpsertBenefitQuantifier(BenefitQuantifierDTO dto)

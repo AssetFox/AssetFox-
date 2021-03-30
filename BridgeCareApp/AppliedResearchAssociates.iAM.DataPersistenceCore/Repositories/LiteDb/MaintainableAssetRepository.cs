@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
         public void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId) => throw new NotImplementedException();
 
         public void CreateMaintainableAssets(List<Section> sections, Guid networkId) => throw new NotImplementedException();
+        public void UpdateMaintainableAssetsSpatialWeighting(List<MaintainableAsset> maintainableAssets) => throw new NotImplementedException();
 
         List<MaintainableAsset> IMaintainableAssetRepository.GetAllInNetworkWithAssignedDataAndLocations(Guid networkId) => throw new NotImplementedException();
     }

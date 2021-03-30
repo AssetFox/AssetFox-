@@ -188,7 +188,8 @@ export default class AppComponent extends Vue {
   ignoredAPIs: string[] = [
     'SynchronizeLegacySimulation',
     'RunSimulation',
-    'GenerateSummaryReport'
+    'GenerateSummaryReport',
+    'AggregateNetworkData'
   ];
 
   get container() {

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Classes
@@ -25,11 +25,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         public BudgetPriorityTests()
         {
-            _testHelper = new TestHelper("IAMv2bp");
+            _testHelper = new TestHelper();
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new BudgetPriorityController(_testHelper.UnitOfDataPersistenceWork, _testHelper.MockEsecSecurity);
+            _controller = new BudgetPriorityController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object);
         }
 
         public BudgetPriorityLibraryEntity TestBudgetPriorityLibrary { get; } = new BudgetPriorityLibraryEntity
@@ -63,19 +64,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
 
         private void SetupForGet()
         {
-            _testHelper.UnitOfDataPersistenceWork.Context.BudgetPriorityLibrary.Add(TestBudgetPriorityLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.BudgetPriority.Add(TestBudgetPriority);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.BudgetPriorityLibrary.Add(TestBudgetPriorityLibrary);
+            _testHelper.UnitOfWork.Context.BudgetPriority.Add(TestBudgetPriority);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void SetupForUpsertOrDelete()
         {
             SetupForGet();
-            _testHelper.UnitOfDataPersistenceWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.BudgetLibrary.Add(TestBudgetLibrary);
-            _testHelper.UnitOfDataPersistenceWork.Context.Budget.Add(TestBudget);
-            _testHelper.UnitOfDataPersistenceWork.Context.BudgetPercentagePair.Add(TestBudgetPercentagePair);
-            _testHelper.UnitOfDataPersistenceWork.Context.SaveChanges();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            _testHelper.UnitOfWork.Context.BudgetLibrary.Add(TestBudgetLibrary);
+            _testHelper.UnitOfWork.Context.Budget.Add(TestBudget);
+            _testHelper.UnitOfWork.Context.BudgetPercentagePair.Add(TestBudgetPercentagePair);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         [Fact]
@@ -175,44 +176,34 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<BudgetPriorityLibraryDTO>));
 
-                var budgetPriorityLibraryDTO = dtos[0];
-                budgetPriorityLibraryDTO.Description = "Updated Description";
-                budgetPriorityLibraryDTO.BudgetPriorities[0].PriorityLevel = 2;
-                budgetPriorityLibraryDTO.BudgetPriorities[0].CriterionLibrary =
+                var dto = dtos[0];
+                dto.Description = "Updated Description";
+                dto.BudgetPriorities[0].PriorityLevel = 2;
+                dto.BudgetPriorities[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
-                budgetPriorityLibraryDTO.BudgetPriorities[0].BudgetPercentagePairs[0].Percentage = 90;
+                dto.BudgetPriorities[0].BudgetPercentagePairs[0].Percentage = 90;
 
                 // Act
-                var result =
-                    await _controller.UpsertBudgetPriorityLibrary(_testHelper.TestSimulation.Id,
-                        budgetPriorityLibraryDTO);
+                await _controller.UpsertBudgetPriorityLibrary(_testHelper.TestSimulation.Id, dto);
 
                 // Assert
-                Assert.IsType<OkResult>(result);
+                var timer = new Timer {Interval = 5000};
+                timer.Elapsed += delegate
+                {
+                    var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo
+                        .BudgetPriorityLibrariesWithBudgetPriorities()[0];
+                    Assert.Equal(dto.Description, modifiedDto.Description);
+                    Assert.Single(modifiedDto.AppliedScenarioIds);
+                    Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
 
-                var budgetPriorityLibraryEntity = _testHelper.UnitOfDataPersistenceWork.Context.BudgetPriorityLibrary
-                    .Include(_ => _.BudgetPriorities)
-                    .ThenInclude(_ => _.CriterionLibraryBudgetPriorityJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.BudgetPriorities)
-                    .ThenInclude(_ => _.BudgetPercentagePairs)
-                    .ThenInclude(_ => _.Budget)
-                    .Include(_ => _.BudgetPriorityLibrarySimulationJoins)
-                    .Single(_ => _.Id == BudgetPriorityLibraryId);
+                    Assert.Equal(dto.BudgetPriorities[0].PriorityLevel, modifiedDto.BudgetPriorities[0].PriorityLevel);
+                    Assert.Equal(dto.BudgetPriorities[0].CriterionLibrary.Id,
+                        modifiedDto.BudgetPriorities[0].CriterionLibrary.Id);
 
-                Assert.Equal(budgetPriorityLibraryDTO.Description, budgetPriorityLibraryEntity.Description);
-                Assert.Single(budgetPriorityLibraryEntity.BudgetPriorityLibrarySimulationJoins);
-                var budgetPriorityLibrarySimulationJoin =
-                    budgetPriorityLibraryEntity.BudgetPriorityLibrarySimulationJoins.ToList()[0];
-                Assert.Equal(_testHelper.TestSimulation.Id, budgetPriorityLibrarySimulationJoin.SimulationId);
-                var budgetPriorityEntity = budgetPriorityLibraryEntity.BudgetPriorities.ToList()[0];
-                Assert.Equal(budgetPriorityLibraryDTO.BudgetPriorities[0].PriorityLevel, budgetPriorityEntity.PriorityLevel);
-                Assert.NotNull(budgetPriorityEntity.CriterionLibraryBudgetPriorityJoin);
-                Assert.Equal(budgetPriorityLibraryDTO.BudgetPriorities[0].CriterionLibrary.Id,
-                    budgetPriorityEntity.CriterionLibraryBudgetPriorityJoin.CriterionLibrary.Id);
-                var budgetPercentagePairEntity = budgetPriorityEntity.BudgetPercentagePairs.ToList()[0];
-                Assert.Equal(budgetPriorityLibraryDTO.BudgetPriorities[0].BudgetPercentagePairs[0].Percentage,
-                    budgetPercentagePairEntity.Percentage);
+                    Assert.Equal(dto.BudgetPriorities[0].BudgetPercentagePairs[0].Percentage,
+                        modifiedDto.BudgetPriorities[0].BudgetPercentagePairs[0].Percentage);
+                };
+                timer.Start();
             }
             finally
             {
@@ -245,14 +236,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == BudgetPriorityLibraryId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetPriority.Any(_ => _.Id == BudgetPriorityId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetPriorityLibrarySimulation.Any(_ =>
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == BudgetPriorityLibraryId));
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriority.Any(_ => _.Id == BudgetPriorityId));
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriorityLibrarySimulation.Any(_ =>
                     _.BudgetPriorityLibraryId == BudgetPriorityLibraryId));
                 Assert.True(
-                    !_testHelper.UnitOfDataPersistenceWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
+                    !_testHelper.UnitOfWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
                         _.BudgetPriorityId == BudgetPriorityId));
-                Assert.True(!_testHelper.UnitOfDataPersistenceWork.Context.BudgetPercentagePair.Any(_ => _.Id == BudgetPercentagePairId));
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPercentagePair.Any(_ => _.Id == BudgetPercentagePairId));
             }
             finally
             {

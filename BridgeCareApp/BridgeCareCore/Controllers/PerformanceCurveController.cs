@@ -4,43 +4,44 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Controllers
 {
-    using PerformanceCurveUpsertMethod = Action<UserInfoDTO, Guid, PerformanceCurveLibraryDTO>;
+    using PerformanceCurveUpsertMethod = Action<Guid, PerformanceCurveLibraryDTO>;
 
     [Route("api/[controller]")]
     [ApiController]
-    public class PerformanceCurveController : ControllerBase
+    public class PerformanceCurveController : HubControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly IEsecSecurity _esecSecurity;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IReadOnlyDictionary<string, PerformanceCurveUpsertMethod> _performanceCurveUpsertMethods;
 
-        public PerformanceCurveController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
+        public PerformanceCurveController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService) : base(hubService)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _performanceCurveUpsertMethods = CreateUpsertMethods();
         }
 
         private Dictionary<string, PerformanceCurveUpsertMethod> CreateUpsertMethods()
         {
-            void UpsertAny(UserInfoDTO userInfo, Guid simulationId, PerformanceCurveLibraryDTO dto)
+            void UpsertAny(Guid simulationId, PerformanceCurveLibraryDTO dto)
             {
-                _unitOfDataPersistenceWork.PerformanceCurveRepo
-                    .UpsertPerformanceCurveLibrary(dto, simulationId, userInfo);
-                _unitOfDataPersistenceWork.PerformanceCurveRepo
-                    .UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id, userInfo);
+                _unitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto, simulationId);
+                _unitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
             }
 
-            void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, PerformanceCurveLibraryDTO dto) =>
-                _unitOfDataPersistenceWork.PerformanceCurveRepo.UpsertPermitted(userInfo, simulationId, dto);
+            void UpsertPermitted(Guid simulationId, PerformanceCurveLibraryDTO dto) =>
+                _unitOfWork.PerformanceCurveRepo.UpsertPermitted(simulationId, dto);
 
             return new Dictionary<string, PerformanceCurveUpsertMethod>
             {
@@ -56,14 +57,14 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.PerformanceCurveRepo
-                    .PerformanceCurveLibrariesWithPerformanceCurves();
+                var result = await Task.Factory.StartNew(() => _unitOfWork.PerformanceCurveRepo
+                    .PerformanceCurveLibrariesWithPerformanceCurves());
                 return Ok(result);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Performance Curve error::{e.Message}");
+                throw;
             }
         }
 
@@ -75,26 +76,29 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var userInfo = _esecSecurity.GetUserInformation(Request);
-                _unitOfDataPersistenceWork.BeginTransaction();
+
+                _unitOfWork.SetUser(userInfo.Name);
+
                 await Task.Factory.StartNew(() =>
                 {
-                    _performanceCurveUpsertMethods[userInfo.Role](userInfo.ToDto(), simulationId, dto);
+                    _unitOfWork.BeginTransaction();
+                    _performanceCurveUpsertMethods[userInfo.Role](simulationId, dto);
+                    _unitOfWork.Commit();
                 });
 
-                _unitOfDataPersistenceWork.Commit();
+
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return Unauthorized(e);
+                _unitOfWork.Rollback();
+                return Unauthorized();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _unitOfWork.Rollback();
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Performance Curve error::{e.Message}");
+                throw;
             }
         }
 
@@ -105,16 +109,20 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfDataPersistenceWork.BeginTransaction();
-                await Task.Factory.StartNew(() => _unitOfDataPersistenceWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(libraryId));
-                _unitOfDataPersistenceWork.Commit();
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(libraryId);
+                    _unitOfWork.Commit();
+                });
+
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _unitOfWork.Rollback();
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Performance Curve error::{e.Message}");
+                throw;
             }
         }
     }

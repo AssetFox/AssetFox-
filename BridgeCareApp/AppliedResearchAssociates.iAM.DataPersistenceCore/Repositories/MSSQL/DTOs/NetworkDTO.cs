@@ -12,5 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
         public DateTime LastModifiedDate { get; set; }
 
         public string Status { get; set; }
+
+        public BenefitQuantifierDTO BenefitQuantifier { get; set; }
     }
 }

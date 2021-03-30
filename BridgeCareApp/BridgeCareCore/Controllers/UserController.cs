@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,13 +12,12 @@ namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UserController : HubControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public UserController(UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public UserController(UnitOfDataPersistenceWork unitOfWork, IHubService hubService) : base(hubService) =>
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         [HttpGet]
         [Route("GetAllUsers")]
@@ -25,13 +26,13 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.UserRepo.GetAllUsers();
+                var result = await _unitOfWork.UserRepo.GetAllUsers();
                 return Ok(result);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User error::{e.Message}");
+                throw;
             }
         }
 
@@ -46,8 +47,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User error::{e.Message}");
+                throw;
             }
         }
 
@@ -62,8 +63,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User error::{e.Message}");
+                throw;
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
@@ -14,137 +15,114 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class UserCriteriaRepository : IUserCriteriaRepository
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public UserCriteriaRepository(UnitOfDataPersistenceWork unitOfDataPersistenceWork) =>
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+        public UserCriteriaRepository(UnitOfDataPersistenceWork unitOfWork) =>
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void RevokeUserAccess(Guid userCriteriaId)
         {
-            var criteriaToBedeleted = _unitOfDataPersistenceWork.Context.UserCriteria.FirstOrDefault(_ => _.UserCriteriaId == userCriteriaId);
-            var userToBeChanged = _unitOfDataPersistenceWork.Context.User.FirstOrDefault(_ => _.Id == criteriaToBedeleted.UserId);
-            userToBeChanged.HasInventoryAccess = false;
-            _unitOfDataPersistenceWork.Context.User.Update(userToBeChanged);
-            _unitOfDataPersistenceWork.Context.Delete<UserCriteriaFilterEntity>(_ => _.UserCriteriaId == userCriteriaId);
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            if (!_unitOfWork.Context.UserCriteria.Any(_ => _.UserCriteriaId == userCriteriaId))
+            {
+                return;
+            }
+
+            var userCriteriaFilterEntity =
+                _unitOfWork.Context.UserCriteria.AsNoTracking()
+                    .Include(_ => _.User)
+                    .Single(_ => _.UserCriteriaId == userCriteriaId);
+
+            userCriteriaFilterEntity.User.HasInventoryAccess = false;
+
+            _unitOfWork.Context.UpdateEntity(userCriteriaFilterEntity.User, userCriteriaFilterEntity.User.Id,
+                _unitOfWork.UserEntity?.Id);
+
+            _unitOfWork.Context.DeleteEntity<UserCriteriaFilterEntity>(_ => _.UserCriteriaId == userCriteriaId);
         }
+
         public List<UserCriteriaDTO> GetAllUserCriteria()
         {
-            var result = new List<UserCriteriaDTO>();
-            var data = _unitOfDataPersistenceWork.Context.UserCriteria
-                .Include(_ => _.User)
-                .Select(_ => _).ToList();
-            foreach (var item in data)
+            if (!_unitOfWork.Context.UserCriteria.Any())
             {
-                result.Add(item.ToDto());
+                return new List<UserCriteriaDTO>();
             }
-            return result;
+
+            return _unitOfWork.Context.UserCriteria
+                .Include(_ => _.User)
+                .Select(_ => _.ToDto())
+                .ToList();
         }
-        public UserCriteriaDTO GetOwnUserCriteria(UserInfoDTO userInformation, string adminCheckConst)
+
+        public UserCriteriaDTO GetOwnUserCriteria(UserInfoDTO userInfo, string adminCheckConst)
         {
             // First time login
-            if (!_unitOfDataPersistenceWork.Context.User.Any(u => u.Username == userInformation.Sub))
+            if (!_unitOfWork.Context.User.Any(_ => _.Username == userInfo.Sub))
             {
-                var newUser = GenerateDefaultUser(userInformation, adminCheckConst);
-                _unitOfDataPersistenceWork.Context.User.Add(newUser);
+                var newUserEntity = new UserEntity
+                {
+                    Id = Guid.NewGuid(),
+                    Username = userInfo.Sub,
+                    HasInventoryAccess = userInfo.Roles.Contains(adminCheckConst)
+                };
+                _unitOfWork.Context.AddEntity(newUserEntity, newUserEntity.Id);
 
                 // if the newly logged in user is an admin
-                var newCriteriaFilter = new UserCriteriaFilterEntity();
-                if (newUser.HasInventoryAccess)
+                switch (newUserEntity.HasInventoryAccess)
                 {
-                    newCriteriaFilter = GenerateDefaultCriteriaForAdmin(newUser);
-                    _unitOfDataPersistenceWork.Context.UserCriteria.Add(newCriteriaFilter);
-                }
-                _unitOfDataPersistenceWork.Context.SaveChanges();
-
+                case true:
+                    var newCriteriaFilter = newUserEntity.GenerateDefaultCriteriaForAdmin();
+                    _unitOfWork.Context.AddEntity(newCriteriaFilter, newUserEntity.Id);
+                    return newCriteriaFilter.ToDto();
+                    break;
                 // user does not have admin access, so don't enter the data in userCriteria_Filter table and return an empty object
-                if (!newUser.HasInventoryAccess)
-                {
-                    return new UserCriteriaDTO { UserName = userInformation.Sub };
+                case false:
+                    return new UserCriteriaDTO { UserName = userInfo.Sub };
                 }
+            }
+
+            var userEntity = _unitOfWork.Context.User
+                .Include(_ => _.UserCriteriaFilterJoin)
+                .Single(_ => _.Username == userInfo.Sub);
+
+            if (userEntity.UserCriteriaFilterJoin == null) // user is present in the user table, but doesn't have data in UserCriteria_Filter table
+            {
+                if (!userEntity.HasInventoryAccess)
+                {
+                    return new UserCriteriaDTO {UserName = userInfo.Sub, HasAccess = userEntity.HasInventoryAccess};
+                }
+
+                var newCriteriaFilter = userEntity.GenerateDefaultCriteriaForAdmin();
+                _unitOfWork.Context.AddEntity(newCriteriaFilter, userEntity.Id);
                 return newCriteriaFilter.ToDto();
             }
-            var currUser = _unitOfDataPersistenceWork.Context.User.FirstOrDefault(_ => _.Username == userInformation.Sub);
-            var userCriteria = _unitOfDataPersistenceWork.Context.UserCriteria.SingleOrDefault(criteria => criteria.User.Username == userInformation.Sub);
 
-            if(userCriteria == null) // user is present in the user table, but doesn't have data in UserCriteria_Filter table
-            {
-                if (currUser.HasInventoryAccess) // It means, the user is admin, so add an entry in UserCriteria_Filter table
-                {
-                     var newCriteriaFilter = GenerateDefaultCriteriaForAdmin(currUser);
-                    _unitOfDataPersistenceWork.Context.UserCriteria.Add(newCriteriaFilter);
-                    _unitOfDataPersistenceWork.Context.SaveChanges();
-
-                    return newCriteriaFilter.ToDto();
-                }
-
-                return new UserCriteriaDTO { UserName = userInformation.Sub, HasAccess = currUser.HasInventoryAccess };
-            }
-            userCriteria.User = currUser;
-            return userCriteria.ToDto();
+            return userEntity.UserCriteriaFilterJoin.ToDto();
         }
 
-        public void SaveUserCriteria(UserCriteriaDTO model)
+        public void UpsertUserCriteria(UserCriteriaDTO dto)
         {
-            var user = _unitOfDataPersistenceWork.Context.User.FirstOrDefault(s => s.Username == model.UserName);
-            var userCriteria = new UserCriteriaFilterEntity{
-                User = user
-            };
-            if (!_unitOfDataPersistenceWork.Context.UserCriteria.Any(criteria => criteria.User.Username == model.UserName))
+            if (!_unitOfWork.Context.User.Any(_ => _.Id == dto.UserId))
             {
-                userCriteria.Criteria = model.Criteria;
-                userCriteria.User.Username = model.UserName;
-                userCriteria.User.HasInventoryAccess = model.HasAccess;
-                userCriteria.HasCriteria = model.HasCriteria;
-                userCriteria.UserCriteriaId = model.CriteriaId;
-                _unitOfDataPersistenceWork.Context.Add(userCriteria);
+                throw new RowNotInTableException($"No user found having id {dto.UserId}.");
             }
-            else
+
+            _unitOfWork.Context.Upsert(dto.ToEntity(), _ => _.UserId == dto.UserId, _unitOfWork.UserEntity?.Id);
+
+            var userEntity = new UserEntity
             {
-                userCriteria = _unitOfDataPersistenceWork.Context.UserCriteria.Single(criteria => criteria.User.Username == model.UserName);
-                userCriteria.User = user;
-
-                userCriteria.Criteria = model.Criteria;
-                userCriteria.HasCriteria = model.HasCriteria;
-                userCriteria.User.HasInventoryAccess = model.HasAccess;
-
-                _unitOfDataPersistenceWork.Context.Update(userCriteria);
-            }
-            _unitOfDataPersistenceWork.Context.SaveChanges();
-        }
-
-        private UserEntity GenerateDefaultUser(UserInfoDTO userInformation, string adminCheckConst)
-        {
-            var newUser = new UserEntity
-            {
-                Id = Guid.NewGuid(),
-                Username = userInformation.Sub,
-                HasInventoryAccess = userInformation.Roles == adminCheckConst ? true : false
+                Id = dto.UserId, Username = dto.UserName, HasInventoryAccess = dto.HasAccess
             };
-            return newUser;
-        }
-        private UserCriteriaFilterEntity GenerateDefaultCriteriaForAdmin(UserEntity newUser)
-        {
-            var newUserCriteriaFilter = new UserCriteriaFilterEntity
-            {
-                UserCriteriaId = Guid.NewGuid(),
-                HasCriteria = false, // because this user is admin, HasCriteria is set to false. Meaning, the user doesn't have any criteria filter
-                CreatedBy = newUser.Id,
-                LastModifiedBy = newUser.Id,
-                CreatedDate = DateTime.Now,
-                LastModifiedDate = DateTime.Now,
-                UserId = newUser.Id,
-                User = newUser
-            };
-            return newUserCriteriaFilter;
+            _unitOfWork.Context.UpdateEntity(userEntity, dto.UserId, _unitOfWork.UserEntity?.Id);
         }
 
         public void DeleteUser(Guid userId)
         {
-            _unitOfDataPersistenceWork.Context.Delete<UserCriteriaFilterEntity>(_ => _.UserId == userId);
-            _unitOfDataPersistenceWork.Context.Delete<UserEntity>(_ => _.Id == userId);
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            if (!_unitOfWork.Context.User.Any(_ => _.Id == userId))
+            {
+                return;
+            }
+
+            _unitOfWork.Context.DeleteEntity<UserEntity>(_ => _.Id == userId);
         }
     }
 }

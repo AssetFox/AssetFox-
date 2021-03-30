@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid AnalysisMethodId { get; set; }
 
-        public Guid? AttributeId { get; set; }
+        public Guid AttributeId { get; set; }
 
         public double Limit { get; set; }
 

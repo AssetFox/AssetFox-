@@ -6,50 +6,48 @@ using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappings;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AnalysisMethodRepository : IAnalysisMethodRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public AnalysisMethodRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
-        {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-        }
+        public AnalysisMethodRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+            _unitOfWork = unitOfWork ??
+                                         throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateAnalysisMethod(AnalysisMethod analysisMethod, Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            if (!_unitOfDataPersistenceWork.Context.Attribute.Any(_ => _.Name == analysisMethod.Weighting.Name))
+            if (analysisMethod.Weighting != null && !string.IsNullOrEmpty(analysisMethod.Weighting.Name) &&
+                !_unitOfWork.Context.Attribute.Any(_ => _.Name == analysisMethod.Weighting.Name))
             {
                 throw new RowNotInTableException($"No attribute found having name {analysisMethod.Weighting.Name}");
             }
 
-            var simulationEntity = _unitOfDataPersistenceWork.Context.Simulation.Single(_ => _.Id == simulationId);
-            var attributeEntity = _unitOfDataPersistenceWork.Context.Attribute.Single(_ => _.Name == analysisMethod.Weighting.Name);
+            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+            var attributeEntity = _unitOfWork.Context.Attribute.SingleOrDefault(_ => _.Name == analysisMethod.Weighting.Name);
 
-            var analysisMethodEntity = analysisMethod.ToEntity(simulationEntity.Id, attributeEntity.Id);
-            _unitOfDataPersistenceWork.Context.AnalysisMethod.Add(analysisMethodEntity);
-            _unitOfDataPersistenceWork.Context.SaveChanges();
+            var analysisMethodEntity = analysisMethod.ToEntity(simulationEntity.Id, attributeEntity?.Id);
+            _unitOfWork.Context.AddEntity(analysisMethodEntity);
 
-            _unitOfDataPersistenceWork.BenefitRepo.CreateBenefit(analysisMethod.Benefit, analysisMethodEntity.Id);
+            _unitOfWork.BenefitRepo.CreateBenefit(analysisMethod.Benefit, analysisMethodEntity.Id);
 
             if (!analysisMethod.Filter.ExpressionIsBlank)
             {
                 var analysisMethodEntityIdPerExpression = new Dictionary<string, List<Guid>>
-                        {
-                            {analysisMethod.Filter.Expression, new List<Guid> {analysisMethodEntity.Id}}
-                        };
-                _unitOfDataPersistenceWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(analysisMethodEntityIdPerExpression,
+                {
+                    {analysisMethod.Filter.Expression, new List<Guid> {analysisMethodEntity.Id}}
+                };
+                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(analysisMethodEntityIdPerExpression,
                     DataPersistenceConstants.CriterionLibraryJoinEntities.AnalysisMethod, simulationEntity.Name);
             }
 
@@ -76,41 +74,45 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void CreateAnalysisMethodBudgetPriorities(SimulationEntity simulationEntity, List<BudgetPriority> budgetPriorities)
         {
-            _unitOfDataPersistenceWork.BudgetPriorityRepo.CreateBudgetPriorityLibrary($"{simulationEntity.Name} Simulation Budget Priority Library", simulationEntity.Id);
+            _unitOfWork.BudgetPriorityRepo.CreateBudgetPriorityLibrary(
+                $"{simulationEntity.Name} Budget Priority Library", simulationEntity.Id);
 
-            _unitOfDataPersistenceWork.BudgetPriorityRepo.CreateBudgetPriorities(budgetPriorities, simulationEntity.Id);
+            _unitOfWork.BudgetPriorityRepo.CreateBudgetPriorities(budgetPriorities, simulationEntity.Id);
         }
 
         private void CreateAnalysisMethodTargetConditionGoals(SimulationEntity simulationEntity, List<TargetConditionGoal> targetConditionGoals)
         {
-            _unitOfDataPersistenceWork.TargetConditionGoalRepo.CreateTargetConditionGoalLibrary($"{simulationEntity.Name} Simulation Target Condition Goal Library", simulationEntity.Id);
+            _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoalLibrary(
+                $"{simulationEntity.Name} Target Condition Goal Library", simulationEntity.Id);
 
-            _unitOfDataPersistenceWork.TargetConditionGoalRepo.CreateTargetConditionGoals(targetConditionGoals, simulationEntity.Id);
+            _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoals(targetConditionGoals, simulationEntity.Id);
         }
 
         private void CreateAnalysisMethodDeficientConditionGoals(SimulationEntity simulationEntity, List<DeficientConditionGoal> deficientConditionGoals)
         {
-            _unitOfDataPersistenceWork.DeficientConditionGoalRepo.CreateDeficientConditionGoalLibrary($"{simulationEntity.Name} Simulation Deficient Condition Goal Library", simulationEntity.Id);
+            _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoalLibrary(
+                $"{simulationEntity.Name} Deficient Condition Goal Library", simulationEntity.Id);
 
-            _unitOfDataPersistenceWork.DeficientConditionGoalRepo.CreateDeficientConditionGoals(deficientConditionGoals, simulationEntity.Id);
+            _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoals(deficientConditionGoals, simulationEntity.Id);
         }
 
         private void CreateAnalysisMethodRemainingLifeLimits(SimulationEntity simulationEntity,
             List<RemainingLifeLimit> remainingLifeLimits)
         {
-            _unitOfDataPersistenceWork.RemainingLifeLimitRepo.CreateRemainingLifeLimitLibrary($"{simulationEntity.Name} Simulation Remaining Life Limit Library", simulationEntity.Id);
+            _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimitLibrary(
+                $"{simulationEntity.Name} Remaining Life Limit Library", simulationEntity.Id);
 
-            _unitOfDataPersistenceWork.RemainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationEntity.Id);
+            _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationEntity.Id);
         }
 
         public void GetSimulationAnalysisMethod(Simulation simulation)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
             }
 
-            _unitOfDataPersistenceWork.Context.AnalysisMethod.Include(_ => _.Attribute)
+            _unitOfWork.Context.AnalysisMethod.Include(_ => _.Attribute)
                 .Include(_ => _.Benefit)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CriterionLibraryAnalysisMethodJoin)
@@ -163,15 +165,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .FillSimulationAnalysisMethod(simulation);
         }
 
-        public AnalysisMethodDTO GetPermittedAnalysisMethod(UserInfoDTO userInfo, Guid simulationId)
+        public AnalysisMethodDTO GetPermittedAnalysisMethod(Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub)))
+            if (_unitOfWork.UserEntity == null || !_unitOfWork.Context.Simulation.Any(_ =>
+                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id)))
             {
                 throw new UnauthorizedAccessException("You are not authorized to view this simulation analysis method.");
             }
@@ -181,12 +183,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public AnalysisMethodDTO GetAnalysisMethod(Guid simulationId)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            if (!_unitOfDataPersistenceWork.Context.AnalysisMethod.Any(_ => _.SimulationId == simulationId))
+            if (!_unitOfWork.Context.AnalysisMethod.Any(_ => _.SimulationId == simulationId))
             {
                 return new AnalysisMethodDTO
                 {
@@ -201,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 };
             }
 
-            return _unitOfDataPersistenceWork.Context.AnalysisMethod
+            return _unitOfWork.Context.AnalysisMethod
                 .Include(_ => _.Attribute)
                 .Include(_ => _.Benefit)
                 .ThenInclude(_ => _.Attribute)
@@ -211,26 +213,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToDto();
         }
 
-        public void UpsertPermittedAnalysisMethod(UserInfoDTO userInfo, Guid simulationId,
-            AnalysisMethodDTO dto)
+        public void UpsertPermittedAnalysisMethod(Guid simulationId, AnalysisMethodDTO dto)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
 
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.User.Username == userInfo.Sub && __.CanModify)))
+            if (_unitOfWork.UserEntity == null || !_unitOfWork.Context.Simulation.Any(_ =>
+                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
             {
                 throw new UnauthorizedAccessException("You are not authorized to modify this simulation analysis method.");
             }
 
-            UpsertAnalysisMethod(simulationId, dto, userInfo);
+            UpsertAnalysisMethod(simulationId, dto);
         }
 
-        public void UpsertAnalysisMethod(Guid simulationId, AnalysisMethodDTO dto, UserInfoDTO userInfo)
+        public void UpsertAnalysisMethod(Guid simulationId, AnalysisMethodDTO dto)
         {
-            if (!_unitOfDataPersistenceWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}.");
             }
@@ -239,26 +240,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (!string.IsNullOrEmpty(dto.Attribute))
             {
-                if (!_unitOfDataPersistenceWork.Context.Attribute.Any(_ => _.Name == dto.Attribute))
+                if (!_unitOfWork.Context.Attribute.Any(_ => _.Name == dto.Attribute))
                 {
                     throw new RowNotInTableException($"No attribute found having name {dto.Attribute}.");
                 }
 
-                attributeEntity = _unitOfDataPersistenceWork.Context.Attribute.Single(_ => _.Name == dto.Attribute);
+                attributeEntity = _unitOfWork.Context.Attribute.Single(_ => _.Name == dto.Attribute);
             }
-
-            var userEntity = _unitOfDataPersistenceWork.Context.User.SingleOrDefault(_ => _.Username == userInfo.Sub);
 
             var analysisMethodEntity = dto.ToEntity(simulationId, attributeEntity?.Id);
 
-            _unitOfDataPersistenceWork.Context.Upsert(analysisMethodEntity, _ => _.Id == dto.Id, userEntity?.Id);
+            _unitOfWork.Context.Upsert(analysisMethodEntity, _ => _.Id == dto.Id, _unitOfWork.UserEntity?.Id);
 
-            if (dto.Benefit.Id != Guid.Empty)
-            {
-                _unitOfDataPersistenceWork.BenefitRepo.UpsertBenefit(dto.Benefit, dto.Id, userEntity?.Id);
-            }
+            _unitOfWork.BenefitRepo.UpsertBenefit(dto.Benefit, dto.Id);
 
-            _unitOfDataPersistenceWork.Context.Delete<CriterionLibraryAnalysisMethodEntity>(_ => _.AnalysisMethodId == dto.Id);
+            _unitOfWork.Context.DeleteEntity<CriterionLibraryAnalysisMethodEntity>(_ => _.AnalysisMethodId == dto.Id);
 
             if (dto.CriterionLibrary?.Id != null && dto.CriterionLibrary?.Id != Guid.Empty &&
                 !string.IsNullOrEmpty(dto.CriterionLibrary.MergedCriteriaExpression))
@@ -269,7 +265,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     AnalysisMethodId = dto.Id
                 };
 
-                _unitOfDataPersistenceWork.Context.AddEntity(criterionJoinEntity, userEntity?.Id);
+                _unitOfWork.Context.AddEntity(criterionJoinEntity, _unitOfWork.UserEntity?.Id);
             }
         }
     }

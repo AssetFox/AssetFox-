@@ -7,8 +7,7 @@ namespace BridgeCareCore.Logging
 {
     public static class ExceptionMiddlewareExtension
     {
-        public static void ConfigureExceptionHandler(this IApplicationBuilder app, ILog logger)
-        {
+        public static void ConfigureExceptionHandler(this IApplicationBuilder app, ILog log) =>
             app.UseExceptionHandler(appError =>
             {
                 appError.Run(async context =>
@@ -19,7 +18,7 @@ namespace BridgeCareCore.Logging
                     var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
                     if (contextFeature != null)
                     {
-                        logger.Error($"Something went wrong: {contextFeature.Error}");
+                        log.Error($"Something went wrong: {contextFeature.Error}");
 
                         await context.Response.WriteAsync(new ErrorDetails()
                         {
@@ -29,6 +28,5 @@ namespace BridgeCareCore.Logging
                     }
                 });
             });
-        }
     }
 }

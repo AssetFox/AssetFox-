@@ -13,12 +13,12 @@ namespace BridgeCareCore.Services
 {
     public class ExpressionValidationService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly ILog _log;
 
         public ExpressionValidationService(UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog log)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _log = log ?? throw new ArgumentNullException(nameof(_log));
         }
 
@@ -33,7 +33,7 @@ namespace BridgeCareCore.Services
             {
                 var expression = model.Expression.Trim();
                 CheckAttributes(expression);
-                var attributes = _unitOfDataPersistenceWork.Context.Attribute.ToList();
+                var attributes = _unitOfWork.Context.Attribute.ToList();
                 var compiler = new CalculateEvaluateCompiler();
                 foreach (var attribute in attributes.Where(_ => expression.Contains(_.Name)))
                 {
@@ -138,7 +138,7 @@ namespace BridgeCareCore.Services
             try
             {
                 CheckAttributes(expression);
-                var attributes = _unitOfDataPersistenceWork.Context.Attribute.ToList();
+                var attributes = _unitOfWork.Context.Attribute.ToList();
                 var compiler = new CalculateEvaluateCompiler();
                 foreach (var attribute in attributes.Where(_ => expression.Contains(_.Name)))
                 {
@@ -163,7 +163,7 @@ namespace BridgeCareCore.Services
 
         private void CheckAttributes(string target)
         {
-            var attributes = _unitOfDataPersistenceWork.Context.Attribute.ToList();
+            var attributes = _unitOfWork.Context.Attribute.ToList();
             target = target.Replace('[', '?');
             foreach (var allowedAttribute in attributes.Where(allowedAttribute => target.IndexOf("?" + allowedAttribute.Name + "]", StringComparison.Ordinal) >= 0))
             {
@@ -198,7 +198,7 @@ namespace BridgeCareCore.Services
             if (currentUserCriteriaFilter.HasCriteria)
             {
                 currentUserCriteriaFilter.Criteria = "(" + currentUserCriteriaFilter.Criteria + ")";
-                
+
                 expression += $" AND { currentUserCriteriaFilter.Criteria }";
             }
 
@@ -209,23 +209,20 @@ namespace BridgeCareCore.Services
 
             var strSelect = $"SELECT COUNT(*) FROM SECTION_13 INNER JOIN SEGMENT_13_NS0 ON SECTION_13.SECTIONID = SEGMENT_13_NS0.SECTIONID WHERE {parameterizedData.ParameterString}";
             // create a sql connection
-            using var connection = _unitOfDataPersistenceWork.LegacyConnection;
+            using var connection = _unitOfWork.GetLegacyConnection();
             try
             {
                 // open the connection
                 connection.Open();
                 // create a sql command with the select string and the connection
-                var cmd = new SqlCommand(strSelect, connection);
+                using var cmd = new SqlCommand(strSelect, connection);
                 // add the command parameters
                 cmd.Parameters.AddRange(parameterizedData.SqlParameters.ToArray());
                 // execute the query
-                var dataReader = cmd.ExecuteReader();
+                using var dataReader = cmd.ExecuteReader();
                 // get the returned count
                 var count = dataReader.HasRows && dataReader.Read() ? dataReader.GetValue(0) : 0;
-                // close the data reader
-                dataReader.Close();
-                // close the connection
-                connection.Close();
+
                 // return the results
                 return new CriterionValidationResult
                 {
@@ -263,7 +260,7 @@ namespace BridgeCareCore.Services
             var predicates = new List<string>();
             var spacedString = 0;
             var indexForSpacedString = 0;
-            var attributes = _unitOfDataPersistenceWork.Context.Attribute.Select(_ => _.Name).ToList();
+            var attributes = _unitOfWork.Context.Attribute.Select(_ => _.Name).ToList();
 
             while (startingIndex < expression.Length)
             {

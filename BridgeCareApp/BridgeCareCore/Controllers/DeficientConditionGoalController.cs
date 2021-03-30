@@ -4,47 +4,47 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Controllers
 {
-    using DeficientConditionGoalUpsertMethod = Action<UserInfoDTO, Guid, DeficientConditionGoalLibraryDTO>;
+    using DeficientConditionGoalUpsertMethod = Action<Guid, DeficientConditionGoalLibraryDTO>;
 
     [Route("api/[controller]")]
     [ApiController]
-    public class DeficientConditionGoalController : ControllerBase
+    public class DeficientConditionGoalController : HubControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly IEsecSecurity _esecSecurity;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         private readonly IReadOnlyDictionary<string, DeficientConditionGoalUpsertMethod>
             _deficientConditionGoalUpsertMethods;
 
-        public DeficientConditionGoalController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
+        public DeficientConditionGoalController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService) : base(hubService)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _deficientConditionGoalUpsertMethods = CreateUpsertMethods();
         }
 
         private Dictionary<string, DeficientConditionGoalUpsertMethod> CreateUpsertMethods()
         {
-            void UpsertAny(UserInfoDTO userInfo, Guid simulationId, DeficientConditionGoalLibraryDTO dto)
+            void UpsertAny(Guid simulationId, DeficientConditionGoalLibraryDTO dto)
             {
-                _unitOfDataPersistenceWork.DeficientConditionGoalRepo
-                    .UpsertDeficientConditionGoalLibrary(dto, simulationId, userInfo);
-                _unitOfDataPersistenceWork.DeficientConditionGoalRepo
-                    .UpsertOrDeleteDeficientConditionGoals(dto.DeficientConditionGoals, dto.Id, userInfo);
+                _unitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibrary(dto, simulationId);
+                _unitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(
+                    dto.DeficientConditionGoals, dto.Id);
             }
 
-            void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, DeficientConditionGoalLibraryDTO dto)
-            {
-                _unitOfDataPersistenceWork.DeficientConditionGoalRepo.UpsertPermitted(userInfo, simulationId, dto);
-            }
+            void UpsertPermitted(Guid simulationId, DeficientConditionGoalLibraryDTO dto) =>
+                _unitOfWork.DeficientConditionGoalRepo.UpsertPermitted(simulationId, dto);
 
             return new Dictionary<string, DeficientConditionGoalUpsertMethod>
             {
@@ -62,14 +62,14 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.DeficientConditionGoalRepo
-                    .DeficientConditionGoalLibrariesWithDeficientConditionGoals();
+                var result = await Task.Factory.StartNew(() => _unitOfWork.DeficientConditionGoalRepo
+                    .DeficientConditionGoalLibrariesWithDeficientConditionGoals());
                 return Ok(result);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                throw;
             }
         }
 
@@ -81,26 +81,28 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var userInfo = _esecSecurity.GetUserInformation(Request);
-                _unitOfDataPersistenceWork.BeginTransaction();
+
+                _unitOfWork.SetUser(userInfo.Name);
+
                 await Task.Factory.StartNew(() =>
                 {
-                    _deficientConditionGoalUpsertMethods[userInfo.Role](userInfo.ToDto(), simulationId, dto);
+                    _unitOfWork.BeginTransaction();
+                    _deficientConditionGoalUpsertMethods[userInfo.Role](simulationId, dto);
+                    _unitOfWork.Commit();
                 });
 
-                _unitOfDataPersistenceWork.Commit();
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return Unauthorized(e);
+                _unitOfWork.Rollback();
+                return Unauthorized();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _unitOfWork.Rollback();
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                throw;
             }
         }
 
@@ -111,17 +113,20 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfDataPersistenceWork.BeginTransaction();
-                await Task.Factory.StartNew(() => _unitOfDataPersistenceWork.DeficientConditionGoalRepo
-                    .DeleteDeficientConditionGoalLibrary(libraryId));
-                _unitOfDataPersistenceWork.Commit();
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.DeficientConditionGoalRepo.DeleteDeficientConditionGoalLibrary(libraryId);
+                    _unitOfWork.Commit();
+                });
+
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _unitOfWork.Rollback();
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                throw;
             }
         }
     }

@@ -9,8 +9,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class IAMContext : DbContext
     {
-        public static readonly bool IsRunningFromNUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("nunit.framework"));
+        public static readonly bool IsRunningFromXunit = AppDomain.CurrentDomain.GetAssemblies()
+            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
         public IAMContext() { }
 
@@ -18,10 +18,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!IsRunningFromNUnit)
+            if (!IsRunningFromXunit)
             {
                 var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Repositories\\MSSQL", "migrationConnection.json");
-                string contents = File.ReadAllText(filePath);
+                var contents = File.ReadAllText(filePath);
                 var migrationConnection = JsonConvert
                     .DeserializeAnonymousType(contents, new { ConnectionStrings = default(MigrationConnection) })
                     .ConnectionStrings;
@@ -178,6 +178,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<SimulationReportDetailEntity> SimulationReportDetail { get; set; }
 
+        public virtual DbSet<BenefitQuantifierEntity> BenefitQuantifier { get; set; }
+
         public virtual DbSet<UserCriteriaFilterEntity> UserCriteria { get; set; }
 
         public virtual DbSet<ReportIndexEntity> ReportIndex { get; set; }
@@ -325,7 +327,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.Attribute)
                     .WithMany(p => p.Benefits)
                     .HasForeignKey(d => d.AttributeId)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<BudgetEntity>(entity =>
@@ -513,7 +515,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasIndex(e => e.BudgetId);
 
-                entity.HasIndex(e => e.SectionId);
+                entity.HasIndex(e => e.MaintainableAssetId);
 
                 entity.Property(e => e.Name).IsRequired();
 
@@ -527,20 +529,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
+                entity.HasOne(d => d.MaintainableAsset)
+                    .WithMany(p => p.CommittedProjects)
+                    .HasForeignKey(d => d.MaintainableAssetId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.CommittedProjects)
                     .HasForeignKey(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.ClientCascade);
 
                 entity.HasOne(d => d.Budget)
                     .WithMany(p => p.CommittedProjects)
                     .HasForeignKey(d => d.BudgetId)
                     .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Section)
-                    .WithMany(p => p.CommittedProjects)
-                    .HasForeignKey(d => d.SectionId)
-                    .OnDelete(DeleteBehavior.ClientCascade);
             });
 
             modelBuilder.Entity<CommittedProjectConsequenceEntity>(entity =>
@@ -1467,6 +1469,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<BenefitQuantifierEntity>(entity =>
+            {
+                entity.HasKey(e => e.NetworkId);
+
+                entity.HasIndex(e => e.NetworkId);
+
+                entity.HasIndex(e => e.EquationId);
+
+                entity.HasOne(d => d.Network)
+                    .WithOne(p => p.BenefitQuantifier)
+                    .HasForeignKey<BenefitQuantifierEntity>(d => d.NetworkId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Equation)
+                    .WithOne(p => p.BenefitQuantifier)
+                    .HasForeignKey<BenefitQuantifierEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<UserCriteriaFilterEntity>(entity =>
             {
                 entity.HasKey(e => e.UserCriteriaId);
@@ -1477,8 +1498,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.User)
                 .WithOne(p => p.UserCriteriaFilterJoin)
-                .HasForeignKey<UserCriteriaFilterEntity>(f => f.UserId);
-
+                .HasForeignKey<UserCriteriaFilterEntity>(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<ReportIndexEntity>(entity =>

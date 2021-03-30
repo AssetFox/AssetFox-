@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy.Entities;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
@@ -136,7 +135,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     setColor(0, section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
                         yearlySectionData.Year, index, worksheet, row, column); // TODO : Get the value of parallel structure. Right now 0 is a dummy value
 
-
                     // Work done in a year
                     var range = worksheet.Cells[row, column];
                     if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
@@ -153,7 +151,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     if (!range.Value.Equals("--"))
                     {
                         workDoneData[i]++;
-                    } 
+                    }
 
                     worksheet.Cells[row, poorOnOffColumnStart].Value = prevYrMinc < 5 ? (thisYrMinc >= 5 ? "Off" : "--") :
                         (thisYrMinc < 5 ? "On" : "--");

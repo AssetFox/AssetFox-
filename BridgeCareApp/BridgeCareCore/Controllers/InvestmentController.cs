@@ -4,47 +4,47 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Controllers
 {
-    using InvestmentUpsertMethod = Action<UserInfoDTO, Guid, UpsertInvestmentDataDTO>;
+    using InvestmentUpsertMethod = Action<Guid, UpsertInvestmentDataDTO>;
 
     [Route("api/[controller]")]
     [ApiController]
-    public class InvestmentController : ControllerBase
+    public class InvestmentController : HubControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly IEsecSecurity _esecSecurity;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IReadOnlyDictionary<string, InvestmentUpsertMethod> _investmentUpsertMethods;
 
-        public InvestmentController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
+        public InvestmentController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService) : base(hubService)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
             _investmentUpsertMethods = CreateUpsertMethods();
         }
 
         private Dictionary<string, InvestmentUpsertMethod> CreateUpsertMethods()
         {
-            void UpsertAny(UserInfoDTO userInfo, Guid simulationId, UpsertInvestmentDataDTO data)
+            void UpsertAny(Guid simulationId, UpsertInvestmentDataDTO data)
             {
-                _unitOfDataPersistenceWork.BudgetRepo
-                    .UpsertBudgetLibrary(data.BudgetLibrary, simulationId, userInfo);
-                _unitOfDataPersistenceWork.BudgetRepo
-                    .UpsertOrDeleteBudgets(data.BudgetLibrary.Budgets, data.BudgetLibrary.Id, userInfo);
-                _unitOfDataPersistenceWork.InvestmentPlanRepo
-                    .UpsertInvestmentPlan(data.InvestmentPlan, simulationId, userInfo);
+                _unitOfWork.BudgetRepo.UpsertBudgetLibrary(data.BudgetLibrary, simulationId);
+                _unitOfWork.BudgetRepo.UpsertOrDeleteBudgets(data.BudgetLibrary.Budgets, data.BudgetLibrary.Id);
+                _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(data.InvestmentPlan, simulationId);
             }
 
-            void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, UpsertInvestmentDataDTO data)
+            void UpsertPermitted(Guid simulationId, UpsertInvestmentDataDTO data)
             {
-                _unitOfDataPersistenceWork.BudgetRepo.UpsertPermitted(userInfo, simulationId, data.BudgetLibrary);
-                _unitOfDataPersistenceWork.InvestmentPlanRepo.UpsertPermitted(userInfo, simulationId,
-                    data.InvestmentPlan);
+                _unitOfWork.BudgetRepo.UpsertPermitted(simulationId, data.BudgetLibrary);
+                _unitOfWork.InvestmentPlanRepo.UpsertPermitted(simulationId, data.InvestmentPlan);
             }
 
             return new Dictionary<string, InvestmentUpsertMethod>
@@ -63,20 +63,26 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var budgetLibraries = await _unitOfDataPersistenceWork.BudgetRepo
-                    .BudgetLibrariesWithBudgets();
-                var scenarioInvestmentPlan = await _unitOfDataPersistenceWork.InvestmentPlanRepo
-                    .ScenarioInvestmentPlan(simulationId);
-                return Ok(new InvestmentDTO
+                var result = await Task.Factory.StartNew(() =>
                 {
-                    BudgetLibraries = budgetLibraries,
-                    InvestmentPlan = scenarioInvestmentPlan
+                    var budgetLibraries = _unitOfWork.BudgetRepo
+                        .BudgetLibrariesWithBudgets();
+
+                    var scenarioInvestmentPlan = _unitOfWork.InvestmentPlanRepo
+                        .ScenarioInvestmentPlan(simulationId);
+                    return new InvestmentDTO
+                    {
+                        BudgetLibraries = budgetLibraries, InvestmentPlan = scenarioInvestmentPlan
+                    };
                 });
+
+
+                return Ok(result);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
             }
         }
 
@@ -88,26 +94,28 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var userInfo = _esecSecurity.GetUserInformation(Request);
-                _unitOfDataPersistenceWork.BeginTransaction();
+
+                _unitOfWork.SetUser(userInfo.Name);
+
                 await Task.Factory.StartNew(() =>
                 {
-                    _investmentUpsertMethods[userInfo.Role](userInfo.ToDto(), simulationId, data);
+                    _unitOfWork.BeginTransaction();
+                    _investmentUpsertMethods[userInfo.Role](simulationId, data);
+                    _unitOfWork.Commit();
                 });
 
-                _unitOfDataPersistenceWork.Commit();
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return Unauthorized(e);
+                _unitOfWork.Rollback();
+                return Unauthorized();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _unitOfWork.Rollback();
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
             }
         }
 
@@ -118,17 +126,20 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfDataPersistenceWork.BeginTransaction();
-                await Task.Factory.StartNew(() => _unitOfDataPersistenceWork.BudgetRepo
-                    .DeleteBudgetLibrary(libraryId));
-                _unitOfDataPersistenceWork.Commit();
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);
+                    _unitOfWork.Commit();
+                });
+
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _unitOfWork.Rollback();
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
             }
         }
 
@@ -139,14 +150,14 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.BudgetRepo
-                    .ScenarioSimpleBudgetDetails(simulationId);
+                var result = await Task.Factory.StartNew(() => _unitOfWork.BudgetRepo
+                    .ScenarioSimpleBudgetDetails(simulationId));
                 return Ok(result);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
             }
         }
     }

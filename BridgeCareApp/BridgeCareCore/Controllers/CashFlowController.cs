@@ -4,43 +4,44 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Controllers
 {
-    using CashFlowUpsertMethod = Action<UserInfoDTO, Guid, CashFlowRuleLibraryDTO>;
+    using CashFlowUpsertMethod = Action<Guid, CashFlowRuleLibraryDTO>;
 
     [Route("api/[controller]")]
     [ApiController]
-    public class CashFlowController : ControllerBase
+    public class CashFlowController : HubControllerBase
     {
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
         private readonly IEsecSecurity _esecSecurity;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IReadOnlyDictionary<string, CashFlowUpsertMethod> _cashFlowUpsertMethods;
 
-        public CashFlowController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity)
+        public CashFlowController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService) : base(hubService)
         {
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _cashFlowUpsertMethods = CreateUpsertMethods();
         }
 
         private Dictionary<string, CashFlowUpsertMethod> CreateUpsertMethods()
         {
-            void UpsertAny(UserInfoDTO userInfo, Guid simulationId, CashFlowRuleLibraryDTO dto)
+            void UpsertAny(Guid simulationId, CashFlowRuleLibraryDTO dto)
             {
-                _unitOfDataPersistenceWork.CashFlowRuleRepo
-                    .UpsertCashFlowRuleLibrary(dto, simulationId, userInfo);
-                _unitOfDataPersistenceWork.CashFlowRuleRepo
-                    .UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id, userInfo);
+                _unitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto, simulationId);
+                _unitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
             }
 
-            void UpsertPermitted(UserInfoDTO userInfo, Guid simulationId, CashFlowRuleLibraryDTO dto) =>
-                _unitOfDataPersistenceWork.CashFlowRuleRepo.UpsertPermitted(userInfo, simulationId, dto);
+            void UpsertPermitted(Guid simulationId, CashFlowRuleLibraryDTO dto) =>
+                _unitOfWork.CashFlowRuleRepo.UpsertPermitted(simulationId, dto);
 
             return new Dictionary<string, CashFlowUpsertMethod>
             {
@@ -56,14 +57,15 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfDataPersistenceWork.CashFlowRuleRepo
-                    .CashFlowRuleLibrariesWithCashFlowRules();
+                var result = await Task.Factory.StartNew(() => _unitOfWork.CashFlowRuleRepo
+                    .CashFlowRuleLibrariesWithCashFlowRules());
+
                 return Ok(result);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Cash Flow error::{e.Message}");
+                throw;
             }
         }
 
@@ -75,26 +77,28 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var userInfo = _esecSecurity.GetUserInformation(Request);
-                _unitOfDataPersistenceWork.BeginTransaction();
+
+                _unitOfWork.SetUser(userInfo.Name);
+
                 await Task.Factory.StartNew(() =>
                 {
-                    _cashFlowUpsertMethods[userInfo.Role](userInfo.ToDto(), simulationId, dto);
+                    _unitOfWork.BeginTransaction();
+                    _cashFlowUpsertMethods[userInfo.Role](simulationId, dto);
+                    _unitOfWork.Commit();
                 });
 
-                _unitOfDataPersistenceWork.Commit();
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return Unauthorized(e);
+                _unitOfWork.Rollback();
+                return Unauthorized();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _unitOfWork.Rollback();
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Cash Flow error::{e.Message}");
+                throw;
             }
         }
 
@@ -105,17 +109,20 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfDataPersistenceWork.BeginTransaction();
-                await Task.Factory.StartNew(() => _unitOfDataPersistenceWork.CashFlowRuleRepo
-                    .DeleteCashFlowRuleLibrary(libraryId));
-                _unitOfDataPersistenceWork.Commit();
+                await Task.Factory.StartNew(() =>
+                {
+                    _unitOfWork.BeginTransaction();
+                    _unitOfWork.CashFlowRuleRepo.DeleteCashFlowRuleLibrary(libraryId);
+                    _unitOfWork.Commit();
+                });
+
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                Console.WriteLine(e);
-                return BadRequest(e);
+                _unitOfWork.Rollback();
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Cash Flow error::{e.Message}");
+                throw;
             }
         }
     }

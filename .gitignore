@@ -378,7 +378,7 @@ iAM-legacy/DatabaseManager.dll
 /BridgeCareApp/BridgeCareNodeApp/logs/nodeCombinedLogs.log
 
 # core connection file
-/BridgeCareApp/BridgeCareCore/coreConnection.json
+/BridgeCareApp/BridgeCareCore/coreConnections.json
 /BridgeCareApp/BridgeCareCore/coreConnection.Development.json
 /BridgeCareApp/AppliedResearchAssociates.iAM.DataPersistenceCore/Repositories/MSSQL/migrationConnection.json
 
@@ -397,3 +397,5 @@ iAM-legacy/DatabaseManager.dll
 /BridgeCareApp/BridgeCareCore/DownloadedReports/*
 /BridgeCareApp/BridgeCareCore/Logs
 /BridgeCareApp/BridgeCareCore/2020-12-14_log.txt
+BridgeCareApp/BridgeCareCore/coreConnection.json
+BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/testConnections.json

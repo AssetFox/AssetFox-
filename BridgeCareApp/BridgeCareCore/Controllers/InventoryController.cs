@@ -20,50 +20,46 @@ namespace BridgeCareCore.Controllers
         private readonly IAssetData _assestData;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IEsecSecurity _esecSecurity;
+        private readonly IMaintainableAssetRepository _maintainableAssetRepository;
 
         public InventoryController(IAssetData repo, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IEsecSecurity esecSecurity) : base(hubService)
+            IHubService hubService, IEsecSecurity esecSecurity, IMaintainableAssetRepository maintainableAssetRepository) : base(hubService)
         {
             _assestData = repo ?? throw new ArgumentNullException(nameof(repo));
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _esecSecurity = esecSecurity;
+            _maintainableAssetRepository = maintainableAssetRepository;
         }
 
         [HttpGet]
         [Route("GetInventory")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetInventory()
         {
-            var userInfo = _esecSecurity.GetUserInformation(Request);
+            //var userInfo = _esecSecurity.GetUserInformation(Request);
 
-            var result = await Task.Factory.StartNew(() =>
-            {
-                _unitOfWork.BeginTransaction();
-                var userCriteria =
-                    _unitOfWork.UserCriteriaRepo.GetOwnUserCriteria(userInfo.ToDto(),
-                        SecurityConstants.Role.BAMSAdmin);
-                _unitOfWork.Commit();
-                return userCriteria;
-            });
+            //var result = await Task.Factory.StartNew(() =>
+            //{
+            //    _unitOfWork.BeginTransaction();
+            //    var userCriteria =
+            //        _unitOfWork.UserCriteriaRepo.GetOwnUserCriteria(userInfo.ToDto(),
+            //            SecurityConstants.Role.BAMSAdmin);
+            //    _unitOfWork.Commit();
+            //    return userCriteria;
+            //});
 
 
-            if (!result.HasAccess)
-            {
-                throw new UnauthorizedAccessException($"User {result.UserName} has no inventory access.");
-            }
-            if (result.HasCriteria)
-            {
-                result.Criteria = "(" + result.Criteria + ")";
+            //if (!result.HasAccess)
+            //{
+            //    throw new UnauthorizedAccessException($"User {result.UserName} has no inventory access.");
+            //}
+            //if (result.HasCriteria)
+            //{
+            //    result.Criteria = "(" + result.Criteria + ")";
 
-               // expression += $" AND { result.Criteria }";
-            }
-
-            var test = _assestData.KeyProperties["BMSID"].Select(_ => _.KeyValue.Value);
-            var data = new List<InventorySelectionModel>();
-            foreach (var item in test)
-            {
-                data.Add(new InventorySelectionModel{ BRKey = "", BMSId = item});
-            }
+            //   // expression += $" AND { result.Criteria }";
+            //}
+            var data = _maintainableAssetRepository.GetBMSIDAndBRKey();
 
             return Ok(data);
         }

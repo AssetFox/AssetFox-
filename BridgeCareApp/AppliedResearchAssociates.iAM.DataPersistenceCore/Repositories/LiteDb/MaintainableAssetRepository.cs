@@ -4,6 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.LiteDb.Mappings;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
@@ -23,5 +24,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
         public void CreateMaintainableAssets(List<Section> sections, Guid networkId) => throw new NotImplementedException();
 
         List<MaintainableAsset> IMaintainableAssetRepository.GetAllInNetworkWithAssignedDataAndLocations(Guid networkId) => throw new NotImplementedException();
+        public List<BMSIDAndBRKeyDTO> GetBMSIDAndBRKey() => throw new NotImplementedException();
     }
 }

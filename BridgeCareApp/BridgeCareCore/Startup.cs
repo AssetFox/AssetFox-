@@ -95,6 +95,7 @@ namespace BridgeCareCore
             services.AddScoped<IUserCriteriaRepository, UserCriteriaRepository>();
             services.AddScoped<IHubService, HubService>();
             services.AddScoped<IAssetData, PennDOTAssetDataRepository>();
+            services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
 
 #if MsSqlDebug || Release || Test
             // SQL SERVER SCOPINGS

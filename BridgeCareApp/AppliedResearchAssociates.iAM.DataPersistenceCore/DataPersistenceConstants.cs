@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
         {
             public static readonly List<string> Keys = new List<string>()
             {
-                "BRKey_",
+                "BRKEY_",
                 "BMSID"
             };
         }

@@ -17,9 +17,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             _unitofwork = uow;
             var network = _unitofwork.NetworkRepo.GetPennDotNetwork();
-            var facilities = _unitofwork.Context.Facility.Where(_ => _.NetworkId == network.Id).Include(_ => _.Sections).ToList();
-            network.Facilities = facilities;
-            var sectionList = network.Facilities.SelectMany(_ => _.Sections);
+            var facilities = _unitofwork.Context.Facility.Where(_ => _.NetworkId == network.Id).Include(_ => _.Sections);
+            //network.Facilities = facilities;
+
 
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
             foreach (var key in DataPersistenceConstants.PennDOTKeyFields.Keys)
@@ -30,6 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 if (key == "BMSID")
                 {
                     // This comes from section.Name, not a specific attribute.
+                    var sectionList = facilities.SelectMany(_ => _.Sections);
                     foreach (var section in sectionList)    
                     {
                         keyValues.Add(new KeySegmentDatum()
@@ -47,26 +48,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         throw new ArgumentException();
                     }
 
-                    var sectionsWithNumericKeys = sectionList
-                        .Where(_ => _.NumericAttributeValueHistories.Any(_ => _.AttributeId == keyAttribute.Id));
-                    IEnumerable<SectionEntity> sectionsWithTextKeys = new List<SectionEntity>();
+                    // EF Core 3 requires this to be a two step process
+                    var sectionsWithKeyAttribute = _unitofwork.Context.NumericAttributeValueHistory.Where(_ => _.AttributeId == keyAttribute.Id).ToList();
+
+                    var sectionsWithNumericKeys = sectionsWithKeyAttribute.GroupBy(_ => _.SectionId);
+
+                    //IEnumerable<SectionEntity> sectionsWithTextKeys = new List<SectionEntity>();
                     if (sectionsWithNumericKeys.Count() < 1)
                     {
                         // Only look in the text values if the numeric values are missing
-                        sectionsWithTextKeys = sectionList
-                            .Where(_ => _.TextAttributeValueHistories.Any(_ => _.AttributeId == keyAttribute.Id));
+                        var sectionsWithKeyTextAttributes = _unitofwork.Context.TextAttributeValueHistory.Where(_ => _.AttributeId == keyAttribute.Id).ToList();
 
-                        foreach (var section in sectionsWithTextKeys)
+                        var sectionsWithTextKeys = sectionsWithKeyTextAttributes.GroupBy(_ => _.SectionId);
+
+                        foreach (var group in sectionsWithTextKeys)
                         {
-                            var lastValue = section.TextAttributeValueHistories
-                                .Where(_ => _.AttributeId == keyAttribute.Id)
+                            var lastValue = group
                                 .OrderByDescending(_ => _.Year)
                                 .First()
                                 .Value;
 
                             keyValues.Add(new KeySegmentDatum()
                             {
-                                SegmentId = section.Id,
+                                SegmentId = group.Key,
                                 KeyValue = new SegmentAttributeDatum(key, lastValue)
                             });
                         }
@@ -74,17 +78,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     else
                     {
                         // Use the numeric keys
-                        foreach (var section in sectionsWithNumericKeys)
+                        foreach (var group in sectionsWithNumericKeys)
                         {
-                            var lastValue = section.NumericAttributeValueHistories
-                                .Where(_ => _.AttributeId == keyAttribute.Id)
+                            var lastValue = group
                                 .OrderByDescending(_ => _.Year)
                                 .First()
                                 .Value;
 
                             keyValues.Add(new KeySegmentDatum()
                             {
-                                SegmentId = section.Id,
+                                SegmentId = group.Key,
                                 KeyValue = new SegmentAttributeDatum(key, lastValue.ToString())
                             });
                         }
@@ -109,7 +112,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var lookupSource = KeyProperties[keyName];
             var targetSegment = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
             if (targetSegment == null) return new List<SegmentAttributeDatum>();
-            var segment = _unitofwork.Context.Section.FirstOrDefault(_ => _.Id == targetSegment.SegmentId);
+            var segment = _unitofwork.Context.Section.Where(_ => _.Id == targetSegment.SegmentId)
+                .Include(_ => _.NumericAttributeValueHistories).ThenInclude(_ => _.Attribute)
+                .Include(_ => _.TextAttributeValueHistories).ThenInclude(_ => _.Attribute)
+                .FirstOrDefault();
             if (segment == null) return new List<SegmentAttributeDatum>();
 
             // Populate the return value list
@@ -123,8 +129,59 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 returnValueList.Add(new SegmentAttributeDatum(textAttribute.Attribute.Name, textAttribute.Value));
             }
+            // Add BMSID
+            returnValueList.Add(new SegmentAttributeDatum("BMSID", segment.Name));
 
             return returnValueList;
         }
+
+        public Dictionary<int, SegmentAttributeDatum> GetAttributeValueHistory(string keyName, string keyValue, string attribute)
+        {
+            // Check for the existence of the given key
+            if (!KeyProperties.ContainsKey(keyName))
+            {
+                throw new ArgumentException($"{keyName} not a key attribute in PennDOT network");
+            }
+
+            // Get the target segment info
+            var lookupSource = KeyProperties[keyName];
+            var targetSegment = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
+            if (targetSegment == null) return new Dictionary<int, SegmentAttributeDatum>();
+            var segment = _unitofwork.Context.Section.Where(_ => _.Id == targetSegment.SegmentId)
+                .Include(_ => _.NumericAttributeValueHistories).ThenInclude(_ => _.Attribute)
+                .Include(_ => _.TextAttributeValueHistories).ThenInclude(_ => _.Attribute)
+                .FirstOrDefault();
+            if (segment == null) return new Dictionary<int, SegmentAttributeDatum>();
+
+            // Get the target attribute information
+            var keyAttribute = _unitofwork.Context.Attribute.FirstOrDefault(_ => _.Name == attribute);
+            if (keyAttribute == null) return new Dictionary<int, SegmentAttributeDatum>();
+
+            // Get all entires for the attribute-segment combination from either the NumericAttributeValueHistories or TextAttributeValueHistories
+            var numAttributeValues = _unitofwork.Context.NumericAttributeValueHistory.Where(_ => _.SectionId == segment.Id && _.AttributeId == keyAttribute.Id);
+            if (numAttributeValues != null)
+            {
+                var result = new Dictionary<int, SegmentAttributeDatum>();
+                foreach (var measurment in numAttributeValues)
+                {
+                    result.Add(measurment.Year, new SegmentAttributeDatum(keyAttribute.Name, measurment.Value.ToString()));
+                }
+                return result;
+            }
+
+            var textAttributeValues = _unitofwork.Context.TextAttributeValueHistory.Where(_ => _.SectionId == segment.Id && _.AttributeId == keyAttribute.Id);
+            if (textAttributeValues != null)
+            {
+                var result = new Dictionary<int, SegmentAttributeDatum>();
+                foreach (var measurement in textAttributeValues)
+                {
+                    result.Add(measurement.Year, new SegmentAttributeDatum(keyAttribute.Name, measurement.Value));
+                }
+                return result;
+            }
+
+            return new Dictionary<int, SegmentAttributeDatum>();
+        }
+
     }
 }

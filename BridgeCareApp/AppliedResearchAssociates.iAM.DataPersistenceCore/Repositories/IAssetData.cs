@@ -25,7 +25,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         /// </summary>
         /// <param name="keyName">Name of the attribute that contains the key</param>
         /// <param name="keyValue">Value of the key attribute</param>
-        /// <returns></returns>
+        /// <returns>List of most recent values for all attributes on a requested segment</returns>
         List<SegmentAttributeDatum> GetAssetAttributes(string keyName, string keyValue);
+
+        /// <summary>
+        /// Provides the time value history for a given attribute on a given asset
+        /// </summary>
+        /// <param name="keyName">Name of the attribute that contains the key</param>
+        /// <param name="keyValue">Value of the key attribute</param>
+        /// <param name="attribute">Name of attribute</param>
+        /// <returns>All values for a specific attribute on a specific asset in the database with a primary key of year</returns>
+        Dictionary<int, SegmentAttributeDatum> GetAttributeValueHistory(string keyName, string keyValue, string attribute);
     }
 }

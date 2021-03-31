@@ -1,7 +1,6 @@
 <template>
     <v-layout>
         <v-flex xs12>
-            <div class="container" v-html="staticHTMLForInventory"></div>
             <v-layout justify-space-between row>
                 <v-spacer></v-spacer>
                 <v-flex xs2>
@@ -38,6 +37,8 @@
                 </v-flex>
                 <v-spacer></v-spacer>
             </v-layout>
+            <v-divider></v-divider>
+            <div class="container" v-html="staticHTMLForInventory"></div>
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
                 <!-- <v-flex xs12>

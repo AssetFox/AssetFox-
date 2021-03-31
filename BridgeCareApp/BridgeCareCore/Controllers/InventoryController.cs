@@ -17,15 +17,13 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class InventoryController : HubControllerBase
     {
-        private readonly IAssetData _assestData;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IEsecSecurity _esecSecurity;
         private readonly IMaintainableAssetRepository _maintainableAssetRepository;
 
-        public InventoryController(IAssetData repo, UnitOfDataPersistenceWork unitOfWork,
+        public InventoryController(UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IEsecSecurity esecSecurity, IMaintainableAssetRepository maintainableAssetRepository) : base(hubService)
         {
-            _assestData = repo ?? throw new ArgumentNullException(nameof(repo));
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _esecSecurity = esecSecurity;
             _maintainableAssetRepository = maintainableAssetRepository;
@@ -62,12 +60,6 @@ namespace BridgeCareCore.Controllers
             var data = _maintainableAssetRepository.GetBMSIDAndBRKey();
 
             return Ok(data);
-        }
-
-        private class InventorySelectionModel
-        {
-            public string BRKey { get; set; }
-            public string BMSId { get; set; }
         }
     }
 }

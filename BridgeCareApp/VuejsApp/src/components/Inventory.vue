@@ -38,7 +38,8 @@
                 <v-spacer></v-spacer>
             </v-layout>
             <v-divider></v-divider>
-            <div class="container" v-html="staticHTMLForInventory"></div>
+            <div class="container columnsplit" v-html="staticHTMLForInventory"></div>
+
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
                 <!-- <v-flex xs12>
@@ -645,5 +646,9 @@
 
     .slider {
         width: 150px;
+    }
+
+    .columnsplit {
+        padding-left: 10px;
     }
 </style>

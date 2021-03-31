@@ -69,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             else
             {
                 providedKey = $"BRKEY:  {segmentIds.BRKey}";
-                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BRKEY_", segmentIds.BRKey.ToString());
+                segmentData = _unitofwork.AssetDataRepository.GetAssetAttributes("BRKEY", segmentIds.BRKey.ToString());
             }
             if (segmentData.Count() < 1)
             {
@@ -80,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var resultsString = new StringBuilder();
             resultsString.Append("<table>");
-            resultsString.Append(CreateHTMLSection("Key Fields", new List<string>() { "BRKEY_", "BMSID" }));
+            resultsString.Append(CreateHTMLSection("Key Fields", new List<string>() { "BRKEY", "BMSID" }));
             resultsString.Append(CreateHTMLSection("Location", new List<string>() { "DISTRICT", "COUNTY", "MUNI_CODE", "FEATURE_INTERSECTED", "FEATURE_CARRIED", "LOCATION" }));
             resultsString.Append(CreateHTMLSection("Age and Service", new List<string>() { "YEAR_BUILT", "YEAR_RECON", "FEATURE_CARRIED", "FEATURE_INTERSECTED" }));
             resultsString.Append(CreateHTMLSection("Management", new List<string>() { "OWNER_CODE", "MPO", "SUBM_AGENCY", "NBISLEN", "HBRR_ELIG", "BUS_PLAN_NETWORK" }));
@@ -127,7 +127,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             if (parameters.BRKey > 0 && !String.IsNullOrEmpty(parameters.BMSID))
             {
                 // Both parameters provided.  Check to see if they are the same asset
-                var BRKeyGuid = _unitofwork.AssetDataRepository.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == parameters.BRKey.ToString());
+                var BRKeyGuid = _unitofwork.AssetDataRepository.KeyProperties["BRKEY"].FirstOrDefault(_ => _.KeyValue.Value == parameters.BRKey.ToString());
                 if (BRKeyGuid == null)
                 {
                     // BRKey was not found
@@ -178,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
                 else
                 {
-                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BRKEY_", segmentIds.BRKey.ToString(), attributeName);
+                    attrubuteValueHistory = _unitofwork.AssetDataRepository.GetAttributeValueHistory("BRKEY", segmentIds.BRKey.ToString(), attributeName);
                 }
                 if (attrubuteValueHistory.Count < 2) return DEFAULT_VALUE;  // The default value is returned if there is either no values OR one value (the previous value is still unknown)
 

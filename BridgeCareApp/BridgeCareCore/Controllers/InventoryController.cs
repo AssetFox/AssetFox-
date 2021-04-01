@@ -31,7 +31,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetInventory")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetInventory()
         {
             //var userInfo = _esecSecurity.GetUserInformation(Request);

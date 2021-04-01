@@ -586,7 +586,7 @@
             //     }));
             var data : InventoryItem = {
                 bmsId: bmsId,
-                brKey: ''
+                brKey: '-1'
             }
             this.getStaticInventoryHTMLAction(({reportType: 'InventoryLookup', filterData: data}));
         }

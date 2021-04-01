@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 maintainableAsset.AssignAttributeData(new List<IAttributeDatum>{attributeDatum});
 
                 // Act
-                maintainableAsset.AssignSpatialWeighting(new List<Attribute>{DeckAreaAttribute}, DeckAreaAttribute.Name);
+                maintainableAsset.AssignSpatialWeighting(DeckAreaAttribute.Name);
 
                 // Assert
                 Assert.NotNull(maintainableAsset.SpatialWeighting);

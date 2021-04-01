@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AttributeDatumRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public int UpdateAssignedData(List<MaintainableAsset> maintainableAssets)
+        public void AddAssignedData(List<MaintainableAsset> maintainableAssets)
         {
             // get all the configurable attributes
             var configurableAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes();
@@ -48,32 +48,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributeDatumEntities = maintainableAssets
                 .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id))).ToList();
 
-            // save any assigned data to the data source and return the count of objects indicating
-            // the number of inserted rows
-            if (!attributeDatumEntities.Any())
-            {
-                return 0;
-            }
-
-            var existingEntityIds = _unitOfWork.Context.AttributeDatum.Select(_ => _.Id).ToList();
-
-            _unitOfWork.Context.UpdateAll(attributeDatumEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(),
-                _unitOfWork.UserEntity?.Id);
-
-            _unitOfWork.Context.AddAll(attributeDatumEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(),
-                _unitOfWork.UserEntity?.Id);
-
-            existingEntityIds = _unitOfWork.Context.AttributeDatumLocation.Select(_ => _.Id).ToList();
+            _unitOfWork.Context.AddAll(attributeDatumEntities, _unitOfWork.UserEntity?.Id);
 
             var attributeDatumLocationEntities = attributeDatumEntities.Select(_ => _.AttributeDatumLocation).ToList();
 
-            _unitOfWork.Context.UpdateAll(attributeDatumLocationEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(),
-                _unitOfWork.UserEntity?.Id);
-
-            _unitOfWork.Context.AddAll(attributeDatumLocationEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(),
-                _unitOfWork.UserEntity?.Id);
-
-            return attributeDatumEntities.Count();
+            _unitOfWork.Context.AddAll(attributeDatumLocationEntities, _unitOfWork.UserEntity?.Id);
         }
     }
 }

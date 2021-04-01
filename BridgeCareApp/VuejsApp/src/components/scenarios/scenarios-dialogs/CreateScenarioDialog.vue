@@ -42,16 +42,8 @@ export default class CreateScenarioDialog extends Vue {
 
   @State(state => state.userModule.users) stateUsers: User[];
 
-  @Action('getAllUsers') getAllUsersAction: any;
-
   newScenario: Scenario = {...emptyScenario, id: getNewGuid()};
   shared: boolean = false;
-
-  mounted() {
-    if (!hasValue(this.stateUsers)) {
-      this.getAllUsersAction();
-    }
-  }
 
   @Watch('showDialog')
   onShowDialogChanged() {

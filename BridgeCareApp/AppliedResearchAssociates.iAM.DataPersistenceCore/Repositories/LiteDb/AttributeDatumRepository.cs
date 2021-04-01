@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
 
         // Removes assigned data on maintainable assets in the given network that have attribute
         // data with attributeIds in the provided list.
-        public int UpdateAssignedData(List<MaintainableAsset> assignedMaintainableAssets)
+        public int AddAssignedData(List<MaintainableAsset> assignedMaintainableAssets)
         {
             var maintainableAssetEntityCollection = Context.Database.GetCollection<MaintainableAssetEntity>("MAINTAINABLE_ASSETS");
             return maintainableAssetEntityCollection.Update(assignedMaintainableAssets.Select(_ => _.ToEntity()));

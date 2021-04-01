@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.LiteDb
     {
         public AggregatedResultsRepository(ILiteDbContext context) : base(context) { }
 
-        public int CreateAggregatedResults(List<IAggregatedResult> domainAggregatedResults)
+        public int AddAggregatedResults(List<IAggregatedResult> domainAggregatedResults)
         {
             DeleteAggregatedResults(domainAggregatedResults.First().MaintainableAsset.NetworkId);
 

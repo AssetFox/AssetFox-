@@ -4,6 +4,7 @@ import {UserInfo, UserTokens} from '@/shared/models/iAM/authentication';
 import {http2XX} from '@/shared/utils/http-utils';
 import {checkLDAP, parseLDAP, regexCheckLDAP} from '@/shared/utils/parse-ldap';
 import {hasValue} from '@/shared/utils/has-value-util';
+import moment from 'moment';
 
 const state = {
     authenticated: false,
@@ -43,11 +44,11 @@ const actions = {
     async getUserTokens({commit}: any, code: string) {
         await AuthenticationService.getUserTokens(code)
             .then((response: AxiosResponse) => {
+                const expirationInMilliseconds = moment().add(30, 'minutes');
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     const userTokens: UserTokens = response.data as UserTokens;
                     localStorage.setItem('UserTokens', JSON.stringify(userTokens));
-                    const expiration: Date = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes, in milliseconds
-                    localStorage.setItem('TokenExpiration', expiration.getTime().toString());
+                    localStorage.setItem('TokenExpiration', expirationInMilliseconds.valueOf().toString());
                     commit('authenticatedMutator', true);
                 }
             });
@@ -84,13 +85,11 @@ const actions = {
             const userTokens: UserTokens = JSON.parse(localStorage.getItem('UserTokens') as string) as UserTokens;
             await AuthenticationService.refreshTokens(userTokens.refresh_token)
                 .then((response: AxiosResponse) => {
+                    const expirationInMilliseconds = moment().add(30, 'minutes');
                     if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                        localStorage.setItem('UserTokens', JSON.stringify({
-                            ...userTokens,
-                            ...JSON.parse(response.data)
-                        }));
-                        const expiration: Date = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes, in milliseconds
-                        localStorage.setItem('TokenExpiration', expiration.getTime().toString());
+                        const userTokens: UserTokens = response.data as UserTokens;
+                        localStorage.setItem('UserTokens', JSON.stringify(userTokens));
+                        localStorage.setItem('TokenExpiration', expirationInMilliseconds.valueOf().toString());
                     }
                 });
             commit('refreshingMutator', false);

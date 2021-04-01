@@ -419,7 +419,6 @@ export default class Scenarios extends Vue {
   @Action('createNetwork') createNetworkAction: any;*/
   @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
   @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
-  @Action('getNetworks') getNetworksAction: any;
 
   @Action('setSuccessMessage') setSuccessMessageAction: any;
   @Action('setWarningMessage') setWarningMessageAction: any;
@@ -496,8 +495,6 @@ export default class Scenarios extends Vue {
   }
 
   mounted() {
-    this.onAuthentication();
-
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, this.getDataAggregationStatus);
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, this.getScenarioAnalysisDetailUpdate);
@@ -509,12 +506,6 @@ export default class Scenarios extends Vue {
     this.$statusHub.$off(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);
     this.$statusHub.$off(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, this.getScenarioAnalysisDetailUpdate);
     this.$statusHub.$off(Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent, this.getSummaryReportStatus);
-  }
-
-  onAuthentication() {
-    if (this.authenticated) {
-      this.getNetworksAction();
-    }
   }
 
   formatDate(dateToFormat: Date) {

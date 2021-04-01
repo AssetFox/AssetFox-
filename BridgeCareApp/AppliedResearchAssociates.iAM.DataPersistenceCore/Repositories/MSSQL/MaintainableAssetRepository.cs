@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -30,15 +31,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException($"The network has no maintainable assets for rollup.");
             }
-
-            /*var maintainableAssets = _unitOfWork.Context.MaintainableAsset
-                .Include(_ => _.MaintainableAssetLocation)
-                .Include(_ => _.AssignedData)
-                .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.AssignedData)
-                .ThenInclude(_ => _.AttributeDatumLocation)
-                .Where(_ => _.NetworkId == networkId)
-                .ToList();*/
 
             var assets = _unitOfWork.Context.MaintainableAsset
                 .Where(_ => _.NetworkId == networkId)
@@ -70,7 +62,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             Command = datum.Attribute.Command,
                             ConnectionType = datum.Attribute.ConnectionType,
                             IsCalculated = datum.Attribute.IsCalculated,
-                            IsAscending = datum.Attribute.IsAscending
+                            IsAscending = datum.Attribute.IsAscending,
+                            DataType = datum.Attribute.DataType
                         }
                     }).ToList()
                 })
@@ -159,26 +152,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpdateMaintainableAssetsSpatialWeighting(List<MaintainableAsset> maintainableAssets)
         {
-            var entityIds = maintainableAssets.Select(_ => _.Id).ToList();
+            var networkId = maintainableAssets.First().NetworkId;
+            var maintainableAssetEntities = maintainableAssets.Select(_ => _.ToEntity(networkId)).ToList();
 
-            var existingEntities = _unitOfWork.Context.MaintainableAsset
-                .Where(_ => entityIds.Contains(_.Id))
-                .Select(asset => new MaintainableAssetEntity
-                {
-                    Id = asset.Id,
-                    NetworkId = asset.NetworkId,
-                    FacilityName = asset.FacilityName,
-                    SectionName = asset.SectionName
-                }).ToList()
-                .Select(asset =>
-                {
-                    var spatialWeighting = maintainableAssets.Single(_ => _.Id == asset.Id).SpatialWeighting;
-                    asset.Area = spatialWeighting.Area;
-                    asset.AreaUnit = spatialWeighting.AreaUnit;
-                    return asset;
-                }).ToList();
+            var propsToExclude = new List<string> { "CreatedDate", "CreatedBy", "FacilityName", "SectionName" };
+            var config = new BulkConfig { PropertiesToExclude = propsToExclude };
 
-            _unitOfWork.Context.UpdateAll(existingEntities, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.UpdateAll(maintainableAssetEntities, _unitOfWork.UserEntity?.Id, config);
         }
 
 

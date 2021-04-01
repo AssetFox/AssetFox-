@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 
@@ -18,6 +19,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
             Config = config ?? throw new ArgumentNullException(nameof(config));
 
             Context = context ?? throw new ArgumentNullException(nameof(context));
+
+            Context.Database.SetCommandTimeout(180);
         }
 
         public IConfiguration Config { get; }

@@ -12,5 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId);
 
         void CreateMaintainableAssets(List<Section> sections, Guid networkId);
+
+        void UpdateMaintainableAssetsSpatialWeighting(List<MaintainableAsset> maintainableAssets);
     }
 }

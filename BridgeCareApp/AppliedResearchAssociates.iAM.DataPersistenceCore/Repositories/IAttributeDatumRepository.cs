@@ -5,6 +5,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeDatumRepository
     {
-        int UpdateAssignedData(List<MaintainableAsset> maintainableAssets);
+        void AddAssignedData(List<MaintainableAsset> maintainableAssets);
     }
 }

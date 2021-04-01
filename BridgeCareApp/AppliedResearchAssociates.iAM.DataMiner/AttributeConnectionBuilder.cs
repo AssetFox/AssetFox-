@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataMiner
                 return new SqlAttributeConnection(attribute);
 
             case ConnectionType.MONGO_DB:
-                throw new NotImplementedException("Mongo Db data retrival has not been implemented");
+                throw new NotImplementedException("Mongo Db data retrieval has not been implemented");
             default:
                 throw new InvalidOperationException($"Invalid Connection type \"{attribute.ConnectionType}\".");
             }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +14,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
-        public AttributeDatumRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork)
-        {
+        public AttributeDatumRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        }
 
-        public int UpdateAssignedData(List<MaintainableAsset> maintainableAssets)
+        public void AddAssignedData(List<MaintainableAsset> maintainableAssets)
         {
             // get all the configurable attributes
             var configurableAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes();
@@ -46,21 +45,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             // convert any assigned data to their equivalent entity object types
-            var assignedData = maintainableAssets
+            var attributeDatumEntities = maintainableAssets
                 .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id))).ToList();
 
-            // save any assigned data to the data source and return the count of objects indicating
-            // the number of inserted rows
-            if (!assignedData.Any())
-            {
-                return 0;
-            }
+            _unitOfWork.Context.AddAll(attributeDatumEntities, _unitOfWork.UserEntity?.Id);
 
-            _unitOfWork.Context.BulkInsertOrUpdate(assignedData);
-            _unitOfWork.Context.BulkInsertOrUpdate(assignedData.Select(_ => _.AttributeDatumLocation).ToList());
-            _unitOfWork.Context.SaveChanges();
+            var attributeDatumLocationEntities = attributeDatumEntities.Select(_ => _.AttributeDatumLocation).ToList();
 
-            return assignedData.Count();
+            _unitOfWork.Context.AddAll(attributeDatumLocationEntities, _unitOfWork.UserEntity?.Id);
         }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using Attribute = System.Attribute;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
@@ -24,9 +26,31 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
         }
 
         // TODO: side effect => mutate (get area equation; calculate spatial weighting)
-        public void AssignSpatialWeighting()
+        public void AssignSpatialWeighting(string benefitQuantifierEquation)
         {
-            // run spatial weighting equation to assign SpatialWeighting value here
+            if (!AssignedData.Any() || !AssignedData.Any(_ => _ is AttributeDatum<double>))
+            {
+                return;
+            }
+
+            var numericAssignedData = AssignedData.Where(_ =>
+                _ is AttributeDatum<double> && benefitQuantifierEquation.Contains(_.Attribute.Name)).ToList();
+
+            var compiler = new CalculateEvaluateCompiler();
+            foreach (var numericDatum in numericAssignedData.Cast<AttributeDatum<double>>())
+            {
+                compiler.ParameterTypes[numericDatum.Attribute.Name] = CalculateEvaluateParameterType.Number;
+            }
+            var calculator = compiler.GetCalculator(benefitQuantifierEquation);
+
+            var scope = new CalculateEvaluateScope();
+            foreach (var numericDatum in numericAssignedData.Cast<AttributeDatum<double>>())
+            {
+                scope.SetNumber(numericDatum.Attribute.Name, numericDatum.Value);
+            }
+
+            var result = calculator.Delegate(scope);
+            SpatialWeighting = new SpatialWeighting(result);
         }
 
         public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)

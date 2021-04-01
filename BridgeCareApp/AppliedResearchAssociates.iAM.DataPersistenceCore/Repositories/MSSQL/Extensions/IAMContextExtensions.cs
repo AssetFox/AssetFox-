@@ -112,15 +112,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             context.SaveChanges();
         }
 
-        public static void UpdateAll<T>(this IAMContext context, List<T> entities, Guid? userId = null) where T : class
+        public static void UpdateAll<T>(this IAMContext context, List<T> entities, Guid? userId = null, BulkConfig config = null) where T : class
         {
             if (!entities.Any())
             {
                 return;
             }
-
-            var propsToExclude = new List<string> { "CreatedDate", "CreatedBy" };
-            var config = new BulkConfig { PropertiesToExclude = propsToExclude };
 
             if (userId.HasValue)
             {
@@ -128,6 +125,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 {
                     SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
                 });
+            }
+
+            if (config == null)
+            {
+                var propsToExclude = new List<string> { "CreatedDate", "CreatedBy" };
+                config = new BulkConfig { PropertiesToExclude = propsToExclude };
             }
 
             context.BulkUpdate(entities, config);

@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
     public class InventoryReport : IReport
     {
         private const string DEFAULT_VALUE = "N";
+        private const int DEFAULT_COLUMNS = 2;
 
         private UnitOfDataPersistenceWork _unitofwork;
         private Guid _networkId;
@@ -191,7 +192,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
         }
 
-        private string CreateHTMLSection(string sectionName, List<string> attributes, int numberColumns = 2, bool previous = false)
+        private string CreateHTMLSection(string sectionName, List<string> attributes, int numberColumns = DEFAULT_COLUMNS, bool previous = false)
         {
             var sectionString = new StringBuilder($"<tr><th colspan=\"4\">{sectionName}</th></tr>");
             int remainingColumns = numberColumns;
@@ -200,15 +201,19 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 if (remainingColumns == numberColumns)
                 {
                     // This is the first column
-                    sectionString.Append($"<tr><td class=\"description\">{GetDescription(attribute)}</td><td class=\"data\">{GetAttribute(attribute, previous)}</td></tr>");
+                    sectionString.Append($"<tr><td class=\"description\">{GetDescription(attribute)}</td><td class=\"data\">{GetAttribute(attribute, previous)}</td>");
                     remainingColumns--;
                 }
                 else
                 {
-                    sectionString.Append($"<td class=\"description columnsplit\">{GetDescription(attribute)}</td><td class=\"data\">{GetAttribute(attribute, previous)}</td></tr>");
+                    sectionString.Append($"<td class=\"description columnsplit\">{GetDescription(attribute)}</td><td class=\"data\">{GetAttribute(attribute, previous)}</td>");
                     remainingColumns--;
                 }
-                if (remainingColumns == 0) remainingColumns = numberColumns;
+                if (remainingColumns == 0)
+                {
+                    remainingColumns = numberColumns;
+                    sectionString.Append($"</tr>");
+                }
             }
 
             return sectionString.ToString();

@@ -88,7 +88,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
-            var networkEntity = _unitOfWork.Context.Network
+            var networkEntity = _unitOfWork.Context.Network.AsNoTracking()
                 .Single(_ => _.Id == networkId);
 
             if (areFacilitiesRequired)
@@ -113,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 Name = result.Attribute.Name
                             }
                         }).ToList()
-                    }).ToList();
+                    }).AsNoTracking().ToList();
             }
             return networkEntity.ToDomain(explorer);
         }

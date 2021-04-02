@@ -134,7 +134,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             ChangeValue = consequence.ChangeValue,
                             Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
                         }).ToList()
-                }).ToList()
+                }).AsNoTracking().ToList()
                 .ForEach(_ => _.CreateCommittedProject(simulation));
         }
     }

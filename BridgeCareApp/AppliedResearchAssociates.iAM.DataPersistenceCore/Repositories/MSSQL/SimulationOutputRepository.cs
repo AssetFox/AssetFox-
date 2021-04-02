@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -23,7 +24,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+            var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
+                .Single(_ => _.Id == simulationId);
 
             if (simulationOutput == null)
             {
@@ -34,7 +36,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var simulationOutputString = JsonConvert.SerializeObject(simulationOutput, settings);
 
             _unitOfWork.Context.Upsert(new SimulationOutputEntity { SimulationId = simulationId, Output = simulationOutputString }, simulationId);
-            _unitOfWork.Context.SaveChanges();
         }
 
         public void GetSimulationOutput(Simulation simulation)

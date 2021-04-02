@@ -466,11 +466,6 @@ export default class Scenarios extends Vue {
   rules: InputValidationRules = rules;
   showMigrateLegacySimulationDialog: boolean = false;
 
-  @Watch('authenticated')
-  onAuthenticatedChanged() {
-    this.onAuthentication();
-  }
-
   @Watch('stateNetworks')
   onStateNetworksChanged() {
     this.networks = clone(this.stateNetworks);
@@ -495,6 +490,9 @@ export default class Scenarios extends Vue {
   }
 
   mounted() {
+    this.networks = clone(this.stateNetworks);
+    this.scenarios = clone(this.stateScenarios);
+
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, this.getDataAggregationStatus);
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, this.getScenarioAnalysisDetailUpdate);
@@ -619,7 +617,7 @@ export default class Scenarios extends Vue {
 
     if (submit && this.selectedScenario.id !== getBlankGuid()) {
       this.runSimulationAction({
-        networkId: this.stateNetworks[0].id,
+        networkId: this.networks[0].id,
         scenarioId: this.selectedScenario.id,
       }).then(() => this.selectedScenario = clone(emptyScenario));
     }

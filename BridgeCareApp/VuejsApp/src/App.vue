@@ -174,10 +174,10 @@ export default class AppComponent extends Vue {
   @Action('setWarningMessage') setWarningMessageAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('setInfoMessage') setInfoMessageAction: any;
-  //@Action('pollEvents') pollEventsAction: any;
   @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
   @Action('getAllUsers') getAllUsersAction: any;
   @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
+  @Action('getUserInfo') getUserInfoAction: any;
 
   drawer: boolean = false;
   alertDialogData: AlertData = clone(emptyAlertData);
@@ -374,9 +374,11 @@ export default class AppComponent extends Vue {
     this.checkBrowserTokensAction();
     window.setInterval(this.checkBrowserTokensAction, 30000);
 
-    // Generate a polling session id, and begin polling once per 5 seconds
-    /*this.generatePollingSessionIdAction();
-    window.setInterval(this.pollEventsAction, 5000);*/
+    if (this.authenticated) {
+      this.onLogin();
+    } else {
+      this.getUserInfoAction();
+    }
   }
 
   mounted() {
@@ -404,25 +406,12 @@ export default class AppComponent extends Vue {
    * Sets up a recurring attempt at refreshing user tokens, and fetches network and attribute data
    */
   onLogin() {
-    this.onRefreshTokenIfAboutToExpire();
-    // Tokens expire after 30 minutes. They are refreshed after 29 minutes.
-    this.refreshIntervalID = window.setInterval(this.onRefreshTokenIfAboutToExpire, 1 * 60 * 1000);
     this.$forceUpdate();
     this.getNetworksAction();
     this.getAttributesAction();
     this.getAllUsersAction();
 
     this.getUserCriteriaFilterAction();
-  }
-
-  onRefreshTokenIfAboutToExpire() {
-    const currentDateTime = moment();
-    const tokenExpiration = parseInt(localStorage.getItem('TokenExpiration') as string);
-    const tokenExpirationDateTime = moment(tokenExpiration);
-    const differenceInMinutes = tokenExpirationDateTime.diff(currentDateTime, 'minutes');
-    if (differenceInMinutes <= 2) {
-      this.refreshTokensAction();
-    }
   }
 
   /**

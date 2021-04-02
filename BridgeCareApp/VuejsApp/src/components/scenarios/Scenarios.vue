@@ -495,6 +495,9 @@ export default class Scenarios extends Vue {
   }
 
   mounted() {
+    this.networks = clone(this.stateNetworks);
+    this.scenarios = clone(this.stateScenarios);
+
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, this.getDataAggregationStatus);
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, this.getScenarioAnalysisDetailUpdate);

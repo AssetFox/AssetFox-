@@ -404,25 +404,12 @@ export default class AppComponent extends Vue {
    * Sets up a recurring attempt at refreshing user tokens, and fetches network and attribute data
    */
   onLogin() {
-    this.onRefreshTokenIfAboutToExpire();
-    // Tokens expire after 30 minutes. They are refreshed after 29 minutes.
-    this.refreshIntervalID = window.setInterval(this.onRefreshTokenIfAboutToExpire, 1 * 60 * 1000);
     this.$forceUpdate();
     this.getNetworksAction();
     this.getAttributesAction();
     this.getAllUsersAction();
 
     this.getUserCriteriaFilterAction();
-  }
-
-  onRefreshTokenIfAboutToExpire() {
-    const currentDateTime = moment();
-    const tokenExpiration = parseInt(localStorage.getItem('TokenExpiration') as string);
-    const tokenExpirationDateTime = moment(tokenExpiration);
-    const differenceInMinutes = tokenExpirationDateTime.diff(currentDateTime, 'minutes');
-    if (differenceInMinutes <= 2) {
-      this.refreshTokensAction();
-    }
   }
 
   /**

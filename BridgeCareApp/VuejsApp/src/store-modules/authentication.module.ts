@@ -55,19 +55,19 @@ const actions = {
   },
 
   async checkBrowserTokens({ commit, dispatch, state }: any, code: string) {
-    const storedTokenExpiration: number = Number(localStorage.getItem('TokenExpiration') as string);
-    if (isNaN(storedTokenExpiration) && state.authenticated) {
-      dispatch('logOut');
+    const storedTokenExpiration: number = parseInt(localStorage.getItem('TokenExpiration') as string);
+    if (isNaN(storedTokenExpiration)) {
+      return;
     }
 
     const currentDateTime = moment();
     const tokenExpirationDateTime = moment(storedTokenExpiration);
+    const differenceInMinutes = tokenExpirationDateTime.diff(currentDateTime, 'minutes');
 
-    if (tokenExpirationDateTime.valueOf() > moment().valueOf()) {
-      const differenceInMinutes = tokenExpirationDateTime.diff(currentDateTime, 'minutes');
-      if (differenceInMinutes <= 2) {
+    if (differenceInMinutes > 2) {
+      return;
+    } else if (differenceInMinutes <= 2) {
         dispatch('refreshTokens');
-      }
     } else if (state.authenticated) {
       dispatch('logOut');
     }
@@ -92,7 +92,7 @@ const actions = {
     }
   },
 
-  async getUserInfo({ commit, dispatch }: any) {
+  async getUserInfo({ commit, dispatch, state }: any) {
     if (!localStorage.getItem('UserTokens')) {
       dispatch('logOut');
     } else {
@@ -104,12 +104,18 @@ const actions = {
             localStorage.setItem('UserInfo', JSON.stringify(userInfo));
             const username: string = parseLDAP(userInfo.sub)[0];
             commit('hasRoleMutator', regexCheckLDAP(userInfo.roles, /PD-BAMS-(Administrator|CWOPA|PlanningPartner|DBEngineer)/));
+
             if (state.hasRole) {
               commit('isAdminMutator', checkLDAP(userInfo.roles, 'PD-BAMS-Administrator'));
               commit('isCWOPAMutator', checkLDAP(userInfo.roles, 'PD-BAMS-CWOPA'));
             }
+
             commit('checkedForRoleMutator', true);
             commit('usernameMutator', username);
+
+            if (!state.authenticated) {
+              commit('authenticatedMutator', true);
+            }
           } else {
             dispatch('logOut');
           }

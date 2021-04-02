@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import vuexPersistedState from 'vuex-persistedstate';
 
 import busyModule from '@/store-modules/busy.module';
 import authenticationModule from '@/store-modules/authentication.module';
@@ -51,6 +50,5 @@ export default new Vuex.Store({
         unsavedChangesFlagModule,
         criterionModule,
         analysisMethodModule
-    },
-    plugins: [vuexPersistedState()]
+    }
 });

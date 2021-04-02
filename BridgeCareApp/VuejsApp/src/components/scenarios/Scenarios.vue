@@ -419,7 +419,6 @@ export default class Scenarios extends Vue {
   @Action('createNetwork') createNetworkAction: any;*/
   @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
   @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
-  @Action('getNetworks') getNetworksAction: any;
 
   @Action('setSuccessMessage') setSuccessMessageAction: any;
   @Action('setWarningMessage') setWarningMessageAction: any;
@@ -467,11 +466,6 @@ export default class Scenarios extends Vue {
   rules: InputValidationRules = rules;
   showMigrateLegacySimulationDialog: boolean = false;
 
-  @Watch('authenticated')
-  onAuthenticatedChanged() {
-    this.onAuthentication();
-  }
-
   @Watch('stateNetworks')
   onStateNetworksChanged() {
     this.networks = clone(this.stateNetworks);
@@ -496,7 +490,8 @@ export default class Scenarios extends Vue {
   }
 
   mounted() {
-    this.onAuthentication();
+    this.networks = clone(this.stateNetworks);
+    this.scenarios = clone(this.stateScenarios);
 
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, this.getDataAggregationStatus);
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);
@@ -509,12 +504,6 @@ export default class Scenarios extends Vue {
     this.$statusHub.$off(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);
     this.$statusHub.$off(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, this.getScenarioAnalysisDetailUpdate);
     this.$statusHub.$off(Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent, this.getSummaryReportStatus);
-  }
-
-  onAuthentication() {
-    if (this.authenticated) {
-      this.getNetworksAction();
-    }
   }
 
   formatDate(dateToFormat: Date) {
@@ -628,7 +617,7 @@ export default class Scenarios extends Vue {
 
     if (submit && this.selectedScenario.id !== getBlankGuid()) {
       this.runSimulationAction({
-        networkId: this.stateNetworks[0].id,
+        networkId: this.networks[0].id,
         scenarioId: this.selectedScenario.id,
       }).then(() => this.selectedScenario = clone(emptyScenario));
     }

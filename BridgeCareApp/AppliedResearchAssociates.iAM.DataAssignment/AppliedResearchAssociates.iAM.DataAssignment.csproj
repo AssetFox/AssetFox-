@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AppliedResearchAssociates.CalculateEvaluate\AppliedResearchAssociates.CalculateEvaluate.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj" />
   </ItemGroup>
 

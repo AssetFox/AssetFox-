@@ -1,29 +1,29 @@
 <template>
-  <v-app class="paper-white-bg">
+  <v-app class='paper-white-bg'>
     <v-content>
-      <v-navigation-drawer :disable-resize-watcher="true" app class="paper-white-bg" v-if="authenticatedWithRole"
-                           v-model="drawer">
-        <v-list class="pt-0" dense>
+      <v-navigation-drawer :disable-resize-watcher='true' app class='paper-white-bg' v-if='authenticatedWithRole'
+                           v-model='drawer'>
+        <v-list class='pt-0' dense>
           <v-list-tile @click="drawer=false; onNavigate('/Home/')">
             <v-list-tile-action>
-              <v-icon class="ara-dark-gray">fas fa-newspaper</v-icon>
+              <v-icon class='ara-dark-gray'>fas fa-newspaper</v-icon>
             </v-list-tile-action>
             <v-list-tile-title>Home</v-list-tile-title>
           </v-list-tile>
           <v-list-tile @click="onNavigate('/Inventory/')">
             <v-list-tile-action>
-              <v-icon class="ara-dark-gray">fas fa-archive</v-icon>
+              <v-icon class='ara-dark-gray'>fas fa-archive</v-icon>
             </v-list-tile-action>
             <v-list-tile-title>Inventory</v-list-tile-title>
           </v-list-tile>
           <v-list-tile @click="onNavigate('/Scenarios/')">
             <v-list-tile-action>
-              <v-icon class="ara-dark-gray">fas fa-project-diagram</v-icon>
+              <v-icon class='ara-dark-gray'>fas fa-project-diagram</v-icon>
             </v-list-tile-action>
             <v-list-tile-title>Scenarios</v-list-tile-title>
           </v-list-tile>
-          <v-list-group prepend-icon="fas fa-book">
-            <template slot="activator">
+          <v-list-group prepend-icon='fas fa-book'>
+            <template slot='activator'>
               <v-list-tile>
                 <v-list-tile-title>Libraries</v-list-tile-title>
               </v-list-tile>
@@ -46,7 +46,7 @@
             <v-list-tile @click="onNavigate('/DeficientConditionGoalEditor/Library/')">
               <v-list-tile-title>Deficient Condition Goal</v-list-tile-title>
             </v-list-tile>
-            <v-list-tile @click="onNavigate('/RemainingLifeLimitEditor/Library/')" v-if="isAdmin">
+            <v-list-tile @click="onNavigate('/RemainingLifeLimitEditor/Library/')" v-if='isAdmin'>
               <v-list-tile-title>Remaining Life Limit</v-list-tile-title>
             </v-list-tile>
             <v-list-tile @click="onNavigate('/CashFlowEditor/Library/')">
@@ -56,96 +56,97 @@
               <v-list-tile-title>Criterion</v-list-tile-title>
             </v-list-tile>
           </v-list-group>
-          <v-list-tile @click="onNavigate('/UserCriteria/')" v-if="isAdmin">
+          <v-list-tile @click="onNavigate('/UserCriteria/')" v-if='isAdmin'>
             <v-list-tile-action>
-              <v-icon class="ara-dark-gray">fas fa-lock</v-icon>
+              <v-icon class='ara-dark-gray'>fas fa-lock</v-icon>
             </v-list-tile-action>
             <v-list-tile-title>Security</v-list-tile-title>
           </v-list-tile>
         </v-list>
       </v-navigation-drawer>
-      <v-toolbar app class="ara-blue-pantone-289-bg">
-        <v-toolbar-side-icon @click="drawer = !drawer"
-                             class="white--text"
+      <v-toolbar app class='ara-blue-pantone-289-bg'>
+        <v-toolbar-side-icon @click='drawer = !drawer'
+                             class='white--text'
                              v-if="authenticatedWithRole && ($router.currentRoute.name !== 'Home')"></v-toolbar-side-icon>
-        <v-toolbar-title class="white--text"
+        <v-toolbar-title class='white--text'
                          v-if="authenticatedWithRole && ($router.currentRoute.name === 'Home')">
-          <v-btn @click="onNavigate('/Inventory/')" class="ara-blue-bg white--text" round>
-            <v-icon style="padding-right: 12px">fas fa-archive</v-icon>
+          <v-btn @click="onNavigate('/Inventory/')" class='ara-blue-bg white--text' round>
+            <v-icon style='padding-right: 12px'>fas fa-archive</v-icon>
             Inventory Lookup
           </v-btn>
-          <v-btn @click="onNavigate('/Scenarios/')" class="ara-blue-bg white--text" round>
-            <v-icon style="padding-right: 12px">fas fa-project-diagram</v-icon>
+          <v-btn @click="onNavigate('/Scenarios/')" class='ara-blue-bg white--text' round>
+            <v-icon style='padding-right: 12px'>fas fa-project-diagram</v-icon>
             BridgeCare Analysis
           </v-btn>
-          <v-btn @click="onNavigate('/UserCriteria/')" class="ara-blue-bg white--text" round v-if="isAdmin">
-            <v-icon style="padding-right: 12px">fas fa-lock</v-icon>
+          <v-btn @click="onNavigate('/UserCriteria/')" class='ara-blue-bg white--text' round v-if='isAdmin'>
+            <v-icon style='padding-right: 12px'>fas fa-lock</v-icon>
             Security
           </v-btn>
         </v-toolbar-title>
-        <v-toolbar-title class="white--text" v-if="hasSelectedScenario">
-          <span class="font-weight-light">Scenario: </span>
+        <v-toolbar-title class='white--text' v-if='hasSelectedScenario'>
+          <span class='font-weight-light'>Scenario: </span>
           <span>{{ selectedScenario.name }}</span>
-          <span v-if="selectedScenarioHasStatus" class="font-weight-light"> => Status: </span>
-          <span v-if="selectedScenarioHasStatus">{{ selectedScenario.status }}</span>
+          <span v-if='selectedScenarioHasStatus' class='font-weight-light'> => Status: </span>
+          <span v-if='selectedScenarioHasStatus'>{{ selectedScenario.status }}</span>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-toolbar-title class="white--text" v-if="authenticated">
-          <span class="font-weight-light">Hello, </span>
+        <v-toolbar-title class='white--text' v-if='authenticated'>
+          <span class='font-weight-light'>Hello, </span>
           <span>{{ username }}</span>
         </v-toolbar-title>
-        <v-toolbar-title class="white--text" v-if="!authenticated">
-          <v-btn @click="onNavigate('/AuthenticationStart/')" class="ara-blue-bg white--text" round>
+        <v-toolbar-title class='white--text' v-if='!authenticated'>
+          <v-btn @click="onNavigate('/AuthenticationStart/')" class='ara-blue-bg white--text' round>
             Log In
           </v-btn>
         </v-toolbar-title>
-        <v-toolbar-title class="white--text" v-if="authenticated">
-          <v-btn @click="onLogout()" class="ara-blue-bg white--text" round>
+        <v-toolbar-title class='white--text' v-if='authenticated'>
+          <v-btn @click='onLogout()' class='ara-blue-bg white--text' round>
             Log Out
           </v-btn>
         </v-toolbar-title>
       </v-toolbar>
-      <v-container fluid v-bind="container">
+      <v-container fluid v-bind='container'>
         <router-view></router-view>
       </v-container>
-      <v-footer app class="ara-blue-pantone-289-bg white--text" fixed>
+      <v-footer app class='ara-blue-pantone-289-bg white--text' fixed>
         <v-spacer></v-spacer>
         <v-flex xs2>
-          <div class="dev-and-ver-div">
-            <div class="font-weight-light">iAM</div>
+          <div class='dev-and-ver-div'>
+            <div class='font-weight-light'>iAM</div>
             <div>BridgeCare &copy; 2019</div>
             <div>{{ packageVersion }}</div>
           </div>
         </v-flex>
         <v-spacer></v-spacer>
       </v-footer>
-      <Spinner/>
-      <Alert :dialog-data="alertDialogData" @submit="onAlertResult"/>
+      <Spinner />
+      <Alert :dialog-data='alertDialogData' @submit='onAlertResult' />
     </v-content>
   </v-app>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import {Watch} from 'vue-property-decorator';
-import {Action, State} from 'vuex-class';
+import { Watch } from 'vue-property-decorator';
+import { Action, State } from 'vuex-class';
 import Spinner from './shared/modals/Spinner.vue';
 import iziToast from 'izitoast';
-import {hasValue} from '@/shared/utils/has-value-util';
-import {AxiosError, AxiosRequestConfig, AxiosResponse} from 'axios';
-import {axiosInstance, coreAxiosInstance, nodejsAxiosInstance} from '@/shared/utils/axios-instance';
-import {getErrorMessage, setAuthHeader, setContentTypeCharset} from '@/shared/utils/http-utils';
+import { hasValue } from '@/shared/utils/has-value-util';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { axiosInstance, coreAxiosInstance, nodejsAxiosInstance } from '@/shared/utils/axios-instance';
+import { getErrorMessage, setAuthHeader, setContentTypeCharset } from '@/shared/utils/http-utils';
 //import ReportsService from './services/reports.service';
 import Alert from '@/shared/modals/Alert.vue';
-import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
-import {clone} from 'ramda';
-import {emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
-import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import { clone } from 'ramda';
+import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
+import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { Hub } from '@/connectionHub';
+import moment from 'moment';
 
 @Component({
-  components: {Alert, Spinner}
+  components: { Alert, Spinner },
 })
 export default class AppComponent extends Vue {
   @State(state => state) state: any;
@@ -173,10 +174,10 @@ export default class AppComponent extends Vue {
   @Action('setWarningMessage') setWarningMessageAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('setInfoMessage') setInfoMessageAction: any;
-  //@Action('pollEvents') pollEventsAction: any;
   @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
   @Action('getAllUsers') getAllUsersAction: any;
   @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
+  @Action('getUserInfo') getUserInfoAction: any;
 
   drawer: boolean = false;
   alertDialogData: AlertData = clone(emptyAlertData);
@@ -188,7 +189,9 @@ export default class AppComponent extends Vue {
   ignoredAPIs: string[] = [
     'SynchronizeLegacySimulation',
     'RunSimulation',
-    'GenerateSummaryReport'
+    'GenerateSummaryReport',
+    'AggregateNetworkData',
+    'RefreshToken',
   ];
 
   get container() {
@@ -229,9 +232,9 @@ export default class AppComponent extends Vue {
         message: this.successMessage,
         position: 'topRight',
         closeOnClick: true,
-        timeout: 3000
+        timeout: 3000,
       });
-      this.setSuccessMessageAction({message: ''});
+      this.setSuccessMessageAction({ message: '' });
     }
   }
 
@@ -243,9 +246,9 @@ export default class AppComponent extends Vue {
         message: this.warningMessage,
         position: 'topRight',
         closeOnClick: true,
-        timeout: 5000
+        timeout: 5000,
       });
-      this.setWarningMessageAction({message: ''});
+      this.setWarningMessageAction({ message: '' });
     }
   }
 
@@ -257,9 +260,9 @@ export default class AppComponent extends Vue {
         message: this.errorMessage,
         position: 'topRight',
         closeOnClick: true,
-        timeout: false
+        timeout: false,
       });
-      this.setErrorMessageAction({message: ''});
+      this.setErrorMessageAction({ message: '' });
     }
   }
 
@@ -271,9 +274,9 @@ export default class AppComponent extends Vue {
         message: this.infoMessage,
         position: 'topRight',
         closeOnClick: true,
-        timeout: 5000
+        timeout: 5000,
       });
-      this.setInfoMessageAction({message: ''});
+      this.setInfoMessageAction({ message: '' });
     }
   }
 
@@ -301,26 +304,26 @@ export default class AppComponent extends Vue {
         await new Promise(_ => setTimeout(_, 5000));
       }
       request.headers = setAuthHeader(request.headers);
-      app.setIsBusyAction({isBusy: app.ignoredAPIs.every((ignored: string) => request.url!.indexOf(ignored) === -1)});
+      app.setIsBusyAction({ isBusy: app.ignoredAPIs.every((ignored: string) => request.url!.indexOf(ignored) === -1) });
       return request;
     }
 
     // set axios request interceptor to use request handler
     axiosInstance.interceptors.request.use(
-        (request: any) => requestHandler(this, request)
+        (request: any) => requestHandler(this, request),
     );
     // set nodejs axios request interceptor to use request handler
     nodejsAxiosInstance.interceptors.request.use(
-        (request: any) => requestHandler(this, request)
+        (request: any) => requestHandler(this, request),
     );
     // set bridge care core axios request interceptor to use request handler
     coreAxiosInstance.interceptors.request.use(
-        (request: any) => requestHandler(this, request)
+        (request: any) => requestHandler(this, request),
     );
     // create a success & error handler
     const successHandler = (response: AxiosResponse) => {
       response.headers = setContentTypeCharset(response.headers);
-      this.setIsBusyAction({isBusy: false});
+      this.setIsBusyAction({ isBusy: false });
       return response;
     };
     const errorHandler = (error: AxiosError) => {
@@ -330,23 +333,23 @@ export default class AppComponent extends Vue {
       if (error.response) {
         error.response.headers = setContentTypeCharset(error.response.headers);
       }
-      this.setIsBusyAction({isBusy: false});
+      this.setIsBusyAction({ isBusy: false });
       //this.setErrorMessageAction({message: getErrorMessage(error)});
     };
     // set axios response handler to use success & error handlers
     axiosInstance.interceptors.response.use(
         (response: any) => successHandler(response),
-        (error: any) => errorHandler(error)
+        (error: any) => errorHandler(error),
     );
     // set nodejs axios response handler to user success & error handlers
     nodejsAxiosInstance.interceptors.response.use(
         (response: any) => successHandler(response),
-        (error: any) => errorHandler(error)
+        (error: any) => errorHandler(error),
     );
     // set bridge care core axios response handler to use success & error handlers
     coreAxiosInstance.interceptors.response.use(
         (response: any) => successHandler(response),
-        (error: any) => errorHandler(error)
+        (error: any) => errorHandler(error),
     );
 
     this.$router.beforeEach((to: any, from: any, next: any) => {
@@ -358,7 +361,7 @@ export default class AppComponent extends Vue {
           showDialog: true,
           heading: 'Unsaved Changes',
           message: 'You have unsaved changes. Are you sure you wish to continue?',
-          choice: true
+          choice: true,
         };
       } else {
         this.pushRouteUpdate = false;
@@ -371,21 +374,23 @@ export default class AppComponent extends Vue {
     this.checkBrowserTokensAction();
     window.setInterval(this.checkBrowserTokensAction, 30000);
 
-    // Generate a polling session id, and begin polling once per 5 seconds
-    /*this.generatePollingSessionIdAction();
-    window.setInterval(this.pollEventsAction, 5000);*/
+    if (this.authenticated) {
+      this.onLogin();
+    } else {
+      this.getUserInfoAction();
+    }
   }
 
   mounted() {
-    this.$statusHub.$on(Hub.BroadcastEventType.BroadcastErrorEvent, this.onSetErrorMessage)
+    this.$statusHub.$on(Hub.BroadcastEventType.BroadcastErrorEvent, this.onSetErrorMessage);
   }
 
   beforeDestroy() {
-    this.$statusHub.$off(Hub.BroadcastEventType.BroadcastErrorEvent, this.onSetErrorMessage)
+    this.$statusHub.$off(Hub.BroadcastEventType.BroadcastErrorEvent, this.onSetErrorMessage);
   }
 
   onSetErrorMessage(data: any) {
-    this.setErrorMessageAction({message: data.error});
+    this.setErrorMessageAction({ message: data.error });
   }
 
   onAlertResult(submit: boolean) {
@@ -401,8 +406,6 @@ export default class AppComponent extends Vue {
    * Sets up a recurring attempt at refreshing user tokens, and fetches network and attribute data
    */
   onLogin() {
-    // Tokens expire after 30 minutes. They are refreshed after 29 minutes.
-    this.refreshIntervalID = window.setInterval(this.refreshTokensAction, 29 * 60 * 1000);
     this.$forceUpdate();
     this.getNetworksAction();
     this.getAttributesAction();

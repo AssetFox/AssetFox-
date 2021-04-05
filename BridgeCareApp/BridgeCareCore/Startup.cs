@@ -96,8 +96,13 @@ namespace BridgeCareCore
             services.AddScoped<IHubService, HubService>();
 
             // SQL SERVER SCOPINGS
-            services.AddDbContext<IAMContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
+            //services.AddDbContext<IAMContext>(options =>
+            //    options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
+
+            services.AddDbContext<IAMContext>(options => options.UseSqlServer(
+            Configuration.GetConnectionString("BridgeCareConnex"),
+            sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
+                );
             services.AddScoped<UnitOfDataPersistenceWork>();
 
             // Setup reporting

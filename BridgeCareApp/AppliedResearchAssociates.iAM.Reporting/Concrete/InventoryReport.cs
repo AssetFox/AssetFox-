@@ -85,15 +85,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             resultsString.Append("<table>");
             resultsString.Append(CreateHTMLSection("Key Fields", new List<string>() { "BRKEY", "BMSID" }));
             resultsString.Append(CreateHTMLSection("Location", new List<string>() { "DISTRICT", "COUNTY", "MUNI_CODE", "FEATURE_INTERSECTED", "FEATURE_CARRIED", "LOCATION" }));
-            resultsString.Append(CreateHTMLSection("Age and Service", new List<string>() { "YEAR_BUILT", "YEAR_RECON", "FEATURE_CARRIED", "FEATURE_INTERSECTED" }));
-            resultsString.Append(CreateHTMLSection("Management", new List<string>() { "OWNER_CODE", "MPO", "SUBM_AGENCY", "NBISLEN", "HBRR_ELIG", "BUS_PLAN_NETWORK" }));
-            resultsString.Append(CreateHTMLSection("Deck Information", new List<string>() { "DECKGEEOM", "DECKSURF_TYPE", "DECK_WIDTH" }));
-            resultsString.Append(CreateHTMLSection("Span Information", new List<string>() { "NUMBER_SPANS", "MATERIAL_TYPE", "SPANTYPE", "LENGTH", "DECK_AREA", "FUNC_CLASS" }));
-            resultsString.Append(CreateHTMLSection("Current Condition", new List<string>() { "DECK", "SUP", "SUB", "CULV" }));
-            //resultsString.Append(CreateHTMLSection("Previous Conditions", new List<string>() { "DECK", "SUP", "SUB", "CULV" }, true));
-            resultsString.Append(CreateHTMLSection("Risk Scores", new List<string>() { "RISK_SCORE" }));
-            resultsString.Append(CreateHTMLSection("Posting", new List<string>() { "POST_STATUS_DATE", "POST_STATUS", "POST_LIMIT_COMB", "POST_LIMIT_WEIGHT" }));
-            resultsString.Append(CreateHTMLSection("Roadway Information", new List<string>() { "ADTTOTAL", "FUNC_CLASS" }));
+            resultsString.Append(CreateHTMLSection("Age and Service", new List<string>() { "YEAR_BUILT", "YEAR_RECON", "SERVTYPON", "SERVTYPUND" }));
+            resultsString.Append(CreateHTMLSection("Management", new List<string>() { "CUSTODIAN", "OWNER_CODE", "MPO_NAME", "SUBM_AGENCY", "NBISLEN", "HISTSIGN", "CRGIS_SHOPKEY_NUM", "BUS_PLAN_NETWORK" }));
+            resultsString.Append(CreateHTMLSection("Deck Information", new List<string>() { "DKSTRUCTYP", "DEPT_DKSTRUCTYP", "DECKSURF_TYPE", "DKMEMBTYPE", "DKPROTECT", "DECK_WIDTH", "SKEW" }));
+            resultsString.Append(CreateHTMLSection("Span Information", new List<string>() { "NUMBER_SPANS", "MATERIALMAIN", "DESIGNMAIN", "MATERIALAPPR", "DESIGNAPPR" , "LENGTH", "DECK_AREA", "TOT_LENGTH", "MAIN_FC_GROUP_NUM", "APPR_FC_GROUP_NUM" }));
+            resultsString.Append(CreateHTMLSection("Current Conditions", new List<string>() { "DECK", "DECK_DURATION_N", "SUP", "SUP_DURATION_N", "SUB", "SUB_DURATION_N", "CULV", "CULV_DURATION_N" }));
+            resultsString.Append(CreateHTMLSection("Previous Conditions", new List<string>() { "PREV_DECK", "PREV_SUP", "PREV_SUB", "PREV_CULV" }));
+            resultsString.Append(CreateHTMLSection("Risk Scores", new List<string>() { "RISK_SCORE", "Old_Risk_Score" }));
+            resultsString.Append(CreateHTMLSection("Posting", new List<string>() { "POST_STATUS_DATE", "POST_STATUS", "SPEC_RESTRICT_POST", "POST_LIMIT_WEIGHT" }));
+            resultsString.Append(CreateHTMLSection("Roadway Information", new List<string>() { "ADTTOTAL", "FUNC_CLASS", "VCLROVER", "VCLRUNDER", "NHS_IND" }));
             resultsString.Append("</table>");
             Results = resultsString.ToString();
             IsComplete = true;
@@ -162,8 +162,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             if (!previous)
             {
-                var returnVal = segmentData.First(_ => _.Name == attributeName).Value;
-                return (returnVal == null) ? DEFAULT_VALUE : returnVal;
+                var returnVal = segmentData.FirstOrDefault(_ => _.Name == attributeName);
+                return (returnVal == null) ? DEFAULT_VALUE : returnVal.Value;
             }
             else
             {
@@ -362,6 +362,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             descriptions.Add("VCLRUNDER", new AttributeDescription() { Description = "Under Street Clearance", Pub100ACode = "4A16" });
             descriptions.Add("YEAR_BUILT", new AttributeDescription() { Description = "Year Built", Pub100ACode = "5A15" });
             descriptions.Add("YEAR_RECON", new AttributeDescription() { Description = "Year Reconstructed", Pub100ACode = "5A16" });
+            descriptions.Add("CULV_DURATION_N", new AttributeDescription() { Description = "Culvert Duration", Pub100ACode = "" });
+            descriptions.Add("DECK_DURATION_N", new AttributeDescription() { Description = "Deck Duration", Pub100ACode = "" });
+            descriptions.Add("SUB_DURATION_N", new AttributeDescription() { Description = "Substructure Duration", Pub100ACode = "" });
+            descriptions.Add("SUP_DURATION_N", new AttributeDescription() { Description = "Superstructure Duration", Pub100ACode = "" });
 
 
             return descriptions;

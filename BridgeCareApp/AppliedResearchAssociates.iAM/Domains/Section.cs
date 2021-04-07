@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
@@ -7,16 +8,6 @@ namespace AppliedResearchAssociates.iAM.Domains
     public sealed class Section : WeakEntity, IValidator
     {
         public Section(Facility facility) => Facility = facility ?? throw new ArgumentNullException(nameof(facility));
-
-        public static string AreaIdentifier => "AREA";
-
-        public double Area { get; set; }
-
-        public string AreaUnit
-        {
-            get => _AreaUnit;
-            set => _AreaUnit = value?.Trim() ?? "";
-        }
 
         public Facility Facility { get; }
 
@@ -31,19 +22,6 @@ namespace AppliedResearchAssociates.iAM.Domains
         public ValidationResultBag GetDirectValidationResults()
         {
             var results = new ValidationResultBag();
-
-            if (double.IsNaN(Area))
-            {
-                results.Add(ValidationStatus.Error, "Area is not a number.", this, nameof(Area));
-            }
-            else if (double.IsInfinity(Area))
-            {
-                results.Add(ValidationStatus.Error, "Area is infinite.", this, nameof(Area));
-            }
-            else if (Area <= 0)
-            {
-                results.Add(ValidationStatus.Error, "Area is less than or equal to zero.", this, nameof(Area));
-            }
 
             if (string.IsNullOrWhiteSpace(Name))
             {
@@ -66,8 +44,34 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public bool Remove(Attribute attribute) => HistoryPerAttribute.Remove(attribute);
 
+        internal bool HasSpatialWeight => _SpatialWeight.HasValue;
+
+        internal double SpatialWeight
+        {
+            get => _SpatialWeight.Value;
+            set
+            {
+                _SpatialWeight = value;
+
+                if (double.IsNaN(SpatialWeight))
+                {
+                    throw new SimulationException("Spatial weight is not a number.");
+                }
+                else if (double.IsInfinity(SpatialWeight))
+                {
+                    throw new SimulationException("Spatial weight is infinite.");
+                }
+                else if (SpatialWeight <= 0)
+                {
+                    throw new SimulationException("Spatial weight is less than or equal to zero.");
+                }
+            }
+        }
+
+        internal void ClearSpatialWeight() => _SpatialWeight = null;
+
         private readonly Dictionary<Attribute, object> HistoryPerAttribute = new Dictionary<Attribute, object>();
 
-        private string _AreaUnit = "";
+        private double? _SpatialWeight;
     }
 }

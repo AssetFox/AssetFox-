@@ -102,11 +102,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 Fail("There are no sections.");
             }
 
-            if (SectionContexts.Select(context => context.Section.AreaUnit).Distinct().Count() > 1)
-            {
-                Fail("Sections have multiple distinct area units.");
-            }
-
             InParallel(SectionContexts, context => context.RollForward());
 
             SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;
@@ -509,7 +504,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var treatmentOptions = treatmentOptionsBag
                 .Select(option => (option, value: ObjectiveFunction(option)))
                 .Where(_ => _.value > 0)
-                .OrderByDescending(_ => _.value * _.option.Context.Section.Area)
+                .OrderByDescending(_ => _.value * _.option.Context.Section.SpatialWeight)
                 .Select(_ => _.option)
                 .ToArray();
 
@@ -529,10 +524,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
 
-                var goalArea = goalContexts.Sum(context => context.Section.Area);
+                var goalSpatialWeight = goalContexts.Sum(context => context.Section.SpatialWeight);
                 var deficientContexts = goalContexts.Where(context => goal.LevelIsDeficient(context.GetNumber(goal.Attribute.Name)));
-                var deficientArea = deficientContexts.Sum(context => context.Section.Area);
-                var deficientPercentageActual = deficientArea / goalArea * 100;
+                var deficientSpatialWeight = deficientContexts.Sum(context => context.Section.SpatialWeight);
+                var deficientPercentageActual = deficientSpatialWeight / goalSpatialWeight * 100;
 
                 results.Add(new ConditionActual(goal, deficientPercentageActual));
             }
@@ -558,8 +553,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
 
-                var goalArea = goalContexts.Sum(context => context.Section.Area);
-                var averageActual = goalContexts.Sum(context => context.GetNumber(goal.Attribute.Name) * context.Section.Area) / goalArea;
+                var goalSpatialWeight = goalContexts.Sum(context => context.Section.SpatialWeight);
+                var averageActual = goalContexts.Sum(context => context.GetNumber(goal.Attribute.Name) * context.Section.SpatialWeight) / goalSpatialWeight;
 
                 results.Add(new ConditionActual(goal, averageActual));
             }

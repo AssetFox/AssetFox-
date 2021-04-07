@@ -228,9 +228,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void PrepareSet(string key)
         {
-            if (KeyComparer.Equals(key, Section.AreaIdentifier))
+            if (KeyComparer.Equals(key, Network.SpatialWeightIdentifier))
             {
-                SimulationRunner.Fail("Section area is being mutated. The analysis does not support this.");
+                SimulationRunner.Fail("Spatial weight of section is being mutated. The analysis does not support this.");
             }
 
             if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key, KeyComparer))
@@ -318,12 +318,17 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void Initialize()
         {
-            base.SetNumber(Section.AreaIdentifier, Section.Area);
-
             var initialReferenceYear = SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
 
             SetInitialValues(SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
             SetInitialValues(SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
+
+            if (!Section.HasSpatialWeight)
+            {
+                Section.SpatialWeight = SimulationRunner.Simulation.SpatialWeighting.Compute(this);
+            }
+
+            base.SetNumber(Network.SpatialWeightIdentifier, Section.SpatialWeight);
 
             foreach (var committedProject in SimulationRunner.CommittedProjectsPerSection[Section])
             {

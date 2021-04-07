@@ -14,6 +14,8 @@ namespace AppliedResearchAssociates.iAM.Domains
 
             AnalysisMethod = new AnalysisMethod(this);
             InvestmentPlan = new InvestmentPlan(this);
+
+            SpatialWeighting = new Equation(Network.Explorer);
         }
 
         public AnalysisMethod AnalysisMethod { get; }
@@ -34,7 +36,9 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public SimulationOutput Results { get; private set; } = new SimulationOutput();
 
-        public ValidatorBag Subvalidators => new ValidatorBag { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
+        public Equation SpatialWeighting { get; }
+
+        public ValidatorBag Subvalidators => new ValidatorBag { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments, SpatialWeighting };
 
         public IReadOnlyCollection<SelectableTreatment> Treatments => _Treatments;
 

@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         }
 
         [JsonConstructor]
-        public SectionDetail(double area, string facilityName, string sectionName) : base(area, facilityName, sectionName)
+        public SectionDetail(double spatialWeight, string facilityName, string sectionName) : base(spatialWeight, facilityName, sectionName)
         {
         }
 

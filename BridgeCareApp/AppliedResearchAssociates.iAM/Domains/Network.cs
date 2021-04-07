@@ -9,6 +9,8 @@ namespace AppliedResearchAssociates.iAM.Domains
     {
         public Network(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
+        public static string SpatialWeightIdentifier => "SPATIAL_WEIGHT";
+
         public Explorer Explorer { get; }
 
         public IReadOnlyCollection<Facility> Facilities => _Facilities;
@@ -16,6 +18,12 @@ namespace AppliedResearchAssociates.iAM.Domains
         public string Name { get; set; }
 
         public IReadOnlyCollection<Simulation> Simulations => _Simulations;
+
+        public string SpatialWeightUnit
+        {
+            get => _SpatialWeightUnit;
+            set => _SpatialWeightUnit = value?.Trim() ?? "";
+        }
 
         public ValidatorBag Subvalidators => new ValidatorBag { Facilities, Simulations };
 
@@ -58,5 +66,7 @@ namespace AppliedResearchAssociates.iAM.Domains
         private readonly List<Facility> _Facilities = new List<Facility>();
 
         private readonly List<Simulation> _Simulations = new List<Simulation>();
+
+        private string _SpatialWeightUnit = "";
     }
 }

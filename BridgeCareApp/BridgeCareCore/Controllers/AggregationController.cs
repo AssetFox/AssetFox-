@@ -120,6 +120,7 @@ namespace BridgeCareCore.Controllers
                             maintainableAsset.AssignedData.RemoveAll(_ =>
                                 attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
                             maintainableAsset.AssignAttributeData(attributeData);
+
                             maintainableAsset.AssignSpatialWeighting(benefitQuantifierEquation.Equation.Expression);
 
                             // aggregate numeric data
@@ -127,7 +128,7 @@ namespace BridgeCareCore.Controllers
                             {
                                 aggregatedResults.AddRange(maintainableAsset.AssignedData
                                     .Where(_ => _.Attribute.DataType == "NUMBER")
-                                    .Select(_ => _.Attribute)
+                                    .Select(_ => _.Attribute).Distinct()
                                     .Select(_ =>
                                         maintainableAsset.GetAggregatedValuesByYear(_,
                                             AggregationRuleFactory.CreateNumericRule(_)))
@@ -139,11 +140,12 @@ namespace BridgeCareCore.Controllers
                             {
                                 aggregatedResults.AddRange(maintainableAsset.AssignedData
                                     .Where(_ => _.Attribute.DataType == "STRING")
-                                    .Select(_ => _.Attribute)
+                                    .Select(_ => _.Attribute).Distinct()
                                     .Select(_ =>
-                                        maintainableAsset.GetAggregatedValuesByYear(_,
-                                            AggregationRuleFactory.CreateTextRule(_)))
-                                    .ToList());
+                                    {
+                                    return maintainableAsset.GetAggregatedValuesByYear(_,
+                                        AggregationRuleFactory.CreateTextRule(_));
+                                    }).ToList());
                             }
                         }
                     });

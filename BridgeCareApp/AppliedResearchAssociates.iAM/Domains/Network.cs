@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.Domains
     {
         public Network(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
-        public static string SpatialWeightIdentifier => "SPATIAL_WEIGHT";
+        public static string SpatialWeightIdentifier => "AREA";
 
         public Explorer Explorer { get; }
 

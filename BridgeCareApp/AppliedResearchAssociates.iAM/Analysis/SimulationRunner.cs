@@ -504,7 +504,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var treatmentOptions = treatmentOptionsBag
                 .Select(option => (option, value: ObjectiveFunction(option)))
                 .Where(_ => _.value > 0)
-                .OrderByDescending(_ => _.value * _.option.Context.Section.SpatialWeight)
+                .OrderByDescending(_ => _.value * _.option.Context.GetSpatialWeight())
                 .Select(_ => _.option)
                 .ToArray();
 
@@ -524,9 +524,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
 
-                var goalSpatialWeight = goalContexts.Sum(context => context.Section.SpatialWeight);
+                var goalSpatialWeight = goalContexts.Sum(context => context.GetSpatialWeight());
                 var deficientContexts = goalContexts.Where(context => goal.LevelIsDeficient(context.GetNumber(goal.Attribute.Name)));
-                var deficientSpatialWeight = deficientContexts.Sum(context => context.Section.SpatialWeight);
+                var deficientSpatialWeight = deficientContexts.Sum(context => context.GetSpatialWeight());
                 var deficientPercentageActual = deficientSpatialWeight / goalSpatialWeight * 100;
 
                 results.Add(new ConditionActual(goal, deficientPercentageActual));
@@ -553,8 +553,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
 
-                var goalSpatialWeight = goalContexts.Sum(context => context.Section.SpatialWeight);
-                var averageActual = goalContexts.Sum(context => context.GetNumber(goal.Attribute.Name) * context.Section.SpatialWeight) / goalSpatialWeight;
+                var goalSpatialWeight = goalContexts.Sum(context => context.GetSpatialWeight());
+                var averageActual = goalContexts.Sum(context => context.GetNumber(goal.Attribute.Name) * context.GetSpatialWeight()) / goalSpatialWeight;
 
                 results.Add(new ConditionActual(goal, averageActual));
             }

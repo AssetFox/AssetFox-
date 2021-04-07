@@ -243,7 +243,7 @@ order by simulationid
                             {
                                 var section = facility.AddSection();
                                 section.Name = sectionName;
-                                section.SpatialWeight = reader.GetDouble(2);
+                                section.SpatialWeighting.Expression = reader.GetDouble(2).ToString();
 
                                 var sectionAreaUnit = reader.GetNullableString(3)?.Trim();
                                 if (areaUnit is null)

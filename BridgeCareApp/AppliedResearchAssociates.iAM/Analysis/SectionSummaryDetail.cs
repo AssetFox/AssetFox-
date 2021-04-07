@@ -16,13 +16,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             FacilityName = section.Facility.Name;
             SectionName = section.Name;
-            SpatialWeight = section.SpatialWeight;
         }
 
         [JsonConstructor]
-        public SectionSummaryDetail(double spatialWeight, string facilityName, string sectionName)
+        public SectionSummaryDetail(string facilityName, string sectionName)
         {
-            SpatialWeight = spatialWeight;
             FacilityName = facilityName ?? throw new ArgumentNullException(nameof(facilityName));
             SectionName = sectionName ?? throw new ArgumentNullException(nameof(sectionName));
         }
@@ -30,8 +28,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public string FacilityName { get; }
 
         public string SectionName { get; }
-
-        public double SpatialWeight { get; }
 
         public Dictionary<string, double> ValuePerNumericAttribute { get; } = new Dictionary<string, double>();
 
@@ -41,7 +37,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             FacilityName = original.FacilityName;
             SectionName = original.SectionName;
-            SpatialWeight = original.SpatialWeight;
 
             ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute);
             ValuePerTextAttribute.CopyFrom(original.ValuePerTextAttribute);

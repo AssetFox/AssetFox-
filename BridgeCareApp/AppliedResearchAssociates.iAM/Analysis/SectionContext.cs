@@ -16,7 +16,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ResetDetail();
 
             Initialize();
-            InitializeCalculatedFields();
         }
 
         public SectionContext(SectionContext original) : base(original)
@@ -160,6 +159,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return number;
         }
 
+        public double GetSpatialWeight() => Section.SpatialWeighting.Compute(this);
+
         public void MarkTreatmentProgress(Treatment treatment)
         {
             Detail.AppliedTreatment = treatment.Name;
@@ -226,25 +227,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             base.SetText(key, value);
         }
 
-        private void PrepareSet(string key)
-        {
-            if (KeyComparer.Equals(key, Network.SpatialWeightIdentifier))
-            {
-                SimulationRunner.Fail("Spatial weight of section is being mutated. The analysis does not support this.");
-            }
-
-            if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key, KeyComparer))
-            {
-                if(Section.Name == "66003002003006")
-                {
-                    var testc = 0;
-                }
-                PreviousAge = GetNumber(key);
-            }
-
-            NumberCache.Clear();
-        }
-
         public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
 
         public bool YearIsWithinShadowForSameTreatment(int year, Treatment treatment) => FirstUnshadowedYearForSameTreatment.TryGetValue(treatment.Name, out var firstUnshadowedYear) && year < firstUnshadowedYear;
@@ -275,6 +257,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void CopyAttributeValuesToDetail(SectionSummaryDetail detail)
         {
+            detail.ValuePerNumericAttribute.Add(Network.SpatialWeightIdentifier, GetNumber(Network.SpatialWeightIdentifier));
+
             foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.NumericAttributes)
             {
                 detail.ValuePerNumericAttribute.Add(attribute.Name, GetNumber(attribute.Name));
@@ -323,24 +307,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
             SetInitialValues(SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
             SetInitialValues(SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-            if (!Section.HasSpatialWeight)
-            {
-                Section.SpatialWeight = SimulationRunner.Simulation.SpatialWeighting.Compute(this);
-            }
-
-            base.SetNumber(Network.SpatialWeightIdentifier, Section.SpatialWeight);
-
             foreach (var committedProject in SimulationRunner.CommittedProjectsPerSection[Section])
             {
                 EventSchedule.Add(committedProject.Year, committedProject);
             }
+
+            InitializeCalculatedFields();
         }
 
         private void InitializeCalculatedFields()
         {
             // This initialization is separate from the rest because it needs to be called again in
             // the copy constructor. Otherwise, the copy's calculated fields will use the original's
-            // scope values. (Note that "this" is captured in the local function's closure object.)
+            // scope values. (Note that "this" is captured on each invocation of SetNumber.)
 
             foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
             {
@@ -359,6 +338,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 SetNumber(calculatedField.Name, calculate);
             }
+
+            base.SetNumber(Network.SpatialWeightIdentifier, GetSpatialWeight);
+        }
+
+        private void PrepareSet(string key)
+        {
+            if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key, KeyComparer))
+            {
+                PreviousAge = GetNumber(key);
+            }
+
+            NumberCache.Clear();
         }
 
         private void SetHistoricalValues<T>(int referenceYear, bool fallForward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)

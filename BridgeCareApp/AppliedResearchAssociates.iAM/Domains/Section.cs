@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Section : WeakEntity, IValidator
     {
-        public Section(Facility facility) => Facility = facility ?? throw new ArgumentNullException(nameof(facility));
+        public Section(Facility facility)
+        {
+            Facility = facility ?? throw new ArgumentNullException(nameof(facility));
+
+            SpatialWeighting = new Equation(Facility.Network.Explorer);
+        }
 
         public Facility Facility { get; }
 
@@ -15,7 +19,9 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public string Name { get; set; }
 
-        public ValidatorBag Subvalidators => new ValidatorBag();
+        public Equation SpatialWeighting { get; }
+
+        public ValidatorBag Subvalidators => new ValidatorBag { SpatialWeighting };
 
         public void ClearHistory() => HistoryPerAttribute.Clear();
 
@@ -44,34 +50,6 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public bool Remove(Attribute attribute) => HistoryPerAttribute.Remove(attribute);
 
-        internal bool HasSpatialWeight => _SpatialWeight.HasValue;
-
-        internal double SpatialWeight
-        {
-            get => _SpatialWeight.Value;
-            set
-            {
-                _SpatialWeight = value;
-
-                if (double.IsNaN(SpatialWeight))
-                {
-                    throw new SimulationException("Spatial weight is not a number.");
-                }
-                else if (double.IsInfinity(SpatialWeight))
-                {
-                    throw new SimulationException("Spatial weight is infinite.");
-                }
-                else if (SpatialWeight <= 0)
-                {
-                    throw new SimulationException("Spatial weight is less than or equal to zero.");
-                }
-            }
-        }
-
-        internal void ClearSpatialWeight() => _SpatialWeight = null;
-
         private readonly Dictionary<Attribute, object> HistoryPerAttribute = new Dictionary<Attribute, object>();
-
-        private double? _SpatialWeight;
     }
 }

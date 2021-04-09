@@ -431,8 +431,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     NetworkId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FacilityName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SectionName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Area = table.Column<double>(type: "float", nullable: false),
-                    AreaUnit = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SpatialWeighting = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -860,8 +859,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FacilityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Area = table.Column<double>(type: "float", nullable: false),
-                    AreaUnit = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SpatialWeightingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -870,6 +868,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Section", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Section_Equation_SpatialWeightingId",
+                        column: x => x.SpatialWeightingId,
+                        principalTable: "Equation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Section_Facility_FacilityId",
                         column: x => x.FacilityId,
@@ -1198,6 +1202,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         principalTable: "Simulation",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReportIndex",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SimulationID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ReportTypeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Result = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReportIndex", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReportIndex_Simulation_SimulationID",
+                        column: x => x.SimulationID,
+                        principalTable: "Simulation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -2420,9 +2449,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_ReportIndex_SimulationID",
+                table: "ReportIndex",
+                column: "SimulationID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Section_FacilityId",
                 table: "Section",
                 column: "FacilityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Section_SpatialWeightingId",
+                table: "Section",
+                column: "SpatialWeightingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SelectableTreatment_TreatmentLibraryId",
@@ -2678,6 +2717,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "RemainingLifeLimitLibrary_Simulation");
 
             migrationBuilder.DropTable(
+                name: "ReportIndex");
+
+            migrationBuilder.DropTable(
                 name: "Simulation_User");
 
             migrationBuilder.DropTable(
@@ -2750,9 +2792,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 name: "TreatmentConsequence");
 
             migrationBuilder.DropTable(
-                name: "Equation");
-
-            migrationBuilder.DropTable(
                 name: "TreatmentCost");
 
             migrationBuilder.DropTable(
@@ -2796,6 +2835,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             migrationBuilder.DropTable(
                 name: "BudgetLibrary");
+
+            migrationBuilder.DropTable(
+                name: "Equation");
 
             migrationBuilder.DropTable(
                 name: "Facility");

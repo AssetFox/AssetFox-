@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Logging;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,12 +26,15 @@ namespace BridgeCareCore.Controllers
     {
         private readonly IEsecSecurity _esecSecurity;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
+        //private readonly ILogger<AggregationController> _logger;
+        private readonly ILog _logger;
 
         public AggregationController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfDataPersistenceWork,
-            IHubService hubService) : base(hubService)
+            IHubService hubService, ILog logger) : base(hubService)
         {
             _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
             _unitOfWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
+            _logger = logger;
         }
 
         [HttpPost]
@@ -59,6 +63,22 @@ namespace BridgeCareCore.Controllers
                         // Get/create configurable attributes
                         configurationAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
 
+                        var checkForDuplicateIDs = configurationAttributes.Select(_ => _.Id).ToList();
+
+                        if(checkForDuplicateIDs.Count != checkForDuplicateIDs.Distinct().ToList().Count)
+                        {
+                            _logger.Error($"Error : Metadata.json file has duplicate Ids");
+                            _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Metadata.json file has duplicate Ids");
+                            throw new InvalidOperationException();
+                        }
+                        var checkForDuplicateNames = configurationAttributes.Select(_ => _.Name).ToList();
+                        if (checkForDuplicateNames.Count != checkForDuplicateNames.Distinct().ToList().Count)
+                        {
+                            _logger.Error($"Error : Metadata.json file has duplicate names");
+                            _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Metadata.json file has duplicate Names");
+                            throw new InvalidOperationException();
+                        }
+
                         // get all maintainable assets in the network with their assigned data (if any) and locations
                         maintainableAssets = _unitOfWork.MaintainableAssetRepo
                             .GetAllInNetworkWithAssignedDataAndLocations(networkId)
@@ -74,10 +94,18 @@ namespace BridgeCareCore.Controllers
                         // create list of attribute data from configuration attributes (exclude attributes
                         // that don't have command text as there will be no way to select data for them from
                         // the data source)
-                        attributeData = configurationAttributes.Where(_ => !string.IsNullOrEmpty(_.Command))
+                        try
+                        {
+                            attributeData = configurationAttributes.Where(_ => !string.IsNullOrEmpty(_.Command))
                             .Select(AttributeConnectionBuilder.Build)
                             .SelectMany(AttributeDataBuilder.GetData).ToList();
-
+                        }
+                        catch(Exception e)
+                        {
+                            _logger.Error($"While getting data for the attributes (attributes coming from metaData.json file) -  {e.Message}");
+                            _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Fetching data for the attributes ::{e.Message}");
+                            throw;
+                        }
                         // get the attribute ids for assigned data that can be deleted (attribute is present
                         // in the data source and meta data file)
                         attributeIdsToBeUpdatedWithAssignedData = configurationAttributes.Select(_ => _.Id)
@@ -121,7 +149,7 @@ namespace BridgeCareCore.Controllers
                                 attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
                             maintainableAsset.AssignAttributeData(attributeData);
 
-                            maintainableAsset.AssignSpatialWeighting(benefitQuantifierEquation.Equation.Expression);
+                            //maintainableAsset.AssignSpatialWeighting(benefitQuantifierEquation.Equation.Expression);
 
                             // aggregate numeric data
                             if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "NUMBER"))
@@ -167,11 +195,37 @@ namespace BridgeCareCore.Controllers
 
                     var crudResult = Task.Factory.StartNew(() =>
                     {
-                        _unitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets);
+                        try
+                        {
+                            _unitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets);
+                        }
+                        catch(Exception e)
+                        {
+                            _logger.Error($"Error while filling Assigned Data -  {e.Message}");
+                            _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while filling Assigned Data ::{e.Message}");
+                            throw;
+                        }
+                        try
+                        {
+                            _unitOfWork.MaintainableAssetRepo.UpdateMaintainableAssetsSpatialWeighting(maintainableAssets);
+                        }
+                        catch(Exception e)
+                        {
+                            _logger.Error($"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}");
+                            _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while updating MaintainableAssets SpatialWeighting ::{e.Message}");
+                            throw;
+                        }
 
-                        _unitOfWork.MaintainableAssetRepo.UpdateMaintainableAssetsSpatialWeighting(maintainableAssets);
-
-                        _unitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
+                        try
+                        {
+                            _unitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
+                        }
+                        catch(Exception e)
+                        {
+                            _logger.Error($"Error while adding Aggregated results -  {e.Message}");
+                            _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while adding Aggregated results ::{e.Message}");
+                            throw;
+                        }
                     });
 
                     count = 0;

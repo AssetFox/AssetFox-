@@ -59,17 +59,17 @@ namespace BridgeCareCore.Controllers
                var result = await Task.Factory.StartNew(() =>
                 {
                     // get network definition attribute from json file
-                    var attribute = _unitOfWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
+                    var networkSettings = _unitOfWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
 
                     // throw an exception if not network definition attribute is present
-                    if (attribute == null)
+                    if (networkSettings.Attribute == null || string.IsNullOrEmpty(networkSettings.DefaultEquation))
                     {
-                        throw new InvalidOperationException("Network definition rules do not exist.");
+                        throw new InvalidOperationException("Network definition rules do not exist, or the default equation is not specified");
                     }
 
                     // create network domain model from attribute data created from the network attribute
                     var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
-                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)));
+                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(networkSettings.Attribute)), networkSettings.DefaultEquation);
                     network.Name = networkName;
 
                     // insert network domain data into the data source

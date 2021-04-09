@@ -12,11 +12,12 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
 {
     public class MaintainableAsset
     {
-        public MaintainableAsset(Guid id, Guid networkId, Location location)
+        public MaintainableAsset(Guid id, Guid networkId, Location location, string spatialWeighting)
         {
             Id = id;
             NetworkId = networkId;
             Location = location;
+            SpatialWeighting = spatialWeighting;
         }
 
         public AggregatedResult<T> GetAggregatedValuesByYear<T>(DataMinerAttribute attribute, AggregationRule<T> aggregationRule)
@@ -26,32 +27,32 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
         }
 
         // TODO: side effect => mutate (get area equation; calculate spatial weighting)
-        public void AssignSpatialWeighting(string benefitQuantifierEquation)
-        {
-            if (!AssignedData.Any() || !AssignedData.Any(_ => _ is AttributeDatum<double>))
-            {
-                return;
-            }
+        //public void AssignSpatialWeighting(string benefitQuantifierEquation)
+        //{
+        //    if (!AssignedData.Any() || !AssignedData.Any(_ => _ is AttributeDatum<double>))
+        //    {
+        //        return;
+        //    }
 
-            var numericAssignedData = AssignedData.Where(_ =>
-                _ is AttributeDatum<double> && benefitQuantifierEquation.Contains(_.Attribute.Name)).ToList();
+        //    var numericAssignedData = AssignedData.Where(_ =>
+        //        _ is AttributeDatum<double> && benefitQuantifierEquation.Contains(_.Attribute.Name)).ToList();
 
-            var compiler = new CalculateEvaluateCompiler();
-            foreach (var numericDatum in numericAssignedData.Cast<AttributeDatum<double>>())
-            {
-                compiler.ParameterTypes[numericDatum.Attribute.Name] = CalculateEvaluateParameterType.Number;
-            }
-            var calculator = compiler.GetCalculator(benefitQuantifierEquation);
+        //    var compiler = new CalculateEvaluateCompiler();
+        //    foreach (var numericDatum in numericAssignedData.Cast<AttributeDatum<double>>())
+        //    {
+        //        compiler.ParameterTypes[numericDatum.Attribute.Name] = CalculateEvaluateParameterType.Number;
+        //    }
+        //    var calculator = compiler.GetCalculator(benefitQuantifierEquation);
 
-            var scope = new CalculateEvaluateScope();
-            foreach (var numericDatum in numericAssignedData.Cast<AttributeDatum<double>>())
-            {
-                scope.SetNumber(numericDatum.Attribute.Name, numericDatum.Value);
-            }
+        //    var scope = new CalculateEvaluateScope();
+        //    foreach (var numericDatum in numericAssignedData.Cast<AttributeDatum<double>>())
+        //    {
+        //        scope.SetNumber(numericDatum.Attribute.Name, numericDatum.Value);
+        //    }
 
-            var result = calculator.Delegate(scope);
-            SpatialWeighting = new SpatialWeighting(result);
-        }
+        //    var result = calculator.Delegate(scope);
+        //    //SpatialWeighting = new SpatialWeighting(result);
+        //}
 
         public void AssignAttributeData(IEnumerable<IAttributeDatum> attributeData)
         {
@@ -76,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
 
         public Guid NetworkId { get; }
 
-        public SpatialWeighting SpatialWeighting { get; set; }
+        public string SpatialWeighting { get; }
 
         public Location Location { get; }
     }

@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 simulation.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.Single(_ => _.Name == domain.Budget.Name);
 
             var maintainableAsset = simulation.Network.MaintainableAssets.Single(_ =>
-                $"{_.SectionName}{_.Area}" == $"{domain.Section.Name}{domain.Section.Area}");
+                _.Id == domain.Section.Id);
 
             return new CommittedProjectEntity
             {
@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var facility = simulation.Network.Facilities
                 .Single(_ => _.Name == entity.MaintainableAsset.FacilityName);
             var section = facility.Sections.Single(_ =>
-                $"{_.Name}{_.Area}" == $"{entity.MaintainableAsset.SectionName}{entity.MaintainableAsset.Area}");
+                _.Id == entity.MaintainableAsset.Id);
 
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(section, entity.Year));
             committedProject.Id = entity.Id;

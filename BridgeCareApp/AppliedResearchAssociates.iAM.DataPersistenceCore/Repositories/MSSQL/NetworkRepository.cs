@@ -98,8 +98,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Select(asset => new MaintainableAssetEntity
                     {
                         Id = asset.Id,
-                        Area = asset.Area,
-                        AreaUnit = asset.AreaUnit,
+                        SpatialWeighting = asset.SpatialWeighting,
+                        //Area = asset.Area,
+                        //AreaUnit = asset.AreaUnit,
                         FacilityName = asset.FacilityName,
                         SectionName = asset.SectionName,
                         AggregatedResults = asset.AggregatedResults.Select(result => new AggregatedResultEntity

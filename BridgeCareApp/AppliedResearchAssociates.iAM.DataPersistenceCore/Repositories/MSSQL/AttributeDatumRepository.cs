@@ -48,8 +48,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributeDatumEntities = maintainableAssets
                 .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id)));
 
-
-             var filtertedEnteties = attributeDatumEntities.Where(_ => configurableAttributes.Select(s => s.Id).Contains(_.AttributeId)).ToList();
+             var configAttributeIds = configurableAttributes.Select(s => s.Id).ToHashSet();
+             var filtertedEnteties = attributeDatumEntities.Where(_ => configAttributeIds.Contains(_.AttributeId)).ToList();
 
             _unitOfWork.Context.AddAll(filtertedEnteties, _unitOfWork.UserEntity?.Id);
 

@@ -38,8 +38,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     Id = asset.Id,
                     NetworkId = networkId,
-                    Area = asset.Area,
-                    AreaUnit = asset.AreaUnit,
+                    SpatialWeighting = asset.SpatialWeighting,
+                    //Area = asset.Area,
+                    //AreaUnit = asset.AreaUnit,
                     MaintainableAssetLocation = new MaintainableAssetLocationEntity(
                         asset.MaintainableAssetLocation.Id, asset.MaintainableAssetLocation.Discriminator,
                         asset.MaintainableAssetLocation.LocationIdentifier),
@@ -177,6 +178,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.Location.ToEntity(_.Id, typeof(MaintainableAssetEntity))).ToList();
 
             _unitOfWork.Context.AddAll(maintainableAssetLocationEntities, _unitOfWork.UserEntity?.Id);
+            //_unitOfWork.Context.SaveChanges();
         }
     }
 }

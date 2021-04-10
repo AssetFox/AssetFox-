@@ -178,7 +178,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.Location.ToEntity(_.Id, typeof(MaintainableAssetEntity))).ToList();
 
             _unitOfWork.Context.AddAll(maintainableAssetLocationEntities, _unitOfWork.UserEntity?.Id);
-            //_unitOfWork.Context.SaveChanges();
         }
     }
 }

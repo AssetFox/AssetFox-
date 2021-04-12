@@ -179,7 +179,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 treatment.UnsetConsequencesPerAttribute();
             }
-            ReportProgress(ProgressStatus.Completed, 0, 100);
+            ReportProgress(ProgressStatus.Completed, 100);
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
         }

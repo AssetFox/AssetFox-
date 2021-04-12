@@ -46,11 +46,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // convert any assigned data to their equivalent entity object types
             var attributeDatumEntities = maintainableAssets
-                .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id))).ToList();
+                .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id)));
 
-            _unitOfWork.Context.AddAll(attributeDatumEntities, _unitOfWork.UserEntity?.Id);
+             var configAttributeIds = configurableAttributes.Select(s => s.Id).ToHashSet();
+             var filtertedEnteties = attributeDatumEntities.Where(_ => configAttributeIds.Contains(_.AttributeId)).ToList();
 
-            var attributeDatumLocationEntities = attributeDatumEntities.Select(_ => _.AttributeDatumLocation).ToList();
+            _unitOfWork.Context.AddAll(filtertedEnteties, _unitOfWork.UserEntity?.Id);
+
+            var attributeDatumLocationEntities = filtertedEnteties.Select(_ => _.AttributeDatumLocation).ToList();
 
             _unitOfWork.Context.AddAll(attributeDatumLocationEntities, _unitOfWork.UserEntity?.Id);
         }

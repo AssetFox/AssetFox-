@@ -17,11 +17,11 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
         /// <typeparam name="T"></typeparam>
         /// <param name="attributeData"></param>
         /// <returns></returns>
-        public static Network CreateNetworkFromAttributeDataRecords(IEnumerable<IAttributeDatum> attributeData)
+        public static Network CreateNetworkFromAttributeDataRecords(IEnumerable<IAttributeDatum> attributeData, string defaultEquation)
         {
             var networkId = Guid.NewGuid();
             var maintenanceAssets = (from attributeDatum in attributeData
-                    let maintenanceAsset = new MaintainableAsset(Guid.NewGuid(), networkId, attributeDatum.Location)
+                    let maintenanceAsset = new MaintainableAsset(Guid.NewGuid(), networkId, attributeDatum.Location, defaultEquation)
                     select maintenanceAsset).ToList();
             return new Network(maintenanceAssets, networkId);
         }

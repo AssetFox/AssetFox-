@@ -12,8 +12,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = domain.Id,
                 FacilityId = domain.Facility.Id,
                 Name = domain.Name,
-                Area = domain.Area,
-                AreaUnit = domain.AreaUnit
+                SpatialWeighting = domain.SpatialWeighting.ToEntity()
+                //Area = domain.Area,
+                //AreaUnit = domain.AreaUnit
             };
 
         /*public static void CreateSection(this SectionEntity entity, Facility facility)
@@ -50,8 +51,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var section = facility.AddSection();
             section.Id = entity.Id;
             section.Name = entity.SectionName;
-            section.Area = entity.Area;
-            section.AreaUnit = entity.AreaUnit;
+            section.SpatialWeighting.Expression = entity.SpatialWeighting;
+            //section.Area = entity.Area;
+            //section.AreaUnit = entity.AreaUnit;
 
             if (entity.AggregatedResults.Any(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
             {

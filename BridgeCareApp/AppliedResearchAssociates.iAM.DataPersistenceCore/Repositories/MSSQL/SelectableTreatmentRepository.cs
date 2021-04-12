@@ -206,6 +206,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.TreatmentLibrary)
                 .ThenInclude(_ => _.Treatments)
                 .ThenInclude(_ => _.TreatmentSupersessions)
+                .AsNoTracking()
                 .Single(_ => _.Id == simulation.Id);
 
             simulationEntity.TreatmentLibrarySimulationJoin?.TreatmentLibrary?.Treatments?.ForEach(_ =>

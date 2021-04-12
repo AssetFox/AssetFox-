@@ -6,16 +6,11 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Section : WeakEntity, IValidator
     {
-        public Section(Facility facility) => Facility = facility ?? throw new ArgumentNullException(nameof(facility));
-
-        public static string AreaIdentifier => "AREA";
-
-        public double Area { get; set; }
-
-        public string AreaUnit
+        public Section(Facility facility)
         {
-            get => _AreaUnit;
-            set => _AreaUnit = value?.Trim() ?? "";
+            Facility = facility ?? throw new ArgumentNullException(nameof(facility));
+
+            SpatialWeighting = new Equation(Facility.Network.Explorer);
         }
 
         public Facility Facility { get; }
@@ -24,26 +19,15 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public string Name { get; set; }
 
-        public ValidatorBag Subvalidators => new ValidatorBag();
+        public Equation SpatialWeighting { get; }
+
+        public ValidatorBag Subvalidators => new ValidatorBag { SpatialWeighting };
 
         public void ClearHistory() => HistoryPerAttribute.Clear();
 
         public ValidationResultBag GetDirectValidationResults()
         {
             var results = new ValidationResultBag();
-
-            if (double.IsNaN(Area))
-            {
-                results.Add(ValidationStatus.Error, "Area is not a number.", this, nameof(Area));
-            }
-            else if (double.IsInfinity(Area))
-            {
-                results.Add(ValidationStatus.Error, "Area is infinite.", this, nameof(Area));
-            }
-            else if (Area <= 0)
-            {
-                results.Add(ValidationStatus.Error, "Area is less than or equal to zero.", this, nameof(Area));
-            }
 
             if (string.IsNullOrWhiteSpace(Name))
             {
@@ -67,7 +51,5 @@ namespace AppliedResearchAssociates.iAM.Domains
         public bool Remove(Attribute attribute) => HistoryPerAttribute.Remove(attribute);
 
         private readonly Dictionary<Attribute, object> HistoryPerAttribute = new Dictionary<Attribute, object>();
-
-        private string _AreaUnit = "";
     }
 }

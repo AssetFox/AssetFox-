@@ -42,7 +42,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             Id = asset.Id,
                             SectionName = asset.SectionName,
-                            Area = asset.Area
+                            SpatialWeighting = asset.SpatialWeighting
+                            //Area = asset.Area
                         }).ToList()
                     },
                     BudgetLibrarySimulationJoin = new BudgetLibrarySimulationEntity
@@ -124,7 +125,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             FacilityName = project.MaintainableAsset.FacilityName,
                             SectionName = project.MaintainableAsset.SectionName,
-                            Area = project.MaintainableAsset.Area
+                            SpatialWeighting = project.MaintainableAsset.SpatialWeighting
+                            //Area = project.MaintainableAsset.Area
                         },
                     Budget = new BudgetEntity {Name = project.Budget.Name},
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
@@ -134,7 +136,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             ChangeValue = consequence.ChangeValue,
                             Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
                         }).ToList()
-                }).ToList()
+                }).AsNoTracking().ToList()
                 .ForEach(_ => _.CreateCommittedProject(simulation));
         }
     }

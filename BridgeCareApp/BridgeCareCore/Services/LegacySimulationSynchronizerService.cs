@@ -52,9 +52,9 @@ namespace BridgeCareCore.Services
             }
 
             var facilityNames = network.Facilities.Select(_ => _.Name).ToHashSet();
-            var sectionNamesAndAreas = network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
+            var sectionNamesAndAreas = network.Sections.Select(_ => _.Id).ToHashSet();
             var assetFacilityNames = _unitOfWork.Context.MaintainableAsset.Select(_ => _.FacilityName).ToHashSet();
-            var assetSectionNamesAndAreas = _unitOfWork.Context.MaintainableAsset.Select(_ => $"{_.SectionName}{_.Area}").ToHashSet();
+            var assetSectionNamesAndAreas = _unitOfWork.Context.MaintainableAsset.Select(_ => _.Id).ToHashSet();
             if (!assetFacilityNames.SetEquals(facilityNames) || !assetSectionNamesAndAreas.SetEquals(sectionNamesAndAreas))
             {
                 _unitOfWork.NetworkRepo.DeleteNetworkData();

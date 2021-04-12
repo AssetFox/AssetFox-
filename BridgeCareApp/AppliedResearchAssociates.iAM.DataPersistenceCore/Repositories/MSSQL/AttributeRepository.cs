@@ -142,6 +142,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.AttributeEquationCriterionLibraryJoins)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Where(_ => _.Name != "AGE")
+                .AsNoTracking()
                 .ToList();
 
             var explorer = new Explorer();

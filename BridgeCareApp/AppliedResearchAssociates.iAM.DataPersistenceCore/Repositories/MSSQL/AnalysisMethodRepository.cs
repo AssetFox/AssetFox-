@@ -112,7 +112,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
             }
 
-            _unitOfWork.Context.AnalysisMethod.Include(_ => _.Attribute)
+            _unitOfWork.Context.AnalysisMethod
+                .Include(_ => _.Attribute)
                 .Include(_ => _.Benefit)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CriterionLibraryAnalysisMethodJoin)
@@ -161,6 +162,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.RemainingLifeLimits)
                 .ThenInclude(_ => _.CriterionLibraryRemainingLifeLimitJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .AsNoTracking()
                 .Single(_ => _.Simulation.Id == simulation.Id)
                 .FillSimulationAnalysisMethod(simulation);
         }

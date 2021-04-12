@@ -70,22 +70,49 @@ namespace BridgeCareCore.Services
                 _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
                 _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
-            runner.Information += (sender, eventArgs) =>
+
+            runner.Progressing += (sender, eventArgs) =>
             {
-                if (eventArgs.Message == "Simulation complete.")
+                if (eventArgs.ProgressStatus == ProgressStatus.Started)
                 {
-                    simulationAnalysisDetail.Status = eventArgs.Message;
+                    simulationAnalysisDetail.Status = "Simulation initializing ...";
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
+                    _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
+                }
+                if(eventArgs.ProgressStatus == ProgressStatus.Running)
+                {
+                    simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {eventArgs.PercentComplete}%";
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
+                    _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                }
+                if(eventArgs.ProgressStatus == ProgressStatus.Completed)
+                {
+                    simulationAnalysisDetail.Status = $"Simulation complete. {100}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
-                }
-                else
-                {
-                    simulationAnalysisDetail.Status = eventArgs.Message;
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-                }
 
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
+                    _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                }
                 _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+            };
+            runner.Information += (sender, eventArgs) =>
+            {
+                //if (eventArgs.Message == "Simulation complete.")
+                //{
+                //    simulationAnalysisDetail.Status = eventArgs.Message;
+                //    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
+                //    _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
+                //}
+                //else
+                //{
+                //    simulationAnalysisDetail.Status = eventArgs.Message;
+                //    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+                //}
+
+                //_hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
+                //_hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
             runner.Warning += (sender, eventArgs) =>
             {

@@ -19,6 +19,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public event EventHandler<WarningEventArgs> Warning;
 
+        public event EventHandler<ProgressEventArgs> Progressing;
+
         public Simulation Simulation { get; }
 
         public void Run()
@@ -40,7 +42,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 ItemId = Simulation.Id,
             };
 
-            Inform(MessageBuilder.ToString());
+            //Inform(MessageBuilder.ToString());
+            Progress(ProgressStatus.Started, 0, 0.0);
 
             var simulationValidationResults = Simulation.GetAllValidationResults();
 
@@ -167,6 +170,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Simulation.Results.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
             Simulation.Results.InitialSectionSummaries.AddRange(SectionContexts.Select(context => context.SummaryDetail));
 
+            var percentComplete = 0.0;
+            var totalYearCount = Simulation.InvestmentPlan.YearsOfAnalysis.Count();
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
                 MessageBuilder = new SimulationMessageBuilder($"Simulating {year} ...")
@@ -174,8 +179,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     ItemName = Simulation.Name,
                     ItemId = Simulation.Id,
                 };
-
-                Inform(MessageBuilder.ToString());
+                percentComplete += (100 / totalYearCount);
+                Math.Round(percentComplete, 2);
+                //Inform(MessageBuilder.ToString());
+                Progress(ProgressStatus.Running, year, percentComplete);
 
                 var unhandledContexts = ApplyRequiredEvents(year);
                 var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
@@ -195,7 +202,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 ItemId = Simulation.Id,
             };
 
-            Inform(MessageBuilder.ToString());
+            //Inform(MessageBuilder.ToString());
+            Progress(ProgressStatus.Completed, 0, 100);
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
         }
@@ -221,6 +229,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
         internal void Inform(string message) => OnInformation(new InformationEventArgs(message));
 
         internal void Warn(string message) => OnWarning(new WarningEventArgs(message));
+
+        internal void Progress(ProgressStatus progressStatus, int year, double percentComplete) =>
+            OnProgress(new ProgressEventArgs(progressStatus, year, percentComplete));
 
         private const int STATUS_CODE_NOT_RUNNING = 0;
 
@@ -619,6 +630,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private void OnInformation(InformationEventArgs e) => Information?.Invoke(this, e);
 
         private void OnWarning(WarningEventArgs e) => Warning?.Invoke(this, e);
+
+        private void OnProgress(ProgressEventArgs e) => Progressing?.Invoke(this, e);
 
         private void RecordStatusOfConditionGoals(SimulationYearDetail detail)
         {

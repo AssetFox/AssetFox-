@@ -1,5 +1,6 @@
 ﻿using System;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace AppliedResearchAssociates.iAM.Domains
 {
@@ -7,13 +8,13 @@ namespace AppliedResearchAssociates.iAM.Domains
     {
         public Criterion(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
-        public bool? Evaluate(CalculateEvaluateScope scope)
+        internal bool? Evaluate(SectionContext scope)
         {
             EnsureCompiled();
             return Evaluator?.Delegate(scope);
         }
 
-        public bool EvaluateOrDefault(CalculateEvaluateScope scope) => Evaluate(scope) ?? true;
+        internal bool EvaluateOrDefault(SectionContext scope) => Evaluate(scope) ?? true;
 
         protected override void Compile()
         {

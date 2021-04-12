@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.Domains
             return results;
         }
 
-        internal override IEnumerable<ChangeApplicator> GetChangeApplicators(CalculateEvaluateScope scope)
+        internal override IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope)
         {
             var applicators = base.GetChangeApplicators(scope);
 

@@ -34,20 +34,38 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 throw new InvalidOperationException("Runner is already running.");
             }
 
-            Inform("Simulation initializing ...");
+            MessageBuilder = new SimulationMessageBuilder("Simulation initializing ...")
+            {
+                ItemName = Simulation.Name,
+                ItemId = Simulation.Id,
+            };
+
+            Inform(MessageBuilder.ToString());
 
             var simulationValidationResults = Simulation.GetAllValidationResults();
 
             var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
             if (numberOfErrors > 0)
             {
-                Fail($"Simulation has {numberOfErrors} validation errors.");
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation errors.")
+                {
+                    ItemName = Simulation.Name,
+                    ItemId = Simulation.Id,
+                };
+
+                Fail(MessageBuilder.ToString());
             }
 
             var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
             if (numberOfWarnings > 0)
             {
-                Warn($"Simulation has {numberOfWarnings} validation warnings.");
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation warnings.")
+                {
+                    ItemName = Simulation.Name,
+                    ItemId = Simulation.Id,
+                };
+
+                Warn(MessageBuilder.ToString());
             }
 
             ActiveTreatments = Simulation.GetActiveTreatments();
@@ -99,7 +117,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (SectionContexts.Count == 0)
             {
-                Fail("There are no sections.");
+                MessageBuilder = new SimulationMessageBuilder("Simulation filter passed no sections.")
+                {
+                    ItemName = Simulation.Name,
+                    ItemId = Simulation.Id,
+                };
+
+                Fail(MessageBuilder.ToString());
             }
 
             InParallel(SectionContexts, context => context.RollForward());
@@ -145,7 +169,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
-                Inform($"Simulating {year} ...");
+                MessageBuilder = new SimulationMessageBuilder($"Simulating {year} ...")
+                {
+                    ItemName = Simulation.Name,
+                    ItemId = Simulation.Id,
+                };
+
+                Inform(MessageBuilder.ToString());
 
                 var unhandledContexts = ApplyRequiredEvents(year);
                 var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
@@ -159,7 +189,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 treatment.UnsetConsequencesPerAttribute();
             }
 
-            Inform("Simulation complete.");
+            MessageBuilder = new SimulationMessageBuilder("Simulation complete.")
+            {
+                ItemName = Simulation.Name,
+                ItemId = Simulation.Id,
+            };
+
+            Inform(MessageBuilder.ToString());
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
         }
@@ -203,6 +239,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private ILookup<Budget, BudgetCondition> ConditionsPerBudget;
 
         private IReadOnlyCollection<ConditionActual> DeficientConditionActuals;
+
+        private SimulationMessageBuilder MessageBuilder;
 
         private Func<TreatmentOption, double> ObjectiveFunction;
 
@@ -289,7 +327,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                         if (costCoverage == CostCoverage.None)
                         {
-                            Warn($"Treatment \"{treatment.Name}\" scheduled for year {year} cannot be funded normally. Spending limits will be temporarily removed to fund this treatment.");
+                            MessageBuilder = new SimulationMessageBuilder($"Treatment scheduled for year {year} cannot be funded normally. Spending limits will be temporarily removed to fund this treatment.")
+                            {
+                                ItemName = treatment.Name,
+                                ItemId = treatment.Id,
+                            };
+
+                            Warn(MessageBuilder.ToString());
 
                             var actualSpendingLimit = SpendingLimit;
                             SpendingLimit = SpendingLimit.NoLimit;
@@ -848,7 +892,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 if (cost < 0)
                 {
-                    Fail(MessageStrings.RemainingCostIsNegative);
+                    throw new InvalidOperationException(MessageStrings.RemainingCostIsNegative);
                 }
             }
         }

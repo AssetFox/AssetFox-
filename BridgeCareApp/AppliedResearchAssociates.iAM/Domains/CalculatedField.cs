@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public CalculatedFieldValueSource AddValueSource() => _ValueSources.GetAdd(new CalculatedFieldValueSource(Explorer));
 
-        public double Calculate(CalculateEvaluateScope scope)
+        internal double Calculate(SectionContext scope)
         {
             ValueSources.Channel(
                 source => source.Criterion.Evaluate(scope),
@@ -32,7 +32,14 @@ namespace AppliedResearchAssociates.iAM.Domains
 
             if (operativeSources.Count == 0)
             {
-                throw new SimulationException(MessageStrings.CalculatedFieldHasNoOperativeEquations);
+                var messageBuilder = new SimulationMessageBuilder(MessageStrings.CalculatedFieldHasNoOperativeEquations)
+                {
+                    ItemName = Name,
+                    SectionName = scope.Section.Name,
+                    SectionId = scope.Section.Id,
+                };
+
+                throw new SimulationException(messageBuilder.ToString());
             }
 
             if (operativeSources.Count == 1)

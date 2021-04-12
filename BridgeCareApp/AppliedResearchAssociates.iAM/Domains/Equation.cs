@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Analysis;
 using MathNet.Numerics.Interpolation;
 
 namespace AppliedResearchAssociates.iAM.Domains
@@ -28,9 +29,9 @@ namespace AppliedResearchAssociates.iAM.Domains
             }
         }
 
-        public double Compute(CalculateEvaluateScope scope) => Compute(scope, null, default);
+        internal double Compute(SectionContext scope) => Compute(scope, null, default);
 
-        internal double Compute(CalculateEvaluateScope scope, PerformanceCurve curve, double previousAge)
+        internal double Compute(SectionContext scope, PerformanceCurve curve, double previousAge)
         {
             EnsureCompiled();
 

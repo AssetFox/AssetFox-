@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
@@ -44,9 +44,9 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         internal abstract bool CanUseBudget(Budget budget);
 
-        internal abstract IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope);
+        internal abstract IReadOnlyCollection<Action> GetConsequenceActions(SectionContext scope);
 
-        internal abstract double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts);
+        internal abstract double GetCost(SectionContext scope, bool shouldApplyMultipleFeasibleCosts);
 
         private const int DEFAULT_SHADOW = 1;
 

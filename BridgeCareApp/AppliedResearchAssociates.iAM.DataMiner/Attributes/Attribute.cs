@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 {
-    public abstract class Attribute
+    public abstract class Attribute : IEquatable<Attribute>
     {
         public Attribute(Guid id,
             string name,
@@ -34,5 +34,19 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
         public string ConnectionString { get; }
         public bool IsCalculated { get; set; }
         public bool IsAscending { get; set; }
+
+        public bool Equals(Attribute other)
+        {
+            return Id.Equals(other.Id);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Attribute a && Equals(a);
+        }
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
     }
 }

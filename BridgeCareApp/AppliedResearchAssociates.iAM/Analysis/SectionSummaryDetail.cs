@@ -16,18 +16,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             FacilityName = section.Facility.Name;
             SectionName = section.Name;
-            Area = section.Area;
         }
 
         [JsonConstructor]
-        public SectionSummaryDetail(double area, string facilityName, string sectionName)
+        public SectionSummaryDetail(string facilityName, string sectionName)
         {
-            Area = area;
             FacilityName = facilityName ?? throw new ArgumentNullException(nameof(facilityName));
             SectionName = sectionName ?? throw new ArgumentNullException(nameof(sectionName));
         }
-
-        public double Area { get; }
 
         public string FacilityName { get; }
 
@@ -41,7 +37,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             FacilityName = original.FacilityName;
             SectionName = original.SectionName;
-            Area = original.Area;
 
             ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute);
             ValuePerTextAttribute.CopyFrom(original.ValuePerTextAttribute);

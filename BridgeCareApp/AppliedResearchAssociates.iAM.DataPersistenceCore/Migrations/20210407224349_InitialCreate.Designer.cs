@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20210329201935_ChangesFromMaster20210329")]
-    partial class ChangesFromMaster20210329
+    [Migration("20210407224349_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1542,12 +1542,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Area")
-                        .HasColumnType("float");
-
-                    b.Property<string>("AreaUnit")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
@@ -1567,6 +1561,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SectionName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SpatialWeighting")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -1987,12 +1984,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Area")
-                        .HasColumnType("float");
-
-                    b.Property<string>("AreaUnit")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
@@ -2012,9 +2003,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("SpatialWeightingId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FacilityId");
+
+                    b.HasIndex("SpatialWeightingId");
 
                     b.ToTable("Section");
                 });
@@ -3458,7 +3454,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "SpatialWeighting")
+                        .WithMany()
+                        .HasForeignKey("SpatialWeightingId");
+
                     b.Navigation("Facility");
+
+                    b.Navigation("SpatialWeighting");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentBudgetEntity", b =>

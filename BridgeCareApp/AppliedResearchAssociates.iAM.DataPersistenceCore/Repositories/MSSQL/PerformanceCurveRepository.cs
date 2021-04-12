@@ -120,6 +120,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.PerformanceCurves)
                 .ThenInclude(_ => _.PerformanceCurveEquationJoin)
                 .ThenInclude(_ => _.Equation)
+                .AsNoTracking()
                 .Single(_ => _.Id == simulation.Id);
 
             simulationEntity.PerformanceCurveLibrarySimulationJoin?.PerformanceCurveLibrary?.PerformanceCurves?.ForEach(

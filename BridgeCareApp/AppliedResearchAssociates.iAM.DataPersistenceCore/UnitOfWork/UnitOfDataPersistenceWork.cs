@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
             Context = context ?? throw new ArgumentNullException(nameof(context));
 
-            Context.Database.SetCommandTimeout(180);
+            Context.Database.SetCommandTimeout(1800);
         }
 
         public IConfiguration Config { get; }

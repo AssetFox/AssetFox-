@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             return attributes;
         }
 
-        public Attribute GetNetworkDefinitionAttribute()
+        public (Attribute Attribute, string DefaultEquation) GetNetworkDefinitionAttribute()
         {
             // get the network definition rules file path
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
@@ -72,15 +72,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             var rawAttributes = File.ReadAllText(filePath);
 
             // convert the json string into attribute meta data models
-            var attributeMetaData = JsonConvert
-                .DeserializeAnonymousType(rawAttributes, new { AttributeMetaData = default(List<AttributeMetaDatum>) })
-                .AttributeMetaData;
+            var metaData = JsonConvert
+                .DeserializeAnonymousType(rawAttributes, new { AttributeMetaData = default(List<AttributeMetaDatum>), DefaultEquation = default(string) });
 
             // convert meta data into attribute domain models
-            var attributes = attributeMetaData.Select(AttributeFactory.Create).ToList();
+            var attributes = metaData.AttributeMetaData.Select(AttributeFactory.Create).ToList();
 
             // return only the first attribute from the list, or null if there isn't any
-            return attributes.FirstOrDefault();
+            return (attributes.FirstOrDefault(), metaData.DefaultEquation);
         }
     }
 }

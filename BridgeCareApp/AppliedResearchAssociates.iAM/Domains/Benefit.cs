@@ -50,8 +50,8 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         internal double GetNetworkCondition(IEnumerable<SectionContext> network)
         {
-            var networkArea = network.Sum(context => context.Section.Area);
-            var networkCondition = network.Sum(context => LimitValue(context.GetNumber(Attribute.Name)) * context.Section.Area) / networkArea;
+            var networkSpatialWeight = network.Sum(context => context.GetSpatialWeight());
+            var networkCondition = network.Sum(context => LimitValue(context.GetNumber(Attribute.Name)) * context.GetSpatialWeight()) / networkSpatialWeight;
             return networkCondition;
         }
 

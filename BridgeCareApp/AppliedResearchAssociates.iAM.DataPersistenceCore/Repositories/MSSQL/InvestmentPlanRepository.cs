@@ -101,6 +101,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CashFlowRuleLibrary)
                 .ThenInclude(_ => _.CashFlowRules)
                 .ThenInclude(_ => _.CashFlowDistributionRules)
+                .AsNoTracking()
                 .Single(_ => _.Simulation.Id == simulation.Id)
                 .FillSimulationInvestmentPlan(simulation);
         }

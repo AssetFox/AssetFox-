@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static void FillBudgetPercentagePair(this BudgetPercentagePairEntity entity, InvestmentPlan investmentPlan,
             BudgetPriority budgetPriority)
         {
-            var budget = investmentPlan.Budgets.Single(_ => _.Id == entity.Budget.Id);
+            var budget = investmentPlan.Budgets.Single(_ => _.Id == entity.BudgetId);
             var budgetPercentagePair = budgetPriority.GetBudgetPercentagePair(budget);
             budgetPercentagePair.Id = entity.Id;
             budgetPercentagePair.Percentage = entity.Percentage;

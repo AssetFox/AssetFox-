@@ -47,9 +47,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 });
             }
 
-            context.BulkInsert(entities);
+            var batches = entities.Count() / 100000;
+            var rem = entities.Count() % 100000;
+            var i = 0;
 
-            context.SaveChanges();
+            while (i < batches)
+            {
+                context.BulkInsert(entities.Skip(i * 100000).Take(100000).ToList(), new BulkConfig { BatchSize = 100000, BulkCopyTimeout = 1800 });
+                context.SaveChanges();
+                i++;
+            }
+
+            if(rem > 0)
+            {
+                context.BulkInsert(entities.Skip(i * 100000).Take(rem).ToList(), new BulkConfig { BatchSize = rem, BulkCopyTimeout = 1800 });
+                context.SaveChanges();
+            }
         }
 
         public static void UpdateEntity<T>(this IAMContext context, T entity, Guid key, Guid? userId = null) where T : class

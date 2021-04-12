@@ -119,7 +119,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 if (yearIsScheduled && scheduledEvent.IsT2())
                 {
-                    AccumulationContext.SimulationRunner.Fail(MessageStrings.TreatmentOutlookIsConsumingAProgressEvent);
+                    throw new InvalidOperationException(MessageStrings.TreatmentOutlookIsConsumingAProgressEvent);
                 }
 
                 AccumulationContext.ApplyPerformanceCurves();

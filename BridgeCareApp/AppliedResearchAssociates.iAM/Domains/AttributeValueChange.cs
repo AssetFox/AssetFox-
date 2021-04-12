@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.Domains
             }
         }
 
-        internal ChangeApplicator GetApplicator(CalculateEvaluateScope scope)
+        internal ChangeApplicator GetApplicator(SectionContext scope)
         {
             switch (Attribute)
             {

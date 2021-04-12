@@ -58,7 +58,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var cost = GetCostOfTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment);
             if (cost != 0)
             {
-                SimulationRunner.Fail(MessageStrings.CostOfPassiveTreatmentIsNonZero);
+                var messageBuilder = new SimulationMessageBuilder(MessageStrings.CostOfPassiveTreatmentIsNonZero)
+                {
+                    ItemName = SimulationRunner.Simulation.DesignatedPassiveTreatment.Name,
+                    ItemId = SimulationRunner.Simulation.DesignatedPassiveTreatment.Id,
+                    SectionName = Section.Name,
+                    SectionId = Section.Id,
+                };
+
+                SimulationRunner.Fail(messageBuilder.ToString());
             }
 
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
@@ -129,7 +137,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 var loop = GetNumber_ActiveKeysOfCurrentInvocation.SkipWhile(activeKey => !StringComparer.OrdinalIgnoreCase.Equals(activeKey, key)).Append(key);
                 var loopText = string.Join(" to ", loop.Select(activeKey => "[" + activeKey + "]"));
-                SimulationRunner.Fail("Loop encountered during number calculation: " + loopText);
+
+                var messageBuilder = new SimulationMessageBuilder("Loop encountered during number calculation: " + loopText)
+                {
+                    SectionName = Section.Name,
+                    SectionId = Section.Id,
+                };
+
+                SimulationRunner.Fail(messageBuilder.ToString());
             }
 
             GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
@@ -283,12 +298,26 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             if (operativeCurves.Count == 0)
             {
-                SimulationRunner.Fail("No performance curves are operative for a deteriorating attribute.");
+                var messageBuilder = new SimulationMessageBuilder("No performance curves are operative for a deteriorating attribute.")
+                {
+                    ItemName = curves.Key.Name,
+                    SectionName = Section.Name,
+                    SectionId = Section.Id,
+                };
+
+                SimulationRunner.Fail(messageBuilder.ToString());
             }
 
             if (operativeCurves.Count > 1)
             {
-                SimulationRunner.Warn("Two or more performance curves are simultaneously operative for a single deteriorating attribute.");
+                var messageBuilder = new SimulationMessageBuilder("Two or more performance curves are simultaneously operative for a single deteriorating attribute.")
+                {
+                    ItemName = curves.Key.Name,
+                    SectionName = Section.Name,
+                    SectionId = Section.Id,
+                };
+
+                SimulationRunner.Warn(messageBuilder.ToString());
             }
 
             Func<double>

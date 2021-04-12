@@ -69,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public override IEnumerable<TreatmentScheduling> GetSchedulings() => Schedulings;
 
-        public bool IsFeasible(CalculateEvaluateScope scope) => FeasibilityCriteria.Any(feasibility => feasibility.EvaluateOrDefault(scope));
+        internal bool IsFeasible(SectionContext scope) => FeasibilityCriteria.Any(feasibility => feasibility.EvaluateOrDefault(scope));
 
         public void Remove(TreatmentSupersession supersession) => _Supersessions.Remove(supersession);
 
@@ -83,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         internal override bool CanUseBudget(Budget budget) => Budgets.Contains(budget);
 
-        internal override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope)
+        internal override IReadOnlyCollection<Action> GetConsequenceActions(SectionContext scope)
         {
             return ConsequencesPerAttribute.SelectMany(getConsequenceAction).ToArray();
 
@@ -112,7 +112,15 @@ namespace AppliedResearchAssociates.iAM.Domains
 
                 if (!(consequences.Key is NumberAttribute numberAttribute))
                 {
-                    throw new SimulationException(MessageStrings.NonNumberAttributeIsBeingActedOnByMultipleConsequences);
+                    var messageBuilder = new SimulationMessageBuilder(MessageStrings.NonNumberAttributeIsBeingActedOnByMultipleConsequences)
+                    {
+                        ItemName = Name,
+                        ItemId = Id,
+                        SectionName = scope.Section.Name,
+                        SectionId = scope.Section.Id,
+                    };
+
+                    throw new SimulationException(messageBuilder.ToString());
                 }
 
                 Array.Sort(changeApplicators, ChangeApplicatorComparer);
@@ -123,7 +131,7 @@ namespace AppliedResearchAssociates.iAM.Domains
             }
         }
 
-        internal override double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts)
+        internal override double GetCost(SectionContext scope, bool shouldApplyMultipleFeasibleCosts)
         {
             var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
             if (feasibleCosts.Length == 0)

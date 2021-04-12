@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
@@ -69,9 +69,9 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         internal override bool CanUseBudget(Budget budget) => budget == Budget;
 
-        internal override IReadOnlyCollection<Action> GetConsequenceActions(CalculateEvaluateScope scope) => Consequences.Select(consequence => consequence.GetChangeApplicators(scope).Single().Action).ToArray();
+        internal override IReadOnlyCollection<Action> GetConsequenceActions(SectionContext scope) => Consequences.Select(consequence => consequence.GetChangeApplicators(scope).Single().Action).ToArray();
 
-        internal override double GetCost(CalculateEvaluateScope scope, bool shouldApplyMultipleFeasibleCosts) => Cost;
+        internal override double GetCost(SectionContext scope, bool shouldApplyMultipleFeasibleCosts) => Cost;
 
         private SelectableTreatment _TemplateTreatment;
     }

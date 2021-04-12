@@ -39,7 +39,7 @@ namespace BridgeCareCore.Controllers
         {
             // NOTE:  This might be useful:  https://weblog.west-wind.com/posts/2013/dec/13/accepting-raw-request-body-content-with-aspnet-web-api
 
-            SendRealTimeMessage($"Starting to process {reportName}.");
+            //SendRealTimeMessage($"Starting to process {reportName}.");
 
             // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
             string parameters = String.Empty;
@@ -63,9 +63,9 @@ namespace BridgeCareCore.Controllers
             // Run the report as long as it does not have any existing errors (i.e., failure on generation)
             if (report.Errors.Count() == 0)
             {
-                SendRealTimeMessage($"Running {reportName}.");
+                //SendRealTimeMessage($"Running {reportName}.");
                 await report.Run(parameters);
-                SendRealTimeMessage($"Completed running {reportName}");
+                //SendRealTimeMessage($"Completed running {reportName}");
             }
 
             // Handle a completed run with errors
@@ -92,7 +92,7 @@ namespace BridgeCareCore.Controllers
             _hubContext
                 .Clients
                 .All
-                .SendAsync("BroadcastReportGenerationStatus", message);
+                .SendAsync(HubConstant.BroadcastError, message);
 
         private IActionResult CreateErrorListing(List<string> errors)
         {
@@ -100,6 +100,7 @@ namespace BridgeCareCore.Controllers
             foreach (var item in errors)
             {
                 errorHTML.Append($"<li>{item}</li>");
+                SendRealTimeMessage(item);
             }
             errorHTML.Append("</list>");
 

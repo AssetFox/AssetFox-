@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -178,6 +179,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.Location.ToEntity(_.Id, typeof(MaintainableAssetEntity))).ToList();
 
             _unitOfWork.Context.AddAll(maintainableAssetLocationEntities, _unitOfWork.UserEntity?.Id);
+        }
+
+        public List<BMSIDAndBRKeyDTO> GetBMSIDAndBRKey()
+        {
+            var valuesFromDb = _unitOfWork.Context.MaintainableAsset.Select(_ => new { bmsId = _.SectionName, brKey = _.FacilityName });
+
+            var result = new List<BMSIDAndBRKeyDTO>();
+            foreach (var item in valuesFromDb)
+            {
+                result.Add(new BMSIDAndBRKeyDTO { BmsId = item.bmsId, BrKey = item.brKey });
+            }
+            return result;
         }
     }
 }

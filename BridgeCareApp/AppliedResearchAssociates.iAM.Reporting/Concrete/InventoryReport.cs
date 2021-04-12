@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public async Task Run(string parameters)
         {
             segmentIds = Parse(parameters);
-            if (segmentIds.BRKey == -1) return; // report failed due to bad parameters
+            if (segmentIds.BRKey == -1 && string.IsNullOrEmpty(segmentIds.BMSID)) return; // report failed due to bad parameters
             if (!Validate(segmentIds)) return; // report failed due to validation
 
             // Check if asset actually exists

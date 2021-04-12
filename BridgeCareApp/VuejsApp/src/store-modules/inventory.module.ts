@@ -8,7 +8,8 @@ const state = {
     inventoryItems: [] as InventoryItem[],
     inventoryItemDetail: emptyInventoryItemDetail as InventoryItemDetail,
     lastFiveBmsIdSearches: [] as string[],
-    lastFiveBrKeySearches: [] as number[]
+    lastFiveBrKeySearches: [] as number[],
+    staticHTMLForInventory: '' as any
 };
 
 const mutations = {
@@ -17,6 +18,9 @@ const mutations = {
     },
     inventoryItemDetailMutator(state: any, inventoryItemDetail: InventoryItemDetail) {
         state.inventoryItemDetail = clone(inventoryItemDetail);
+    },
+    inventoryStaticHTMLMutator(state: any, staticHTMLPage: any){
+        state.staticHTMLForInventory = clone(staticHTMLPage);
     },
     lastFiveBmsIdSearchesMutator(state: any, searchString: string) {
         if (!contains(searchString, state.lastFiveBmsIdSearches)) {
@@ -75,6 +79,15 @@ const actions = {
                     commit('inventoryItemDetailMutator', response.data);
                 }
             });
+    },
+
+    async getStaticInventoryHTML({commit}: any, payload: any){
+        await InventoryService.getStaticInventoryHTML(payload.reportType, payload.filterData)
+        .then((response: AxiosResponse<any>) => {
+            if(hasValue(response, 'data')){
+                commit('inventoryStaticHTMLMutator', response.data);
+            }
+        });
     }
 };
 

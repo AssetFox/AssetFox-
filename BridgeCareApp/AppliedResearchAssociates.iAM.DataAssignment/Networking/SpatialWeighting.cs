@@ -2,7 +2,7 @@
 {
     public class SpatialWeighting
     {
-        public SpatialWeighting(double area, string areaUnit)
+        public SpatialWeighting(double area, string areaUnit = "ft^2")
         {
             Area = area;
             AreaUnit = areaUnit;

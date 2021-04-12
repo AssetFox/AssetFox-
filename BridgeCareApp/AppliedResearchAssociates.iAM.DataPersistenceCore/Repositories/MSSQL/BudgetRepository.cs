@@ -89,12 +89,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return new List<SimpleBudgetDetailDTO>();
             }
 
-            return _unitOfWork.Context.BudgetLibrary
-                .Include(_ => _.Budgets)
-                .Single(_ =>
-                    _.BudgetLibrarySimulationJoins.FirstOrDefault(__ => __.SimulationId == simulationId) != null)
-                .Budgets.Select(_ => new SimpleBudgetDetailDTO {Id = _.Id, Name = _.Name}).OrderBy(_ => _.Name)
+            return _unitOfWork.Context.Simulation
+                .Where(_ => _.Id == simulationId)
+                .Select(simulation => new SimulationEntity
+                {
+                    BudgetLibrarySimulationJoin = new BudgetLibrarySimulationEntity
+                    {
+                        BudgetLibrary = new BudgetLibraryEntity
+                        {
+                            Budgets = simulation.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets
+                                .Select(budget => new BudgetEntity {Id = budget.Id, Name = budget.Name})
+                                .ToList()
+                        }
+                    }
+                })
+                .Single()
+                .BudgetLibrarySimulationJoin.BudgetLibrary.Budgets
+                .Select(_ => new SimpleBudgetDetailDTO {Id = _.Id, Name = _.Name}).OrderBy(_ => _.Name)
                 .ToList();
+
         }
 
         public List<BudgetLibraryDTO> BudgetLibrariesWithBudgets()

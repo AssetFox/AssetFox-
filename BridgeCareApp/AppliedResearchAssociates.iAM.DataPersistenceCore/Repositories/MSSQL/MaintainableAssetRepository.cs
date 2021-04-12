@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 
@@ -24,50 +25,52 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
-                throw new RowNotInTableException($"No network found having id {networkId}");
+                throw new RowNotInTableException($"No network found having id {networkId}.");
             }
 
-            var maintainableAssets = _unitOfWork.Context.MaintainableAsset
-                .Include(_ => _.MaintainableAssetLocation)
-                .Include(_ => _.AssignedData)
-                .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.AssignedData)
-                .ThenInclude(_ => _.AttributeDatumLocation)
+            if (!_unitOfWork.Context.MaintainableAsset.Any(_ => _.NetworkId == networkId))
+            {
+                throw new RowNotInTableException($"The network has no maintainable assets for rollup.");
+            }
+
+            var assets = _unitOfWork.Context.MaintainableAsset
                 .Where(_ => _.NetworkId == networkId)
+                .Select(asset => new MaintainableAssetEntity
+                {
+                    Id = asset.Id,
+                    NetworkId = networkId,
+                    Area = asset.Area,
+                    AreaUnit = asset.AreaUnit,
+                    MaintainableAssetLocation = new MaintainableAssetLocationEntity(
+                        asset.MaintainableAssetLocation.Id, asset.MaintainableAssetLocation.Discriminator,
+                        asset.MaintainableAssetLocation.LocationIdentifier),
+                    AssignedData = asset.AssignedData.Select(datum => new AttributeDatumEntity
+                    {
+                        Id = datum.Id,
+                        NumericValue = datum.NumericValue,
+                        TextValue = datum.TextValue,
+                        Discriminator = datum.Discriminator,
+                        AttributeDatumLocation = new AttributeDatumLocationEntity(datum.AttributeDatumLocation.Id,
+                            datum.AttributeDatumLocation.Discriminator,
+                            datum.AttributeDatumLocation.LocationIdentifier),
+                        Attribute = new AttributeEntity
+                        {
+                            Id = datum.Attribute.Id,
+                            Name = datum.Attribute.Name,
+                            Minimum = datum.Attribute.Minimum,
+                            Maximum = datum.Attribute.Maximum,
+                            AggregationRuleType = datum.Attribute.AggregationRuleType,
+                            Command = datum.Attribute.Command,
+                            ConnectionType = datum.Attribute.ConnectionType,
+                            IsCalculated = datum.Attribute.IsCalculated,
+                            IsAscending = datum.Attribute.IsAscending,
+                            DataType = datum.Attribute.DataType
+                        }
+                    }).ToList()
+                })
                 .ToList();
 
-            var attributeId = Guid.Empty;
-
-            var assets = (from ma in _unitOfWork.Context.MaintainableAsset
-                          join mal in _unitOfWork.Context.MaintainableAssetLocation on ma.Id equals mal.MaintainableAssetId
-                          join ad in _unitOfWork.Context.AttributeDatum on ma.Id equals ad.MaintainableAssetId
-                          where ad.AttributeId == attributeId
-                          select new MaintainableAssetEntity
-                          {
-                              Id = ma.Id,
-                              NetworkId = ma.NetworkId,
-                              MaintainableAssetLocation =
-                                  new MaintainableAssetLocationEntity(mal.Id, mal.Discriminator, mal.LocationIdentifier)
-                                  {
-                                      MaintainableAssetId = mal.MaintainableAssetId
-                                  },
-                              AssignedData = (from adSub in _unitOfWork.Context.AttributeDatum
-                                              where adSub.MaintainableAssetId == ma.Id
-                                              select new AttributeDatumEntity
-                                              {
-                                                  Id = adSub.Id,
-                                                  TimeStamp = adSub.TimeStamp,
-                                                  NumericValue = adSub.NumericValue,
-                                                  TextValue = adSub.TextValue,
-                                                  Discriminator = adSub.Discriminator,
-                                                  AttributeId = adSub.AttributeId,
-                                                  MaintainableAssetId = adSub.MaintainableAssetId
-                                              }).ToList()
-                          });
-
-            return !maintainableAssets.Any()
-                ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")
-                : maintainableAssets.Select(_ => _.ToDomain()).ToList();
+            return assets.Select(_ => _.ToDomain()).ToList();
         }
 
         public void CreateMaintainableAssets(List<Section> sections, Guid networkId)
@@ -147,6 +150,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     textAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple);
             }
         }
+
+        public void UpdateMaintainableAssetsSpatialWeighting(List<MaintainableAsset> maintainableAssets)
+        {
+            var networkId = maintainableAssets.First().NetworkId;
+            var maintainableAssetEntities = maintainableAssets.Select(_ => _.ToEntity(networkId)).ToList();
+
+            var propsToExclude = new List<string> { "CreatedDate", "CreatedBy", "FacilityName", "SectionName" };
+            var config = new BulkConfig { PropertiesToExclude = propsToExclude };
+
+            _unitOfWork.Context.UpdateAll(maintainableAssetEntities, _unitOfWork.UserEntity?.Id, config);
+        }
+
 
         public void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId)
         {

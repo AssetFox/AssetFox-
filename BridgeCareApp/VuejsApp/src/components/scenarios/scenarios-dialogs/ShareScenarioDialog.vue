@@ -61,8 +61,6 @@ export default class ShareScenarioDialog extends Vue {
 
   @State(state => state.userModule.users) stateUsers: User[];
 
-  @Action('getAllUsers') getAllUsersAction: any;
-
   scenarioUserGridHeaders: DataTableHeader[] = [
     {text: 'Username', value: 'username', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Shared With', value: '', align: 'left', sortable: true, class: '', width: ''},
@@ -71,12 +69,6 @@ export default class ShareScenarioDialog extends Vue {
   scenarioUserGridRows: ScenarioUserGridRow[] = [];
   currentUserAndOwner: ScenarioUser[] = [];
   searchTerm: string = '';
-
-  mounted() {
-    if (!hasValue(this.stateUsers)) {
-      this.getAllUsersAction();
-    }
-  }
 
   @Watch('dialogData')
   onDialogDataChanged() {

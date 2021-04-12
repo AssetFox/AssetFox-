@@ -97,24 +97,10 @@ namespace BridgeCareCore
             services.AddScoped<IAssetData, PennDOTAssetDataRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
 
-#if MsSqlDebug || Release || Test
             // SQL SERVER SCOPINGS
             services.AddDbContext<IAMContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
             services.AddScoped<UnitOfDataPersistenceWork>();
-
-            // Repository for legacy database
-            //services.AddMSSQLLegacyServices(Configuration.GetConnectionString("BridgeCareLegacyConnex"));
-#elif LiteDbDebug
-            // LITE DB SCOPINGS
-            services.Configure<LiteDb.LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
-            services.AddSingleton<LiteDb.ILiteDbContext, LiteDb.LiteDbContext>();
-            services.AddScoped<IAttributeRepository, LiteDb.AttributeRepository>();
-            services.AddScoped<IAggregatedResultRepository, LiteDb.AggregatedResultsRepository>();
-            services.AddScoped<INetworkRepository, LiteDb.NetworkRepository>();
-            services.AddScoped<IAttributeDatumRepository, LiteDb.AttributeDatumRepository>();
-            services.AddScoped<IMaintainableAssetRepository, LiteDb.MaintainableAssetRepository>();
-#endif
 
             // Setup reporting
             var reportLookup = new Dictionary<string, Type>();

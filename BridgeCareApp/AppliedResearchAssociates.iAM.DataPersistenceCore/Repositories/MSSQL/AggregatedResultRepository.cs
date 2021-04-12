@@ -20,16 +20,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AggregatedResultRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public int CreateAggregatedResults(List<IAggregatedResult> aggregatedResults)
+        public void AddAggregatedResults(List<IAggregatedResult> aggregatedResults)
         {
             DeleteAggregatedResults(aggregatedResults.First().MaintainableAsset.NetworkId);
 
             var entities = aggregatedResults.SelectMany(_ => _.ToEntity()).ToList();
 
-            _unitOfWork.Context.BulkInsert(entities);
-            _unitOfWork.Context.SaveChanges();
-
-            return entities.Count();
+            _unitOfWork.Context.AddAll(entities);
         }
 
         public IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId)

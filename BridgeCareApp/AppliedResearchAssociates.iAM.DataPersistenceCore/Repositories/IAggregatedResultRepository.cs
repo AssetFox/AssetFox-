@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAggregatedResultRepository
     {
-        int CreateAggregatedResults(List<IAggregatedResult> aggregatedResults);
+        void AddAggregatedResults(List<IAggregatedResult> aggregatedResults);
 
         IEnumerable<IAggregatedResult> GetAggregatedResults(Guid networkId);
 

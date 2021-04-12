@@ -149,19 +149,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 var history = section.GetHistory(numberAttribute);
 
-                var attributeValueHistories = entitiesPerAttributeName[attributeName]
-                    .Where(_ => _.Year != 0).ToList();
+                var attributeValueHistories = entitiesPerAttributeName[attributeName].ToList();
 
                 if (attributeValueHistories.Count > 1)
                 {
                     attributeValueHistories.ForEach(_ => history.Add(_.Year, _.NumericValue ?? 0));
-                    history.MostRecentValue = attributeValueHistories.Last().NumericValue ?? numberAttribute.DefaultValue;
+                    history.MostRecentValue = attributeValueHistories.Last().NumericValue ?? 0;
                 }
                 else
                 {
-                    var yearZero = entitiesPerAttributeName[attributeName].SingleOrDefault(_ => _.Year == 0);
-                    var altValue = numberAttribute?.DefaultValue ?? 0;
-                    history.MostRecentValue = yearZero?.NumericValue ?? altValue;
+                    history.MostRecentValue = entitiesPerAttributeName[attributeName].FirstOrDefault()?.NumericValue ?? 0;
                 }
             });
         }
@@ -180,19 +177,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 var history = section.GetHistory(textAttribute);
 
-                var attributeValueHistories = entitiesPerAttributeName[attributeName]
-                    .Where(_ => _.Year != 0).ToList();
+                var attributeValueHistories = entitiesPerAttributeName[attributeName].ToList();
 
                 if (attributeValueHistories.Any())
                 {
                     attributeValueHistories.ForEach(_ => history.Add(_.Year, _.TextValue));
-                    history.MostRecentValue = attributeValueHistories.Last().TextValue ?? textAttribute.DefaultValue;
+                    history.MostRecentValue = attributeValueHistories.Last().TextValue;
                 }
                 else
                 {
-                    var yearZero = entitiesPerAttributeName[attributeName].SingleOrDefault(_ => _.Year == 0);
-                    var altValue = textAttribute?.DefaultValue;
-                    history.MostRecentValue = yearZero?.TextValue ?? altValue;
+                    history.MostRecentValue = entitiesPerAttributeName[attributeName].FirstOrDefault()?.TextValue;
                 }
             });
         }

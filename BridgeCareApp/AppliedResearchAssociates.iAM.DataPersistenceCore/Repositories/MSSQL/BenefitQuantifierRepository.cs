@@ -43,6 +43,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == dto.NetworkId))
             {
                 throw new RowNotInTableException($"No network found having id {dto.NetworkId}.");
+            }
 
                 var attributes = _unitOfWork.Context.Attribute.ToList();
                 var stringAttributes = attributes.Where(_ => _.DataType == "STRING").ToList();
@@ -57,7 +58,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.Context.Upsert(benefitQuantifierEntity, _ => _.NetworkId == dto.NetworkId,
                     _unitOfWork.UserEntity?.Id);
-            }
         }
 
         private void CheckEquationAttributes(List<AttributeEntity> stringAttributes, List<AttributeEntity> numberAttributes, string target)

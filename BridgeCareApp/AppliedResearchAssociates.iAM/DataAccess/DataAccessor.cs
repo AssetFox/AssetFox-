@@ -226,6 +226,7 @@ order by simulationid
                     void createSections()
                     {
                         var facilityPerName = new Dictionary<string, Facility>();
+                        string areaUnit = null;
 
                         while (reader.Read())
                         {
@@ -242,13 +243,24 @@ order by simulationid
                             {
                                 var section = facility.AddSection();
                                 section.Name = sectionName;
-                                section.Area = reader.GetDouble(2);
-                                section.AreaUnit = reader.GetNullableString(3);
+                                section.SpatialWeighting.Expression = reader.GetDouble(2).ToString();
+
+                                var sectionAreaUnit = reader.GetNullableString(3)?.Trim();
+                                if (areaUnit is null)
+                                {
+                                    areaUnit = sectionAreaUnit;
+                                }
+                                else if (!areaUnit.Equals(sectionAreaUnit, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    throw new InvalidOperationException("Sections of network have inconsistent area units.");
+                                }
 
                                 var sectionId = reader.GetInt32(4);
                                 helper.SectionPerId.Add(sectionId, section);
                             }
                         }
+
+                        network.SpatialWeightUnit = areaUnit;
                     }
 
                     void fillSectionHistories()

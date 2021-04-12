@@ -6,6 +6,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         List<DataMiner.Attributes.Attribute> GetAllAttributes();
 
-        DataMiner.Attributes.Attribute GetNetworkDefinitionAttribute();
+        (DataMiner.Attributes.Attribute Attribute, string DefaultEquation) GetNetworkDefinitionAttribute();
     }
 }

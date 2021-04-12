@@ -21,7 +21,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.SimulationId);
-            _unitOfWork.Context.SaveChanges();
         }
 
         public SimulationAnalysisDetailDTO GetSimulationAnalysisDetail(Guid simulationId)

@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public event EventHandler<WarningEventArgs> Warning;
 
-        public event EventHandler<ProgressEventArgs> Progressing;
+        public event EventHandler<ProgressEventArgs> Progress;
 
         public Simulation Simulation { get; }
 
@@ -36,14 +36,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 throw new InvalidOperationException("Runner is already running.");
             }
 
-            MessageBuilder = new SimulationMessageBuilder("Simulation initializing ...")
-            {
-                ItemName = Simulation.Name,
-                ItemId = Simulation.Id,
-            };
-
-            //Inform(MessageBuilder.ToString());
-            Progress(ProgressStatus.Started, 0, 0.0);
+            ReportProgress(ProgressStatus.Started);
 
             var simulationValidationResults = Simulation.GetAllValidationResults();
 
@@ -170,19 +163,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Simulation.Results.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
             Simulation.Results.InitialSectionSummaries.AddRange(SectionContexts.Select(context => context.SummaryDetail));
 
-            var percentComplete = 0.0;
-            var totalYearCount = Simulation.InvestmentPlan.YearsOfAnalysis.Count();
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
-                MessageBuilder = new SimulationMessageBuilder($"Simulating {year} ...")
-                {
-                    ItemName = Simulation.Name,
-                    ItemId = Simulation.Id,
-                };
-                percentComplete += (100 / totalYearCount);
-                Math.Round(percentComplete, 2);
-                //Inform(MessageBuilder.ToString());
-                Progress(ProgressStatus.Running, year, percentComplete);
+                var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod;
+                ReportProgress(ProgressStatus.Running, percentComplete, year);
 
                 var unhandledContexts = ApplyRequiredEvents(year);
                 var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
@@ -195,15 +179,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 treatment.UnsetConsequencesPerAttribute();
             }
-
-            MessageBuilder = new SimulationMessageBuilder("Simulation complete.")
-            {
-                ItemName = Simulation.Name,
-                ItemId = Simulation.Id,
-            };
-
-            //Inform(MessageBuilder.ToString());
-            Progress(ProgressStatus.Completed, 0, 100);
+            ReportProgress(ProgressStatus.Completed, 0, 100);
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
         }
@@ -230,8 +206,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal void Warn(string message) => OnWarning(new WarningEventArgs(message));
 
-        internal void Progress(ProgressStatus progressStatus, int year, double percentComplete) =>
-            OnProgress(new ProgressEventArgs(progressStatus, year, percentComplete));
+        internal void ReportProgress(ProgressStatus progressStatus, double percentComplete = 0, int? year = null) => OnProgress(new ProgressEventArgs(progressStatus, percentComplete, year));
 
         private const int STATUS_CODE_NOT_RUNNING = 0;
 
@@ -631,7 +606,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void OnWarning(WarningEventArgs e) => Warning?.Invoke(this, e);
 
-        private void OnProgress(ProgressEventArgs e) => Progressing?.Invoke(this, e);
+        private void OnProgress(ProgressEventArgs e) => Progress?.Invoke(this, e);
 
         private void RecordStatusOfConditionGoals(SimulationYearDetail detail)
         {

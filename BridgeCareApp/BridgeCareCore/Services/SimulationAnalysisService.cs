@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.Simulation;
-using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Services
 {
@@ -71,7 +70,7 @@ namespace BridgeCareCore.Services
                 _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
 
-            runner.Progressing += (sender, eventArgs) =>
+            runner.Progress += (sender, eventArgs) =>
             {
                 if (eventArgs.ProgressStatus == ProgressStatus.Started)
                 {
@@ -80,14 +79,14 @@ namespace BridgeCareCore.Services
 
                     _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
                 }
-                if(eventArgs.ProgressStatus == ProgressStatus.Running)
+                if (eventArgs.ProgressStatus == ProgressStatus.Running)
                 {
-                    simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {eventArgs.PercentComplete}%";
+                    simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete, 2)}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                     _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
                 }
-                if(eventArgs.ProgressStatus == ProgressStatus.Completed)
+                if (eventArgs.ProgressStatus == ProgressStatus.Completed)
                 {
                     simulationAnalysisDetail.Status = $"Simulation complete. {100}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);

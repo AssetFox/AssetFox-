@@ -148,7 +148,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IReportIndexRepository ReportIndexRepository => _reportIndexRepo ??= new ReportIndexRepository(this);
 
-        public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTAssetDataRepository(this);
+        public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTMaintainableAssetDataRepository(this);
 
 
         public UserEntity UserEntity { get; private set; }

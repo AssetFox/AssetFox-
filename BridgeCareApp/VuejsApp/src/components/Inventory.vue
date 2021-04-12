@@ -37,9 +37,12 @@
                 </v-flex>
                 <v-spacer></v-spacer>
             </v-layout>
+            <v-divider></v-divider>
+            <div class="container columnsplit" v-html="staticHTMLForInventory"></div>
+
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <v-flex xs12>
+                <!-- <v-flex xs12>
                     <v-layout justify-space-between row>
                         <div class="grouping-div">
                             <v-layout column justify-center>
@@ -68,11 +71,11 @@
                             </v-layout>
                         </div>
                     </v-layout>
-                </v-flex>
+                </v-flex> -->
             </v-layout>
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <v-flex xs12>
+                <!-- <v-flex xs12>
                     <v-layout justify-space-between row>
                         <div class="grouping-div">
                             <v-layout align-center fill-height>
@@ -94,11 +97,11 @@
                             </v-layout>
                         </div>
                     </v-layout>
-                </v-flex>
+                </v-flex> -->
             </v-layout>
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <v-flex xs12>
+                <!-- <v-flex xs12>
                     <v-layout justify-space-between row>
                         <div class="grouping-div">
                             <v-layout column justify-center>
@@ -127,11 +130,11 @@
                             </v-layout>
                         </div>
                     </v-layout>
-                </v-flex>
+                </v-flex> -->
             </v-layout>
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <v-flex xs12>
+                <!-- <v-flex xs12>
                     <v-layout justify-space-between row>
                         <div class="grouping-div">
                             <v-layout column justify-center>
@@ -166,11 +169,11 @@
                             </v-layout>
                         </div>
                     </v-layout>
-                </v-flex>
+                </v-flex> -->
             </v-layout>
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <v-flex xs12>
+                <!-- <v-flex xs12>
                     <v-layout justify-center>
                         <div class="grouping-div">
                             <v-layout column>
@@ -190,11 +193,11 @@
                             </v-layout>
                         </div>
                     </v-layout>
-                </v-flex>
+                </v-flex> -->
             </v-layout>
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <v-flex xs12>
+                <!-- <v-flex xs12>
                     <v-layout justify-center>
                         <div class="unsized-grouping-div">
                             <v-layout column>
@@ -234,11 +237,11 @@
                             </v-layout>
                         </div>
                     </v-layout>
-                </v-flex>
+                </v-flex> -->
             </v-layout>
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <v-flex xs12>
+                <!-- <v-flex xs12>
                     <v-layout justify-center>
                         <div class="unsized-grouping-div">
                             <v-layout justify-center>
@@ -255,11 +258,11 @@
                             </v-data-table>
                         </div>
                     </v-layout>
-                </v-flex>
+                </v-flex> -->
             </v-layout>
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <v-flex xs12>
+                <!-- <v-flex xs12>
                     <v-layout justify-center>
                         <div class="unsized-grouping-div">
                             <v-layout justify-center>
@@ -276,11 +279,11 @@
                             </v-data-table>
                         </div>
                     </v-layout>
-                </v-flex>
+                </v-flex> -->
             </v-layout>
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <v-flex xs12>
+                <!-- <v-flex xs12>
                     <v-layout justify-center>
                         <div class="grouping-div">
                             <v-layout column justify-center>
@@ -296,7 +299,7 @@
                             </v-layout>
                         </div>
                     </v-layout>
-                </v-flex>
+                </v-flex> -->
             </v-layout>
         </v-flex>
 
@@ -319,8 +322,10 @@
         @State(state => state.inventoryModule.inventoryItemDetail) inventoryItemDetail: InventoryItemDetail;
         @State(state => state.inventoryModule.lastFiveBmsIdSearches) stateLastFiveBmsIdSearches: string[];
         @State(state => state.inventoryModule.lastFiveBrKeySearches) stateLastFiveBrKeySearches: number[];
+        @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
 
         @Action('getInventory') getInventoryAction: any;
+        @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
         @Action('getInventoryItemDetailByBMSId') getInventoryItemDetailByBMSIdAction: any;
         @Action('getInventoryItemDetailByBRKey') getInventoryItemDetailByBRKeyAction: any;
         @Action('appendBmsIdSearchString') appendBmsIdSearchStringAction: any;
@@ -348,6 +353,8 @@
         postingTableHeaders: DataTableHeader[] = [];
         postingTableRows: DataTableRow[] = [];
         inventorySelectListsWorker: any = null;
+
+        inventoryData: any  = null;
 
         /**
          * Calls the setInventorySelectLists function to set both inventory type select lists
@@ -570,26 +577,37 @@
          * BMS id has been selected
          */
         onSelectInventoryItemByBMSId(bmsId: string) {
-            this.getInventoryItemDetailByBMSIdAction({bmsId: bmsId})
-                .then(() => setTimeout(() => {
-                    this.selectedBmsId = bmsId;
-                    const inventoryItem: InventoryItem = find(propEq('bmsId', bmsId), this.inventoryItems) as InventoryItem;
-                    this.selectedBrKey = inventoryItem.brKey;
-                    this.appendBmsIdSearchStringAction({bmsId: bmsId});
-                }));
+            // this.getInventoryItemDetailByBMSIdAction({bmsId: bmsId})
+            //     .then(() => setTimeout(() => {
+            //         this.selectedBmsId = bmsId;
+            //         const inventoryItem: InventoryItem = find(propEq('bmsId', bmsId), this.inventoryItems) as InventoryItem;
+            //         this.selectedBrKey = inventoryItem.brKey;
+            //         this.appendBmsIdSearchStringAction({bmsId: bmsId});
+            //     }));
+            var data : InventoryItem = {
+                bmsId: bmsId,
+                brKey: '-1'
+            }
+            this.getStaticInventoryHTMLAction(({reportType: 'InventoryLookup', filterData: data}));
         }
 
         /**
          * BR key has been selected
          */
         onSelectInventoryItemsByBRKey(brKey: string) {
-            this.getInventoryItemDetailByBRKeyAction({brKey: brKey})
-                .then(() => setTimeout(() => {
-                    this.selectedBrKey = brKey;
-                    const inventoryItem: InventoryItem = find(propEq('brKey', brKey), this.inventoryItems) as InventoryItem;
-                    this.selectedBmsId = inventoryItem.bmsId;
-                    this.appendBrKeySearchNumberAction({brKey: brKey});
-                }));
+            // this.getInventoryItemDetailByBRKeyAction({brKey: brKey})
+            //     .then(() => setTimeout(() => {
+            //         this.selectedBrKey = brKey;
+            //         const inventoryItem: InventoryItem = find(propEq('brKey', brKey), this.inventoryItems) as InventoryItem;
+            //         this.selectedBmsId = inventoryItem.bmsId;
+            //         this.appendBrKeySearchNumberAction({brKey: brKey});
+            //     }));
+
+            var data : InventoryItem = {
+                bmsId: '',
+                brKey: brKey
+            }
+            this.getStaticInventoryHTMLAction({reportType: 'InventoryLookup', filterData: data});
         }
 
         getGMapsUrl() {
@@ -628,5 +646,9 @@
 
     .slider {
         width: 150px;
+    }
+
+    .columnsplit {
+        padding-left: 10px;
     }
 </style>

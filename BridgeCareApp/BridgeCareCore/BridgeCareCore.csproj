@@ -35,16 +35,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Update="MetaData\AttributeMetaData\metaData.json">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="MetaData\NetworkDefinitionRules\definitionRules.json">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -109,8 +99,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="MetaData\AttributeMetaData\" />
-    <Folder Include="MetaData\NetworkDefinitionRules\" />
+    <Folder Include="Interfaces\Inventory\" />
   </ItemGroup>
 
 

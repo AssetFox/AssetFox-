@@ -25,19 +25,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         {
             Name = name;
 
-            double numValue;
-            if (double.TryParse(value, out numValue))
-            {
-                TextValue = String.Empty;
-                NumericValue = numValue;
-                Type = SegmentAttributeType.Number;
-            }
-            else
-            {
+            //double numValue;
+            //if (double.TryParse(value, out numValue) && value[0] != '0')
+            //{
+            //    TextValue = String.Empty;
+            //    NumericValue = numValue;
+            //    Type = SegmentAttributeType.Number;
+            //}
+            //else
+            //{
                 TextValue = value;
                 NumericValue = null;
                 Type = SegmentAttributeType.String;
-            }
+            //}
         }
     }
 

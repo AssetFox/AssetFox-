@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using MoreLinq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
 using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -162,7 +161,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.UpdateAll(maintainableAssetEntities, _unitOfWork.UserEntity?.Id, config);
         }
-
 
         public void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId)
         {

@@ -25,7 +25,6 @@ namespace BridgeCareCore.Controllers
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly ISimulationAnalysis _simulationAnalysis;
 
-
         private readonly IReadOnlyDictionary<string, SimulationUpdateMethod> _simulationUpdateMethods;
         private readonly IReadOnlyDictionary<string, SimulationDeleteMethod> _simulationDeleteMethods;
         private readonly IReadOnlyDictionary<string, SimulationRunMethod> _simulationRunMethods;

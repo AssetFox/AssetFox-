@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.Simulation;
-using Microsoft.AspNetCore.SignalR;
 
 namespace BridgeCareCore.Services
 {
@@ -70,21 +69,31 @@ namespace BridgeCareCore.Services
                 _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
                 _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
-            runner.Information += (sender, eventArgs) =>
+
+            runner.Progress += (sender, eventArgs) =>
             {
-                if (eventArgs.Message == "Simulation complete.")
+                switch (eventArgs.ProgressStatus)
                 {
-                    simulationAnalysisDetail.Status = eventArgs.Message;
+                case ProgressStatus.Started:
+                    simulationAnalysisDetail.Status = "Simulation initializing ...";
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
+                    _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
+                    break;
+                case ProgressStatus.Running:
+                    simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete, 2)*100}%";
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
+                    _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                    break;
+                case ProgressStatus.Completed:
+                    simulationAnalysisDetail.Status = $"Simulation complete. {100}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
-                }
-                else
-                {
-                    simulationAnalysisDetail.Status = eventArgs.Message;
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-                }
 
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
+                    _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                    break;
+                }
                 _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
             runner.Warning += (sender, eventArgs) =>

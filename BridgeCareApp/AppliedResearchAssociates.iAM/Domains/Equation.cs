@@ -12,6 +12,11 @@ namespace AppliedResearchAssociates.iAM.Domains
     {
         public Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
+        public EquationFormat Format =>
+            Calculator is object ? EquationFormat.CalculationExpression :
+            ValueVersusAge is object ? EquationFormat.PiecewiseExpression :
+            EquationFormat.Unknown;
+
         public IReadOnlyCollection<string> ReferencedParameters
         {
             get
@@ -24,48 +29,43 @@ namespace AppliedResearchAssociates.iAM.Domains
                 {
                     return Array.Empty<string>();
                 }
-
                 return Calculator.ReferencedParameters;
             }
         }
 
-        internal double Compute(SectionContext scope) => Compute(scope, null, default);
+        internal double Compute(SectionContext scope) => Compute(scope, null);
 
-        internal double Compute(SectionContext scope, PerformanceCurve curve, double previousAge)
+        internal double Compute(SectionContext scope, PerformanceCurve curve)
         {
             EnsureCompiled();
-
-            if (ValueVersusAge != null)
+            if (Format == EquationFormat.PiecewiseExpression)
             {
                 var actualAge = scope.GetNumber(Explorer.AgeAttribute.Name);
-
-                if (curve == null || previousAge <= 0 || actualAge < previousAge)
+                if (curve is null)
                 {
                     return ValueVersusAge.Interpolate(actualAge);
                 }
                 else
                 {
-                    if(previousAge == actualAge)
-                    {
-                        previousAge--;
-                    }
                     var previousValue = scope.GetNumber(curve.Attribute.Name);
                     var apparentPreviousAge = AgeVersusValue.Interpolate(previousValue);
 
-                    if (curve.Shift)
+                    var previousAge = actualAge - 1;
+                    if (curve.Shift && previousAge != 0)
                     {
                         var shiftFactor = apparentPreviousAge / previousAge;
                         var shiftedAge = actualAge * shiftFactor;
                         return ValueVersusAge.Interpolate(shiftedAge);
                     }
-
-                    var ageDifference = actualAge - previousAge;
-                    var apparentAge = apparentPreviousAge + ageDifference;
-                    return ValueVersusAge.Interpolate(apparentAge);
+                    else
+                    {
+                        var apparentAge = apparentPreviousAge + 1;
+                        return ValueVersusAge.Interpolate(apparentAge);
+                    }
                 }
             }
 
-            if (Calculator != null)
+            if (Format == EquationFormat.CalculationExpression)
             {
                 return Calculator.Delegate(scope);
             }
@@ -78,44 +78,34 @@ namespace AppliedResearchAssociates.iAM.Domains
             ValueVersusAge = null;
             AgeVersusValue = null;
             Calculator = null;
-
             if (ExpressionIsBlank)
             {
                 throw ExpressionCouldNotBeCompiled("Expression is blank.");
             }
-
             var match = PiecewisePattern.Match(Expression);
             if (match.Success)
             {
                 double parseValue(Capture capture) => double.TryParse(capture.Value, out var result) ? result : throw ExpressionCouldNotBeCompiled();
-
                 double[] parseGroup(int index) => match.Groups[index].Captures.Cast<Capture>().Select(parseValue).ToArray();
-
                 var xValues = parseGroup(1);
                 var yValues = parseGroup(2);
-
                 if (xValues.Length < 2)
                 {
                     throw ExpressionCouldNotBeCompiled("Piecewise expression has less than two points.");
                 }
-
                 if (xValues.Distinct().Count() != xValues.Length)
                 {
                     throw ExpressionCouldNotBeCompiled("Piecewise expression has non-unique x values.");
                 }
-
                 if (yValues.Distinct().Count() != yValues.Length)
                 {
                     throw ExpressionCouldNotBeCompiled("Piecewise expression has non-unique y values.");
                 }
-
                 Array.Sort(xValues, yValues);
-
                 if (!yValues.IsSorted())
                 {
                     throw ExpressionCouldNotBeCompiled("Piecewise function is not monotone.");
                 }
-
                 ValueVersusAge = LinearSpline.InterpolateSorted(xValues, yValues);
                 AgeVersusValue = LinearSpline.Interpolate(yValues, xValues);
             }
@@ -133,13 +123,9 @@ namespace AppliedResearchAssociates.iAM.Domains
         }
 
         private static readonly Regex PiecewisePattern = new Regex($@"(?>\A\s*(?:\(\s*({PatternStrings.NaturalNumber})\s*,\s*({PatternStrings.Number})\s*\)\s*)*\z)", RegexOptions.Compiled);
-
         private readonly Explorer Explorer;
-
         private LinearSpline AgeVersusValue;
-
         private Calculator Calculator;
-
         private LinearSpline ValueVersusAge;
     }
 }

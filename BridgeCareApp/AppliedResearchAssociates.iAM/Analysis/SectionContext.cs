@@ -256,8 +256,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private int? FirstUnshadowedYearForAnyTreatment;
 
-        private double PreviousAge;
-
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
             var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
@@ -268,7 +266,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve, PreviousAge);
+        private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve);
 
         private void CopyAttributeValuesToDetail(SectionSummaryDetail detail)
         {
@@ -373,10 +371,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void PrepareSet(string key)
         {
-            if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key, KeyComparer))
-            {
-                PreviousAge = GetNumber(key);
-            }
+            //if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key, KeyComparer))
+            //{
+            //    PreviousAge = GetNumber(key);
+            //}
 
             NumberCache.Clear();
         }

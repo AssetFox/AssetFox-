@@ -81,7 +81,7 @@ namespace BridgeCareCore.Services
                     _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
                     break;
                 case ProgressStatus.Running:
-                    simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete, 2)}%";
+                    simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete, 2)*100}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                     _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);

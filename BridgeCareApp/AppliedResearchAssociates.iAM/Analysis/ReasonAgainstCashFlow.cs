@@ -4,6 +4,7 @@
     {
         Undefined,
         NotNeeded,
+        NoApplicableDistributionRule,
         ApplicableDistributionRuleIsForOnlyOneYear,
         LastYearOfCashFlowIsOutsideOfAnalysisPeriod,
         FutureEventScheduleIsBlocked,

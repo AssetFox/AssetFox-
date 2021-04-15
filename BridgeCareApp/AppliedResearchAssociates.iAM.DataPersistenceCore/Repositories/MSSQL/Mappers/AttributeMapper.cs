@@ -84,48 +84,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static Domains.Attribute ToSimulationAnalysisDomain(this AttributeEntity entity, Explorer explorer)
-        {
-            if (entity.DataType == "NUMBER")
-            {
-                if (entity.IsCalculated)
-                {
-                    var calculatedField = explorer.AddCalculatedField(entity.Name);
-                    calculatedField.IsDecreasingWithDeterioration = entity.IsAscending;
-
-                    if (entity.AttributeEquationCriterionLibraryJoins.Any())
-                    {
-                        entity.AttributeEquationCriterionLibraryJoins.ForEach(join =>
-                        {
-                            var source = calculatedField.AddValueSource();
-                            source.Equation.Expression = join.Equation.Expression;
-                            source.Criterion.Expression = join.CriterionLibrary?.MergedCriteriaExpression ?? string.Empty;
-                        });
-                    }
-                    return calculatedField;
-                }
-                else
-                {
-                    var numAttribute = explorer.AddNumberAttribute(entity.Name);
-                    numAttribute.IsDecreasingWithDeterioration = entity.IsAscending;
-                    numAttribute.DefaultValue = Convert.ToDouble(entity.DefaultValue);
-                    numAttribute.Maximum = entity.Maximum;
-                    numAttribute.Minimum = entity.Minimum;
-                    return numAttribute;
-                }
-            }
-
-            if (entity.DataType == "STRING")
-            {
-                var textAttribute = explorer.AddTextAttribute(entity.Name);
-
-                textAttribute.DefaultValue = entity.DefaultValue;
-                return textAttribute;
-            }
-
-            throw new InvalidOperationException("Cannot determine Attribute entity data type");
-        }
-
         public static Domains.Attribute GetAttributesFromDomain(this AttributeEntity entity, IEnumerable<Domains.Attribute> attributes)
         {
             var filteredAttribute = attributes.Where(_ => _.Name == entity.Name).FirstOrDefault();

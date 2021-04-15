@@ -123,6 +123,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     MaintainableAsset =
                         new MaintainableAssetEntity
                         {
+                            Id = project.MaintainableAssetId,
                             FacilityName = project.MaintainableAsset.FacilityName,
                             SectionName = project.MaintainableAsset.SectionName,
                             SpatialWeighting = project.MaintainableAsset.SpatialWeighting

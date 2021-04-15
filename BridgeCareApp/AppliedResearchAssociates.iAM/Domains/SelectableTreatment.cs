@@ -51,14 +51,20 @@ namespace AppliedResearchAssociates.iAM.Domains
                 results.Add(ValidationStatus.Error, "At least one future year has more than one scheduling.", this, nameof(Schedulings));
             }
 
-            var consequencesWithBlankCriterion = Consequences.Where(consequence => consequence.Criterion.ExpressionIsBlank).ToArray();
-            if (consequencesWithBlankCriterion.Select(consequence => consequence.Attribute).Distinct().Count() < consequencesWithBlankCriterion.Length)
+            var unconditionalConsequencesPerAttribute = Consequences
+                .Where(consequence => consequence.Attribute is TextAttribute && consequence.Criterion.ExpressionIsBlank)
+                .GroupBy(consequence => consequence.Attribute);
+
+            if (unconditionalConsequencesPerAttribute.Any(group => group.Count() > 1))
             {
-                results.Add(ValidationStatus.Error, "At least one attribute is unconditionally acted on by more than one consequence.", this, nameof(Consequences));
+                results.Add(ValidationStatus.Error, "At least one text attribute is unconditionally acted on by more than one consequence.", this, nameof(Consequences));
             }
 
-            var supersessionsWithBlankCriterion = Supersessions.Where(supersession => supersession.Criterion.ExpressionIsBlank).ToArray();
-            if (supersessionsWithBlankCriterion.Select(supersession => supersession.Treatment).Distinct().Count() < supersessionsWithBlankCriterion.Length)
+            var unconditionalSupersessionsPerTreatment = Supersessions
+                .Where(supersession => supersession.Criterion.ExpressionIsBlank)
+                .GroupBy(supersession => supersession.Treatment);
+
+            if (unconditionalSupersessionsPerTreatment.Any(group => group.Count() > 1))
             {
                 results.Add(ValidationStatus.Warning, "At least one treatment is unconditionally superseded more than once.", this, nameof(Supersessions));
             }

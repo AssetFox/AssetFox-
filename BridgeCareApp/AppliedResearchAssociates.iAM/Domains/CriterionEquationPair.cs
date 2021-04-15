@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public class CriterionEquationPair : WeakEntity, IValidator
     {
-        public CriterionEquationPair(Explorer explorer)
+        internal CriterionEquationPair(Explorer explorer)
         {
             Criterion = new Criterion(explorer);
             Equation = new Equation(explorer);

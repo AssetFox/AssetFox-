@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class BudgetPriority : WeakEntity, IValidator
     {
-        public BudgetPriority(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+        internal BudgetPriority(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
 
         public IReadOnlyCollection<BudgetPercentagePair> BudgetPercentagePairs => _BudgetPercentagePairs;
 

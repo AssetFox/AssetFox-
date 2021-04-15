@@ -53,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.TreatmentConsequences.Any())
             {
-                entity.TreatmentConsequences.ForEach(_ => _.CreateConditionalTreatmentConsequence(selectableTreatment));
+                entity.TreatmentConsequences.ForEach(_ => _.CreateConditionalTreatmentConsequence(selectableTreatment, simulation.Network.Explorer.AllAttributes));
             }
 
             if (entity.TreatmentCosts.Any())

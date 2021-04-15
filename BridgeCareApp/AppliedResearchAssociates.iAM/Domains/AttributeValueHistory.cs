@@ -6,6 +6,10 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class AttributeValueHistory<T> : IDictionary<int, T>
     {
+        internal AttributeValueHistory()
+        {
+        }
+
         public bool HasMostRecentValue
         {
             get => _HasMostRecentValue;

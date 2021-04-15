@@ -5,6 +5,10 @@
     <Configurations>Debug;Release;MsSqlDebug;LiteDbDebug;Test</Configurations>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MsSqlDebug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Humanizer.Core" Version="2.8.26" />
     <PackageReference Include="MathNet.Numerics" Version="4.11.0" />

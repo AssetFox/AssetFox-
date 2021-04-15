@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.Domains;
+using MoreLinq;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 using TextAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.TextAttribute;
 
@@ -80,28 +84,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static Domains.Attribute ToSimulationAnalysisDomain(this AttributeEntity entity)
+        public static Domains.Attribute GetAttributesFromDomain(this AttributeEntity entity, IEnumerable<Domains.Attribute> attributes)
         {
-            if (entity.DataType == "NUMBER")
+            var filteredAttribute = attributes.Where(_ => _.Name == entity.Name).FirstOrDefault();
+
+            if(filteredAttribute == null)
             {
-                return new Domains.NumberAttribute(entity.Name)
-                {
-                    IsDecreasingWithDeterioration = entity.IsAscending,
-                    DefaultValue = Convert.ToDouble(entity.DefaultValue),
-                    Maximum = entity.Maximum,
-                    Minimum = entity.Minimum
-                };
+                throw new ArgumentNullException($"The attribute present in `Attribute entity` {entity.Name}, is not present in `Explorer.Network.Attribute` object");
             }
 
-            if (entity.DataType == "STRING")
-            {
-                return new Domains.TextAttribute(entity.Name)
-                {
-                    DefaultValue = entity.DefaultValue
-                };
-            }
-
-            throw new InvalidOperationException("Cannot determine Attribute entity data type");
+            return filteredAttribute;
         }
 
         public static AttributeDTO ToDto(this AttributeEntity entity) =>

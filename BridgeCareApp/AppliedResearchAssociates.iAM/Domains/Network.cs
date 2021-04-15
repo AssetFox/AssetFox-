@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Network : WeakEntity, IValidator
     {
-        public Network(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
+        internal Network(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
         public static string SpatialWeightIdentifier => "AREA";
 

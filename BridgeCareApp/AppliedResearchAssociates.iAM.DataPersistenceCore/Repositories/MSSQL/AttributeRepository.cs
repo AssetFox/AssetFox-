@@ -149,8 +149,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             attributes.ForEach(entity =>
             {
-                var simulationAnalysisDomainAttribute = entity.ToSimulationAnalysisDomain();
-                if (simulationAnalysisDomainAttribute is NumberAttribute numberAttribute)
+                if (entity.DataType == "NUMBER")
                 {
                     if (entity.IsCalculated)
                     {
@@ -169,17 +168,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     }
                     else
                     {
-                        var attribute = explorer.AddNumberAttribute(numberAttribute.Name);
-                        attribute.IsDecreasingWithDeterioration = numberAttribute.IsDecreasingWithDeterioration;
-                        attribute.DefaultValue = numberAttribute.DefaultValue;
-                        attribute.Minimum = numberAttribute.Minimum;
-                        attribute.Maximum = numberAttribute.Maximum;
+                        var numAttribute = explorer.AddNumberAttribute(entity.Name);
+                        numAttribute.IsDecreasingWithDeterioration = entity.IsAscending;
+                        numAttribute.DefaultValue = Convert.ToDouble(entity.DefaultValue);
+                        numAttribute.Maximum = entity.Maximum;
+                        numAttribute.Minimum = entity.Minimum;
                     }
                 }
-                else if (simulationAnalysisDomainAttribute is TextAttribute textAttribute)
+
+                else if (entity.DataType == "STRING")
                 {
-                    var attribute = explorer.AddTextAttribute(textAttribute.Name);
-                    attribute.DefaultValue = textAttribute.DefaultValue;
+                    var textAttribute = explorer.AddTextAttribute(entity.Name);
+
+                    textAttribute.DefaultValue = entity.DefaultValue;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Cannot determine Attribute entity data type");
                 }
             });
 

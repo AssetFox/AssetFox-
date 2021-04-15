@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class ConditionalTreatmentConsequence : TreatmentConsequence
     {
-        public ConditionalTreatmentConsequence(Explorer explorer)
+        internal ConditionalTreatmentConsequence(Explorer explorer)
         {
             if (explorer == null)
             {

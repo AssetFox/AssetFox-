@@ -8,6 +8,10 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Benefit : WeakEntity, IValidator
     {
+        internal Benefit()
+        {
+        }
+
         public INumericAttribute Attribute
         {
             get => _Attribute;

@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.Domains;
+using MoreLinq;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 using TextAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.TextAttribute;
 
@@ -80,28 +84,58 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static Domains.Attribute ToSimulationAnalysisDomain(this AttributeEntity entity)
+        public static Domains.Attribute ToSimulationAnalysisDomain(this AttributeEntity entity, Explorer explorer)
         {
             if (entity.DataType == "NUMBER")
             {
-                return new Domains.NumberAttribute(entity.Name)
+                if (entity.IsCalculated)
                 {
-                    IsDecreasingWithDeterioration = entity.IsAscending,
-                    DefaultValue = Convert.ToDouble(entity.DefaultValue),
-                    Maximum = entity.Maximum,
-                    Minimum = entity.Minimum
-                };
+                    var calculatedField = explorer.AddCalculatedField(entity.Name);
+                    calculatedField.IsDecreasingWithDeterioration = entity.IsAscending;
+
+                    if (entity.AttributeEquationCriterionLibraryJoins.Any())
+                    {
+                        entity.AttributeEquationCriterionLibraryJoins.ForEach(join =>
+                        {
+                            var source = calculatedField.AddValueSource();
+                            source.Equation.Expression = join.Equation.Expression;
+                            source.Criterion.Expression = join.CriterionLibrary?.MergedCriteriaExpression ?? string.Empty;
+                        });
+                    }
+                    return calculatedField;
+                }
+                else
+                {
+                    var numAttribute = explorer.AddNumberAttribute(entity.Name);
+                    numAttribute.IsDecreasingWithDeterioration = entity.IsAscending;
+                    numAttribute.DefaultValue = Convert.ToDouble(entity.DefaultValue);
+                    numAttribute.Maximum = entity.Maximum;
+                    numAttribute.Minimum = entity.Minimum;
+                    return numAttribute;
+                }
             }
 
             if (entity.DataType == "STRING")
             {
-                return new Domains.TextAttribute(entity.Name)
-                {
-                    DefaultValue = entity.DefaultValue
-                };
+                var textAttribute = explorer.AddTextAttribute(entity.Name);
+
+                textAttribute.DefaultValue = entity.DefaultValue;
+                return textAttribute;
             }
 
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
+        }
+
+        public static Domains.Attribute GetAttributesFromDomain(this AttributeEntity entity, IEnumerable<Domains.Attribute> attributes)
+        {
+            var filteredAttribute = attributes.Where(_ => _.Name == entity.Name).FirstOrDefault();
+
+            if(filteredAttribute == null)
+            {
+                throw new ArgumentNullException($"The attribute present in `Attribute entity` {entity.Name}, is not present in `Explorer.Network.Attribute` object");
+            }
+
+            return filteredAttribute;
         }
 
         public static AttributeDTO ToDto(this AttributeEntity entity) =>

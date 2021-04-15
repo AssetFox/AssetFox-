@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
@@ -26,11 +28,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ChangeValue = dto.ChangeValue
             };
 
-        public static void CreateConditionalTreatmentConsequence(this ConditionalTreatmentConsequenceEntity entity, SelectableTreatment treatment)
+        public static void CreateConditionalTreatmentConsequence(this ConditionalTreatmentConsequenceEntity entity, SelectableTreatment treatment, IEnumerable<Domains.Attribute> attributes)
         {
             var consequence = treatment.AddConsequence();
             consequence.Id = entity.Id;
-            consequence.Attribute = entity.Attribute.ToSimulationAnalysisDomain();
+            consequence.Attribute = entity.Attribute.GetAttributesFromDomain(attributes);
             consequence.Change.Expression = entity.ChangeValue;
             consequence.Criterion.Expression = entity.CriterionLibraryConditionalTreatmentConsequenceJoin?.CriterionLibrary
                 .MergedCriteriaExpression ?? string.Empty;

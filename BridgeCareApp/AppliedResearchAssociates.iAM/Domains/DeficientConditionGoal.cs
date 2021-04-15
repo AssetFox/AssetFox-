@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class DeficientConditionGoal : ConditionGoal
     {
-        public DeficientConditionGoal(Explorer explorer) : base(explorer)
+        internal DeficientConditionGoal(Explorer explorer) : base(explorer)
         {
         }
 

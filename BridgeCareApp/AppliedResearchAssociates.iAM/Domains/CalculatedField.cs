@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
@@ -9,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class CalculatedField : Attribute, INumericAttribute, IValidator
     {
-        public CalculatedField(string name, Explorer explorer) : base(name) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
+        internal CalculatedField(string name, Explorer explorer) : base(name) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
         public bool IsDecreasingWithDeterioration { get; set; }
 

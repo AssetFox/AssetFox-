@@ -713,7 +713,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     ReasonAgainstCashFlow handleCashFlowRule()
                     {
-                        var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].First(kv => remainingCost <= kv.Key).Value;
+                        var distributionRule = SortedDistributionRulesPerCashFlowRule[cashFlowRule].FirstOrDefault(kv => remainingCost <= kv.Key).Value;
+                        if (distributionRule is null)
+                        {
+                            return ReasonAgainstCashFlow.NoApplicableDistributionRule;
+                        }
+
                         if (distributionRule.YearlyPercentages.Count == 1)
                         {
                             return ReasonAgainstCashFlow.ApplicableDistributionRuleIsForOnlyOneYear;

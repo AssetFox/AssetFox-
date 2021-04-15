@@ -2,7 +2,7 @@
 {
     public sealed class CalculatedFieldValueSource : CriterionEquationPair
     {
-        public CalculatedFieldValueSource(Explorer explorer) : base(explorer)
+        internal CalculatedFieldValueSource(Explorer explorer) : base(explorer)
         {
         }
     }

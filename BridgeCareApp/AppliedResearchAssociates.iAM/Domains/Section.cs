@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Section : WeakEntity, IValidator
     {
-        public Section(Facility facility)
+        internal Section(Facility facility)
         {
             Facility = facility ?? throw new ArgumentNullException(nameof(facility));
 

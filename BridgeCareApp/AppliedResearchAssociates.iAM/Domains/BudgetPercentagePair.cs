@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class BudgetPercentagePair : WeakEntity, IValidator
     {
-        public BudgetPercentagePair(Budget budget) => Budget = budget ?? throw new ArgumentNullException(nameof(budget));
+        internal BudgetPercentagePair(Budget budget) => Budget = budget ?? throw new ArgumentNullException(nameof(budget));
 
         public Budget Budget { get; }
 

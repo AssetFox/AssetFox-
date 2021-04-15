@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class RemainingLifeLimit : WeakEntity, IValidator
     {
-        public RemainingLifeLimit(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+        internal RemainingLifeLimit(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
 
         public INumericAttribute Attribute { get; set; }
 

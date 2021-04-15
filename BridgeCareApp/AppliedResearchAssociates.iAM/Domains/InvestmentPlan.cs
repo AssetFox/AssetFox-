@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class InvestmentPlan : WeakEntity, IValidator
     {
-        public InvestmentPlan(Simulation simulation)
+        internal InvestmentPlan(Simulation simulation)
         {
             Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 

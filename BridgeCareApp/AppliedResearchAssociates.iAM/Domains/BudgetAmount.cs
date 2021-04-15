@@ -4,6 +4,10 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class BudgetAmount : WeakEntity, IValidator
     {
+        internal BudgetAmount()
+        {
+        }
+
         public ValidatorBag Subvalidators => new ValidatorBag();
 
         public decimal Value { get; set; }

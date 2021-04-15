@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class PerformanceCurve : WeakEntity, IValidator
     {
-        public PerformanceCurve(Explorer explorer)
+        internal PerformanceCurve(Explorer explorer)
         {
             if (explorer is null)
             {

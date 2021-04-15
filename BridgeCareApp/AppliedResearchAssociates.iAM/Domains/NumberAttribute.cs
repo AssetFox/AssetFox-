@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class NumberAttribute : Attribute<double>, INumericAttribute, IValidator
     {
-        public NumberAttribute(string name) : base(name)
+        internal NumberAttribute(string name) : base(name)
         {
         }
 

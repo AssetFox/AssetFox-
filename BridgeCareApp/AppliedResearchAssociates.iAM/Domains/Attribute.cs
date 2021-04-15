@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public class Attribute
     {
-        public Attribute(string name)
+        internal Attribute(string name)
         {
             if (name == null || !NamePattern.IsMatch(name))
             {
@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
     public class Attribute<T> : Attribute
     {
-        public Attribute(string name) : base(name)
+        internal Attribute(string name) : base(name)
         {
         }
 

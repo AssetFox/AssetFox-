@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class TreatmentSupersession : WeakEntity, IValidator
     {
-        public TreatmentSupersession(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+        internal TreatmentSupersession(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
 
         public Criterion Criterion { get; }
 

@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class TargetConditionGoal : ConditionGoal
     {
-        public TargetConditionGoal(Explorer explorer) : base(explorer)
+        internal TargetConditionGoal(Explorer explorer) : base(explorer)
         {
         }
 

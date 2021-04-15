@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Criterion : CompilableExpression
     {
-        public Criterion(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
+        internal Criterion(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
         internal bool? Evaluate(SectionContext scope)
         {

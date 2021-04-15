@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class BudgetCondition : WeakEntity, IValidator
     {
-        public BudgetCondition(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+        internal BudgetCondition(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
 
         public Budget Budget { get; set; }
 

@@ -19,6 +19,8 @@ import '@progress/kendo-theme-default/dist/all.css';
 import {KendoChartInstaller} from '@progress/kendo-charts-vue-wrapper';
 import VueCurrencyInput from 'vue-currency-input';
 import connectionHub from './connectionHub';
+// @ts-ignore
+import VueSanitize from "vue-sanitize";
 
 Vue.use(Vuetify, {
     iconfont: 'fa'
@@ -40,6 +42,15 @@ Vue.use(VueScreen, {
     freeRealEstate: 1700,
     breakpointsOrder: ['sm', 'md', 'lg', 'xl', 'xxl', 'freeRealEstate']
 });
+
+var defaultOptions = {
+    disallowedallowedTags: ['a'],
+    disallowedAttributes: {
+      'a': [ 'href' ]
+    }
+};
+
+Vue.use(VueSanitize, defaultOptions);
 
 Vue.config.productionTip = false;
 

@@ -469,7 +469,9 @@ export default class Scenarios extends Vue {
   @Watch('stateNetworks')
   onStateNetworksChanged() {
     this.networks = clone(this.stateNetworks);
-    this.getScenariosAction({ networkId: this.networks[0].id });
+      if (hasValue(this.networks)) {
+          this.getScenariosAction({ networkId: this.networks[0].id });
+      }
   }
 
   @Watch('stateScenarios')
@@ -491,7 +493,12 @@ export default class Scenarios extends Vue {
 
   mounted() {
     this.networks = clone(this.stateNetworks);
-    this.scenarios = clone(this.stateScenarios);
+    if (hasValue(this.stateScenarios)) {
+        this.scenarios = clone(this.stateScenarios);
+    } else if (hasValue(this.networks)) {
+        this.getScenariosAction({ networkId: this.networks[0].id });
+    }
+
 
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, this.getDataAggregationStatus);
     this.$statusHub.$on(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);

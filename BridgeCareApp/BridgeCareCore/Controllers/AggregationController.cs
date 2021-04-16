@@ -227,7 +227,7 @@ namespace BridgeCareCore.Controllers
         private Task CreateCurrentStatusMessageTask(CancellationToken token) =>
             Task.Run(async () =>
             {
-                await Task.Delay(3000);
+                await Task.Delay(3000, token);
                 if (_count > 3)
                 {
                     _count = 0;

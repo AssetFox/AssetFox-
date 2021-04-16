@@ -654,28 +654,27 @@
         width: 150px;
     }
 
-
-    <!-- table, th, td {
+    .report-cell {
         border: 1px solid black;
         border-collapse: collapse;
     }
 
-    th {
+    .report-header {
         text-align: left;
         color: white;
         background-color: darkblue;
         padding-top: 12px;
-    } -->
+    }
 
-    .description {
+    .report-description {
         font-weight: bold;
     }
 
-    .data {
+    .report-data {
         padding-left: 10px;
     }
 
-    .columnsplit {
+    .report-columnsplit {
         padding-left: 10px;
         border-left: 3px solid black;
     }

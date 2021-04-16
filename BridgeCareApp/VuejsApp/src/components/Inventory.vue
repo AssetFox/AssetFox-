@@ -654,7 +654,27 @@
         width: 150px;
     }
 
-    .columnsplit {
+    .report-cell {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+    .report-header {
+        text-align: left;
+        color: white;
+        background-color: darkblue;
+        padding-top: 12px;
+    }
+
+    .report-description {
+        font-weight: bold;
+    }
+
+    .report-data {
+        padding-left: 10px;
+    }
+
+    .report-columnsplit {
         padding-left: 10px;
     }
 </style>

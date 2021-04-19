@@ -38,7 +38,7 @@
                 <v-spacer></v-spacer>
             </v-layout>
             <v-divider></v-divider>
-            <div class="container columnsplit" v-html="sanitizedHTML"></div>
+            <div class="container" v-html="sanitizedHTML"></div>
 
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">

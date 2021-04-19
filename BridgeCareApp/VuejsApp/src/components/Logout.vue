@@ -54,17 +54,5 @@
 </script>
 
 <style>
-    .logged-out-card {
-        width: 45%;
-    }
-
-    .bridgecare-logo-img-div {
-        width: 100%;
-    }
-
-    .bridgecare-logo-img {
-        width: 100%;
-        border-bottom-style: solid;
-        border-color: #008FCA;
-    }
+        @import "../assets/css/logout.css"
 </style>

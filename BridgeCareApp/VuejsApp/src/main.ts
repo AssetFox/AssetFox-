@@ -44,10 +44,8 @@ Vue.use(VueScreen, {
 });
 
 var defaultOptions = {
-    disallowedallowedTags: ['a'],
-    disallowedAttributes: {
-      'a': [ 'href' ]
-    }
+    allowedTags: VueSanitize.defaults.allowedTags.concat(['html', 'head', 'body', 'link']),
+    allowedAttributes: false
 };
 
 Vue.use(VueSanitize, defaultOptions);

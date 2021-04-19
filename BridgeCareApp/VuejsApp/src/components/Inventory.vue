@@ -38,7 +38,7 @@
                 <v-spacer></v-spacer>
             </v-layout>
             <v-divider></v-divider>
-            <div class="container columnsplit" v-html="sanitizedHTML"></div>
+            <div class="container columnsplit" v-html="staticHTMLForInventory"></div>
 
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
@@ -624,58 +624,5 @@
 </script>
 
 <style>
-    .grouping-div, .text-field-div {
-        width: 500px;
-    }
-
-    .small-text-field-div {
-        width: 300px;
-    }
-
-    .grouping-div, .unsized-grouping-div {
-        margin: 30px 0;
-    }
-
-    .grouping-header {
-        margin-bottom: 20px;
-    }
-
-    .gmap_canvas {
-        width: 100%;
-        min-height: 786px;
-        height: 100%;
-    }
-
-    .text-align-center {
-        text-align: center;
-    }
-
-    .slider {
-        width: 150px;
-    }
-
-    .report-cell {
-        border: 1px solid black;
-        border-collapse: collapse;
-    }
-
-    .report-header {
-        text-align: left;
-        color: white;
-        background-color: darkblue;
-        padding-top: 12px;
-    }
-
-    .report-description {
-        font-weight: bold;
-    }
-
-    .report-data {
-        padding-left: 10px;
-    }
-
-    .report-columnsplit {
-        padding-left: 10px;
-        border-left: 3px solid black;
-    }
+    @import "../assets/css/inventory.css"
 </style>

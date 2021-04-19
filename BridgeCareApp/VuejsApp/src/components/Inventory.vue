@@ -593,7 +593,7 @@
             var data : InventoryItem = {
                 bmsId: bmsId,
                 brKey: '-1'
-            }
+            };
             this.getStaticInventoryHTMLAction(({reportType: 'InventoryLookup', filterData: data}));
         }
 
@@ -612,7 +612,7 @@
             var data : InventoryItem = {
                 bmsId: '',
                 brKey: brKey
-            }
+            };
             this.getStaticInventoryHTMLAction({reportType: 'InventoryLookup', filterData: data});
         }
 

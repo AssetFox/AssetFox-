@@ -20,7 +20,7 @@ import {KendoChartInstaller} from '@progress/kendo-charts-vue-wrapper';
 import VueCurrencyInput from 'vue-currency-input';
 import connectionHub from './connectionHub';
 // @ts-ignore
-import VueSanitize from "vue-sanitize";
+import VueSanitize from 'vue-sanitize';
 
 Vue.use(Vuetify, {
     iconfont: 'fa'

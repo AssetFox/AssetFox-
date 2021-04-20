@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Classes
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
 {
     public class SimulationTests
     {
@@ -153,9 +153,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Cla
                 Id = maintainableAssetId,
                 NetworkId = _testHelper.TestNetwork.Id,
                 FacilityName = "1",
-                SectionName = "0123456789",
-                Area = 4422,
-                AreaUnit = "ft^2"
+                SectionName = "0123456789"
             });
 
             _testHelper.UnitOfWork.Context.AddEntity(

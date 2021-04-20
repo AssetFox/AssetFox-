@@ -53,11 +53,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
                 throw new RowNotInTableException($"No network found having id {network.Id}.");
             }
 
-            var facilityNames = network.Facilities.Select(_ => _.Name).ToHashSet();
-            var sectionNamesAndAreas = network.Sections.Select(_ => $"{_.Name}{_.Area}").ToHashSet();
-            var assetFacilityNames = _unitOfWork.Context.MaintainableAsset.Select(_ => _.FacilityName).ToHashSet();
-            var assetSectionNamesAndAreas = _unitOfWork.Context.MaintainableAsset.Select(_ => $"{_.SectionName}{_.Area}").ToHashSet();
-            if (!assetFacilityNames.SetEquals(facilityNames) || !assetSectionNamesAndAreas.SetEquals(sectionNamesAndAreas))
+            var facilitySectionNames = network.Facilities
+                .SelectMany(facility => facility.Sections.Select(section => $"{facility.Name}{section.Name}")).ToHashSet();
+            var assetFacilitySectionNames = _unitOfWork.Context.MaintainableAsset
+                .Select(_ => _.MaintainableAssetLocation.LocationIdentifier).ToHashSet();
+            if (!facilitySectionNames.SetEquals(assetFacilitySectionNames))
             {
                 _unitOfWork.NetworkRepo.DeleteNetworkData();
                 SendRealTimeMessage("Creating the network's maintainable assets...");

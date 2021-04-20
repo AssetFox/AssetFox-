@@ -10,7 +10,7 @@ using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Classes
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
 {
     public class BudgetPriorityTests
     {

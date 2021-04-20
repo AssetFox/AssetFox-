@@ -49,6 +49,13 @@
     <None Update="testConnections.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TestData\Files\TestCommittedProjects.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TestData\Files" />
   </ItemGroup>
 
 </Project>

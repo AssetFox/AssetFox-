@@ -90,8 +90,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                         var section = facility.AddSection();
                         section.Id = __.Id;
                         section.Name = __.Name;
-                        section.Area = __.Area;
-                        section.AreaUnit = __.AreaUnit;
 
                         if (__.HistoricalAttributes.Any())
                         {

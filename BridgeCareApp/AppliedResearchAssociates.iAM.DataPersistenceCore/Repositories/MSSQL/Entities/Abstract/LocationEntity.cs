@@ -5,6 +5,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public abstract class LocationEntity : BaseEntity
     {
+        protected LocationEntity() {}
+
         protected LocationEntity(Guid id, string discriminator, string locationIdentifier)
         {
             Id = id;

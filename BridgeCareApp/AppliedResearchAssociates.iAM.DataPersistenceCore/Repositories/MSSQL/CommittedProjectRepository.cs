@@ -140,5 +140,84 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }).AsNoTracking().ToList()
                 .ForEach(_ => _.CreateCommittedProject(simulation));
         }
+
+        public List<CommittedProjectEntity> GetCommittedProjectsForExport(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+            }
+
+            return _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
+                .Select(project => new CommittedProjectEntity
+                {
+                    Name = project.Name,
+                    Year = project.Year,
+                    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
+                    ShadowForSameTreatment = project.ShadowForSameTreatment,
+                    Cost = project.Cost,
+                    Budget = new BudgetEntity {Name = project.Budget.Name},
+                    MaintainableAsset = new MaintainableAssetEntity
+                    {
+                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                        {
+                            LocationIdentifier = project.MaintainableAsset.MaintainableAssetLocation
+                                .LocationIdentifier
+                        }
+                    },
+                    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
+                        new CommittedProjectConsequenceEntity
+                        {
+                            Attribute = new AttributeEntity {Name = consequence.Attribute.Name},
+                            ChangeValue = consequence.ChangeValue
+                        }).ToList()
+                })
+                .ToList();
+        }
+
+        public List<CommittedProjectEntity> GetPermittedCommittedProjectsForExport(Guid simulationId)
+        {
+            _unitOfWork.CheckUserSimulationAuthorization(simulationId);
+            return GetCommittedProjectsForExport(simulationId);
+        }
+
+        public void CreateCommittedProjects(List<CommittedProjectEntity> committedProjectEntities)
+        {
+            _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
+
+            var committedProjectConsequenceEntities = committedProjectEntities
+                .Where(_ => _.CommittedProjectConsequences.Any())
+                .SelectMany(_ => _.CommittedProjectConsequences)
+                .ToList();
+
+            _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
+        }
+
+        public void CreatePermittedCommittedProjects(Guid simulationId, List<CommittedProjectEntity> committedProjectEntities)
+        {
+            _unitOfWork.CheckUserSimulationAuthorization(simulationId);
+            CreateCommittedProjects(committedProjectEntities);
+        }
+
+        public void DeleteCommittedProjects(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+            }
+
+            if (!_unitOfWork.Context.CommittedProject.Any(_ => _.SimulationId == simulationId))
+            {
+                return;
+            }
+
+            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
+        }
+
+        public void DeletePermittedCommittedProjects(Guid simulationId)
+        {
+            _unitOfWork.CheckUserSimulationAuthorization(simulationId);
+            DeleteCommittedProjects(simulationId);
+        }
     }
 }

@@ -3,10 +3,10 @@ using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using BridgeCareCore.Hubs;
-using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.SignalR;
@@ -100,8 +100,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         {
             if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
             {
-                UnitOfWork.Context.Network.Add(TestNetwork);
-                UnitOfWork.Context.SaveChanges();
+                UnitOfWork.Context.AddEntity(TestNetwork);
             }
         }
 
@@ -109,8 +108,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
         {
             if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == SimulationId))
             {
-                UnitOfWork.Context.Simulation.Add(TestSimulation);
-                UnitOfWork.Context.SaveChanges();
+                UnitOfWork.Context.AddEntity(TestSimulation);
             }
         }
 

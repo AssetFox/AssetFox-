@@ -8,10 +8,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Library_API_Test_Classes
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
 {
     public class DeficientConditionGoalTests
     {

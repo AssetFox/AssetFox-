@@ -96,6 +96,7 @@ namespace BridgeCareCore
             services.AddScoped<IHubService, HubService>();
             services.AddScoped<IAssetData, PennDOTAssetDataRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
+            services.AddScoped<ICommittedProjectService, CommittedProjectService>();
 
             // SQL SERVER SCOPINGS
             //services.AddDbContext<IAMContext>(options =>

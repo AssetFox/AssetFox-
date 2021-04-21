@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -54,7 +54,7 @@ namespace BridgeCareCore.Controllers
             //   // expression += $" AND { result.Criteria }";
             //}
             var data = _maintainableAssetRepository.GetBMSIDAndBRKey();
-
+            data.Sort((a, b) => a.BrKey.CompareTo(b.BrKey));
             return Ok(data);
         }
     }

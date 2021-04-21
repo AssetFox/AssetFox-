@@ -4,10 +4,11 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
+using BridgeCareCore.Models.Validation;
 
 namespace BridgeCareCore.Services
 {

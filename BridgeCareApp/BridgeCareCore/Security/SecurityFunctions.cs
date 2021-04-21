@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

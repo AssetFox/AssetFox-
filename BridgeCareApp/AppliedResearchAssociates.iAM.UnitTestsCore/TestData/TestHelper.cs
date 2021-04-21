@@ -8,7 +8,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Logging;
+using BridgeCareCore.Models;
+using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,7 +34,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public UnitOfDataPersistenceWork UnitOfWork { get; }
 
-        public MockEsecSecurity MockEsecSecurity { get; }
+        public Mock<IEsecSecurity> MockEsecSecurityAuthorized { get; }
+        public Mock<IEsecSecurity> MockEsecSecurityNotAuthorized { get; }
 
         public ILog Logger { get; }
 
@@ -46,7 +50,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 .AddJsonFile("testConnections.json")
                 .Build();
 
-            MockEsecSecurity = new MockEsecSecurity();
+            MockEsecSecurityAuthorized = new Mock<IEsecSecurity>();
+            MockEsecSecurityAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
+                .Returns(new UserInfo
+                {
+                    Name = "pdsystbamsusr02", Role = "PD-BAMS-Administrator", Email = "pdstseseca5@pa.gov"
+                });
+            MockEsecSecurityNotAuthorized = new Mock<IEsecSecurity>();
+            MockEsecSecurityNotAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
+                .Returns(new UserInfo
+                {
+                    Name = "b-bamsadmin", Role = "PD-BAMS-PlanningPartner", Email = "jmalmberg@ara.com"
+                });
 
             Logger = new LogNLog();
 

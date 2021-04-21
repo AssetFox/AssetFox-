@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -179,20 +178,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
             {
                 DbContextTransaction.Rollback();
                 DbContextTransaction.Dispose();
-            }
-        }
-
-        public void CheckUserSimulationAuthorization(Guid simulationId)
-        {
-            if (!Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
-            }
-
-            if (!Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == UserEntity.Id && __.CanModify)))
-            {
-                throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
             }
         }
 

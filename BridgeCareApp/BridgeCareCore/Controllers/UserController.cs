@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;

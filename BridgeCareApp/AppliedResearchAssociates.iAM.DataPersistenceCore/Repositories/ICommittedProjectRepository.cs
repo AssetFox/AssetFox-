@@ -13,14 +13,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<CommittedProjectEntity> GetCommittedProjectsForExport(Guid simulationId);
 
-        List<CommittedProjectEntity> GetPermittedCommittedProjectsForExport(Guid simulationId);
-
         void CreateCommittedProjects(List<CommittedProjectEntity> committedProjectEntities);
 
-        void CreatePermittedCommittedProjects(Guid simulationId, List<CommittedProjectEntity> committedProjectEntities);
-
         void DeleteCommittedProjects(Guid simulationId);
-
-        void DeletePermittedCommittedProjects(Guid simulationId);
     }
 }

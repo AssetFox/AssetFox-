@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 

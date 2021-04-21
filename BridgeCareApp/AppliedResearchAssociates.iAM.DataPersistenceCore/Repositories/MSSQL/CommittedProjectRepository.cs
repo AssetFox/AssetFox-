@@ -8,15 +8,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
-using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class CommittedProjectRepository : ICommittedProjectRepository
     {
-        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public CommittedProjectRepository(UnitOfDataPersistenceWork unitOfWork)
@@ -175,12 +171,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public List<CommittedProjectEntity> GetPermittedCommittedProjectsForExport(Guid simulationId)
-        {
-            _unitOfWork.CheckUserSimulationAuthorization(simulationId);
-            return GetCommittedProjectsForExport(simulationId);
-        }
-
         public void CreateCommittedProjects(List<CommittedProjectEntity> committedProjectEntities)
         {
             _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
@@ -191,12 +181,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
 
             _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
-        }
-
-        public void CreatePermittedCommittedProjects(Guid simulationId, List<CommittedProjectEntity> committedProjectEntities)
-        {
-            _unitOfWork.CheckUserSimulationAuthorization(simulationId);
-            CreateCommittedProjects(committedProjectEntities);
         }
 
         public void DeleteCommittedProjects(Guid simulationId)
@@ -212,12 +196,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
-        }
-
-        public void DeletePermittedCommittedProjects(Guid simulationId)
-        {
-            _unitOfWork.CheckUserSimulationAuthorization(simulationId);
-            DeleteCommittedProjects(simulationId);
         }
     }
 }

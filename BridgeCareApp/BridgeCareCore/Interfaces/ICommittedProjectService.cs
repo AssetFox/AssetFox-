@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.AspNetCore.Http;
+using OfficeOpenXml;
 
 namespace BridgeCareCore.Interfaces
 {
     public interface ICommittedProjectService
     {
-        (string, byte[]) ExportCommittedProjectsFile(HttpRequest request, Guid simulationId);
+        FileInfoDTO ExportCommittedProjectsFile(Guid simulationId);
 
-        void ImportCommittedProjectFiles(HttpRequest request);
-
-        void DeleteCommittedProjects(HttpRequest request, Guid simulationId);
+        void ImportCommittedProjectFiles(Guid simulationId, List<ExcelPackage> excelPackages, bool applyNoTreatment);
     }
 }

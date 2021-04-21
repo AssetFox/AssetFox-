@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
+﻿namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     /// <summary>
     /// A datum specifically representing an attribute on an asset

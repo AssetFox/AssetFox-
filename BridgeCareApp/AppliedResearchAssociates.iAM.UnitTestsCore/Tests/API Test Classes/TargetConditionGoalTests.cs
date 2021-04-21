@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new TargetConditionGoalController(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork,
+            _controller = new TargetConditionGoalController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object);
         }
 

@@ -1,21 +1,25 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Timers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using AppliedResearchAssociates.iAM.Domains;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Models;
+using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
+using Moq;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
@@ -24,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
     {
         private readonly TestHelper _testHelper;
         private readonly CommittedProjectService _service;
-        private readonly CommittedProjectController _controller;
+        private CommittedProjectController _controller;
 
         private static readonly Guid InvestmentPlanId = Guid.Parse("f6af0c20-da73-4bec-8318-e904c53b4fec");
         private static readonly Guid BudgetLibraryId = Guid.Parse("6e99c853-a881-4953-bc9c-38632949f70c");
@@ -32,7 +36,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
         private static readonly Guid MaintainableAssetId = Guid.Parse("0bd797b0-a104-4fc3-9b16-479f87e89b4a");
         private static readonly Guid MaintainableAssetLocationId = Guid.Parse("74ff59a1-7450-4f61-9930-d687feb13ec7");
         private static readonly Guid CommittedProjectId = Guid.Parse("06d74235-0970-4d7c-82a4-843ff73ad34a");
-        private static readonly Guid CommittedProjectConsequenceId = Guid.Parse("23de64ae-723c-43a6-a409-c93961748b78");
 
         private static readonly List<string> ConsequenceAttributeNames = new List<string>
         {
@@ -52,9 +55,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _service = new CommittedProjectService(_testHelper.MockEsecSecurity, _testHelper.UnitOfWork);
-            _controller = new CommittedProjectController(_testHelper.MockEsecSecurity, _service,
-                _testHelper.MockHubService.Object);
+            _service = new CommittedProjectService(_testHelper.UnitOfWork);
         }
 
         private InvestmentPlanEntity TestInvestmentPlan { get; } = new InvestmentPlanEntity
@@ -141,6 +142,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
                 ChangeValue = "1"
             }).ToList();
             _testHelper.UnitOfWork.Context.AddAll(consequences);
+        }
+
+        private ControllerContext CreateDefaultControllerContext()
+        {
+            var httpContext = new DefaultHttpContext();
+            var actionContext = new ActionContext(httpContext, new RouteData(), new ControllerActionDescriptor());
+            return new ControllerContext(actionContext);
         }
 
         private ControllerContext CreateRequestWithFormData()
@@ -238,6 +246,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
         {
             try
             {
+                // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
+                _controller.ControllerContext = CreateDefaultControllerContext();
+
                 // Act
                 var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
 
@@ -257,6 +272,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
             try
             {
                 // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
                 SetupForImport();
 
                 // Act
@@ -277,6 +296,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
         {
             try
             {
+                // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
+                _controller.ControllerContext = CreateDefaultControllerContext();
+
                 // Act
                 var result = await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
 
@@ -291,11 +317,84 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
         }
 
         [Fact]
+        public async void ShouldThrowNotAuthorizedOnGet()
+        {
+            try
+            {
+                // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityNotAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
+                _controller.ControllerContext = CreateDefaultControllerContext();
+
+                // Act + Assert
+                await Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
+                    await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id));
+            }
+            finally
+            {
+                // Cleanup
+                _testHelper.CleanUp();
+            }
+        }
+
+        [Fact]
+        public async void ShouldThrowNotAuthorizedOnPost()
+        {
+            try
+            {
+                // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityNotAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
+                SetupForImport();
+
+                // Act + Assert
+                await Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
+                    await _controller.ImportCommittedProjects());
+            }
+            finally
+            {
+                // Cleanup
+                _testHelper.CleanUp();
+            }
+        }
+
+        [Fact]
+        public async void ShouldThrowNotAuthorizedOnDelete()
+        {
+            try
+            {
+                // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityNotAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
+                _controller.ControllerContext = CreateDefaultControllerContext();
+
+                // Act + Assert
+                await Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
+                    await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id));
+            }
+            finally
+            {
+                // Cleanup
+                _testHelper.CleanUp();
+            }
+        }
+
+        [Fact]
         public async void ShouldImportCommittedProjectsFromFile()
         {
             try
             {
                 // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
                 SetupForImport();
 
                 // Act
@@ -317,6 +416,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
             try
             {
                 // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
+                _controller.ControllerContext = CreateDefaultControllerContext();
                 SetupForExport();
 
                 // Act
@@ -351,6 +455,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
             try
             {
                 // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
+                _controller.ControllerContext = CreateDefaultControllerContext();
                 SetupForExport();
 
                 // Act
@@ -370,6 +479,84 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
                         .ToList();
                     Assert.Empty(consequences);
                 };
+            }
+            finally
+            {
+                // Cleanup
+                _testHelper.CleanUp();
+            }
+        }
+
+        [Fact]
+        public async void ShouldThrowConstraintWhenNoMimeTypeForImport()
+        {
+            try
+            {
+                // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
+                _controller.ControllerContext = CreateDefaultControllerContext();
+
+                // Act + Asset
+                var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
+                    await _controller.ImportCommittedProjects());
+                Assert.Equal("Request MIME type is invalid.", exception.Message);
+            }
+            finally
+            {
+                // Cleanup
+                _testHelper.CleanUp();
+            }
+        }
+
+        [Fact]
+        public async void ShouldThrowConstraintWhenNoFilesForImport()
+        {
+            try
+            {
+                // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
+                _controller.ControllerContext = CreateDefaultControllerContext();
+                _controller.ControllerContext.HttpContext.Request.Form =
+                    new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection());
+
+                // Act + Asset
+                var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
+                    await _controller.ImportCommittedProjects());
+                Assert.Equal("Committed project files were not found.", exception.Message);
+            }
+            finally
+            {
+                // Cleanup
+                _testHelper.CleanUp();
+            }
+        }
+
+        [Fact]
+        public async void ShouldThrowConstraintWhenNoSimulationIdForImport()
+        {
+            try
+            {
+                // Arrange
+                _controller = new CommittedProjectController(_service,
+                    _testHelper.MockEsecSecurityAuthorized.Object,
+                    _testHelper.UnitOfWork,
+                    _testHelper.MockHubService.Object);
+                _controller.ControllerContext = CreateDefaultControllerContext();
+                var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
+                    "dummy.txt");
+                _controller.ControllerContext.HttpContext.Request.Form =
+                    new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection{file});
+
+                // Act + Asset
+                var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
+                    await _controller.ImportCommittedProjects());
+                Assert.Equal("Request contained no simulation id.", exception.Message);
             }
             finally
             {

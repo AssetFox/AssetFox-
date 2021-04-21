@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 
-namespace BridgeCareCore.Interfaces.Simulation
+namespace BridgeCareCore.Interfaces
 {
     public interface ISimulationAnalysis
     {

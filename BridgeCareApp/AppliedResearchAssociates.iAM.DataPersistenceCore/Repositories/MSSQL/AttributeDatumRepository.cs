@@ -4,9 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
-using MoreLinq.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {

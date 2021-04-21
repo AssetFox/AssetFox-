@@ -1,5 +1,5 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -22,6 +22,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static SimulationAnalysisDetailDTO ToDto(this SimulationAnalysisDetailEntity entity) => new SimulationAnalysisDetailDTO(entity);
+        public static SimulationAnalysisDetailDTO ToDto(this SimulationAnalysisDetailEntity entity) =>
+            new SimulationAnalysisDetailDTO
+            {
+                SimulationId = entity.SimulationId,
+                LastRun = entity.LastRun,
+                Status = entity.Status,
+                RunTime = entity.RunTime
+            };
     }
 }

@@ -227,9 +227,9 @@ namespace BridgeCareCore.Services
                 // return the results
                 return new CriterionValidationResult
                 {
-                    IsValid = (int)count > 0,
+                    IsValid = true,
                     ResultsCount = (int)count,
-                    ValidationMessage = (int)count > 0 ? "Success" : "Invalid"
+                    ValidationMessage = "Success"
                 };
             }
             catch (SqlException e)

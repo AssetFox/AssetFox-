@@ -4,7 +4,6 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
-using MoreLinq;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.UnfundedRecommendations

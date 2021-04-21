@@ -1,4 +1,4 @@
-﻿namespace BridgeCareCore.Models
+﻿namespace BridgeCareCore.Models.Validation
 {
     public class EquationValidationParameters : ValidationParameter
     {

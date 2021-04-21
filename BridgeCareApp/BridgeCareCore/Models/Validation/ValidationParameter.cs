@@ -1,6 +1,6 @@
-﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+﻿using AppliedResearchAssociates.iAM.DTOs;
 
-namespace BridgeCareCore.Models
+namespace BridgeCareCore.Models.Validation
 {
     public class ValidationParameter
     {

@@ -9,7 +9,6 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using MoreLinq;
 
 namespace BridgeCareCore.Security
 {

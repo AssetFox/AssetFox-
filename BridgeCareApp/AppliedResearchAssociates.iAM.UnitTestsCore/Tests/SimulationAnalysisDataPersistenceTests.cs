@@ -141,9 +141,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Assert.Equal(sections.Count(), dataSourceSections.Count());
                 sections.ForEach(section =>
                 {
-                    var dataSourceSection = dataSourceSections.SingleOrDefault(_ => $"{_.Name}{_.Area}" == $"{section.Name}{section.Area}");
+                    var dataSourceSection = dataSourceSections.SingleOrDefault(_ => $"{_.Facility.Name}{_.Name}" == $"{section.Facility.Name}{section.Name}");
                     Assert.NotNull(dataSourceSection);
-                    Assert.Equal(section.AreaUnit, dataSourceSection.AreaUnit);
+                    Assert.Equal(section.SpatialWeighting.Expression, dataSourceSection.SpatialWeighting.Expression);
                     Assert.Equal(section.HistoricalAttributes.Count(), dataSourceSection.HistoricalAttributes.Count());
 
                     var numberAttributes = network.Explorer.NumberAttributes.ToList();

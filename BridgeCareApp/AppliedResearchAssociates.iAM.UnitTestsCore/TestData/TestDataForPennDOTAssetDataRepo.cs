@@ -54,8 +54,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 Name = "FirstA",
                 Id = new Guid("799acb6e-539d-444b-b16a-6defc50b2c64"),
                 FacilityId = FirstFacility.Id,
-                Area = 100,
-                AreaUnit = "ft2",
                 Facility = FirstFacility,
             };
             FirstFacility.Sections.Add(FirstASection);
@@ -69,8 +67,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 Name = "FirstB",
                 Id = new Guid("8f80c690-3088-4084-b0e5-a8e070000a06"),
                 FacilityId = FirstFacility.Id,
-                Area = 251.45,
-                AreaUnit = "ft2",
                 Facility = FirstFacility,
             };
             FirstFacility.Sections.Add(FirstBSection);
@@ -84,8 +80,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 Name = "First C",
                 Id = new Guid("1bb0dd92-db74-45c6-a66a-72ae0c70b636"),
                 FacilityId = FirstFacility.Id,
-                Area = 200,
-                AreaUnit = "ft2",
                 Facility = FirstFacility,
             };
             FirstFacility.Sections.Add(FirstCSection);
@@ -99,8 +93,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 Name = "SecondA",
                 Id = new Guid("3fb90c20-9885-48db-8e47-1c76c5040757"),
                 FacilityId = SecondFacility.Id,
-                Area = 100,
-                AreaUnit = "ft2",
                 Facility = SecondFacility,
             };
             SecondFacility.Sections.Add(SecondASection);
@@ -114,8 +106,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 Name = "SecondB",
                 Id = new Guid("6d79de97-1c3c-4da5-9cc4-f5043efa047a"),
                 FacilityId = SecondFacility.Id,
-                Area = 200,
-                AreaUnit = "ft2",
                 Facility = SecondFacility,
             };
             SecondFacility.Sections.Add(SecondBSection);

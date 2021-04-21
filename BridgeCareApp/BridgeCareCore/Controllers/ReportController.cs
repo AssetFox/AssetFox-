@@ -4,17 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Hubs;
-using BridgeCareCore.Security;
-using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using System.IO;
 
 namespace BridgeCareCore.Controllers

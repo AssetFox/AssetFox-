@@ -38,7 +38,7 @@
                 <v-spacer></v-spacer>
             </v-layout>
             <v-divider></v-divider>
-            <div class="container columnsplit" v-html="staticHTMLForInventory"></div>
+            <div class="container" v-html="sanitizedHTML"></div>
 
             <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
             <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
@@ -355,6 +355,7 @@
         inventorySelectListsWorker: any = null;
 
         inventoryData: any  = null;
+        sanitizedHTML: any = null;
 
         /**
          * Calls the setInventorySelectLists function to set both inventory type select lists
@@ -396,6 +397,11 @@
                 this.setInventorySelectLists();
             }*/
 
+        }
+
+        @Watch('staticHTMLForInventory')
+        onStaticHTMLForInventory(){
+            this.sanitizedHTML = this.$sanitize(this.staticHTMLForInventory);
         }
 
         @Watch('inventoryItemDetail')
@@ -587,7 +593,7 @@
             var data : InventoryItem = {
                 bmsId: bmsId,
                 brKey: '-1'
-            }
+            };
             this.getStaticInventoryHTMLAction(({reportType: 'InventoryLookup', filterData: data}));
         }
 
@@ -606,7 +612,7 @@
             var data : InventoryItem = {
                 bmsId: '',
                 brKey: brKey
-            }
+            };
             this.getStaticInventoryHTMLAction({reportType: 'InventoryLookup', filterData: data});
         }
 
@@ -618,37 +624,5 @@
 </script>
 
 <style>
-    .grouping-div, .text-field-div {
-        width: 500px;
-    }
-
-    .small-text-field-div {
-        width: 300px;
-    }
-
-    .grouping-div, .unsized-grouping-div {
-        margin: 30px 0;
-    }
-
-    .grouping-header {
-        margin-bottom: 20px;
-    }
-
-    .gmap_canvas {
-        width: 100%;
-        min-height: 786px;
-        height: 100%;
-    }
-
-    .text-align-center {
-        text-align: center;
-    }
-
-    .slider {
-        width: 150px;
-    }
-
-    .columnsplit {
-        padding-left: 10px;
-    }
+    @import "../assets/css/inventory.css"
 </style>

@@ -58,7 +58,7 @@ namespace BridgeCareCore.Controllers
             //   // expression += $" AND { result.Criteria }";
             //}
             var data = _maintainableAssetRepository.GetBMSIDAndBRKey();
-
+            data.Sort((a, b) => a.BrKey.CompareTo(b.BrKey));
             return Ok(data);
         }
     }

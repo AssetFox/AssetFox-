@@ -7,6 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.D
     public class BMSIDAndBRKeyDTO
     {
         public string BmsId { get; set; }
-        public string BrKey { get; set; }
+        public int BrKey { get; set; }
     }
 }

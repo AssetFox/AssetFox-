@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Xunit;
 using Assert = Xunit.Assert;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.API_Test_Classes
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class PerformanceCurveTests
     {

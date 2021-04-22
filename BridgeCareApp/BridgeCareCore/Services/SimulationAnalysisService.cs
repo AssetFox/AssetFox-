@@ -43,7 +43,7 @@ namespace BridgeCareCore.Services
             {
                 SimulationId = simulationId,
                 LastRun = DateTime.Now,
-                Status = "Starting analysis..."
+                Status = "Creating input..."
             };
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
@@ -99,6 +99,11 @@ namespace BridgeCareCore.Services
             {
                 _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
             };
+
+            // resetting the report generation status.
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
+            _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             runner.Run();
 

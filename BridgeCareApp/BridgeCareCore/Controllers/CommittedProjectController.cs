@@ -140,7 +140,7 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     _committedProjectImportMethods[UserInfo.Role](simulationId, excelPackages, applyNoTreatment);
-                    UnitOfWork.Rollback();
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();

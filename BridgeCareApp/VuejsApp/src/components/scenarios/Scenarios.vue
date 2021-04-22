@@ -637,6 +637,7 @@ export default class Scenarios extends Vue {
             showModal: true,
             scenarioId: scenario.id,
             networkId: this.networks[0].id,
+            name: scenario.name
         };
     }
 

@@ -106,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
             }
 
-            _unitOfWork.Context.CommittedProject
+            var projects = _unitOfWork.Context.CommittedProject
                 .Where(_ => _.SimulationId == simulation.Id)
                 .Select(project => new CommittedProjectEntity
                 {
@@ -120,10 +120,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         new MaintainableAssetEntity
                         {
                             Id = project.MaintainableAssetId,
-                            FacilityName = project.MaintainableAsset.FacilityName,
-                            SectionName = project.MaintainableAsset.SectionName,
-                            SpatialWeighting = project.MaintainableAsset.SpatialWeighting
-                            //Area = project.MaintainableAsset.Area
+                            SpatialWeighting = project.MaintainableAsset.SpatialWeighting,
+                            MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                            {
+                                LocationIdentifier = project.MaintainableAsset.MaintainableAssetLocation.LocationIdentifier
+                            }
                         },
                     Budget = new BudgetEntity {Name = project.Budget.Name},
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
@@ -133,8 +134,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             ChangeValue = consequence.ChangeValue,
                             Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
                         }).ToList()
-                }).AsNoTracking().ToList()
-                .ForEach(_ => _.CreateCommittedProject(simulation));
+                }).AsNoTracking().ToList();
+
+            if (projects.Any())
+            {
+                projects.ForEach(_ => _.CreateCommittedProject(simulation));
+            }
+
         }
 
         public List<CommittedProjectEntity> GetCommittedProjectsForExport(Guid simulationId)

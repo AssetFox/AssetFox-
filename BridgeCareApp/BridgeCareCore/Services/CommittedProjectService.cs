@@ -309,7 +309,7 @@ namespace BridgeCareCore.Services
                                 var noTreatmentProjectId = Guid.NewGuid();
                                 var noTreatmentProject = new CommittedProjectEntity
                                 {
-                                    Id = Guid.NewGuid(),
+                                    Id = noTreatmentProjectId,
                                     SimulationId = project.SimulationId,
                                     BudgetId = project.BudgetId,
                                     MaintainableAssetId = project.MaintainableAssetId,

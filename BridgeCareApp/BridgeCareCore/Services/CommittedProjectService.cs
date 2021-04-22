@@ -236,8 +236,7 @@ namespace BridgeCareCore.Services
                 var worksheet = excelPackage.Workbook.Worksheets[0];
                 var end = worksheet.Dimension.End;
 
-                var projects = new List<CommittedProjectEntity>();
-                var projectUniqueIdentifierTuples = new List<(string, string, int, string)>();
+                var projectsPerLocationIdentifierAndYearTuple = new Dictionary<(string, int), CommittedProjectEntity>();
 
                 for (var row = 2; row <= end.Row; row++)
                 {
@@ -245,18 +244,14 @@ namespace BridgeCareCore.Services
                     var bmsId = GetCellValue(worksheet, row, 2);
                     var locationIdentifier = $"{brKey}-{bmsId}";
 
-                    var projectName = GetCellValue(worksheet, row, 3);
-
                     var projectYear = int.Parse(GetCellValue(worksheet, row, 4));
 
-                    var budgetName = GetCellValue(worksheet, row, 7);
-
-                    var projectUniqueIdentifierTuple = (locationIdentifier, projectName, projectYear, budgetName);
-
-                    if (projectUniqueIdentifierTuples.Contains(projectUniqueIdentifierTuple))
+                    if (projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifier, projectYear)))
                     {
                         continue;
                     }
+
+                    var budgetName = GetCellValue(worksheet, row, 7);
 
                     if (simulationEntity.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.All(
                         _ => _.Name != budgetName))
@@ -276,15 +271,13 @@ namespace BridgeCareCore.Services
                         SimulationId = simulationEntity.Id,
                         BudgetId = budgetEntity.Id,
                         MaintainableAssetId = maintainableAssetId,
-                        Name = projectName,
+                        Name = GetCellValue(worksheet, row, 3),
                         Year = projectYear,
                         ShadowForAnyTreatment = int.Parse(GetCellValue(worksheet, row, 5)),
                         ShadowForSameTreatment = int.Parse(GetCellValue(worksheet, row, 6)),
                         Cost = double.Parse(GetCellValue(worksheet, row, 8)),
                         CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
                     };
-                    projects.Add(project);
-                    projectUniqueIdentifierTuples.Add(projectUniqueIdentifierTuple);
 
                     if (end.Column >= 10)
                     {
@@ -298,16 +291,25 @@ namespace BridgeCareCore.Services
                                 ChangeValue = GetCellValue(worksheet, row, column)
                             });
                         }
+                    }
 
-                        if (applyNoTreatment && simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod < project.Year)
+                    projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifier, projectYear), project);
+                }
+
+                if (applyNoTreatment && projectsPerLocationIdentifierAndYearTuple.Keys.Any(_ => _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod))
+                {
+                    var locationIdentifierAndYearTuples = projectsPerLocationIdentifierAndYearTuple.Keys
+                        .Where(_ => _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod).ToList();
+                    locationIdentifierAndYearTuples.ForEach(locationIdentifierAndYearTuple =>
                         {
+                            var project = projectsPerLocationIdentifierAndYearTuple[locationIdentifierAndYearTuple];
                             var year = simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod;
-                            while (year < project.Year)
+                            while (year < project.Year && !projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifierAndYearTuple.Item1, year)))
                             {
                                 var noTreatmentProjectId = Guid.NewGuid();
-                                projects.Add(new CommittedProjectEntity
+                                var noTreatmentProject = new CommittedProjectEntity
                                 {
-                                    Id = noTreatmentProjectId,
+                                    Id = Guid.NewGuid(),
                                     SimulationId = project.SimulationId,
                                     BudgetId = project.BudgetId,
                                     MaintainableAssetId = project.MaintainableAssetId,
@@ -324,17 +326,15 @@ namespace BridgeCareCore.Services
                                             AttributeId = _.AttributeId,
                                             ChangeValue = "+0"
                                         }).ToList()
-                                });
+                                };
 
-                                var noTreatmentProjectUniqueIdentifierTuple = (locationIdentifier, NoTreatment, year, budgetName);
-                                projectUniqueIdentifierTuples.Add(noTreatmentProjectUniqueIdentifierTuple);
+                                projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifierAndYearTuple.Item1, year), noTreatmentProject);
 
                                 year++;
                             }
-                        }
-                    }
+                        });
                 }
-                return projects;
+                return projectsPerLocationIdentifierAndYearTuple.Values;
             }).ToList();
         }
 

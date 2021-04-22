@@ -31,8 +31,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation)
         {
+            var facilitySectionNameSplit =
+                entity.MaintainableAsset.MaintainableAssetLocation.LocationIdentifier.Split("-");
+
             var facility = simulation.Network.Facilities
-                .Single(_ => _.Name == entity.MaintainableAsset.FacilityName);
+                .Single(_ => _.Name == facilitySectionNameSplit[0]);
             var section = facility.Sections.Single(_ =>
                 _.Id == entity.MaintainableAsset.Id);
 

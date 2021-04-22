@@ -99,10 +99,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         Id = asset.Id,
                         SpatialWeighting = asset.SpatialWeighting,
-                        //Area = asset.Area,
-                        //AreaUnit = asset.AreaUnit,
-                        FacilityName = asset.FacilityName,
-                        SectionName = asset.SectionName,
+                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                        {
+                            LocationIdentifier = asset.MaintainableAssetLocation.LocationIdentifier
+                        },
                         AggregatedResults = asset.AggregatedResults.Select(result => new AggregatedResultEntity
                         {
                             Discriminator = result.Discriminator,

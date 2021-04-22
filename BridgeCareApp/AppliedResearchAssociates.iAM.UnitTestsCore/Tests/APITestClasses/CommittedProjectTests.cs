@@ -313,7 +313,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowNotAuthorizedOnGet()
+        public async void ShouldReturnUnauthorizedOnGet()
         {
             try
             {
@@ -324,9 +324,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     _testHelper.MockHubService.Object);
                 _controller.ControllerContext = CreateDefaultControllerContext();
 
-                // Act + Assert
-                await Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
-                    await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id));
+                // Act
+                var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
+
+                // Assert
+                Assert.IsType<UnauthorizedResult>(result);
             }
             finally
             {
@@ -336,7 +338,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowNotAuthorizedOnPost()
+        public async void ShouldReturnUnauthorizedOnPost()
         {
             try
             {
@@ -347,9 +349,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     _testHelper.MockHubService.Object);
                 SetupForImport();
 
-                // Act + Assert
-                await Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
-                    await _controller.ImportCommittedProjects());
+                // Act
+                var result = await _controller.ImportCommittedProjects();
+
+                // Assert
+                Assert.IsType<UnauthorizedResult>(result);
             }
             finally
             {
@@ -359,7 +363,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowNotAuthorizedOnDelete()
+        public async void ShouldReturnUnauthorizedOnDelete()
         {
             try
             {
@@ -370,9 +374,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     _testHelper.MockHubService.Object);
                 _controller.ControllerContext = CreateDefaultControllerContext();
 
-                // Act + Assert
-                await Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
-                    await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id));
+                // Act
+                var result = await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
+
+                // assert
+                Assert.IsType<UnauthorizedResult>(result);
             }
             finally
             {

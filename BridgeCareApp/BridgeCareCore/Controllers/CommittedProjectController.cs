@@ -137,8 +137,18 @@ namespace BridgeCareCore.Controllers
                 var applyNoTreatment = applyNoTreatmentValue.ToString() == "1";
 
                 await Task.Factory.StartNew(() =>
-                    _committedProjectImportMethods[UserInfo.Role](simulationId, excelPackages, applyNoTreatment));
+                {
+                    UnitOfWork.BeginTransaction();
+                    _committedProjectImportMethods[UserInfo.Role](simulationId, excelPackages, applyNoTreatment);
+                    UnitOfWork.Rollback();
+                });
+
                 return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UnitOfWork.Rollback();
+                return Unauthorized();
             }
             catch (Exception e)
             {
@@ -159,6 +169,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
@@ -174,12 +188,22 @@ namespace BridgeCareCore.Controllers
             try
             {
                 await Task.Factory.StartNew(() =>
-                    _committedProjectDeleteMethods[UserInfo.Role](simulationId));
+                {
+                    UnitOfWork.BeginTransaction();
+                    _committedProjectDeleteMethods[UserInfo.Role](simulationId);
+                    UnitOfWork.Commit();
+                });
 
                 return Ok();
             }
+            catch (UnauthorizedAccessException)
+            {
+                UnitOfWork.Rollback();
+                return Unauthorized();
+            }
             catch (Exception e)
             {
+                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
                 throw;
             }

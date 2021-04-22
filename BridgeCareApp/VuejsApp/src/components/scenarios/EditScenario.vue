@@ -93,7 +93,6 @@ import Alert from '@/shared/modals/Alert.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
-import { CommittedProjectFile } from '@/shared/models/iAM/committed-project';
 import { FileInfo } from '@/shared/models/iAM/file-info';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 

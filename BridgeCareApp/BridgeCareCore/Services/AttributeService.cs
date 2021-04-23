@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using AppliedResearchAssociates;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Models;
+using BridgeCareCore.Utils;
+using MoreLinq;
 
 namespace BridgeCareCore.Services
 {
@@ -17,102 +22,58 @@ namespace BridgeCareCore.Services
 
         public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
         {
-            var attributeSelectValuesResults = new List<AttributeSelectValuesResult>();
-
-            var validAttributes = _unitOfWork.Context.Attribute.Select(_ => _.Name)
-                .Where(_ => attributeNames.Contains(_)).ToList();
-
-            if (!validAttributes.Any())
+            if (!_unitOfWork.Context.AggregatedResult.Any() ||
+                !_unitOfWork.Context.AggregatedResult.Any(_ => attributeNames.Contains(_.Attribute.Name)))
             {
-                throw new RowNotInTableException($"Provided attributes are not valid.");
+                return new List<AttributeSelectValuesResult>();
             }
 
-            var attributesWithValues = new List<string>();
-
-            using var sqlConnection = _unitOfWork.GetLegacyConnection();
-            sqlConnection.Open();
-
-            var attributeCountSelects =
-                validAttributes.Select(attribute => $"COUNT(DISTINCT({attribute})) AS {attribute}").ToList();
-            var countsQuery = $"SELECT {string.Join(", ", attributeCountSelects)} FROM SEGMENT_13_NS0;";
-
-            using var countsSqlCommand = new SqlCommand(countsQuery, sqlConnection);
-
-            using var countsReader = countsSqlCommand.ExecuteReader();
-            if (countsReader.HasRows)
-            {
-                while (countsReader.Read())
+            return _unitOfWork.Context.AggregatedResult
+                .Where(_ => attributeNames.Contains(_.Attribute.Name))
+                .Select(aggregatedResult => new AggregatedResultEntity
                 {
-                    for (var i = 0; i < validAttributes.Count; i++)
+                    Attribute = new AttributeEntity
                     {
-                        if (countsReader.GetInt32(i) > 100)
-                        {
-                            attributeSelectValuesResults.Add(new AttributeSelectValuesResult
-                            {
-                                Attribute = validAttributes[i],
-                                Values = new List<string>(),
-                                ResultMessage = $"Number of values for attribute {validAttributes[i]} exceeds 100; use text input",
-                                ResultType = "warning"
-                            });
-                        }
-                        else if (countsReader.GetInt32(i) == 0)
-                        {
-                            attributeSelectValuesResults.Add(new AttributeSelectValuesResult
-                            {
-                                Attribute = validAttributes[i],
-                                Values = new List<string>(),
-                                ResultMessage = $"No values found for attribute {validAttributes[i]}; use text input",
-                                ResultType = "warning"
-                            });
-                        }
-                        else
-                        {
-                            attributesWithValues.Add(validAttributes[i]);
-                        }
-                    }
-                }
-            }
-
-            if (attributesWithValues.Any())
-            {
-                var multipleAttributeValuesSelectQueries = new List<string>();
-                attributesWithValues.ForEach(attribute =>
-                {
-                    multipleAttributeValuesSelectQueries.Add($"SELECT DISTINCT(CAST({attribute} AS VARCHAR(255))) AS {attribute} FROM SEGMENT_13_NS0;");
-                });
-
-                using var sqlCommand = new SqlCommand(string.Join("", multipleAttributeValuesSelectQueries), sqlConnection);
-
-                var index = 0;
-
-                using var reader = sqlCommand.ExecuteReader();
-                while (reader.HasRows)
+                        Name = aggregatedResult.Attribute.Name
+                    },
+                    NumericValue = aggregatedResult.NumericValue,
+                    TextValue = aggregatedResult.TextValue,
+                    Discriminator = aggregatedResult.Discriminator
+                }).AsEnumerable()
+                .GroupBy(_ => _.Attribute.Name, _ => _)
+                .ToDictionary(_ => _.Key, _ => _.ToList())
+                .Select(keyValuePair =>
                 {
                     var values = new List<string>();
 
-                    while (reader.Read())
+                    if (keyValuePair.Value.All(aggregatedResultEntity =>
+                        aggregatedResultEntity.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
                     {
-                        if (reader[reader.GetName(0)] != null)
-                        {
-                            values.Add(reader[reader.GetName(0)].ToString());
-                        }
+                        values = keyValuePair.Value.Where(_ => _.NumericValue.HasValue)
+                            .DistinctBy(_ => _.NumericValue).Select(_ => _.NumericValue!.Value.ToString())
+                            .ToSortedSet(new AlphanumericComparator()).ToList();
                     }
 
-                    attributeSelectValuesResults.Add(new AttributeSelectValuesResult
+                    if (keyValuePair.Value.All(aggregatedResultEntity =>
+                        aggregatedResultEntity.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
                     {
-                        Attribute = attributesWithValues[index],
-                        Values = values,
-                        ResultMessage = "Success",
-                        ResultType = "success"
-                    });
+                        values = keyValuePair.Value.Where(_ => _.TextValue != null)
+                            .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue)
+                            .ToSortedSet(new AlphanumericComparator()).ToList();
+                    }
 
-                    index++;
-
-                    reader.NextResult();
-                }
-            }
-
-            return attributeSelectValuesResults;
+                    return new AttributeSelectValuesResult
+                    {
+                        Attribute = keyValuePair.Key,
+                        Values = values.Count > 100 ? new List<string>() : values,
+                        ResultMessage = !values.Any()
+                            ? $"No values found for attribute {keyValuePair.Key}; use text input"
+                            : values.Count > 100
+                                ? $"Number of values for attribute {keyValuePair.Key} exceeds 100; use text input"
+                                : "Success",
+                        ResultType = !values.Any() || values.Count > 100 ? "warning" : "success"
+                    };
+                }).ToList();
         }
     }
 }

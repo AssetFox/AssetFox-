@@ -22,8 +22,7 @@ namespace BridgeCareCore.Services
 
         public List<AttributeSelectValuesResult> GetAttributeSelectValues(List<string> attributeNames)
         {
-            if (!_unitOfWork.Context.AggregatedResult.Any() ||
-                !_unitOfWork.Context.AggregatedResult.Any(_ => attributeNames.Contains(_.Attribute.Name)))
+            if (!_unitOfWork.Context.AggregatedResult.Any(_ => attributeNames.Contains(_.Attribute.Name)))
             {
                 return new List<AttributeSelectValuesResult>();
             }
@@ -50,22 +49,22 @@ namespace BridgeCareCore.Services
                         aggregatedResultEntity.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
                     {
                         values = keyValuePair.Value.Where(_ => _.NumericValue.HasValue)
-                            .DistinctBy(_ => _.NumericValue).Select(_ => _.NumericValue!.Value.ToString())
-                            .ToSortedSet(new AlphanumericComparator()).ToList();
+                            .DistinctBy(_ => _.NumericValue).Select(_ => _.NumericValue!.Value.ToString()).ToList();
                     }
 
                     if (keyValuePair.Value.All(aggregatedResultEntity =>
                         aggregatedResultEntity.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
                     {
                         values = keyValuePair.Value.Where(_ => _.TextValue != null)
-                            .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue)
-                            .ToSortedSet(new AlphanumericComparator()).ToList();
+                            .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue).ToList();
                     }
 
                     return new AttributeSelectValuesResult
                     {
                         Attribute = keyValuePair.Key,
-                        Values = values.Count > 100 ? new List<string>() : values,
+                        Values = values.Count > 100
+                            ? new List<string>()
+                            : values.ToSortedSet(new AlphanumericComparator()).ToList(),
                         ResultMessage = !values.Any()
                             ? $"No values found for attribute {keyValuePair.Key}; use text input"
                             : values.Count > 100

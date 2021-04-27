@@ -3,11 +3,10 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Interfaces.Simulation;
 
 namespace BridgeCareCore.Services
 {
@@ -44,7 +43,7 @@ namespace BridgeCareCore.Services
             {
                 SimulationId = simulationId,
                 LastRun = DateTime.Now,
-                Status = "Starting analysis..."
+                Status = "Creating input..."
             };
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
@@ -100,6 +99,11 @@ namespace BridgeCareCore.Services
             {
                 _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
             };
+
+            // resetting the report generation status.
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
+            _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             runner.Run();
 

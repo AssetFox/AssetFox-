@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Simulation : WeakEntity, IValidator
     {
-        public Simulation(Network network)
+        internal Simulation(Network network)
         {
             Network = network ?? throw new ArgumentNullException(nameof(network));
 

@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
+using AppliedResearchAssociates.iAM.DTOs;
 using EFCore.BulkExtensions;
 using MoreLinq;
 
@@ -186,7 +186,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var result = new List<BMSIDAndBRKeyDTO>();
             foreach (var item in valuesFromDb)
             {
-                result.Add(new BMSIDAndBRKeyDTO { BmsId = item.bmsId, BrKey = item.brKey });
+                result.Add(new BMSIDAndBRKeyDTO { BmsId = item.bmsId, BrKey = Convert.ToInt32(item.brKey) });
             }
             return result;
         }

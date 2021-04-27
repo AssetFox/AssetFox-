@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class AnalysisMethod : WeakEntity, IValidator
     {
-        public AnalysisMethod(Simulation simulation)
+        internal AnalysisMethod(Simulation simulation)
         {
             Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 

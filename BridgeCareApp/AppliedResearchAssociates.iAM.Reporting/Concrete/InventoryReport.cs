@@ -82,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             var resultsString = new StringBuilder();
-            resultsString.Append("<table>");
+            resultsString.Append("<table class=\"report-cell\">");
             resultsString.Append(CreateHTMLSection("Key Fields", new List<string>() { "BRKEY", "BMSID" }));
             resultsString.Append(CreateHTMLSection("Location", new List<string>() { "DISTRICT", "COUNTY", "MUNI_CODE", "FEATURE_INTERSECTED", "FEATURE_CARRIED", "LOCATION" }));
             resultsString.Append(CreateHTMLSection("Age and Service", new List<string>() { "YEAR_BUILT", "YEAR_RECON", "SERVTYPON", "SERVTYPUND" }));
@@ -194,19 +194,19 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private string CreateHTMLSection(string sectionName, List<string> attributes, int numberColumns = DEFAULT_COLUMNS, bool previous = false)
         {
-            var sectionString = new StringBuilder($"<tr><th colspan=\"4\">{sectionName}</th></tr>");
+            var sectionString = new StringBuilder($"<tr><th colspan=\"4\" class=\"report-header report-cell\">{sectionName}</th></tr>");
             int remainingColumns = numberColumns;
             foreach (var attribute in attributes)
             {
                 if (remainingColumns == numberColumns)
                 {
                     // This is the first column
-                    sectionString.Append($"<tr><td class=\"description\">{GetDescription(attribute)}</td><td class=\"data\">{GetAttribute(attribute, previous)}</td>");
+                    sectionString.Append($"<tr><td class=\"report-description report-cell\">{GetDescription(attribute)}</td><td class=\"report-data report-cell\">{GetAttribute(attribute, previous)}</td>");
                     remainingColumns--;
                 }
                 else
                 {
-                    sectionString.Append($"<td class=\"description columnsplit\">{GetDescription(attribute)}</td><td class=\"data\">{GetAttribute(attribute, previous)}</td>");
+                    sectionString.Append($"<td class=\"report-description report-columnsplit report-cell\">{GetDescription(attribute)}</td><td class=\"report-data report-cell\">{GetAttribute(attribute, previous)}</td>");
                     remainingColumns--;
                 }
                 if (remainingColumns == 0)

@@ -68,7 +68,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 SimulationRunner.Fail(messageBuilder.ToString());
             }
-
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
         }
 

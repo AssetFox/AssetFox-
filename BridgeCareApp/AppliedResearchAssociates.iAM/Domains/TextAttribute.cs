@@ -2,7 +2,7 @@
 {
     public sealed class TextAttribute : Attribute<string>
     {
-        public TextAttribute(string name) : base(name)
+        internal TextAttribute(string name) : base(name)
         {
         }
     }

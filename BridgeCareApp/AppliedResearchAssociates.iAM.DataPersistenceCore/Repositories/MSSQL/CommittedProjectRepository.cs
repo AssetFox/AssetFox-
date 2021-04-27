@@ -8,15 +8,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
-using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class CommittedProjectRepository : ICommittedProjectRepository
     {
-        public static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         public CommittedProjectRepository(UnitOfDataPersistenceWork unitOfWork)
@@ -110,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
             }
 
-            _unitOfWork.Context.CommittedProject
+            var projects = _unitOfWork.Context.CommittedProject
                 .Where(_ => _.SimulationId == simulation.Id)
                 .Select(project => new CommittedProjectEntity
                 {
@@ -124,10 +120,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         new MaintainableAssetEntity
                         {
                             Id = project.MaintainableAssetId,
-                            FacilityName = project.MaintainableAsset.FacilityName,
-                            SectionName = project.MaintainableAsset.SectionName,
-                            SpatialWeighting = project.MaintainableAsset.SpatialWeighting
-                            //Area = project.MaintainableAsset.Area
+                            SpatialWeighting = project.MaintainableAsset.SpatialWeighting,
+                            MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                            {
+                                LocationIdentifier = project.MaintainableAsset.MaintainableAssetLocation.LocationIdentifier
+                            }
                         },
                     Budget = new BudgetEntity {Name = project.Budget.Name},
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
@@ -137,8 +134,74 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             ChangeValue = consequence.ChangeValue,
                             Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
                         }).ToList()
-                }).AsNoTracking().ToList()
-                .ForEach(_ => _.CreateCommittedProject(simulation));
+                }).AsNoTracking().ToList();
+
+            if (projects.Any())
+            {
+                projects.ForEach(_ => _.CreateCommittedProject(simulation));
+            }
+
+        }
+
+        public List<CommittedProjectEntity> GetCommittedProjectsForExport(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+            }
+
+            return _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
+                .Select(project => new CommittedProjectEntity
+                {
+                    Name = project.Name,
+                    Year = project.Year,
+                    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
+                    ShadowForSameTreatment = project.ShadowForSameTreatment,
+                    Cost = project.Cost,
+                    Budget = new BudgetEntity {Name = project.Budget.Name},
+                    MaintainableAsset = new MaintainableAssetEntity
+                    {
+                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                        {
+                            LocationIdentifier = project.MaintainableAsset.MaintainableAssetLocation
+                                .LocationIdentifier
+                        }
+                    },
+                    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
+                        new CommittedProjectConsequenceEntity
+                        {
+                            Attribute = new AttributeEntity {Name = consequence.Attribute.Name},
+                            ChangeValue = consequence.ChangeValue
+                        }).ToList()
+                })
+                .ToList();
+        }
+
+        public void CreateCommittedProjects(List<CommittedProjectEntity> committedProjectEntities)
+        {
+            _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
+
+            var committedProjectConsequenceEntities = committedProjectEntities
+                .Where(_ => _.CommittedProjectConsequences.Any())
+                .SelectMany(_ => _.CommittedProjectConsequences)
+                .ToList();
+
+            _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
+        }
+
+        public void DeleteCommittedProjects(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+            }
+
+            if (!_unitOfWork.Context.CommittedProject.Any(_ => _.SimulationId == simulationId))
+            {
+                return;
+            }
+
+            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Equation : CompilableExpression
     {
-        public Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
+        internal Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
         public EquationFormat Format =>
             Calculator is object ? EquationFormat.CalculationExpression :

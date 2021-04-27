@@ -7,6 +7,10 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class AttributeValueChange : CompilableExpression
     {
+        internal AttributeValueChange()
+        {
+        }
+
         public Attribute Attribute { get; set; }
 
         public override ValidationResultBag GetDirectValidationResults()

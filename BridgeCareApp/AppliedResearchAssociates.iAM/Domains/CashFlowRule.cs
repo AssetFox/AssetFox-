@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class CashFlowRule : WeakEntity, IValidator
     {
-        public CashFlowRule(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+        internal CashFlowRule(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
 
         public Criterion Criterion { get; }
 

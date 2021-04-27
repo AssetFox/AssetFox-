@@ -38,269 +38,7 @@
                 <v-spacer></v-spacer>
             </v-layout>
             <v-divider></v-divider>
-            <div class="container columnsplit" v-html="staticHTMLForInventory"></div>
-
-            <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
-            <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <!-- <v-flex xs12>
-                    <v-layout justify-space-between row>
-                        <div class="grouping-div">
-                            <v-layout column justify-center>
-                                <v-layout justify-center>
-                                    <h3>Location</h3>
-                                </v-layout>
-                                <div class="text-field-div"
-                                     v-for="locationGrouping in inventoryItemDetail.location">
-                                    <v-text-field :label="locationGrouping.label" :value="locationGrouping.value"
-                                                  outline readonly>
-                                    </v-text-field>
-                                </div>
-                            </v-layout>
-                        </div>
-                        <div class="grouping-div">
-                            <v-layout class="text-field-div" column justify-center>
-                                <v-layout justify-center>
-                                    <h3>Age and Service</h3>
-                                </v-layout>
-                                <div class="text-field-div"
-                                     v-for="ageAndServiceGrouping in inventoryItemDetail.ageAndService">
-                                    <v-text-field :label="ageAndServiceGrouping.label"
-                                                  :value="ageAndServiceGrouping.value" outline readonly>
-                                    </v-text-field>
-                                </div>
-                            </v-layout>
-                        </div>
-                    </v-layout>
-                </v-flex> -->
-            </v-layout>
-            <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
-            <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <!-- <v-flex xs12>
-                    <v-layout justify-space-between row>
-                        <div class="grouping-div">
-                            <v-layout align-center fill-height>
-                                <iframe :src="getGMapsUrl()" class="gmap_canvas" frameborder="0" marginheight="0"
-                                        marginwidth="0" scrolling="no"></iframe>
-                            </v-layout>
-                        </div>
-                        <div class="grouping-div">
-                            <v-layout column justify-center>
-                                <v-layout justify-center>
-                                    <h3>Management</h3>
-                                </v-layout>
-                                <div class="text-field-div"
-                                     v-for="managementGrouping in inventoryItemDetail.management">
-                                    <v-text-field :label="managementGrouping.label" :value="managementGrouping.value"
-                                                  outline readonly>
-                                    </v-text-field>
-                                </div>
-                            </v-layout>
-                        </div>
-                    </v-layout>
-                </v-flex> -->
-            </v-layout>
-            <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
-            <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <!-- <v-flex xs12>
-                    <v-layout justify-space-between row>
-                        <div class="grouping-div">
-                            <v-layout column justify-center>
-                                <v-layout justify-center>
-                                    <h3>Deck Information</h3>
-                                </v-layout>
-                                <div class="text-field-div"
-                                     v-for="deckInformationGrouping in inventoryItemDetail.deckInformation">
-                                    <v-text-field :label="deckInformationGrouping.label"
-                                                  :value="deckInformationGrouping.value" outline readonly>
-                                    </v-text-field>
-                                </div>
-                            </v-layout>
-                        </div>
-                        <div class="grouping-div">
-                            <v-layout column justify-center>
-                                <v-layout justify-center>
-                                    <h3>Span Information</h3>
-                                </v-layout>
-                                <div class="text-field-div"
-                                     v-for="spanInformationGrouping in inventoryItemDetail.spanInformation">
-                                    <v-text-field :label="spanInformationGrouping.label"
-                                                  :value="spanInformationGrouping.value" outline readonly>
-                                    </v-text-field>
-                                </div>
-                            </v-layout>
-                        </div>
-                    </v-layout>
-                </v-flex> -->
-            </v-layout>
-            <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
-            <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <!-- <v-flex xs12>
-                    <v-layout justify-space-between row>
-                        <div class="grouping-div">
-                            <v-layout column justify-center>
-                                <v-layout justify-center>
-                                    <h3>Current</h3>
-                                </v-layout>
-                                <v-data-table :headers="conditionTableHeaders"
-                                              :items="inventoryItemDetail.currentConditionDuration"
-                                              class="elevation-1">
-                                    <template slot="items" slot-scope="props">
-                                        <td class="text-align-center">{{props.item.name}}</td>
-                                        <td class="text-align-center">{{props.item.condition}}</td>
-                                        <td class="text-align-center">{{props.item.duration}}</td>
-                                    </template>
-                                </v-data-table>
-                            </v-layout>
-                        </div>
-                        <div class="grouping-div">
-                            <v-layout column justify-center>
-                                <v-layout justify-center>
-                                    <h3>Previous</h3>
-                                </v-layout>
-                                <v-data-table :headers="conditionTableHeaders"
-                                              :items="inventoryItemDetail.previousConditionDuration"
-                                              class="elevation-1">
-                                    <template slot="items" slot-scope="props">
-                                        <td class="text-align-center">{{props.item.name}}</td>
-                                        <td class="text-align-center">{{props.item.condition}}</td>
-                                        <td class="text-align-center">{{props.item.duration}}</td>
-                                    </template>
-                                </v-data-table>
-                            </v-layout>
-                        </div>
-                    </v-layout>
-                </v-flex> -->
-            </v-layout>
-            <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
-            <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <!-- <v-flex xs12>
-                    <v-layout justify-center>
-                        <div class="grouping-div">
-                            <v-layout column>
-                                <v-layout justify-center>
-                                    <h3 class="grouping-header">Risk Scores</h3>
-                                </v-layout>
-                                <div>
-                                    <v-layout justify-space-between row>
-                                        <v-text-field :value="inventoryItemDetail.riskScores.new" label="New Risk Score"
-                                                      outline readonly>
-                                        </v-text-field>
-                                        <v-text-field :value="inventoryItemDetail.riskScores.old" label="Old Risk Score"
-                                                      outline readonly>
-                                        </v-text-field>
-                                    </v-layout>
-                                </div>
-                            </v-layout>
-                        </div>
-                    </v-layout>
-                </v-flex> -->
-            </v-layout>
-            <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
-            <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <!-- <v-flex xs12>
-                    <v-layout justify-center>
-                        <div class="unsized-grouping-div">
-                            <v-layout column>
-                                <v-layout justify-center>
-                                    <h3 class="grouping-header">Operating Rating (OR) vs Inventory Rating (IR)</h3>
-                                </v-layout>
-                                <v-layout column>
-                                    <div v-for="ratingRow in inventoryItemDetail.operatingRatingInventoryRatingGrouping.ratingRows">
-                                        <v-layout justify-space-between row>
-                                            <div class="small-text-field-div">
-                                                <v-text-field :label="ratingRow.operatingRating.label"
-                                                              :value="ratingRow.operatingRating.value" outline readonly>
-                                                </v-text-field>
-                                            </div>
-                                            <div class="small-text-field-div">
-                                                <v-text-field :label="ratingRow.inventoryRating.label"
-                                                              :value="ratingRow.inventoryRating.value" outline readonly>
-                                                </v-text-field>
-                                            </div>
-                                            <div class="small-text-field-div">
-                                                <v-text-field :label="ratingRow.ratioLegalLoad.label"
-                                                              :value="ratingRow.ratioLegalLoad.value" outline readonly>
-                                                </v-text-field>
-                                            </div>
-                                        </v-layout>
-                                    </div>
-                                </v-layout>
-                                <v-layout justify-center>
-                                    <div class="small-text-field-div">
-                                        <v-text-field
-                                                :label="inventoryItemDetail.operatingRatingInventoryRatingGrouping.minRatioLegalLoad.label"
-                                                :value="inventoryItemDetail.operatingRatingInventoryRatingGrouping.minRatioLegalLoad.value"
-                                                outline readonly>
-                                        </v-text-field>
-                                    </div>
-                                </v-layout>
-                            </v-layout>
-                        </div>
-                    </v-layout>
-                </v-flex> -->
-            </v-layout>
-            <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
-            <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <!-- <v-flex xs12>
-                    <v-layout justify-center>
-                        <div class="unsized-grouping-div">
-                            <v-layout justify-center>
-                                <h3>NBI Load Rating</h3>
-                            </v-layout>
-                            <v-data-table :headers="nbiLoadRatingTableHeaders"
-                                          :items="nbiLoadRatingTableRows"
-                                          class="elevation-1">
-                                <template slot="items" slot-scope="props">
-                                    <td class="text-align-center" v-for="header in nbiLoadRatingTableHeaders">
-                                        {{props.item[header.value]}}
-                                    </td>
-                                </template>
-                            </v-data-table>
-                        </div>
-                    </v-layout>
-                </v-flex> -->
-            </v-layout>
-            <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
-            <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <!-- <v-flex xs12>
-                    <v-layout justify-center>
-                        <div class="unsized-grouping-div">
-                            <v-layout justify-center>
-                                <h3>Posting</h3>
-                            </v-layout>
-                            <v-data-table :headers="postingTableHeaders"
-                                          :items="postingTableRows"
-                                          class="elevation-1">
-                                <template slot="items" slot-scope="props">
-                                    <td class="text-align-center" v-for="header in postingTableHeaders">
-                                        {{props.item[header.value]}}
-                                    </td>
-                                </template>
-                            </v-data-table>
-                        </div>
-                    </v-layout>
-                </v-flex> -->
-            </v-layout>
-            <v-divider v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0"></v-divider>
-            <v-layout v-if="inventoryItemDetail.bmsId > 0 || inventoryItemDetail.brKey > 0">
-                <!-- <v-flex xs12>
-                    <v-layout justify-center>
-                        <div class="grouping-div">
-                            <v-layout column justify-center>
-                                <v-layout justify-center>
-                                    <h3>Roadway Info</h3>
-                                </v-layout>
-                                <div class="text-field-div"
-                                     v-for="roadwayInfoGrouping in inventoryItemDetail.roadwayInfo">
-                                    <v-text-field :label="roadwayInfoGrouping.label" :value="roadwayInfoGrouping.value"
-                                                  outline readonly>
-                                    </v-text-field>
-                                </div>
-                            </v-layout>
-                        </div>
-                    </v-layout>
-                </v-flex> -->
-            </v-layout>
+            <div class="container" v-html="sanitizedHTML"></div>
         </v-flex>
 
     </v-layout>
@@ -341,8 +79,8 @@
         selectedBmsId: string = '';
         // brKeys: any[] = [];
         lastFiveBrKeySearches: any[] = [];
-        brKeysSelectList: any[] = [];
-        selectedBrKey: string = '0';
+        brKeysSelectList: number[] = [];
+        selectedBrKey: number = 0;
         conditionTableHeaders: DataTableHeader[] = [
             {text: '', value: '', align: 'center', sortable: false, class: '', width: ''},
             {text: 'Condition', value: '', align: 'center', sortable: false, class: '', width: ''},
@@ -355,6 +93,7 @@
         inventorySelectListsWorker: any = null;
 
         inventoryData: any  = null;
+        sanitizedHTML: any = null;
 
         /**
          * Calls the setInventorySelectLists function to set both inventory type select lists
@@ -396,6 +135,11 @@
                 this.setInventorySelectLists();
             }*/
 
+        }
+
+        @Watch('staticHTMLForInventory')
+        onStaticHTMLForInventory(){
+            this.sanitizedHTML = this.$sanitize(this.staticHTMLForInventory);
         }
 
         @Watch('inventoryItemDetail')
@@ -586,15 +330,18 @@
             //     }));
             var data : InventoryItem = {
                 bmsId: bmsId,
-                brKey: '-1'
-            }
+                brKey: -1
+            };
+            this.selectedBmsId = bmsId;
+            const inventoryItem: InventoryItem = find(propEq('bmsId', bmsId), this.inventoryItems) as InventoryItem;
+            this.selectedBrKey = inventoryItem.brKey;
             this.getStaticInventoryHTMLAction(({reportType: 'InventoryLookup', filterData: data}));
         }
 
         /**
          * BR key has been selected
          */
-        onSelectInventoryItemsByBRKey(brKey: string) {
+        onSelectInventoryItemsByBRKey(brKey: number) {
             // this.getInventoryItemDetailByBRKeyAction({brKey: brKey})
             //     .then(() => setTimeout(() => {
             //         this.selectedBrKey = brKey;
@@ -606,7 +353,10 @@
             var data : InventoryItem = {
                 bmsId: '',
                 brKey: brKey
-            }
+            };
+            this.selectedBrKey = brKey;
+            const inventoryItem: InventoryItem = find(propEq('brKey', brKey), this.inventoryItems) as InventoryItem;
+            this.selectedBmsId = inventoryItem.bmsId;
             this.getStaticInventoryHTMLAction({reportType: 'InventoryLookup', filterData: data});
         }
 
@@ -618,37 +368,5 @@
 </script>
 
 <style>
-    .grouping-div, .text-field-div {
-        width: 500px;
-    }
-
-    .small-text-field-div {
-        width: 300px;
-    }
-
-    .grouping-div, .unsized-grouping-div {
-        margin: 30px 0;
-    }
-
-    .grouping-header {
-        margin-bottom: 20px;
-    }
-
-    .gmap_canvas {
-        width: 100%;
-        min-height: 786px;
-        height: 100%;
-    }
-
-    .text-align-center {
-        text-align: center;
-    }
-
-    .slider {
-        width: 150px;
-    }
-
-    .columnsplit {
-        padding-left: 10px;
-    }
+    @import "../assets/css/inventory.css"
 </style>

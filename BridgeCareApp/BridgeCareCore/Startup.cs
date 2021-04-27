@@ -4,13 +4,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQLLegacy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Interfaces.Simulation;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Security;
@@ -96,6 +93,7 @@ namespace BridgeCareCore
             services.AddScoped<IHubService, HubService>();
             services.AddScoped<IAssetData, PennDOTAssetDataRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
+            services.AddScoped<ICommittedProjectService, CommittedProjectService>();
 
             // SQL SERVER SCOPINGS
             //services.AddDbContext<IAMContext>(options =>

@@ -46,14 +46,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }#1#
         }*/
 
-        public static void CreateSection(this MaintainableAssetEntity entity, Facility facility)
+        public static void CreateSection(this MaintainableAssetEntity entity, Facility facility, string sectionName)
         {
             var section = facility.AddSection();
             section.Id = entity.Id;
-            section.Name = entity.SectionName;
+            section.Name = sectionName;
             section.SpatialWeighting.Expression = entity.SpatialWeighting;
-            //section.Area = entity.Area;
-            //section.AreaUnit = entity.AreaUnit;
 
             if (entity.AggregatedResults.Any(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
             {

@@ -2,7 +2,7 @@
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public sealed class SimulationMessageBuilder
+    internal sealed class SimulationMessageBuilder
     {
         public SimulationMessageBuilder(string messageDetail) => MessageDetail = messageDetail;
 

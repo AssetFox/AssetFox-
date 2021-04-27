@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Facility : WeakEntity, IValidator
     {
-        public Facility(Network network) => Network = network ?? throw new ArgumentNullException(nameof(network));
+        internal Facility(Network network) => Network = network ?? throw new ArgumentNullException(nameof(network));
 
         public string Name { get; set; }
 

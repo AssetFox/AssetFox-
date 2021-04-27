@@ -96,7 +96,7 @@ export default class ReportsDownloaderDialog extends Vue {
                     this.isDownloading = false;
                     if (hasValue(response, 'data')) {
                       this.setSuccessMessageAction({message: 'Report downloaded'});
-                      FileDownload(response.data, 'SummaryReportTestData.xlsx');
+                      FileDownload(response.data, `Summary Report ${this.dialogData.name}.xlsx`);
                     } else {
                       this.setErrorMessageAction({
                         message: 'Failed to download summary report. Please try generating and downloading the report again.'

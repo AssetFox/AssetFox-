@@ -1,6 +1,6 @@
 export interface InventoryItem {
     bmsId: string;
-    brKey: string;
+    brKey: number;
 }
 
 export interface LabelValue {

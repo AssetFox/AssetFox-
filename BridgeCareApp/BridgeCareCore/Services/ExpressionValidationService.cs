@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using System.Data;
 using System.Linq;
-using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Logging;
-using BridgeCareCore.Models;
 using BridgeCareCore.Models.Validation;
+using Microsoft.EntityFrameworkCore;
+using MoreLinq;
 
 namespace BridgeCareCore.Services
 {
@@ -25,13 +27,13 @@ namespace BridgeCareCore.Services
 
         public ValidationResult ValidateEquation(EquationValidationParameters model)
         {
-            if (model.IsPiecewise)
-            {
-                return CheckPiecewise(model.Expression);
-            }
-
             try
             {
+                if (model.IsPiecewise)
+                {
+                    return CheckPiecewise(model.Expression);
+                }
+
                 var expression = model.Expression.Trim();
                 CheckAttributes(expression);
                 var attributes = _unitOfWork.Context.Attribute.ToList();
@@ -44,6 +46,8 @@ namespace BridgeCareCore.Services
                 }
 
                 compiler.GetCalculator(expression);
+
+                return new ValidationResult { IsValid = true, ValidationMessage = "Success" };
             }
             catch (CalculateEvaluateException e)
             {
@@ -53,8 +57,6 @@ namespace BridgeCareCore.Services
             {
                 return new ValidationResult { IsValid = false, ValidationMessage = e.Message };
             }
-
-            return new ValidationResult { IsValid = true, ValidationMessage = "Success" };
         }
 
         private ValidationResult CheckPiecewise(string piecewise)
@@ -132,34 +134,67 @@ namespace BridgeCareCore.Services
 
         public CriterionValidationResult ValidateCriterion(string mergedCriteriaExpression, UserCriteriaDTO currentUserCriteriaFilter)
         {
-            var expression = mergedCriteriaExpression.Replace("|", "'").ToUpper();
-            /*expression = CheckAttributes(expression);
-            _calculateEvaluateService.BuildClass(expression, false);
-            _calculateEvaluateService.CompileAssembly();*/
             try
             {
-                CheckAttributes(expression);
-                var attributes = _unitOfWork.Context.Attribute.ToList();
+                if (string.IsNullOrEmpty(mergedCriteriaExpression))
+                {
+                    return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = "There is no criterion expression." };
+                }
+
+                // Appending the criteria filtering clause for non-admin users
+                if (currentUserCriteriaFilter.HasCriteria)
+                {
+                    currentUserCriteriaFilter.Criteria = "(" + currentUserCriteriaFilter.Criteria + ")";
+
+                    mergedCriteriaExpression = $"({mergedCriteriaExpression}) AND { currentUserCriteriaFilter.Criteria }";
+                }
+
+                CheckAttributes(mergedCriteriaExpression);
+
+                var modifiedExpression = mergedCriteriaExpression
+                    .Replace("[", "")
+                    .Replace("]", "")
+                    .Replace("@", "")
+                    .Replace("|", "'")
+                    .ToUpper();
+
+
+                var attributes = _unitOfWork.Context.Attribute
+                    .Where(_ => modifiedExpression.Contains(_.Name))
+                    .Select(attribute => new AttributeEntity
+                    {
+                        Name = attribute.Name,
+                        DataType = attribute.DataType
+                    }).AsNoTracking().ToList();
+
                 var compiler = new CalculateEvaluateCompiler();
-                foreach (var attribute in attributes.Where(_ => expression.Contains(_.Name)))
+
+                attributes.ForEach(attribute =>
                 {
                     compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
                         ? CalculateEvaluateParameterType.Number
                         : CalculateEvaluateParameterType.Text;
-                }
+                });
 
-                compiler.GetEvaluator(expression);
+                compiler.GetEvaluator(modifiedExpression);
+
+                var resultsCount = GetResultsCount(modifiedExpression, attributes.Select(_ => _.Name).ToList());
+
+                return new CriterionValidationResult
+                {
+                    IsValid = true, ResultsCount = resultsCount, ValidationMessage = "Success"
+                };
             }
             catch (CalculateEvaluateException e)
             {
+                _log.Error($"{e.Message}\r\n{e.StackTrace}");
                 return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = e.Message };
             }
             catch (Exception e)
             {
+                _log.Error($"{e.Message}\r\n{e.StackTrace}");
                 return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = e.Message };
             }
-
-            return GetResultsCount(expression, currentUserCriteriaFilter);
         }
 
         private void CheckAttributes(string target)
@@ -185,195 +220,57 @@ namespace BridgeCareCore.Services
             throw new InvalidOperationException("Unsupported Attribute " + target.Substring(start + 1, end - 1));
         }
 
-        public CriterionValidationResult GetResultsCount(string expression, UserCriteriaDTO currentUserCriteriaFilter)
+        private DataTable CreateFlattenedDataTable(List<string> attributeNames)
         {
-            if (string.IsNullOrEmpty(expression))
+            var flattenedDataTable = new DataTable("FlattenedDataTable");
+            flattenedDataTable.Columns.Add("MaintainableAssetId", typeof(Guid));
+            attributeNames.ForEach(attributeName =>
             {
-                _log.Error("There is no criteria created");
-                return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = "There is no criterion expression." };
-            }
-            //oracle chokes on non-space whitespace
-            var whiteSpaceMechanic = new Regex(@"\s+");
-
-            // Appending the criteria filtering clause for non-admin users
-            if (currentUserCriteriaFilter.HasCriteria)
-            {
-                currentUserCriteriaFilter.Criteria = "(" + currentUserCriteriaFilter.Criteria + ")";
-
-                expression += $" AND { currentUserCriteriaFilter.Criteria }";
-            }
-
-            // modify the expression replacing all special characters and white space
-            var modifiedExpression = whiteSpaceMechanic.Replace(expression.Replace("[", "").Replace("]", "").Replace("@", ""), " ");
-            // parameterize the predicate and add it to the select
-            var parameterizedData = ParameterizeExpression(modifiedExpression);
-
-            var strSelect = $"SELECT COUNT(*) FROM SECTION_13 INNER JOIN SEGMENT_13_NS0 ON SECTION_13.SECTIONID = SEGMENT_13_NS0.SECTIONID WHERE {parameterizedData.ParameterString}";
-            // create a sql connection
-            using var connection = _unitOfWork.GetLegacyConnection();
-            try
-            {
-                // open the connection
-                connection.Open();
-                // create a sql command with the select string and the connection
-                using var cmd = new SqlCommand(strSelect, connection);
-                // add the command parameters
-                cmd.Parameters.AddRange(parameterizedData.SqlParameters.ToArray());
-                // execute the query
-                using var dataReader = cmd.ExecuteReader();
-                // get the returned count
-                var count = dataReader.HasRows && dataReader.Read() ? dataReader.GetValue(0) : 0;
-
-                // return the results
-                return new CriterionValidationResult
-                {
-                    IsValid = true,
-                    ResultsCount = (int)count,
-                    ValidationMessage = "Success"
-                };
-            }
-            catch (SqlException e)
-            {
-                var message = $"Failed SQL Query: {strSelect}, Error Message: {e.Message}";
-                _log.Error(message);
-                return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = message };
-            }
-            catch (Exception e2)
-            {
-                _log.Error(e2.Message);
-                return new CriterionValidationResult
-                {
-                    IsValid = false,
-                    ResultsCount = 0,
-                    ValidationMessage = e2.Message
-                };
-            }
+                flattenedDataTable.Columns.Add(attributeName, typeof(string));
+            });
+            return flattenedDataTable;
         }
 
-        public ParameterizedData ParameterizeExpression(string expression)
+        private void AddToFlattenedDataTable(DataTable flattenedDataTable, Dictionary<Guid, Dictionary<string, string>> valuePerAttributeNamePerMaintainableAssetId) =>
+            valuePerAttributeNamePerMaintainableAssetId.Keys.ForEach(maintainableAssetId =>
+            {
+                var row = flattenedDataTable.NewRow();
+                row["MaintainableAssetId"] = maintainableAssetId;
+                valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId].Keys.ForEach(attributeName =>
+                {
+                    row[attributeName] = valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId][attributeName];
+                });
+                flattenedDataTable.Rows.Add(row);
+            });
+
+        private int GetResultsCount(string expression, List<string> attributeNames)
         {
-            var predicateParameters = new List<string>();
-            var sqlParameters = new List<SqlParameter>();
-            var operators = new List<string>() { "<=", ">=", "<>", "=", "<", ">" };
-            var operatorsRegex = new Regex(@"<=|>=|<>|=|<|>");
-            var parameterCount = 0;
-            var startingIndex = 0;
-            var predicates = new List<string>();
-            var spacedString = 0;
-            var indexForSpacedString = 0;
-            var attributes = _unitOfWork.Context.Attribute.Select(_ => _.Name).ToList();
+            var flattenedDataTable = CreateFlattenedDataTable(attributeNames);
 
-            while (startingIndex < expression.Length)
-            {
-                var index = expression.IndexOf(" ", startingIndex, StringComparison.Ordinal);
-
-                if (index == -1)
+            var valuePerAttributeNamePerMaintainableAssetId = _unitOfWork.Context.AggregatedResult
+                .Where(_ => attributeNames.Contains(_.Attribute.Name))
+                .Select(aggregatedResult => new AggregatedResultEntity
                 {
-                    if (spacedString == 0)
+                    MaintainableAssetId = aggregatedResult.MaintainableAssetId,
+                    TextValue = aggregatedResult.TextValue,
+                    NumericValue = aggregatedResult.NumericValue,
+                    Attribute = new AttributeEntity
                     {
-                        var length = expression.Length - startingIndex;
-                        predicates.Add(expression.Substring(startingIndex, length));
+                        Name = aggregatedResult.Attribute.Name, DataType = aggregatedResult.Attribute.DataType
                     }
-                    else
-                    {
-                        var lengthForCustomString = expression.Length - indexForSpacedString;
-                        predicates.Add(expression.Substring(indexForSpacedString, lengthForCustomString));
-                        /*
-                                                spacedString = 0;
-                        */
-                    }
-                    break;
-                }
-
-                if (expression[index + 1] == '(' || expression[index + 1] == '['
-                    || expression.Substring(index + 1, 3) == "AND"
-                    || expression.Substring(index + 1, 2) == "OR")
+                }).AsNoTracking().AsEnumerable()
+                .GroupBy(_ => _.MaintainableAssetId, _ => _)
+                .ToDictionary(_ => _.Key, aggregatedResults =>
                 {
-                    if (spacedString == 0)
-                    {
-                        var length = index - startingIndex;
-                        predicates.Add(expression.Substring(startingIndex, length));
-                    }
-                    else
-                    {
-                        var lengthForCustomString = index - indexForSpacedString;
-                        predicates.Add(expression.Substring(indexForSpacedString, lengthForCustomString));
-                        spacedString = 0;
-                    }
-                    startingIndex = index + 1;
-                }
-                else
-                {
-                    if (spacedString == 0)
-                    {
-                        indexForSpacedString = startingIndex;
-                        spacedString++;
-                    }
-                    startingIndex = index + 1;
-                }
-            }
-            //var predicates = criteria.Split(' ');
-            foreach (var predicate in predicates)
-            {
-                if (operatorsRegex.IsMatch(predicate))
-                {
-                    foreach (var @operator in operators)
-                    {
-                        if (!predicate.Contains(@operator))
-                        {
-                            continue;
-                        }
+                    return aggregatedResults.ToDictionary(_ => _.Attribute.Name, _ =>
+                        _.Attribute.DataType == DataPersistenceConstants.AttributeNumericDataType
+                            ? _.NumericValue?.ToString()
+                            : _.TextValue);
+                });
 
-                        // count number of closed parentheses
-                        var closedParenthesesCount = predicate.Count(x => x == ')');
-                        // split the predicate at the operator
-                        var splitPredicate = predicate.Split(new[] { @operator }, StringSplitOptions.None);
-                        // create the parameter name
-                        var parameterName = $"@value{++parameterCount}";
-                        // create the parameter value
-                        var value = splitPredicate[1].Replace(")", "").Replace("'", "");
+            AddToFlattenedDataTable(flattenedDataTable, valuePerAttributeNamePerMaintainableAssetId);
 
-                        var parameterizedPredicate = !attributes.Contains(value)
-                            ? $"{splitPredicate[0]} {@operator} {parameterName}"
-                            : $"{splitPredicate[0]} {@operator} {value}";
-                        // add a number of closed parentheses equal to closedParenthesesCount to end
-                        // of parameterizedPredicate
-                        if (closedParenthesesCount > 0)
-                        {
-                            for (var i = 0; i < closedParenthesesCount; i++)
-                            {
-                                parameterizedPredicate += ")";
-                            }
-                        }
-                        // add the parameterizedPredicate to the criteriaParameterizedPredicates list
-                        predicateParameters.Add(parameterizedPredicate);
-                        // create a new sql parameter with parameterName and value
-                        sqlParameters.Add(new SqlParameter()
-                        {
-                            ParameterName = parameterName,
-                            Value = value
-                        });
-                        break;
-                    }
-                }
-                else
-                {
-                    predicateParameters.Add(predicate);
-                }
-            }
-
-            return new ParameterizedData
-            {
-                ParameterString = string.Join(" ", predicateParameters),
-                SqlParameters = sqlParameters
-            };
+            return flattenedDataTable.Select(expression).Length;
         }
-    }
-
-    public class ParameterizedData
-    {
-        public string ParameterString { get; set; }
-
-        public List<SqlParameter> SqlParameters { get; set; }
     }
 }

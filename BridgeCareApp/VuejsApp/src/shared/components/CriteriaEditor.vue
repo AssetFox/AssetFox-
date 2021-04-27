@@ -398,8 +398,12 @@ export default class CriteriaEditor extends Vue {
     const parsedCriteria = parseCriteriaJson(this.getMainCriteria());
 
     if (parsedCriteria) {
-      var validationParameter = {expression: parsedCriteria.join(''), currentUserCriteriaFilter : this.currentUserCriteriaFilter} as ValidationParameter;
-      ValidationService.getCriterionValidationResult(validationParameter)
+        const validationParameter = {
+            expression: parsedCriteria.join(''),
+            currentUserCriteriaFilter: this.currentUserCriteriaFilter,
+        } as ValidationParameter;
+
+        ValidationService.getCriterionValidationResult(validationParameter)
           .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
               const result: CriterionValidationResult = response.data as CriterionValidationResult;
@@ -453,8 +457,12 @@ export default class CriteriaEditor extends Vue {
       return;
     }
 
-    var validationParameter = {expression: criteria, currentUserCriteriaFilter : this.currentUserCriteriaFilter} as ValidationParameter;
-    ValidationService.getCriterionValidationResult(validationParameter)
+      const validationParameter = {
+          expression: criteria,
+          currentUserCriteriaFilter: this.currentUserCriteriaFilter,
+      } as ValidationParameter;
+
+      ValidationService.getCriterionValidationResult(validationParameter)
         .then((response: AxiosResponse) => {
           this.resetSubCriteriaValidationProperties();
 

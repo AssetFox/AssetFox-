@@ -132,8 +132,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                         previousYearTreatment = prevYearSection.AppliedTreatment;
                     }
 
-                    setColor(0, section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
-                        yearlySectionData.Year, index, worksheet, row, column); // TODO : Get the value of parallel structure. Right now 0 is a dummy value
+                    setColor((int)section.ValuePerNumericAttribute["PARALLEL"], section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
+                        yearlySectionData.Year, index, worksheet, row, column);
 
                     // Work done in a year
                     var range = worksheet.Cells[row, column];

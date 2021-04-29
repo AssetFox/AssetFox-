@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
@@ -16,19 +21,43 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         private readonly SqlConnection _sqlConnection;
         private readonly DataAccessor _dataAccessor;
+        public UnitOfDataPersistenceWork UnitOfWorkForAnalysis { get; }
+        public readonly IAMContext DbContextForAnalysis;
+        public IConfiguration ConfigForAnalysis { get; }
 
         public Simulation StandAloneSimulation { get; set; }
 
         public SimulationAnalysisDataPersistenceTestHelper()
         {
-            _sqlConnection = UnitOfWork.GetLegacyConnection();
-            _sqlConnection.Open();
-            _dataAccessor = new DataAccessor(_sqlConnection, null);
+            ConfigForAnalysis = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("testConnections.json")
+                .Build();
+
+            DbContextForAnalysis = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
+                .UseSqlServer(Config.GetConnectionString("BridgeCareConnexRealDb"))
+                .Options);
+
+            UnitOfWorkForAnalysis = new UnitOfDataPersistenceWork(ConfigForAnalysis, DbContextForAnalysis);
+
+            //_sqlConnection = UnitOfWork.GetLegacyConnection();
+            //_sqlConnection.Open();
+            //_dataAccessor = new DataAccessor(_sqlConnection, null);
         }
 
         public void SetStandAloneSimulation(int simulationId)
         {
-            StandAloneSimulation = _dataAccessor.GetStandAloneSimulation(NetworkId, simulationId);
+            var explorer = UnitOfWorkForAnalysis.AttributeRepo.GetExplorer();
+            var network = UnitOfWorkForAnalysis.NetworkRepo.GetSimulationAnalysisNetwork(new Guid(DataPersistenceConstants.PennDotNetworkId), explorer, true);
+            UnitOfWorkForAnalysis.SimulationRepo.GetSimulationInNetwork(new Guid("75942BFA-D205-4456-80FA-C51493CB2E0E"), network);
+
+            StandAloneSimulation = network.Simulations.First();
+            UnitOfWorkForAnalysis.InvestmentPlanRepo.GetSimulationInvestmentPlan(StandAloneSimulation);
+            UnitOfWorkForAnalysis.AnalysisMethodRepo.GetSimulationAnalysisMethod(StandAloneSimulation);
+            UnitOfWorkForAnalysis.PerformanceCurveRepo.SimulationPerformanceCurves(StandAloneSimulation);
+            UnitOfWorkForAnalysis.SelectableTreatmentRepo.GetSimulationTreatments(StandAloneSimulation);
+
+            //StandAloneSimulation = _dataAccessor.GetStandAloneSimulation(NetworkId, simulationId);
             StandAloneSimulation.Network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
         }
 
@@ -196,7 +225,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public override void CleanUp()
         {
-            _sqlConnection.Close();
+            //_sqlConnection.Close();
             UnitOfWork.Context.Database.EnsureDeleted();
             UnitOfWork.Dispose();
         }

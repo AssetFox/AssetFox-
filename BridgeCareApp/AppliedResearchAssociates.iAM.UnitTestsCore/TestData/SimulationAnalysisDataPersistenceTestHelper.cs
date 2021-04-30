@@ -18,9 +18,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
     public class SimulationAnalysisDataPersistenceTestHelper : TestHelper
     {
         private const int NetworkId = 13;
-
-        private readonly SqlConnection _sqlConnection;
-        private readonly DataAccessor _dataAccessor;
         public UnitOfDataPersistenceWork UnitOfWorkForAnalysis { get; }
         public readonly IAMContext DbContextForAnalysis;
         public IConfiguration ConfigForAnalysis { get; }
@@ -39,10 +36,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                 .Options);
 
             UnitOfWorkForAnalysis = new UnitOfDataPersistenceWork(ConfigForAnalysis, DbContextForAnalysis);
-
-            //_sqlConnection = UnitOfWork.GetLegacyConnection();
-            //_sqlConnection.Open();
-            //_dataAccessor = new DataAccessor(_sqlConnection, null);
         }
 
         public void SetStandAloneSimulation(int simulationId)
@@ -57,7 +50,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             UnitOfWorkForAnalysis.PerformanceCurveRepo.SimulationPerformanceCurves(StandAloneSimulation);
             UnitOfWorkForAnalysis.SelectableTreatmentRepo.GetSimulationTreatments(StandAloneSimulation);
 
-            //StandAloneSimulation = _dataAccessor.GetStandAloneSimulation(NetworkId, simulationId);
             StandAloneSimulation.Network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
         }
 
@@ -225,7 +217,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public override void CleanUp()
         {
-            //_sqlConnection.Close();
             UnitOfWork.Context.Database.EnsureDeleted();
             UnitOfWork.Dispose();
         }

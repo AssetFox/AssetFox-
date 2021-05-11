@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 
@@ -31,8 +32,8 @@ namespace BridgeCareCore.Controllers
         private readonly IReadOnlyDictionary<string, CommittedProjectDeleteMethod> _committedProjectDeleteMethods;
 
         public CommittedProjectController(ICommittedProjectService committedProjectService,
-            IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService) : base(
-            esecSecurity, unitOfWork, hubService)
+            IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(
+            esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _committedProjectService = committedProjectService ??
                                        throw new ArgumentNullException(nameof(committedProjectService));
@@ -50,7 +51,7 @@ namespace BridgeCareCore.Controllers
 
             FileInfoDTO GetPermitted(Guid simulationId)
             {
-                CheckUserSimulationAuthorization(simulationId);
+                CheckUserSimulationModifyAuthorization(simulationId);
                 return _committedProjectService.ExportCommittedProjectsFile(simulationId);
             }
 
@@ -72,7 +73,7 @@ namespace BridgeCareCore.Controllers
 
             void CreatePermitted(Guid simulationId, List<ExcelPackage> excelPackages, bool applyNoTreatment)
             {
-                CheckUserSimulationAuthorization(simulationId);
+                CheckUserSimulationModifyAuthorization(simulationId);
                 _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackages, applyNoTreatment);
             }
 
@@ -94,7 +95,7 @@ namespace BridgeCareCore.Controllers
 
             void DeletePermitted(Guid simulationId)
             {
-                CheckUserSimulationAuthorization(simulationId);
+                CheckUserSimulationModifyAuthorization(simulationId);
                 UnitOfWork.CommittedProjectRepo.DeleteCommittedProjects(simulationId);
             }
 
@@ -114,26 +115,26 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                if (!Request.HasFormContentType)
+                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
                 {
                     throw new ConstraintException("Request MIME type is invalid.");
                 }
 
-                if (Request.Form.Files.Count < 1)
+                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
                 {
                     throw new ConstraintException("Committed project files were not found.");
                 }
 
-                if (!Request.Form.TryGetValue("simulationId", out var id))
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("simulationId", out var id))
                 {
                     throw new ConstraintException("Request contained no simulation id.");
                 }
 
                 var simulationId = Guid.Parse(id.ToString());
 
-                var excelPackages = Request.Form.Files.Select(file => new ExcelPackage(file.OpenReadStream())).ToList();
+                var excelPackages = ContextAccessor.HttpContext.Request.Form.Files.Select(file => new ExcelPackage(file.OpenReadStream())).ToList();
 
-                Request.Form.TryGetValue("applyNoTreatment", out var applyNoTreatmentValue);
+                ContextAccessor.HttpContext.Request.Form.TryGetValue("applyNoTreatment", out var applyNoTreatmentValue);
                 var applyNoTreatment = applyNoTreatmentValue.ToString() == "1";
 
                 await Task.Factory.StartNew(() =>

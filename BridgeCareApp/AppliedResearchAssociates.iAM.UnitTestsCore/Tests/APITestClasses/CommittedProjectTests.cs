@@ -119,7 +119,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 SimulationId = _testHelper.TestSimulation.Id, BudgetLibraryId = BudgetLibraryId
             });
-            _controller.ControllerContext = CreateRequestWithFormData();
+            CreateRequestWithFormData();
         }
 
         private void SetupForExport()
@@ -140,16 +140,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.AddAll(consequences);
         }
 
-        private ControllerContext CreateDefaultControllerContext()
+        private void CreateRequestWithFormData()
         {
             var httpContext = new DefaultHttpContext();
-            var actionContext = new ActionContext(httpContext, new RouteData(), new ControllerActionDescriptor());
-            return new ControllerContext(actionContext);
-        }
-
-        private ControllerContext CreateRequestWithFormData()
-        {
-            var httpContext = new DefaultHttpContext();
+            _testHelper.AddAuthorizationHeader(httpContext);
             httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData\\Files",
@@ -166,15 +160,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             httpContext.Request.Form = new FormCollection(formData, new FormFileCollection {formFile});
-
-            var actionContext = new ActionContext(httpContext, new RouteData(), new ControllerActionDescriptor());
-
-            return new ControllerContext(actionContext);
+            _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(httpContext);
         }
 
-        private ControllerContext CreateRequestWithFormData(FileInfoDTO fileInfo)
+        private void CreateRequestWithFormData(FileInfoDTO fileInfo)
         {
             var httpContext = new DefaultHttpContext();
+            _testHelper.AddAuthorizationHeader(httpContext);
             httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
 
             var memStream = new MemoryStream(Convert.FromBase64String(fileInfo.FileData));
@@ -187,10 +179,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             httpContext.Request.Form = new FormCollection(formData, new FormFileCollection {formFile});
+            _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(httpContext);
+        }
 
-            var actionContext = new ActionContext(httpContext, new RouteData(), new ControllerActionDescriptor());
+        private void CreateRequestForExceptionTesting(FormFile file = null)
+        {
+            var httpContext = new DefaultHttpContext();
 
-            return new ControllerContext(actionContext);
+            FormFileCollection formFileCollection;
+            if (file != null)
+            {
+                formFileCollection = new FormFileCollection {file};
+            }
+            else
+            {
+                formFileCollection = new FormFileCollection();
+            }
+
+            httpContext.Request.Form = new FormCollection(new Dictionary<string, StringValues>(), formFileCollection);
+            _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(httpContext);
         }
 
         private void AssertCommittedProjectsData()
@@ -243,11 +250,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                _testHelper.SetupDefaultHttpContext();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                _controller.ControllerContext = CreateDefaultControllerContext();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
 
                 // Act
                 var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
@@ -268,11 +276,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                SetupForImport();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                SetupForImport();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
 
                 // Act
                 var result = await _controller.ImportCommittedProjects();
@@ -293,11 +302,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                _testHelper.SetupDefaultHttpContext();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                _controller.ControllerContext = CreateDefaultControllerContext();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
 
                 // Act
                 var result = await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
@@ -318,11 +328,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                _testHelper.SetupDefaultHttpContext();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityNotAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                _controller.ControllerContext = CreateDefaultControllerContext();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
 
                 // Act
                 var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
@@ -343,11 +354,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                SetupForImport();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityNotAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                SetupForImport();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
 
                 // Act
                 var result = await _controller.ImportCommittedProjects();
@@ -368,11 +380,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                _testHelper.SetupDefaultHttpContext();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityNotAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                _controller.ControllerContext = CreateDefaultControllerContext();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
 
                 // Act
                 var result = await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
@@ -393,11 +406,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                SetupForImport();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                SetupForImport();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
+
 
                 // Act
                 await _controller.ImportCommittedProjects();
@@ -418,11 +433,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                _testHelper.SetupDefaultHttpContext();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                _controller.ControllerContext = CreateDefaultControllerContext();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
                 SetupForExport();
 
                 // Act
@@ -438,7 +454,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 var timer = new Timer {Interval = 5000};
                 timer.Elapsed += async delegate
                 {
-                    _controller.ControllerContext = CreateRequestWithFormData(fileInfo);
+                    CreateRequestWithFormData(fileInfo);
                     await _controller.ImportCommittedProjects();
                 };
 
@@ -457,11 +473,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                _testHelper.SetupDefaultHttpContext();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                _controller.ControllerContext = CreateDefaultControllerContext();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
                 SetupForExport();
 
                 // Act
@@ -495,11 +512,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                _testHelper.SetupDefaultHttpContext();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                _controller.ControllerContext = CreateDefaultControllerContext();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
 
                 // Act + Asset
                 var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -522,10 +540,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                _controller.ControllerContext = CreateDefaultControllerContext();
-                _controller.ControllerContext.HttpContext.Request.Form =
-                    new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection());
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
+                CreateRequestForExceptionTesting();
+                /*_controller.ControllerContext.HttpContext.Request.Form =
+                    new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection());*/
 
                 // Act + Asset
                 var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -548,12 +567,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object);
-                _controller.ControllerContext = CreateDefaultControllerContext();
+                    _testHelper.MockHubService.Object,
+                    _testHelper.MockHttpContextAccessor.Object);
                 var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                     "dummy.txt");
-                _controller.ControllerContext.HttpContext.Request.Form =
-                    new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection{file});
+                CreateRequestForExceptionTesting(file);
+                /*_controller.ControllerContext.HttpContext.Request.Form =
+                    new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection{file});*/
 
                 // Act + Asset
                 var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>

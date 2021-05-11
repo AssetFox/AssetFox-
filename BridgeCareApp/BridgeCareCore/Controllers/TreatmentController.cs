@@ -4,11 +4,13 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
@@ -17,30 +19,27 @@ namespace BridgeCareCore.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class TreatmentController : HubControllerBase
+    public class TreatmentController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IReadOnlyDictionary<string, TreatmentUpsertMethod> _treatmentUpsertMethods;
 
-        public TreatmentController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService) : base(hubService)
-        {
-            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public TreatmentController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _treatmentUpsertMethods = CreateUpsertMethods();
-        }
 
         private Dictionary<string, TreatmentUpsertMethod> CreateUpsertMethods()
         {
             void UpsertAny(Guid simulationId, TreatmentLibraryDTO dto)
             {
-                _unitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto, simulationId);
-                _unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
+                UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto, simulationId);
+                UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
             }
 
-            void UpsertPermitted(Guid simulationId, TreatmentLibraryDTO dto) =>
-                _unitOfWork.SelectableTreatmentRepo.UpsertPermitted(simulationId, dto);
+            void UpsertPermitted(Guid simulationId, TreatmentLibraryDTO dto)
+            {
+                CheckUserSimulationModifyAuthorization(simulationId);
+                UpsertAny(simulationId, dto);
+            }
 
             return new Dictionary<string, TreatmentUpsertMethod>
             {
@@ -56,13 +55,13 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _unitOfWork.SelectableTreatmentRepo
+                var result = await Task.Factory.StartNew(() => UnitOfWork.SelectableTreatmentRepo
                     .TreatmentLibrariesWithTreatments());
                 return Ok(result);
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Treatment error::{e.Message}");
                 throw;
             }
         }
@@ -74,28 +73,24 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
-                _unitOfWork.SetUser(userInfo.Name);
-
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _treatmentUpsertMethods[userInfo.Role](simulationId, dto);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    _treatmentUpsertMethods[UserInfo.Role](simulationId, dto);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                _unitOfWork.Rollback();
+                UnitOfWork.Rollback();
                 return Unauthorized();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Treatment error::{e.Message}");
                 throw;
             }
         }
@@ -109,17 +104,17 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _unitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Treatment error::{e.Message}");
                 throw;
             }
         }

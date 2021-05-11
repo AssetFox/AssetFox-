@@ -146,26 +146,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertPermitted(Guid simulationId, PerformanceCurveLibraryDTO dto)
-        {
-            if (simulationId != Guid.Empty)
-            {
-                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-                {
-                    throw new RowNotInTableException($"No simulation found having id {dto.Id}");
-                }
-
-                if (!_unitOfWork.Context.Simulation.Any(_ =>
-                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
-                }
-            }
-
-            UpsertPerformanceCurveLibrary(dto, simulationId);
-            UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
-        }
-
         public void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto, Guid simulationId)
         {
             var performanceCurveLibraryEntity = dto.ToEntity();

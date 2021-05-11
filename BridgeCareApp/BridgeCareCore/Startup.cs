@@ -22,10 +22,13 @@ using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
 using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 using BridgeCareCore.Services.SummaryReport.UnfundedRecommendations;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.AzureADB2C.UI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,6 +49,50 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
+            {
+                builder
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com", "https://iam-demo.net/");
+            }));
+
+            var security = Configuration.GetSection("Security").Value;
+
+            if (security == SecurityConstants.Security.Esec)
+            {
+                services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            RequireExpirationTime = true,
+                            RequireSignedTokens = true,
+                            ValidateAudience = false,
+                            ValidateIssuer = false,
+                            ValidateLifetime = true,
+                            IssuerSigningKey = SecurityFunctions.GetPublicKey(Configuration.GetSection("EsecConfig"))
+                        };
+                    });
+            }
+
+            if (security == SecurityConstants.Security.B2C)
+            {
+                services.AddAuthentication(AzureADB2CDefaults.BearerAuthenticationScheme)
+                    .AddAzureADB2CBearer(options => Configuration.Bind("AzureAdB2C", options));
+            }
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(SecurityConstants.Policy.AdminOrDistrictEngineer,
+                    policy => policy.Requirements.Add(
+                        new UserHasAllowedRoleRequirement(Role.Administrator, Role.DistrictEngineer)));
+                options.AddPolicy(SecurityConstants.Policy.Admin,
+                    policy => policy.Requirements.Add(
+                        new UserHasAllowedRoleRequirement(Role.Administrator)));
+            });
+
             services.AddSingleton(Configuration);
             services.AddControllers().AddNewtonsoftJson();
 
@@ -94,6 +141,7 @@ namespace BridgeCareCore
             services.AddScoped<IAssetData, PennDOTAssetDataRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
             services.AddScoped<ICommittedProjectService, CommittedProjectService>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             // SQL SERVER SCOPINGS
             //services.AddDbContext<IAMContext>(options =>
@@ -112,39 +160,6 @@ namespace BridgeCareCore
 
             services.AddSingleton(service => new ReportLookupLibrary(reportLookup));
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
-
-            services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
-            {
-                builder
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials()
-                .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com");
-            }));
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        RequireExpirationTime = true,
-                        RequireSignedTokens = true,
-                        ValidateAudience = false,
-                        ValidateIssuer = false,
-                        ValidateLifetime = true,
-                        IssuerSigningKey = SecurityFunctions.GetPublicKey(Configuration.GetSection("EsecConfig"))
-                    };
-                });
-
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy(SecurityConstants.Policy.AdminOrDistrictEngineer,
-                    policy => policy.Requirements.Add(
-                        new UserHasAllowedRoleRequirement(Role.Administrator, Role.DistrictEngineer)));
-                options.AddPolicy(SecurityConstants.Policy.Admin,
-                    policy => policy.Requirements.Add(
-                        new UserHasAllowedRoleRequirement(Role.Administrator)));
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

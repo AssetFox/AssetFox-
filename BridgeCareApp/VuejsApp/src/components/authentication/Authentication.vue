@@ -24,6 +24,7 @@ import Vue from 'vue';
     export default class Authentication extends Vue {
         @State(state => state.authenticationModule.authenticated) authenticated: boolean;
         @State(state => state.authenticationModule.hasRole) hasRole: boolean;
+        @State(state => state.authenticationModule.securityType) securityType: string;
         @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
         @Action('setSuccessMessage') setSuccessMessageAction: any;
@@ -32,37 +33,48 @@ import Vue from 'vue';
         @Action('getUserInfo') getUserInfoAction: any;
         @Action('getNetworks') getNetworksAction: any;
         @Action('getAttributes') getAttributesAction: any;
-
+        @Action('getAzureAccountDetails') getAzureAccountDetailsAction: any;
         @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
 
         mounted() {
             const code: string = this.$route.query.code as string;
             const state: string = this.$route.query.state as string;
 
-            // The ESEC login will always redirect the browser to the iam-deploy site.
-            // If the state is set, we know the authentication was started by a local client,
-            // and so we should send the browser back to that client.
-            if (state === 'localhost8080') {
-                window.location.href = `http://localhost:8080/Authentication/?code=${code}`;
-                return;
+            if (this.securityType === 'ESEC') {
+                // The ESEC login will always redirect the browser to the iam-deploy site.
+                // If the state is set, we know the authentication was started by a local client,
+                // and so we should send the browser back to that client.
+                if (state === 'localhost8080') {
+                    window.location.href = `http://localhost:8080/Authentication/?code=${code}`;
+                    return;
+                }
+
+                this.getUserTokensAction(code).then(() => {
+                    if (!this.authenticated) {
+                        this.onAuthenticationFailure();
+                    } else {
+                        this.getUserInfoAction().then(() => {
+
+                            this.getUserCriteriaFilterAction().then(() => {
+                                if (!this.hasRole || !this.currentUserCriteriaFilter.hasAccess) {
+                                    this.onRoleFailure();
+                                } else {
+                                    this.onAuthenticationSuccess();
+                                }
+                            });
+                        });
+                    }
+                });
             }
 
-            this.getUserTokensAction(code).then(() => {
+            if (this.securityType === 'B2C') {
+                this.getAzureAccountDetailsAction();
                 if (!this.authenticated) {
                     this.onAuthenticationFailure();
                 } else {
-                    this.getUserInfoAction().then(() => {
-
-                        this.getUserCriteriaFilterAction().then(() => {
-                           if (!this.hasRole || !this.currentUserCriteriaFilter.hasAccess) {
-                            this.onRoleFailure();
-                        } else {
-                            this.onAuthenticationSuccess();
-                        } 
-                        });
-                    });
+                    this.onAuthenticationSuccess();
                 }
-            });
+            }
         }
 
         onAuthenticationSuccess() {

@@ -122,25 +122,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return investmentPlan != null ? investmentPlan.ToDto() : new InvestmentPlanDTO();
         }
 
-        public void UpsertPermitted(Guid simulationId, InvestmentPlanDTO dto)
-        {
-            if (simulationId != Guid.Empty)
-            {
-                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-                {
-                    throw new RowNotInTableException($"No simulation found having id {dto.Id}");
-                }
-
-                if (!_unitOfWork.Context.Simulation.Any(_ =>
-                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
-                }
-
-                UpsertInvestmentPlan(dto, simulationId);
-            }
-        }
-
         public void UpsertInvestmentPlan(InvestmentPlanDTO dto, Guid simulationId)
         {
             if (simulationId != Guid.Empty)

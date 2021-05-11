@@ -13,8 +13,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<BudgetPriorityLibraryDTO> BudgetPriorityLibrariesWithBudgetPriorities();
 
-        void UpsertPermitted(Guid simulationId, BudgetPriorityLibraryDTO dto);
-
         void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId);
 
         void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId);

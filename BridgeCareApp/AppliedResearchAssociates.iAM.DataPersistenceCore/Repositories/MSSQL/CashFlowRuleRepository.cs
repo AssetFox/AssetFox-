@@ -99,26 +99,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertPermitted(Guid simulationId, CashFlowRuleLibraryDTO dto)
-        {
-            if (simulationId != Guid.Empty)
-            {
-                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-                {
-                    throw new RowNotInTableException($"No simulation found having id {dto.Id}");
-                }
-
-                if (!_unitOfWork.Context.Simulation.Any(_ =>
-                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
-                }
-            }
-
-            UpsertCashFlowRuleLibrary(dto, simulationId);
-            UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
-        }
-
         public void UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto, Guid simulationId)
         {
             var cashFlowRuleLibraryEntity = dto.ToEntity();

@@ -2,28 +2,22 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BenefitQuantifierController : HubControllerBase
+    public class BenefitQuantifierController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
-
-        public BenefitQuantifierController(UnitOfDataPersistenceWork unitOfDataPersistenceWork, IEsecSecurity esecSecurity,
-            IHubService hubService) : base(hubService)
-        {
-            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ??
-                                         throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
-        }
+        public BenefitQuantifierController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
         [HttpGet]
         [Route("GetBenefitQuantifier/{networkId}")]
@@ -33,13 +27,13 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await Task.Factory.StartNew(() =>
-                    _unitOfDataPersistenceWork.BenefitQuantifierRepo.GetBenefitQuantifier(networkId));
+                    UnitOfWork.BenefitQuantifierRepo.GetBenefitQuantifier(networkId));
 
                 return Ok(result);
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Benefit Quantifier error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Benefit Quantifier error::{e.Message}");
                 throw;
             }
         }
@@ -51,21 +45,19 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfDataPersistenceWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
-
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfDataPersistenceWork.BeginTransaction();
-                    _unitOfDataPersistenceWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto);
-                    _unitOfDataPersistenceWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Benefit Quantifier error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Benefit Quantifier error::{e.Message}");
                 throw;
             }
         }
@@ -79,17 +71,17 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfDataPersistenceWork.BeginTransaction();
-                    _unitOfDataPersistenceWork.BenefitQuantifierRepo.DeleteBenefitQuantifier(networkId);
-                    _unitOfDataPersistenceWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.BenefitQuantifierRepo.DeleteBenefitQuantifier(networkId);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfDataPersistenceWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Benefit Quantifier error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Benefit Quantifier error::{e.Message}");
                 throw;
             }
         }

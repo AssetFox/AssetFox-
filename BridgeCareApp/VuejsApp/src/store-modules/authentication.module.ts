@@ -14,6 +14,7 @@ const state = {
   isCWOPA: false,
   username: '',
   refreshing: false,
+  securityType: process.env.SECURITY
 };
 
 const mutations = {
@@ -138,6 +139,39 @@ const actions = {
       commit('authenticatedMutator', false);
     }
   },
+  async setAzureUserInfo({ commit, dispatch }: any, payload: any) {
+    if (payload.status) {
+      commit('hasRoleMutator', true);
+      commit('checkedForRoleMutator', true);
+      commit('isAdminMutator', true);
+      commit('usernameMutator', payload.username);
+    } else {
+      commit('hasRoleMutator', false);
+      commit('checkedForRoleMutator', false);
+      commit('isAdminMutator', false);
+      commit('usernameMutator', '');
+      dispatch('azureB2CLogout');
+    }
+
+    if (state.authenticated !== payload.status) {
+      commit('authenticatedMutator', payload.status);
+    }
+  },
+  async checkAzureB2CBrowserTokens({commit, dispatch}: any) {
+    const storedTokenExpiration: number = Number(localStorage.getItem('TokenExpiration') as string);
+    if (isNaN(storedTokenExpiration)) {
+      return;
+    }
+
+    if (storedTokenExpiration > Date.now()) {
+      if (state.authenticated) {
+        return;
+      }
+      commit('authenticatedMutator', true);
+    } else if (state.authenticated) {
+      dispatch('logOut');
+    }
+  }
 };
 
 const getters = {};

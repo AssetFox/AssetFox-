@@ -2,6 +2,8 @@ import {AxiosError, AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {prop} from 'ramda';
 import {UserTokens} from '@/shared/models/iAM/authentication';
+import AuthenticationModule from '@/store-modules/authentication.module';
+import AzureB2CModule from '@/store-modules/azureB2C.module';
 
 export const http2XX = /(2(0|2)[0-8])/;
 
@@ -40,9 +42,14 @@ export const setContentTypeCharset = (headers: any) => {
 };
 
 export const setAuthHeader = (headers: any) => {
-    if (headers && localStorage.getItem('UserTokens')) {
+    if (headers && AuthenticationModule.state.securityType === 'ESEC' && localStorage.getItem('UserTokens')) {
         const userTokens: UserTokens = JSON.parse(localStorage.getItem('UserTokens') as string) as UserTokens;
         headers['Authorization'] = `Bearer ${userTokens.id_token}`;
+    }
+
+    if (headers && AuthenticationModule.state.securityType === 'B2C' && localStorage.getItem('access_token')) {
+        const accessToken: string =  localStorage.getItem('access_token') as string;
+        headers['Authorization'] = `Bearer ${accessToken}`;
     }
 
     return headers;

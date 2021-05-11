@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
@@ -28,10 +29,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
             var simulationAnalysis =
                 new SimulationAnalysisService(_testHelper.UnitOfWork, _testHelper.MockHubService.Object);
-            _controller = new SimulationController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
-                simulationAnalysis, _testHelper.MockHubService.Object);
+            _controller = new SimulationController( simulationAnalysis, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
         private void SetupForClone()
@@ -301,18 +303,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 var result = await _controller.CreateSimulation(_testHelper.TestNetwork.Id, newSimulationDTO) as OkObjectResult;
                 var dto = (SimulationDTO)Convert.ChangeType(result!.Value, typeof(SimulationDTO));
 
-                var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
-                    .Include(_ => _.SimulationUserJoins)
-                    .ThenInclude(_ => _.User)
-                    .SingleOrDefault(_ => _.Id == dto.Id);
-
                 // Assert
-                Assert.NotNull(simulationEntity);
-                Assert.Equal(dto.Users[0].UserId, simulationEntity.CreatedBy);
+                var timer = new Timer {Interval = 5000};
+                timer.Elapsed += delegate
+                {
+                    var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
+                        .Include(_ => _.SimulationUserJoins)
+                        .ThenInclude(_ => _.User)
+                        .SingleOrDefault(_ => _.Id == dto.Id);
 
-                var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
-                Assert.Single(simulationUsers);
-                Assert.Equal(dto.Users[0].UserId, simulationUsers[0].UserId);
+                    Assert.NotNull(simulationEntity);
+                    Assert.Equal(dto.Users[0].UserId, simulationEntity.CreatedBy);
+
+                    var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
+                    Assert.Single(simulationUsers);
+                    Assert.Equal(dto.Users[0].UserId, simulationUsers[0].UserId);
+                };
             }
             finally
             {
@@ -420,7 +426,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Assert.NotNull(okObjResult.Value);
                 var dto = (SimulationDTO)Convert.ChangeType(okObjResult.Value, typeof(SimulationDTO));
 
-                var originalSimulation = _testHelper.UnitOfWork.Context.Simulation
+                var timer = new Timer {Interval = 5000};
+                timer.Elapsed += delegate
+                {
+                    var originalSimulation = _testHelper.UnitOfWork.Context.Simulation
                     .Include(_ => _.AnalysisMethod)
                     .ThenInclude(_ => _.Benefit)
                     .Include(_ => _.AnalysisMethod)
@@ -502,6 +511,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Assert.Equal(clonedSimulationUsers.Count, originalSimulationUsers.Count);
                 Assert.NotEqual(clonedSimulationUsers[0].SimulationId, originalSimulationUsers[0].SimulationId);
                 Assert.Equal(clonedSimulationUsers[0].IsOwner, originalSimulationUsers[0].IsOwner);
+                };
             }
             finally
             {

@@ -10,11 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void GetSimulationAnalysisMethod(Simulation simulation);
 
-        AnalysisMethodDTO GetPermittedAnalysisMethod(Guid simulationId);
-
         AnalysisMethodDTO GetAnalysisMethod(Guid simulationId);
-
-        void UpsertPermittedAnalysisMethod(Guid simulationId, AnalysisMethodDTO dto);
 
         void UpsertAnalysisMethod(Guid simulationId, AnalysisMethodDTO dto);
     }

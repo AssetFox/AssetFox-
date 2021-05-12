@@ -16,7 +16,7 @@ namespace BridgeCareCore.Security
     public class EsecSecurity : IEsecSecurity
     {
         private readonly RsaSecurityKey _esecPublicKey;
-        private readonly string _security;
+        private readonly string _securityType;
         private readonly IConfiguration _config;
 
         public UserEntity UserEntity { get; set; }
@@ -31,7 +31,7 @@ namespace BridgeCareCore.Security
         {
             _revokedTokens = new ConcurrentDictionary<string, long>();
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            _security = _config.GetSection("Security").Value;
+            _securityType = _config.GetSection("SecurityType").Value;
             _esecPublicKey = SecurityFunctions.GetPublicKey(_config.GetSection("EsecConfig"));
         }
 
@@ -80,7 +80,7 @@ namespace BridgeCareCore.Security
 
             var decodedToken = DecodeToken(idToken);
 
-            if (_security == SecurityConstants.Security.Esec)
+            if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
                 var roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
                 if (roleStrings.Count == 0)
@@ -96,7 +96,7 @@ namespace BridgeCareCore.Security
                 };
             }
 
-            if (_security == SecurityConstants.Security.B2C)
+            if (_securityType == SecurityConstants.SecurityTypes.B2C)
             {
                 return new UserInfo
                 {
@@ -141,7 +141,7 @@ namespace BridgeCareCore.Security
 
             var handler = new JwtSecurityTokenHandler();
 
-            if (_security == SecurityConstants.Security.Esec)
+            if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
                 validationParameters.IssuerSigningKey = _esecPublicKey;
 

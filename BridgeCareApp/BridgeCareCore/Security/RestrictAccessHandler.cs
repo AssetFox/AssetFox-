@@ -17,9 +17,9 @@ namespace BridgeCareCore.Security
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context,
             UserHasAllowedRoleRequirement requirement)
         {
-            var security = _config.GetSection("Security").Value;
+            var securityType = _config.GetSection("SecurityType").Value;
 
-            if (security == SecurityConstants.Security.Esec)
+            if (securityType == SecurityConstants.SecurityTypes.Esec)
             {
                 if (!context.User.HasClaim(_ => _.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"))
                 {
@@ -37,7 +37,7 @@ namespace BridgeCareCore.Security
                 });
             }
 
-            if (security == SecurityConstants.Security.B2C)
+            if (securityType == SecurityConstants.SecurityTypes.B2C)
             {
                 context.Succeed(requirement);
             }

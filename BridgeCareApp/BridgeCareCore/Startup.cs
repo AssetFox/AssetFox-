@@ -58,9 +58,9 @@ namespace BridgeCareCore
                 .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com", "https://iam-demo.net/");
             }));
 
-            var security = Configuration.GetSection("Security").Value;
+            var securityType = Configuration.GetSection("SecurityType").Value;
 
-            if (security == SecurityConstants.Security.Esec)
+            if (securityType == SecurityConstants.SecurityTypes.Esec)
             {
                 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
@@ -77,7 +77,7 @@ namespace BridgeCareCore
                     });
             }
 
-            if (security == SecurityConstants.Security.B2C)
+            if (securityType == SecurityConstants.SecurityTypes.B2C)
             {
                 services.AddAuthentication(AzureADB2CDefaults.BearerAuthenticationScheme)
                     .AddAzureADB2CBearer(options => Configuration.Bind("AzureAdB2C", options));

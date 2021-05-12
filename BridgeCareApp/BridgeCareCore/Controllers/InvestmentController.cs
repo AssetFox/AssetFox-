@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
@@ -16,33 +18,27 @@ namespace BridgeCareCore.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class InvestmentController : HubControllerBase
+    public class InvestmentController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IReadOnlyDictionary<string, InvestmentUpsertMethod> _investmentUpsertMethods;
 
-        public InvestmentController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService) : base(hubService)
-        {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
+        public InvestmentController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _investmentUpsertMethods = CreateUpsertMethods();
-        }
 
         private Dictionary<string, InvestmentUpsertMethod> CreateUpsertMethods()
         {
             void UpsertAny(Guid simulationId, UpsertInvestmentDataDTO data)
             {
-                _unitOfWork.BudgetRepo.UpsertBudgetLibrary(data.BudgetLibrary, simulationId);
-                _unitOfWork.BudgetRepo.UpsertOrDeleteBudgets(data.BudgetLibrary.Budgets, data.BudgetLibrary.Id);
-                _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(data.InvestmentPlan, simulationId);
+                UnitOfWork.BudgetRepo.UpsertBudgetLibrary(data.BudgetLibrary, simulationId);
+                UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(data.BudgetLibrary.Budgets, data.BudgetLibrary.Id);
+                UnitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(data.InvestmentPlan, simulationId);
             }
 
             void UpsertPermitted(Guid simulationId, UpsertInvestmentDataDTO data)
             {
-                _unitOfWork.BudgetRepo.UpsertPermitted(simulationId, data.BudgetLibrary);
-                _unitOfWork.InvestmentPlanRepo.UpsertPermitted(simulationId, data.InvestmentPlan);
+                CheckUserSimulationModifyAuthorization(simulationId);
+                UpsertAny(simulationId, data);
             }
 
             return new Dictionary<string, InvestmentUpsertMethod>
@@ -63,10 +59,10 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    var budgetLibraries = _unitOfWork.BudgetRepo
+                    var budgetLibraries = UnitOfWork.BudgetRepo
                         .BudgetLibrariesWithBudgets();
 
-                    var scenarioInvestmentPlan = _unitOfWork.InvestmentPlanRepo
+                    var scenarioInvestmentPlan = UnitOfWork.InvestmentPlanRepo
                         .ScenarioInvestmentPlan(simulationId);
                     return new InvestmentDTO
                     {
@@ -79,7 +75,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 throw;
             }
         }
@@ -91,28 +87,24 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
-                _unitOfWork.SetUser(userInfo.Name);
-
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _investmentUpsertMethods[userInfo.Role](simulationId, data);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    _investmentUpsertMethods[UserInfo.Role](simulationId, data);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                _unitOfWork.Rollback();
+                UnitOfWork.Rollback();
                 return Unauthorized();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 throw;
             }
         }
@@ -126,17 +118,17 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _unitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 throw;
             }
         }
@@ -148,13 +140,13 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _unitOfWork.BudgetRepo
+                var result = await Task.Factory.StartNew(() => UnitOfWork.BudgetRepo
                     .ScenarioSimpleBudgetDetails(simulationId));
                 return Ok(result);
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 throw;
             }
         }

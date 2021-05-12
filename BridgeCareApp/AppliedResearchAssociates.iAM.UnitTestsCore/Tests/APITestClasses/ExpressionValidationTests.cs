@@ -32,8 +32,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
             _service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());
-            _controller = new ExpressionValidationController(_service, _testHelper.MockHubService.Object);
+            _controller = new ExpressionValidationController(_service, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
         private AttributeEntity NumericAttribute { get; set; }

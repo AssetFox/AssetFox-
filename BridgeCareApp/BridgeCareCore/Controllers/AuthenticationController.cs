@@ -6,11 +6,12 @@ using System.Net.Http.Headers;
 using System.Security.Authentication;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Models;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -19,19 +20,13 @@ namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthenticationController : HubControllerBase
+    public class AuthenticationController : BridgeCareCoreBaseController
     {
         private static IConfigurationSection _esecConfig;
-        private static IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public AuthenticationController(IConfiguration config, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork
-        , IHubService hubService) : base(hubService)
-        {
+        public AuthenticationController(IConfiguration config, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _esecConfig = config?.GetSection("EsecConfig") ?? throw new ArgumentNullException(nameof(config));
-            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        }
 
         /// <summary>
         ///     API endpoint for fetching user info from ESEC using the OpenID Connect protocol
@@ -52,7 +47,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }
@@ -62,14 +57,14 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfWork.BeginTransaction();
-                _unitOfWork.UserRepo.AddUser(SecurityFunctions.ParseLdap(userInfo.Sub)[0],
+                UnitOfWork.BeginTransaction();
+                UnitOfWork.UserRepo.AddUser(SecurityFunctions.ParseLdap(userInfo.Sub)[0],
                     SecurityFunctions.ParseLdap(userInfo.Roles)[0]);
-                _unitOfWork.Commit();
+                UnitOfWork.Commit();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
+                UnitOfWork.Rollback();
                 throw;
             }
         }
@@ -102,17 +97,6 @@ namespace BridgeCareCore.Controllers
 
             return responseTask.Result.Content.ReadAsStringAsync().Result;
         }
-
-        /// <summary>
-        ///     Fetches user info as a dictionary
-        /// </summary>
-        /// <param name="token">Access token</param>
-        /// <returns>User info dictionary</returns>
-        public static Dictionary<string, string> GetUserInfoDictionary(string token) =>
-            JsonConvert.DeserializeObject<Dictionary<string, string>>(GetUserInfoString(token));
-
-        public static UserInfo GetUserInformation(Dictionary<string, string> userInfoDictionary) =>
-            _esecSecurity.GetUserInformation(userInfoDictionary);
 
         /// <summary>
         ///     API endpoint for fetching ID and Access tokens from ESEC using the OpenID Connect protocol
@@ -158,7 +142,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }
@@ -204,7 +188,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
 
@@ -256,7 +240,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }
@@ -274,12 +258,12 @@ namespace BridgeCareCore.Controllers
             {
                 // A JWT is too large to store in the URL, so it is passed in the authorization header.
                 string idToken = Request.Headers["Authorization"];
-                _esecSecurity.RevokeToken(idToken);
+                EsecSecurity.RevokeToken(idToken);
                 return Ok();
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }

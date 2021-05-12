@@ -400,3 +400,5 @@ iAM-legacy/DatabaseManager.dll
 BridgeCareApp/BridgeCareCore/coreConnection.json
 BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/testConnections.json
 BridgeCareApp/BridgeCareCore/coreConnection.Development.json
+/BridgeCareApp/BridgeCareCore/metaData.json
+/BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/MetaData/AttributeMetaData/metaData.json

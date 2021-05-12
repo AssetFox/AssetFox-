@@ -3,6 +3,7 @@
     "version": "v2.0.0-beta1",
     "private": true,
     "description": "BridgeCare",
+    "security": "B2C",
     "author": {
         "name": "Applied Research Associates"
     },
@@ -29,6 +30,7 @@
         "jquery": "^3.4.1",
         "js-file-download": "0.4.7",
         "moment": "^2.24.0",
+        "msal": "^1.4.10",
         "popper.js": "^1.15.0",
         "ramda": "0.26.1",
         "socket.io-client": "^2.2.0",

@@ -2,28 +2,25 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CriterionLibraryController : HubControllerBase
+    public class CriterionLibraryController : BridgeCareCoreBaseController
     {
         private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public CriterionLibraryController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService) : base(hubService)
-        {
-            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        }
+        public CriterionLibraryController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
         [HttpGet]
         [Route("GetCriterionLibraries")]
@@ -32,12 +29,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfWork.CriterionLibraryRepo.CriterionLibraries();
+                var result = await UnitOfWork.CriterionLibraryRepo.CriterionLibraries();
                 return Ok(result);
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
                 throw;
             }
         }
@@ -49,21 +46,19 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
-
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _unitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
                 throw;
             }
         }
@@ -77,16 +72,16 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _unitOfWork.CriterionLibraryRepo.DeleteCriterionLibrary(libraryId);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.CriterionLibraryRepo.DeleteCriterionLibrary(libraryId);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
                 throw;
             }
         }

@@ -21,11 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         SimulationDTO CloneSimulation(Guid simulationId);
 
-        void UpdatePermittedSimulation(SimulationDTO dto);
-
         void UpdateSimulation(SimulationDTO dto);
-
-        void DeletePermittedSimulation(Guid simulationId);
 
         void DeleteSimulation(Guid simulationId);
     }

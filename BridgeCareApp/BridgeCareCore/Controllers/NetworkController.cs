@@ -5,27 +5,25 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class NetworkController : HubControllerBase
+    public class NetworkController : BridgeCareCoreBaseController
     {
         private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public NetworkController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService) : base(hubService)
-        {
-            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        }
+
+        public NetworkController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
         [HttpGet]
         [Route("GetAllNetworks")]
@@ -34,12 +32,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await _unitOfWork.NetworkRepo.Networks();
+                var result = await UnitOfWork.NetworkRepo.Networks();
                 return Ok(result);
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Network error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Network error::{e.Message}");
                 throw;
             }
         }
@@ -51,12 +49,10 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
-
-               var result = await Task.Factory.StartNew(() =>
+                var result = await Task.Factory.StartNew(() =>
                 {
                     // get network definition attribute from json file
-                    var networkSettings = _unitOfWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
+                    var networkSettings = UnitOfWork.AttributeMetaDataRepo.GetNetworkDefinitionAttribute();
 
                     // throw an exception if not network definition attribute is present
                     if (networkSettings.Attribute == null || string.IsNullOrEmpty(networkSettings.DefaultEquation))
@@ -70,7 +66,7 @@ namespace BridgeCareCore.Controllers
                     network.Name = networkName;
 
                     // insert network domain data into the data source
-                    _unitOfWork.NetworkRepo.CreateNetwork(network);
+                    UnitOfWork.NetworkRepo.CreateNetwork(network);
 
                     // [TODO] Create DTO to return network information necessary to be stored in the UI
                     // for future reference.
@@ -81,7 +77,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Network error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Network error::{e.Message}");
                 throw;
             }
         }
@@ -93,13 +89,11 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
-
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _unitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.BenefitQuantifierRepo.UpsertBenefitQuantifier(dto);
+                    UnitOfWork.Commit();
                 });
 
 
@@ -107,8 +101,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Network error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Network error::{e.Message}");
                 throw;
             }
         }

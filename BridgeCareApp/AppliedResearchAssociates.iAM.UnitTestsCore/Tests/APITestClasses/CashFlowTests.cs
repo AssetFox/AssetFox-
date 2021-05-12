@@ -27,7 +27,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
-            _controller = new CashFlowController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork, _testHelper.MockHubService.Object);
+            _testHelper.SetupDefaultHttpContext();
+            _controller = new CashFlowController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
         public CashFlowRuleLibraryEntity TestCashFlowRuleLibrary { get; } = new CashFlowRuleLibraryEntity

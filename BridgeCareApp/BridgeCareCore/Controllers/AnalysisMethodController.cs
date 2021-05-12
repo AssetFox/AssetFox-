@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
@@ -17,18 +19,14 @@ namespace BridgeCareCore.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class AnalysisMethodController : HubControllerBase
+    public class AnalysisMethodController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IReadOnlyDictionary<string, AnalysisMethodGetMethod> _analysisMethodGetMethods;
         private readonly IReadOnlyDictionary<string, AnalysisMethodUpsertMethod> _analysisMethodUpsertMethods;
 
-        public AnalysisMethodController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService) : base(hubService)
+        public AnalysisMethodController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _esecSecurity = esecSecurity;
-            _unitOfWork = unitOfWork;
             _analysisMethodGetMethods = CreateGetMethods();
             _analysisMethodUpsertMethods = CreateUpsertMethods();
         }
@@ -36,10 +34,13 @@ namespace BridgeCareCore.Controllers
         private Dictionary<string, AnalysisMethodGetMethod> CreateGetMethods()
         {
             AnalysisMethodDTO GetAny(Guid simulationId) =>
-                _unitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationId);
+                UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationId);
 
-            AnalysisMethodDTO GetPermitted(Guid simulationId) =>
-                _unitOfWork.AnalysisMethodRepo.GetPermittedAnalysisMethod(simulationId);
+            AnalysisMethodDTO GetPermitted(Guid simulationId)
+            {
+                CheckUserSimulationReadAuthorization(simulationId);
+                return GetAny(simulationId);
+            }
 
             return new Dictionary<string, AnalysisMethodGetMethod>
             {
@@ -53,10 +54,13 @@ namespace BridgeCareCore.Controllers
         private Dictionary<string, AnalysisMethodUpsertMethod> CreateUpsertMethods()
         {
             void UpsertAny(Guid simulationId, AnalysisMethodDTO dto) =>
-                _unitOfWork.AnalysisMethodRepo.UpsertAnalysisMethod(simulationId, dto);
+                UnitOfWork.AnalysisMethodRepo.UpsertAnalysisMethod(simulationId, dto);
 
-            void UpsertPermitted(Guid simulationId, AnalysisMethodDTO dto) =>
-                _unitOfWork.AnalysisMethodRepo.UpsertPermittedAnalysisMethod(simulationId, dto);
+            void UpsertPermitted(Guid simulationId, AnalysisMethodDTO dto)
+            {
+                CheckUserSimulationModifyAuthorization(simulationId);
+                UpsertAny(simulationId, dto);
+            }
 
             return new Dictionary<string, AnalysisMethodUpsertMethod>
             {
@@ -74,17 +78,14 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
-                _unitOfWork.SetUser(userInfo.Name);
-
                 var result = await Task.Factory.StartNew(() =>
-                    _analysisMethodGetMethods[userInfo.Role](simulationId));
+                    _analysisMethodGetMethods[UserInfo.Role](simulationId));
+
                 return Ok(result);
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Analysis Method error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Analysis Method error::{e.Message}");
                 throw;
             }
         }
@@ -96,23 +97,19 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
-                _unitOfWork.SetUser(userInfo.Name);
-
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _analysisMethodUpsertMethods[userInfo.Role](simulationId, dto);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    _analysisMethodUpsertMethods[UserInfo.Role](simulationId, dto);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Analysis Method error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Analysis Method error::{e.Message}");
                 throw;
             }
         }

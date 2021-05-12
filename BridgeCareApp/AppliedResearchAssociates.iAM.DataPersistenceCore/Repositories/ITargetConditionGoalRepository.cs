@@ -13,8 +13,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<TargetConditionGoalLibraryDTO> TargetConditionGoalLibrariesWithTargetConditionGoals();
 
-        void UpsertPermitted(Guid simulationId, TargetConditionGoalLibraryDTO dto);
-
         void UpsertTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto, Guid simulationId);
 
         void UpsertOrDeleteTargetConditionGoals(List<TargetConditionGoalDTO> targetConditionGoals, Guid libraryId);

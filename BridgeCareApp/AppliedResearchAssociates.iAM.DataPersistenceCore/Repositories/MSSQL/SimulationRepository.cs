@@ -296,22 +296,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return simulationToClone.ToDto(_unitOfWork.UserEntity);
         }
 
-        public void UpdatePermittedSimulation(SimulationDTO dto)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == dto.Id))
-            {
-                throw new RowNotInTableException($"No simulation found having id {dto.Id}");
-            }
-
-            if (!_unitOfWork.Context.Simulation.Any(_ =>
-                _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
-            {
-                throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
-            }
-
-            UpdateSimulation(dto);
-        }
-
         public void UpdateSimulation(SimulationDTO dto)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == dto.Id))
@@ -333,22 +317,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(),
                     _unitOfWork.UserEntity?.Id);
             }
-        }
-
-        public void DeletePermittedSimulation(Guid simulationId)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
-            }
-
-            if (!_unitOfWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
-            {
-                throw new UnauthorizedAccessException("You are not authorized to modify the simulation.");
-            }
-
-            DeleteSimulation(simulationId);
         }
 
         public void DeleteSimulation(Guid simulationId)

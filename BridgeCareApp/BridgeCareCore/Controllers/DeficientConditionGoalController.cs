@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
@@ -16,33 +18,29 @@ namespace BridgeCareCore.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class DeficientConditionGoalController : HubControllerBase
+    public class DeficientConditionGoalController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
-
         private readonly IReadOnlyDictionary<string, DeficientConditionGoalUpsertMethod>
             _deficientConditionGoalUpsertMethods;
 
-        public DeficientConditionGoalController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService) : base(hubService)
-        {
-            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public DeficientConditionGoalController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _deficientConditionGoalUpsertMethods = CreateUpsertMethods();
-        }
 
         private Dictionary<string, DeficientConditionGoalUpsertMethod> CreateUpsertMethods()
         {
             void UpsertAny(Guid simulationId, DeficientConditionGoalLibraryDTO dto)
             {
-                _unitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibrary(dto, simulationId);
-                _unitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(
+                UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibrary(dto, simulationId);
+                UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(
                     dto.DeficientConditionGoals, dto.Id);
             }
 
-            void UpsertPermitted(Guid simulationId, DeficientConditionGoalLibraryDTO dto) =>
-                _unitOfWork.DeficientConditionGoalRepo.UpsertPermitted(simulationId, dto);
+            void UpsertPermitted(Guid simulationId, DeficientConditionGoalLibraryDTO dto)
+            {
+                CheckUserSimulationModifyAuthorization(simulationId);
+                UpsertAny(simulationId, dto);
+            }
 
             return new Dictionary<string, DeficientConditionGoalUpsertMethod>
             {
@@ -60,13 +58,13 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _unitOfWork.DeficientConditionGoalRepo
+                var result = await Task.Factory.StartNew(() => UnitOfWork.DeficientConditionGoalRepo
                     .DeficientConditionGoalLibrariesWithDeficientConditionGoals());
                 return Ok(result);
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
                 throw;
             }
         }
@@ -78,28 +76,24 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
-                _unitOfWork.SetUser(userInfo.Name);
-
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _deficientConditionGoalUpsertMethods[userInfo.Role](simulationId, dto);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    _deficientConditionGoalUpsertMethods[UserInfo.Role](simulationId, dto);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                _unitOfWork.Rollback();
+                UnitOfWork.Rollback();
                 return Unauthorized();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
                 throw;
             }
         }
@@ -113,17 +107,17 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _unitOfWork.DeficientConditionGoalRepo.DeleteDeficientConditionGoalLibrary(libraryId);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.DeficientConditionGoalRepo.DeleteDeficientConditionGoalLibrary(libraryId);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
                 throw;
             }
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.SqlServer.Management.Smo;
 using Moq;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
@@ -41,7 +43,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
 
         public Mock<HubService> MockHubService { get; }
 
-        public Mock<IHubContext<BridgeCareHub>> MockHubContext { get; set; }
+        public Mock<IHubContext<BridgeCareHub>> MockHubContext { get; }
+
+        public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; }
 
         public TestHelper()
         {
@@ -63,6 +67,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
                     Name = "b-bamsadmin", Role = "PD-BAMS-PlanningPartner", Email = "jmalmberg@ara.com"
                 });
 
+            MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+
             Logger = new LogNLog();
 
             MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
@@ -78,6 +84,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             UnitOfWork.Context.Database.EnsureDeleted();
             UnitOfWork.Context.Database.EnsureCreated();
         }
+
+        public void SetupDefaultHttpContext()
+        {
+            var context = new DefaultHttpContext();
+            AddAuthorizationHeader(context);
+            MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+        }
+
+        public void AddAuthorizationHeader(DefaultHttpContext context) =>
+            context.Request.Headers.Add("Authorization", "Bearer abc123");
 
         public NetworkEntity TestNetwork { get; } = new NetworkEntity
         {

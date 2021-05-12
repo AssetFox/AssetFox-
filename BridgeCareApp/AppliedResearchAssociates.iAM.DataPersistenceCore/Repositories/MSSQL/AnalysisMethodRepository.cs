@@ -167,22 +167,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .FillSimulationAnalysisMethod(simulation);
         }
 
-        public AnalysisMethodDTO GetPermittedAnalysisMethod(Guid simulationId)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
-            }
-
-            if (_unitOfWork.UserEntity == null || !_unitOfWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id)))
-            {
-                throw new UnauthorizedAccessException("You are not authorized to view this simulation analysis method.");
-            }
-
-            return GetAnalysisMethod(simulationId);
-        }
-
         public AnalysisMethodDTO GetAnalysisMethod(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -213,22 +197,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Single(_ => _.SimulationId == simulationId)
                 .ToDto();
-        }
-
-        public void UpsertPermittedAnalysisMethod(Guid simulationId, AnalysisMethodDTO dto)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
-            }
-
-            if (_unitOfWork.UserEntity == null || !_unitOfWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
-            {
-                throw new UnauthorizedAccessException("You are not authorized to modify this simulation analysis method.");
-            }
-
-            UpsertAnalysisMethod(simulationId, dto);
         }
 
         public void UpsertAnalysisMethod(Guid simulationId, AnalysisMethodDTO dto)

@@ -1,12 +1,15 @@
 import {UserInfo} from '@/shared/models/iAM/authentication';
 import {parseLDAP} from './parse-ldap';
+import authenticationModule from '@/store-modules/authentication.module';
 
 export const getUserInfo = () => {
     return JSON.parse(localStorage.getItem('UserInfo') as string) as UserInfo;
 };
 
 export const getUserName = () => {
-    return parseLDAP(getUserInfo().sub)[0];
+    return authenticationModule.state.securityType === authenticationModule.state.pennDotSecurityType
+      ? parseLDAP(getUserInfo().sub)[0]
+      : localStorage.getItem('LoggedInUser') as string;
 };
 
 export const getUserRoles = () => {

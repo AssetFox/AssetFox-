@@ -2,28 +2,25 @@ using System;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class InventoryController : HubControllerBase
+    public class InventoryController : BridgeCareCoreBaseController
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private readonly IEsecSecurity _esecSecurity;
         private readonly IMaintainableAssetRepository _maintainableAssetRepository;
 
-        public InventoryController(UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IEsecSecurity esecSecurity, IMaintainableAssetRepository maintainableAssetRepository) : base(hubService)
-        {
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _esecSecurity = esecSecurity;
+        public InventoryController(IMaintainableAssetRepository maintainableAssetRepository, IEsecSecurity esecSecurity,
+            UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) :
+            base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _maintainableAssetRepository = maintainableAssetRepository;
-        }
 
         [HttpGet]
         [Route("GetInventory")]
@@ -34,11 +31,11 @@ namespace BridgeCareCore.Controllers
 
             //var result = await Task.Factory.StartNew(() =>
             //{
-            //    _unitOfWork.BeginTransaction();
+            //    UnitOfWork.BeginTransaction();
             //    var userCriteria =
-            //        _unitOfWork.UserCriteriaRepo.GetOwnUserCriteria(userInfo.ToDto(),
+            //        UnitOfWork.UserCriteriaRepo.GetOwnUserCriteria(userInfo.ToDto(),
             //            SecurityConstants.Role.BAMSAdmin);
-            //    _unitOfWork.Commit();
+            //    UnitOfWork.Commit();
             //    return userCriteria;
             //});
 

@@ -25,8 +25,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
             _controller = new AnalysisMethodController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object);
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
         public AnalysisMethodEntity TestAnalysis { get; } = new AnalysisMethodEntity

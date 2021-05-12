@@ -1,31 +1,25 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserCriteriaController : HubControllerBase
+    public class UserCriteriaController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-
-        public UserCriteriaController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IUserCriteriaRepository repo) : base(hubService)
-        {
-            _esecSecurity = esecSecurity;
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        }
+        public UserCriteriaController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
         [HttpGet]
         [Route("GetUserCriteria")]
@@ -34,15 +28,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    var userCriteria =
-                        _unitOfWork.UserCriteriaRepo.GetOwnUserCriteria(userInfo.ToDto(),
-                            SecurityConstants.Role.BAMSAdmin);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    var userCriteria = UnitOfWork.UserCriteriaRepo
+                        .GetOwnUserCriteria(UserInfo.ToDto(), SecurityConstants.Role.BAMSAdmin);
+                    UnitOfWork.Commit();
                     return userCriteria;
                 });
 
@@ -50,7 +41,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
                 throw;
             }
         }
@@ -62,12 +54,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _unitOfWork.UserCriteriaRepo.GetAllUserCriteria());
+                var result = await Task.Factory.StartNew(() => UnitOfWork.UserCriteriaRepo.GetAllUserCriteria());
                 return Ok(result);
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
                 throw;
             }
         }
@@ -79,20 +71,19 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
-
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _unitOfWork.UserCriteriaRepo.UpsertUserCriteria(userCriteria);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.UserCriteriaRepo.UpsertUserCriteria(userCriteria);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
                 throw;
             }
         }
@@ -104,20 +95,19 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
-
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _unitOfWork.UserCriteriaRepo.RevokeUserAccess(userCriteriaId);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.UserCriteriaRepo.RevokeUserAccess(userCriteriaId);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
                 throw;
             }
         }
@@ -131,16 +121,17 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _unitOfWork.UserCriteriaRepo.DeleteUser(userId);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.UserCriteriaRepo.DeleteUser(userId);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"User Criteria error::{e.Message}");
                 throw;
             }
         }

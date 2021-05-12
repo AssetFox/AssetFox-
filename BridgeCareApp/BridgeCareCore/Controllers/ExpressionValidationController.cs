@@ -1,23 +1,27 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Models;
 using BridgeCareCore.Models.Validation;
+using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ExpressionValidationController : HubControllerBase
+    public class ExpressionValidationController : BridgeCareCoreBaseController
     {
         private readonly ExpressionValidationService _expressionValidationService;
 
         public ExpressionValidationController(ExpressionValidationService expressionValidationService,
-            IHubService hubService) : base(hubService) =>
+            IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _expressionValidationService = expressionValidationService ??
                                            throw new ArgumentNullException(nameof(expressionValidationService));
 
@@ -33,7 +37,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Expression Validation error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Expression Validation error::{e.Message}");
                 throw;
             }
         }
@@ -51,7 +55,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Expression Validation error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Expression Validation error::{e.Message}");
                 throw;
             }
         }

@@ -26,8 +26,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
             _controller = new TargetConditionGoalController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object);
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
         public TargetConditionGoalLibraryEntity TestTargetConditionGoalLibrary { get; } = new TargetConditionGoalLibraryEntity

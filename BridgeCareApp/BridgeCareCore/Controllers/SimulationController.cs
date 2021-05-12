@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
@@ -18,21 +20,17 @@ namespace BridgeCareCore.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class SimulationController : HubControllerBase
+    public class SimulationController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly ISimulationAnalysis _simulationAnalysis;
 
         private readonly IReadOnlyDictionary<string, SimulationUpdateMethod> _simulationUpdateMethods;
         private readonly IReadOnlyDictionary<string, SimulationDeleteMethod> _simulationDeleteMethods;
         private readonly IReadOnlyDictionary<string, SimulationRunMethod> _simulationRunMethods;
 
-        public SimulationController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfDataPersistenceWork,
-            ISimulationAnalysis simulationAnalysis, IHubService hubService) : base(hubService)
+        public SimulationController(ISimulationAnalysis simulationAnalysis, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _esecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
-            _unitOfWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
             _simulationUpdateMethods = CreateUpdateMethods();
             _simulationDeleteMethods = CreateDeleteMethods();
@@ -41,9 +39,13 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, SimulationUpdateMethod> CreateUpdateMethods()
         {
-            void UpdateAnySimulation(SimulationDTO dto) => _unitOfWork.SimulationRepo.UpdateSimulation(dto);
+            void UpdateAnySimulation(SimulationDTO dto) => UnitOfWork.SimulationRepo.UpdateSimulation(dto);
 
-            void UpdatePermittedSimulation(SimulationDTO dto) => _unitOfWork.SimulationRepo.UpdatePermittedSimulation(dto);
+            void UpdatePermittedSimulation(SimulationDTO dto)
+            {
+                CheckUserSimulationModifyAuthorization(dto.Id);
+                UpdateAnySimulation(dto);
+            }
 
             return new Dictionary<string, SimulationUpdateMethod>
             {
@@ -56,10 +58,13 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, SimulationDeleteMethod> CreateDeleteMethods()
         {
-            void DeleteAnySimulation(Guid simulationId) => _unitOfWork.SimulationRepo.DeleteSimulation(simulationId);
+            void DeleteAnySimulation(Guid simulationId) => UnitOfWork.SimulationRepo.DeleteSimulation(simulationId);
 
-            void DeletePermittedSimulation(Guid simulationId) =>
-                _unitOfWork.SimulationRepo.DeletePermittedSimulation(simulationId);
+            void DeletePermittedSimulation(Guid simulationId)
+            {
+                CheckUserSimulationModifyAuthorization(simulationId);
+                DeleteAnySimulation(simulationId);
+            }
 
             return new Dictionary<string, SimulationDeleteMethod>
             {
@@ -75,8 +80,11 @@ namespace BridgeCareCore.Controllers
             void RunAnySimulation(Guid networkId, Guid simulationId) =>
                 _simulationAnalysis.CreateAndRun(networkId, simulationId);
 
-            void RunPermittedSimulation(Guid networkId, Guid simulationId) =>
-                _simulationAnalysis.CreateAndRunPermitted(networkId, simulationId);
+            void RunPermittedSimulation(Guid networkId, Guid simulationId)
+            {
+                CheckUserSimulationModifyAuthorization(simulationId);
+                RunAnySimulation(networkId, simulationId);
+            }
 
             return new Dictionary<string, SimulationRunMethod>
             {
@@ -94,12 +102,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _unitOfWork.SimulationRepo.GetAllInNetwork(networkId));
+                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetAllInNetwork(networkId));
                 return Ok(result);
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
                 throw;
             }
         }
@@ -111,24 +119,20 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
-                _unitOfWork.SetUser(userInfo.Name);
-
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _unitOfWork.SimulationRepo.CreateSimulation(networkId, dto);
-                    _unitOfWork.Commit();
-                    return _unitOfWork.SimulationRepo.GetSimulation(dto.Id);
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.SimulationRepo.CreateSimulation(networkId, dto);
+                    UnitOfWork.Commit();
+                    return UnitOfWork.SimulationRepo.GetSimulation(dto.Id);
                 });
 
                 return Ok(result);
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
                 throw;
             }
         }
@@ -140,15 +144,11 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
-                _unitOfWork.SetUser(userInfo.Name);
-
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    var cloneResult = _unitOfWork.SimulationRepo.CloneSimulation(simulationId);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    var cloneResult = UnitOfWork.SimulationRepo.CloneSimulation(simulationId);
+                    UnitOfWork.Commit();
                     return cloneResult;
                 });
 
@@ -156,8 +156,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
                 throw;
             }
         }
@@ -169,29 +169,25 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
-                _unitOfWork.SetUser(userInfo.Name);
-
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _simulationUpdateMethods[userInfo.Role](dto);
-                    _unitOfWork.Commit();
-                    return _unitOfWork.SimulationRepo.GetSimulation(dto.Id);
+                    UnitOfWork.BeginTransaction();
+                    _simulationUpdateMethods[UserInfo.Role](dto);
+                    UnitOfWork.Commit();
+                    return UnitOfWork.SimulationRepo.GetSimulation(dto.Id);
                 });
 
                 return Ok(result);
             }
             catch (UnauthorizedAccessException e)
             {
-                _unitOfWork.Rollback();
+                UnitOfWork.Rollback();
                 return Unauthorized();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
                 throw;
             }
         }
@@ -203,28 +199,24 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
-                _unitOfWork.SetUser(userInfo.Name);
-
                 await Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.BeginTransaction();
-                    _simulationDeleteMethods[userInfo.Role](simulationId);
-                    _unitOfWork.Commit();
+                    UnitOfWork.BeginTransaction();
+                    _simulationDeleteMethods[UserInfo.Role](simulationId);
+                    UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
             {
-                _unitOfWork.Rollback();
+                UnitOfWork.Rollback();
                 return Unauthorized();
             }
             catch (Exception e)
             {
-                _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
                 throw;
             }
         }
@@ -236,18 +228,14 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var userInfo = _esecSecurity.GetUserInformation(Request);
-
-                _unitOfWork.SetUser(userInfo.Name);
-
                 await Task.Factory.StartNew(() =>
-                    _simulationRunMethods[userInfo.Role](networkId, simulationId));
+                    _simulationRunMethods[UserInfo.Role](networkId, simulationId));
 
                 return Ok();
             }
             catch (Exception e)
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
+                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Scenario error::{e.Message}");
                 throw;
             }
         }

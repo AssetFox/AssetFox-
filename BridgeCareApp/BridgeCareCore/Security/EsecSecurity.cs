@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +16,10 @@ namespace BridgeCareCore.Security
     public class EsecSecurity : IEsecSecurity
     {
         private readonly RsaSecurityKey _esecPublicKey;
+        private readonly string _securityType;
+        private readonly IConfiguration _config;
+
+        public UserEntity UserEntity { get; set; }
 
         /// <summary>
         ///     Each key is a token that has been revoked. Its value is the unix timestamp of the
@@ -25,8 +30,9 @@ namespace BridgeCareCore.Security
         public EsecSecurity(IConfiguration config)
         {
             _revokedTokens = new ConcurrentDictionary<string, long>();
-            var esecConfig = config?.GetSection("EsecConfig") ?? throw new ArgumentNullException(nameof(config));
-            _esecPublicKey = SecurityFunctions.GetPublicKey(esecConfig);
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _securityType = _config.GetSection("SecurityType").Value;
+            _esecPublicKey = SecurityFunctions.GetPublicKey(_config.GetSection("EsecConfig"));
         }
 
         /// <summary>
@@ -73,16 +79,34 @@ namespace BridgeCareCore.Security
             }
 
             var decodedToken = DecodeToken(idToken);
-            var roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
-            if (roleStrings.Count == 0)
+
+            if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
-                throw new UnauthorizedAccessException("User has no security roles assigned.");
+                var roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
+                if (roleStrings.Count == 0)
+                {
+                    throw new UnauthorizedAccessException("User has no security roles assigned.");
+                }
+
+                return new UserInfo
+                {
+                    Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],
+                    Role = roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)),
+                    Email = decodedToken.GetClaimValue("email")
+                };
             }
 
-            var role = roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString));
-            var name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0];
-            var email = decodedToken.GetClaimValue("email");
-            return new UserInfo { Name = name, Role = role, Email = email };
+            if (_securityType == SecurityConstants.SecurityTypes.B2C)
+            {
+                return new UserInfo
+                {
+                    Name = decodedToken.GetClaimValue("name"),
+                    Email = decodedToken.GetClaimValue("email"),
+                    Role = SecurityConstants.Role.BAMSAdmin
+                };
+            }
+
+            return new UserInfo { Name = "", Role = "", Email = "" };
         }
 
         /// <summary>
@@ -112,13 +136,21 @@ namespace BridgeCareCore.Security
                 RequireSignedTokens = true,
                 ValidateAudience = false,
                 ValidateIssuer = false,
-                ValidateLifetime = true,
-                IssuerSigningKey = _esecPublicKey
+                ValidateLifetime = true
             };
 
             var handler = new JwtSecurityTokenHandler();
-            handler.ValidateToken(idToken, validationParameters, out var validatedToken);
-            return validatedToken as JwtSecurityToken;
+
+            if (_securityType == SecurityConstants.SecurityTypes.Esec)
+            {
+                validationParameters.IssuerSigningKey = _esecPublicKey;
+
+                handler.ValidateToken(idToken, validationParameters, out var validatedToken);
+                return validatedToken as JwtSecurityToken;
+            }
+
+            var token = handler.ReadJwtToken(idToken);
+            return token;
         }
     }
 }

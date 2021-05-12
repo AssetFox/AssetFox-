@@ -23,6 +23,7 @@ import userModule from '@/store-modules/user.module';
 import unsavedChangesFlagModule from '@/store-modules/unsaved-changes-flag.module';
 import criterionModule from '@/store-modules/criterion-library.module';
 import analysisMethodModule from '@/store-modules/analysis-method.module';
+import azureB2CModule from '@/store-modules/azureB2C.module';
 
 Vue.use(Vuex);
 
@@ -49,6 +50,7 @@ export default new Vuex.Store({
         userModule,
         unsavedChangesFlagModule,
         criterionModule,
-        analysisMethodModule
+        analysisMethodModule,
+        azureB2CModule
     }
 });

@@ -98,26 +98,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertPermitted(Guid simulationId, BudgetPriorityLibraryDTO dto)
-        {
-            if (simulationId != Guid.Empty)
-            {
-                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-                {
-                    throw new RowNotInTableException($"No simulation found having id {dto.Id}");
-                }
-
-                if (!_unitOfWork.Context.Simulation.Any(_ =>
-                    _.Id == dto.Id && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
-                }
-            }
-
-            UpsertBudgetPriorityLibrary(dto, simulationId);
-            UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
-        }
-
         public void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId)
         {
             var budgetPriorityLibraryEntity = dto.ToEntity();

@@ -10,26 +10,28 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.IO;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using BridgeCareCore.Controllers.BaseController;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Security.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReportController : ControllerBase
+    public class ReportController : BridgeCareCoreBaseController
     {
         private readonly IReportGenerator _generator;
-        private readonly IHubContext<BridgeCareHub> _hubContext;
 
-        public ReportController(IReportGenerator generator, IHubContext<BridgeCareHub> hub)
-        {
+        public ReportController(IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _generator = generator ?? throw new ArgumentNullException(nameof(generator));
-            _hubContext = hub ?? throw new ArgumentNullException(nameof(hub));
-        }
 
         [HttpPost]
         [Route("GetHTML/{reportName}")]
         [Authorize]
-        public async Task<IActionResult> GetHTML(string reportName)
+        public async Task<IActionResult> GetHtml(string reportName)
         {
             // NOTE:  This might be useful:  https://weblog.west-wind.com/posts/2013/dec/13/accepting-raw-request-body-content-with-aspnet-web-api
 
@@ -55,7 +57,7 @@ namespace BridgeCareCore.Controllers
             }
 
             // Run the report as long as it does not have any existing errors (i.e., failure on generation)
-            if (report.Errors.Count() == 0)
+            if (!report.Errors.Any())
             {
                 //SendRealTimeMessage($"Running {reportName}.");
                 await report.Run(parameters);
@@ -63,7 +65,7 @@ namespace BridgeCareCore.Controllers
             }
 
             // Handle a completed run with errors
-            if (report.Errors.Count() > 0)
+            if (report.Errors.Any())
             {
                 return CreateErrorListing(report.Errors);
             }
@@ -83,22 +85,19 @@ namespace BridgeCareCore.Controllers
         }
 
         private void SendRealTimeMessage(string message) =>
-            _hubContext
-                .Clients
-                .All
-                .SendAsync(HubConstant.BroadcastError, message);
+            HubService.SendRealTimeMessage(HubConstant.BroadcastError, message);
 
         private IActionResult CreateErrorListing(List<string> errors)
         {
-            var errorHTML = new StringBuilder("<h2>Error Listing</h2><list>");
+            var errorHtml = new StringBuilder("<h2>Error Listing</h2><list>");
             foreach (var item in errors)
             {
-                errorHTML.Append($"<li>{item}</li>");
+                errorHtml.Append($"<li>{item}</li>");
                 SendRealTimeMessage(item);
             }
-            errorHTML.Append("</list>");
+            errorHtml.Append("</list>");
 
-            var returnValue = Content(errorHTML.ToString());
+            var returnValue = Content(errorHtml.ToString());
             returnValue.ContentType = "text/html";
             returnValue.StatusCode = (int?)HttpStatusCode.BadRequest;
             return returnValue;

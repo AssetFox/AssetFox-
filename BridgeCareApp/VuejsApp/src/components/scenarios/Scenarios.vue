@@ -36,7 +36,7 @@
                                         </v-btn>
                                     </td>
                                     <td class='status-min-width'>
-                                        {{ networkDataAssignmentStatus }}
+                                        {{ props.item.status }}
                                         <v-progress-linear v-model='networkDataAssignmentPercentage'
                                                            color='light-green darken-1'
                                                            height='25'
@@ -362,7 +362,7 @@ import {
 import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
 import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
 import { Network } from '@/shared/models/iAM/network';
-import { any, clone, isNil } from 'ramda';
+import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 import CreateNetworkDialog from '@/components/scenarios/scenarios-dialogs/CreateNetworkDialog.vue';
@@ -417,6 +417,7 @@ export default class Scenarios extends Vue {
     @Action('migrateLegacySimulationData') migrateLegacySimulationDataAction: any;
     @Action('updateSimulationAnalysisDetail') updateSimulationAnalysisDetailAction: any;
     @Action('updateSimulationReportDetail') updateSimulationReportDetailAction: any;
+    @Action('updateNetworkRollupDetail') updateNetworkRollupDetailAction: any;
     @Action('selectScenario') selectScenarioAction: any;
 
     /*@Action('rollupNetwork') rollupNetworkAction: any;
@@ -721,7 +722,18 @@ export default class Scenarios extends Vue {
     }
 
     getDataAggregationStatus(data: any) {
-        this.networkDataAssignmentStatus = data.status;
+        const networkRollupDetail: NetworkRollupDetail = data.networkRollupDetail as NetworkRollupDetail;
+        if (any(propEq('id', networkRollupDetail.networkId), this.networks)) {
+            const updatedNetwork: Network = find(propEq('id', networkRollupDetail.networkId), this.networks) as Network;
+            updatedNetwork.status = networkRollupDetail.status;
+
+            this.networks = update(
+                findIndex(propEq('id', updatedNetwork.id), this.networks),
+                updatedNetwork,
+                this.networks
+            );
+        }
+
         this.networkDataAssignmentPercentage = data.percentage;
     }
 

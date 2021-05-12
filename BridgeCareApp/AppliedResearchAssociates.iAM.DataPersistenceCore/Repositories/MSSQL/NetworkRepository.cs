@@ -50,6 +50,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return Task.Factory.StartNew(() => _unitOfWork.Context.Network
                 .Include(_ => _.BenefitQuantifier)
                 .ThenInclude(_ => _.Equation)
+                .Include(_ => _.NetworkRollupDetail)
                 .Select(_ => _.ToDto())
                 .ToList());
         }
@@ -144,6 +145,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.Database.ExecuteSqlRaw(
                 $"DELETE FROM [dbo].[MaintainableAsset] WHERE [dbo].[MaintainableAsset].[NetworkId] = '{DataPersistenceConstants.PennDotNetworkId}'");
             _unitOfWork.Context.SaveChanges();
+        }
+
+        public void UpsertNetworkRollupDetail(Guid networkId, string status)
+        {
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
+            {
+                throw new RowNotInTableException($"No network found having id {networkId}.");
+            }
+
+            var networkRollupDetailEntity = new NetworkRollupDetailEntity {NetworkId = networkId, Status = status};
+
+            _unitOfWork.Context.Upsert(networkRollupDetailEntity, _ => _.NetworkId == networkId,
+                _unitOfWork.UserEntity?.Id);
         }
     }
 }

@@ -1,6 +1,7 @@
 import { HttpTransportType, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { SimulationAnalysisDetail } from '@/shared/models/iAM/simulation-analysis-detail';
 import { SimulationReportDetail } from '@/shared/models/iAM/simulation-report-detail';
+import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 
 export default {
   install(Vue: any) {
@@ -15,8 +16,8 @@ export default {
     const statusHub = new Vue();
     Vue.prototype.$statusHub = statusHub;
 
-    connection.on(Hub.BroadcastType.BroadcastAssignDataStatus, (status, percentage) => {
-      statusHub.$emit(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, { status, percentage });
+    connection.on(Hub.BroadcastType.BroadcastAssignDataStatus, (networkRollupDetail: NetworkRollupDetail, percentage) => {
+      statusHub.$emit(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, { networkRollupDetail, percentage });
     });
 
     connection.on(Hub.BroadcastType.BroadcastSummaryReportGenerationStatus, (simulationReportDetail: SimulationReportDetail) => {
@@ -63,7 +64,8 @@ export const Hub = {
         BroadcastSummaryReportGenerationStatus: 'BroadcastSummaryReportGenerationStatus',
         BroadcastScenarioStatusUpdate: 'BroadcastScenarioStatusUpdate',
         BroadcastSimulationAnalysisDetail: 'BroadcastSimulationAnalysisDetail',
-        BroadcastDataMigration: 'BroadcastDataMigration'
+        BroadcastDataMigration: 'BroadcastDataMigration',
+        BroadcastNetworkRollupDetail: 'BroadcastNetworkRollupDetail'
     },
     BroadcastEventType: {
         BroadcastErrorEvent: 'BroadcastErrorEvent',
@@ -71,6 +73,7 @@ export const Hub = {
         BroadcastSummaryReportGenerationStatusEvent: 'BroadcastSummaryReportGenerationStatusEvent',
         BroadcastScenarioStatusUpdateEvent: 'BroadcastScenarioStatusUpdateEvent',
         BroadcastSimulationAnalysisDetailEvent: 'BroadcastSimulationAnalysisDetailEvent',
-        BroadcastDataMigrationEvent: 'BroadcastDataMigrationEvent'
+        BroadcastDataMigrationEvent: 'BroadcastDataMigrationEvent',
+        BroadcastNetworkRollupDetailEvent: 'BroadcastNetworkRollupDetailEvent'
     }
 };

@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Hubs;
@@ -28,6 +29,7 @@ namespace BridgeCareCore.Controllers
         private int _count;
         private string _status = string.Empty;
         private double _percentage;
+        private Guid _networkId = Guid.Empty;
 
         public AggregationController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfDataPersistenceWork,
             IHubService hubService) : base(hubService)
@@ -43,6 +45,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                _networkId = networkId;
                 _unitOfWork.SetUser(_esecSecurity.GetUserInformation(Request).Name);
 
                 await Task.Factory.StartNew(() =>
@@ -53,8 +56,11 @@ namespace BridgeCareCore.Controllers
                     var attributeData = new List<IAttributeDatum>();
                     var attributeIdsToBeUpdatedWithAssignedData = new List<Guid>();
 
+                    _status = "Preparing";
                     var getResult = Task.Factory.StartNew(() =>
                     {
+                        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+
                         // Get/create configurable attributes
                         var configurationAttributes = _unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
 
@@ -107,7 +113,6 @@ namespace BridgeCareCore.Controllers
                             .Intersect(networkAttributeIds).Distinct().ToList();
                     });
 
-                    _status = "Preparing";
                     CheckCurrentLongRunningTask(getResult);
 
                     var aggregatedResults = new List<IAggregatedResult>();
@@ -115,8 +120,10 @@ namespace BridgeCareCore.Controllers
                     var totalAssets = (double)maintainableAssets.Count;
                     var i = 0.0;
 
+                    _status = "Aggregating";
                     var aggregationResult = Task.Factory.StartNew(() =>
                     {
+                        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
                         // loop over maintainable assets and remove assigned data that has an attribute id
                         // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
                         // that was created
@@ -158,11 +165,13 @@ namespace BridgeCareCore.Controllers
                         }
                     });
 
-                    _status = "Aggregating";
                     CheckCurrentLongRunningTask(aggregationResult);
 
+                    _status = "Saving";
                     var crudResult = Task.Factory.StartNew(() =>
                     {
+                        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+
                         try
                         {
                             _unitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets);
@@ -184,13 +193,15 @@ namespace BridgeCareCore.Controllers
                         }
                     });
 
-                    _status = "Saving";
+
                     CheckCurrentLongRunningTask(crudResult);
 
+                    _status = "Aggregated all network data";
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
                     _unitOfWork.Commit();
 
                     _hubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,
-                        "Aggregated all network data", _percentage);
+                        new NetworkRollupDetailDTO {NetworkId = _networkId, Status = _status}, _percentage);
                 });
 
                 return Ok();
@@ -198,7 +209,10 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _unitOfWork.Rollback();
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus, "Aggregation failed", 0.0);
+                _status = "Aggregation failed";
+                _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                _hubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,
+                    new NetworkRollupDetailDTO {NetworkId = _networkId, Status = _status}, 0.0);
                 _hubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Aggregation error::{e.Message}");
                 throw;
             }
@@ -248,7 +262,7 @@ namespace BridgeCareCore.Controllers
             };
 
             _hubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,
-                message, _percentage);
+                new NetworkRollupDetailDTO {NetworkId = _networkId, Status = message}, _percentage);
         }
     }
 }

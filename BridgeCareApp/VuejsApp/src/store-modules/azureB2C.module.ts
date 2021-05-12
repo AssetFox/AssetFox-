@@ -24,8 +24,8 @@ const actions = {
     await state.app.loginPopup()
       .then((token: any) => {
         if (hasValue(token, 'account') && hasValue(token.account, 'name')) {
-          dispatch('getAzureAccountDetails');
           dispatch('getAzureB2CAccessToken');
+          dispatch('getAzureAccountDetails');
         }
       })
       .catch(async (error: any) => {

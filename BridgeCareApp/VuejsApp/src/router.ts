@@ -7,7 +7,7 @@ import Logout from '@/components/Logout.vue';
 import Home from '@/components/Home.vue';
 import AuthenticationStart from '@/components/authentication/AuthenticationStart.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
-import AuthenticationModule from '@/store-modules/authentication.module';
+import authenticationModule from '@/store-modules/authentication.module';
 
 // Lazily-loaded pages
 const Scenario = () => import(/* webpackChunkName: "scenario" */ '@/components/scenarios/Scenarios.vue');
@@ -198,7 +198,8 @@ const router = new VueRouter({
 const routesToIgnore: string[] = ['AuthenticationStart', 'iAM', 'Authentication'];
 
 router.beforeEach((to: any, from: any, next) => {
-    if (AuthenticationModule.state.securityType === 'B2C' && !hasValue(localStorage.getItem('LoggedInUser')) && routesToIgnore.indexOf(to.name) === -1) {
+    if (authenticationModule.state.securityType === authenticationModule.state.azureSecurityType &&
+      !hasValue(localStorage.getItem('LoggedInUser')) && routesToIgnore.indexOf(to.name) === -1) {
         next('/AuthenticationStart');
     } else {
         next();

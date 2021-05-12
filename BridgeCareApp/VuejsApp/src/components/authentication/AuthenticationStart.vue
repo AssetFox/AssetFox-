@@ -7,14 +7,14 @@
                         <v-card-title>
                             <h3>Beginning Authentication</h3>
                         </v-card-title>
-                        <v-card-text v-if="securityType === 'ESEC'">
+                        <v-card-text v-if="securityType === pennDotSecurityType">
                             You should be redirected to the PennDOT login page shortly. If you are not redirected within
                             5 seconds, press the button below.
                         </v-card-text>
-                        <v-btn v-if="securityType === 'ESEC'" @click="onRedirect" class="v-btn theme--light ara-blue-bg white--text">
+                        <v-btn v-if="securityType === pennDotSecurityType" @click="onRedirect" class="v-btn theme--light ara-blue-bg white--text">
                             Go to login page
                         </v-btn>
-                        <v-card-text v-if="securityType === 'B2C'">
+                        <v-card-text v-if="securityType === azureSecurityType">
                             Please click 'Login' if the login pop-up does not show within ~5 seconds.
                         </v-card-text>
                     </v-card>
@@ -36,12 +36,14 @@
         @State(state => state.authenticationModule.hasRole) hasRole: boolean;
         @State(state => state.authenticationModule.checkedForRole) checkedForRole: boolean;
         @State(state => state.authenticationModule.securityType) securityType: string;
+        @State(state => state.authenticationModule.pennDotSecurityType) pennDotSecurityType: string;
+        @State(state => state.authenticationModule.azureSecurityType) azureSecurityType: string;
 
         @Action('azureB2CLogin') azureB2CLoginAction: any;
 
         @Watch('checkedForRole')
         onCheckedRole() {
-            if (this.checkedForRole && this.securityType === 'ESEC') {
+            if (this.checkedForRole && this.securityType === this.pennDotSecurityType) {
                 if (this.hasRole) {
                     this.$router.push('/Scenarios/');
                 } else {
@@ -58,9 +60,9 @@
         }
 
         mounted() {
-            if (this.securityType === 'ESEC') {
+            if (this.securityType === this.pennDotSecurityType) {
                 this.onRedirect();
-            } else if (this.securityType === 'B2C') {
+            } else if (this.securityType === this.azureSecurityType) {
                 this.onAzureLogin();
             }
         }

@@ -95,22 +95,22 @@
                     <span>{{ username }}</span>
                 </v-toolbar-title>
                 <v-toolbar-title class='white--text' v-if='!authenticated'>
-                    <v-btn v-if="securityType === 'B2C'"
+                    <v-btn v-if="securityType === azureSecurityType"
                            @click='onAzureLogin'
                            class='ara-blue-bg white--text' round>
                         Log In
                     </v-btn>
-                    <v-btn v-if="securityType === 'ESEC'"
+                    <v-btn v-if="securityType === pennDotSecurityType"
                            @click="onNavigate('/AuthenticationStart/')"
                            class='ara-blue-bg white--text' round>
                         Log In
                     </v-btn>
                 </v-toolbar-title>
                 <v-toolbar-title class='white--text' v-if='authenticated'>
-                    <v-btn v-if="securityType === 'B2C'" @click='onAzureLogout' class='ara-blue-bg white--text' round>
+                    <v-btn v-if="securityType === azureSecurityType" @click='onAzureLogout' class='ara-blue-bg white--text' round>
                         Log Out
                     </v-btn>
-                    <v-btn v-if="securityType === 'ESEC'" @click='onLogout' class='ara-blue-bg white--text' round>
+                    <v-btn v-if="securityType === pennDotSecurityType" @click='onLogout' class='ara-blue-bg white--text' round>
                         Log Out
                     </v-btn>
                 </v-toolbar-title>
@@ -153,8 +153,6 @@ import { clone } from 'ramda';
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { Hub } from '@/connectionHub';
-import moment from 'moment';
-import { isEqual } from '@/shared/utils/has-unsaved-changes-helper';
 
 @Component({
     components: { Alert, Spinner },
@@ -166,7 +164,6 @@ export default class AppComponent extends Vue {
     @State(state => state.authenticationModule.username) username: string;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.authenticationModule.refreshing) refreshing: boolean;
-    @State(state => state.authenticationModule.securityType) securityType: string;
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
     @State(state => state.toastrModule.successMessage) successMessage: string;
     @State(state => state.toastrModule.warningMessage) warningMessage: string;
@@ -175,6 +172,9 @@ export default class AppComponent extends Vue {
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.scenarioModule.selectedScenario) stateSelectedScenario: Scenario;
     @State(state => state.announcementModule.packageVersion) packageVersion: string;
+    @State(state => state.authenticationModule.securityType) securityType: string;
+    @State(state => state.authenticationModule.pennDotSecurityType) pennDotSecurityType: string;
+    @State(state => state.authenticationModule.azureSecurityType) azureSecurityType: string;
 
     @Action('refreshTokens') refreshTokensAction: any;
     @Action('checkBrowserTokens') checkBrowserTokensAction: any;
@@ -308,9 +308,9 @@ export default class AppComponent extends Vue {
     onAuthenticationChange() {
         if (this.authenticated && this.hasRole) {
             this.onLogin();
-        } else if (!this.authenticated && this.securityType === 'ESEC') {
+        } else if (!this.authenticated && this.securityType === this.pennDotSecurityType) {
             this.onLogout();
-        } else if (!this.authenticated && this.securityType === 'B2C') {
+        } else if (!this.authenticated && this.securityType === this.azureSecurityType) {
             this.onAzureLogout();
         }
     }
@@ -389,7 +389,7 @@ export default class AppComponent extends Vue {
             }
         });
 
-        if (this.securityType === 'ESEC') {
+        if (this.securityType === this.pennDotSecurityType) {
             // Upon opening the page, and every 30 seconds, check if authentication data
             // has been changed by another tab or window
             this.checkBrowserTokensAction();
@@ -399,11 +399,11 @@ export default class AppComponent extends Vue {
         if (this.authenticated) {
             this.onLogin();
         } else {
-            if (this.securityType === 'ESEC') {
+            if (this.securityType === this.pennDotSecurityType) {
                 this.getUserInfoAction();
             }
 
-            if (this.securityType === 'B2C') {
+            if (this.securityType === this.azureSecurityType) {
                 this.getAzureAccountDetailsAction();
             }
         }

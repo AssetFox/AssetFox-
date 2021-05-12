@@ -9,8 +9,7 @@ module.exports = {
         plugins: [
             new webpack.DefinePlugin({
                 'process.env': {
-                    PACKAGE_VERSION: '"' + version + '"',
-                    SECURITY: '"' + security + '"'
+                    PACKAGE_VERSION: '"' + version + '"'
                 }
             })
         ],

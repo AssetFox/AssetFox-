@@ -16,7 +16,7 @@
 
 <script lang="ts">
     import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
-import Vue from 'vue';
+    import Vue from 'vue';
     import {Component} from 'vue-property-decorator';
     import {Action, State} from 'vuex-class';
 
@@ -24,8 +24,10 @@ import Vue from 'vue';
     export default class Authentication extends Vue {
         @State(state => state.authenticationModule.authenticated) authenticated: boolean;
         @State(state => state.authenticationModule.hasRole) hasRole: boolean;
-        @State(state => state.authenticationModule.securityType) securityType: string;
         @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
+        @State(state => state.authenticationModule.securityType) securityType: string;
+        @State(state => state.authenticationModule.pennDotSecurityType) pennDotSecurityType: string;
+        @State(state => state.authenticationModule.azureSecurityType) azureSecurityType: string;
 
         @Action('setSuccessMessage') setSuccessMessageAction: any;
         @Action('setErrorMessage') setErrorMessageAction: any;
@@ -40,7 +42,7 @@ import Vue from 'vue';
             const code: string = this.$route.query.code as string;
             const state: string = this.$route.query.state as string;
 
-            if (this.securityType === 'ESEC') {
+            if (this.securityType === this.pennDotSecurityType) {
                 // The ESEC login will always redirect the browser to the iam-deploy site.
                 // If the state is set, we know the authentication was started by a local client,
                 // and so we should send the browser back to that client.
@@ -67,7 +69,7 @@ import Vue from 'vue';
                 });
             }
 
-            if (this.securityType === 'B2C') {
+            if (this.securityType === this.azureSecurityType) {
                 this.getAzureAccountDetailsAction();
                 if (!this.authenticated) {
                     this.onAuthenticationFailure();

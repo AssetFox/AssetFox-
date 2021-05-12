@@ -29,13 +29,14 @@
 
     @Component
     export default class Logout extends Vue {
-        @State(state => state.authentication.securityType) securityType: string;
+        @State(state => state.authenticationModule.securityType) securityType: string;
+        @State(state => state.authenticationModule.pennDotSecurityType) pennDotSecurityType: string;
 
         mounted() {
-            if (this.securityType === 'ESEC') {
+            if (this.securityType === this.pennDotSecurityType) {
                 /*
-             * The /iAM/ pages of the penndot deployments fail to set the cookie until they have been refreshed.
-             */
+                 * The /iAM/ pages of the penndot deployments fail to set the cookie until they have been refreshed.
+                 */
                 if (!window.location.hash) {
                     window.location.hash = 'refreshed';
                     window.location.reload(true);

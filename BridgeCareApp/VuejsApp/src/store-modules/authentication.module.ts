@@ -14,7 +14,9 @@ const state = {
   isCWOPA: false,
   username: '',
   refreshing: false,
-  securityType: process.env.SECURITY
+  securityType: 'B2C',
+  pennDotSecurityType: 'ESEC',
+  azureSecurityType: 'B2C'
 };
 
 const mutations = {

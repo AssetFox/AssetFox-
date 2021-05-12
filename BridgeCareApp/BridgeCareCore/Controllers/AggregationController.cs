@@ -7,8 +7,8 @@ using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -17,7 +17,6 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
 namespace BridgeCareCore.Controllers
 {
@@ -25,10 +24,16 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : BridgeCareCoreBaseController
     {
-        private readonly ILog _logger;
+        private int _count;
+        private string _status = string.Empty;
+        private double _percentage;
+        private Guid _networkId = Guid.Empty;
+        private readonly ILog _log;
 
-        public AggregationController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
+        public AggregationController(ILog log, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService, IHttpContextAccessor httpContextAccessor) :
+            base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
+            _log = log ?? throw new ArgumentNullException(nameof(log));
 
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
@@ -37,37 +42,37 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-
+                _networkId = networkId;
 
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
 
-                    var percentage = 0.0;
-                    var configurationAttributes = new List<Attribute>();
                     var maintainableAssets = new List<MaintainableAsset>();
-                    var benefitQuantifierEquation = new BenefitQuantifierDTO();
-                    var networkAttributeIds = new List<Guid>();
                     var attributeData = new List<IAttributeDatum>();
                     var attributeIdsToBeUpdatedWithAssignedData = new List<Guid>();
 
+                    _status = "Preparing";
                     var getResult = Task.Factory.StartNew(() =>
                     {
+                        UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+
                         // Get/create configurable attributes
-                        configurationAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
+                        var configurationAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
 
                         var checkForDuplicateIDs = configurationAttributes.Select(_ => _.Id).ToList();
 
-                        if(checkForDuplicateIDs.Count != checkForDuplicateIDs.Distinct().ToList().Count)
+                        if (checkForDuplicateIDs.Count != checkForDuplicateIDs.Distinct().ToList().Count)
                         {
-                            _logger.Error($"Error : Metadata.json file has duplicate Ids");
+                            _log.Error($"Error : Metadata.json file has duplicate Ids");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Metadata.json file has duplicate Ids");
                             throw new InvalidOperationException();
                         }
+
                         var checkForDuplicateNames = configurationAttributes.Select(_ => _.Name).ToList();
                         if (checkForDuplicateNames.Count != checkForDuplicateNames.Distinct().ToList().Count)
                         {
-                            _logger.Error($"Error : Metadata.json file has duplicate names");
+                            _log.Error($"Error : Metadata.json file has duplicate names");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Metadata.json file has duplicate Names");
                             throw new InvalidOperationException();
                         }
@@ -77,11 +82,9 @@ namespace BridgeCareCore.Controllers
                             .GetAllInNetworkWithAssignedDataAndLocations(networkId)
                             .ToList();
 
-                        // get the network benefit quantifier equation
-                        benefitQuantifierEquation = UnitOfWork.BenefitQuantifierRepo.GetBenefitQuantifier(maintainableAssets.First().NetworkId);
-
                         // Create list of attribute ids we are allowed to update with assigned data.
-                        networkAttributeIds = maintainableAssets.Where(_ => _.AssignedData != null && _.AssignedData.Any())
+                        var networkAttributeIds = maintainableAssets
+                            .Where(_ => _.AssignedData != null && _.AssignedData.Any())
                             .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();
 
                         // create list of attribute data from configuration attributes (exclude attributes
@@ -90,43 +93,33 @@ namespace BridgeCareCore.Controllers
                         try
                         {
                             attributeData = configurationAttributes.Where(_ => !string.IsNullOrEmpty(_.Command))
-                            .Select(AttributeConnectionBuilder.Build)
-                            .SelectMany(AttributeDataBuilder.GetData).ToList();
+                                .Select(AttributeConnectionBuilder.Build)
+                                .SelectMany(AttributeDataBuilder.GetData).ToList();
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
-                            _logger.Error($"While getting data for the attributes (attributes coming from metaData.json file) -  {e.Message}");
+                            _log.Error($"While getting data for the attributes (attributes coming from metaData.json file) -  {e.Message}");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Fetching data for the attributes ::{e.Message}");
                             throw;
                         }
+
                         // get the attribute ids for assigned data that can be deleted (attribute is present
                         // in the data source and meta data file)
                         attributeIdsToBeUpdatedWithAssignedData = configurationAttributes.Select(_ => _.Id)
                             .Intersect(networkAttributeIds).Distinct().ToList();
                     });
 
-                    var count = 0;
-                    while (!getResult.IsCompleted)
-                    {
-                        if (count > 3)
-                        {
-                            count = 0;
-                        }
-
-                        SendCurrentStatusMessage(count, "Preparing", percentage);
-
-                        count++;
-
-                        Thread.Sleep(3000);
-                    }
+                    CheckCurrentLongRunningTask(getResult);
 
                     var aggregatedResults = new List<IAggregatedResult>();
 
                     var totalAssets = (double)maintainableAssets.Count;
                     var i = 0.0;
 
+                    _status = "Aggregating";
                     var aggregationResult = Task.Factory.StartNew(() =>
                     {
+                        UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
                         // loop over maintainable assets and remove assigned data that has an attribute id
                         // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
                         // that was created
@@ -134,7 +127,7 @@ namespace BridgeCareCore.Controllers
                         {
                             if (i % 500 == 0)
                             {
-                                percentage = Math.Round((i / totalAssets) * 100, 1);
+                                _percentage = Math.Round((i / totalAssets) * 100, 1);
                             }
                             i++;
 
@@ -168,30 +161,20 @@ namespace BridgeCareCore.Controllers
                         }
                     });
 
-                    count = 0;
-                    while (!aggregationResult.IsCompleted)
-                    {
-                        if (count > 3)
-                        {
-                            count = 0;
-                        }
+                    CheckCurrentLongRunningTask(aggregationResult);
 
-                        SendCurrentStatusMessage(count, "Aggregating", percentage);
-
-                        count++;
-
-                        Thread.Sleep(3000);
-                    }
-
+                    _status = "Saving";
                     var crudResult = Task.Factory.StartNew(() =>
                     {
+                        UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+
                         try
                         {
                             UnitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets);
                         }
                         catch(Exception e)
                         {
-                            _logger.Error($"Error while filling Assigned Data -  {e.Message}");
+                            _log.Error($"Error while filling Assigned Data -  {e.Message}");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while filling Assigned Data ::{e.Message}");
                             throw;
                         }
@@ -201,7 +184,7 @@ namespace BridgeCareCore.Controllers
                         }
                         catch(Exception e)
                         {
-                            _logger.Error($"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}");
+                            _log.Error($"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while updating MaintainableAssets SpatialWeighting ::{e.Message}");
                             throw;
                         }
@@ -212,31 +195,21 @@ namespace BridgeCareCore.Controllers
                         }
                         catch(Exception e)
                         {
-                            _logger.Error($"Error while adding Aggregated results -  {e.Message}");
+                            _log.Error($"Error while adding Aggregated results -  {e.Message}");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while adding Aggregated results ::{e.Message}");
                             throw;
                         }
                     });
 
-                    count = 0;
-                    while (!crudResult.IsCompleted)
-                    {
-                        if (count > 3)
-                        {
-                            count = 0;
-                        }
 
-                        SendCurrentStatusMessage(count, "Saving", percentage);
+                    CheckCurrentLongRunningTask(crudResult);
 
-                        count++;
-
-                        Thread.Sleep(3000);
-                    }
-
+                    _status = "Aggregated all network data";
+                    UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
                     UnitOfWork.Commit();
 
                     HubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,
-                        "Aggregated all network data", percentage);
+                        new NetworkRollupDetailDTO {NetworkId = _networkId, Status = _status}, _percentage);
                 });
 
                 return Ok();
@@ -244,24 +217,60 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus, "Aggregation failed", 0.0);
+                _status = "Aggregation failed";
+                UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                HubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,
+                    new NetworkRollupDetailDTO {NetworkId = _networkId, Status = _status}, 0.0);
                 HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Aggregation error::{e.Message}");
                 throw;
             }
         }
 
-        private void SendCurrentStatusMessage(int count, string status, double percentage)
+        private void CheckCurrentLongRunningTask(Task currentLongRunningTask)
         {
-            var message = count switch
+            _count = 0;
+            var cts = new CancellationTokenSource();
+
+            var currentStatusMessageTask = CreateCurrentStatusMessageTask(cts.Token);
+
+            while (!currentLongRunningTask.IsCompleted)
             {
-                0 => $"{status}.",
-                1 => $"{status}..",
-                2 => $"{status}...",
-                _ => status
+                if (currentStatusMessageTask.IsCompleted)
+                {
+                    currentStatusMessageTask = CreateCurrentStatusMessageTask(cts.Token);
+                }
+            }
+
+            if (!currentStatusMessageTask.IsCompleted)
+            {
+                cts.Cancel();
+            }
+        }
+
+        private Task CreateCurrentStatusMessageTask(CancellationToken token) =>
+            Task.Run(async () =>
+            {
+                await Task.Delay(3000, token);
+                if (_count > 3)
+                {
+                    _count = 0;
+                }
+                SendCurrentStatusMessage();
+                _count++;
+            }, token);
+
+        private void SendCurrentStatusMessage()
+        {
+            var message = _count switch
+            {
+                0 => $"{_status}.",
+                1 => $"{_status}..",
+                2 => $"{_status}...",
+                _ => _status
             };
 
             HubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,
-                message, percentage);
+                new NetworkRollupDetailDTO {NetworkId = _networkId, Status = message}, _percentage);
         }
     }
 }

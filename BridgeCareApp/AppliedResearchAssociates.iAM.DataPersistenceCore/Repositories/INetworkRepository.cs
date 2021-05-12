@@ -24,5 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         Domains.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true);
 
         void DeleteNetworkData();
+
+        void UpsertNetworkRollupDetail(Guid networkId, string status);
     }
 }

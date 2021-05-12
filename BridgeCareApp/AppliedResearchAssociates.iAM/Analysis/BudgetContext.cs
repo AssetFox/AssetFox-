@@ -11,8 +11,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Budget = budget ?? throw new ArgumentNullException(nameof(budget));
             FirstYearOfAnalysisPeriod = firstYearOfAnalysisPeriod;
 
-            var cumulativeAmount = 0m;
-            CumulativeAmountPerYear = Budget.YearlyAmounts.Select(amount => cumulativeAmount += amount.Value).ToArray();
+            if (budget.InvestmentPlan.ShouldAccumulateUnusedBudgetAmounts)
+            {
+                var cumulativeAmount = 0m;
+                CumulativeAmountPerYear = Budget.YearlyAmounts.Select(amount => cumulativeAmount += amount.Value).ToArray();
+            }
+            else
+            {
+                CumulativeAmountPerYear = Budget.YearlyAmounts.Select(amount => amount.Value).ToArray();
+            }
         }
 
         public Budget Budget { get; }

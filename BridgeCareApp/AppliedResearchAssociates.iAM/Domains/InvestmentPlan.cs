@@ -7,13 +7,6 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class InvestmentPlan : WeakEntity, IValidator
     {
-        internal InvestmentPlan(Simulation simulation)
-        {
-            Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
-
-            SynchronizeBudgetPriorities();
-        }
-
         public IReadOnlyCollection<BudgetCondition> BudgetConditions => _BudgetConditions;
 
         public IReadOnlyList<Budget> Budgets => _Budgets;
@@ -48,13 +41,15 @@ namespace AppliedResearchAssociates.iAM.Domains
             }
         }
 
+        public bool ShouldAccumulateUnusedBudgetAmounts { get; set; }
+
         public ValidatorBag Subvalidators => new ValidatorBag { BudgetConditions, Budgets, CashFlowRules };
 
         public IEnumerable<int> YearsOfAnalysis => Enumerable.Range(FirstYearOfAnalysisPeriod, NumberOfYearsInAnalysisPeriod);
 
         public Budget AddBudget()
         {
-            var budget = new Budget();
+            var budget = new Budget(this);
             budget.SetNumberOfYears(NumberOfYearsInAnalysisPeriod);
             _Budgets.Add(budget);
             SynchronizeBudgetPriorities();
@@ -102,8 +97,14 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public void Remove(CashFlowRule cashFlowRule) => _CashFlowRules.Remove(cashFlowRule);
 
-        internal double GetInflationFactor(int year) => Math.Pow(1 + InflationRatePercentage / 100, year - FirstYearOfAnalysisPeriod);
+        internal InvestmentPlan(Simulation simulation)
+        {
+            Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
+            SynchronizeBudgetPriorities();
+        }
+
+        internal double GetInflationFactor(int year) => Math.Pow(1 + InflationRatePercentage / 100, year - FirstYearOfAnalysisPeriod);
 
         private readonly List<BudgetCondition> _BudgetConditions = new List<BudgetCondition>();
 

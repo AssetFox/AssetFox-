@@ -9,7 +9,6 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -25,17 +24,16 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
-
         private int _count;
         private string _status = string.Empty;
         private double _percentage;
         private Guid _networkId = Guid.Empty;
-        private readonly ILog _logger;
+        private readonly ILog _log;
 
-        public AggregationController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
+        public AggregationController(ILog log, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService, IHttpContextAccessor httpContextAccessor) :
+            base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
+            _log = log ?? throw new ArgumentNullException(nameof(log));
 
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
@@ -57,7 +55,7 @@ namespace BridgeCareCore.Controllers
                     _status = "Preparing";
                     var getResult = Task.Factory.StartNew(() =>
                     {
-                        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                        UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
 
                         // Get/create configurable attributes
                         var configurationAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
@@ -66,7 +64,7 @@ namespace BridgeCareCore.Controllers
 
                         if (checkForDuplicateIDs.Count != checkForDuplicateIDs.Distinct().ToList().Count)
                         {
-                            _logger.Error($"Error : Metadata.json file has duplicate Ids");
+                            _log.Error($"Error : Metadata.json file has duplicate Ids");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Metadata.json file has duplicate Ids");
                             throw new InvalidOperationException();
                         }
@@ -74,7 +72,7 @@ namespace BridgeCareCore.Controllers
                         var checkForDuplicateNames = configurationAttributes.Select(_ => _.Name).ToList();
                         if (checkForDuplicateNames.Count != checkForDuplicateNames.Distinct().ToList().Count)
                         {
-                            _logger.Error($"Error : Metadata.json file has duplicate names");
+                            _log.Error($"Error : Metadata.json file has duplicate names");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Metadata.json file has duplicate Names");
                             throw new InvalidOperationException();
                         }
@@ -100,7 +98,7 @@ namespace BridgeCareCore.Controllers
                         }
                         catch (Exception e)
                         {
-                            _logger.Error($"While getting data for the attributes (attributes coming from metaData.json file) -  {e.Message}");
+                            _log.Error($"While getting data for the attributes (attributes coming from metaData.json file) -  {e.Message}");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Fetching data for the attributes ::{e.Message}");
                             throw;
                         }
@@ -121,7 +119,7 @@ namespace BridgeCareCore.Controllers
                     _status = "Aggregating";
                     var aggregationResult = Task.Factory.StartNew(() =>
                     {
-                        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                        UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
                         // loop over maintainable assets and remove assigned data that has an attribute id
                         // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
                         // that was created
@@ -168,7 +166,7 @@ namespace BridgeCareCore.Controllers
                     _status = "Saving";
                     var crudResult = Task.Factory.StartNew(() =>
                     {
-                        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                        UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
 
                         try
                         {
@@ -176,7 +174,7 @@ namespace BridgeCareCore.Controllers
                         }
                         catch(Exception e)
                         {
-                            _logger.Error($"Error while filling Assigned Data -  {e.Message}");
+                            _log.Error($"Error while filling Assigned Data -  {e.Message}");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while filling Assigned Data ::{e.Message}");
                             throw;
                         }
@@ -186,7 +184,7 @@ namespace BridgeCareCore.Controllers
                         }
                         catch(Exception e)
                         {
-                            _logger.Error($"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}");
+                            _log.Error($"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while updating MaintainableAssets SpatialWeighting ::{e.Message}");
                             throw;
                         }
@@ -197,7 +195,7 @@ namespace BridgeCareCore.Controllers
                         }
                         catch(Exception e)
                         {
-                            _logger.Error($"Error while adding Aggregated results -  {e.Message}");
+                            _log.Error($"Error while adding Aggregated results -  {e.Message}");
                             HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while adding Aggregated results ::{e.Message}");
                             throw;
                         }
@@ -207,7 +205,7 @@ namespace BridgeCareCore.Controllers
                     CheckCurrentLongRunningTask(crudResult);
 
                     _status = "Aggregated all network data";
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                    UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
                     UnitOfWork.Commit();
 
                     HubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,

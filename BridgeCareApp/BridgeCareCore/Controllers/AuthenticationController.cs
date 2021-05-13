@@ -42,29 +42,11 @@ namespace BridgeCareCore.Controllers
                 var response = GetUserInfoString(token);
                 ValidateResponse(response);
                 var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(response);
-                AddUser(userInfo);
                 return Ok(userInfo);
             }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
-                throw;
-            }
-        }
-
-        // TODO: remove this method when user accounts are transferred to v2 database
-        private void AddUser(UserInfoDTO userInfo)
-        {
-            try
-            {
-                UnitOfWork.BeginTransaction();
-                UnitOfWork.UserRepo.AddUser(SecurityFunctions.ParseLdap(userInfo.Sub)[0],
-                    SecurityFunctions.ParseLdap(userInfo.Roles)[0]);
-                UnitOfWork.Commit();
-            }
-            catch (Exception e)
-            {
-                UnitOfWork.Rollback();
                 throw;
             }
         }
@@ -257,7 +239,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 // A JWT is too large to store in the URL, so it is passed in the authorization header.
-                string idToken = Request.Headers["Authorization"];
+                var idToken = Request.Headers["Authorization"].ToString().Split(" ")[1];
                 EsecSecurity.RevokeToken(idToken);
                 return Ok();
             }

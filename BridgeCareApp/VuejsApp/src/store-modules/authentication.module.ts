@@ -14,9 +14,9 @@ const state = {
   isCWOPA: false,
   username: '',
   refreshing: false,
-  securityType: 'B2C',
+  securityType: 'ESEC',
   pennDotSecurityType: 'ESEC',
-  azureSecurityType: 'B2C'
+  azureSecurityType: 'B2C',
 };
 
 const mutations = {
@@ -70,7 +70,7 @@ const actions = {
     if (differenceInMinutes > 2) {
       return;
     } else if (differenceInMinutes <= 2) {
-        dispatch('refreshTokens');
+      dispatch('refreshTokens');
     } else if (state.authenticated) {
       dispatch('logOut');
     }
@@ -127,16 +127,17 @@ const actions = {
   },
 
   async logOut({ commit }: any) {
-    if (!localStorage.getItem('UserTokens')) {
+    if (!hasValue(localStorage.getItem('UserTokens'))) {
       commit('usernameMutator', '');
       commit('authenticatedMutator', false);
     } else {
       localStorage.removeItem('UserInfo');
+      await AuthenticationService.revokeIdToken();
       const userTokens: UserTokens = JSON.parse(localStorage.getItem('UserTokens') as string) as UserTokens;
       localStorage.removeItem('UserTokens');
       localStorage.removeItem('TokenExpiration');
-      AuthenticationService.revokeToken(userTokens.access_token, 'Access');
-      AuthenticationService.revokeToken(userTokens.refresh_token, 'Refresh');
+      await AuthenticationService.revokeToken(userTokens.access_token, 'Access');
+      await AuthenticationService.revokeToken(userTokens.refresh_token, 'Refresh');
       commit('usernameMutator', '');
       commit('authenticatedMutator', false);
     }
@@ -159,7 +160,7 @@ const actions = {
       commit('authenticatedMutator', payload.status);
     }
   },
-  async checkAzureB2CBrowserTokens({commit, dispatch}: any) {
+  async checkAzureB2CBrowserTokens({ commit, dispatch }: any) {
     const storedTokenExpiration: number = Number(localStorage.getItem('TokenExpiration') as string);
     if (isNaN(storedTokenExpiration)) {
       return;
@@ -173,7 +174,7 @@ const actions = {
     } else if (state.authenticated) {
       dispatch('logOut');
     }
-  }
+  },
 };
 
 const getters = {};

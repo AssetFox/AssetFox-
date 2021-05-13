@@ -64,7 +64,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
                 throw;
             }
         }
@@ -85,7 +85,7 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 UnitOfWork.Rollback();
                 return Unauthorized();
@@ -93,7 +93,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
                 throw;
             }
         }
@@ -117,7 +117,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
                 throw;
             }
         }

@@ -38,13 +38,11 @@ namespace BridgeCareCore.Controllers
             //SendRealTimeMessage($"Starting to process {reportName}.");
 
             // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
-            string parameters = String.Empty;
+            var parameters = string.Empty;
             if (Request.ContentLength > 0)
             {
-                using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
-                {
-                    parameters = await reader.ReadToEndAsync();
-                }
+                using var reader = new StreamReader(Request.Body, Encoding.UTF8);
+                parameters = await reader.ReadToEndAsync();
             }
 
             var report = await _generator.Generate(reportName);
@@ -85,7 +83,7 @@ namespace BridgeCareCore.Controllers
         }
 
         private void SendRealTimeMessage(string message) =>
-            HubService.SendRealTimeMessage(HubConstant.BroadcastError, message);
+            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, message);
 
         private IActionResult CreateErrorListing(List<string> errors)
         {

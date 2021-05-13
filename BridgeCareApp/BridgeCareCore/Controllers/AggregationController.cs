@@ -65,7 +65,7 @@ namespace BridgeCareCore.Controllers
                         if (checkForDuplicateIDs.Count != checkForDuplicateIDs.Distinct().ToList().Count)
                         {
                             _log.Error($"Error : Metadata.json file has duplicate Ids");
-                            HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Metadata.json file has duplicate Ids");
+                            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error: Metadata.json file has duplicate Ids");
                             throw new InvalidOperationException();
                         }
 
@@ -73,7 +73,7 @@ namespace BridgeCareCore.Controllers
                         if (checkForDuplicateNames.Count != checkForDuplicateNames.Distinct().ToList().Count)
                         {
                             _log.Error($"Error : Metadata.json file has duplicate names");
-                            HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Metadata.json file has duplicate Names");
+                            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error: Metadata.json file has duplicate Names");
                             throw new InvalidOperationException();
                         }
 
@@ -99,7 +99,7 @@ namespace BridgeCareCore.Controllers
                         catch (Exception e)
                         {
                             _log.Error($"While getting data for the attributes (attributes coming from metaData.json file) -  {e.Message}");
-                            HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: Fetching data for the attributes ::{e.Message}");
+                            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error: Fetching data for the attributes ::{e.Message}");
                             throw;
                         }
 
@@ -175,7 +175,7 @@ namespace BridgeCareCore.Controllers
                         catch(Exception e)
                         {
                             _log.Error($"Error while filling Assigned Data -  {e.Message}");
-                            HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while filling Assigned Data ::{e.Message}");
+                            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error: while filling Assigned Data ::{e.Message}");
                             throw;
                         }
                         try
@@ -185,7 +185,7 @@ namespace BridgeCareCore.Controllers
                         catch(Exception e)
                         {
                             _log.Error($"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}");
-                            HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while updating MaintainableAssets SpatialWeighting ::{e.Message}");
+                            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error: while updating MaintainableAssets SpatialWeighting ::{e.Message}");
                             throw;
                         }
 
@@ -196,7 +196,7 @@ namespace BridgeCareCore.Controllers
                         catch(Exception e)
                         {
                             _log.Error($"Error while adding Aggregated results -  {e.Message}");
-                            HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Error: while adding Aggregated results ::{e.Message}");
+                            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error: while adding Aggregated results ::{e.Message}");
                             throw;
                         }
                     });
@@ -208,7 +208,7 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
                     UnitOfWork.Commit();
 
-                    HubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
                         new NetworkRollupDetailDTO {NetworkId = _networkId, Status = _status}, _percentage);
                 });
 
@@ -219,9 +219,9 @@ namespace BridgeCareCore.Controllers
                 UnitOfWork.Rollback();
                 _status = "Aggregation failed";
                 UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
-                HubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
                     new NetworkRollupDetailDTO {NetworkId = _networkId, Status = _status}, 0.0);
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Aggregation error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Aggregation error::{e.Message}");
                 throw;
             }
         }
@@ -269,7 +269,7 @@ namespace BridgeCareCore.Controllers
                 _ => _status
             };
 
-            HubService.SendRealTimeMessage(HubConstant.BroadcastAssignDataStatus,
+            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
                 new NetworkRollupDetailDTO {NetworkId = _networkId, Status = message}, _percentage);
         }
     }

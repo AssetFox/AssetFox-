@@ -46,7 +46,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }
@@ -124,7 +124,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }
@@ -170,7 +170,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
 
@@ -222,7 +222,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }
@@ -245,7 +245,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Authentication error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }

@@ -33,7 +33,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Remaining Life Limit error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Remaining Life Limit error::{e.Message}");
                 throw;
             }
         }
@@ -61,7 +61,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Remaining Life Limit error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Remaining Life Limit error::{e.Message}");
                 throw;
             }
         }
@@ -85,7 +85,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Remaining Life Limit error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Remaining Life Limit error::{e.Message}");
                 throw;
             }
         }

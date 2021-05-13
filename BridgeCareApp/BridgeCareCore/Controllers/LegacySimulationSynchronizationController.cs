@@ -31,20 +31,20 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastDataMigration, "Starting data migration...");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastDataMigration, "Starting data migration...");
 
                 await Task.Factory.StartNew(() =>
                 {
                     _legacySimulationSynchronizerService.Synchronize(simulationId, UserInfo.Name);
 
-                    HubService.SendRealTimeMessage(HubConstant.BroadcastDataMigration, "Finished data migration...");
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastDataMigration, "Finished data migration...");
                 });
 
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Synchronization error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Synchronization error::{e.Message}");
                 throw;
             }
         }

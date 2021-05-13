@@ -6,6 +6,11 @@ namespace BridgeCareCore.Hubs
     public class BridgeCareHub : Hub
     {
         public async Task SendMessage(string status) => await Clients.All.SendAsync("BroadcastMessage", status);
+
+        public async Task AssociateMessage(string username)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, username);
+        }
     }
 
     public static class HubConstant

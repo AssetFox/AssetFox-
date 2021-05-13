@@ -16,9 +16,6 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class CriterionLibraryController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-
-
         public CriterionLibraryController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
@@ -34,7 +31,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
                 throw;
             }
         }
@@ -58,7 +55,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
                 throw;
             }
         }
@@ -81,7 +78,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
                 throw;
             }
         }

@@ -67,9 +67,9 @@ namespace BridgeCareCore.Controllers.BaseController
 
         private void CheckIfUserExist()
         {
-            if (string.IsNullOrEmpty(UserInfo.Name))
+            if (!string.IsNullOrEmpty(UserInfo.Name))
             {
-                if (UnitOfWork.Context.User.Any(_ => _.Username == UserInfo.Name))
+                if (!UnitOfWork.Context.User.Any(_ => _.Username == UserInfo.Name))
                 {
                     UnitOfWork.AddUser(UserInfo.Name, UserInfo.Role);
                 }

@@ -46,7 +46,7 @@ namespace BridgeCareCore.Services
                 Status = "Creating input..."
             };
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
-            _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
@@ -65,8 +65,8 @@ namespace BridgeCareCore.Services
             {
                 simulationAnalysisDetail.Status = eventArgs.Message;
                 UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
 
             runner.Progress += (sender, eventArgs) =>
@@ -77,33 +77,33 @@ namespace BridgeCareCore.Services
                     simulationAnalysisDetail.Status = "Simulation initializing ...";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
-                    _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
                     break;
                 case ProgressStatus.Running:
                     simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete, 2)*100}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
-                    _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
                     break;
                 case ProgressStatus.Completed:
                     simulationAnalysisDetail.Status = $"Simulation complete. {100}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
 
-                    _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
                     break;
                 }
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
             runner.Warning += (sender, eventArgs) =>
             {
-                _hubService.SendRealTimeMessage(HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
             };
 
             // resetting the report generation status.
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             runner.Run();
 

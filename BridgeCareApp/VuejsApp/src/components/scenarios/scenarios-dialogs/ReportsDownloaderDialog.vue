@@ -24,11 +24,11 @@
                      avatar
                      v-for="item in reports">
           <v-layout align-start row>
-            <v-checkbox :label="item"
+            <!-- <v-checkbox :label="item"
                         :value="item"
                         color="primary lighten-1"
                         v-model="selectedReports">
-            </v-checkbox>
+            </v-checkbox> -->
           </v-layout>
         </v-list-tile>
         <v-alert :value="errorMessage !== ''"
@@ -77,7 +77,7 @@ export default class ReportsDownloaderDialog extends Vue {
   @Action('setErrorMessage') setErrorMessageAction: any;
 
   reports: string[] = [/*'Detailed Report', */'Summary Report'];
-  selectedReports: string[] = [];
+  selectedReports: string[] = ['Summary Report']; // Because rigth now, we have only 1 report
   errorMessage: string = '';
   isDownloading: boolean = false;
 

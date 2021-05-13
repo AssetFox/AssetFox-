@@ -3,7 +3,7 @@
     "version": "v2.0.0-beta1",
     "private": true,
     "description": "BridgeCare",
-    "security": "B2C",
+    "security": "ESEC",
     "author": {
         "name": "Applied Research Associates"
     },

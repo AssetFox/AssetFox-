@@ -17,4 +17,8 @@ export default class AuthenticationService {
     static revokeToken(token: string, tokenType: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.Authentication}/RevokeToken/${tokenType}/${token}`, null);
     }
+
+    static revokeIdToken(): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Authentication}/RevokeToken/Id`, null);
+    }
 }

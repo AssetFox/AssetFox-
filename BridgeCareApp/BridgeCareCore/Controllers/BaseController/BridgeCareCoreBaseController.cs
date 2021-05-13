@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -20,16 +21,32 @@ namespace BridgeCareCore.Controllers.BaseController
 
         protected readonly IHttpContextAccessor ContextAccessor;
 
+        private readonly IReadOnlyCollection<string> PathsToIgnore = new List<string>
+        {
+            "UserTokens", "RevokeToken", "RefreshToken"
+        };
+
         public BridgeCareCoreBaseController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor)
         {
             EsecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             HubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-            if (ContextAccessor?.HttpContext?.Request != null)
+            if (RequestHasBearer())
             {
                 SetUserInfo(ContextAccessor?.HttpContext?.Request);
             }
+        }
+
+        private bool RequestHasBearer()
+        {
+            if (ContextAccessor?.HttpContext?.Request != null)
+            {
+                return !PathsToIgnore.Any(pathToIgnore =>
+                    ContextAccessor.HttpContext.Request.Path.Value.Contains(pathToIgnore));
+            }
+
+            return false;
         }
 
         public void SetUserInfo(HttpRequest request) => UserInfo = EsecSecurity.GetUserInformation(request);

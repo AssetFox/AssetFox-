@@ -380,6 +380,7 @@ import {
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
 import { Hub } from '@/connectionHub';
+import {NetworkRollupDetail} from '../../shared/models/iAM/network-rollup-detail';
 
 @Component({
     components: {

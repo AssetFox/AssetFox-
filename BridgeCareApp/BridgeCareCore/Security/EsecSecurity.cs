@@ -19,8 +19,6 @@ namespace BridgeCareCore.Security
         private readonly string _securityType;
         private readonly IConfiguration _config;
 
-        public UserEntity UserEntity { get; set; }
-
         /// <summary>
         ///     Each key is a token that has been revoked. Its value is the unix timestamp of the
         ///     time at which it expires.

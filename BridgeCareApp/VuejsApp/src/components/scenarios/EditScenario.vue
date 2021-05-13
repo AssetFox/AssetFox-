@@ -340,20 +340,7 @@ export default class EditScenario extends Vue {
         this.alertData = clone(emptyAlertData);
 
         if (runScenarioSimulation) {
-            if (process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL != undefined) {
-                if (this.selectedScenario.id === process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_MSSQL.toLowerCase()) {
-                    this.runNewSimulationAction({
-                        networkId: process.env.VUE_APP_HARDCODED_NETWORKID_FROM_MSSQL,
-                        selectedScenarioId: this.selectedScenario.id,
-                    });
-                } else {
-                    this.runSimulationAction({
-                        selectedScenario: this.selectedScenario,
-                        userId: this.userId,
-                    });
-                }
-
-            }
+            this.runSimulationAction({ networkId: this.networkId, scenarioId: this.selectedScenarioId, });
         }
     }
 }

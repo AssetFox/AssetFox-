@@ -2,6 +2,12 @@ import { HttpTransportType, HubConnectionBuilder, LogLevel } from '@microsoft/si
 import { SimulationAnalysisDetail } from '@/shared/models/iAM/simulation-analysis-detail';
 import { SimulationReportDetail } from '@/shared/models/iAM/simulation-report-detail';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
+import AuthenticationModule from '@/store-modules/authentication.module';
+import { hasValue } from '@/shared/utils/has-value-util';
+import { UserInfo } from '@/shared/models/iAM/authentication';
+import { parseLDAP } from '@/shared/utils/parse-ldap';
+import has = Reflect.has;
+import { getUserName } from '@/shared/utils/get-user-info';
 
 export default {
   install(Vue: any) {
@@ -43,7 +49,12 @@ export default {
     let startedPromise = null;
 
     function start() {
-      startedPromise = connection.start().catch((err: any) => {
+      const username: string = hasValue(localStorage.getItem('UserInfo')) || hasValue(localStorage.getItem('LoggedInUser'))
+        ? getUserName() : '';
+
+      startedPromise = connection.start()
+        .then(_ => connection.invoke('AssociateMessage', username))
+        .catch((err: any) => {
         console.error('Failed to connect with hub', err);
         return new Promise((resolve: any, reject: any) =>
           setTimeout(() => start().then(resolve).catch(reject), 5000));

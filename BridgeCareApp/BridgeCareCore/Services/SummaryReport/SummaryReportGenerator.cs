@@ -74,7 +74,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 {
                     reportDetailDto.Status = $"{item} was not found in initial section";
                     UpdateSimulationAnalysisDetail(reportDetailDto);
-                    _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
                     throw new KeyNotFoundException($"{item} was not found in initial section");
                 }
             }
@@ -87,7 +87,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 {
                     reportDetailDto.Status = $"{item} was not found in sections";
                     UpdateSimulationAnalysisDetail(reportDetailDto);
-                    _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
                     throw new KeyNotFoundException($"{item} was not found in sections");
                 }
             }
@@ -141,7 +141,7 @@ namespace BridgeCareCore.Services.SummaryReport
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
             reportDetailDto.Status = $"Creating Bridge Data TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             // Bridge Data TAB
             var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
@@ -151,7 +151,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
             reportDetailDto.Status = $"Creating Unfunded Recommendations TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             // Unfunded Recommendations TAB
             var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");
             _unfundedRecommendations.Fill(unfundedRecommendationWorksheet, reportOutputData);
@@ -161,20 +161,20 @@ namespace BridgeCareCore.Services.SummaryReport
             _summaryReportGlossary.Fill(shortNameWorksheet);
             reportDetailDto.Status = $"Creating Bridge Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             // Bridge work summary TAB
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
                 simulationYears, workSummaryModel, yearlyBudgetAmount);
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
             reportDetailDto.Status = $"Creating Graph TABs";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 

@@ -21,8 +21,6 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class PerformanceCurveController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-
         private readonly IReadOnlyDictionary<string, PerformanceCurveUpsertMethod> _performanceCurveUpsertMethods;
 
         public PerformanceCurveController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
@@ -63,7 +61,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Performance Curve error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Performance Curve error::{e.Message}");
                 throw;
             }
         }
@@ -85,7 +83,7 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 UnitOfWork.Rollback();
                 return Unauthorized();
@@ -93,7 +91,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Performance Curve error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Performance Curve error::{e.Message}");
                 throw;
             }
         }
@@ -117,7 +115,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(HubConstant.BroadcastError, $"Performance Curve error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Performance Curve error::{e.Message}");
                 throw;
             }
         }

@@ -29,6 +29,9 @@
                         color="primary lighten-1"
                         v-model="selectedReports">
             </v-checkbox> -->
+            <v-chip color='ara-blue-bg' text-color='white'>
+                            Summary Report
+                        </v-chip>
           </v-layout>
         </v-list-tile>
         <v-alert :value="errorMessage !== ''"
@@ -77,7 +80,7 @@ export default class ReportsDownloaderDialog extends Vue {
   @Action('setErrorMessage') setErrorMessageAction: any;
 
   reports: string[] = [/*'Detailed Report', */'Summary Report'];
-  selectedReports: string[] = ['Summary Report']; // Because rigth now, we have only 1 report
+  selectedReports: string[] = ['Summary Report'];
   errorMessage: string = '';
   isDownloading: boolean = false;
 

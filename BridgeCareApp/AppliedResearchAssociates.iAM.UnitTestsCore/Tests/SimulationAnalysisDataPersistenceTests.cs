@@ -25,8 +25,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
-                _testHelper.SetStandAloneSimulation(SimulationId);
                 _testHelper.CreateAttributes();
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                
 
                 // Act
                 _testHelper.UnitOfWork.BeginTransaction();
@@ -103,8 +104,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             try
             {
                 // Arrange
-                _testHelper.SetStandAloneSimulation(SimulationId);
                 _testHelper.CreateAttributes();
+                _testHelper.SetStandAloneSimulation(SimulationId);
+                
                 _testHelper.ReduceNumberOfFacilitiesAndSections(_testHelper.StandAloneSimulation);
 
                 // Act

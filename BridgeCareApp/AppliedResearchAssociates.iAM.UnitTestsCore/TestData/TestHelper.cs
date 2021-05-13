@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             MockEsecSecurityAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo
                 {
-                    Name = "pdsystbamsusr02", Role = "PD-BAMS-Administrator", Email = "pdstseseca5@pa.gov"
+                    Name = "pdsystbamsusr01", Role = "PD-BAMS-Administrator", Email = "pdstseseca5@pa.gov"
                 });
             MockEsecSecurityNotAuthorized = new Mock<IEsecSecurity>();
             MockEsecSecurityNotAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))

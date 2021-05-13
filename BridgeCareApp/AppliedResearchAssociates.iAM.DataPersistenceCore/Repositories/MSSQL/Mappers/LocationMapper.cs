@@ -97,7 +97,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static LocationEntity CreateMaintainableAssetLocation(this MaintainableAssetEntity entity) =>
-            new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation, $"{entity.FacilityName}{entity.SectionName}")
+            new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation, $"{entity.FacilityName}-{entity.SectionName}")
             {
                 MaintainableAssetId = entity.Id
             };

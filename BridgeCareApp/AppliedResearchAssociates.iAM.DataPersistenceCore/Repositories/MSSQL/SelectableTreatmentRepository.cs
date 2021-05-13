@@ -291,7 +291,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.UpdateAll(selectableTreatmentEntities.Where(_ => existingEntityIds.Contains(_.Id))
                 .ToList());
 
-            _unitOfWork.Context.UpdateAll(selectableTreatmentEntities.Where(_ => !existingEntityIds.Contains(_.Id))
+            _unitOfWork.Context.AddAll(selectableTreatmentEntities.Where(_ => !existingEntityIds.Contains(_.Id))
                 .ToList());
 
             _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>

@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
@@ -14,9 +15,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class TreatmentConsequenceRepository : ITreatmentConsequenceRepository
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
         public TreatmentConsequenceRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
@@ -125,21 +123,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SelectableTreatment.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
-            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<ConditionalTreatmentConsequenceEntity, bool>>>
-            {
-                {"delete", _ => _.SelectableTreatment.TreatmentLibraryId == libraryId && !entityIds.Contains(_.Id)},
-                {"update", _ => existingEntityIds.Contains(_.Id)},
-                {"add", _ => !existingEntityIds.Contains(_.Id)}
-            };
+            _unitOfWork.Context.DeleteAll<ConditionalTreatmentConsequenceEntity>(_ =>
+                _.SelectableTreatment.TreatmentLibraryId == libraryId && !entityIds.Contains(_.Id));
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfWork.Context.UpsertOrDelete(conditionalTreatmentConsequenceEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
-            }
-            else
-            {
-                _unitOfWork.Context.BulkUpsertOrDelete(conditionalTreatmentConsequenceEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
-            }
+            _unitOfWork.Context.UpdateAll(conditionalTreatmentConsequenceEntities
+                .Where(_ => existingEntityIds.Contains(_.Id)).ToList());
+
+            _unitOfWork.Context.AddAll(conditionalTreatmentConsequenceEntities
+                .Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
 
             if (treatmentConsequences.Any(_ =>
                 _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression)))

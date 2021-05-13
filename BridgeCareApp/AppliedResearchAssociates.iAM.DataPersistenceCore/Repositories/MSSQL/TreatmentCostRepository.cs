@@ -13,9 +13,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class TreatmentCostRepository : ITreatmentCostRepository
     {
-        private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
-            .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
-
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 
         public TreatmentCostRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
@@ -87,21 +84,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SelectableTreatment.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
-            var predicatesPerCrudOperation = new Dictionary<string, Expression<Func<TreatmentCostEntity, bool>>>
-            {
-                {"delete", _ => _.SelectableTreatment.TreatmentLibraryId == libraryId && !entityIds.Contains(_.Id)},
-                {"update", _ => existingEntityIds.Contains(_.Id)},
-                {"add", _ => !existingEntityIds.Contains(_.Id)}
-            };
+            _unitOfWork.Context.DeleteAll<TreatmentCostEntity>(_ =>
+                _.SelectableTreatment.TreatmentLibraryId == libraryId && !entityIds.Contains(_.Id));
 
-            if (IsRunningFromXUnit)
-            {
-                _unitOfWork.Context.UpsertOrDelete(treatmentCostEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
-            }
-            else
-            {
-                _unitOfWork.Context.BulkUpsertOrDelete(treatmentCostEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
-            }
+            _unitOfWork.Context.UpdateAll(treatmentCostEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
+
+            _unitOfWork.Context.AddAll(treatmentCostEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
 
             var treatmentCosts = treatmentCostPerTreatmentId.SelectMany(_ => _.Value).ToList();
 

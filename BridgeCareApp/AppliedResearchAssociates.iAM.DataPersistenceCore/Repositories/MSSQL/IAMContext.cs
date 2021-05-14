@@ -184,6 +184,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<ReportIndexEntity> ReportIndex { get; set; }
 
+        public virtual DbSet<AnnouncementEntity> Announcement { get; set; }
+
         private class MigrationConnection
         {
             public string BridgeCareConnex { get; set; }
@@ -1510,6 +1512,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithMany(p => p.SimulationReports)
                     .HasForeignKey(d => d.SimulationID)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<AnnouncementEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Title).IsRequired();
+
+                entity.Property(e => e.Content).IsRequired();
             });
         }
     }

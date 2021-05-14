@@ -70,6 +70,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IUserCriteriaRepository _userCriteriaRepo;
         private IReportIndexRepository _reportIndexRepo;
         private IAssetData _assetDataRepository;
+        private IAnnouncementRepository _announcementRepo;
 
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
 
@@ -150,6 +151,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public IReportIndexRepository ReportIndexRepository => _reportIndexRepo ??= new ReportIndexRepository(this);
 
         public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTMaintainableAssetDataRepository(this);
+
+        public IAnnouncementRepository AnnouncementRepo => _announcementRepo ??= new AnnouncementRepository(this);
 
 
         public UserEntity UserEntity { get; private set; }

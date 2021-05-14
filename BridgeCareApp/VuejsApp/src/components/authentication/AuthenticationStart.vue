@@ -45,7 +45,7 @@
         onCheckedRole() {
             if (this.checkedForRole && this.securityType === this.pennDotSecurityType) {
                 if (this.hasRole) {
-                    this.$router.push('/Scenarios/');
+                    this.$router.push('/Home/');
                 } else {
                     this.$router.push('/NoRole/');
                 }
@@ -55,7 +55,7 @@
         @Watch('authenticated')
         onAuthenticatedChanged() {
             if (this.authenticated) {
-                this.$router.push('/Scenarios/');
+                this.$router.push('/Home/');
             }
         }
 
@@ -87,7 +87,7 @@
             if (!this.authenticated) {
                 this.azureB2CLoginAction();
             } else if (this.authenticated) {
-                this.$router.push('/Scenarios/');
+                this.$router.push('/Home/');
             }
         }
     }

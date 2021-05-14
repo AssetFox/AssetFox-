@@ -1,13 +1,15 @@
+import { getNewGuid } from '@/shared/utils/uuid-utils';
+
 export interface Announcement {
     id: string;
     title: string;
     content: string;
-    creationDate: number;
+    createdDate: Date;
 }
 
 export const emptyAnnouncement: Announcement = {
-    id: '0',
+    id: getNewGuid(),
     title: '',
     content: '',
-    creationDate: 0
+    createdDate: new Date()
 };

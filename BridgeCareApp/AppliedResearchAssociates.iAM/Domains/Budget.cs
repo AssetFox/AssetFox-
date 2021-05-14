@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.Validation;
 
@@ -6,9 +7,9 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Budget : WeakEntity, IValidator
     {
-        internal Budget()
-        {
-        }
+        internal Budget(InvestmentPlan investmentPlan) => InvestmentPlan = investmentPlan ?? throw new ArgumentNullException(nameof(investmentPlan));
+
+        public InvestmentPlan InvestmentPlan { get; }
 
         public string Name { get; set; }
 

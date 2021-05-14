@@ -11,8 +11,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Budget = budget ?? throw new ArgumentNullException(nameof(budget));
             FirstYearOfAnalysisPeriod = firstYearOfAnalysisPeriod;
 
-            var cumulativeAmount = 0m;
-            CumulativeAmountPerYear = Budget.YearlyAmounts.Select(amount => cumulativeAmount += amount.Value).ToArray();
+            if (Budget.InvestmentPlan.ShouldAccumulateUnusedBudgetAmounts)
+            {
+                var cumulativeAmount = 0m;
+                CumulativeAmountPerYear = Budget.YearlyAmounts.Select(amount => cumulativeAmount += amount.Value).ToArray();
+            }
+            else
+            {
+                CumulativeAmountPerYear = Budget.YearlyAmounts.Select(amount => amount.Value).ToArray();
+            }
         }
 
         public Budget Budget { get; }
@@ -56,17 +63,21 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void _AllocateCost(decimal cost, int targetYearIndex)
         {
-            for (var yearIndex = targetYearIndex; yearIndex < CumulativeAmountPerYear.Length; ++yearIndex)
-            {
-                CumulativeAmountPerYear[yearIndex] -= cost;
-            }
-
             CurrentPrioritizedAmount -= cost;
+            CumulativeAmountPerYear[targetYearIndex] -= cost;
 
-            for (var yearIndex = targetYearIndex; yearIndex > 0; --yearIndex)
+            if (Budget.InvestmentPlan.ShouldAccumulateUnusedBudgetAmounts)
             {
-                var previousYearIndex = yearIndex - 1;
-                CumulativeAmountPerYear[previousYearIndex] = Math.Min(CumulativeAmountPerYear[previousYearIndex], CumulativeAmountPerYear[yearIndex]);
+                for (var yearIndex = targetYearIndex + 1; yearIndex < CumulativeAmountPerYear.Length; ++yearIndex)
+                {
+                    CumulativeAmountPerYear[yearIndex] -= cost;
+                }
+
+                for (var yearIndex = targetYearIndex; yearIndex > 0; --yearIndex)
+                {
+                    var previousYearIndex = yearIndex - 1;
+                    CumulativeAmountPerYear[previousYearIndex] = Math.Min(CumulativeAmountPerYear[previousYearIndex], CumulativeAmountPerYear[yearIndex]);
+                }
             }
         }
 

@@ -40,5 +40,6 @@ export const API = {
     SummaryReport: '/api/SummaryReport',
     ExpressionValidation: '/api/ExpressionValidation',
     UserCriteria: '/api/UserCriteria',
-    CommittedProject: '/api/CommittedProject'
+    CommittedProject: '/api/CommittedProject',
+    Announcement: '/api/Announcement'
 };

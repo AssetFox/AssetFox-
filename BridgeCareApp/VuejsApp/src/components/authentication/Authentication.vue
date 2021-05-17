@@ -81,7 +81,7 @@
 
         onAuthenticationSuccess() {
             this.setSuccessMessageAction({message: 'Authentication successful.'});
-            this.$router.push('/Scenarios/');
+            this.$router.push('/Home/');
         }
 
         onAuthenticationFailure() {

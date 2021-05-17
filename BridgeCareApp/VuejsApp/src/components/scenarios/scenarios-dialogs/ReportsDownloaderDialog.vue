@@ -1,6 +1,5 @@
 ﻿<template>
   <v-dialog max-width="500px"
-            persistent
             scrollable
             v-model="dialogData.showModal">
     <v-card>
@@ -29,7 +28,7 @@
                         color="primary lighten-1"
                         v-model="selectedReports">
             </v-checkbox> -->
-            <v-chip color='ara-blue-bg' text-color='white'>
+            <v-chip color='ara-blue-bg' text-color='white' @click="onDownloadReports(true)">
                             Summary Report
                         </v-chip>
           </v-layout>
@@ -43,7 +42,7 @@
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions>
-        <v-layout justify-space-between row>
+        <!-- <v-layout justify-space-between row>
           <v-btn :disabled="isBusy"
                  @click="onDownloadReports(true)"
                  class="ara-blue-bg white--text">
@@ -54,7 +53,7 @@
                  class="ara-orange-bg white--text">
             Close
           </v-btn>
-        </v-layout>
+        </v-layout> -->
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -94,6 +93,7 @@ export default class ReportsDownloaderDialog extends Vue {
           switch (report) {
             case 'Summary Report': {
               this.isDownloading = true;
+              this.dialogData.showModal = false;
               await ReportsService.downloadSummaryReport(this.dialogData.networkId, this.dialogData.scenarioId)
                   .then((response: AxiosResponse<any>) => {
                     this.isDownloading = false;

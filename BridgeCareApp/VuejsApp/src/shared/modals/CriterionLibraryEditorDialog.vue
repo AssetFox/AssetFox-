@@ -4,7 +4,7 @@
       <v-card-text>
         <v-layout justify-center column>
           <div>
-            <CriterionLibraryEditor :dialogLibraryId="dialogData.libraryId"
+            <CriterionLibraryEditor :dialogLibraryId="dialogData.libraryId" :dialogIsFromScenario="true"
                                     @submit="onSubmitSelectedCriterionLibrary" />
           </div>
         </v-layout>

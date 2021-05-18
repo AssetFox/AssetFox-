@@ -8,7 +8,8 @@ import {http2XX} from '@/shared/utils/http-utils';
 const state = {
     criterionLibraries: [] as CriterionLibrary[],
     selectedCriterionLibrary: clone(emptyCriterionLibrary) as CriterionLibrary,
-    selectedCriterionIsValid: false as boolean
+    selectedCriterionIsValid: false as boolean,
+    scenarioRelatedCriteria: clone(emptyCriterionLibrary) as CriterionLibrary
 };
 
 const mutations = {
@@ -33,12 +34,22 @@ const mutations = {
     },
     selectedCriterionIsValidMutator(state: any, isValid: boolean) {
         state.selectedCriterionIsValid = isValid;
+    },
+    scenarioRelatedCriterionMutator(state: any, libraryId: string){
+        if (any(propEq('id', libraryId), state.criterionLibraries)) {
+            state.scenarioRelatedCriteria = find(propEq('id', libraryId), state.criterionLibraries);
+        } else {
+            state.scenarioRelatedCriteria = clone(emptyCriterionLibrary);
+        }
     }
 };
 
 const actions = {
     selectCriterionLibrary({commit}: any, payload: any) {
         commit('selectedCriterionLibraryMutator', payload.libraryId);
+    },
+    selectScenarioRelatedCriterion({commit}: any, payload: any) {
+        commit('scenarioRelatedCriterionMutator', payload.libraryId);
     },
     setSelectedCriterionIsValid({commit}: any, payload: any) {
         commit('selectedCriterionIsValidMutator', payload.isValid);

@@ -101,6 +101,7 @@ import {hasValue} from '@/shared/utils/has-value-util';
 })
 export default class CriterionLibraryEditor extends Vue {
   @Prop() dialogLibraryId: string;
+  @Prop() dialogIsFromScenario: boolean;
 
   @State(state => state.criterionModule.criterionLibraries) stateCriterionLibraries: CriterionLibrary[];
   @State(state => state.criterionModule.selectedCriterionLibrary) stateSelectedCriterionLibrary: CriterionLibrary;
@@ -111,6 +112,7 @@ export default class CriterionLibraryEditor extends Vue {
   @Action('deleteCriterionLibrary') deleteCriterionLibraryAction: any;
   @Action('setSelectedCriterionIsValid') setSelectedCriterionIsValidAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+  @Action('selectScenarioRelatedCriterion') selectScenarioRelatedCriterionAction: any;
 
   hasSelectedCriterionLibrary: boolean = false;
   criterionLibrarySelectItems: SelectItem[] = [];
@@ -125,6 +127,7 @@ export default class CriterionLibraryEditor extends Vue {
   confirmDeleteAlertData: AlertData = clone(emptyAlertData);
   canUpdateOrCreate: boolean = false;
   uuidNIL: string = getBlankGuid();
+  callFromScenario: boolean = false;
 
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
@@ -157,7 +160,10 @@ export default class CriterionLibraryEditor extends Vue {
 
   @Watch('dialogLibraryId')
   onDialogLibraryIdChanged() {
-    this.librarySelectItemValue = this.dialogLibraryId;
+    if(!this.dialogIsFromScenario){
+      this.librarySelectItemValue = this.dialogLibraryId;
+    }
+    this.callFromScenario = this.dialogIsFromScenario;
   }
 
   @Watch('librarySelectItemValue')

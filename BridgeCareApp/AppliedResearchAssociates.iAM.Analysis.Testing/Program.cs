@@ -95,6 +95,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
                     logToConsoleAndFile($"Running {networkSimulationLabel} ...");
 
                     var runner = new SimulationRunner(simulation);
+                    runner.Progress += (sender, eventArgs) => logToConsoleAndFile(eventArgs.ToString());
                     runner.Information += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
                     runner.Warning += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
                     runner.Failure += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);

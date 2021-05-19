@@ -6,10 +6,11 @@
           <v-btn @click="onShowCreateCriterionLibraryDialog(false)" class="ara-blue-bg white--text">
             New Library
           </v-btn>
-          <v-select v-if="!hasSelectedCriterionLibrary" v-model="librarySelectItemValue"
+          <v-select  v-model="librarySelectItemValue"
+          
                     :items="criterionLibrarySelectItems" label="Select a Criteria Library" outline>
           </v-select>
-          <v-text-field v-if="hasSelectedCriterionLibrary"
+          <v-text-field v-if="hasSelectedCriterionLibrary && !callFromScenario"
                         v-model="selectedCriterionLibrary.name" @change="canUpdateOrCreate = true">
             <template slot="append">
               <v-btn @click="librarySelectItemValue = null" class="ara-orange" icon>
@@ -26,8 +27,8 @@
         </v-flex>
       </v-layout>
     </v-flex>
-    <v-divider v-show="hasSelectedCriterionLibrary"/>
-    <v-flex v-show="hasSelectedCriterionLibrary">
+    <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario"/>
+    <v-flex v-show="hasSelectedCriterionLibrary || callFromScenario">
       <v-layout justify-center>
         <v-flex xs10>
           <CriteriaEditor :criteriaEditorData="criteriaEditorData"
@@ -35,8 +36,9 @@
         </v-flex>
       </v-layout>
     </v-flex>
-    <v-divider v-show="hasSelectedCriterionLibrary"/>
-    <v-flex v-show="hasSelectedCriterionLibrary">
+    <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario"/>
+    <v-flex> 
+      <!-- v-show="hasSelectedCriterionLibrary" -->
       <v-layout justify-center>
         <v-flex xs6>
           <v-textarea v-model="selectedCriterionLibrary.description" label="Description" no-resize outline
@@ -46,7 +48,8 @@
       </v-layout>
     </v-flex>
     <v-flex>
-      <v-layout v-show="hasSelectedCriterionLibrary" justify-end row>
+      <v-layout  justify-end row>
+        <!-- v-show="hasSelectedCriterionLibrary" -->
         <v-btn @click="onUpsertCriterionLibrary(selectedCriterionLibrary)" class="ara-blue-bg white--text"
                :disabled="!canUpdateOrCreate">
           Update Library
@@ -106,6 +109,8 @@ export default class CriterionLibraryEditor extends Vue {
   @State(state => state.criterionModule.criterionLibraries) stateCriterionLibraries: CriterionLibrary[];
   @State(state => state.criterionModule.selectedCriterionLibrary) stateSelectedCriterionLibrary: CriterionLibrary;
 
+  @State(state => state.criterionModule.scenarioRelatedCriteria) scenarioRelatedCriteria: CriterionLibrary;
+
   @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
   @Action('upsertCriterionLibrary') upsertCriterionLibraryAction: any;
   @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
@@ -128,6 +133,7 @@ export default class CriterionLibraryEditor extends Vue {
   canUpdateOrCreate: boolean = false;
   uuidNIL: string = getBlankGuid();
   callFromScenario: boolean = false;
+  criteriaForScenario: string | null = null;
 
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
@@ -156,12 +162,19 @@ export default class CriterionLibraryEditor extends Vue {
     if (!this.isLibraryContext && hasValue(this.librarySelectItemValue)) {
       this.selectCriterionLibraryAction({libraryId: this.librarySelectItemValue});
     }
+
+    if(this.callFromScenario){
+      this.selectScenarioRelatedCriterionAction({libraryId: this.dialogLibraryId});
+    }
   }
 
   @Watch('dialogLibraryId')
   onDialogLibraryIdChanged() {
     if(!this.dialogIsFromScenario){
       this.librarySelectItemValue = this.dialogLibraryId;
+    }
+    else{
+      this.criteriaForScenario = this.dialogLibraryId;
     }
     this.callFromScenario = this.dialogIsFromScenario;
   }
@@ -175,6 +188,16 @@ export default class CriterionLibraryEditor extends Vue {
   onStateSelectedCriterionLibraryChanged() {
     this.canUpdateOrCreate = false;
     this.selectedCriterionLibrary = clone(this.stateSelectedCriterionLibrary);
+  }
+
+  @Watch('scenarioRelatedCriteria')
+  onScenarioRelatedCriteria(){
+    //this.selectedCriterionLibrary = clone(this.scenarioRelatedCriteria);
+
+    this.criteriaEditorData = {
+      ...this.criteriaEditorData,
+      mergedCriteriaExpression: this.scenarioRelatedCriteria.mergedCriteriaExpression
+    };
   }
 
   @Watch('canUpdateOrCreate')

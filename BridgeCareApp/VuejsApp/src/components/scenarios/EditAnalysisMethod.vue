@@ -38,7 +38,8 @@
             <v-text-field @input="onSetBenefitProperty('limit', $event)" label="Benefit limit"
                           outline
                           type="number"
-                          :value.number="analysisMethod.benefit.limit">
+                          :value.number="analysisMethod.benefit.limit"
+                          :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotNegative(analysisMethod.benefit.limit)]">
             </v-text-field>
           </v-flex>
           <v-spacer/>
@@ -105,6 +106,7 @@ import {
 } from '@/shared/models/iAM/analysis-method';
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {CriterionLibrary} from '@/shared/models/iAM/criteria';
+import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 
 @Component({
   components: {CriterionLibraryEditorDialog}
@@ -141,6 +143,7 @@ export default class EditAnalysisMethod extends Vue {
   weightingAttributes: SelectItem[] = [{text: '', value: ''}];
   simulationName: string;
   criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+  rules: InputValidationRules = rules;
 
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {

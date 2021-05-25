@@ -46,10 +46,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var logLine = validationResult.ToLogEntry();
                 validationLogLines.Add(logLine);
             }
+            var combinedLogLines = string.Join(Environment.NewLine, validationLogLines.ToArray());
             var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
             if (numberOfErrors > 0)
             {
-                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation errors.")
+                MessageBuilder = new SimulationMessageBuilder(combinedLogLines)
                 {
                     ItemName = Simulation.Name,
                     ItemId = Simulation.Id,

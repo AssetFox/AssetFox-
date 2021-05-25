@@ -10,7 +10,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class SimulationLogRepository
+    public class SimulationLogRepository : ISimulationLogRepository
     {
         private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
 

@@ -40,6 +40,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             var simulationValidationResults = Simulation.GetAllValidationResults();
 
+            var validationLogLines = new List<string>();
+            foreach (var validationResult in simulationValidationResults)
+            {
+                var logLine = validationResult.ToLogEntry();
+                validationLogLines.Add(logLine);
+            }
             var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
             if (numberOfErrors > 0)
             {

@@ -109,7 +109,7 @@ namespace BridgeCareCore.Services
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             RunValidation(runner);
-            runner.Run();
+            runner.Run(false);
 
             return Task.CompletedTask;
         }

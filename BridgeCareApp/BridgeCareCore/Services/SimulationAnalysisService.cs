@@ -107,7 +107,7 @@ namespace BridgeCareCore.Services
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
-
+            
             RunValidation(runner);
             runner.Run(false);
 
@@ -117,6 +117,7 @@ namespace BridgeCareCore.Services
         private void RunValidation(SimulationRunner runner)
         {
             var validationResults = runner.Simulation.GetAllValidationResults();
+            _unitOfWork.SimulationLogRepo.ClearLog(runner.Simulation.Id);
             var simulationLogDtos = new List<SimulationLogDTO>();
             foreach (var result in validationResults)
             {

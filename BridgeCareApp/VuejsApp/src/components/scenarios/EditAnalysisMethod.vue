@@ -38,6 +38,7 @@
             <v-text-field @input="onSetBenefitProperty('limit', $event)" label="Benefit limit"
                           outline
                           type="number"
+                          min=0
                           :value.number="analysisMethod.benefit.limit"
                           :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotNegative(analysisMethod.benefit.limit)]">
             </v-text-field>

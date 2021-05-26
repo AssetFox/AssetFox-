@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             return new SimulationLogEntity
             {
+                Id = Guid.NewGuid(),
                 Message = dto.Message,
                 SimulationId = dto.SimulationId,
                 Status = dto.Status,

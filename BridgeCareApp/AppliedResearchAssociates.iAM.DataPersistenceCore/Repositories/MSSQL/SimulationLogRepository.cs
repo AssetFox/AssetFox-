@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var entity = dto.ToEntity();
                 entities.Add(entity);
             }
-            _unitOfWork.Context.AddRange(entities);
+            _unitOfWork.Context.AddAll(entities);
         }
     }
 }

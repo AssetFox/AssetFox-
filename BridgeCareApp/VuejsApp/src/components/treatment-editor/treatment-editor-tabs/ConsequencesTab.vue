@@ -171,7 +171,8 @@ export default class ConsequencesTab extends Vue {
 
     this.consequenceCriterionLibraryEditorDialogData = {
       showDialog: true,
-      libraryId: consequence.criterionLibrary.id
+      libraryId: consequence.criterionLibrary.id,
+      isCallFromScenario: true
     };
   }
 

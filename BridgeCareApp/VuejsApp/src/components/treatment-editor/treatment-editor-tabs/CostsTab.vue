@@ -121,7 +121,8 @@ export default class CostsTab extends Vue {
 
     this.costCriterionLibraryEditorDialogData = {
       showDialog: true,
-      libraryId: cost.criterionLibrary.id
+      libraryId: cost.criterionLibrary.id,
+      isCallFromScenario: true
     };
   }
 

@@ -331,7 +331,8 @@ export default class TargetConditionGoalEditor extends Vue {
 
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
-      libraryId: targetConditionGoal.criterionLibrary.id
+      libraryId: targetConditionGoal.criterionLibrary.id,
+      isCallFromScenario: true
     };
   }
 

@@ -508,7 +508,8 @@ export default class CashFlowEditor extends Vue {
 
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
-      libraryId: this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id
+      libraryId: this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id,
+      isCallFromScenario: true
     };
   }
 

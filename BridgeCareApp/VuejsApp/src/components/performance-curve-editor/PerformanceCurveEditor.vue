@@ -443,7 +443,8 @@ export default class PerformanceCurveEditor extends Vue {
 
       this.criterionLibraryEditorDialogData = {
         showDialog: true,
-        libraryId: this.selectedPerformanceCurve.criterionLibrary.id
+        libraryId: this.selectedPerformanceCurve.criterionLibrary.id,
+        isCallFromScenario: true
       };
     }
   }

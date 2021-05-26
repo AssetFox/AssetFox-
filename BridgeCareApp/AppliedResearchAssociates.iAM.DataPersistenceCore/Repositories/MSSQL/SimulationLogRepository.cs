@@ -23,14 +23,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteAll<SimulationLogEntity>(_ => _.SimulationId == simulationId);
         }
 
-        public void CreateLog(SimulationLogDTO dto)
+        public void CreateLogs(IList<SimulationLogDTO> dtos)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == dto.SimulationId))
+            var entities = new List<SimulationLogEntity>();
+            foreach (var dto in dtos)
             {
-                throw new RowNotInTableException($"No simulation with id {dto.SimulationId}");
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == dto.SimulationId))
+                {
+                    throw new RowNotInTableException($"No simulation with id {dto.SimulationId}");
+                }
+                var entity = dto.ToEntity();
+                entities.Add(entity);
             }
-            var entity = dto.ToEntity();
-            _unitOfWork.Context.AddEntity(entity);
+            _unitOfWork.Context.AddRange(entities);
         }
     }
 }

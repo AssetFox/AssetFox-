@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Static;
+using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 
@@ -105,9 +108,31 @@ namespace BridgeCareCore.Services
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
+            RunValidation(runner);
             runner.Run();
 
             return Task.CompletedTask;
+        }
+
+        private void RunValidation(SimulationRunner runner)
+        {
+            var validationResults = runner.Simulation.GetAllValidationResults();
+            var simulationLogDtos = new List<SimulationLogDTO>();
+            foreach (var result in validationResults)
+            {
+                var simulationLogDto = new SimulationLogDTO
+                {
+                    Id = Guid.NewGuid(),
+                    Message = result.Message,
+                    Status = (int)result.Status,
+                    SimulationId = runner.Simulation.Id,
+                    Subject = (int)SimulationLogSubject.Validation,
+                    TimeStamp = DateTime.UtcNow,
+                };
+                simulationLogDtos.Add(simulationLogDto);
+            }
+            _unitOfWork.SimulationLogRepo.CreateLogs(simulationLogDtos);
+            runner.HandleValidationFailures(validationResults);
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationAnalysisDetailDTO simulationAnalysisDetail, DateTime? stopDateTime)

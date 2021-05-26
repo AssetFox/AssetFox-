@@ -14,7 +14,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = dto.Id,
                 Message = dto.Message,
-                TimeStamp = dto.TimeStamp,
                 SimulationId = dto.SimulationId,
                 Status = dto.Status,
                 Subject = dto.Subject,

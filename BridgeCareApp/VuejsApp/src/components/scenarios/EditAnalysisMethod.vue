@@ -1,87 +1,91 @@
 ﻿<template>
-  <v-layout column>
-    <v-flex xs12>
-      <v-layout column>
-        <v-layout justify-center>
-          <v-flex xs2>
-            <v-select :items="weightingAttributes"
-                      @change="onSetAnalysisMethodProperty('attribute', $event)" label="Weighting"
-                      outline
-                      clearable
-                      :value="analysisMethod.attribute">
-            </v-select>
-          </v-flex>
-          <v-flex xs2>
-            <v-select :items="optimizationStrategy"
-                      @change="onSetAnalysisMethodProperty('optimizationStrategy', $event)"
-                      label="Optimization Strategy" outline
-                      :value="analysisMethod.optimizationStrategy">
-            </v-select>
-          </v-flex>
-          <v-flex xs2>
-            <v-select :items="spendingStrategy" @change="onSetAnalysisMethodProperty('spendingStrategy', $event)"
-                      label="Spending Strategy" outline
-                      :value="analysisMethod.spendingStrategy">
-            </v-select>
-          </v-flex>
+  <v-form ref="form"
+          v-model="valid"
+          lazy-validation>
+    <v-layout column>
+      <v-flex xs12>
+        <v-layout column>
+          <v-layout justify-center>
+            <v-flex xs2>
+              <v-select :items="weightingAttributes"
+                        @change="onSetAnalysisMethodProperty('attribute', $event)" label="Weighting"
+                        outline
+                        clearable
+                        :value="analysisMethod.attribute">
+              </v-select>
+            </v-flex>
+            <v-flex xs2>
+              <v-select :items="optimizationStrategy"
+                        @change="onSetAnalysisMethodProperty('optimizationStrategy', $event)"
+                        label="Optimization Strategy" outline
+                        :value="analysisMethod.optimizationStrategy">
+              </v-select>
+            </v-flex>
+            <v-flex xs2>
+              <v-select :items="spendingStrategy" @change="onSetAnalysisMethodProperty('spendingStrategy', $event)"
+                        label="Spending Strategy" outline
+                        :value="analysisMethod.spendingStrategy">
+              </v-select>
+            </v-flex>
+          </v-layout>
+          <v-layout justify-center>
+            <v-spacer/>
+            <v-flex xs2>
+              <v-select :items="benefitAttributes" @change="onSetBenefitProperty('attribute', $event)"
+                        label="Benefit Attribute"
+                        outline
+                        :value="analysisMethod.benefit.attribute">
+              </v-select>
+            </v-flex>
+            <v-flex xs2>
+              <v-text-field @input="onSetBenefitProperty('limit', $event)" label="Benefit limit"
+                            outline
+                            type="number"
+                            min=0
+                            :value.number="analysisMethod.benefit.limit"
+                            :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotNegative(analysisMethod.benefit.limit)]">
+              </v-text-field>
+            </v-flex>
+            <v-spacer/>
+          </v-layout>
+          <v-layout justify-center>
+            <v-spacer></v-spacer>
+            <v-flex xs6>
+              <v-textarea @input="onSetAnalysisMethodProperty('description', $event)" label="Description" no-resize
+                          outline rows="5"
+                          :value="analysisMethod.description">
+              </v-textarea>
+            </v-flex>
+            <v-spacer></v-spacer>
+          </v-layout>
+          <v-layout justify-center>
+            <v-spacer></v-spacer>
+            <v-flex xs6>
+              <v-textarea label="Criteria" no-resize outline readonly rows="5"
+                          v-model="analysisMethod.criterionLibrary.mergedCriteriaExpression">
+                <template slot="append-outer">
+                  <v-btn @click="onShowCriterionLibraryEditorDialog" class="edit-icon" icon>
+                    <v-icon>fas fa-edit</v-icon>
+                  </v-btn>
+                </template>
+              </v-textarea>
+            </v-flex>
+            <v-spacer></v-spacer>
+          </v-layout>
         </v-layout>
-        <v-layout justify-center>
-          <v-spacer/>
-          <v-flex xs2>
-            <v-select :items="benefitAttributes" @change="onSetBenefitProperty('attribute', $event)"
-                      label="Benefit Attribute"
-                      outline
-                      :value="analysisMethod.benefit.attribute">
-            </v-select>
-          </v-flex>
-          <v-flex xs2>
-            <v-text-field @input="onSetBenefitProperty('limit', $event)" label="Benefit limit"
-                          outline
-                          type="number"
-                          min=0
-                          :value.number="analysisMethod.benefit.limit"
-                          :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotNegative(analysisMethod.benefit.limit)]">
-            </v-text-field>
-          </v-flex>
-          <v-spacer/>
-        </v-layout>
-        <v-layout justify-center>
-          <v-spacer></v-spacer>
-          <v-flex xs6>
-            <v-textarea @input="onSetAnalysisMethodProperty('description', $event)" label="Description" no-resize
-                        outline rows="5"
-                        :value="analysisMethod.description">
-            </v-textarea>
-          </v-flex>
-          <v-spacer></v-spacer>
-        </v-layout>
-        <v-layout justify-center>
-          <v-spacer></v-spacer>
-          <v-flex xs6>
-            <v-textarea label="Criteria" no-resize outline readonly rows="5"
-                        v-model="analysisMethod.criterionLibrary.mergedCriteriaExpression">
-              <template slot="append-outer">
-                <v-btn @click="onShowCriterionLibraryEditorDialog" class="edit-icon" icon>
-                  <v-icon>fas fa-edit</v-icon>
-                </v-btn>
-              </template>
-            </v-textarea>
-          </v-flex>
-          <v-spacer></v-spacer>
-        </v-layout>
-      </v-layout>
-    </v-flex>
+      </v-flex>
 
-    <v-flex xs12>
-      <v-layout justify-end row>
-        <v-btn @click="onUpsertAnalysisMethod" class="ara-blue-bg white--text">Save</v-btn>
-        <v-btn @click="onDiscardChanges" class="ara-orange-bg white--text">Discard Changes</v-btn>
-      </v-layout>
-    </v-flex>
+      <v-flex xs12>
+        <v-layout justify-end row>
+          <v-btn @click="onUpsertAnalysisMethod" :disabled="!valid" class="ara-blue-bg white--text">Save</v-btn>
+          <v-btn @click="onDiscardChanges" class="ara-orange-bg white--text">Discard Changes</v-btn>
+        </v-layout>
+      </v-flex>
 
-    <CriterionLibraryEditorDialog :dialogData="criterionLibraryEditorDialogData"
-                                  @submit="onCriterionLibraryEditorDialogSubmit"/>
-  </v-layout>
+      <CriterionLibraryEditorDialog :dialogData="criterionLibraryEditorDialogData"
+                                    @submit="onCriterionLibraryEditorDialogSubmit"/>
+    </v-layout>
+  </v-form>  
 </template>
 
 <script lang="ts">
@@ -145,6 +149,7 @@ export default class EditAnalysisMethod extends Vue {
   simulationName: string;
   criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
   rules: InputValidationRules = rules;
+  valid: boolean = true;
 
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
@@ -209,7 +214,7 @@ export default class EditAnalysisMethod extends Vue {
   }
 
   onSetBenefitProperty(property: string, value: any) {
-    this.analysisMethod.benefit = setItemPropertyValue(property, value, this.analysisMethod.benefit);
+      this.analysisMethod.benefit = setItemPropertyValue(property, value, this.analysisMethod.benefit);
   }
 
   setBenefitAndWeightingAttributes() {
@@ -237,7 +242,11 @@ export default class EditAnalysisMethod extends Vue {
   }
 
   onUpsertAnalysisMethod() {
-    this.upsertAnalysisMethodAction({analysisMethod: this.analysisMethod, scenarioId: this.selectedScenarioId});
+    const form: any = this.$refs.form;
+
+    if (form.validate()) {
+      this.upsertAnalysisMethodAction({analysisMethod: this.analysisMethod, scenarioId: this.selectedScenarioId});
+    }
   }
 
   onDiscardChanges() {

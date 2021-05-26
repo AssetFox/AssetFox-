@@ -122,7 +122,6 @@ namespace BridgeCareCore.Services
             {
                 var simulationLogDto = new SimulationLogDTO
                 {
-                    Id = Guid.NewGuid(),
                     Message = result.Message,
                     Status = (int)result.Status,
                     SimulationId = runner.Simulation.Id,

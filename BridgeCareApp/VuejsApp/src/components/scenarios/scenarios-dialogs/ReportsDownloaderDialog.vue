@@ -81,22 +81,6 @@ export default class ReportsDownloaderDialog extends Vue {
   errorMessage: string = '';
   isDownloading: boolean = false;
 
-  async onDownloadLog() {
-    await ReportsService.downloadSimulationLog(this.dialogData.networkId, this.dialogData.scenarioId)
-       .then((response: AxiosResponse<any>) => {
-          this.isDownloading = false;
-             if (hasValue(response, 'data')) {
-               this.setSuccessMessageAction({message: 'Log downloaded'});
-               FileDownload(response.data, `Simulation log ${this.dialogData.name}.txt`);
-             } else {
-               this.setErrorMessageAction({
-               message: 'Failed to download simulation log. Please try running the simulation and downloading the log again.'
-             });
-           }
-          });
-              
-  }
-
   async onDownloadSummaryReport(download: boolean) {
     if (download) {
       this.errorMessage = '';
@@ -130,7 +114,7 @@ export default class ReportsDownloaderDialog extends Vue {
          this.isDownloading = false;
          if (hasValue(response, 'data')) {
            this.setSuccessMessageAction({message: 'Report downloaded'});
-           FileDownload(response.data, `Simulation Log ${this.dialogData.name}.xlsx`);
+           FileDownload(response.data, `Simulation Log ${this.dialogData.name}.txt`);
          } else {
            this.setErrorMessageAction({
              message: 'Failed to download simulation log. Please try generating and downloading the log again.'

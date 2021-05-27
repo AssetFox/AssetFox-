@@ -2,15 +2,15 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace BridgeCareCore.Controllers
 {
@@ -42,15 +42,16 @@ namespace BridgeCareCore.Controllers
                 UpdateSimulationAnalysisDetail(reportDetailDto);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
-                var response = await UnitOfWork.SimulationLogRepo.GetLog(simulationId);
-
-                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                var logDtos = await UnitOfWork.SimulationLogRepo.GetLog(simulationId);
+                var log = SimulationLogReport.ToLog(logDtos);
+                var bytes = Encoding.Unicode.GetBytes(log);
+                const string contentType = "text/plain";
                 HttpContext.Response.ContentType = contentType;
                 HttpContext.Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
 
-                var fileContentResult = new FileContentResult(response, contentType)
+                var fileContentResult = new FileContentResult(bytes, contentType)
                 {
-                    FileDownloadName = "SummaryReportTestData.xlsx"
+                    FileDownloadName = "SimulationLog.txt"
                 };
 
                 reportDetailDto.Status = "Completed";

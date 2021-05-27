@@ -15,7 +15,7 @@ export default class ReportsService {
         console.log("Downloading log . . . ");
         return coreAxiosInstance.request({
             method: 'POST',
-            url: `${API.SimulationLog}/DownloadSimulationLog/${networkId}/${scenarioId}`,
+            url: `${API.SimulationLog}/GetSimulationLog/${networkId}/${scenarioId}`,
             headers: {'Content-Type': 'text'},
             responseType: 'arraybuffer'
         });

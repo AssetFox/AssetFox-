@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -135,7 +136,7 @@ namespace Simulation
                 .GetStandAloneSimulation(parameters.NetworkId, parameters.SimulationId);
 
             var errorIsPresent = false;
-            foreach (var result in newSimulation.Network.Explorer.GetAllValidationResults())
+            foreach (var result in newSimulation.Network.Explorer.GetAllValidationResults(Enumerable.Empty<string>()))
             {
                 errorIsPresent |= result.Status == ValidationStatus.Error;
                 Console.WriteLine($"[{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");

@@ -43,5 +43,7 @@ namespace AppliedResearchAssociates.iAM.Domains
         }
 
         private readonly List<Section> _Sections = new List<Section>();
+
+        public string ShortDescription => Name;
     }
 }

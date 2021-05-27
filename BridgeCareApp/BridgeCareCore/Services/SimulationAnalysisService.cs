@@ -116,14 +116,15 @@ namespace BridgeCareCore.Services
 
         private void RunValidation(SimulationRunner runner)
         {
-            var validationResults = runner.Simulation.GetAllValidationResults();
+            var validationResults = runner.Simulation.GetAllValidationResults(Enumerable.Empty<string>());
             _unitOfWork.SimulationLogRepo.ClearLog(runner.Simulation.Id);
             var simulationLogDtos = new List<SimulationLogDTO>();
             foreach (var result in validationResults)
             {
+                var breadcrumb = string.Join(".", result.Target.ValidationPath);
                 var simulationLogDto = new SimulationLogDTO
                 {
-                    Message = result.Message,
+                    Message = $"{breadcrumb} {result.Message}",
                     Status = (int)result.Status,
                     SimulationId = runner.Simulation.Id,
                     Subject = (int)SimulationLogSubject.Validation,

@@ -165,7 +165,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public ValidationResultBag RunValidation()
         {
-            var simulationValidationResults = Simulation.GetAllValidationResults();
+            var simulationValidationResults = Simulation.GetAllValidationResults(Enumerable.Empty<string>());
 
             HandleValidationFailures(simulationValidationResults);
             return simulationValidationResults;

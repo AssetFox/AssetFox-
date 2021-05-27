@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 {
     public static class SimulationLogReport
     {
-        private static int PrefixLength = "Warning: ".Length;
+        private static readonly int PrefixLength = "Warning: ".Length;
 
         public static string ToPrefix(SimulationLogStatus status) => status switch
         {

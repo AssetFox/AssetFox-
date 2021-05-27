@@ -12,7 +12,6 @@ export default class ReportsService {
     }
 
     static downloadSimulationLog(networkId: string, scenarioId: string): AxiosPromise {
-        console.log("Downloading log . . . ");
         return coreAxiosInstance.request({
             method: 'POST',
             url: `${API.SimulationLog}/GetSimulationLog/${networkId}/${scenarioId}`,

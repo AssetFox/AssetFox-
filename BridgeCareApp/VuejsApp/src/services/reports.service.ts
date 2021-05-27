@@ -10,4 +10,14 @@ export default class ReportsService {
             responseType: 'arraybuffer'
         });
     }
+
+    static downloadSimulationLog(networkId: string, scenarioId: string): AxiosPromise {
+        console.log("Downloading log . . . ");
+        return coreAxiosInstance.request({
+            method: 'POST',
+            url: `${API.SimulationLog}/DownloadSimulationLog/${networkId}/${scenarioId}`,
+            headers: {'Content-Type': 'text'},
+            responseType: 'arraybuffer'
+        });
+    }
 }

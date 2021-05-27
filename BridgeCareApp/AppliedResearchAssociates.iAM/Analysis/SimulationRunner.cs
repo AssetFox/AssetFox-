@@ -176,7 +176,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
             if (numberOfErrors > 0)
             {
-                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation errors.")
+                var errorsWord = numberOfErrors == 1 ? "error" : "errors";
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation {errorsWord}. Download the log to see all validation results.")
                 {
                     ItemName = Simulation.Name,
                     ItemId = Simulation.Id,

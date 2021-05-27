@@ -16,6 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public CriterionLibraryRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
+        // [Obselete] - Not getting used anywhere
         public void JoinEntitiesWithCriteria(Dictionary<string, List<Guid>> entityIdsPerExpression, string joinEntity, string prependName) =>
             entityIdsPerExpression.Keys.ForEach(expression =>
             {
@@ -105,6 +106,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             });
 
+        // [Obselete] - Not getting used anywhere
         public void UpsertCriterionLibraries(List<CriterionLibraryEntity> criterionLibraryEntities)
         {
             var existingEntityIds = _unitOfWork.Context.CriterionLibrary.Select(_ => _.Id).ToList();
@@ -272,6 +274,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.AddAll(joinEntities, _unitOfWork.UserEntity?.Id);
         }
 
+        // [Obselete] - Not getting used anywhere
         public void JoinSelectableTreatmentEntitiesWithCriteria(
             Dictionary<Guid, List<string>> expressionsPerSelectableTreatmentEntityId, string simulationName)
         {

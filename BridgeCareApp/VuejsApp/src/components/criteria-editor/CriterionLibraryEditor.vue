@@ -171,6 +171,9 @@ export default class CriterionLibraryEditor extends Vue {
     @Action('setSelectedCriterionIsValid')
     setSelectedCriterionIsValidAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+    @Action('selectScenarioRelatedCriterion')
+    selectScenarioRelatedCriterionAction: any;
+    @Action('upsertSelectedScenarioRelatedCriterion') upsertSelectedScenarioRelatedCriterionAction: any;
 
     hasSelectedCriterionLibrary: boolean = false;
     criterionLibrarySelectItems: SelectItem[] = [];
@@ -189,6 +192,7 @@ export default class CriterionLibraryEditor extends Vue {
     uuidNIL: string = getBlankGuid();
     callFromScenario: boolean = false;
     criteriaForScenario: string | null = null;
+    selectedScenarioRelatedCriteria: CriterionLibrary = clone(emptyCriterionLibrary);
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -248,9 +252,12 @@ export default class CriterionLibraryEditor extends Vue {
     onScenarioRelatedCriteria() {
         this.criteriaForScenario = this.dialogLibraryId;
         this.callFromScenario = this.dialogIsFromScenario;
+        this.selectedScenarioRelatedCriteria = clone(
+            this.scenarioRelatedCriteria
+        );
         this.criteriaEditorData = {
             ...this.criteriaEditorData,
-            mergedCriteriaExpression: this.scenarioRelatedCriteria
+            mergedCriteriaExpression: this.selectedScenarioRelatedCriteria
                 .mergedCriteriaExpression,
         };
     }
@@ -269,7 +276,7 @@ export default class CriterionLibraryEditor extends Vue {
         ) {
             this.criteriaEditorData = {
                 ...this.criteriaEditorData,
-                mergedCriteriaExpression: this.scenarioRelatedCriteria
+                mergedCriteriaExpression: this.selectedScenarioRelatedCriteria
                     .mergedCriteriaExpression,
             };
         } else {
@@ -289,6 +296,7 @@ export default class CriterionLibraryEditor extends Vue {
                 ),
             });
         } else {
+            //this.$emit('submit', this.selectedScenarioRelatedCriteria);
             this.$emit('submit', this.selectedCriterionLibrary);
         }
     }
@@ -328,10 +336,21 @@ export default class CriterionLibraryEditor extends Vue {
         this.canUpdateOrCreate = result.validated;
 
         if (result.validated) {
-            this.selectedCriterionLibrary = {
+
+            if(!this.dialogIsFromScenario){
+                this.selectedCriterionLibrary = {
                 ...this.selectedCriterionLibrary,
                 mergedCriteriaExpression: result.criteria!,
-            };
+                };
+            }
+            else{
+                this.selectedScenarioRelatedCriteria = {
+                ...this.selectedScenarioRelatedCriteria,
+                mergedCriteriaExpression: result.criteria!,
+                forScenario: true
+                };
+                this.upsertSelectedScenarioRelatedCriterionAction({library: this.selectedScenarioRelatedCriteria})
+            }
 
             this.setSelectedCriterionIsValidAction({ isValid: true });
         } else {

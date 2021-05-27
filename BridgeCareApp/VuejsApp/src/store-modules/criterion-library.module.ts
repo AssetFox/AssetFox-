@@ -41,6 +41,9 @@ const mutations = {
         } else {
             state.scenarioRelatedCriteria = clone(emptyCriterionLibrary);
         }
+    },
+    upsertScenarioRelatedCriteriaMutator(state: any, library: CriterionLibrary){
+        state.scenarioRelatedCriteria = clone(library);
     }
 };
 
@@ -85,6 +88,9 @@ const actions = {
                     commit('selectedCriterionIsValidMutator', false);
                 }
             });
+    },
+    upsertSelectedScenarioRelatedCriterion({commit, dispatch}: any, payload: any){
+        commit('upsertScenarioRelatedCriteriaMutator', payload.library);
     }
 };
 

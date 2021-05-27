@@ -21,8 +21,11 @@
                 <v-layout justify-space-between row>
                     <v-btn
                         :disabled="
-                            stateSelectedCriterionLibrary.id === uuidNIL ||
-                                !stateSelectedCriterionIsValid
+                            (
+                                (stateSelectedCriterionLibrary.id === uuidNIL ||
+                                !stateSelectedCriterionIsValid) && !dialogData.isCallFromScenario
+                                || (!stateSelectedCriterionIsValid && dialogData.isCallFromScenario)
+                                )
                         "
                         class="ara-blue-bg white--text"
                         @click="onBeforeSubmit(true)"
@@ -75,6 +78,7 @@ export default class CriterionLibraryEditorDialog extends Vue {
     stateSelectedCriterionLibrary: CriterionLibrary;
     @State(state => state.criterionModule.selectedCriterionIsValid)
     stateSelectedCriterionIsValid: boolean;
+    @State(state => state.criterionModule.scenarioRelatedCriteria) stateScenarioRelatedCriteria: CriterionLibrary;
 
     @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
     //@Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
@@ -156,7 +160,7 @@ export default class CriterionLibraryEditorDialog extends Vue {
     }
 
     onBeforeSubmit(submit: boolean) {
-        if (this.hasUnsavedChanges) {
+        if (this.hasUnsavedChanges && !this.dialogData.isCallFromScenario) {
             this.onShowHasUnsavedChangesAlert();
         } else {
             this.onSubmit(submit);
@@ -179,7 +183,7 @@ export default class CriterionLibraryEditorDialog extends Vue {
 
     onSubmit(submit: boolean) {
         if (submit) {
-            this.$emit('submit', this.stateSelectedCriterionLibrary);
+            this.$emit('submit', this.stateScenarioRelatedCriteria);
         } else {
             this.$emit('submit', null);
         }

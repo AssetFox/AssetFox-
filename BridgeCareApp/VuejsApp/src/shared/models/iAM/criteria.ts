@@ -35,6 +35,7 @@ export interface CriterionLibrary {
     description: string;
     owner?: string;
     shared?: boolean;
+    forScenario: boolean
 }
 
 export interface CriteriaEditorData {
@@ -56,7 +57,8 @@ export const emptyCriterionLibrary: CriterionLibrary = {
     id: getBlankGuid(),
     name: '',
     description: '',
-    mergedCriteriaExpression: ''
+    mergedCriteriaExpression: '',
+    forScenario: false
 };
 
 export const emptyCriteriaEditorData: CriteriaEditorData = {

@@ -318,6 +318,10 @@ export default class BudgetPriorityEditor extends Vue {
           id: budgetPercentagePair.budgetId, name: budgetPercentagePair.budgetName
         })) as SimpleBudgetDetail[];
 
+      //[WIP] Added this to remove the infinite loop
+      if(isNil(this.stateScenarioSimpleBudgetDetails)){
+        return true;
+      }
     return isEqual(simpleBudgetDetails, this.stateScenarioSimpleBudgetDetails);
   }
 
@@ -503,7 +507,7 @@ export default class BudgetPriorityEditor extends Vue {
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
       libraryId: this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id,
-      isCallFromScenario: true
+      isCallFromScenario: false
     };
   }
 

@@ -124,7 +124,7 @@ namespace BridgeCareCore.Services
                 var breadcrumb = string.Join(".", result.Target.ValidationPath);
                 var simulationLogDto = new SimulationLogDTO
                 {
-                    Message = $"{breadcrumb} {result.Message}",
+                    Message = $"{result.Message} {breadcrumb}",
                     Status = (int)result.Status,
                     SimulationId = runner.Simulation.Id,
                     Subject = (int)SimulationLogSubject.Validation,

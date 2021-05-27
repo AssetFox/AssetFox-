@@ -7,5 +7,6 @@ namespace AppliedResearchAssociates.iAM.DTOs.Static
     public enum SimulationLogSubject
     {
         Validation,
+        ExceptionThrown,
     }
 }

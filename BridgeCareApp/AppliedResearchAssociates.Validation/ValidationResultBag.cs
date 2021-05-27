@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.Validation
     {
         public int Count => ((IReadOnlyCollection<ValidationResult>)Results).Count;
 
-        public void Add(ValidationStatus status, string message, object target, string key = null) => Results.Add(new ValidationTarget(target, key).CreateResult(status, message));
+        public void Add(ValidationStatus status, string message, object target, List<string> validationPath, string key = null) => Results.Add(new ValidationTarget(target, key, validationPath).CreateResult(status, message));
 
         public void Add(IEnumerable<ValidationResult> results) => Results.UnionWith(results);
 

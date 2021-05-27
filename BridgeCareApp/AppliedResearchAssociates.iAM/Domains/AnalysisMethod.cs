@@ -60,52 +60,52 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public TargetConditionGoal AddTargetConditionGoal() => _TargetConditionGoals.GetAdd(new TargetConditionGoal(Simulation.Network.Explorer));
 
-        public ValidationResultBag GetDirectValidationResults()
+        public ValidationResultBag GetDirectValidationResults(List<string> validationPath)
         {
             var results = new ValidationResultBag();
 
             if (!OptimizationStrategy.IsDefined())
             {
-                results.Add(ValidationStatus.Error, MessageStrings.InvalidOptimizationStrategy, this, nameof(OptimizationStrategy));
+                results.Add(ValidationStatus.Error, MessageStrings.InvalidOptimizationStrategy, this, validationPath, nameof(OptimizationStrategy));
             }
 
             if (!SpendingStrategy.IsDefined())
             {
-                results.Add(ValidationStatus.Error, MessageStrings.InvalidSpendingStrategy, this, nameof(SpendingStrategy));
+                results.Add(ValidationStatus.Error, MessageStrings.InvalidSpendingStrategy, this, validationPath, nameof(SpendingStrategy));
             }
 
             var prioritiesByLevelYear = BudgetPriorities.ToLookup(priority => (priority.PriorityLevel, priority.Year));
             if (prioritiesByLevelYear.Any(group => group.Count() > 1 && group.Any(priority => priority.Criterion.ExpressionIsBlank)))
             {
-                results.Add(ValidationStatus.Error, "At least one priority level-year has multiple criteria where at least one criterion is blank.", this, nameof(BudgetPriorities));
+                results.Add(ValidationStatus.Error, "At least one priority level-year has multiple criteria where at least one criterion is blank.", this, validationPath, nameof(BudgetPriorities));
             }
 
             var deficientConditionGoalNames = GetNames(DeficientConditionGoals);
             if (deficientConditionGoalNames.Distinct().Count() < deficientConditionGoalNames.Count)
             {
-                results.Add(ValidationStatus.Error, "Multiple deficient condition goals have the same name.", this, nameof(DeficientConditionGoals));
+                results.Add(ValidationStatus.Error, "Multiple deficient condition goals have the same name.", this, validationPath, nameof(DeficientConditionGoals));
             }
 
             var targetConditionGoalNames = GetNames(TargetConditionGoals);
             if (targetConditionGoalNames.Distinct().Count() < targetConditionGoalNames.Count)
             {
-                results.Add(ValidationStatus.Error, "Multiple target condition goals have the same name.", this, nameof(TargetConditionGoals));
+                results.Add(ValidationStatus.Error, "Multiple target condition goals have the same name.", this, validationPath, nameof(TargetConditionGoals));
             }
 
             var remainingLifeLimitsWithBlankCriterion = RemainingLifeLimits.Where(limit => limit.Criterion.ExpressionIsBlank).ToArray();
             if (remainingLifeLimitsWithBlankCriterion.Select(limit => limit.Attribute).Distinct().Count() < remainingLifeLimitsWithBlankCriterion.Length)
             {
-                results.Add(ValidationStatus.Warning, "At least one attribute has more than one remaining life limit with a blank criterion.", this, nameof(RemainingLifeLimits));
+                results.Add(ValidationStatus.Warning, "At least one attribute has more than one remaining life limit with a blank criterion.", this, validationPath, nameof(RemainingLifeLimits));
             }
 
             if (OptimizationStrategy.UsesRemainingLife() && RemainingLifeLimits.Count == 0)
             {
-                results.Add(ValidationStatus.Error, "Optimization strategy uses remaining life, but no remaining life limits are defined.", this);
+                results.Add(ValidationStatus.Error, "Optimization strategy uses remaining life, but no remaining life limits are defined.", this, validationPath);
             }
 
             if (ShouldRestrictCashFlowToFirstYearBudget && ShouldUseExtraFundsAcrossBudgets)
             {
-                results.Add(ValidationStatus.Error, "Using extra funds across budgets and restricting cash flow future budgets are currently incompatible settings.", this);
+                results.Add(ValidationStatus.Error, "Using extra funds across budgets and restricting cash flow future budgets are currently incompatible settings.", this, validationPath);
             }
 
             return results;

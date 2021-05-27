@@ -1,9 +1,11 @@
-﻿namespace AppliedResearchAssociates.Validation
+﻿using System.Collections.Generic;
+
+namespace AppliedResearchAssociates.Validation
 {
     public interface IValidator
     {
         ValidatorBag Subvalidators { get; }
 
-        ValidationResultBag GetDirectValidationResults();
+        ValidationResultBag GetDirectValidationResults(List<string> validationPath);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
@@ -8,6 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void ClearLog(Guid simulationId);
         void CreateLogs(IList<SimulationLogDTO> dtos);
+        Task<List<SimulationLogDTO>> GetLog(Guid simulationId);
     }
 
     public static class ISimulationLogRepositoryExtensions

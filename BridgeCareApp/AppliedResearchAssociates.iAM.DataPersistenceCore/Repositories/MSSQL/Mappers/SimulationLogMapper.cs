@@ -19,5 +19,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Subject = dto.Subject,
             };
         }
+
+        internal static SimulationLogDTO ToDTO(SimulationLogEntity entity)
+        {
+            var r = new SimulationLogDTO
+            {
+                Id = entity.Id,
+                Message = entity.Message,
+                SimulationId = entity.SimulationId,
+                Status = entity.Status,
+                Subject = entity.Subject,
+                TimeStamp = entity.CreatedDate,
+            };
+            return r;
+        }
     }
 }

@@ -51,5 +51,6 @@ namespace AppliedResearchAssociates.iAM.Domains
         public bool Remove(Attribute attribute) => HistoryPerAttribute.Remove(attribute);
 
         private readonly Dictionary<Attribute, object> HistoryPerAttribute = new Dictionary<Attribute, object>();
+        public string ShortDescription => Name;
     }
 }

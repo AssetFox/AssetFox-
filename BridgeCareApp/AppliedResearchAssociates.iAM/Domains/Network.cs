@@ -68,5 +68,7 @@ namespace AppliedResearchAssociates.iAM.Domains
         private readonly List<Simulation> _Simulations = new List<Simulation>();
 
         private string _SpatialWeightUnit = "";
+
+        public string ShortDescription => Name;
     }
 }

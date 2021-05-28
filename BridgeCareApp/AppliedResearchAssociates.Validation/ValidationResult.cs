@@ -5,7 +5,11 @@ namespace AppliedResearchAssociates.Validation
 {
     public sealed class ValidationResult
     {
-        public ValidationResult(ValidationTarget target, ValidationStatus status, string message)
+        public ValidationResult(
+            ValidationTarget target,
+            ValidationStatus status,
+            string message
+            )
         {
             Target = target ?? throw new ArgumentNullException(nameof(target));
             Status = status;

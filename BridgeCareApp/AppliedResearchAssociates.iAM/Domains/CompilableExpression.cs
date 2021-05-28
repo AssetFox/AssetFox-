@@ -61,5 +61,7 @@ namespace AppliedResearchAssociates.iAM.Domains
             Compile();
             _EnsureCompiled = null;
         }
+
+        public string ShortDescription => _Expression ?? "Uncompiled expression";
     }
 }

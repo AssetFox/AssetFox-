@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public IReadOnlyCollection<BudgetPercentagePair> BudgetPercentagePairs => _BudgetPercentagePairs;
 
+        public string ShortDescription => $"{Year} Priority {PriorityLevel}";
+
         public Criterion Criterion { get; }
 
         public int PriorityLevel { get; set; }

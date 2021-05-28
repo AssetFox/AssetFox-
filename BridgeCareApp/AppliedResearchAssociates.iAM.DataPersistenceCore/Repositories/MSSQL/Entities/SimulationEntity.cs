@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         {
             CommittedProjects = new HashSet<CommittedProjectEntity>();
             SimulationUserJoins = new HashSet<SimulationUserEntity>();
+            SimulationLogs = new HashSet<SimulationLogEntity>();
         }
 
         public Guid Id { get; set; }
@@ -47,6 +48,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual SimulationAnalysisDetailEntity SimulationAnalysisDetail { get; set; }
 
         public virtual SimulationReportDetailEntity SimulationReportDetail { get; set; }
+
+        public virtual ICollection<SimulationLogEntity> SimulationLogs { get; set; }
 
         public virtual ICollection<ReportIndexEntity> SimulationReports { get; set; }
 

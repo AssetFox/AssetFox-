@@ -13,6 +13,8 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public string Name { get; set; }
 
+        public string ShortDescription => Name ?? "Unnamed budget";
+
         public ValidatorBag Subvalidators => new ValidatorBag { YearlyAmounts };
 
         public IReadOnlyList<BudgetAmount> YearlyAmounts => _YearlyAmounts;

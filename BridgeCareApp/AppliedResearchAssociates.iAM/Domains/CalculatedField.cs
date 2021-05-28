@@ -10,6 +10,8 @@ namespace AppliedResearchAssociates.iAM.Domains
     {
         internal CalculatedField(string name, Explorer explorer) : base(name) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
+        public string ShortDescription => Name;
+
         public bool IsDecreasingWithDeterioration { get; set; }
 
         public ValidatorBag Subvalidators => new ValidatorBag { ValueSources };

@@ -40,6 +40,8 @@ namespace AppliedResearchAssociates.iAM.Domains
             return results;
         }
 
+        public string ShortDescription => Name;
+
         public abstract IEnumerable<TreatmentScheduling> GetSchedulings();
 
         internal abstract bool CanUseBudget(Budget budget);

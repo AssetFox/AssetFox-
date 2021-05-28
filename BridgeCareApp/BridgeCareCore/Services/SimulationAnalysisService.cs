@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Static;
+using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 
@@ -104,10 +107,32 @@ namespace BridgeCareCore.Services
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
-
-            runner.Run();
+            
+            RunValidation(runner);
+            runner.Run(false);
 
             return Task.CompletedTask;
+        }
+
+        private void RunValidation(SimulationRunner runner)
+        {
+            var validationResults = runner.Simulation.GetAllValidationResults(Enumerable.Empty<string>());
+            _unitOfWork.SimulationLogRepo.ClearLog(runner.Simulation.Id);
+            var simulationLogDtos = new List<SimulationLogDTO>();
+            foreach (var result in validationResults)
+            {
+                var breadcrumb = string.Join(".", result.Target.ValidationPath);
+                var simulationLogDto = new SimulationLogDTO
+                {
+                    Message = $"{result.Message} {breadcrumb}",
+                    Status = (int)result.Status,
+                    SimulationId = runner.Simulation.Id,
+                    Subject = (int)SimulationLogSubject.Validation,
+                };
+                simulationLogDtos.Add(simulationLogDto);
+            }
+            _unitOfWork.SimulationLogRepo.CreateLogs(simulationLogDtos);
+            runner.HandleValidationFailures(validationResults);
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationAnalysisDetailDTO simulationAnalysisDetail, DateTime? stopDateTime)

@@ -38,6 +38,8 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public ValidatorBag Subvalidators => new ValidatorBag();
 
+        public string ShortDescription => nameof(Benefit);
+
         public ValidationResultBag GetDirectValidationResults()
         {
             var results = new ValidationResultBag();

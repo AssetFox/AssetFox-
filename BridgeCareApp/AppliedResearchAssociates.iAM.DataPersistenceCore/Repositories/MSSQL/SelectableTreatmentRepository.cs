@@ -218,7 +218,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return new List<TreatmentLibraryDTO>();
             }
 
-            return _unitOfWork.Context.TreatmentLibrary
+            return _unitOfWork.Context.TreatmentLibrary.OrderBy(tl => tl.Name)
                 .Include(_ => _.Treatments)
                 .ThenInclude(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)

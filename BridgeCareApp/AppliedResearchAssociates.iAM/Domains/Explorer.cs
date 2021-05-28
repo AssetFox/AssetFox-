@@ -100,5 +100,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                 _ = attributes.Remove(attribute);
             }
         }
+
+        public string ShortDescription => nameof(Explorer);
     }
 }

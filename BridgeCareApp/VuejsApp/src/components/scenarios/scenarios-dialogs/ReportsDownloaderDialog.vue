@@ -18,18 +18,17 @@
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
-        <v-list-tile :disabled="isBusy"
-                     :key="item"
-                     avatar
-                     v-for="item in reports">
           <v-layout align-start row>
             <!-- <v-checkbox :label="item"
                         :value="item"
                         color="primary lighten-1"
                         v-model="selectedReports">
             </v-checkbox> -->
-            <v-chip color='ara-blue-bg' text-color='white' @click="onDownloadReports(true)">
+            <v-chip color='ara-blue-bg' text-color='white' @click="onDownloadSummaryReport(true)">
                             Summary Report
+                        </v-chip>
+            <v-chip color='ara-blue-bg' text-color='white' @click="onDownloadSimulationLog(true)">
+                            Simulation Log
                         </v-chip>
           </v-layout>
         </v-list-tile>
@@ -78,40 +77,52 @@ export default class ReportsDownloaderDialog extends Vue {
   @Action('setSuccessMessage') setSuccessMessageAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
 
-  reports: string[] = [/*'Detailed Report', */'Summary Report'];
-  selectedReports: string[] = ['Summary Report'];
+  reports: string[] = [/*'Detailed Report', */'Summary Report', 'Simulation Log'];
   errorMessage: string = '';
   isDownloading: boolean = false;
 
-  async onDownloadReports(download: boolean) {
+  async onDownloadSummaryReport(download: boolean) {
     if (download) {
-      if (this.selectedReports.length === 0) {
-        this.errorMessage = 'Please select report for download';
-      } else {
-        this.errorMessage = '';
-        for (let report of this.selectedReports) {
-          switch (report) {
-            case 'Summary Report': {
-              this.isDownloading = true;
-              this.dialogData.showModal = false;
-              await ReportsService.downloadSummaryReport(this.dialogData.networkId, this.dialogData.scenarioId)
-                  .then((response: AxiosResponse<any>) => {
-                    this.isDownloading = false;
-                    if (hasValue(response, 'data')) {
-                      this.setSuccessMessageAction({message: 'Report downloaded'});
-                      FileDownload(response.data, `Summary Report ${this.dialogData.name}.xlsx`);
-                    } else {
-                      this.setErrorMessageAction({
-                        message: 'Failed to download summary report. Please try generating and downloading the report again.'
-                      });
-                    }
-                  });
-              break;
-            }
-          }
-        }
+      this.errorMessage = '';
+      this.isDownloading = true;
+      this.dialogData.showModal = false;
+      await ReportsService.downloadSummaryReport(this.dialogData.networkId, this.dialogData.scenarioId)
+         .then((response: AxiosResponse<any>) => {
+         this.isDownloading = false;
+         if (hasValue(response, 'data')) {
+           this.setSuccessMessageAction({message: 'Report downloaded'});
+           FileDownload(response.data, `Summary Report ${this.dialogData.name}.xlsx`);
+         } else {
+           this.setErrorMessageAction({
+             message: 'Failed to download summary report. Please try generating and downloading the report again.'
+           });
+         }
+        });
       }
-    } else {
+    else {
+      this.dialogData.showModal = false;
+    }
+  }
+
+  async onDownloadSimulationLog(download: boolean) {
+    if (download) {
+      this.errorMessage = '';
+      this.isDownloading = true;
+      this.dialogData.showModal = false;
+      await ReportsService.downloadSimulationLog(this.dialogData.networkId, this.dialogData.scenarioId)
+         .then((response: AxiosResponse<any>) => {
+         this.isDownloading = false;
+         if (hasValue(response, 'data')) {
+           this.setSuccessMessageAction({message: 'Report downloaded'});
+           FileDownload(response.data, `Simulation Log ${this.dialogData.name}.txt`);
+         } else {
+           this.setErrorMessageAction({
+             message: 'Failed to download simulation log. Please try generating and downloading the log again.'
+           });
+         }
+        });
+      }
+    else {
       this.dialogData.showModal = false;
     }
   }

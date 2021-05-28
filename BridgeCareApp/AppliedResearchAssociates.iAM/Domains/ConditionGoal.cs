@@ -33,5 +33,6 @@ namespace AppliedResearchAssociates.iAM.Domains
         public abstract bool IsMet(double actual);
 
         protected ConditionGoal(Explorer explorer) => Criterion = new Criterion(explorer ?? throw new ArgumentNullException(nameof(explorer)));
+        public string ShortDescription => Name;
     }
 }

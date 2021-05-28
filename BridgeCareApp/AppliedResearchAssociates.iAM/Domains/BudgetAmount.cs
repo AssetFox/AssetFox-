@@ -8,6 +8,8 @@ namespace AppliedResearchAssociates.iAM.Domains
         {
         }
 
+        public string ShortDescription => "Amount";
+
         public ValidatorBag Subvalidators => new ValidatorBag();
 
         public decimal Value { get; set; }

@@ -112,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = entity.Name,
                 Description = entity.Description,
                 Treatments = entity.Treatments.Any()
-                    ? entity.Treatments.Select(_ => _.ToDto()).ToList()
+                    ? entity.Treatments.Select(_ => _.ToDto()).OrderBy(t => t.Name).ToList()
                     : new List<TreatmentDTO>(),
                 AppliedScenarioIds = entity.TreatmentLibrarySimulationJoins.Any()
                     ? entity.TreatmentLibrarySimulationJoins.Select(_ => _.SimulationId).ToList()

@@ -7,6 +7,8 @@ namespace AppliedResearchAssociates.iAM.Domains
     {
         internal BudgetPercentagePair(Budget budget) => Budget = budget ?? throw new ArgumentNullException(nameof(budget));
 
+        public string ShortDescription => $"Percentage {Percentage}";
+
         public Budget Budget { get; }
 
         public decimal Percentage { get; set; }

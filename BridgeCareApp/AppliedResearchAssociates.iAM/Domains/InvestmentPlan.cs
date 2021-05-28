@@ -123,5 +123,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                 budgetPriority.SynchronizeWithBudgets(Budgets);
             }
         }
+
+        public string ShortDescription => nameof(InvestmentPlan);
     }
 }

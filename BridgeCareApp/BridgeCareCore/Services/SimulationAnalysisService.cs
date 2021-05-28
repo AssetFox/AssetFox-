@@ -67,7 +67,7 @@ namespace BridgeCareCore.Services
             runner.Failure += (sender, eventArgs) =>
             {
                 simulationAnalysisDetail.Status = eventArgs.Message;
-                //UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                 _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
                 _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };

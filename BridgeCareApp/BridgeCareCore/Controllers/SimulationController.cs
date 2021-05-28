@@ -238,7 +238,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario error::{e.Message}");
-                var logDto = SimulationLogDtos.ExceptionGeneric(simulationId);
+                var logDto = SimulationLogDtos.GenericException(simulationId, e);
                 UnitOfWork.SimulationLogRepo.CreateLog(logDto);
                 throw;
             }

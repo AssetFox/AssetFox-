@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
@@ -255,13 +255,22 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private int? FirstUnshadowedYearForAnyTreatment;
 
+        private static readonly Random Random = new Random(1);
+
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
+            // wjwjwj calculations here
             var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
-
+            var allDataUpdates = dataUpdates.Select(x => $"{x.Key} {x.Item2}");
+            var oneString = string.Join(Environment.NewLine, allDataUpdates.ToArray());
             foreach (var (key, value) in dataUpdates)
             {
-                SetNumber(key, value);
+                var setValue = value;
+                if (Random.Next(20) == 1)
+                {
+                    setValue = double.NaN;
+                }
+                SetNumber(key, setValue);
             }
         }
 

@@ -44,9 +44,8 @@ namespace BridgeCareCore.Controllers
                 var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(response);
                 return Ok(userInfo);
             }
-            catch (Exception e)
+            catch 
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }

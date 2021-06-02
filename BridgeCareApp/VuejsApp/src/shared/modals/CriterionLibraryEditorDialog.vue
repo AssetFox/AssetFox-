@@ -11,7 +11,9 @@
                     <div>
                         <CriterionLibraryEditor
                             :dialogLibraryId="dialogData.libraryId"
-                            :dialogIsFromScenario="dialogData.isCallFromScenario"
+                            :dialogIsFromScenario="
+                                dialogData.isCallFromScenario
+                            "
                             @submit="onSubmitSelectedCriterionLibrary"
                         />
                     </div>
@@ -21,11 +23,11 @@
                 <v-layout justify-space-between row>
                     <v-btn
                         :disabled="
-                            (
-                                (stateSelectedCriterionLibrary.id === uuidNIL ||
-                                !stateSelectedCriterionIsValid) && !dialogData.isCallFromScenario
-                                || (!stateSelectedCriterionIsValid && dialogData.isCallFromScenario)
-                                )
+                            ((stateSelectedCriterionLibrary.id === uuidNIL ||
+                                !stateSelectedCriterionIsValid) &&
+                                !dialogData.isCallFromScenario) ||
+                                (!stateSelectedCriterionIsValid &&
+                                    dialogData.isCallFromScenario)
                         "
                         class="ara-blue-bg white--text"
                         @click="onBeforeSubmit(true)"
@@ -61,7 +63,7 @@ import {
 import { hasValue } from '@/shared/utils/has-value-util';
 import CriterionLibraryEditor from '@/components/criteria-editor/CriterionLibraryEditor.vue';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
-import { clone } from 'ramda';
+import { clone, isNil } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
@@ -78,7 +80,8 @@ export default class CriterionLibraryEditorDialog extends Vue {
     stateSelectedCriterionLibrary: CriterionLibrary;
     @State(state => state.criterionModule.selectedCriterionIsValid)
     stateSelectedCriterionIsValid: boolean;
-    @State(state => state.criterionModule.scenarioRelatedCriteria) stateScenarioRelatedCriteria: CriterionLibrary;
+    @State(state => state.criterionModule.scenarioRelatedCriteria)
+    stateScenarioRelatedCriteria: CriterionLibrary;
 
     @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
     //@Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
@@ -88,6 +91,7 @@ export default class CriterionLibraryEditorDialog extends Vue {
     @Action('selectScenarioRelatedCriterion')
     selectScenarioRelatedCriterionAction: any;
     @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
+    @Action('upsertCriterionLibrary') upsertCriterionLibraryAction: any;
 
     criterionLibraryEditorSelectedCriterionLibrary: CriterionLibrary = clone(
         emptyCriterionLibrary,
@@ -131,7 +135,6 @@ export default class CriterionLibraryEditorDialog extends Vue {
             if (hasValue(criteriaEditorCard)) {
                 criteriaEditorCard[0].setAttribute('style', 'height:100%');
             }
-
         } else {
             if (hasValue(htmlTag)) {
                 htmlTag[0].setAttribute('style', 'overflow:auto;');
@@ -182,8 +185,17 @@ export default class CriterionLibraryEditorDialog extends Vue {
     }
 
     onSubmit(submit: boolean) {
+        // [TODO] - save the criteria to the database for that particular scenario
         if (submit) {
-            this.$emit('submit', this.stateScenarioRelatedCriteria);
+            if (!isNil(this.stateScenarioRelatedCriteria)) {
+                this.upsertCriterionLibraryAction({
+                    library: this.stateScenarioRelatedCriteria,
+                })
+                .then((id: string) => {
+                    this.stateScenarioRelatedCriteria.id = id;
+                    this.$emit('submit', this.stateScenarioRelatedCriteria);
+                });
+            }
         } else {
             this.$emit('submit', null);
         }

@@ -365,8 +365,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.CriterionLibrary.Select(_ => _.ToDto()).ToList());
         }
 
-        public void UpsertCriterionLibrary(CriterionLibraryDTO dto) =>
-            _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
+        public Guid UpsertCriterionLibrary(CriterionLibraryDTO dto)
+        {
+            var entity = _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
+
+            return entity.Id;
+        }
 
         public void DeleteCriterionLibrary(Guid libraryId)
         {

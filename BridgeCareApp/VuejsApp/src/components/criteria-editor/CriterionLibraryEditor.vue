@@ -173,7 +173,8 @@ export default class CriterionLibraryEditor extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('selectScenarioRelatedCriterion')
     selectScenarioRelatedCriterionAction: any;
-    @Action('upsertSelectedScenarioRelatedCriterion') upsertSelectedScenarioRelatedCriterionAction: any;
+    @Action('upsertSelectedScenarioRelatedCriterion')
+    upsertSelectedScenarioRelatedCriterionAction: any;
 
     hasSelectedCriterionLibrary: boolean = false;
     criterionLibrarySelectItems: SelectItem[] = [];
@@ -192,7 +193,9 @@ export default class CriterionLibraryEditor extends Vue {
     uuidNIL: string = getBlankGuid();
     callFromScenario: boolean = false;
     criteriaForScenario: string | null = null;
-    selectedScenarioRelatedCriteria: CriterionLibrary = clone(emptyCriterionLibrary);
+    selectedScenarioRelatedCriteria: CriterionLibrary = clone(
+        emptyCriterionLibrary,
+    );
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -213,12 +216,12 @@ export default class CriterionLibraryEditor extends Vue {
 
     @Watch('stateCriterionLibraries')
     onStateCriterionLibrariesChanged() {
-        this.criterionLibrarySelectItems = this.stateCriterionLibraries.map(
-            (library: CriterionLibrary) => ({
+        this.criterionLibrarySelectItems = this.stateCriterionLibraries
+            .filter((lib: CriterionLibrary) => lib.forScenario != true)
+            .map((library: CriterionLibrary) => ({
                 text: library.name,
                 value: library.id,
-            }),
-        );
+            }));
         if (!this.isLibraryContext && hasValue(this.librarySelectItemValue)) {
             this.selectCriterionLibraryAction({
                 libraryId: this.librarySelectItemValue,
@@ -228,7 +231,10 @@ export default class CriterionLibraryEditor extends Vue {
 
     @Watch('dialogLibraryId')
     onDialogLibraryIdChanged() {
-        if (!this.dialogIsFromScenario || this.dialogLibraryId == this.uuidNIL) {
+        if (
+            !this.dialogIsFromScenario ||
+            this.dialogLibraryId == this.uuidNIL
+        ) {
             this.librarySelectItemValue = this.dialogLibraryId;
         }
     }
@@ -253,7 +259,7 @@ export default class CriterionLibraryEditor extends Vue {
         this.criteriaForScenario = this.dialogLibraryId;
         this.callFromScenario = this.dialogIsFromScenario;
         this.selectedScenarioRelatedCriteria = clone(
-            this.scenarioRelatedCriteria
+            this.scenarioRelatedCriteria,
         );
         this.criteriaEditorData = {
             ...this.criteriaEditorData,
@@ -336,20 +342,20 @@ export default class CriterionLibraryEditor extends Vue {
         this.canUpdateOrCreate = result.validated;
 
         if (result.validated) {
-
-            if(!this.dialogIsFromScenario){
+            if (!this.dialogIsFromScenario) {
                 this.selectedCriterionLibrary = {
-                ...this.selectedCriterionLibrary,
-                mergedCriteriaExpression: result.criteria!,
+                    ...this.selectedCriterionLibrary,
+                    mergedCriteriaExpression: result.criteria!,
                 };
-            }
-            else{
+            } else {
                 this.selectedScenarioRelatedCriteria = {
-                ...this.selectedScenarioRelatedCriteria,
-                mergedCriteriaExpression: result.criteria!,
-                forScenario: true
+                    ...this.selectedScenarioRelatedCriteria,
+                    mergedCriteriaExpression: result.criteria!,
+                    forScenario: true,
                 };
-                this.upsertSelectedScenarioRelatedCriterionAction({library: this.selectedScenarioRelatedCriteria})
+                this.upsertSelectedScenarioRelatedCriterionAction({
+                    library: this.selectedScenarioRelatedCriteria,
+                });
             }
 
             this.setSelectedCriterionIsValidAction({ isValid: true });

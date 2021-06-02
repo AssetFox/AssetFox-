@@ -507,7 +507,7 @@ export default class BudgetPriorityEditor extends Vue {
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
       libraryId: this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id,
-      isCallFromScenario: false
+      isCallFromScenario: true
     };
   }
 

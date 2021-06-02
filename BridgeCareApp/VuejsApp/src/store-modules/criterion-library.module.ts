@@ -4,6 +4,7 @@ import CriterionLibraryService from '@/services/criterion-library.service';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
+import { getBlankGuid } from '@/shared/utils/uuid-utils';
 
 const state = {
     criterionLibraries: [] as CriterionLibrary[],
@@ -65,19 +66,33 @@ const actions = {
                 }
             });
     },
-    async upsertCriterionLibrary({commit, dispatch}: any, payload: any) {
+    async upsertCriterionLibrary({commit, dispatch}: any, payload: any) : Promise<string> {
+        var returningId = getBlankGuid();
         await CriterionLibraryService.upsertCriterionLibrary(payload.library)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     const library: CriterionLibrary = payload.library;
-                    const message: string = any(propEq('id', library.id), state.criterionLibraries)
+
+                    const isExistingCriteria: boolean = any(propEq('id', library.id), state.criterionLibraries);
+                    const message: string = isExistingCriteria
                         ? 'Updated criterion library'
                         : 'Added criterion library';
                     commit('addedOrUpdatedCriterionLibraryMutator', library);
-                    commit('selectedCriterionLibraryMutator', library.id);
+                    if(!library.forScenario){
+                        commit('selectedCriterionLibraryMutator', library.id);
+                    }
+                    else{
+
+                        if(isExistingCriteria){
+                            commit('scenarioRelatedCriterionMutator', library.id);
+                        }
+                    }
                     dispatch('setSuccessMessage', {message: message});
+                    returningId = response.data;
                 }
+                return returningId;
             });
+            return returningId;
     },
     async deleteCriterionLibrary({commit, dispatch}: any, payload: any) {
         await CriterionLibraryService.deleteCriterionLibrary(payload.libraryId)

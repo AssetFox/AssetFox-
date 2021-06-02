@@ -132,11 +132,15 @@ namespace BridgeCareCore.Services
             ChannelReader<SimulationLogMessageBuilder> reader
         )
         {
+            var writtenMessages = new HashSet<string>();
             while (await reader.WaitToReadAsync())
             {
                 var message = await reader.ReadAsync();
-                var dto = SimulationLogMapper.ToDTO(message);
-                _unitOfWork.SimulationLogRepo.CreateLog(dto);
+                if (writtenMessages.Add(message.Message))
+                {
+                    var dto = SimulationLogMapper.ToDTO(message);
+                    _unitOfWork.SimulationLogRepo.CreateLog(dto);
+                }
             }
         }
 

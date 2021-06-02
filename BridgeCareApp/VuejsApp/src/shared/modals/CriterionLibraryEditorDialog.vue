@@ -22,12 +22,7 @@
             <v-card-actions>
                 <v-layout justify-space-between row>
                     <v-btn
-                        :disabled="
-                            ((stateSelectedCriterionLibrary.id === uuidNIL ||
-                                !stateSelectedCriterionIsValid) &&
-                                !dialogData.isCallFromScenario) ||
-                                (!stateSelectedCriterionIsValid &&
-                                    dialogData.isCallFromScenario)
+                        :disabled="!dialogData.isCallFromScenario || !stateSelectedCriterionIsValid
                         "
                         class="ara-blue-bg white--text"
                         @click="onBeforeSubmit(true)"
@@ -185,7 +180,6 @@ export default class CriterionLibraryEditorDialog extends Vue {
     }
 
     onSubmit(submit: boolean) {
-        // [TODO] - save the criteria to the database for that particular scenario
         if (submit) {
             if (!isNil(this.stateScenarioRelatedCriteria)) {
                 this.upsertCriterionLibraryAction({

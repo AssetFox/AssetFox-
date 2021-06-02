@@ -245,6 +245,7 @@ export default class BudgetPriorityEditor extends Vue {
     next((vm: any) => {
       if (to.path.indexOf('BudgetPriorityEditor/Scenario') !== -1) {
         vm.selectedScenarioId = to.query.scenarioId;
+        vm.callFromScenario
         if (vm.selectedScenarioId === vm.uuidNIL) {
           vm.setErrorMessageAction({message: 'Found no selected scenario for edit'});
           vm.$router.push('/Scenarios/');
@@ -319,7 +320,7 @@ export default class BudgetPriorityEditor extends Vue {
         })) as SimpleBudgetDetail[];
 
       //[WIP] Added this to remove the infinite loop
-      if(isNil(this.stateScenarioSimpleBudgetDetails)){
+      if(isNil(this.stateScenarioSimpleBudgetDetails) || this.stateScenarioSimpleBudgetDetails.length == 0){
         return true;
       }
     return isEqual(simpleBudgetDetails, this.stateScenarioSimpleBudgetDetails);
@@ -504,10 +505,14 @@ export default class BudgetPriorityEditor extends Vue {
         propEq('id', budgetPriorityGridDatum.id), this.selectedBudgetPriorityLibrary.budgetPriorities
     ) as BudgetPriority;
 
+    var fromScenario = false;
+    if(this.selectedScenarioId != this.uuidNIL){
+      fromScenario = true;
+    }
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
       libraryId: this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id,
-      isCallFromScenario: true
+      isCallFromScenario: fromScenario
     };
   }
 

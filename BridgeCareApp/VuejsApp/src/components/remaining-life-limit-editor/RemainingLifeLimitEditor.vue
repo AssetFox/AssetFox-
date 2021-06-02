@@ -319,10 +319,14 @@ export default class RemainingLifeLimitEditor extends Vue {
   onShowCriterionLibraryEditorDialog(remainingLifeLimit: RemainingLifeLimit) {
     this.selectedRemainingLifeLimit = remainingLifeLimit;
 
+    var fromScenario = false;
+    if(this.selectedScenarioId != this.uuidNIL){
+      fromScenario = true;
+    }
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
       libraryId: remainingLifeLimit.criterionLibrary.id,
-      isCallFromScenario: true
+      isCallFromScenario: fromScenario
     };
   }
 

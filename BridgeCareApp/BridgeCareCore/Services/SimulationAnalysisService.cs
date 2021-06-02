@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Channels;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Static;
@@ -25,6 +29,7 @@ namespace BridgeCareCore.Services
         }
 
         private readonly HashSet<string> WarningsSent = new HashSet<string>();
+        private Task MessageWritingTask;
 
         public Task CreateAndRunPermitted(Guid networkId, Guid simulationId)
         {
@@ -115,9 +120,24 @@ namespace BridgeCareCore.Services
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             
             RunValidation(runner);
-            runner.Run(false);
+            var channel = Channel.CreateUnbounded<SimulationLogMessageBuilder>();
+            MessageWritingTask = WriteMessages(channel.Reader);
+            runner.Run(channel.Writer, false);
+            channel.Writer.Complete();
 
             return Task.CompletedTask;
+        }
+
+        protected async Task WriteMessages(
+            ChannelReader<SimulationLogMessageBuilder> reader
+        )
+        {
+            while (await reader.WaitToReadAsync())
+            {
+                var message = await reader.ReadAsync();
+                var dto = SimulationLogMapper.ToDTO(message);
+                _unitOfWork.SimulationLogRepo.CreateLog(dto);
+            }
         }
 
         private void RunValidation(SimulationRunner runner)

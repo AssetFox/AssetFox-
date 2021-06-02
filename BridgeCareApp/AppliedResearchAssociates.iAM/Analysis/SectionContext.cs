@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Domains;
+using AppliedResearchAssociates.iAM.DTOs.Static;
+using Writer = System.Threading.Channels.ChannelWriter<AppliedResearchAssociates.CalculateEvaluate.SimulationLogMessageBuilder>;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
@@ -71,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
         }
 
-        public void ApplyPerformanceCurves() => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute());
+        public void ApplyPerformanceCurves(Writer channel) => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute(), channel);
 
         public void ApplyTreatment(Treatment treatment, int year)
         {
@@ -183,7 +185,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void ResetDetail() => Detail = new SectionDetail(Section);
 
-        public void RollForward()
+        public void RollForward(Writer channel)
         {
             // Per email on 2020-05-06 from Gregg to Jake, Chad, and William: "We roll forward
             // attributes with performance curves. To do so we need to know which performance curve
@@ -206,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
                 SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-                ApplyPerformanceCurves();
+                ApplyPerformanceCurves(channel);
                 ApplyPassiveTreatment(earliestYearOfMostRecentValue.Value);
 
                 foreach (var year in Static.RangeFromBounds(earliestYearOfMostRecentValue.Value + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1))
@@ -214,7 +216,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
                     SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-                    ApplyPerformanceCurves();
+                    ApplyPerformanceCurves(channel);
                     ApplyPassiveTreatment(year);
                 }
             }
@@ -258,7 +260,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private static readonly Random Random = new Random(1);
         private static int MonkeyWrenchCount = 0;
         private static int MonkeyWrenchAllowance = 4;
-        private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
+        private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute, Writer channel)
         {
             // wjwjwj calculations here
             var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
@@ -279,11 +281,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 // end debugging code to be deleted
                 if (double.IsNaN(setValue))
                 {
-                    var message = new SimulationMessageBuilder($"Output of calculation for {key} was not a number")
+                    var message = new SimulationLogMessageBuilder
                     {
-                        SectionId = Section.Id,
-                        SectionName = Section.Name,
+                        SimulationId = SimulationRunner.Simulation.Id,
+                        Subject = SimulationLogSubject.Calculation,
+                        Message = SimulationLogMessages.SectionCalculationReturnedNaN(Section, key),
+                        Status = SimulationLogStatus.Warning,
                     };
+                    _ = channel.WriteAsync(message);
                     SimulationRunner.Warn(message.ToString());
                 }
                 SetNumber(key, setValue);

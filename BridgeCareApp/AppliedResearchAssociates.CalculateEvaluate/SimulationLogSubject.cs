@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AppliedResearchAssociates.iAM.DTOs.Static
+namespace AppliedResearchAssociates.CalculateEvaluate
 {
     public enum SimulationLogSubject
     {
         Validation,
         ExceptionThrown,
+        Calculation,
     }
 }

@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
             return results;
         }
-
+        public string ShortDescription => nameof(TreatmentConsequence);
         internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope) => Change.GetApplicator(scope).Once();
     }
 }

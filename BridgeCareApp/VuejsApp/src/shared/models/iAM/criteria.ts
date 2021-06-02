@@ -35,7 +35,7 @@ export interface CriterionLibrary {
     description: string;
     owner?: string;
     shared?: boolean;
-    forScenario: boolean
+    forScenario: boolean;
 }
 
 export interface CriteriaEditorData {

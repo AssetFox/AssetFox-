@@ -245,7 +245,7 @@ export default class BudgetPriorityEditor extends Vue {
     next((vm: any) => {
       if (to.path.indexOf('BudgetPriorityEditor/Scenario') !== -1) {
         vm.selectedScenarioId = to.query.scenarioId;
-        vm.callFromScenario
+        vm.callFromScenario;
         if (vm.selectedScenarioId === vm.uuidNIL) {
           vm.setErrorMessageAction({message: 'Found no selected scenario for edit'});
           vm.$router.push('/Scenarios/');

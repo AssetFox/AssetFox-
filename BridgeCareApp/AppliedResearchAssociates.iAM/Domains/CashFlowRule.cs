@@ -14,6 +14,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public string Name { get; set; }
 
+        public string ShortDescription => Name;
         public ValidatorBag Subvalidators => new ValidatorBag { Criterion, DistributionRules };
 
         public ValidationResultBag GetDirectValidationResults()

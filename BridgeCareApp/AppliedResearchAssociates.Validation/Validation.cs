@@ -1,25 +1,30 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace AppliedResearchAssociates.Validation
 {
     public static class Validation
     {
-        public static ValidationResultBag GetAllValidationResults(this IValidator validator)
+        public static ValidationResultBag GetAllValidationResults(this IValidator validator, IEnumerable<string> validationPath)
         {
             var results = new ValidationResultBag();
 
             var visited = new HashSet<IValidator>();
-            var queue = new Queue<IValidator>();
-            queue.Enqueue(validator);
+            var queue = new Queue<PathedValidator>();
+            var initialPathedValidator = new PathedValidator(validator, validationPath);
+            queue.Enqueue(initialPathedValidator);
             while (queue.Count > 0)
             {
-                validator = queue.Dequeue();
-                if (validator != null && visited.Add(validator))
+                var pathedValidator = queue.Dequeue();
+                var nextValidator = pathedValidator.Validator;
+                if (nextValidator != null && visited.Add(nextValidator))
                 {
-                    results.Add(validator.GetDirectValidationResults());
-                    foreach (var subvalidator in validator.Subvalidators)
+                    results.Add(nextValidator.GetDirectValidationResults(pathedValidator.ValidationPath));
+                    foreach (var subvalidator in nextValidator.Subvalidators)
                     {
-                        queue.Enqueue(subvalidator);
+                        var subpath = pathedValidator.ValidationPath.Append(subvalidator.ShortDescription);
+                        var pathedSubvalidator = new PathedValidator(subvalidator, subpath);
+                        queue.Enqueue(pathedSubvalidator);
                     }
                 }
             }

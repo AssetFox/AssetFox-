@@ -57,6 +57,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ISectionRepository _sectionRepo;
         private ISelectableTreatmentRepository _selectableTreatmentRepo;
         private ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;
+        private ISimulationLogRepository _simulationLogRepo;
         private ISimulationOutputRepository _simulationOutputRepo;
         private ISimulationRepository _simulationRepo;
         private ITargetConditionGoalRepository _targetConditionGoalRepo;
@@ -125,6 +126,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ISelectableTreatmentRepository SelectableTreatmentRepo => _selectableTreatmentRepo ??= new SelectableTreatmentRepository(this);
 
         public ISimulationAnalysisDetailRepository SimulationAnalysisDetailRepo => _simulationAnalysisDetailRepo ??= new SimulationAnalysisDetailRepository(this);
+
+        public ISimulationLogRepository SimulationLogRepo => _simulationLogRepo ??= new SimulationLogRepository(this);
 
         public ISimulationOutputRepository SimulationOutputRepo => _simulationOutputRepo ??= new SimulationOutputRepository(this);
 

@@ -24,5 +24,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
             return results;
         }
+
+        public string ShortDescription => nameof(TreatmentSupersession);
     }
 }

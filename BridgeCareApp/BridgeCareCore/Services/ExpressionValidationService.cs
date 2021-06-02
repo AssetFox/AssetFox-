@@ -61,7 +61,7 @@ namespace BridgeCareCore.Services
 
         private ValidationResult CheckPiecewise(string piecewise)
         {
-            var ageValues = new Dictionary<int, double>();
+            var ageValues = new SortedDictionary<int, double>();
             piecewise = piecewise.Trim();
 
             var pieces = piecewise.Split(new[] { '(' });
@@ -117,6 +117,21 @@ namespace BridgeCareCore.Services
                         ValidationMessage = "Only unique integer values for TIME are allowed"
                     };
                 }
+            }
+
+            var previous = ageValues.First();
+            foreach (var ageValue in ageValues)
+            {
+                if (ageValue.Value > previous.Value)
+                {
+                    _log.Error($"Values for CONDITION must descend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})");
+                    return new ValidationResult
+                    {
+                        IsValid = false,
+                        ValidationMessage = $"Values for CONDITION must descend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})"
+                    };
+                }
+                previous = ageValue;
             }
 
             if (ageValues.Count >= 1)

@@ -37,6 +37,7 @@ export const API = {
     User: '/api/User',
     Attribute: '/api/Attribute',
     AnalysisMethod: '/api/AnalysisMethod',
+    SimulationLog: '/api/SimulationLog',
     SummaryReport: '/api/SummaryReport',
     ExpressionValidation: '/api/ExpressionValidation',
     UserCriteria: '/api/UserCriteria',

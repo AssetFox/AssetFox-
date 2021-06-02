@@ -7,7 +7,8 @@
         </v-layout>
       </v-card-title>
       <v-card-text>
-        <v-text-field :mask="'##########'" label="Edit" single-line v-model.number="range"/>
+        <v-text-field type="number" min=1 :mask="'##########'" label="Edit" single-line v-model.number="range"/>
+        <label>{{rangeLabel}}</label>
       </v-card-text>
       <v-card-actions>
         <v-btn :disabled="range === 0" @click="onSubmit(true)" class="ara-blue-bg white--text">Save</v-btn>
@@ -24,8 +25,13 @@ import {Component, Prop} from 'vue-property-decorator';
 @Component
 export default class SetRangeForAddingBudgetYearsDialog extends Vue {
   @Prop() showDialog: boolean;
+  @Prop() startYear : number;  
 
-  range: number = 0;
+  range: number = 1;
+
+  get rangeLabel() {
+    return 'Year Range: ' + (this.range <= 1 ? this.startYear : this.startYear + '-' + (this.startYear + this.range - 1));
+  }
 
   onSubmit(submit: boolean) {
     if (submit) {
@@ -34,7 +40,7 @@ export default class SetRangeForAddingBudgetYearsDialog extends Vue {
       this.$emit('submit', 0);
     }
 
-    this.range = 0;
+    this.range = 1;
   }
 }
 </script>

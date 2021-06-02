@@ -24,6 +24,8 @@ namespace BridgeCareCore.Services
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
         }
 
+        private readonly HashSet<string> WarningsSent = new HashSet<string>();
+
         public Task CreateAndRunPermitted(Guid networkId, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -100,7 +102,11 @@ namespace BridgeCareCore.Services
             };
             runner.Warning += (sender, eventArgs) =>
             {
-                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
+                var message = eventArgs.Message;
+                if (WarningsSent.Add(message))
+                {
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, message, simulationId);
+                }
             };
 
             // resetting the report generation status.

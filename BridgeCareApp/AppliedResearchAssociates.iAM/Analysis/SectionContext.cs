@@ -279,16 +279,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 // end debugging code to be deleted
                 if (double.IsNaN(setValue))
                 {
-                    var oldValue = GetNumber(key);
-                    if (!double.IsNaN(oldValue))
+                    var message = new SimulationMessageBuilder($"Output of calculation for {key} was not a number")
                     {
-                        var message = new SimulationMessageBuilder($"Output of calculation for {key} was not a number")
-                        {
-                            SectionId = Section.Id,
-                            SectionName = Section.Name,
-                        };
-                        SimulationRunner.Warn(message.ToString());
-                    }
+                        SectionId = Section.Id,
+                        SectionName = Section.Name,
+                    };
+                    SimulationRunner.Warn(message.ToString());
                 }
                 SetNumber(key, setValue);
             }

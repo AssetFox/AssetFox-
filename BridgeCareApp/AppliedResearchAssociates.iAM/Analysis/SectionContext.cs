@@ -256,7 +256,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private int? FirstUnshadowedYearForAnyTreatment;
 
         private static readonly Random Random = new Random(1);
-
+        private static int MonkeyWrenchCount = 0;
+        private static int MonkeyWrenchAllowance = 4;
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
             // wjwjwj calculations here
@@ -266,9 +267,28 @@ namespace AppliedResearchAssociates.iAM.Analysis
             foreach (var (key, value) in dataUpdates)
             {
                 var setValue = value;
-                if (Random.Next(20) == 1)
+                // debugging code to be deleted
+                if (MonkeyWrenchCount < MonkeyWrenchAllowance)
                 {
-                    setValue = double.NaN;
+                    if (Random.Next(20) == 1)
+                    {
+                        MonkeyWrenchCount++;
+                        setValue = double.NaN;
+                    }
+                }
+                // end debugging code to be deleted
+                if (double.IsNaN(setValue))
+                {
+                    var oldValue = GetNumber(key);
+                    if (!double.IsNaN(oldValue))
+                    {
+                        var message = new SimulationMessageBuilder($"Output of calculation for {key} was not a number")
+                        {
+                            SectionId = Section.Id,
+                            SectionName = Section.Name,
+                        };
+                        SimulationRunner.Warn(message.ToString());
+                    }
                 }
                 SetNumber(key, setValue);
             }

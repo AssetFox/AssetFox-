@@ -144,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
-                var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod;
+                var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod * 100;
                 ReportProgress(ProgressStatus.Running, percentComplete, year);
 
                 var unhandledContexts = ApplyRequiredEvents(year);

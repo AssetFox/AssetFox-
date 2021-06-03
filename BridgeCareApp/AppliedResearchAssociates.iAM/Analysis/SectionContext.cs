@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
         }
 
-        public void ApplyPerformanceCurves(Writer channel) => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute(), channel);
+        public void ApplyPerformanceCurves(Writer channel) => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute(), GetPerformanceCurvePerAttribute(), channel);
 
         public void ApplyTreatment(Treatment treatment, int year)
         {
@@ -258,40 +258,29 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private int? FirstUnshadowedYearForAnyTreatment;
 
         private static readonly Random Random = new Random(1);
-        private static int MonkeyWrenchCount = 0;
-        private static int MonkeyWrenchAllowance = 4;
-        private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute, Writer channel)
+
+        private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute, IDictionary<string, Func<PerformanceCurve>> curvePerAttribute, Writer channel)
         {
             // wjwjwj calculations here
             var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
-            var allDataUpdates = dataUpdates.Select(x => $"{x.Key} {x.Item2}");
-            var oneString = string.Join(Environment.NewLine, allDataUpdates.ToArray());
             foreach (var (key, value) in dataUpdates)
             {
-                var setValue = value;
-                // debugging code to be deleted
-                if (MonkeyWrenchCount < MonkeyWrenchAllowance)
+                if (double.IsNaN(value))
                 {
-                    if (Random.Next(20) == 1)
-                    {
-                        MonkeyWrenchCount++;
-                        setValue = double.NaN;
-                    }
-                }
-                // end debugging code to be deleted
-                if (double.IsNaN(setValue))
-                {
+                    var target = calculatorPerAttribute[key].Target;
+                    var targetTypeName = target.GetType().Name;
+                    var performanceCurve = curvePerAttribute[key]();
                     var message = new SimulationLogMessageBuilder
                     {
                         SimulationId = SimulationRunner.Simulation.Id,
                         Subject = SimulationLogSubject.Calculation,
-                        Message = SimulationLogMessages.SectionCalculationReturnedNaN(Section, key),
+                        Message = SimulationLogMessages.SectionCalculationReturnedNaN(Section, performanceCurve, key),
                         Status = SimulationLogStatus.Warning,
                     };
                     _ = channel.WriteAsync(message);
-                    SimulationRunner.Warn(message.ToString());
+               //     SimulationRunner.Warn(message.ToString());
                 }
-                SetNumber(key, setValue);
+                SetNumber(key, value);
             }
         }
 
@@ -310,6 +299,40 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 detail.ValuePerTextAttribute.Add(attribute.Name, GetText(attribute.Name));
             }
+        }
+
+        private PerformanceCurve GetCalculatorPerformanceCurve(IGrouping<NumberAttribute, PerformanceCurve> curves, string key)
+        {
+            curves.Channel(
+                curve => curve.Criterion.Evaluate(this),
+                result => result ?? false,
+                result => !result.HasValue,
+                out var applicableCurves,
+                out var defaultCurves);
+
+            var theCurve = applicableCurves.FirstOrDefault() ?? defaultCurves.FirstOrDefault();
+            return theCurve;
+        }
+
+        private Func<PerformanceCurve> GetCalculatorCurve(IGrouping<NumberAttribute, PerformanceCurve> curves)
+        {
+            return () =>
+            {
+                curves.Channel(
+                curve => curve.Criterion.Evaluate(this),
+                result => result ?? false,
+                result => !result.HasValue,
+                out var applicableCurves,
+                out var defaultCurves);
+
+                var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
+
+                if (operativeCurves.Any())
+                {
+                    return operativeCurves[0];
+                }
+                return null;
+            };
         }
 
         private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
@@ -354,7 +377,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return curves.Key.IsDecreasingWithDeterioration ? calculateMinimum : calculateMaximum;
         }
 
-        private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
+        private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary<IGrouping<NumberAttribute, PerformanceCurve>, string, Func<double>>(curves => curves.Key.Name, GetCalculator);
+
+        private IDictionary<string, Func<PerformanceCurve>> GetPerformanceCurvePerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary<IGrouping<NumberAttribute, PerformanceCurve>, string, Func<PerformanceCurve>>(curves => curves.Key.Name, GetCalculatorCurve);
 
         private void Initialize()
         {

@@ -233,12 +233,13 @@
                                            lazy
                                            persistent
                                            :return-value.sync='props.item.name'
-                                           @save='onEditScenarioName(props.item)'>
+                                           @save='onEditScenarioName(props.item, nameUpdate)'
+                                           @open='prepareForNameEdit(props.item.name)''>
                                 {{ props.item.name }}
                                 <template slot='input'>
                                     <v-text-field label='Edit'
                                                   single-line
-                                                  v-model='props.item.name'
+                                                  v-model='nameUpdate'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                 </template>
                             </v-edit-dialog>

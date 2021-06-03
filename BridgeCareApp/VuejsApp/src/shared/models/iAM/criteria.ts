@@ -35,7 +35,7 @@ export interface CriterionLibrary {
     description: string;
     owner?: string;
     shared?: boolean;
-    forScenario: boolean;
+    isSingleUse: boolean;
 }
 
 export interface CriteriaEditorData {
@@ -58,7 +58,7 @@ export const emptyCriterionLibrary: CriterionLibrary = {
     name: '',
     description: '',
     mergedCriteriaExpression: '',
-    forScenario: false
+    isSingleUse: false
 };
 
 export const emptyCriteriaEditorData: CriteriaEditorData = {

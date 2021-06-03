@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = dto.Name,
                 Description = dto.Description,
                 MergedCriteriaExpression = dto.MergedCriteriaExpression,
-                ForScenario = dto.ForScenario
+                IsSingleUse = dto.IsSingleUse
             };
 
         public static CriterionLibraryDTO ToDto(this CriterionLibraryEntity entity) =>
@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = entity.Name,
                 Description = entity.Description,
                 MergedCriteriaExpression = entity.MergedCriteriaExpression,
-                ForScenario = entity.ForScenario
+                IsSingleUse = entity.IsSingleUse
             };
     }
 }

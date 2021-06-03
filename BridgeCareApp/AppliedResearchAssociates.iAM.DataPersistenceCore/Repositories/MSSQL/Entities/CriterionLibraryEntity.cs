@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string MergedCriteriaExpression { get; set; }
 
-        public bool ForScenario { get; set; }
+        public bool IsSingleUse { get; set; }
 
         public virtual ICollection<CriterionLibraryAnalysisMethodEntity> CriterionLibraryAnalysisMethodJoins { get; set; }
 

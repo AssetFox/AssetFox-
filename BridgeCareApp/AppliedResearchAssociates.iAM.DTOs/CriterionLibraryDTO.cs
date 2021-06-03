@@ -10,6 +10,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public string MergedCriteriaExpression { get; set; }
 
-        public bool ForScenario { get; set; }
+        public bool IsSingleUse { get; set; }
     }
 }

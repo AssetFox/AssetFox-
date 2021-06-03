@@ -217,7 +217,7 @@ export default class CriterionLibraryEditor extends Vue {
     @Watch('stateCriterionLibraries')
     onStateCriterionLibrariesChanged() {
         this.criterionLibrarySelectItems = this.stateCriterionLibraries
-            .filter((lib: CriterionLibrary) => lib.forScenario != true)
+            .filter((lib: CriterionLibrary) => lib.isSingleUse == false)
             .map((library: CriterionLibrary) => ({
                 text: library.name,
                 value: library.id,
@@ -309,12 +309,12 @@ export default class CriterionLibraryEditor extends Vue {
 
     mounted() {
         if (hasValue(this.stateCriterionLibraries)) {
-            this.criterionLibrarySelectItems = this.stateCriterionLibraries.map(
-                (library: CriterionLibrary) => ({
-                    text: library.name,
-                    value: library.id,
-                }),
-            );
+            this.criterionLibrarySelectItems = this.stateCriterionLibraries
+            .filter((lib: CriterionLibrary) => lib.isSingleUse == false)
+            .map((library: CriterionLibrary) => ({
+                text: library.name,
+                value: library.id,
+            }));
 
             if (
                 !this.isLibraryContext &&
@@ -351,7 +351,7 @@ export default class CriterionLibraryEditor extends Vue {
                 this.selectedScenarioRelatedCriteria = {
                     ...this.selectedScenarioRelatedCriteria,
                     mergedCriteriaExpression: result.criteria!,
-                    forScenario: true,
+                    isSingleUse: true,
                 };
                 this.upsertSelectedScenarioRelatedCriterionAction({
                     library: this.selectedScenarioRelatedCriteria,

@@ -78,7 +78,7 @@ const actions = {
                         ? 'Updated criterion library'
                         : 'Added criterion library';
                     commit('addedOrUpdatedCriterionLibraryMutator', library);
-                    if(!library.forScenario){
+                    if(!library.isSingleUse){
                         commit('selectedCriterionLibraryMutator', library.id);
                     }
                     else{

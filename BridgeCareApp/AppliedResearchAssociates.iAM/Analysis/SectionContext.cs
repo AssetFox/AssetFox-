@@ -257,8 +257,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private int? FirstUnshadowedYearForAnyTreatment;
 
-        private static readonly Random Random = new Random(1);
-
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute, IDictionary<string, Func<PerformanceCurve>> curvePerAttribute, Writer channel)
         {
             // wjwjwj calculations here

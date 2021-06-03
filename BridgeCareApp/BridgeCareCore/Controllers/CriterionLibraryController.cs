@@ -43,14 +43,15 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                var entityId = Guid.Empty;
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto);
+                    entityId = UnitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto);
                     UnitOfWork.Commit();
                 });
 
-                return Ok();
+                return Ok(entityId);
             }
             catch (Exception e)
             {

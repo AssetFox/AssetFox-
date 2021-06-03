@@ -267,7 +267,7 @@ export default class InvestmentEditor extends Vue {
   uuidNIL: string = getBlankGuid();
   rules: InputValidationRules = clone(rules);
 
-  get addYearLabel() { return 'Add Year (' + this.getNextYear() + ')'; };
+  get addYearLabel() { return 'Add Year (' + this.getNextYear() + ')'; }
   get deleteYearLabel() {
     const latestYear = this.getLatestYear();
     return latestYear ? 'Delete Year (' + latestYear + ')' : 'Delete Year';

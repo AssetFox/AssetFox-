@@ -329,9 +329,14 @@ export default class TargetConditionGoalEditor extends Vue {
   onShowCriterionLibraryEditorDialog(targetConditionGoal: TargetConditionGoal) {
     this.selectedTargetConditionGoalForCriteriaEdit = clone(targetConditionGoal);
 
+    var fromScenario = false;
+    if(this.selectedScenarioId != this.uuidNIL){
+      fromScenario = true;
+    }
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
-      libraryId: targetConditionGoal.criterionLibrary.id
+      libraryId: targetConditionGoal.criterionLibrary.id,
+      isCallFromScenario: fromScenario
     };
   }
 

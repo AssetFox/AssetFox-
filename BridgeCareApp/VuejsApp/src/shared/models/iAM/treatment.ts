@@ -45,6 +45,7 @@ export interface TreatmentDetails {
     shadowForAnyTreatment: number;
     shadowForSameTreatment: number;
     criterionLibrary: CriterionLibrary;
+    isCallFromScenario: boolean;
 }
 
 export interface BudgetGridRow {
@@ -89,5 +90,6 @@ export const emptyTreatmentDetails: TreatmentDetails = {
     description: '',
     shadowForAnyTreatment: 0,
     shadowForSameTreatment: 0,
-    criterionLibrary: clone(emptyCriterionLibrary)
+    criterionLibrary: clone(emptyCriterionLibrary),
+    isCallFromScenario: false
 };

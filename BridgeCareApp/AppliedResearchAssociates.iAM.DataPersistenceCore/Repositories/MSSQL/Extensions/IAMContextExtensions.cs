@@ -151,14 +151,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             context.SaveChanges();
         }
 
-        public static void Upsert<T>(this IAMContext context, T entity, Guid key, Guid? userId = null) where T : class
+        public static T Upsert<T>(this IAMContext context, T entity, Guid key, Guid? userId = null) where T : class
         {
             if (entity == null)
             {
-                return;
+                return null;
             }
 
             var entities = context.Set<T>();
+            T changedEntity = null;
 
             var existingEntity = entities.Find(key);
             if (existingEntity != null)
@@ -176,6 +177,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 SetPropertyValue(entity, BaseEntityProperty.LastModifiedDate, DateTime.Now);
 
                 context.Entry(existingEntity).CurrentValues.SetValues(entity);
+                changedEntity = entity;
             }
             else
             {
@@ -186,10 +188,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                     SetPropertyValue(entity, BaseEntityProperty.LastModifiedBy, userId.Value);
                 }
 
-                entities.Add(entity);
+                changedEntity = entities.Add(entity).Entity;
             }
 
             context.SaveChanges();
+
+            return changedEntity;
         }
 
         public static void Upsert<T>(this IAMContext context, T entity, Expression<Func<T, bool>> predicate, Guid? userId = null) where T : class

@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public Simulation Simulation { get; }
 
-        public void Run()
+        public void Run(bool withValidation = true)
         {
             // During the execution of this method and its dependencies, the "SimulationException"
             // type is used for errors that are caused by invalid user input. Other types like
@@ -38,32 +38,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             ReportProgress(ProgressStatus.Started);
 
-            var simulationValidationResults = Simulation.GetAllValidationResults();
-
-            var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
-            if (numberOfErrors > 0)
+            if (withValidation)
             {
-                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation errors.")
-                {
-                    ItemName = Simulation.Name,
-                    ItemId = Simulation.Id,
-                };
-
-                Fail(MessageBuilder.ToString());
+                RunValidation();
             }
-
-            var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
-            if (numberOfWarnings > 0)
-            {
-                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation warnings.")
-                {
-                    ItemName = Simulation.Name,
-                    ItemId = Simulation.Id,
-                };
-
-                Warn(MessageBuilder.ToString());
-            }
-
+            
             ActiveTreatments = Simulation.GetActiveTreatments();
 
             try
@@ -182,6 +161,42 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ReportProgress(ProgressStatus.Completed, 100);
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
+        }
+
+        public ValidationResultBag RunValidation()
+        {
+            var simulationValidationResults = Simulation.GetAllValidationResults(Enumerable.Empty<string>());
+
+            HandleValidationFailures(simulationValidationResults);
+            return simulationValidationResults;
+        }
+
+        public void HandleValidationFailures(ValidationResultBag simulationValidationResults)
+        {
+            var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
+            if (numberOfErrors > 0)
+            {
+                var errorsWord = numberOfErrors == 1 ? "error" : "errors";
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation {errorsWord}. Download the log to see all validation results.")
+                {
+                    ItemName = Simulation.Name,
+                    ItemId = Simulation.Id,
+                };
+
+                Fail(MessageBuilder.ToString());
+            }
+
+            var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
+            if (numberOfWarnings > 0)
+            {
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation warnings.")
+                {
+                    ItemName = Simulation.Name,
+                    ItemId = Simulation.Id,
+                };
+
+                Warn(MessageBuilder.ToString());
+            }
         }
 
         internal ILookup<Section, CommittedProject> CommittedProjectsPerSection { get; private set; }

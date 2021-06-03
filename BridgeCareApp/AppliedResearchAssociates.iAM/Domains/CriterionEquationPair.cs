@@ -17,5 +17,7 @@ namespace AppliedResearchAssociates.iAM.Domains
         public ValidatorBag Subvalidators => new ValidatorBag { Criterion, Equation };
 
         public ValidationResultBag GetDirectValidationResults() => new ValidationResultBag();
+
+        public string ShortDescription => nameof(CriterionEquationPair);
     }
 }

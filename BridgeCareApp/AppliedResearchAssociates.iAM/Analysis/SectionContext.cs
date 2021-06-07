@@ -259,12 +259,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute, IDictionary<string, Func<PerformanceCurve>> curvePerAttribute, Writer channel)
         {
-            // wjwjwj calculations here
+            // wjwjwj calculations here.
+            // wjWilliam -- using Channel . . .
             var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
             foreach (var (key, value) in dataUpdates)
             {
-                if (double.IsNaN(value))
+                if (double.IsNaN(value) || double.IsInfinity(value))
                 {
+                    var valueString = double.IsNaN(value) ? "'not a number'" :
+                        double.IsPositiveInfinity(value) ? "infinity" : "negative infinity";
                     var target = calculatorPerAttribute[key].Target;
                     var targetTypeName = target.GetType().Name;
                     var performanceCurve = curvePerAttribute[key]();
@@ -272,7 +275,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     {
                         SimulationId = SimulationRunner.Simulation.Id,
                         Subject = SimulationLogSubject.Calculation,
-                        Message = SimulationLogMessages.SectionCalculationReturnedNaN(Section, performanceCurve, key),
+                        Message = SimulationLogMessages.SectionCalculationReturned(Section, performanceCurve, key, valueString),
                         Status = SimulationLogStatus.Warning,
                     };
                     _ = channel.WriteAsync(message);

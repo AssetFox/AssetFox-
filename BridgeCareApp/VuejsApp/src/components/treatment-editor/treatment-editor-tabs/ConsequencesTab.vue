@@ -98,6 +98,7 @@ import {CriterionLibrary} from '@/shared/models/iAM/criteria';
 export default class ConsequencesTab extends Vue {
   @Prop() selectedTreatmentConsequences: TreatmentConsequence[];
   @Prop() rules: InputValidationRules;
+  @Prop() callFromScenario: boolean;
 
   @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
 
@@ -171,7 +172,8 @@ export default class ConsequencesTab extends Vue {
 
     this.consequenceCriterionLibraryEditorDialogData = {
       showDialog: true,
-      libraryId: consequence.criterionLibrary.id
+      libraryId: consequence.criterionLibrary.id,
+      isCallFromScenario: this.callFromScenario
     };
   }
 

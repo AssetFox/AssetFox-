@@ -75,6 +75,7 @@ import {setItemPropertyValue} from '@/shared/utils/setter-utils';
 })
 export default class CostsTab extends Vue {
   @Prop() selectedTreatmentCosts: TreatmentCost[];
+  @Prop() callFromScenario: boolean;
 
   costsGridHeaders: DataTableHeader[] = [
     {text: 'Equation', value: 'equation', align: 'left', sortable: false, class: '', width: ''},
@@ -118,10 +119,11 @@ export default class CostsTab extends Vue {
 
   onShowCostCriterionLibraryEditorDialog(cost: TreatmentCost) {
     this.selectedCostForEquationOrCriteriaEdit = clone(cost);
-
+    
     this.costCriterionLibraryEditorDialogData = {
       showDialog: true,
-      libraryId: cost.criterionLibrary.id
+      libraryId: cost.criterionLibrary.id,
+      isCallFromScenario: this.callFromScenario
     };
   }
 

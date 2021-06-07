@@ -112,12 +112,13 @@
                                            lazy
                                            persistent
                                            :return-value.sync='props.item.name'
-                                           @save='onEditScenarioName(props.item)'>
+                                           @save='onEditScenarioName(props.item, nameUpdate)'
+                                           @open='prepareForNameEdit(props.item.name)'>
                                 {{ props.item.name }}
                                 <template slot='input'>
                                     <v-text-field label='Edit'
                                                   single-line
-                                                  v-model='props.item.name'
+                                                  v-model='nameUpdate'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                 </template>
                             </v-edit-dialog>
@@ -232,12 +233,13 @@
                                            lazy
                                            persistent
                                            :return-value.sync='props.item.name'
-                                           @save='onEditScenarioName(props.item)'>
+                                           @save='onEditScenarioName(props.item, nameUpdate)'
+                                           @open='prepareForNameEdit(props.item.name)''>
                                 {{ props.item.name }}
                                 <template slot='input'>
                                     <v-text-field label='Edit'
                                                   single-line
-                                                  v-model='props.item.name'
+                                                  v-model='nameUpdate'
                                                   :rules="[rules['generalRules'].valueIsNotEmpty]" />
                                 </template>
                             </v-edit-dialog>
@@ -451,6 +453,7 @@ export default class Scenarios extends Vue {
         { text: 'Report Status', value: 'reportStatus', align: 'left', sortable: false, class: '', width: '' },
         { text: '', value: '', align: 'left', sortable: false, class: '', width: '' },
     ];
+    nameUpdate: string = '';
     scenarios: Scenario[] = [];
     userScenarios: Scenario[] = [];
     sharedScenarios: Scenario[] = [];
@@ -603,13 +606,18 @@ export default class Scenarios extends Vue {
         this.migrateLegacySimulationDataAction({ simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY });
     }
 
-    onEditScenarioName(scenario: Scenario) {
+    onEditScenarioName(scenario: Scenario, name: string) {
+        scenario.name = name;
         if (hasValue(scenario.name)) {
             this.updateScenarioAction({ scenario: scenario });
         } else {
             this.scenarios = [];
             setTimeout(() => (this.scenarios = clone(this.stateScenarios)));
         }
+    }
+
+    prepareForNameEdit(name: string) {
+        this.nameUpdate = name;
     }
 
     onShowConfirmAnalysisRunAlert(scenario: Scenario) {

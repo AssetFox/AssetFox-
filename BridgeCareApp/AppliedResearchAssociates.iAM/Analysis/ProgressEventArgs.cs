@@ -16,5 +16,20 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public int? Year { get; }
 
         public double PercentComplete { get; }
+
+        public override string ToString()
+        {
+            var result = $"Analysis progress: {PercentComplete:f0}% ({ProgressStatus})";
+            if (Year.HasValue)
+            {
+                result += $", year {Year}.";
+            }
+            else
+            {
+                result += ".";
+            }
+
+            return result;
+        }
     }
 }

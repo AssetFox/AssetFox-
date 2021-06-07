@@ -3,8 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.Domains;
+using AppliedResearchAssociates.iAM.DTOs.Static;
 using AppliedResearchAssociates.Validation;
 using Writer = System.Threading.Channels.ChannelWriter<AppliedResearchAssociates.CalculateEvaluate.SimulationLogMessageBuilder>;
 
@@ -521,6 +523,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
 
                     context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
+                    var messageBuilder = InvalidTreatmentCost(context, treatment, cost);
+                    _ = channel.WriteAsync(messageBuilder); // WjWilliam
                     return true;
                 });
 
@@ -556,6 +560,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             return treatmentOptions;
         }
+
+        private SimulationLogMessageBuilder InvalidTreatmentCost(SectionContext context, SelectableTreatment treatment, double cost) => new SimulationLogMessageBuilder
+        {
+            SimulationId = Simulation.Id,
+            Status = SimulationLogStatus.Warning,
+            Subject = SimulationLogSubject.Calculation,
+            Message = $"Invalid cost {cost} for treatment {treatment.Name} on section ({context.Section.Name} {context.Section.Id})",
+        };
 
         private IReadOnlyCollection<ConditionActual> GetDeficientConditionActuals()
         {

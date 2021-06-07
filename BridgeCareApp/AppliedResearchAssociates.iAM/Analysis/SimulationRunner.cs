@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
-        public ChannelWriter<FailureEventArgs> Failure { get; set; }
+        public EventHandler<FailureEventArgs> Failure { get; set; }
 
         public event EventHandler<InformationEventArgs> Information;
 
@@ -565,7 +565,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private SimulationLogMessageBuilder InvalidTreatmentCost(SectionContext context, SelectableTreatment treatment, double cost) => new SimulationLogMessageBuilder
         {
             SimulationId = Simulation.Id,
-            Status = SimulationLogStatus.Warning,
+            Status = SimulationLogStatus.Error,
             Subject = SimulationLogSubject.Calculation,
             Message = $"Invalid cost {cost} for treatment {treatment.Name} on section ({context.Section.Name} {context.Section.Id})",
         };

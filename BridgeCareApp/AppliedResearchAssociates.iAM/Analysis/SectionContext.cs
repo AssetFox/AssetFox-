@@ -276,7 +276,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                         SimulationId = SimulationRunner.Simulation.Id,
                         Subject = SimulationLogSubject.Calculation,
                         Message = SimulationLogMessages.SectionCalculationReturned(Section, performanceCurve, key, valueString),
-                        Status = SimulationLogStatus.Warning,
+                        Status = SimulationLogStatus.Error,
                     };
                     _ = writer.WriteAsync(message);
                //     SimulationRunner.Warn(message.ToString());

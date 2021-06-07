@@ -37,6 +37,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         internal double Compute(SectionContext scope, PerformanceCurve curve)
         {
+            // wjwjwj maybe catch here?
             EnsureCompiled();
             if (Format == EquationFormat.PiecewiseExpression)
             {

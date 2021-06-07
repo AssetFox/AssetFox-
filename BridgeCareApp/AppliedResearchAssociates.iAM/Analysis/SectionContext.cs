@@ -369,8 +369,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 };
 
                 SimulationRunner.Warn(messageBuilder.ToString());
-            }
-
+            } // wjwjwj what if one curve is NaN or infinity, and others are not?
+            // wjwjwj think about event handlers? -- refactor one event handler to a channel and look at the changes
             Func<double>
                 calculateMinimum = () => operativeCurves.Min(CalculateValueOnCurve),
                 calculateMaximum = () => operativeCurves.Max(CalculateValueOnCurve);

@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public Simulation Simulation { get; }
 
-        public void Run(Writer channel, bool withValidation = true)
+        public void Run(Writer writer, bool withValidation = true)
         {
             // During the execution of this method and its dependencies, the "SimulationException"
             // type is used for errors that are caused by invalid user input. Other types like
@@ -104,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 Fail(MessageBuilder.ToString());
             }
 
-            InParallel(SectionContexts, context => context.RollForward(channel));
+            InParallel(SectionContexts, context => context.RollForward(writer));
 
             SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;
 
@@ -150,8 +150,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod * 100;
                 ReportProgress(ProgressStatus.Running, percentComplete, year);
 
-                var unhandledContexts = ApplyRequiredEvents(year, channel);
-                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year, channel);
+                var unhandledContexts = ApplyRequiredEvents(year, writer);
+                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year, writer);
                 ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
 
                 Snapshot(year);
@@ -293,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private ICollection<SectionContext> ApplyRequiredEvents(int year, Writer channel)
+        private ICollection<SectionContext> ApplyRequiredEvents(int year, Writer writer)
         {
             var unhandledContexts = new List<SectionContext>();
 
@@ -305,7 +305,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     if (Simulation.AnalysisMethod.ShouldDeteriorateDuringCashFlow)
                     {
-                        context.ApplyPerformanceCurves(channel);
+                        context.ApplyPerformanceCurves(writer);
                     }
 
                     context.Detail.TreatmentConsiderations.Add(progress.TreatmentConsideration);
@@ -323,7 +323,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
                 else
                 {
-                    context.ApplyPerformanceCurves(channel);
+                    context.ApplyPerformanceCurves(writer);
 
                     if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                     {
@@ -453,7 +453,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private IReadOnlyCollection<TreatmentOption> GetBeneficialTreatmentOptionsInOptimalOrder(IEnumerable<SectionContext> contexts, int year, Writer channel)
+        private IReadOnlyCollection<TreatmentOption> GetBeneficialTreatmentOptionsInOptimalOrder(IEnumerable<SectionContext> contexts, int year, Writer writer)
         {
             var treatmentOptionsBag = new ConcurrentBag<TreatmentOption>();
             void addTreatmentOptions(SectionContext context)
@@ -524,7 +524,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
                     var messageBuilder = InvalidTreatmentCost(context, treatment, cost);
-                    _ = channel.WriteAsync(messageBuilder); // WjWilliam
+                    _ = writer.WriteAsync(messageBuilder); // WjWilliam
                     return true;
                 });
 
@@ -536,11 +536,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                         group limit.Value by limit.Attribute into attributeLimitValues
                         select new RemainingLifeCalculator.Factory(attributeLimitValues));
 
-                    var baselineOutlook = new TreatmentOutlook(this, context, Simulation.DesignatedPassiveTreatment, year, remainingLifeCalculatorFactories, channel);
+                    var baselineOutlook = new TreatmentOutlook(this, context, Simulation.DesignatedPassiveTreatment, year, remainingLifeCalculatorFactories, writer);
 
                     foreach (var treatment in feasibleTreatments)
                     {
-                        var outlook = new TreatmentOutlook(this, context, treatment, year, remainingLifeCalculatorFactories, channel);
+                        var outlook = new TreatmentOutlook(this, context, treatment, year, remainingLifeCalculatorFactories, writer);
                         var option = outlook.GetOptionRelativeToBaseline(baselineOutlook);
                         treatmentOptionsBag.Add(option);
 

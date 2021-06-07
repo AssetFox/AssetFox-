@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
         }
 
-        public void ApplyPerformanceCurves(Writer channel) => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute(), GetPerformanceCurvePerAttribute(), channel);
+        public void ApplyPerformanceCurves(Writer writer) => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute(), GetPerformanceCurvePerAttribute(), writer);
 
         public void ApplyTreatment(Treatment treatment, int year)
         {
@@ -185,7 +185,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void ResetDetail() => Detail = new SectionDetail(Section);
 
-        public void RollForward(Writer channel)
+        public void RollForward(Writer writer)
         {
             // Per email on 2020-05-06 from Gregg to Jake, Chad, and William: "We roll forward
             // attributes with performance curves. To do so we need to know which performance curve
@@ -208,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
                 SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-                ApplyPerformanceCurves(channel);
+                ApplyPerformanceCurves(writer);
                 ApplyPassiveTreatment(earliestYearOfMostRecentValue.Value);
 
                 foreach (var year in Static.RangeFromBounds(earliestYearOfMostRecentValue.Value + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1))
@@ -216,7 +216,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
                     SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-                    ApplyPerformanceCurves(channel);
+                    ApplyPerformanceCurves(writer);
                     ApplyPassiveTreatment(year);
                 }
             }
@@ -257,7 +257,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private int? FirstUnshadowedYearForAnyTreatment;
 
-        private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute, IDictionary<string, Func<PerformanceCurve>> curvePerAttribute, Writer channel)
+        private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute, IDictionary<string, Func<PerformanceCurve>> curvePerAttribute, Writer writer)
         {
             // wjwjwj calculations here.
             // wjWilliam -- using Channel . . .
@@ -278,7 +278,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                         Message = SimulationLogMessages.SectionCalculationReturned(Section, performanceCurve, key, valueString),
                         Status = SimulationLogStatus.Warning,
                     };
-                    _ = channel.WriteAsync(message);
+                    _ = writer.WriteAsync(message);
                //     SimulationRunner.Warn(message.ToString());
                 }
                 SetNumber(key, value);

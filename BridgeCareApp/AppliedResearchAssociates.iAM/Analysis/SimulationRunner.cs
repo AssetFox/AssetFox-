@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Channels;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.Domains;
@@ -16,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
-        public event EventHandler<FailureEventArgs> Failure;
+        public ChannelWriter<FailureEventArgs> Failure { get; set; }
 
         public event EventHandler<InformationEventArgs> Information;
 

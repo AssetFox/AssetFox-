@@ -3,13 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Channels;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs.Static;
 using AppliedResearchAssociates.Validation;
-using Writer = System.Threading.Channels.ChannelWriter<AppliedResearchAssociates.CalculateEvaluate.SimulationLogMessageBuilder>;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
@@ -24,10 +22,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public event EventHandler<WarningEventArgs> Warning;
 
         public event EventHandler<ProgressEventArgs> Progress;
+        public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
         public Simulation Simulation { get; }
 
-        public void Run(Writer writer, bool withValidation = true)
+        public void Run(bool withValidation = true)
         {
             // During the execution of this method and its dependencies, the "SimulationException"
             // type is used for errors that are caused by invalid user input. Other types like
@@ -105,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 Fail(MessageBuilder.ToString());
             }
 
-            InParallel(SectionContexts, context => context.RollForward(writer));
+            InParallel(SectionContexts, context => context.RollForward());
 
             SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;
 
@@ -151,8 +150,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod * 100;
                 ReportProgress(ProgressStatus.Running, percentComplete, year);
 
-                var unhandledContexts = ApplyRequiredEvents(year, writer);
-                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year, writer);
+                var unhandledContexts = ApplyRequiredEvents(year);
+                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
                 ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
 
                 Snapshot(year);
@@ -294,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private ICollection<SectionContext> ApplyRequiredEvents(int year, Writer writer)
+        private ICollection<SectionContext> ApplyRequiredEvents(int year)
         {
             var unhandledContexts = new List<SectionContext>();
 
@@ -306,7 +305,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     if (Simulation.AnalysisMethod.ShouldDeteriorateDuringCashFlow)
                     {
-                        context.ApplyPerformanceCurves(writer);
+                        context.ApplyPerformanceCurves();
                     }
 
                     context.Detail.TreatmentConsiderations.Add(progress.TreatmentConsideration);
@@ -324,7 +323,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
                 else
                 {
-                    context.ApplyPerformanceCurves(writer);
+                    context.ApplyPerformanceCurves();
 
                     if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                     {
@@ -373,6 +372,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
 
             return unhandledContexts;
+        }
+
+        internal void SendToSimulationLog(SimulationLogMessageBuilder message)
+        {
+            var args = new SimulationLogEventArgs(message);
+            OnLog(args);
         }
 
         private bool ConditionGoalsAreMet(int year)
@@ -454,7 +459,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private IReadOnlyCollection<TreatmentOption> GetBeneficialTreatmentOptionsInOptimalOrder(IEnumerable<SectionContext> contexts, int year, Writer writer)
+        private IReadOnlyCollection<TreatmentOption> GetBeneficialTreatmentOptionsInOptimalOrder(IEnumerable<SectionContext> contexts, int year)
         {
             var treatmentOptionsBag = new ConcurrentBag<TreatmentOption>();
             void addTreatmentOptions(SectionContext context)
@@ -525,7 +530,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
                     var messageBuilder = InvalidTreatmentCost(context, treatment, cost);
-                    _ = writer.WriteAsync(messageBuilder); // WjWilliam
+                    SendToSimulationLog(messageBuilder);
                     return true;
                 });
 
@@ -537,11 +542,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                         group limit.Value by limit.Attribute into attributeLimitValues
                         select new RemainingLifeCalculator.Factory(attributeLimitValues));
 
-                    var baselineOutlook = new TreatmentOutlook(this, context, Simulation.DesignatedPassiveTreatment, year, remainingLifeCalculatorFactories, writer);
+                    var baselineOutlook = new TreatmentOutlook(this, context, Simulation.DesignatedPassiveTreatment, year, remainingLifeCalculatorFactories);
 
                     foreach (var treatment in feasibleTreatments)
                     {
-                        var outlook = new TreatmentOutlook(this, context, treatment, year, remainingLifeCalculatorFactories, writer);
+                        var outlook = new TreatmentOutlook(this, context, treatment, year, remainingLifeCalculatorFactories);
                         var option = outlook.GetOptionRelativeToBaseline(baselineOutlook);
                         treatmentOptionsBag.Add(option);
 
@@ -636,7 +641,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private void OnWarning(WarningEventArgs e) => Warning?.Invoke(this, e);
 
         private void OnProgress(ProgressEventArgs e) => Progress?.Invoke(this, e);
-
+        private void OnLog(SimulationLogEventArgs e) => SimulationLog?.Invoke(this, e);
         private void RecordStatusOfConditionGoals(SimulationYearDetail detail)
         {
             detail.TargetConditionGoals.AddRange(TargetConditionActuals.Select(actual => new TargetConditionGoalDetail

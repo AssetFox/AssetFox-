@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Channels;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Domains;
@@ -432,9 +431,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                         simulationIsRunning = false;
                     }
                 };
-                var channel = Channel.CreateUnbounded<SimulationLogMessageBuilder>();
-                runner.Run(channel.Writer);
-                channel.Writer.Complete();
+                runner.Run();
 
                 while (simulationIsRunning)
                 {
@@ -794,10 +791,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                         simulationIsRunning = false;
                     }
                 };
-                var channel = Channel.CreateUnbounded<SimulationLogMessageBuilder>();
 
-                runner.Run(channel.Writer);
-                channel.Writer.Complete();
+                runner.Run();
 
                 while (simulationIsRunning)
                 {
@@ -814,9 +809,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                         dataSourceSimulationIsRunning = false;
                     }
                 };
-                var channel2 = Channel.CreateUnbounded<SimulationLogMessageBuilder>();
-                dataSourceRunner.Run(channel2.Writer);
-                channel2.Writer.Complete();
+                dataSourceRunner.Run();
 
                 while (dataSourceSimulationIsRunning)
                 {
@@ -875,9 +868,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                         simulationIsRunning = false;
                     }
                 };
-                var channel = Channel.CreateUnbounded<SimulationLogMessageBuilder>();
-                runner.Run(channel.Writer);
-                channel.Writer.Complete();
+                runner.Run();
 
                 while (simulationIsRunning)
                 {
@@ -894,9 +885,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                         dataSourceSimulationIsRunning = false;
                     }
                 };
-                var channel2 = Channel.CreateUnbounded<SimulationLogMessageBuilder>();
-                dataSourceRunner.Run(channel2.Writer);
-                channel2.Writer.Complete();
+                dataSourceRunner.Run();
 
                 while (dataSourceSimulationIsRunning)
                 {

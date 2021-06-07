@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Domains;
-using Writer = System.Threading.Channels.ChannelWriter<AppliedResearchAssociates.CalculateEvaluate.SimulationLogMessageBuilder>;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
     internal sealed class TreatmentOutlook
     {
-        public TreatmentOutlook(SimulationRunner simulationRunner, SectionContext templateContext, SelectableTreatment initialTreatment, int initialYear, IEnumerable<RemainingLifeCalculator.Factory> remainingLifeCalculatorFactories, Writer writer)
+        public TreatmentOutlook(SimulationRunner simulationRunner, SectionContext templateContext, SelectableTreatment initialTreatment, int initialYear, IEnumerable<RemainingLifeCalculator.Factory> remainingLifeCalculatorFactories)
         {
             SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
             TemplateContext = templateContext ?? throw new ArgumentNullException(nameof(templateContext));
@@ -25,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             AccumulationContext = new SectionContext(TemplateContext);
             MostRecentBenefit = AccumulationContext.GetBenefit();
 
-            Run(writer);
+            Run();
         }
 
         public TreatmentOption GetOptionRelativeToBaseline(TreatmentOutlook baseline)
@@ -76,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             AccumulationContext.ApplyTreatment(treatment, year);
         }
 
-        private void Run(Writer writer)
+        private void Run()
         {
             Action updateRemainingLife = null;
 
@@ -123,7 +122,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     throw new InvalidOperationException(MessageStrings.TreatmentOutlookIsConsumingAProgressEvent);
                 }
 
-                AccumulationContext.ApplyPerformanceCurves(writer);
+                AccumulationContext.ApplyPerformanceCurves();
 
                 if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                 {

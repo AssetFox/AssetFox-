@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
@@ -29,6 +28,7 @@ namespace BridgeCareCore.Services
         }
 
         private readonly HashSet<string> WarningsSent = new HashSet<string>();
+        private readonly HashSet<string> LoggedMessages = new HashSet<string>();
         private Task MessageWritingTask;
 
         public Task CreateAndRunPermitted(Guid networkId, Guid simulationId)
@@ -114,34 +114,25 @@ namespace BridgeCareCore.Services
                 }
             };
 
+            runner.SimulationLog += (sender, eventArgs) =>
+            {
+                var message = eventArgs.MessageBuilder;
+                if (LoggedMessages.Add(message.Message))
+                {
+                    var dto = SimulationLogMapper.ToDTO(message);
+                    _unitOfWork.SimulationLogRepo.CreateLog(dto);
+                }
+            };
+
             // resetting the report generation status.
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             
             RunValidation(runner);
-            var channel = Channel.CreateUnbounded<SimulationLogMessageBuilder>();
-            MessageWritingTask = WriteMessages(channel.Reader);
-            runner.Run(channel.Writer, false);
-            channel.Writer.Complete();
+            runner.Run(false);
 
             return Task.CompletedTask;
-        }
-
-        protected async Task WriteMessages(
-            ChannelReader<SimulationLogMessageBuilder> reader
-        )
-        {
-            var writtenMessages = new HashSet<string>();
-            while (await reader.WaitToReadAsync())
-            {
-                var message = await reader.ReadAsync();
-                if (writtenMessages.Add(message.Message))
-                {
-                    var dto = SimulationLogMapper.ToDTO(message);
-                    _unitOfWork.SimulationLogRepo.CreateLog(dto);
-                }
-            }
         }
 
         private void RunValidation(SimulationRunner runner)

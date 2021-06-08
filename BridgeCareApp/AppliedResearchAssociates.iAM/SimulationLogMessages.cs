@@ -1,13 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM
 {
     public static class SimulationLogMessages
     {
-        public static string SectionCalculationReturned(Section section, PerformanceCurve performanceCurve, string key, string valueString)
-            => $"Calculation for {key} on (Section {section.Name} {section.Id}) using performance curve ({performanceCurve.Name} {performanceCurve.Id}) returned {valueString}";
+        private static string SectionString(Section section)
+            => $"(section {section.Name} {section.Id})";
+
+        public static string SectionCalculationReturned(Section section, PerformanceCurve performanceCurve, string key, double value)
+        {
+            var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
+            return $"Calculation for {key} on {SectionString(section)} using performance curve ({performanceCurve.Name} {performanceCurve.Id}) returned {valueString}";
+        }
+
+        public static string SpatialWeightCalculationReturned(Section section, double value)
+        {
+            var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
+            return $"Spatial weight for {SectionString(section)} returned {valueString}";
+        }
+
+        internal static string CalculatedFieldReturned(Section section, string fieldName, double value)
+        {
+            var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
+            return $"Calculated field {fieldName} on {SectionString(section)} returned {valueString}";
+        }
     }
 }

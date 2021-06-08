@@ -174,7 +174,22 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return number;
         }
 
-        public double GetSpatialWeight() => Section.SpatialWeighting.Compute(this);
+        public double GetSpatialWeight()
+        {
+            double r = Section.SpatialWeighting.Compute(this);
+            if (double.IsNaN(r) || double.IsInfinity(r))
+            {
+                var messageBuilder = new SimulationLogMessageBuilder
+                {
+                    Message = SimulationLogMessages.SpatialWeightCalculationReturned(Section, r),
+                    SimulationId = SimulationRunner.Simulation.Id,
+                    Status = SimulationLogStatus.Error,
+                    Subject = SimulationLogSubject.Calculation,
+                };
+                SimulationRunner.SendToSimulationLog(messageBuilder);
+            }
+            return r;
+        }
 
         public void MarkTreatmentProgress(Treatment treatment)
         {
@@ -328,14 +343,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             if (double.IsNaN(value) || double.IsInfinity(value))
             {
-                var valueString = double.IsNaN(value) ? "'not a number'" :
-                    double.IsPositiveInfinity(value) ? "infinity" : "negative infinity";
                 var key = curve.Attribute.Name;
                 var message = new SimulationLogMessageBuilder
                 {
                     SimulationId = SimulationRunner.Simulation.Id,
                     Subject = SimulationLogSubject.Calculation,
-                    Message = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, valueString),
+                    Message = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, value),
                     Status = SimulationLogStatus.Error,
                 };
                 SimulationRunner.SendToSimulationLog(message);
@@ -377,8 +390,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 SimulationRunner.Warn(messageBuilder.ToString());
             }
 
-
-            // wjwjwj If one curve is NaN or infinity, it should still be reported, even if the others are not.
             Func<double>
                 calculateMinimum = () => operativeCurves.Min(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value))),
                 calculateMaximum = () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));

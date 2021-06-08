@@ -35,7 +35,16 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             _excelHelper.ApplyBorder(worksheet.Cells[1, 1, 1, 10]);
             // End of Simulation Name format
 
-            FillData(worksheet, parametersModel);
+            // Simulation Comment
+            _excelHelper.MergeCells(worksheet, 2, 1, 2, 2);
+            _excelHelper.ApplyColor(worksheet.Cells[2, 1, 2, 2], Color.Gray);
+            worksheet.Cells["A2:B2"].Value = "Simulation Comment";
+
+            _excelHelper.MergeCells(worksheet, 2, 3, 2, 10);
+            worksheet.Cells["C2:J2"].Value = simulation.AnalysisMethod.Description;
+            _excelHelper.ApplyBorder(worksheet.Cells[2, 1, 2, 10]);
+
+            FillData(worksheet, parametersModel, simulation.LastRun);
 
             FillSimulationDetails(worksheet, simulationYearsCount, simulation);
             FillAnalysisDetails(worksheet, simulation);
@@ -47,7 +56,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
         #region
 
-        private void FillData(ExcelWorksheet worksheet, ParametersModel parametersModel)
+        private void FillData(ExcelWorksheet worksheet, ParametersModel parametersModel, DateTime lastRun)
         {
             var bpnValueCellTracker = new Dictionary<string, string>();
             var statusValueCellTracker = new Dictionary<string, string>();
@@ -57,6 +66,10 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells["A4"].Value = "BridgeCare Rules Date:";
             worksheet.Cells["B4"].Value = "10/25/2019";
             _excelHelper.ApplyBorder(worksheet.Cells[3, 1, 4, 2]);
+
+            worksheet.Cells["D3"].Value = "Simulation Last Run:";
+            worksheet.Cells["E3"].Value = "10/25/2019";
+            _excelHelper.ApplyBorder(worksheet.Cells[3, 4, 3, 5]);
 
             _excelHelper.MergeCells(worksheet, 6, 1, 6, 2);
             _excelHelper.ApplyColor(worksheet.Cells[6, 1, 6, 2], Color.Gray);
@@ -89,6 +102,12 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells["A19"].Value = "N";
             worksheet.Cells["A20"].Value = "Blank";
 
+            bpnValueCellTracker.Add("L", "B16");
+            bpnValueCellTracker.Add("T", "B17");
+            bpnValueCellTracker.Add("D", "B18");
+            bpnValueCellTracker.Add("N", "B19");
+            bpnValueCellTracker.Add("Blank", "B20");
+
             foreach (var item in bpnValueCellTracker)
             {
                 if (parametersModel.BPNValues.Contains(item.Key))
@@ -100,11 +119,11 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
                     worksheet.Cells[item.Value].Value = "N";
                 }
             }
-            worksheet.Cells["B16"].Value = "Y";
-            worksheet.Cells["B17"].Value = "Y";
-            worksheet.Cells["B18"].Value = "Y";
-            worksheet.Cells["B19"].Value = "Y";
-            worksheet.Cells["B20"].Value = "Y";
+            //worksheet.Cells["B16"].Value = "Y";
+            //worksheet.Cells["B17"].Value = "Y";
+            //worksheet.Cells["B18"].Value = "Y";
+            //worksheet.Cells["B19"].Value = "Y";
+            //worksheet.Cells["B20"].Value = "Y";
             _excelHelper.ApplyBorder(worksheet.Cells[10, 1, 20, 2]);
 
             _excelHelper.MergeCells(worksheet, 23, 1, 23, 2);

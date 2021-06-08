@@ -28,5 +28,17 @@ namespace AppliedResearchAssociates.iAM
             var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
             return $"Calculated field {fieldName} on {SectionString(section)} returned {valueString}";
         }
+
+        internal static string ChangeApplicatorReturned(Section section, ConditionalTreatmentConsequence consequence, double value)
+        {
+            var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
+            return $"Conditional treatment consequence {consequence.Attribute.Name} on {SectionString(section)} returned {valueString}";
+        }
+
+        internal static string TreatementCostReturned(Section section, TreatmentCost cost, double value)
+        {
+            var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
+            return $"Treatment cost {cost.Equation.Expression}  on {SectionString(section)} returned {valueString}";
+        }
     }
 }

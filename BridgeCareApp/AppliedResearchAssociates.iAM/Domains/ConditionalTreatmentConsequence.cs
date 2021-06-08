@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
@@ -56,10 +57,21 @@ namespace AppliedResearchAssociates.iAM.Domains
             if (!Equation.ExpressionIsBlank && Attribute is NumberAttribute)
             {
                 var newValue = Equation.Compute(scope);
+                if (double.IsNaN(newValue) || double.IsInfinity(newValue))
+                {
+                    var logBuilder = new SimulationLogMessageBuilder
+                    {
+                        Message = SimulationLogMessages.ChangeApplicatorReturned(scope.Section, this, newValue),
+                        SimulationId = scope.SimulationRunner.Simulation.Id,
+                        Status = DTOs.Static.SimulationLogStatus.Error,
+                        Subject = SimulationLogSubject.Calculation,
+                    };
+                    scope.SimulationRunner.SendToSimulationLog(logBuilder);
+                };
+
                 var equationApplicator = new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newValue), newValue);
                 applicators = applicators.Append(equationApplicator);
             }
-
             return applicators;
         }
     }

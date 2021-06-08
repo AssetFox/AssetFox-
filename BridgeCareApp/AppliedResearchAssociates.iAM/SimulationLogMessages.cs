@@ -14,31 +14,31 @@ namespace AppliedResearchAssociates.iAM
         public static string SectionCalculationReturned(Section section, PerformanceCurve performanceCurve, string key, double value)
         {
             var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
-            return $"Calculation for {key} on {SectionString(section)} using performance curve ({performanceCurve.Name} {performanceCurve.Id}) returned {valueString}";
+            return $"Calculation for {key} on with equation {performanceCurve.Equation?.Expression} {SectionString(section)} using performance curve ({performanceCurve.Name} {performanceCurve.Id}) returned {valueString}";
         }
 
-        public static string SpatialWeightCalculationReturned(Section section, double value)
+        public static string SpatialWeightCalculationReturned(Section section, Equation equation, double value)
         {
             var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
-            return $"Spatial weight for {SectionString(section)} returned {valueString}";
+            return $"Spatial weight {equation.Expression} for {SectionString(section)} returned {valueString}";
         }
 
-        internal static string CalculatedFieldReturned(Section section, string fieldName, double value)
+        internal static string CalculatedFieldReturned(Section section, Equation equation, string fieldName, double value)
         {
             var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
-            return $"Calculated field {fieldName} on {SectionString(section)} returned {valueString}";
+            return $"Calculated field {fieldName} with equation {equation?.Expression} on {SectionString(section)} returned {valueString}";
         }
 
-        internal static string ConditionalTreatmentConsequenceReturned(Section section, ConditionalTreatmentConsequence consequence, double value)
+        internal static string ConditionalTreatmentConsequenceReturned(Section section, Equation equation, ConditionalTreatmentConsequence consequence, double value)
         {
             var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
-            return $"Conditional treatment consequence {consequence.Attribute.Name} on {SectionString(section)} returned {valueString}";
+            return $"Conditional treatment consequence {consequence.Attribute.Name} with equation {equation?.Expression} on {SectionString(section)} returned {valueString}";
         }
 
         internal static string TreatementCostReturned(Section section, TreatmentCost cost, SelectableTreatment selectableTreatment, double value)
         {
             var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
-            return $"Cost {cost.Equation.Expression} for treatment {selectableTreatment.Name } on {SectionString(section)} returned {valueString}";
+            return $"Cost {cost?.Equation?.Expression} for treatment {selectableTreatment.Name } on {SectionString(section)} returned {valueString}";
         }
     }
 }

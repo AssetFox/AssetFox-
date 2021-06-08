@@ -32,9 +32,10 @@ namespace AppliedResearchAssociates.iAM.Domains
                     SimulationId = sectionContext.SimulationRunner.Simulation.Id,
                     Status = SimulationLogStatus.Error,
                     Subject = SimulationLogSubject.Calculation,
-                    Message = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, this.Name, r),
+                    Message = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, equation, this.Name, r),
                 };
                 sectionContext.SimulationRunner.SendToSimulationLog(messageBuilder);
+                throw new SimulationException(messageBuilder.Message);
             }
             return r;
         }

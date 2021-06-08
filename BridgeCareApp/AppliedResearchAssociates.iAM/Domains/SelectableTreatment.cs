@@ -151,6 +151,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                     Subject = SimulationLogSubject.Calculation,
                 };
                 scope.SimulationRunner.SendToSimulationLog(message);
+                throw new SimulationException(message.Message);
             }
             return r;
         }

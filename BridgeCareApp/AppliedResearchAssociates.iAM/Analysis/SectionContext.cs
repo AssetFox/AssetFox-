@@ -72,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
         }
 
-        public void ApplyPerformanceCurves() => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute(), GetPerformanceCurvePerAttribute());
+        public void ApplyPerformanceCurves() => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute());
 
         public void ApplyTreatment(Treatment treatment, int year)
         {
@@ -176,17 +176,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public double GetSpatialWeight()
         {
-            double r = Section.SpatialWeighting.Compute(this);
+            var r = Section.SpatialWeighting.Compute(this);
             if (double.IsNaN(r) || double.IsInfinity(r))
             {
                 var messageBuilder = new SimulationLogMessageBuilder
                 {
-                    Message = SimulationLogMessages.SpatialWeightCalculationReturned(Section, r),
+                    Message = SimulationLogMessages.SpatialWeightCalculationReturned(Section, Section.SpatialWeighting, r),
                     SimulationId = SimulationRunner.Simulation.Id,
                     Status = SimulationLogStatus.Error,
                     Subject = SimulationLogSubject.Calculation,
                 };
                 SimulationRunner.SendToSimulationLog(messageBuilder);
+                throw new SimulationException(messageBuilder.Message);
             }
             return r;
         }
@@ -271,9 +272,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private int? FirstUnshadowedYearForAnyTreatment;
 
-        private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute, IDictionary<string, Func<PerformanceCurve>> curvePerAttribute)
+        private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
-            // wjwjwj calculations here.
             var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
             foreach (var (key, value) in dataUpdates)
             {
@@ -344,14 +344,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
             if (double.IsNaN(value) || double.IsInfinity(value))
             {
                 var key = curve.Attribute.Name;
-                var message = new SimulationLogMessageBuilder
+                var messageBuilder = new SimulationLogMessageBuilder
                 {
                     SimulationId = SimulationRunner.Simulation.Id,
                     Subject = SimulationLogSubject.Calculation,
                     Message = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, value),
                     Status = SimulationLogStatus.Error,
                 };
-                SimulationRunner.SendToSimulationLog(message);
+                SimulationRunner.SendToSimulationLog(messageBuilder);
+                throw new SimulationException(messageBuilder.Message);
             }
         }
 

@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                 {
                     var logBuilder = new SimulationLogMessageBuilder
                     {
-                        Message = SimulationLogMessages.ConditionalTreatmentConsequenceReturned(scope.Section, this, newValue),
+                        Message = SimulationLogMessages.ConditionalTreatmentConsequenceReturned(scope.Section, Equation, this, newValue),
                         SimulationId = scope.SimulationRunner.Simulation.Id,
                         Status = DTOs.Static.SimulationLogStatus.Error,
                         Subject = SimulationLogSubject.Calculation,

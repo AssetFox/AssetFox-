@@ -259,32 +259,21 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute, IDictionary<string, Func<PerformanceCurve>> curvePerAttribute)
         {
             // wjwjwj calculations here.
-            // wjWilliam -- using Channel . . .
             var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
             foreach (var (key, value) in dataUpdates)
             {
-                if (double.IsNaN(value) || double.IsInfinity(value))
-                {
-                    var valueString = double.IsNaN(value) ? "'not a number'" :
-                        double.IsPositiveInfinity(value) ? "infinity" : "negative infinity";
-                    var target = calculatorPerAttribute[key].Target;
-                    var targetTypeName = target.GetType().Name;
-                    var performanceCurve = curvePerAttribute[key]();
-                    var message = new SimulationLogMessageBuilder
-                    {
-                        SimulationId = SimulationRunner.Simulation.Id,
-                        Subject = SimulationLogSubject.Calculation,
-                        Message = SimulationLogMessages.SectionCalculationReturned(Section, performanceCurve, key, valueString),
-                        Status = SimulationLogStatus.Error,
-                    };
-                    SimulationRunner.SendToSimulationLog(message);
-               //     SimulationRunner.Warn(message.ToString());
-                }
                 SetNumber(key, value);
             }
         }
 
         private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve);
+
+        private double CalculateValueOnCurve(PerformanceCurve curve, Action<double> handle)
+        {
+            var value = CalculateValueOnCurve(curve);
+            handle(value);
+            return value;
+        }
 
         private void CopyAttributeValuesToDetail(SectionSummaryDetail detail)
         {
@@ -335,6 +324,24 @@ namespace AppliedResearchAssociates.iAM.Analysis
             };
         }
 
+        private void SendToSimulationLogIfNeeded(PerformanceCurve curve, double value)
+        {
+            if (double.IsNaN(value) || double.IsInfinity(value))
+            {
+                var valueString = double.IsNaN(value) ? "'not a number'" :
+                    double.IsPositiveInfinity(value) ? "infinity" : "negative infinity";
+                var key = curve.Attribute.Name;
+                var message = new SimulationLogMessageBuilder
+                {
+                    SimulationId = SimulationRunner.Simulation.Id,
+                    Subject = SimulationLogSubject.Calculation,
+                    Message = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, valueString),
+                    Status = SimulationLogStatus.Error,
+                };
+                SimulationRunner.SendToSimulationLog(message);
+            }
+        }
+
         private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
         {
             curves.Channel(
@@ -368,11 +375,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 };
 
                 SimulationRunner.Warn(messageBuilder.ToString());
-            } // wjwjwj what if one curve is NaN or infinity, and others are not?
-            // wjwjwj think about event handlers? -- refactor one event handler to a channel and look at the changes
+            }
+
+
+            // wjwjwj If one curve is NaN or infinity, it should still be reported, even if the others are not.
             Func<double>
-                calculateMinimum = () => operativeCurves.Min(CalculateValueOnCurve),
-                calculateMaximum = () => operativeCurves.Max(CalculateValueOnCurve);
+                calculateMinimum = () => operativeCurves.Min(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value))),
+                calculateMaximum = () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));
 
             return curves.Key.IsDecreasingWithDeterioration ? calculateMinimum : calculateMaximum;
         }

@@ -530,7 +530,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
                     var messageBuilder = InvalidTreatmentCost(context, treatment, cost);
-                    SendToSimulationLog(messageBuilder);
+                    SendToSimulationLog(messageBuilder); // WjWilliam -- this one is a little awkward. For a cost that is Infinity or NaN, it will return a duplicated message. But if we take this out, values that fail to convert to Decimal but are not Infinity or NaN will not yield any message.
                     return true;
                 });
 

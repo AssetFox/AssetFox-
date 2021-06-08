@@ -147,7 +147,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                 {
                     SimulationId = scope.SimulationRunner.Simulation.Id,
                     Status = SimulationLogStatus.Error,
-                    Message = SimulationLogMessages.TreatementCostReturned(scope.Section, cost, r),
+                    Message = SimulationLogMessages.TreatementCostReturned(scope.Section, cost, this, r),
                     Subject = SimulationLogSubject.Calculation,
                 };
                 scope.SimulationRunner.SendToSimulationLog(message);

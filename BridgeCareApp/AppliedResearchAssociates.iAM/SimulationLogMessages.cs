@@ -29,16 +29,16 @@ namespace AppliedResearchAssociates.iAM
             return $"Calculated field {fieldName} on {SectionString(section)} returned {valueString}";
         }
 
-        internal static string ChangeApplicatorReturned(Section section, ConditionalTreatmentConsequence consequence, double value)
+        internal static string ConditionalTreatmentConsequenceReturned(Section section, ConditionalTreatmentConsequence consequence, double value)
         {
             var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
             return $"Conditional treatment consequence {consequence.Attribute.Name} on {SectionString(section)} returned {valueString}";
         }
 
-        internal static string TreatementCostReturned(Section section, TreatmentCost cost, double value)
+        internal static string TreatementCostReturned(Section section, TreatmentCost cost, SelectableTreatment selectableTreatment, double value)
         {
             var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
-            return $"Treatment cost {cost.Equation.Expression}  on {SectionString(section)} returned {valueString}";
+            return $"Cost {cost.Equation.Expression} for treatment {selectableTreatment.Name } on {SectionString(section)} returned {valueString}";
         }
     }
 }

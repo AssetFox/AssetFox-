@@ -49,7 +49,8 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             FillSimulationDetails(worksheet, simulationYearsCount, simulation);
             FillAnalysisDetails(worksheet, simulation);
             FillJurisdictionCriteria(worksheet, simulation);
-            FillPriorities(worksheet, simulation);
+            var rowNum = FillPriorities(worksheet, simulation);
+            FillBudgetSplitCriteria(worksheet);
             FillInvestmentAndBudgetCriteria(worksheet, simulation);
             worksheet.Cells.AutoFitColumns(50);
         }
@@ -356,7 +357,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells["N14:O14"].Value = simulation.AnalysisMethod.Benefit.Attribute.Name; //BenefitAttribute;
         }
 
-        private void FillPriorities(ExcelWorksheet worksheet, Simulation simulation)
+        private int FillPriorities(ExcelWorksheet worksheet, Simulation simulation)
         {
             _excelHelper.MergeCells(worksheet, 19, 12, 19, worksheet.Dimension.End.Column);
             _excelHelper.ApplyColor(worksheet.Cells[19, 12, 19, worksheet.Dimension.End.Column], Color.Gray);
@@ -383,6 +384,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
                 startingRow++;
             }
             _excelHelper.ApplyBorder(worksheet.Cells[21, 12, startingRow - 1, worksheet.Dimension.End.Column]);
+            return startingRow;
         }
 
         private void FillJurisdictionCriteria(ExcelWorksheet worksheet, Simulation simulation)

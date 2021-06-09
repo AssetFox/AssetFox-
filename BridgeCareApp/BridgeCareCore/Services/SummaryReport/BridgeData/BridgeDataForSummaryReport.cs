@@ -324,9 +324,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BRIDGE_TYPE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["DECK_AREA"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LENGTH"];
-                columnNo++; // temporary, because we can commented out 1 excel rows
+                columnNo++; // temporary, because we can comment out 1 excel rows
 
                 // Add span type, owner code, functional class, submitting agency
+                columnNo += 4;
 
                 //worksheet.Cells[rowNo, columnNo++].Value = bridgeDataModel.PlanningPartner;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY_ID"];
@@ -370,6 +371,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 "Bridge (B/C)",
                 "Deck Area",
                 "Structure Length",
+
+                "Span Type",
+                "Owner Code",
+                "Functional Class",
+                "Submitting Agency",
+
                 "Planning Partner",
                 "Bridge Family",
                 "NHS",

@@ -50,7 +50,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             FillAnalysisDetails(worksheet, simulation);
             FillJurisdictionCriteria(worksheet, simulation);
             var rowNum = FillPriorities(worksheet, simulation);
-            FillBudgetSplitCriteria(worksheet);
+            FillBudgetSplitCriteria(worksheet, rowNum, simulation);
             FillInvestmentAndBudgetCriteria(worksheet, simulation);
             worksheet.Cells.AutoFitColumns(50);
         }
@@ -396,6 +396,33 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             worksheet.Cells["L16:M16"].Value = "Jurisdiction Criteria:";
             worksheet.Cells["N16:Z16"].Value = simulation.AnalysisMethod.Filter.Expression; //criteria;
+        }
+
+        private void FillBudgetSplitCriteria(ExcelWorksheet worksheet, int rowNum, Simulation simulation)
+        {
+            var currencyFormat = "_-$* #,##0.00_-;-$* #,##0.00_-;_-$* \"-\"??_-;_-@_-";
+            rowNum++;
+            var startingRow = rowNum;
+            _excelHelper.MergeCells(worksheet, rowNum, 12, rowNum, 14);
+
+            worksheet.Cells[rowNum, 12].Value = "Budget Split Criteria";
+            worksheet.Cells[++rowNum, 12].Value = "Rank";
+            worksheet.Cells[rowNum, 13].Value = "Amount";
+            worksheet.Cells[rowNum, 14].Value = "Percentage";
+
+            foreach(var item in simulation.InvestmentPlan.CashFlowRules)
+            {
+                var i = 0;
+                foreach(var rule in item.DistributionRules)
+                {
+                    i++;
+                    worksheet.Cells[++rowNum, 12].Value = i;
+                    worksheet.Cells[rowNum, 13].Style.Numberformat.Format = currencyFormat;
+                    worksheet.Cells[rowNum, 13].Value = rule.CostCeiling;
+                    worksheet.Cells[rowNum, 14].Value = rule.Expression;
+                }
+            }
+            _excelHelper.ApplyBorder(worksheet.Cells[startingRow, 12, rowNum, 14]);
         }
 
         private void FillInvestmentAndBudgetCriteria(ExcelWorksheet worksheet, Simulation simulation)

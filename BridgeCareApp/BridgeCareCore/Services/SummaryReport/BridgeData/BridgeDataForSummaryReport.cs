@@ -326,18 +326,29 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LENGTH"];
                 columnNo++; // temporary, because we can commented out 1 excel rows
 
+                // Add span type, owner code, functional class, submitting agency
+
                 //worksheet.Cells[rowNo, columnNo++].Value = bridgeDataModel.PlanningPartner;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY_ID"];
                 worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(sectionSummary.ValuePerTextAttribute["NHS_IND"],
                     out var numericValue) && numericValue > 0 ? "Y" : "N";
+
+                // Add NBIS Len
+
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
+                // Add Interstate
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["STRUCTURE_TYPE"];
+
+                // Fractural Critical, Deck surface type, Wearing surface cond, Paint cond, paint ext
+
                 worksheet.Cells[rowNo, columnNo++].Value = (int)sectionSummary.ValuePerNumericAttribute["YEAR_BUILT"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["AGE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["ADTTOTAL"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISK_SCORE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["P3"] > 0 ? "Y" : "N";
                 previousYearInitialMinC.Add(sectionSummary.ValuePerNumericAttribute["MINCOND"]);
+
+                // Add Parallel Structure, Internet Report, Federal Aid, 
             }
             currentCell.Row = rowNo;
             currentCell.Column = columnNo;

@@ -405,3 +405,4 @@ BridgeCareApp/BridgeCareCore/coreConnection.Development.json
 BridgeCareApp/BridgeCareCore/b2c.json
 /BridgeCareApp/BridgeCareCore/migrationConnection.json
 /BridgeCareApp/BridgeCareCore/testConnections.json.json
+/BridgeCareApp/BridgeCareCore/Reports/output.txt

@@ -42,6 +42,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public async Task Run(string parameters)
         {
+            // TODO:  Don't regenerate the report if it has already been generated AND the date on the file was after the LastRun date of the
+            // scenario.
+
             // Determine the Guid for the simulation
             if (!Guid.TryParse(parameters, out Guid simulationGuid)) {
                 Errors.Add("Simulation ID could not be parsed to a Guid");
@@ -50,6 +53,28 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 return;
             }
             SimulationID = simulationGuid;
+
+            // Check for simulation existence
+            string reportFileName;
+            try
+            {
+                var simulationInformation = _unitofwork.SimulationRepo.GetSimulation(simulationGuid);
+                if (!String.IsNullOrEmpty(simulationInformation.Name)) {
+                    reportFileName = $"Reports\\{simulationInformation.Name}-{SimulationID}.json";
+                }
+                else
+                {
+                    reportFileName = $"Reports\\{SimulationID}.json";
+                }
+            }
+            catch (Exception e)
+            {
+                Status = "Simulation output report completed with errors";
+                IsComplete = true;
+                Errors.Add($"Failed to find simulation ID {SimulationID}.");
+                Errors.Add(e.Message);
+                return;
+            }
 
             // Pull the simulation object
             Analysis.SimulationOutput simulationOutput;
@@ -68,10 +93,21 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var outputJson = JsonConvert.SerializeObject(simulationOutput);
 
             // Save the output to a file
-            File.WriteAllText(@"output.txt", outputJson);
+            try
+            {
+                File.WriteAllText(reportFileName, outputJson);
+            }
+            catch(Exception e)
+            {
+                Status = "Simulation output report completed with errors";
+                IsComplete = true;
+                Errors.Add("Failed to write file to server");
+                Errors.Add(e.Message);
+                return;
+            }
 
             // Report success with location of file
-            Results = "output.txt";
+            Results = reportFileName;  // This is not set until here to ensure the file was created correctly
             IsComplete = true;
             Status = "File generated.";
             return;

@@ -82,6 +82,55 @@ namespace BridgeCareCore.Controllers
             return validResult;
         }
 
+        [HttpPost]
+        [Route("GetFile/{reportName}")]
+        [Authorize]
+        public async Task<IActionResult> GetFile(string reportName)
+        {
+            // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
+            var parameters = string.Empty;
+            if (Request.ContentLength > 0)
+            {
+                using var reader = new StreamReader(Request.Body, Encoding.UTF8);
+                parameters = await reader.ReadToEndAsync();
+            }
+
+            var report = await _generator.Generate(reportName);
+
+            // Report back to the user if the request report isn't an HTML report
+            if (report.Type != ReportType.File)
+            {
+                var message = new List<string>() { $"{reportName} will not result in a file" };
+                return CreateErrorListing(message);
+            }
+
+            // Run the report as long as it does not have any existing errors (i.e., failure on generation)
+            if (!report.Errors.Any())
+            {
+                //SendRealTimeMessage($"Running {reportName}.");
+                await report.Run(parameters);
+                //SendRealTimeMessage($"Completed running {reportName}");
+            }
+
+            // Handle a completed run with errors
+            if (report.Errors.Any())
+            {
+                return CreateErrorListing(report.Errors);
+            }
+
+            // Handle an incomplete run without errors
+            if (!report.IsComplete)
+            {
+                var message = new List<string>() { $"{reportName} ran but never completed" };
+                return CreateErrorListing(message);
+            }
+
+            // Report is good, return the location of the file
+            var validResult = Content(report.Results);
+            validResult.StatusCode = (int?)HttpStatusCode.OK;
+            return validResult;
+        }
+
         private void SendRealTimeMessage(string message) =>
             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, message);
 

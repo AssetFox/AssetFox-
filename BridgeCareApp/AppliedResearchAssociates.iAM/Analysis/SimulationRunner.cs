@@ -529,7 +529,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
 
                     context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
-                    var messageBuilder = InvalidTreatmentCost(context, treatment, cost);
+                    var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Section, treatment, cost, context.SimulationRunner.Simulation.Id);
                     SendToSimulationLog(messageBuilder);
                     throw new SimulationException(messageBuilder.Message);
                 });
@@ -566,14 +566,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             return treatmentOptions;
         }
-
-        private SimulationLogMessageBuilder InvalidTreatmentCost(SectionContext context, SelectableTreatment treatment, double cost) => new SimulationLogMessageBuilder
-        {
-            SimulationId = Simulation.Id,
-            Status = SimulationLogStatus.Error,
-            Subject = SimulationLogSubject.Calculation,
-            Message = $"Invalid cost {cost} for treatment {treatment.Name} on section ({context.Section.Name} {context.Section.Id})",
-        };
 
         private IReadOnlyCollection<ConditionActual> GetDeficientConditionActuals()
         {

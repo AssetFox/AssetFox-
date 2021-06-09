@@ -59,16 +59,11 @@ namespace AppliedResearchAssociates.iAM.Domains
                 var newValue = Equation.Compute(scope);
                 if (double.IsNaN(newValue) || double.IsInfinity(newValue))
                 {
-                    var logBuilder = new SimulationLogMessageBuilder
-                    {
-                        Message = SimulationLogMessages.ConditionalTreatmentConsequenceReturned(scope.Section, Equation, this, newValue),
-                        SimulationId = scope.SimulationRunner.Simulation.Id,
-                        Status = DTOs.Static.SimulationLogStatus.Error,
-                        Subject = SimulationLogSubject.Calculation,
-                    };
+                    var errorMessage = SimulationLogMessages.ConditionalTreatmentConsequenceReturned(scope.Section, Equation, this, newValue);
+                    var logBuilder = SimulationLogMessageBuilders.CalculationError(errorMessage, scope.SimulationRunner.Simulation.Id);
                     scope.SimulationRunner.SendToSimulationLog(logBuilder);
+                    scope.SimulationRunner.Fail(errorMessage);
                 };
-
                 var equationApplicator = new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newValue), newValue);
                 applicators = applicators.Append(equationApplicator);
             }

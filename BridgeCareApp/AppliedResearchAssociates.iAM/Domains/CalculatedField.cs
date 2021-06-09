@@ -27,15 +27,10 @@ namespace AppliedResearchAssociates.iAM.Domains
             double r = equation.Compute(sectionContext);
             if (double.IsNaN(r) || double.IsInfinity(r))
             {
-                var messageBuilder = new SimulationLogMessageBuilder
-                {
-                    SimulationId = sectionContext.SimulationRunner.Simulation.Id,
-                    Status = SimulationLogStatus.Error,
-                    Subject = SimulationLogSubject.Calculation,
-                    Message = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, equation, this.Name, r),
-                };
+                var errorMessage = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, equation, Name, r);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationError(errorMessage, sectionContext.SimulationRunner.Simulation.Id);
                 sectionContext.SimulationRunner.SendToSimulationLog(messageBuilder);
-                sectionContext.SimulationRunner.Fail(messageBuilder.Message);
+                sectionContext.SimulationRunner.Fail(errorMessage);
             }
             return r;
         }

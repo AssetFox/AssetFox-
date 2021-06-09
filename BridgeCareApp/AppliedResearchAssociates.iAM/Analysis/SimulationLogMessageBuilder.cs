@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DTOs.Static;
 
-namespace AppliedResearchAssociates.CalculateEvaluate
+namespace AppliedResearchAssociates.iAM.Analysis
 {
     public class SimulationLogMessageBuilder
     {

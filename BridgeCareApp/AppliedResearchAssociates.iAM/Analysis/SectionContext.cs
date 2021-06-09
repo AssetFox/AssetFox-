@@ -179,15 +179,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var r = Section.SpatialWeighting.Compute(this);
             if (double.IsNaN(r) || double.IsInfinity(r))
             {
-                var messageBuilder = new SimulationLogMessageBuilder
-                {
-                    Message = SimulationLogMessages.SpatialWeightCalculationReturned(Section, Section.SpatialWeighting, r),
-                    SimulationId = SimulationRunner.Simulation.Id,
-                    Status = SimulationLogStatus.Error,
-                    Subject = SimulationLogSubject.Calculation,
-                };
+                var errorMessage = SimulationLogMessages.SpatialWeightCalculationReturned(Section, Section.SpatialWeighting, r);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationError(errorMessage, SimulationRunner.Simulation.Id);
                 SimulationRunner.SendToSimulationLog(messageBuilder);
-                SimulationRunner.Fail(messageBuilder.Message);
+                SimulationRunner.Fail(errorMessage);
             }
             return r;
         }
@@ -344,15 +339,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
             if (double.IsNaN(value) || double.IsInfinity(value))
             {
                 var key = curve.Attribute.Name;
-                var messageBuilder = new SimulationLogMessageBuilder
-                {
-                    SimulationId = SimulationRunner.Simulation.Id,
-                    Subject = SimulationLogSubject.Calculation,
-                    Message = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, value),
-                    Status = SimulationLogStatus.Error,
-                };
+                var errorMessage = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, value);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationError(errorMessage, SimulationRunner.Simulation.Id);
                 SimulationRunner.SendToSimulationLog(messageBuilder);
-                SimulationRunner.Fail(messageBuilder.Message);
+                SimulationRunner.Fail(errorMessage);
             }
         }
 

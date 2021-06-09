@@ -27,12 +27,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 NumberOfYearsOfTreatmentOutlook = 100
             };
 
-        public static void CreateSimulation(this SimulationEntity entity, Network network)
+        public static void CreateSimulation(this SimulationEntity entity, Network network, DateTime lastRun)
         {
             var simulation = network.AddSimulation();
             simulation.Id = entity.Id;
             simulation.Name = entity.Name;
             simulation.NumberOfYearsOfTreatmentOutlook = entity.NumberOfYearsOfTreatmentOutlook;
+            simulation.LastRun = lastRun;
         }
 
         public static SimulationDTO ToDto(this SimulationEntity entity, UserEntity creator) =>

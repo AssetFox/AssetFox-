@@ -37,30 +37,7 @@ namespace BridgeCareCore.Controllers
 
             //SendRealTimeMessage($"Starting to process {reportName}.");
 
-            // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
-            var parameters = string.Empty;
-            if (Request.ContentLength > 0)
-            {
-                using var reader = new StreamReader(Request.Body, Encoding.UTF8);
-                parameters = await reader.ReadToEndAsync();
-            }
-
-            var report = await _generator.Generate(reportName);
-
-            // Report back to the user if the request report isn't an HTML report
-            if (report.Type != ReportType.HTML)
-            {
-                var message = new List<string>() { $"{reportName} is not an HTML report" };
-                return CreateErrorListing(message);
-            }
-
-            // Run the report as long as it does not have any existing errors (i.e., failure on generation)
-            if (!report.Errors.Any())
-            {
-                //SendRealTimeMessage($"Running {reportName}.");
-                await report.Run(parameters);
-                //SendRealTimeMessage($"Completed running {reportName}");
-            }
+            var report = await GenerateReport(reportName, ReportType.HTML);
 
             // Handle a completed run with errors
             if (report.Errors.Any())
@@ -87,30 +64,7 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetFile(string reportName)
         {
-            // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
-            var parameters = string.Empty;
-            if (Request.ContentLength > 0)
-            {
-                using var reader = new StreamReader(Request.Body, Encoding.UTF8);
-                parameters = await reader.ReadToEndAsync();
-            }
-
-            var report = await _generator.Generate(reportName);
-
-            // Report back to the user if the request report isn't an HTML report
-            if (report.Type != ReportType.File)
-            {
-                var message = new List<string>() { $"{reportName} will not result in a file" };
-                return CreateErrorListing(message);
-            }
-
-            // Run the report as long as it does not have any existing errors (i.e., failure on generation)
-            if (!report.Errors.Any())
-            {
-                //SendRealTimeMessage($"Running {reportName}.");
-                await report.Run(parameters);
-                //SendRealTimeMessage($"Completed running {reportName}");
-            }
+            var report = await GenerateReport(reportName, ReportType.File);
 
             // Handle a completed run with errors
             if (report.Errors.Any())
@@ -129,6 +83,37 @@ namespace BridgeCareCore.Controllers
             var validResult = Content(report.Results);
             validResult.StatusCode = (int?)HttpStatusCode.OK;
             return validResult;
+        }
+
+        private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType)
+        {
+            // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
+            var parameters = string.Empty;
+            if (Request.ContentLength > 0)
+            {
+                using var reader = new StreamReader(Request.Body, Encoding.UTF8);
+                parameters = await reader.ReadToEndAsync();
+            }
+
+            var report = await _generator.Generate(reportName);
+
+            // Return an error if the report type does not match the expected type
+            if (report.Type != expectedReportType)
+            {
+                report = new FailureReport();
+                await report.Run($"{reportName} is not of the expected type");
+            }
+
+            // Run the report as long as it does not have any existing errors (i.e., failure on generation)
+            // Note:  If report was switched to a FailureReport previously, this will not run again
+            if (!report.Errors.Any())
+            {
+                //SendRealTimeMessage($"Running {reportName}.");
+                await report.Run(parameters);
+                //SendRealTimeMessage($"Completed running {reportName}");
+            }
+
+            return report;
         }
 
         private void SendRealTimeMessage(string message) =>

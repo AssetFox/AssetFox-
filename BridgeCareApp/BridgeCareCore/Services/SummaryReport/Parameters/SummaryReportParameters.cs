@@ -320,7 +320,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             _excelHelper.ApplyBorder(worksheet.Cells[6, 12, 14, 15]);
 
-            _excelHelper.MergeCells(worksheet, 8, 14, 8, 15);
+            _excelHelper.MergeCells(worksheet, 8, 14, 8, 15, false);
             _excelHelper.MergeCells(worksheet, 10, 14, 10, 15, false);
             _excelHelper.MergeCells(worksheet, 12, 14, 12, 15, false);
             _excelHelper.MergeCells(worksheet, 14, 14, 14, 15, false);
@@ -333,25 +333,9 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells["L10:M10"].Value = "Budget:";
             worksheet.Cells["L12:M12"].Value = "Weighting:";
             worksheet.Cells["L14:M14"].Value = "Benefit:";
-            var optimization = worksheet.DataValidations.AddListValidation("N8:O8");
-            optimization.Formula.Values.Add("Incremental Benefit/Cost");
-            optimization.Formula.Values.Add("Maximum Benefit");
-            optimization.Formula.Values.Add("Remaining Life/Cost");
-            optimization.Formula.Values.Add("Maximum Remaining Life");
-            optimization.Formula.Values.Add("Multi-year Incremental Benefit/Cost");
-            optimization.Formula.Values.Add("Multi-year Maximum Benefit");
-            optimization.Formula.Values.Add("Multi-year Remaining Life/Cost");
-            optimization.Formula.Values.Add("Multi-year Maximum Life");
-            optimization.AllowBlank = false;
+
             worksheet.Cells["N8:O8"].Value = simulation.AnalysisMethod.OptimizationStrategy;
 
-            var budgets = worksheet.DataValidations.AddListValidation("N10:O10");
-            budgets.Formula.Values.Add("No Spending");
-            budgets.Formula.Values.Add("As Budget Permits");
-            budgets.Formula.Values.Add("Until Targets Met");
-            budgets.Formula.Values.Add("Until Deficient Met");
-            budgets.Formula.Values.Add("Targets/Deficient Met");
-            budgets.Formula.Values.Add("Unlimited");
             worksheet.Cells["N10:O10"].Value = simulation.AnalysisMethod.SpendingStrategy; //BudgetType;
             worksheet.Cells["N12:O12"].Value = simulation.AnalysisMethod.Weighting.Name; //WeightingAttribute;
             worksheet.Cells["N14:O14"].Value = simulation.AnalysisMethod.Benefit.Attribute.Name; //BenefitAttribute;
@@ -392,7 +376,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             _excelHelper.MergeCells(worksheet, 16, 12, 17, 13);
             _excelHelper.MergeCells(worksheet, 16, 14, 17, 26, false);
 
-            _excelHelper.ApplyBorder(worksheet.Cells[16, 14, 17, 26]);
+            _excelHelper.ApplyBorder(worksheet.Cells[16, 12, 17, 26]);
 
             worksheet.Cells["L16:M16"].Value = "Jurisdiction Criteria:";
             worksheet.Cells["N16:Z16"].Value = simulation.AnalysisMethod.Filter.Expression; //criteria;
@@ -404,13 +388,16 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             rowNum++;
             var startingRow = rowNum;
             _excelHelper.MergeCells(worksheet, rowNum, 12, rowNum, 14);
+            _excelHelper.ApplyColor(worksheet.Cells[rowNum, 12, rowNum, worksheet.Dimension.End.Column], Color.Gray);
 
             worksheet.Cells[rowNum, 12].Value = "Budget Split Criteria";
             worksheet.Cells[++rowNum, 12].Value = "Rank";
             worksheet.Cells[rowNum, 13].Value = "Amount";
             worksheet.Cells[rowNum, 14].Value = "Percentage";
 
-            foreach(var item in simulation.InvestmentPlan.CashFlowRules)
+            _excelHelper.ApplyBorder(worksheet.Cells[rowNum, 12, rowNum, 14]);
+
+            foreach (var item in simulation.InvestmentPlan.CashFlowRules)
             {
                 var i = 0;
                 foreach(var rule in item.DistributionRules)

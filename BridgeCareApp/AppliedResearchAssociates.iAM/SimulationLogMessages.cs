@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM
         public static string SectionCalculationReturned(Section section, PerformanceCurve performanceCurve, string key, double value)
         {
             var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
-            return $"Calculation for {key} on with equation {performanceCurve.Equation?.Expression} {SectionString(section)} using performance curve ({performanceCurve.Name} {performanceCurve.Id}) returned {valueString}";
+            return $"Calculation for {key} on with equation {performanceCurve.Equation?.Expression} on {SectionString(section)} using performance curve ({performanceCurve.Name} {performanceCurve.Id}) returned {valueString}";
         }
 
         public static string SpatialWeightCalculationReturned(Section section, Equation equation, double value)

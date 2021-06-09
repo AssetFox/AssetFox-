@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
-        public EventHandler<FailureEventArgs> Failure { get; set; }
+        public event EventHandler<FailureEventArgs> Failure;
 
         public event EventHandler<InformationEventArgs> Information;
 

@@ -47,10 +47,6 @@ namespace AppliedResearchAssociates.iAM.Domains
                 {
                     var oldNumber = scope.GetNumber(Attribute.Name);
                     var newNumber = NumberChanger.Invoke(oldNumber);
-                    if (double.IsNaN(newNumber) || double.IsInfinity(newNumber))
-                    {
-                        int x = 666;
-                    }
                     return new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newNumber), newNumber);
                 }
 

@@ -300,40 +300,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private PerformanceCurve GetCalculatorPerformanceCurve(IGrouping<NumberAttribute, PerformanceCurve> curves, string key)
-        {
-            curves.Channel(
-                curve => curve.Criterion.Evaluate(this),
-                result => result ?? false,
-                result => !result.HasValue,
-                out var applicableCurves,
-                out var defaultCurves);
-
-            var theCurve = applicableCurves.FirstOrDefault() ?? defaultCurves.FirstOrDefault();
-            return theCurve;
-        }
-
-        private Func<PerformanceCurve> GetCalculatorCurve(IGrouping<NumberAttribute, PerformanceCurve> curves)
-        {
-            return () =>
-            {
-                curves.Channel(
-                curve => curve.Criterion.Evaluate(this),
-                result => result ?? false,
-                result => !result.HasValue,
-                out var applicableCurves,
-                out var defaultCurves);
-
-                var operativeCurves = applicableCurves.Count > 0 ? applicableCurves : defaultCurves;
-
-                if (operativeCurves.Any())
-                {
-                    return operativeCurves[0];
-                }
-                return null;
-            };
-        }
-
         private void SendToSimulationLogIfNeeded(PerformanceCurve curve, double value)
         {
             if (double.IsNaN(value) || double.IsInfinity(value))
@@ -389,8 +355,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         }
 
         private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary<IGrouping<NumberAttribute, PerformanceCurve>, string, Func<double>>(curves => curves.Key.Name, GetCalculator);
-
-        private IDictionary<string, Func<PerformanceCurve>> GetPerformanceCurvePerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary<IGrouping<NumberAttribute, PerformanceCurve>, string, Func<PerformanceCurve>>(curves => curves.Key.Name, GetCalculatorCurve);
 
         private void Initialize()
         {

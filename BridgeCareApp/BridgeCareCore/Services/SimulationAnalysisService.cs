@@ -27,9 +27,7 @@ namespace BridgeCareCore.Services
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
         }
 
-        private readonly HashSet<string> WarningsSent = new HashSet<string>();
         private readonly HashSet<string> LoggedMessages = new HashSet<string>();
-        private Task MessageWritingTask;
 
         public Task CreateAndRunPermitted(Guid networkId, Guid simulationId)
         {
@@ -107,11 +105,7 @@ namespace BridgeCareCore.Services
             };
             runner.Warning += (sender, eventArgs) =>
             {
-                var message = eventArgs.Message;
-                if (WarningsSent.Add(message))
-                {
-                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, message, simulationId);
-                }
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
             };
 
             runner.SimulationLog += (sender, eventArgs) =>
@@ -128,7 +122,7 @@ namespace BridgeCareCore.Services
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
-            
+
             RunValidation(runner);
             runner.Run(false);
 

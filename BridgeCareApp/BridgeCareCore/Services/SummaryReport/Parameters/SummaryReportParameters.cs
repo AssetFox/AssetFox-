@@ -28,6 +28,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             _excelHelper.MergeCells(worksheet, 1, 1, 1, 2);
             _excelHelper.MergeCells(worksheet, 1, 3, 1, 10);
             _excelHelper.ApplyColor(worksheet.Cells[1, 1, 1, 2], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[1, 1, 1, 2], Color.White);
 
             worksheet.Cells["A1:B1"].Value = "Simulation Name";
             worksheet.Cells["C1:J1"].Value = simulation.Name;
@@ -38,6 +39,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             // Simulation Comment
             _excelHelper.MergeCells(worksheet, 2, 1, 2, 2);
             _excelHelper.ApplyColor(worksheet.Cells[2, 1, 2, 2], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[2, 1, 2, 2], Color.White);
             worksheet.Cells["A2:B2"].Value = "Simulation Comment";
 
             _excelHelper.MergeCells(worksheet, 2, 3, 2, 10);
@@ -74,6 +76,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             _excelHelper.MergeCells(worksheet, 6, 1, 6, 2);
             _excelHelper.ApplyColor(worksheet.Cells[6, 1, 6, 2], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[6, 1, 6, 2], Color.White);
             worksheet.Cells["A6:B6"].Value = "NHS";
             worksheet.Cells["A7"].Value = "NHS";
             worksheet.Cells["A8"].Value = "Non-NHS";
@@ -84,6 +87,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             _excelHelper.MergeCells(worksheet, 10, 1, 10, 2);
             _excelHelper.ApplyColor(worksheet.Cells[10, 1, 10, 2], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[10, 1, 10, 2], Color.White);
             worksheet.Cells["A10:B10"].Value = "6A19 BPN";
             worksheet.Cells["A11"].Value = "1";
             worksheet.Cells["A12"].Value = "2";
@@ -120,15 +124,11 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
                     worksheet.Cells[item.Value].Value = "N";
                 }
             }
-            //worksheet.Cells["B16"].Value = "Y";
-            //worksheet.Cells["B17"].Value = "Y";
-            //worksheet.Cells["B18"].Value = "Y";
-            //worksheet.Cells["B19"].Value = "Y";
-            //worksheet.Cells["B20"].Value = "Y";
             _excelHelper.ApplyBorder(worksheet.Cells[10, 1, 20, 2]);
 
             _excelHelper.MergeCells(worksheet, 23, 1, 23, 2);
             _excelHelper.ApplyColor(worksheet.Cells[23, 1, 23, 2], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[23, 1, 23, 2], Color.White);
             worksheet.Cells["A23:B23"].Value = "Bridge Length";
             worksheet.Cells["A24"].Value = "8-20";
             worksheet.Cells["A25"].Value = "NBIS Length";
@@ -138,6 +138,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             _excelHelper.MergeCells(worksheet, 27, 1, 27, 2);
             _excelHelper.ApplyColor(worksheet.Cells[27, 1, 27, 2], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[27, 1, 27, 2], Color.White);
             worksheet.Cells["A27:B27"].Value = "Status";
             worksheet.Cells["A28"].Value = "Open";
             worksheet.Cells["A29"].Value = "Closed";
@@ -164,6 +165,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             _excelHelper.MergeCells(worksheet, 14, 4, 14, 6);
             _excelHelper.ApplyColor(worksheet.Cells[14, 4, 14, 6], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[14, 4, 14, 6], Color.White);
             worksheet.Cells["D14:F14"].Value = "5A21 Owner";
 
             _excelHelper.MergeCells(worksheet, 15, 4, 15, 5, false);
@@ -228,9 +230,11 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             _excelHelper.MergeCells(worksheet, 14, 8, 14, 10);
             _excelHelper.ApplyColor(worksheet.Cells[14, 8, 14, 10], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[14, 8, 14, 10], Color.White);
             worksheet.Cells["H14:J14"].Value = "5C22 Functional Class";
             _excelHelper.MergeCells(worksheet, 15, 8, 15, 10);
             _excelHelper.ApplyColor(worksheet.Cells[15, 8, 15, 10], Color.DimGray);
+            _excelHelper.SetTextColor(worksheet.Cells[15, 8, 15, 10], Color.White);
             worksheet.Cells["H15:J15"].Value = "Rural";
 
             _excelHelper.MergeCells(worksheet, 16, 8, 16, 9, false);
@@ -253,6 +257,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             _excelHelper.MergeCells(worksheet, 23, 8, 23, 10);
             _excelHelper.ApplyColor(worksheet.Cells[23, 8, 23, 10], Color.DimGray);
+            _excelHelper.SetTextColor(worksheet.Cells[23, 8, 23, 10], Color.White);
             worksheet.Cells["H23:J23"].Value = "Urban";
 
             _excelHelper.MergeCells(worksheet, 24, 8, 24, 9, false);
@@ -295,6 +300,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             _excelHelper.MergeCells(worksheet, 12, 6, 12, 7);
 
             _excelHelper.ApplyColor(worksheet.Cells[6, 6, 6, 8], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[6, 6, 6, 8], Color.White);
 
             worksheet.Cells["F6:H6"].Value = "Investment:";
             worksheet.Cells["F8:G8"].Value = "Start Year:";
@@ -329,6 +335,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             worksheet.Cells["L6:O6"].Value = "Analysis:";
             _excelHelper.ApplyColor(worksheet.Cells[6, 12, 6, 15], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[6, 12, 6, 15], Color.White);
             worksheet.Cells["L8:M8"].Value = "Optimization:";
             worksheet.Cells["L10:M10"].Value = "Budget:";
             worksheet.Cells["L12:M12"].Value = "Weighting:";
@@ -345,6 +352,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
         {
             _excelHelper.MergeCells(worksheet, 19, 12, 19, worksheet.Dimension.End.Column);
             _excelHelper.ApplyColor(worksheet.Cells[19, 12, 19, worksheet.Dimension.End.Column], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[19, 12, 19, worksheet.Dimension.End.Column], Color.White);
             _excelHelper.MergeCells(worksheet, 20, 13, 20, worksheet.Dimension.End.Column);
 
             _excelHelper.ApplyBorder(worksheet.Cells[20, 12, 20, worksheet.Dimension.End.Column]);
@@ -389,6 +397,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             var startingRow = rowNum;
             _excelHelper.MergeCells(worksheet, rowNum, 12, rowNum, 14);
             _excelHelper.ApplyColor(worksheet.Cells[rowNum, 12, rowNum, worksheet.Dimension.End.Column], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[rowNum, 12, rowNum, worksheet.Dimension.End.Column], Color.White);
 
             worksheet.Cells[rowNum, 12].Value = "Budget Split Criteria";
             worksheet.Cells[++rowNum, 12].Value = "Rank";
@@ -418,7 +427,9 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells[38, 1].Value = "Years";
             worksheet.Cells[38, 2].Value = "Total Funding";
             _excelHelper.ApplyColor(worksheet.Cells[38, 2], Color.DimGray);
+            _excelHelper.SetTextColor(worksheet.Cells[38, 2], Color.White);
             _excelHelper.ApplyColor(worksheet.Cells[38, 1], Color.DimGray);
+            _excelHelper.SetTextColor(worksheet.Cells[38, 1], Color.White);
 
             var startingRowInvestment = 40;
             var startingBudgetHeaderColumn = 2;
@@ -491,6 +502,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells[startingRowInvestment + 2, 1].Value = "Budget Criteria";
             _excelHelper.MergeCells(worksheet, startingRowInvestment + 2, 1, startingRowInvestment + 2, 5);
             _excelHelper.ApplyColor(worksheet.Cells[startingRowInvestment + 2, 1, startingRowInvestment + 2, 5], Color.Gray);
+            _excelHelper.SetTextColor(worksheet.Cells[startingRowInvestment + 2, 1, startingRowInvestment + 2, 5], Color.White);
 
             worksheet.Cells[startingRowInvestment + 3, 1].Value = "Budget Name";
             worksheet.Cells[startingRowInvestment + 3, 2].Value = "Criteria";

@@ -91,7 +91,6 @@ namespace BridgeCareCore.Services.SummaryReport
         {
             cells.Style.Fill.PatternType = ExcelFillStyle.Solid;
             cells.Style.Fill.BackgroundColor.SetColor(color);
-            cells.Style.Font.Color.SetColor(Color.White);
         }
 
         public void SetTextColor(ExcelRange cells, Color color)

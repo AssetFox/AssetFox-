@@ -33,6 +33,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 simulationYears, treatments, costPerTreatmentPerYear);
             var bridgeTotalRow = FillCostOfBridgeWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
+            var catRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, committedTotalRow);
             var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears,
                 costPerTreatmentPerYear, yearlyBudgetAmount);
             FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
@@ -64,6 +65,25 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Bridge Work", "BAMS Bridge Work Type");
             var bridgeTotalRow = AddCostsOfBridgeWork(worksheet, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
             return bridgeTotalRow;
+        }
+
+        private int FillWorkTypeTotalsSection(
+            ExcelWorksheet worksheet,
+            CurrentCell currentCell,
+            List<int> simulationYears,
+            int committedTotalRow)
+        {
+            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
+            currentCell.Row += 2;
+            ExcelFiller.FillVertically(worksheet, currentCell.Row, 1, "Preservation", "Emergency Repair", "Rehab", "Replacement", "Total spent");
+            var numberOfYears = simulationYears.Count;
+            var startColumnIndex = 3;
+            for (var columnIndex = startColumnIndex; columnIndex < startColumnIndex + numberOfYears; columnIndex++)
+            {
+                worksheet.Cells[currentCell.Row, columnIndex].Formula = "Sum(" + worksheet.Cells[committedTotalRow, columnIndex] + ")";
+            }
+            currentCell.Row += 10;
+            return 12;
         }
 
         private int FillTotalBudgetSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,

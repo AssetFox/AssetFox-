@@ -362,6 +362,8 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells["L20"].Value = "Number";
             worksheet.Cells["M20"].Value = "Criteria:";
 
+            var cells = worksheet.Cells["L20"];
+            _excelHelper.ApplyStyle(cells);
             var startingRow = 21;
 
             var priorites = simulation.AnalysisMethod.BudgetPriorities.OrderBy(_ => _.PriorityLevel);
@@ -396,7 +398,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             rowNum++;
             var startingRow = rowNum;
             _excelHelper.MergeCells(worksheet, rowNum, 12, rowNum, 14);
-            _excelHelper.ApplyColor(worksheet.Cells[rowNum, 12, rowNum, worksheet.Dimension.End.Column], Color.Gray);
+            _excelHelper.ApplyColor(worksheet.Cells[rowNum, 12, rowNum, 14], Color.Gray);
             _excelHelper.SetTextColor(worksheet.Cells[rowNum, 12, rowNum, worksheet.Dimension.End.Column], Color.White);
 
             worksheet.Cells[rowNum, 12].Value = "Budget Split Criteria";
@@ -405,6 +407,8 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells[rowNum, 14].Value = "Percentage";
 
             _excelHelper.ApplyBorder(worksheet.Cells[rowNum, 12, rowNum, 14]);
+            var cells = worksheet.Cells[rowNum, 12, rowNum, 14];
+            _excelHelper.ApplyStyle(cells);
 
             foreach (var item in simulation.InvestmentPlan.CashFlowRules)
             {

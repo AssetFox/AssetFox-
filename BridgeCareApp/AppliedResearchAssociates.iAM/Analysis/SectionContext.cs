@@ -187,7 +187,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     Subject = SimulationLogSubject.Calculation,
                 };
                 SimulationRunner.SendToSimulationLog(messageBuilder);
-                throw new SimulationException(messageBuilder.Message);
+                SimulationRunner.Fail(messageBuilder.Message);
             }
             return r;
         }
@@ -352,7 +352,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     Status = SimulationLogStatus.Error,
                 };
                 SimulationRunner.SendToSimulationLog(messageBuilder);
-                throw new SimulationException(messageBuilder.Message);
+                SimulationRunner.Fail(messageBuilder.Message);
             }
         }
 

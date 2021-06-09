@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DTOs.Static;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
@@ -138,24 +136,6 @@ namespace AppliedResearchAssociates.iAM.Domains
             }
         }
 
-        private double getCost(TreatmentCost cost, SectionContext scope)
-        {
-            var r = cost.Equation.Compute(scope);
-            if (double.IsNaN(r) || double.IsInfinity(r))
-            {
-                var message = new SimulationLogMessageBuilder
-                {
-                    SimulationId = scope.SimulationRunner.Simulation.Id,
-                    Status = SimulationLogStatus.Error,
-                    Message = SimulationLogMessages.TreatementCostReturned(scope.Section, cost, this, r),
-                    Subject = SimulationLogSubject.Calculation,
-                };
-                scope.SimulationRunner.SendToSimulationLog(message);
-                throw new SimulationException(message.Message);
-            }
-            return r;
-        }
-
         internal override double GetCost(SectionContext scope, bool shouldApplyMultipleFeasibleCosts)
         {
             var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
@@ -163,8 +143,9 @@ namespace AppliedResearchAssociates.iAM.Domains
             {
                 return 0;
             }
-            
-            return shouldApplyMultipleFeasibleCosts ? feasibleCosts.Sum(cost => getCost(cost, scope)) : feasibleCosts.Max(cost => getCost(cost, scope));
+
+            double getCost(TreatmentCost cost) => cost.Equation.Compute(scope);
+            return shouldApplyMultipleFeasibleCosts ? feasibleCosts.Sum(getCost) : feasibleCosts.Max(getCost);
         }
 
         internal void SetConsequencesPerAttribute() => ConsequencesPerAttribute = Consequences.ToLookup(c => c.Attribute);

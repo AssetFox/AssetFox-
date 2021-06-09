@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                     Message = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, equation, this.Name, r),
                 };
                 sectionContext.SimulationRunner.SendToSimulationLog(messageBuilder);
-                throw new SimulationException(messageBuilder.Message);
+                sectionContext.SimulationRunner.Fail(messageBuilder.Message);
             }
             return r;
         }

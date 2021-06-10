@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 Message = message,
                 SimulationId = simulationId,
-                Status = SimulationLogStatus.Warning,
+                Status = SimulationLogStatus.Error,
                 Subject = SimulationLogSubject.Calculation,
             };
 

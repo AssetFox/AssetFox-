@@ -103,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
                 var operativeConsequences = applicableConsequences.Count > 0 ? applicableConsequences : defaultConsequences;
 
-                var changeApplicators = operativeConsequences.SelectMany(consequence => consequence.GetChangeApplicators(scope)).ToArray();
+                var changeApplicators = operativeConsequences.SelectMany(consequence => consequence.GetChangeApplicators(scope, this)).ToArray();
 
                 if (changeApplicators.Length == 0)
                 {

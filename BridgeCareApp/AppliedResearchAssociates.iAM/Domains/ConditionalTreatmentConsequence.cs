@@ -50,16 +50,16 @@ namespace AppliedResearchAssociates.iAM.Domains
             return results;
         }
 
-        internal override IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope)
+        internal override IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope, Treatment treatment)
         {
-            var applicators = base.GetChangeApplicators(scope);
+            var applicators = base.GetChangeApplicators(scope, treatment);
 
             if (!Equation.ExpressionIsBlank && Attribute is NumberAttribute)
             {
                 var newValue = Equation.Compute(scope);
                 if (double.IsNaN(newValue) || double.IsInfinity(newValue))
                 {
-                    var errorMessage = SimulationLogMessages.ConditionalTreatmentConsequenceReturned(scope.Section, Equation, this, newValue);
+                    var errorMessage = SimulationLogMessages.TreatmentConsequenceReturned(scope.Section, treatment, Equation, this, newValue);
                     var logBuilder = SimulationLogMessageBuilders.CalculationError(errorMessage, scope.SimulationRunner.Simulation.Id);
                     scope.SimulationRunner.SendToSimulationLog(logBuilder);
                     scope.SimulationRunner.Fail(errorMessage);

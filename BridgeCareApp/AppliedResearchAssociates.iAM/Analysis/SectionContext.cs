@@ -354,7 +354,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return curves.Key.IsDecreasingWithDeterioration ? calculateMinimum : calculateMaximum;
         }
 
-        private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary<IGrouping<NumberAttribute, PerformanceCurve>, string, Func<double>>(curves => curves.Key.Name, GetCalculator);
+        private IDictionary<string, Func<double>> GetPerformanceCurveCalculatorPerAttribute() => SimulationRunner.CurvesPerAttribute.ToDictionary(curves => curves.Key.Name, GetCalculator);
 
         private void Initialize()
         {

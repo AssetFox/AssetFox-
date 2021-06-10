@@ -33,7 +33,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 simulationYears, treatments, costPerTreatmentPerYear);
             var bridgeTotalRow = FillCostOfBridgeWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
-            var catRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, committedTotalRow);
+            var catRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, bridgeTotalRow);
             var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears,
                 costPerTreatmentPerYear, yearlyBudgetAmount);
             FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
@@ -67,20 +67,23 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             return bridgeTotalRow;
         }
 
+        private static string[] WorkTypeNames = { "Preservation", "Emergency Repair", "Rehab", "Replacement" };
+
         private int FillWorkTypeTotalsSection(
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            int committedTotalRow)
+            int bridgeTotalRow)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
             currentCell.Row += 2;
-            ExcelFiller.FillVertically(worksheet, currentCell.Row, 1, "Preservation", "Emergency Repair", "Rehab", "Replacement", "Total spent");
+            var namesToFill = WorkTypeNames.Append("Total spent").ToArray();
+            ExcelFiller.FillVertically(worksheet, currentCell.Row, 1, namesToFill);
             var numberOfYears = simulationYears.Count;
             var startColumnIndex = 3;
             for (var columnIndex = startColumnIndex; columnIndex < startColumnIndex + numberOfYears; columnIndex++)
             {
-                worksheet.Cells[currentCell.Row, columnIndex].Formula = "Sum(" + worksheet.Cells[committedTotalRow, columnIndex] + ")";
+                worksheet.Cells[currentCell.Row, columnIndex].Formula = "Sum(" + worksheet.Cells[bridgeTotalRow, columnIndex] + ")";
             }
             currentCell.Row += 10;
             return 12;

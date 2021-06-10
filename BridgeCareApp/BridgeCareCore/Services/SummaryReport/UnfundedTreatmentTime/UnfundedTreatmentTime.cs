@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
@@ -32,11 +33,6 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
                 {"NN", "Other"},
                 {"99", "Ramp" },
             };
-
-        private class dataRow
-        {
-            //
-        }
 
         public UnfundedTreatmentTime(IExcelHelper excelHelper)
         {
@@ -91,6 +87,27 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
             //    }
             //}
 
+            // facilityId, year, section
+
+            var treatmentsPerSection = new SortedDictionary<int, List<Tuple<SimulationYearDetail, SectionDetail>>>();
+            foreach (var year in simulationOutput.Years)
+            {
+                var untreatedSections = year.Sections.Where(sect => sect.TreatmentCause == TreatmentCause.NoSelection && sect.TreatmentOptions.Count > 0).ToList();
+                foreach (var section in untreatedSections)
+                {
+                    var facilityId = int.Parse(section.FacilityName);
+                    var newTuple = new Tuple<SimulationYearDetail, SectionDetail>(year, section);
+                    if (!treatmentsPerSection.ContainsKey(facilityId))
+                    {
+                        treatmentsPerSection.Add(facilityId, new List<Tuple<SimulationYearDetail, SectionDetail>> { newTuple });
+                    }
+                    else
+                    {
+                        treatmentsPerSection[facilityId].Add(newTuple);
+                    }
+                }
+            }
+
             currentCell.Row += 1; // Data starts here
             currentCell.Column = 1;
             //foreach (var initialSection in simulationOutput.InitialSectionSummaries)
@@ -104,41 +121,53 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
             //    //}
             //}
 
-            //currentCell.Row = 4; // Data starts here
-            //currentCell.Column += 1; // feasible treatment starts here
-            foreach (var item in simulationOutput.Years)
+
+            foreach (var facilityList in treatmentsPerSection.Values)
             {
-                foreach (var section in item.Sections)
+                foreach (var facilityTuple in facilityList)
                 {
-                    if (section.TreatmentCause == TreatmentCause.NoSelection)
-                    {
-                        FillDataInWorkSheet(worksheet, currentCell, section, item.Year);
-                        currentCell.Row++;
-                        currentCell.Column = 1;
-                    }
-
-
-                //    if (section.ValuePerNumericAttribute["RISK_SCORE"] > 15000 &&
-                //        treatmentDecisionPerSection[int.Parse(section.FacilityName)] == true
-                //        )
-                //    {
-                //        var filteredOptions = section.TreatmentOptions.
-                //            Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
-                //        filteredOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
-
-                //        var requiredTreatmentName = filteredOptions.Count > 0 ? filteredOptions.FirstOrDefault().TreatmentName
-                //            : "";
-
-                //        worksheet.Cells[currentCell.Row, currentCell.Column].Value = requiredTreatmentName;
-                //        currentCell.Row++;
-                //    }
+                    var section = facilityTuple.Item2;
+                    var year = facilityTuple.Item1;
+                    FillDataInWorkSheet(worksheet, currentCell, section, year.Year);
+                    currentCell.Row++;
+                    currentCell.Column = 1;
                 }
-                //currentCell.Column++;
-                //currentCell.Row = 4;
             }
+
+
+        //    foreach (var item in simulationOutput.Years)
+        //    {
+        //        foreach (var section in item.Sections)
+        //        {
+        //            if (section.TreatmentCause == TreatmentCause.NoSelection)
+        //            {
+        //                FillDataInWorkSheet(worksheet, currentCell, section, item.Year);
+        //                currentCell.Row++;
+        //                currentCell.Column = 1;
+        //            }
+
+
+        //        //    if (section.ValuePerNumericAttribute["RISK_SCORE"] > 15000 &&
+        //        //        treatmentDecisionPerSection[int.Parse(section.FacilityName)] == true
+        //        //        )
+        //        //    {
+        //        //        var filteredOptions = section.TreatmentOptions.
+        //        //            Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
+        //        //        filteredOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
+
+        //        //        var requiredTreatmentName = filteredOptions.Count > 0 ? filteredOptions.FirstOrDefault().TreatmentName
+        //        //            : "";
+
+        //        //        worksheet.Cells[currentCell.Row, currentCell.Column].Value = requiredTreatmentName;
+        //        //        currentCell.Row++;
+        //        //    }
+        //        }
+        //        //currentCell.Column++;
+        //        //currentCell.Row = 4;
+        //    }
         }
 
-        private void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, SectionSummaryDetail sectionSummary, int Year)
+        private void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, SectionDetail sectionSummary, int Year)
         {
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
@@ -190,8 +219,9 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["CULV_DURATION_N"];
 
 
-            worksheet.Cells[row, columnNo++].Value = "??"; // Unfunded Treatment
-            worksheet.Cells[row, columnNo++].Value = "??"; // Cost
+            worksheet.Cells[row, columnNo++].Value = sectionSummary.TreatmentOptions.First().TreatmentName;
+            worksheet.Cells[row, columnNo].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";
+            worksheet.Cells[row, columnNo++].Value = sectionSummary.TreatmentOptions.First().Cost;
 
             currentCell.Column = columnNo;
         }

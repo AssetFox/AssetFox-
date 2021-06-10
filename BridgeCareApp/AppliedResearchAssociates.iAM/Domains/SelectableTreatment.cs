@@ -136,6 +136,25 @@ namespace AppliedResearchAssociates.iAM.Domains
             }
         }
 
+        private double getCost(TreatmentCost cost, SectionContext scope)
+        {
+            var r = cost.Equation.Compute(scope);
+            if (double.IsNaN(r) || double.IsInfinity(r))
+            {
+                var errorMessage = SimulationLogMessages.TreatmentCostReturned(scope.Section, cost, this, r);
+                var message = new SimulationLogMessageBuilder
+                {
+                    SimulationId = scope.SimulationRunner.Simulation.Id,
+                    Status = SimulationLogStatus.Error,
+                    Message = errorMessage,
+                    Subject = SimulationLogSubject.Calculation,
+                };
+                scope.SimulationRunner.SendToSimulationLog(message);
+                scope.SimulationRunner.Fail(errorMessage);
+            }
+            return r;
+        }
+
         internal override double GetCost(SectionContext scope, bool shouldApplyMultipleFeasibleCosts)
         {
             var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
@@ -144,8 +163,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                 return 0;
             }
 
-            double getCost(TreatmentCost cost) => cost.Equation.Compute(scope);
-            return shouldApplyMultipleFeasibleCosts ? feasibleCosts.Sum(getCost) : feasibleCosts.Max(getCost);
+            return shouldApplyMultipleFeasibleCosts ? feasibleCosts.Sum(cost => getCost(cost, scope)) : feasibleCosts.Max(cost => getCost(cost, scope));
         }
 
         internal void SetConsequencesPerAttribute() => ConsequencesPerAttribute = Consequences.ToLookup(c => c.Attribute);

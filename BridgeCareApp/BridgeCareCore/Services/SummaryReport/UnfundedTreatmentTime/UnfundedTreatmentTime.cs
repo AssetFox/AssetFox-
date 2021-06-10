@@ -33,7 +33,10 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
                 {"99", "Ramp" },
             };
 
-
+        private class dataRow
+        {
+            //
+        }
 
         public UnfundedTreatmentTime(IExcelHelper excelHelper)
         {
@@ -143,8 +146,11 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DISTRICT"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["COUNTY"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.FacilityName;
+
+            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
             var deckArea = sectionSummary.ValuePerNumericAttribute["DECK_AREA"];
             worksheet.Cells[row, columnNo++].Value = deckArea;
+
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LENGTH"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["MPO_NAME"];
@@ -155,6 +161,8 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
 
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["NHS_IND"] == "0" ? "N" : "Y";
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerTextAttribute["INTERSTATE"];
+
+            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.00";
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISK_SCORE"];
 
             worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? "Y" : "N";
@@ -167,10 +175,14 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
 
             worksheet.Cells[row, columnNo++].Value = Year;
 
-            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["DECK"];
-            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SUP"];
-            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SUB"];
-            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["CULV"];
+            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["DECK_SEEDED"];
+            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SUP_SEEDED"];
+            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SUB_SEEDED"];
+            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+            worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["CULV_SEEDED"];
 
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["DECK_DURATION_N"];
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SUP_DURATION_N"];

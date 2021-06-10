@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM
         public static string SpatialWeightCalculationReturned(Section section, Equation equation, double value)
         {
             var valueString = DoubleWarningStrings.InfinityOrNanWarning(value);
-            return $"Spatial weight {equation.Expression} for {SectionString(section)} returned {valueString}";
+            return $"Spatial weight {equation?.Expression} for {SectionString(section)} returned {valueString}";
         }
 
         internal static string CalculatedFieldReturned(Section section, Equation equation, string fieldName, double value)

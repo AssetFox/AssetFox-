@@ -67,6 +67,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                 var equationApplicator = new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newValue), newValue);
                 applicators = applicators.Append(equationApplicator);
             }
+
             return applicators;
         }
     }

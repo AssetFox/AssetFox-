@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.Validation;
@@ -21,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public event EventHandler<WarningEventArgs> Warning;
 
         public event EventHandler<ProgressEventArgs> Progress;
+
         public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
         public Simulation Simulation { get; }

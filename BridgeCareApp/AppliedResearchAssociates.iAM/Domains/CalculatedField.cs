@@ -57,8 +57,6 @@ namespace AppliedResearchAssociates.iAM.Domains
                 throw new SimulationException(messageBuilder.ToString());
             }
 
-
-
             if (operativeSources.Count == 1)
             {
                 return Compute(operativeSources[0].Equation, scope);

@@ -791,9 +791,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                         simulationIsRunning = false;
                     }
                 };
-
                 runner.Run();
-
                 while (simulationIsRunning)
                 {
                     testOutputHelper.WriteLine("Simulation is running...");

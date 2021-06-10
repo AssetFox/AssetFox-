@@ -269,6 +269,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
             var dataUpdates = calculatorPerAttribute.Select(kv => (kv.Key, kv.Value())).ToArray();
+
             foreach (var (key, value) in dataUpdates)
             {
                 SetNumber(key, value);

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Domains;
-using AppliedResearchAssociates.iAM.DTOs.Static;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {

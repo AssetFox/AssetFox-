@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DTOs.Static;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains

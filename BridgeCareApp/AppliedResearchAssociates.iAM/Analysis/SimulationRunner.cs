@@ -6,7 +6,6 @@ using System.Threading;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.Domains;
-using AppliedResearchAssociates.iAM.DTOs.Static;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis

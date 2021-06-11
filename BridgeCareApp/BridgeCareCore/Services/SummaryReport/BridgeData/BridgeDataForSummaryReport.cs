@@ -137,17 +137,24 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                         yearlySectionData.Year, index, worksheet, row, column);
 
                     // Work done in a year
+                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
                     var range = worksheet.Cells[row, column];
                     if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
                     {
                         range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[section.AppliedTreatment])
                             || section.AppliedTreatment.ToLower() == Properties.Resources.NoTreatment
                             ? "--" : abbreviatedTreatmentNames[section.AppliedTreatment];
+
+                        worksheet.Cells[row, column + 1].Value = cost;
+                        _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
                     }
                     else
                     {
                         range.Value = section.AppliedTreatment.ToLower() == Properties.Resources.NoTreatment ? "--" :
                             section.AppliedTreatment.ToLower();
+
+                        worksheet.Cells[row, column + 1].Value = cost;
+                        _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
                     }
                     if (!range.Value.Equals("--"))
                     {
@@ -239,8 +246,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     }
 
                     var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
-                    //var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
-                    //var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
@@ -330,10 +335,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BRIDGE_TYPE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["DECK_AREA"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LENGTH"];
-                //columnNo++; // temporary, because we can comment out 1 excel rows
 
                 // Add span type, owner code, functional class, submitting agency
-                columnNo += 1;
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SPANTYPE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["OWNER_CODE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SUBM_AGENCY"];
@@ -367,7 +371,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 previousYearInitialMinC.Add(sectionSummary.ValuePerNumericAttribute["MINCOND"]);
 
                 // Add Parallel Structure, Internet Report, Federal Aid, Bridge Funding
-                columnNo++; // Parallel Structure
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["PARALLEL"] > 0 ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["INTERNET_REPORT"];
                 columnNo += 7; //Bridge Funding takes 6 column
             }
@@ -573,18 +577,16 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             return new List<string>
             {
-                "Deck Cond",
-                "Super Cond",
-                "Sub Cond",
-                "Culv Cond",
+                "GCR Deck",
+                "GCR Sup",
+                "GCR Sub",
+                "GCR Culv",
                 "Deck Dur",
                 "Super Dur",
                 "Sub Dur",
                 "Culv Dur",
-                "Min Cond",
-                //"SD",
+                "GCR Min",
                 "Poor",
-                //"Posted",
                 "Project Pick",
                 "Budget",
                 "Project",

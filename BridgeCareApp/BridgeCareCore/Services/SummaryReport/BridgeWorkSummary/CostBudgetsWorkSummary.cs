@@ -33,7 +33,8 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 simulationYears, treatments, costPerTreatmentPerYear);
             var bridgeTotalRow = FillCostOfBridgeWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
-            var catRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, bridgeTotalRow);
+            var map = WorkTypeMap.Map;
+            var catRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, map, culvertTotalRow);
             var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears,
                 costPerTreatmentPerYear, yearlyBudgetAmount);
             FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
@@ -73,17 +74,42 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            int bridgeTotalRow)
+            Dictionary<string, WorkTypeName> workTypeMap,
+            int startRowForSummands)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
+            var initialRow = currentCell.Row;
             currentCell.Row += 2;
-            var namesToFill = WorkTypeNames.Append("Total spent").ToArray();
-            ExcelFiller.FillVertically(worksheet, currentCell.Row, 1, namesToFill);
+            var workTypes = EnumExtensions.GetValues<WorkTypeName>();
+            var namesToFill = workTypes.Select(x => x.ToSpreadsheetString()).ToList();
+            namesToFill.Add("Total spent");
+            ExcelFiller.FillVertically(worksheet, currentCell.Row, 1, namesToFill.ToArray());
             var numberOfYears = simulationYears.Count;
             var startColumnIndex = 3;
-            for (var columnIndex = startColumnIndex; columnIndex < startColumnIndex + numberOfYears; columnIndex++)
+            for (var workType = workTypes[0]; workType < workTypes.Last(); workType++)
             {
-                worksheet.Cells[currentCell.Row, columnIndex].Formula = "Sum(" + worksheet.Cells[bridgeTotalRow, columnIndex] + ")";
+                var cellsToSum = new List<ExcelRange>();
+                var rowIndex = currentCell.Row + (int)workType;
+                for (var columnIndex = startColumnIndex; columnIndex < startColumnIndex + numberOfYears; columnIndex++)
+                {
+                    for (var summandRowIndex = startRowForSummands + 1; summandRowIndex < initialRow; summandRowIndex++)
+                    {
+                        var summandRowTitle = worksheet.Cells[summandRowIndex, 1].Value?.ToString();
+                        if (summandRowTitle!=null && workTypeMap.ContainsKey(summandRowTitle))
+                        {
+                            var summandWorkType = workTypeMap[summandRowTitle];
+                            if (workType == summandWorkType)
+                            {
+                                var cell = worksheet.Cells[summandRowIndex, columnIndex];
+                                cellsToSum.Add(cell);
+                            }
+                        }
+                        if (cellsToSum.Any())
+                        {
+                            worksheet.Cells[rowIndex, columnIndex].Formula = ExcelFormulas.Sum(cellsToSum);
+                        }
+                    }
+                }
             }
             currentCell.Row += 10;
             return 12;

@@ -15,7 +15,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
     public static class WorkTypeNamesExtensions
     {
-        public static string ToSpreadsheetString(WorkTypeName name) => name switch
+        public static string ToSpreadsheetString(this WorkTypeName name) => name switch
         {
             WorkTypeName.Preservation => "Preservation",
             WorkTypeName.EmergencyRepair => "Emergency Repair",

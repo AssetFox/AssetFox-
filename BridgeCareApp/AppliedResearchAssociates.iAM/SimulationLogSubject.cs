@@ -9,5 +9,6 @@ namespace AppliedResearchAssociates.iAM
         Validation,
         ExceptionThrown,
         Calculation,
+        Runtime,
     }
 }

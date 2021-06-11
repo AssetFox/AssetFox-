@@ -13,14 +13,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
-        public event EventHandler<FailureEventArgs> Failure;
-
-        public event EventHandler<InformationEventArgs> Information;
-
-        public event EventHandler<WarningEventArgs> Warning;
-
-        public event EventHandler<ProgressEventArgs> Progress;
-
         public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
         public Simulation Simulation { get; }
@@ -182,10 +174,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation {errorsWord}. Download the log to see all validation results.")
                 {
                     ItemName = Simulation.Name,
-                    ItemId = Simulation.Id,
+                    ItemId = Simulation.Id
                 };
 
-                Fail(MessageBuilder.ToString());
+                var logMessageBuilder = SimulationLogMessageBuilders.HasValidationErrors(MessageBuilder, Simulation.Id);
+
+                SendToSimulationLog(logMessageBuilder);
             }
 
             var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
@@ -207,21 +201,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal IReadOnlyDictionary<string, NumberAttribute> NumberAttributeByName { get; private set; }
 
-        internal void Fail(string message, bool shouldThrow = true)
-        {
-            OnFailure(new FailureEventArgs(message));
-
-            if (shouldThrow)
-            {
-                throw new SimulationException(message);
-            }
-        }
-
         internal double GetInflationFactor(int year) => Simulation.InvestmentPlan.GetInflationFactor(year);
-
-        internal void Inform(string message) => OnInformation(new InformationEventArgs(message));
-
-        internal void Warn(string message) => OnWarning(new WarningEventArgs(message));
 
         internal void ReportProgress(ProgressStatus progressStatus, double percentComplete = 0, int? year = null) => OnProgress(new ProgressEventArgs(progressStatus, percentComplete, year));
 
@@ -336,7 +316,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 ItemId = treatment.Id,
                             };
 
-                            Warn(MessageBuilder.ToString());
+                            var warning = SimulationLogMessageBuilders.RuntimeWarning(MessageBuilder, Simulation.Id);
+
+                            SendToSimulationLog(warning);
 
                             var actualSpendingLimit = SpendingLimit;
                             SpendingLimit = SpendingLimit.NoLimit;
@@ -625,14 +607,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private void OnFailure(FailureEventArgs e) => Failure?.Invoke(this, e);
-
-        private void OnInformation(InformationEventArgs e) => Information?.Invoke(this, e);
-
-        private void OnWarning(WarningEventArgs e) => Warning?.Invoke(this, e);
-
-        private void OnProgress(ProgressEventArgs e) => Progress?.Invoke(this, e);
         private void OnLog(SimulationLogEventArgs e) => SimulationLog?.Invoke(this, e);
+
         private void RecordStatusOfConditionGoals(SimulationYearDetail detail)
         {
             detail.TargetConditionGoals.AddRange(TargetConditionActuals.Select(actual => new TargetConditionGoalDetail

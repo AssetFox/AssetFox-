@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                 if (double.IsNaN(newValue) || double.IsInfinity(newValue))
                 {
                     var errorMessage = SimulationLogMessages.TreatmentConsequenceReturned(scope.Section, treatment, Equation, this, newValue);
-                    var logBuilder = SimulationLogMessageBuilders.CalculationError(errorMessage, scope.SimulationRunner.Simulation.Id);
+                    var logBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, scope.SimulationRunner.Simulation.Id);
                     scope.SimulationRunner.SendToSimulationLog(logBuilder);
                     scope.SimulationRunner.Fail(errorMessage);
                 }

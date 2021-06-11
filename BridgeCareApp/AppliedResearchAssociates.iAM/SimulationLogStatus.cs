@@ -11,5 +11,7 @@ namespace AppliedResearchAssociates.iAM
         Error,
         Warning,
         Information,
+        Fatal,
+        Progress,
     }
 }

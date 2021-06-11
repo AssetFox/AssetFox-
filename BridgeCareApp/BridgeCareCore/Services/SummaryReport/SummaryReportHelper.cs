@@ -10,10 +10,6 @@ namespace BridgeCareCore.Services.SummaryReport
     public class SummaryReportHelper : ISummaryReportHelper
     {
         // Identifying 185 Bridges
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_185='Y' where F_185='N' and fedaid like '1 - %'")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_185='Y' where F_185='N' and fedaid like '2 - %'")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_185='Y' where F_185='N' and fedaid like '0 - %' and BridgeLength>=20")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_185='Y' where F_185='N' and fedaid like '0 - %' and BridgeLength>=8 and BridgeLength<20 and ownercode like '01 - %'")
         public bool BridgeFunding185(SectionDetail section)
         {
             // ----------------------------------------------------------
@@ -34,10 +30,6 @@ namespace BridgeCareCore.Services.SummaryReport
         }
 
         // Identifying 581 Bridges
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_581='Y' where F_581='N' and fedaid like '1 - %'")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_581='Y' where F_581='N' and fedaid like '2 - %'")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_581='Y' where F_581='N' and fedaid like '0 - %' and BridgeLength>=20")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_581='Y' where F_581='N' and fedaid like '0 - %' and BridgeLength>=8 and BridgeLength<20 and ownercode like '01 - %'")
         public bool BridgeFunding581(SectionDetail section)
         {
             // ----------------------------------------------------------
@@ -58,9 +50,6 @@ namespace BridgeCareCore.Services.SummaryReport
         }
 
         // Identifing STP Bridges
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_STP='Y' where F_STP='N' and fedaid like '1 - %' and BridgeLength>=20")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_STP='Y' where F_STP='N' and fedaid like '2 - %' and BridgeLength>=20")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_STP='Y' where F_STP='N' and fedaid like '0 - %'  and BridgeLength>=20")
         public bool BridgeFundingSTP(SectionDetail section)
         {
             // ----------------------------------------------------------
@@ -79,17 +68,6 @@ namespace BridgeCareCore.Services.SummaryReport
         }
 
         // Identifying NHPP Bridges
-
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '1 - %' and funcclass like '01 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '1 - %' and funcclass like '02 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '1 - %' and funcclass like '11 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '1 - %' and funcclass like '12 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '1 - %' and funcclass like '14 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '2 - %' and funcclass like '01 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '2 - %' and funcclass like '02 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '2 - %' and funcclass like '11 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '2 - %' and funcclass like '12 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '2 - %' and funcclass like '14 - %' ")
         public bool BridgeFundingNHPP(SectionDetail section)
         {
             // ----------------------------------------------------------
@@ -107,10 +85,6 @@ namespace BridgeCareCore.Services.SummaryReport
         }
 
         // Identifying BOF Bridges
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_BOF='Y' where F_BOF='N' and fedaid like '0 - %' and BridgeLength>=20 and funcclass like '08 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_BOF='Y' where F_BOF='N' and fedaid like '0 - %' and BridgeLength>=20 and funcclass like '09 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_BOF='Y' where F_BOF='N' and fedaid like '0 - %' and BridgeLength>=20 and funcclass like '19 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_BOF='Y' where F_BOF='N' and fedaid like '0 - %' and BridgeLength>=20 and BPN='L'")
         public bool BridgeFundingBOF(SectionDetail section)
         {
             // ----------------------------------------------------------
@@ -131,9 +105,6 @@ namespace BridgeCareCore.Services.SummaryReport
 
 
         // Identifying 183 Bridges
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_183='Y' where F_183='N' and fedaid like '0 - %' and BridgeLength>=8 and funcclass like '09 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_183='Y' where F_183='N' and fedaid like '0 - %' and BridgeLength>=8 and funcclass like '19 - %' ")
-        //con.Execute("update BAMs_Lite_plus_Data_Base set F_183='Y' where F_183='N' and fedaid like '0 - %' and BridgeLength>=8 and BPN='L' ")
         public bool BridgeFunding183(SectionDetail section)
         {
             // ----------------------------------------------------------

@@ -31,10 +31,11 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
 
             var culvertTotalRow = FillCostOfCulvertWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
-            var bridgeTotalRow = FillCostOfBridgeWorkSection(worksheet, currentCell,
+            var bridgeTotalRange = FillCostOfBridgeWorkSection(worksheet, currentCell,
                 simulationYears, treatments, costPerTreatmentPerYear);
+            var bridgeTotalRow = bridgeTotalRange.FooterRange.End.Value;
             var map = WorkTypeMap.Map;
-            var catRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, map, culvertTotalRow);
+            var workTypeTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, map, bridgeTotalRange.ContentRange);
             var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears,
                 costPerTreatmentPerYear, yearlyBudgetAmount);
             FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
@@ -59,13 +60,21 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             return culvertTotalRow;
         }
 
-        private int FillCostOfBridgeWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
+        private ExcelTableRowRanges FillCostOfBridgeWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, SortedSet<string> treatments,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
         {
+            var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Bridge Work", "BAMS Bridge Work Type");
             var bridgeTotalRow = AddCostsOfBridgeWork(worksheet, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
-            return bridgeTotalRow;
+            var contentRange = new Range(headerRange.End.Value + 1, bridgeTotalRow - 1);
+            var footerRange = new Range(bridgeTotalRow, bridgeTotalRow);
+            return new ExcelTableRowRanges
+            {
+                HeaderRange = headerRange,
+                ContentRange = contentRange,
+                FooterRange = footerRange,
+            };
         }
 
         private static string[] WorkTypeNames = { "Preservation", "Emergency Repair", "Rehab", "Replacement" };
@@ -75,8 +84,9 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<string, WorkTypeName> workTypeMap,
-            int startRowForSummands)
+            Range rangeForSummands)
         {
+
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
             var initialRow = currentCell.Row;
             currentCell.Row += 2;
@@ -92,7 +102,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 var rowIndex = currentCell.Row + (int)workType;
                 for (var columnIndex = startColumnIndex; columnIndex < startColumnIndex + numberOfYears; columnIndex++)
                 {
-                    for (var summandRowIndex = startRowForSummands + 1; summandRowIndex < initialRow; summandRowIndex++)
+                    for (var summandRowIndex = rangeForSummands.Start.Value; summandRowIndex <= rangeForSummands.End.Value; summandRowIndex++)
                     {
                         var summandRowTitle = worksheet.Cells[summandRowIndex, 1].Value?.ToString();
                         if (summandRowTitle!=null && workTypeMap.ContainsKey(summandRowTitle))

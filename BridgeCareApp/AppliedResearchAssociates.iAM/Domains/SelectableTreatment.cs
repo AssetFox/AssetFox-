@@ -145,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                 var message = new SimulationLogMessageBuilder
                 {
                     SimulationId = scope.SimulationRunner.Simulation.Id,
-                    Status = SimulationLogStatus.Error,
+                    Status = SimulationLogStatus.Fatal,
                     Message = errorMessage,
                     Subject = SimulationLogSubject.Calculation,
                 };

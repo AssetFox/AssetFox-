@@ -103,6 +103,7 @@ namespace BridgeCareCore
             services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
             services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
             services.AddScoped<IExcelHelper, ExcelHelper>();
+            services.AddScoped<ISummaryReportHelper, SummaryReportHelper>();
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
             services.AddScoped<IHighlightWorkDoneCells, HighlightWorkDoneCells>();
             services.AddScoped<IUnfundedRecommendations, UnfundedRecommendations>();

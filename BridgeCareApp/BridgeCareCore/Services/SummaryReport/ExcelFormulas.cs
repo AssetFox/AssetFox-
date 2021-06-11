@@ -41,5 +41,22 @@ namespace BridgeCareCore.Services.SummaryReport
             var addresses = ranges.Select(r => r.Address).ToArray();
             return Sum(addresses);
         }
+
+        public static string SumOrReference(IEnumerable<ExcelRange> ranges)
+        {
+            var count = ranges.Count();
+            if (count == 0)
+            {
+                return "";
+            }
+            if (count > 1)
+            {
+                return Sum(ranges);
+            }
+            return ranges.First().Address;
+        }
+
+        public static string RangeSum(string startAddress, string endAddress)
+            => $"Sum({startAddress}:{endAddress})";
     }
 }

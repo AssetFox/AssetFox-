@@ -11,6 +11,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         EmergencyRepair,
         Rehab,
         Replacement,
+        Other,
     }
 
     public static class WorkTypeNamesExtensions

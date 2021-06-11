@@ -77,7 +77,6 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             };
         }
 
-        private static string[] WorkTypeNames = { "Preservation", "Emergency Repair", "Rehab", "Replacement" };
 
         private int FillWorkTypeTotalsSection(
             ExcelWorksheet worksheet,
@@ -91,23 +90,21 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             var initialRow = currentCell.Row;
             currentCell.Row += 2;
             var workTypes = EnumExtensions.GetValues<WorkTypeName>();
-            var namesToFill = workTypes.Select(x => x.ToSpreadsheetString()).ToList();
-            namesToFill.Add("Total spent");
-            ExcelFiller.FillVertically(worksheet, currentCell.Row, 1, namesToFill.ToArray());
             var numberOfYears = simulationYears.Count;
             var startColumnIndex = 3;
-            for (var workType = workTypes[0]; workType < workTypes.Last(); workType++)
+            var firstContentRow = currentCell.Row;
+            for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
             {
-                var cellsToSum = new List<ExcelRange>();
-                var rowIndex = currentCell.Row + (int)workType;
+                var rowIndex = firstContentRow + (int)workType;
+                worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
                 for (var columnIndex = startColumnIndex; columnIndex < startColumnIndex + numberOfYears; columnIndex++)
                 {
+                    var cellsToSum = new List<ExcelRange>();
                     for (var summandRowIndex = rangeForSummands.Start.Value; summandRowIndex <= rangeForSummands.End.Value; summandRowIndex++)
                     {
                         var summandRowTitle = worksheet.Cells[summandRowIndex, 1].Value?.ToString();
-                        if (summandRowTitle!=null && workTypeMap.ContainsKey(summandRowTitle))
-                        {
-                            var summandWorkType = workTypeMap[summandRowTitle];
+                        if (summandRowTitle!=null) {
+                            var summandWorkType = workTypeMap.ContainsKey(summandRowTitle) ? workTypeMap[summandRowTitle] : WorkTypeName.Other;
                             if (workType == summandWorkType)
                             {
                                 var cell = worksheet.Cells[summandRowIndex, columnIndex];
@@ -116,12 +113,27 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                         }
                         if (cellsToSum.Any())
                         {
-                            worksheet.Cells[rowIndex, columnIndex].Formula = ExcelFormulas.Sum(cellsToSum);
+                            worksheet.Cells[rowIndex, columnIndex].Formula = ExcelFormulas.SumOrReference(cellsToSum);
+                        } else
+                        {
+                            worksheet.Cells[rowIndex, columnIndex].Value = 0;
                         }
                     }
                 }
             }
-            currentCell.Row += 10;
+            var lastContentRow = firstContentRow + workTypes.Count - 1;
+            currentCell.Row += workTypes.Count() + 1;
+            worksheet.Cells[currentCell.Row, 1].Value = "Total Spent";
+            for (var columnIndex = 3; columnIndex < 3 + numberOfYears; columnIndex ++)
+            {
+                var startAddress = worksheet.Cells[firstContentRow, columnIndex].Address;
+                var endAddress = worksheet.Cells[lastContentRow, columnIndex].Address;
+                worksheet.Cells[currentCell.Row, columnIndex].Formula = ExcelFormulas.RangeSum(startAddress, endAddress);
+            }
+            currentCell.Row += 1;
+            _excelHelper.ApplyBorder(worksheet.Cells[firstContentRow, 1, currentCell.Row, 3 + numberOfYears]);
+            _excelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3+numberOfYears], "NegativeCurrency");
+
             return 12;
         }
 

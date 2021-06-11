@@ -61,8 +61,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                 {
                     var errorMessage = SimulationLogMessages.TreatmentConsequenceReturned(scope.Section, treatment, Equation, this, newValue);
                     var logBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, scope.SimulationRunner.Simulation.Id);
-                    scope.SimulationRunner.SendToSimulationLog(logBuilder);
-                    scope.SimulationRunner.Fail(errorMessage);
+                    scope.SimulationRunner.Send(logBuilder);
                 }
                 var equationApplicator = new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newValue), newValue);
                 applicators = applicators.Append(equationApplicator);

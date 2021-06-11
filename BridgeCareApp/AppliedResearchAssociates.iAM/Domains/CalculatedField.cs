@@ -28,8 +28,7 @@ namespace AppliedResearchAssociates.iAM.Domains
             {
                 var errorMessage = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, equation, Name, r);
                 var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, sectionContext.SimulationRunner.Simulation.Id);
-                sectionContext.SimulationRunner.SendToSimulationLog(messageBuilder);
-                sectionContext.SimulationRunner.Fail(errorMessage);
+                sectionContext.SimulationRunner.Send(messageBuilder);
             }
             return r;
         }

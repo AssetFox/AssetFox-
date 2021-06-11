@@ -149,8 +149,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                     Message = errorMessage,
                     Subject = SimulationLogSubject.Calculation,
                 };
-                scope.SimulationRunner.SendToSimulationLog(message);
-                scope.SimulationRunner.Fail(errorMessage);
+                scope.SimulationRunner.Send(message);
             }
             return r;
         }

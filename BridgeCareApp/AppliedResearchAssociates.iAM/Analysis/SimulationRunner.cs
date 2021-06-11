@@ -15,6 +15,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
+        public event EventHandler<ProgressEventArgs> Progress;
+
         public Simulation Simulation { get; }
 
         public void Run(bool withValidation = true)
@@ -45,7 +47,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
             catch (SimulationException e)
             {
-                Fail(e.Message, false);
+                var logMessage = SimulationLogMessageBuilders.Exception(e, Simulation.Id);
+                Send(logMessage, false);
                 throw;
             }
 
@@ -92,7 +95,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     ItemId = Simulation.Id,
                 };
 
-                Fail(MessageBuilder.ToString());
+                var logMessage = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
+                Send(logMessage);
             }
 
             InParallel(SectionContexts, context => context.RollForward());
@@ -179,19 +183,27 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 var logMessageBuilder = SimulationLogMessageBuilders.HasValidationErrors(MessageBuilder, Simulation.Id);
 
-                SendToSimulationLog(logMessageBuilder);
+                Send(logMessageBuilder);
             }
 
             var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
             if (numberOfWarnings > 0)
             {
-                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation warnings.")
+                var warningsWord = numberOfWarnings == 1 ? "warning" : "warnings";
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation {warningsWord}.")
                 {
                     ItemName = Simulation.Name,
                     ItemId = Simulation.Id,
                 };
 
-                Warn(MessageBuilder.ToString());
+                var logBuilder = new SimulationLogMessageBuilder
+                {
+                    Message = MessageBuilder.ToString(),
+                    SimulationId = Simulation.Id,
+                    Status = SimulationLogStatus.Warning,
+                    Subject = SimulationLogSubject.Validation,
+                };
+                Send(logBuilder);
             }
         }
 
@@ -318,7 +330,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                             var warning = SimulationLogMessageBuilders.RuntimeWarning(MessageBuilder, Simulation.Id);
 
-                            SendToSimulationLog(warning);
+                            Send(warning);
 
                             var actualSpendingLimit = SpendingLimit;
                             SpendingLimit = SpendingLimit.NoLimit;
@@ -355,10 +367,16 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return unhandledContexts;
         }
 
-        internal void SendToSimulationLog(SimulationLogMessageBuilder message)
+        private void OnProgress(ProgressEventArgs e) => Progress?.Invoke(this, e);
+
+        internal void Send(SimulationLogMessageBuilder message, bool throwOnFatal = true)
         {
             var args = new SimulationLogEventArgs(message);
             OnLog(args);
+            if (message.Status == SimulationLogStatus.Fatal && throwOnFatal)
+            {
+                throw new SimulationException(message.Message);
+            }
         }
 
         private bool ConditionGoalsAreMet(int year)
@@ -511,7 +529,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
                     var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Section, treatment, cost, context.SimulationRunner.Simulation.Id);
-                    SendToSimulationLog(messageBuilder);
+                    Send(messageBuilder);
                     throw new SimulationException(messageBuilder.Message);
                 });
 

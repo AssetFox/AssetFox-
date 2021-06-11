@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     Status = SimulationLogStatus.Fatal,
                     Subject = SimulationLogSubject.Runtime,
                 };
-                SimulationRunner.SendToSimulationLog(builder);
+                SimulationRunner.Send(builder);
             }
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
         }
@@ -93,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             catch (SimulationException e)
             {
                 var messageBuilder = SimulationLogMessageBuilders.Exception(e, SimulationRunner.Simulation.Id);
-                SimulationRunner.SendToSimulationLog(messageBuilder);
+                SimulationRunner.Send(messageBuilder);
                 throw;
             }
 
@@ -151,7 +151,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SectionId = Section.Id,
                 };
                 var logBuilder = SimulationLogMessageBuilders.CalculationFatal(messageBuilder.ToString(), SimulationRunner.Simulation.Id);
-                SimulationRunner.SendToSimulationLog(logBuilder);
+                SimulationRunner.Send(logBuilder);
             }
 
             GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
@@ -188,7 +188,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 var errorMessage = SimulationLogMessages.SpatialWeightCalculationReturned(Section, Section.SpatialWeighting, r);
                 var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
-                SimulationRunner.SendToSimulationLog(messageBuilder);
+                SimulationRunner.Send(messageBuilder);
             }
             return r;
         }
@@ -314,7 +314,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var key = curve.Attribute.Name;
                 var errorMessage = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, value);
                 var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
-                SimulationRunner.SendToSimulationLog(messageBuilder);
+                SimulationRunner.Send(messageBuilder);
             }
         }
 
@@ -339,7 +339,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 };
 
                 var logBuilder = SimulationLogMessageBuilders.RuntimeFatal(messageBuilder, SimulationRunner.Simulation.Id);
-                SimulationRunner.SendToSimulationLog(logBuilder);
+                SimulationRunner.Send(logBuilder);
             }
 
             if (operativeCurves.Count > 1)
@@ -351,7 +351,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SectionId = Section.Id,
                 };
 
-                SimulationRunner.Warn(messageBuilder.ToString());
+                var logMessage = SimulationLogMessageBuilders.RuntimeWarning(messageBuilder, SimulationRunner.Simulation.Id);
+
+                SimulationRunner.Send(logMessage);
             }
 
             Func<double>
@@ -394,7 +396,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
                     catch (SimulationException e)
                     {
-                        SimulationRunner.Fail(e.Message, false);
+                        var logBuilder = SimulationLogMessageBuilders.Exception(e, SimulationRunner.Simulation.Id);
+                        SimulationRunner.Send(logBuilder, false);
                         throw;
                     }
                 }

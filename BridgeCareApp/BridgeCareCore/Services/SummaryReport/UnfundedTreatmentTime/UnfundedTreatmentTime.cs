@@ -88,7 +88,6 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
             //}
 
             // facilityId, year, section
-
             var treatmentsPerSection = new SortedDictionary<int, List<Tuple<SimulationYearDetail, SectionDetail>>>();
             foreach (var year in simulationOutput.Years)
             {
@@ -167,6 +166,152 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
         //    }
         }
 
+
+
+        // Identifying 185 Bridges
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_185='Y' where F_185='N' and fedaid like '1 - %'")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_185='Y' where F_185='N' and fedaid like '2 - %'")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_185='Y' where F_185='N' and fedaid like '0 - %' and BridgeLength>=20")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_185='Y' where F_185='N' and fedaid like '0 - %' and BridgeLength>=8 and BridgeLength<20 and ownercode like '01 - %'")
+        bool BridgeFunding185(SectionDetail sectionSummary)
+        {
+            // ----------------------------------------------------------
+            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
+            return false;
+            // ----------------------------------------------------------
+
+
+            var fedAid = sectionSummary.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var bridgeLength = sectionSummary.ValuePerNumericAttribute["LENGTH"];
+            var ownerCode = sectionSummary.ValuePerTextAttribute["OWNER_CODE"];
+
+            return
+                fedAid == "1" ||
+                fedAid == "2" ||
+                fedAid == "0" && bridgeLength >= 20 ||
+                fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
+        }
+
+        // Identifying 581 Bridges
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_581='Y' where F_581='N' and fedaid like '1 - %'")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_581='Y' where F_581='N' and fedaid like '2 - %'")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_581='Y' where F_581='N' and fedaid like '0 - %' and BridgeLength>=20")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_581='Y' where F_581='N' and fedaid like '0 - %' and BridgeLength>=8 and BridgeLength<20 and ownercode like '01 - %'")
+        bool BridgeFunding581(SectionDetail sectionSummary)
+        {
+            // ----------------------------------------------------------
+            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
+            return false;
+            // ----------------------------------------------------------
+
+
+            var fedAid = sectionSummary.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var bridgeLength = sectionSummary.ValuePerNumericAttribute["LENGTH"];
+            var ownerCode = sectionSummary.ValuePerTextAttribute["OWNER_CODE"];
+
+            return
+                fedAid == "1" ||
+                fedAid == "2" ||
+                fedAid == "0" && bridgeLength >= 20 ||
+                fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
+        }
+
+        // Identifing STP Bridges
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_STP='Y' where F_STP='N' and fedaid like '1 - %' and BridgeLength>=20")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_STP='Y' where F_STP='N' and fedaid like '2 - %' and BridgeLength>=20")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_STP='Y' where F_STP='N' and fedaid like '0 - %'  and BridgeLength>=20")
+        bool BridgeFundingSTP(SectionDetail sectionSummary)
+        {
+            // ----------------------------------------------------------
+            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
+            return false;
+            // ----------------------------------------------------------
+
+
+            var fedAid = sectionSummary.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var bridgeLength = sectionSummary.ValuePerNumericAttribute["LENGTH"];
+
+            return
+                fedAid == "1" && bridgeLength >= 20 ||
+                fedAid == "2" && bridgeLength >= 20 ||
+                fedAid == "0" && bridgeLength >= 20;
+        }
+
+        // Identifying NHPP Bridges
+
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '1 - %' and funcclass like '01 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '1 - %' and funcclass like '02 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '1 - %' and funcclass like '11 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '1 - %' and funcclass like '12 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '1 - %' and funcclass like '14 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '2 - %' and funcclass like '01 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '2 - %' and funcclass like '02 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '2 - %' and funcclass like '11 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '2 - %' and funcclass like '12 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_NHPP='Y' where F_NHPP='N' and fedaid like '2 - %' and funcclass like '14 - %' ")
+        bool BridgeFundingNHPP(SectionDetail sectionSummary)
+        {
+            // ----------------------------------------------------------
+            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
+            return false;
+            // ----------------------------------------------------------
+
+
+            var fedAid = sectionSummary.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+
+            return
+                (fedAid == "1" || fedAid == "2") &&
+                (functionalClass == "01" || functionalClass == "02" || functionalClass == "11" || functionalClass == "12" || functionalClass == "14");
+        }
+
+        // Identifying BOF Bridges
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_BOF='Y' where F_BOF='N' and fedaid like '0 - %' and BridgeLength>=20 and funcclass like '08 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_BOF='Y' where F_BOF='N' and fedaid like '0 - %' and BridgeLength>=20 and funcclass like '09 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_BOF='Y' where F_BOF='N' and fedaid like '0 - %' and BridgeLength>=20 and funcclass like '19 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_BOF='Y' where F_BOF='N' and fedaid like '0 - %' and BridgeLength>=20 and BPN='L'")
+        bool BridgeFundingBOF(SectionDetail sectionSummary)
+        {
+            // ----------------------------------------------------------
+            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
+            return false;
+            // ----------------------------------------------------------
+
+
+            var fedAid = sectionSummary.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            var busPlanNetwork = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
+            var bridgeLength = sectionSummary.ValuePerNumericAttribute["LENGTH"];
+
+            return
+                fedAid == "0" && bridgeLength >= 20 &&
+                (functionalClass == "08" || functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
+        }
+
+
+        // Identifying 183 Bridges
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_183='Y' where F_183='N' and fedaid like '0 - %' and BridgeLength>=8 and funcclass like '09 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_183='Y' where F_183='N' and fedaid like '0 - %' and BridgeLength>=8 and funcclass like '19 - %' ")
+        //con.Execute("update BAMs_Lite_plus_Data_Base set F_183='Y' where F_183='N' and fedaid like '0 - %' and BridgeLength>=8 and BPN='L' ")
+        bool BridgeFunding183(SectionDetail sectionSummary)
+        {
+            // ----------------------------------------------------------
+            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
+            return false;
+            // ----------------------------------------------------------
+
+
+            var fedAid = sectionSummary.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            var busPlanNetwork = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
+            var bridgeLength = sectionSummary.ValuePerNumericAttribute["LENGTH"];
+
+            return
+                fedAid == "0" && bridgeLength >= 8 &&
+                (functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
+        }
+
+
         private void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, SectionDetail sectionSummary, int Year)
         {
             var row = currentCell.Row;
@@ -195,12 +340,18 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
             worksheet.Cells[row, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISK_SCORE"];
 
             worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = "??"; // Bridge Funding 185
-            worksheet.Cells[row, columnNo++].Value = "??"; // Bridge Funding 581
-            worksheet.Cells[row, columnNo++].Value = "??"; // Bridge Funding STP
-            worksheet.Cells[row, columnNo++].Value = "??"; // Bridge Funding NHPP
-            worksheet.Cells[row, columnNo++].Value = "??"; // Bridge Funding BOF
-            worksheet.Cells[row, columnNo++].Value = "??"; // Bridge Funding 183
+
+            // ----------------------------------------------
+            // TODO: FIX THESE WHEN "FEDAID" PARAMETER IS AVAILABLE
+            //
+            worksheet.Cells[row, columnNo++].Value = BridgeFunding185(sectionSummary) ? " " : " "; // "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = BridgeFunding581(sectionSummary) ? " " : " "; // "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = BridgeFundingSTP(sectionSummary) ? " " : " "; // "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = BridgeFundingNHPP(sectionSummary) ? " " : " "; // "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = BridgeFundingBOF(sectionSummary) ? " " : " "; // "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = BridgeFunding183(sectionSummary) ? " " : " "; // "Y" : "N";
+            //
+            // ----------------------------------------------
 
             worksheet.Cells[row, columnNo++].Value = Year;
 

@@ -82,20 +82,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void ApplyTreatment(Treatment treatment, int year)
         {
-            try
+            var consequenceActions = treatment.GetConsequenceActions(this);
+            foreach (var consequenceAction in consequenceActions)
             {
-                var consequenceActions = treatment.GetConsequenceActions(this);
-                foreach (var consequenceAction in consequenceActions)
-                {
-                    consequenceAction();
-                }
+                consequenceAction();
             }
-            catch (SimulationException e)
-            {
-                var messageBuilder = SimulationLogMessageBuilders.Exception(e, SimulationRunner.Simulation.Id);
-                SimulationRunner.Send(messageBuilder);
-                throw;
-            }
+            // Note to PR reviewers -- in the new flow, when a SimulationException is thrown, we have always already logged. Therefore, we no longer need the try block. 
 
             foreach (var scheduling in treatment.GetSchedulings())
             {

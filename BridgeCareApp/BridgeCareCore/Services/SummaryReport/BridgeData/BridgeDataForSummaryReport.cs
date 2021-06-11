@@ -37,10 +37,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             // Add data to excel.
             var headers = GetHeaders();
+            var subHeaders = GetStaticSubHeaders();
 
             reportOutputData.Years.ForEach(_ => SimulationYears.Add(_.Year));
 
-            var currentCell = AddHeadersCells(worksheet, headers, SimulationYears);
+            var currentCell = AddHeadersCells(worksheet, headers, SimulationYears, subHeaders);
 
             // Add row next to headers for filters and year numbers for dynamic data. Cover from
             // top, left to right, and bottom set of data.
@@ -96,7 +97,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 workDoneData = new List<int>(new int[outputResults.Years[0].Sections.Count]);
                 previousYearSectionMinC = new List<double>(new double[outputResults.Years[0].Sections.Count]);
             }
-            var poorOnOffColumnStart = outputResults.Years.Count + column + 2;
+            var poorOnOffColumnStart = (outputResults.Years.Count * 2) + column + 3;
             var index = 1; // to track the initial section from rest of the years
 
             var isInitialYear = true;
@@ -173,15 +174,20 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 index++;
 
                 poorOnOffColumnStart++;
-                column++;
+                column += 2;
                 isInitialYear = false;
             }
 
             // work done information
             row = 4; // setting row back to start
+            column++;
             foreach (var wdInfo in workDoneData)
             {
-                worksheet.Cells[row++, column].Value = wdInfo > 1 ? "Yes" : "--";
+                // Work Done
+                worksheet.Cells[row, column - 1].Value = wdInfo >= 1 ? "Yes" : "--";
+                // Work done more than once
+                worksheet.Cells[row, column].Value = wdInfo > 1 ? "Yes" : "--";
+                row++;
             }
             column = column + outputResults.Years.Count + 2; // this will take us to the empty column after "poor on off"
             worksheet.Column(column).Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -324,23 +330,34 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BRIDGE_TYPE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["DECK_AREA"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LENGTH"];
-                columnNo++; // temporary, because we can comment out 1 excel rows
+                //columnNo++; // temporary, because we can comment out 1 excel rows
 
                 // Add span type, owner code, functional class, submitting agency
-                columnNo += 4;
+                columnNo += 1;
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["OWNER_CODE"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SUBM_AGENCY"];
 
                 //worksheet.Cells[rowNo, columnNo++].Value = bridgeDataModel.PlanningPartner;
+                columnNo++; // for skipping planning partner
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY_ID"];
                 worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(sectionSummary.ValuePerTextAttribute["NHS_IND"],
                     out var numericValue) && numericValue > 0 ? "Y" : "N";
 
-                // Add NBIS Len
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["NBISLEN"];
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
                 // Add Interstate
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["INTERSTATE"];
+
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["STRUCTURE_TYPE"];
 
                 // Fractural Critical, Deck surface type, Wearing surface cond, Paint cond, paint ext
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FRACT_CRIT"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DECKSURF_TYPE"];
+                columnNo++; // Wearing surface cond
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["PAINT_COND"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["PAINT_EXTENT"];
 
                 worksheet.Cells[rowNo, columnNo++].Value = (int)sectionSummary.ValuePerNumericAttribute["YEAR_BUILT"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["AGE"];
@@ -349,7 +366,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["P3"] > 0 ? "Y" : "N";
                 previousYearInitialMinC.Add(sectionSummary.ValuePerNumericAttribute["MINCOND"]);
 
-                // Add Parallel Structure, Internet Report, Federal Aid, 
+                // Add Parallel Structure, Internet Report, Federal Aid, Bridge Funding
+                columnNo++; // Parallel Structure
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["INTERNET_REPORT"];
+                columnNo += 7; //Bridge Funding takes 6 column
             }
             currentCell.Row = rowNo;
             currentCell.Column = columnNo;
@@ -380,26 +400,66 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 "Planning Partner",
                 "Bridge Family",
                 "NHS",
+
+                "NBIS Len",
+
                 "BPN",
+
+                "Interstate",
+
                 "Struct Type",
-                //"Functional Class",
+
+                "Fractural Critical",
+                "Deck Surfacr Type",
+                "Wearing Surface Cond",
+                "Paint Cond",
+                "Paint Ext",
+
                 "Year Built",
                 "Age",
                 "ADTT",
-                //"ADT Over 10,000",
                 "Risk Score",
-                "P3"
+                "P3",
+
+                "Parallel Structure",
+                "Internet Report",
+                "Federal Aid",
+                "BridgeFunding"
             };
         }
 
-        private CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<string> headers, List<int> simulationYears)
+        private List<string> GetStaticSubHeaders()
+        {
+            return new List<string>
+            {
+                "185",
+                "581",
+                "STP",
+                "NHPP",
+                "BOF",
+                "183"
+            };
+        }
+
+        private CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<string> headers, List<int> simulationYears, List<string> subHeaders)
         {
             int headerRow = 1;
+
+            _excelHelper.MergeCells(worksheet, 1, headers.Count, 1, headers.Count + 5);
+
             for (int column = 0; column < headers.Count; column++)
             {
                 worksheet.Cells[headerRow, column + 1].Value = headers[column];
             }
-            var currentCell = new CurrentCell { Row = headerRow, Column = headers.Count };
+
+            // sub header columns
+            var subHeaderCol = headers.Count;
+            for(int i = 0; i < subHeaders.Count; i++)
+            {
+                worksheet.Cells[headerRow + 1, subHeaderCol++].Value = subHeaders[i];
+            }
+
+            var currentCell = new CurrentCell { Row = headerRow, Column = headers.Count + 5 };
             _excelHelper.ApplyBorder(worksheet.Cells[headerRow, 1, headerRow + 1, worksheet.Dimension.Columns]);
 
             AddDynamicHeadersCells(worksheet, currentCell, simulationYears);
@@ -414,11 +474,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var initialColumn = column;
             foreach (var year in simulationYears)
             {
-                worksheet.Cells[row, ++column].Value = HeaderConstText + year;
-                worksheet.Cells[row + 2, column].Value = year;
-                _excelHelper.ApplyStyle(worksheet.Cells[row + 2, column]);
-                _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(244, 176, 132));
+                _excelHelper.MergeCells(worksheet, row, ++column, row, ++column);
+                worksheet.Cells[row, column - 1].Value = HeaderConstText + year;
+                worksheet.Cells[row + 2, column -1].Value = year;
+                worksheet.Cells[row + 2, column].Value = "Cost";
+                _excelHelper.ApplyStyle(worksheet.Cells[row + 2, column - 1]);
+                _excelHelper.ApplyColor(worksheet.Cells[row, column - 1], Color.FromArgb(244, 176, 132));
             }
+
+            worksheet.Cells[row, ++column].Value = "Work Done";
             worksheet.Cells[row, ++column].Value = "Work Done more than once";
             worksheet.Cells[row, ++column].Value = "Total";
             worksheet.Cells[row, ++column].Value = "Poor On/Off Rate";
@@ -430,9 +494,21 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 column++;
             }
 
-            // Merge 2 rows for headers till column before Poor On/Off Rate
             worksheet.Row(row).Height = 40;
-            for (int cellColumn = 1; cellColumn < poorOnOffRateColumn; cellColumn++)
+            // Merge 2 rows for headers till column before Bridge Funding
+            for (int cellColumn = 1; cellColumn < currentCell.Column - 5; cellColumn++)
+            {
+                _excelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
+            }
+
+            // Merge 2 rows for headers of "Work Done" columns
+            for (int cellColumn = currentCell.Column + 1; cellColumn < poorOnOffRateColumn - 4; cellColumn++)
+            {
+                _excelHelper.MergeCells(worksheet, row, cellColumn, row + 1, ++cellColumn);
+            }
+
+            // Merge "Work Done", "Work done more than once", "Total"
+            for(var cellColumn = poorOnOffRateColumn - 3; cellColumn < poorOnOffRateColumn; cellColumn++)
             {
                 _excelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
             }

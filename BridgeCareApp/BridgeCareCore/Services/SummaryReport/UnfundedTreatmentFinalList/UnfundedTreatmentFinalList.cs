@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -32,7 +32,20 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
             {
                 autoFilterCells.AutoFilter = true;
             }
+
+            // Add "Total Unfunded Amount" header & calculated cell
+            var costColumn = unfundedTreatmentTimeWorksheet.Dimension.Columns;
+            var costColumnLetter = OfficeOpenXml.ExcelCellAddress.GetColumnLetter(costColumn);
+            var totalColumn = costColumn + 2;
+            unfundedTreatmentTimeWorksheet.Cells[1, totalColumn].Value = "Total Unfunded Amount:";
+            unfundedTreatmentTimeWorksheet.Cells[2, totalColumn].Formula = $"=SUM({costColumnLetter}:{costColumnLetter})";
+            unfundedTreatmentTimeWorksheet.Cells[2, totalColumn].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";
+            _excelHelper.ApplyBorder(unfundedTreatmentTimeWorksheet.Cells[1, totalColumn]);
+
+            unfundedTreatmentTimeWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
+
             AddDynamicDataCells(unfundedTreatmentTimeWorksheet, SimulationYears, simulationOutput, currentCell);
+            unfundedTreatmentTimeWorksheet.Calculate();  // calculation is set to manual, so force calculation of the total now
 
             unfundedTreatmentTimeWorksheet.Cells.AutoFitColumns();
         }
@@ -206,7 +219,6 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
 
             _excelHelper.ApplyBorder(worksheet.Cells[headerRow, 1, headerRow + 1, worksheet.Dimension.Columns]);
             _excelHelper.ApplyStyle(worksheet.Cells[headerRow + 1, bridgeFundingColumn, headerRow + 1, analysisColumn - 1]);
-            worksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             var currentCell = new CurrentCell { Row = headerRow + 2, Column = worksheet.Dimension.Columns + 1};
             return currentCell;

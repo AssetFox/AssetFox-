@@ -153,20 +153,32 @@ namespace Simulation
             }
 
             var runner = new SimulationRunner(newSimulation);
-            runner.Failure += (sender, eventArgs) => {
-                log.Info($"Failed:  {eventArgs.Message}");
-                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"Failed: {eventArgs.Message}");
-                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
-            };
-            runner.Information += (sender, eventArgs) => {
-                log.Info(eventArgs.Message);
-                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"{eventArgs.Message}");
-                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
-            };
-            runner.Warning += (sender, eventArgs) => { 
-                log.Info(eventArgs.Message);
-                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"{eventArgs.Message}");
-                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+            runner.SimulationLog += (sender, eventArgs) =>
+            {
+                var messageBuilder = eventArgs.MessageBuilder;
+                switch (messageBuilder.Status)
+                {
+                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Error:
+                        log.Info($"Error:  {messageBuilder.Message}");
+                        var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"Failed: {messageBuilder.Message}");
+                        Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+                        break;
+                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Fatal:
+                        log.Info($"Failed:  {messageBuilder.Message}");
+                        var updateStatus2 = Builders<SimulationModel>.Update.Set(s => s.status, $"Failed: {messageBuilder.Message}");
+                        Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus2);
+                        break;
+                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Information:
+                            log.Info(messageBuilder.Message);
+                            var updateStatus3 = Builders<SimulationModel>.Update.Set(s => s.status, $"{messageBuilder.Message}");
+                            Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus3);
+                            break;
+                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Warning:
+                        log.Info(messageBuilder.Message);
+                        var updateStatus4 = Builders<SimulationModel>.Update.Set(s => s.status, $"{messageBuilder.Message}");
+                        Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus4);
+                        break;
+                };
             };
 
             var timer = Stopwatch.StartNew();

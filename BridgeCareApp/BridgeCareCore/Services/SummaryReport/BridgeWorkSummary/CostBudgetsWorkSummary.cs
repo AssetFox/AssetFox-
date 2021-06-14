@@ -91,6 +91,12 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             currentCell.Row++;
             var workTypes = EnumExtensions.GetValues<WorkTypeName>();
             var numberOfYears = simulationYears.Count;
+            worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
+            var totalColumnHeaderRange = worksheet.Cells[initialRow, 3 + numberOfYears];
+            _excelHelper.ApplyBorder(totalColumnHeaderRange);
+            _excelHelper.ApplyStyle(totalColumnHeaderRange);
+            
+
             var startColumnIndex = 3;
             var firstContentRow = currentCell.Row;
             for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
@@ -124,8 +130,9 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             }
             var lastContentRow = firstContentRow + workTypes.Count - 1;
             currentCell.Row += workTypes.Count();
-            worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(currentCell.Row, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1); ;
-            worksheet.Cells[currentCell.Row, 1].Value = "Total Spent";
+            var totalSpentRow = currentCell.Row;
+            worksheet.Cells[totalSpentRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(totalSpentRow, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1); ;
+            worksheet.Cells[totalSpentRow, 1].Value = "Total Spent";
             for (var columnIndex = 3; columnIndex < 3 + numberOfYears; columnIndex ++)
             {
                 var startAddress = worksheet.Cells[firstContentRow, columnIndex].Address;
@@ -133,9 +140,14 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 worksheet.Cells[currentCell.Row, columnIndex].Formula = ExcelFormulas.RangeSum(startAddress, endAddress);
             }
             currentCell.Row += 2;
-            _excelHelper.ApplyBorder(worksheet.Cells[firstContentRow, 1, currentCell.Row, 3 + numberOfYears]);
+            var contentColor = Color.FromArgb(84, 130, 53);
+            _excelHelper.ApplyBorder(worksheet.Cells[firstContentRow, 1, totalSpentRow, 3 + numberOfYears]);
             _excelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3+numberOfYears], "NegativeCurrency");
+            _excelHelper.ApplyColor(worksheet.Cells[firstContentRow, 3, totalSpentRow, 3 + numberOfYears - 1], contentColor);
+            _excelHelper.SetTextColor(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3 + numberOfYears - 1], Color.White);
             worksheet.Cells[currentCell.Row, 1].Value = "Total Bridge Care Budget";
+            var totalColumnRange = worksheet.Cells[firstContentRow, 3 + numberOfYears, totalSpentRow, 3 + numberOfYears];
+            _excelHelper.ApplyColor(totalColumnRange, Color.FromArgb(217, 217, 217));
             foreach (var year in simulationYears)
             {
                 var yearIndex = year - simulationYears[0];
@@ -143,7 +155,13 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 var budgetTotal = yearlyBudgetAmount.Sum(x => x.Value.YearlyAmounts[yearIndex].Value);
                 worksheet.Cells[currentCell.Row, columnIndex].Value = budgetTotal;
             }
+            
             worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(currentCell.Row, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1); ;
+            var totalRowRange = worksheet.Cells[currentCell.Row, 3, currentCell.Row, 2 + numberOfYears];
+            _excelHelper.ApplyColor(totalRowRange, Color.FromArgb(0, 128, 0));
+            var grandTotalRange = worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears];
+            _excelHelper.ApplyColor(grandTotalRange, Color.FromArgb(217, 217, 217));
+            _excelHelper.ApplyBorder(totalRowRange);
             currentCell.Row++;
             return 666;
         }

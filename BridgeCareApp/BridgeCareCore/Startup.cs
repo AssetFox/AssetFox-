@@ -22,6 +22,7 @@ using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
 using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
 using BridgeCareCore.Services.SummaryReport.UnfundedRecommendations;
+using BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList;
 using BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureADB2C.UI;
@@ -107,6 +108,7 @@ namespace BridgeCareCore
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
             services.AddScoped<IHighlightWorkDoneCells, HighlightWorkDoneCells>();
             services.AddScoped<IUnfundedRecommendations, UnfundedRecommendations>();
+            services.AddScoped<IUnfundedTreatmentFinalList, UnfundedTreatmentFinalList>();
             services.AddScoped<IUnfundedTreatmentTime, UnfundedTreatmentTime>();
             services.AddScoped<IBridgeWorkSummary, BridgeWorkSummary>();
             services.AddScoped<IBridgeWorkSummaryByBudget, BridgeWorkSummaryByBudget>();

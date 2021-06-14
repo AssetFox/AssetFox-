@@ -85,10 +85,9 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             Dictionary<string, WorkTypeName> workTypeMap,
             Range rangeForSummands)
         {
-
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
             var initialRow = currentCell.Row;
-            currentCell.Row += 2;
+            currentCell.Row++;
             var workTypes = EnumExtensions.GetValues<WorkTypeName>();
             var numberOfYears = simulationYears.Count;
             var startColumnIndex = 3;
@@ -120,9 +119,11 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                         }
                     }
                 }
+                worksheet.Cells[rowIndex, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(rowIndex, startColumnIndex, rowIndex, startColumnIndex + numberOfYears - 1); ;
             }
             var lastContentRow = firstContentRow + workTypes.Count - 1;
-            currentCell.Row += workTypes.Count() + 1;
+            currentCell.Row += workTypes.Count();
+            worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(currentCell.Row, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1); ;
             worksheet.Cells[currentCell.Row, 1].Value = "Total Spent";
             for (var columnIndex = 3; columnIndex < 3 + numberOfYears; columnIndex ++)
             {

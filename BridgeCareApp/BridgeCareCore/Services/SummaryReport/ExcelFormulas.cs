@@ -58,5 +58,18 @@ namespace BridgeCareCore.Services.SummaryReport
 
         public static string RangeSum(string startAddress, string endAddress)
             => $"Sum({startAddress}:{endAddress})";
+
+        public static string CellAddress(int rowIndex, int columnIndex)
+        {
+            var columnName = ExcelCellAddress.GetColumnLetter(columnIndex);
+            return $"{columnName}{rowIndex}";
+        }
+
+        public static string Sum(int fromRow, int fromColumn, int toRow, int toColumn)
+        {
+            var fromCell = CellAddress(fromRow, fromColumn);
+            var toCell = CellAddress(toRow, toColumn);
+            return $"Sum({fromCell}:{toCell})";
+        }
     }
 }

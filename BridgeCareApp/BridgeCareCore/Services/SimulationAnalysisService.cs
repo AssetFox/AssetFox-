@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DTOs.Static;
 using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -23,6 +25,8 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
         }
+
+        private readonly HashSet<string> LoggedMessages = new HashSet<string>();
 
         public Task CreateAndRunPermitted(Guid networkId, Guid simulationId)
         {
@@ -64,14 +68,6 @@ namespace BridgeCareCore.Services
 
             var runner = new SimulationRunner(simulation);
 
-            runner.Failure += (sender, eventArgs) =>
-            {
-                simulationAnalysisDetail.Status = eventArgs.Message;
-                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
-                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-            };
-
             runner.Progress += (sender, eventArgs) =>
             {
                 switch (eventArgs.ProgressStatus)
@@ -98,16 +94,35 @@ namespace BridgeCareCore.Services
                 }
                 _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
-            runner.Warning += (sender, eventArgs) =>
+
+            runner.SimulationLog += (sender, eventArgs) =>
             {
-                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
+                var message = eventArgs.MessageBuilder;
+                if (LoggedMessages.Add(message.Message))
+                {
+                    var dto = SimulationLogMapper.ToDTO(message);
+                    _unitOfWork.SimulationLogRepo.CreateLog(dto);
+                }
+                switch (message.Status)
+                {
+                case SimulationLogStatus.Warning:
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
+                    break;
+                case SimulationLogStatus.Error:
+                case SimulationLogStatus.Fatal:
+                    simulationAnalysisDetail.Status = message.Message;
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                    break;
+                }
             };
 
             // resetting the report generation status.
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
-            
+
             RunValidation(runner);
             runner.Run(false);
 

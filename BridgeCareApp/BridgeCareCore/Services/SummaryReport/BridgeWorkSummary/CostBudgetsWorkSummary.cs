@@ -35,7 +35,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 simulationYears, treatments, costPerTreatmentPerYear);
             var bridgeTotalRow = bridgeTotalRange.FooterRange.End.Value;
             var map = WorkTypeMap.Map;
-            var workTypeTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, map, bridgeTotalRange.ContentRange);
+            var workTypeTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, map, bridgeTotalRange.ContentRange, yearlyBudgetAmount);
             var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears,
                 costPerTreatmentPerYear, yearlyBudgetAmount);
             FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
@@ -83,7 +83,8 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<string, WorkTypeName> workTypeMap,
-            Range rangeForSummands)
+            Range rangeForSummands,
+            Dictionary<string, Budget> yearlyBudgetAmount)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
             var initialRow = currentCell.Row;
@@ -131,11 +132,20 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 var endAddress = worksheet.Cells[lastContentRow, columnIndex].Address;
                 worksheet.Cells[currentCell.Row, columnIndex].Formula = ExcelFormulas.RangeSum(startAddress, endAddress);
             }
-            currentCell.Row += 1;
+            currentCell.Row += 2;
             _excelHelper.ApplyBorder(worksheet.Cells[firstContentRow, 1, currentCell.Row, 3 + numberOfYears]);
             _excelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3+numberOfYears], "NegativeCurrency");
-
-            return 12;
+            worksheet.Cells[currentCell.Row, 1].Value = "Total Bridge Care Budget";
+            foreach (var year in simulationYears)
+            {
+                var yearIndex = year - simulationYears[0];
+                var columnIndex = yearIndex + 3;
+                var budgetTotal = yearlyBudgetAmount.Sum(x => x.Value.YearlyAmounts[yearIndex].Value);
+                worksheet.Cells[currentCell.Row, columnIndex].Value = budgetTotal;
+            }
+            worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(currentCell.Row, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1); ;
+            currentCell.Row++;
+            return 666;
         }
 
         private int FillTotalBudgetSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,

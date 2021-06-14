@@ -151,9 +151,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
                 ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
 
-                foreach (var context in unhandledContexts)
+                foreach (var context in SectionContexts)
                 {
-                    context.ApplyMetadataOfMostRecentTreatment(year);
+                    context.ApplyTreatmentMetadataIfPending(year);
                 }
 
                 Snapshot(year);
@@ -314,8 +314,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     if (progress.IsComplete)
                     {
-                        context.ApplyTreatment(progress.Treatment);
-                        context.ApplyMetadataOfMostRecentTreatment(year);
+                        context.ApplyTreatment(progress.Treatment, year);
                     }
                     else
                     {
@@ -328,9 +327,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     context.ApplyPerformanceCurves();
 
-                    if (Simulation.ShouldApplyPassiveTreatmentBeforeSelection)
+                    if (Simulation.ShouldPreapplyPassiveTreatment)
                     {
-                        context.ApplyPassiveTreatment();
+                        context.PreapplyPassiveTreatment();
                     }
 
                     if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
@@ -357,8 +356,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                         if (costCoverage == CostCoverage.Full)
                         {
-                            context.ApplyTreatment(treatment);
-                            context.ApplyMetadataOfMostRecentTreatment(year);
+                            context.ApplyTreatment(treatment, year);
                         }
                         else if (costCoverage == CostCoverage.CashFlow)
                         {
@@ -404,9 +402,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 context.Detail.TreatmentCause = TreatmentCause.NoSelection;
                 context.EventSchedule.Add(year, Simulation.DesignatedPassiveTreatment);
 
-                if (!Simulation.ShouldApplyPassiveTreatmentBeforeSelection)
+                if (!Simulation.ShouldPreapplyPassiveTreatment)
                 {
-                    context.ApplyPassiveTreatment();
+                    context.ApplyPassiveTreatment(year);
                 }
             });
 
@@ -448,7 +446,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 if (costCoverage == CostCoverage.Full)
                                 {
                                     workingContext.EventSchedule.Add(year, option.CandidateTreatment);
-                                    workingContext.ApplyTreatment(option.CandidateTreatment);
+                                    workingContext.ApplyTreatment(option.CandidateTreatment, year);
 
                                     if (ConditionGoalsAreMet(year))
                                     {

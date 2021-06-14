@@ -72,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             var cost = AccumulationContext.GetCostOfTreatment(treatment);
             CumulativeCost += cost * SimulationRunner.GetInflationFactor(year);
 
-            AccumulationContext.ApplyTreatment(treatment);
+            AccumulationContext.ApplyTreatment(treatment, year);
         }
 
         private void Run()
@@ -110,7 +110,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             ApplyTreatment(InitialTreatment, InitialYear);
 
-            AccumulationContext.ApplyMetadataOfMostRecentTreatment(InitialYear);
             AccumulateBenefit();
             updateRemainingLife?.Invoke();
 
@@ -125,21 +124,22 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 AccumulationContext.ApplyPerformanceCurves();
 
-                if (SimulationRunner.Simulation.ShouldApplyPassiveTreatmentBeforeSelection)
+                if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
                 {
-                    AccumulationContext.ApplyPassiveTreatment();
+                    AccumulationContext.PreapplyPassiveTreatment();
                 }
 
                 if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                 {
                     ApplyTreatment(treatment, year);
                 }
-                else if (!SimulationRunner.Simulation.ShouldApplyPassiveTreatmentBeforeSelection)
+                else if (!SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
                 {
-                    AccumulationContext.ApplyPassiveTreatment();
+                    AccumulationContext.ApplyPassiveTreatment(year);
                 }
 
-                AccumulationContext.ApplyMetadataOfMostRecentTreatment(year);
+                AccumulationContext.ApplyTreatmentMetadataIfPending(year);
+
                 AccumulateBenefit();
                 updateRemainingLife?.Invoke();
             }

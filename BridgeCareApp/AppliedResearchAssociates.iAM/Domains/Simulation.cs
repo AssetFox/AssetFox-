@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public string ShortDescription => Name;
 
-        public bool ShouldApplyPassiveTreatmentBeforeSelection { get; set; } = true;
+        public bool ShouldPreapplyPassiveTreatment { get; set; } = true;
 
         public ValidatorBag Subvalidators => new ValidatorBag { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
 

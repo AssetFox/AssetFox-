@@ -53,69 +53,25 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private AnalysisMethod AnalysisMethod => SimulationRunner.Simulation.AnalysisMethod;
 
-        public void ApplyMetadataOfMostRecentTreatment(int year)
+        public void ApplyPassiveTreatment(int year)
         {
-            var treatment = MostRecentTreatment;
-
-            foreach (var scheduling in treatment.GetSchedulings())
-            {
-                var schedulingYear = year + scheduling.OffsetToFutureYear;
-
-                if (EventSchedule.ContainsKey(schedulingYear))
-                {
-                    Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.Treatment.Name));
-                }
-                else
-                {
-                    EventSchedule.Add(schedulingYear, scheduling.Treatment);
-                }
-            }
-
-            FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
-            FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
-
-            Detail.AppliedTreatment = treatment.Name;
-            Detail.TreatmentStatus = TreatmentStatus.Applied;
-        }
-
-        public void ApplyPassiveTreatment()
-        {
-            var passiveTreatment = SimulationRunner.Simulation.DesignatedPassiveTreatment;
-            var cost = GetCostOfTreatment(passiveTreatment);
-            if (cost != 0)
-            {
-                var messageBuilder = new SimulationMessageBuilder(MessageStrings.CostOfPassiveTreatmentIsNonZero)
-                {
-                    ItemName = SimulationRunner.Simulation.DesignatedPassiveTreatment.Name,
-                    ItemId = SimulationRunner.Simulation.DesignatedPassiveTreatment.Id,
-                    SectionName = Section.Name,
-                    SectionId = Section.Id,
-                };
-
-                SimulationRunner.Fail(messageBuilder.ToString());
-            }
-
-            ApplyTreatment(passiveTreatment);
+            CheckPassiveTreatmentCostIsZero();
+            ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
         }
 
         public void ApplyPerformanceCurves() => ApplyPerformanceCurves(GetPerformanceCurveCalculatorPerAttribute());
 
-        public void ApplyTreatment(Treatment treatment)
+        public void ApplyTreatment(Treatment treatment, int year)
         {
-            MostRecentTreatment = treatment;
+            ApplyTreatmentButNotMetadata(treatment);
+            ApplyTreatmentMetadata(year);
+        }
 
-            try
+        public void ApplyTreatmentMetadataIfPending(int year)
+        {
+            if (AppliedTreatmentWithPendingMetadata is object)
             {
-                var consequenceActions = treatment.GetConsequenceActions(this);
-                foreach (var consequenceAction in consequenceActions)
-                {
-                    consequenceAction();
-                }
-            }
-            catch (SimulationException e)
-            {
-                SimulationRunner.Fail(e.Message, false);
-                throw;
+                ApplyTreatmentMetadata(year);
             }
         }
 
@@ -190,6 +146,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
             Detail.TreatmentStatus = TreatmentStatus.Progressed;
         }
 
+        public void PreapplyPassiveTreatment()
+        {
+            CheckPassiveTreatmentCostIsZero();
+            ApplyTreatmentButNotMetadata(SimulationRunner.Simulation.DesignatedPassiveTreatment);
+        }
+
         public void ResetDetail() => Detail = new SectionDetail(Section);
 
         public void RollForward()
@@ -216,8 +178,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 SetHistoricalValues(earliestYearOfMostRecentValue.Value, true, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
                 ApplyPerformanceCurves();
-                ApplyPassiveTreatment();
-                ApplyMetadataOfMostRecentTreatment(earliestYearOfMostRecentValue.Value);
+                ApplyPassiveTreatment(earliestYearOfMostRecentValue.Value);
 
                 foreach (var year in Static.RangeFromBounds(earliestYearOfMostRecentValue.Value + 1, SimulationRunner.Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod - 1))
                 {
@@ -225,8 +186,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SetHistoricalValues(year, false, SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
                     ApplyPerformanceCurves();
-                    ApplyPassiveTreatment();
-                    ApplyMetadataOfMostRecentTreatment(year);
+                    ApplyPassiveTreatment(year);
                 }
             }
 
@@ -264,9 +224,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(KeyComparer);
 
-        private int? FirstUnshadowedYearForAnyTreatment;
+        private Treatment AppliedTreatmentWithPendingMetadata;
 
-        private Treatment MostRecentTreatment;
+        private int? FirstUnshadowedYearForAnyTreatment;
 
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
@@ -278,7 +238,69 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
+        private void ApplyTreatmentButNotMetadata(Treatment treatment)
+        {
+            try
+            {
+                var consequenceActions = treatment.GetConsequenceActions(this);
+                foreach (var consequenceAction in consequenceActions)
+                {
+                    consequenceAction();
+                }
+            }
+            catch (SimulationException e)
+            {
+                SimulationRunner.Fail(e.Message, false);
+                throw;
+            }
+
+            AppliedTreatmentWithPendingMetadata = treatment;
+        }
+
+        private void ApplyTreatmentMetadata(int year)
+        {
+            var treatment = AppliedTreatmentWithPendingMetadata;
+            AppliedTreatmentWithPendingMetadata = null;
+
+            foreach (var scheduling in treatment.GetSchedulings())
+            {
+                var schedulingYear = year + scheduling.OffsetToFutureYear;
+
+                if (EventSchedule.ContainsKey(schedulingYear))
+                {
+                    Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.Treatment.Name));
+                }
+                else
+                {
+                    EventSchedule.Add(schedulingYear, scheduling.Treatment);
+                }
+            }
+
+            FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
+            FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+
+            Detail.AppliedTreatment = treatment.Name;
+            Detail.TreatmentStatus = TreatmentStatus.Applied;
+        }
+
         private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve);
+
+        private void CheckPassiveTreatmentCostIsZero()
+        {
+            var cost = GetCostOfTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment);
+            if (cost != 0)
+            {
+                var messageBuilder = new SimulationMessageBuilder(MessageStrings.CostOfPassiveTreatmentIsNonZero)
+                {
+                    ItemName = SimulationRunner.Simulation.DesignatedPassiveTreatment.Name,
+                    ItemId = SimulationRunner.Simulation.DesignatedPassiveTreatment.Id,
+                    SectionName = Section.Name,
+                    SectionId = Section.Id,
+                };
+
+                SimulationRunner.Fail(messageBuilder.ToString());
+            }
+        }
 
         private void CopyAttributeValuesToDetail(SectionSummaryDetail detail)
         {

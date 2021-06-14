@@ -529,8 +529,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                     context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
                     var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Section, treatment, cost, context.SimulationRunner.Simulation.Id);
-                    Send(messageBuilder, false);
-                    throw new SimulationException(messageBuilder.Message);
+                    Send(messageBuilder);
+                    return true;
                 });
 
                 if (feasibleTreatments.Count > 0)

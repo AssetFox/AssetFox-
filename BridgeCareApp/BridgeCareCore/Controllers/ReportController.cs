@@ -100,8 +100,10 @@ namespace BridgeCareCore.Controllers
             // Return an error if the report type does not match the expected type
             if (report.Type != expectedReportType)
             {
+                // Set the error string before creating the FailureReport output object as the report type will be overwritten
+                var errorMessage = $"A {expectedReportType} type was expected, but {reportName} is a {report.Type} type report.";
                 report = new FailureReport();
-                await report.Run($"{reportName} is not of the expected type");
+                await report.Run(errorMessage);
             }
 
             // Run the report as long as it does not have any existing errors (i.e., failure on generation)

@@ -48,32 +48,28 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Determine the Guid for the simulation
             if (!Guid.TryParse(parameters, out Guid simulationGuid)) {
                 Errors.Add("Simulation ID could not be parsed to a Guid");
-                IsComplete = true;
-                Status = "Simulation output report completed with errors";
+                IndicateError();
                 return;
             }
             SimulationID = simulationGuid;
 
             // Check for simulation existence
             string reportFileName;
-            try
+            var simulationName = _unitofwork.SimulationRepo.GetSimulationName(simulationGuid);
+            if (simulationName == null)
             {
-                var simulationInformation = _unitofwork.SimulationRepo.GetSimulation(simulationGuid);
-                if (!String.IsNullOrEmpty(simulationInformation.Name)) {
-                    reportFileName = $"Reports\\{simulationInformation.Name}-{SimulationID}.json";
-                }
-                else
-                {
-                    reportFileName = $"Reports\\{SimulationID}.json";
-                }
-            }
-            catch (Exception e)
-            {
-                Status = "Simulation output report completed with errors";
-                IsComplete = true;
+                IndicateError();
                 Errors.Add($"Failed to find simulation ID {SimulationID}.");
-                Errors.Add(e.Message);
                 return;
+            }
+
+            if (!string.IsNullOrEmpty(simulationName))
+            {
+                reportFileName = $"Reports\\{simulationName}-{SimulationID}.json";
+            }
+            else
+            {
+                reportFileName = $"Reports\\{SimulationID}.json";
             }
 
             // Pull the simulation object
@@ -84,8 +80,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
             catch(Exception e)
             {
-                Status = "Simulation output report completed with errors";
-                IsComplete = true;
+                IndicateError();
                 Errors.Add("Failed to pull simulation output.  Has the simulation been run?");
                 Errors.Add(e.Message);
                 return;
@@ -99,8 +94,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
             catch(Exception e)
             {
-                Status = "Simulation output report completed with errors";
-                IsComplete = true;
+                IndicateError();
                 Errors.Add("Failed to write file to server");
                 Errors.Add(e.Message);
                 return;
@@ -111,6 +105,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             IsComplete = true;
             Status = "File generated.";
             return;
+        }
+
+        private void IndicateError()
+        {
+            Status = "Simulation output report completed with errors";
+            IsComplete = true;
         }
     }
 }

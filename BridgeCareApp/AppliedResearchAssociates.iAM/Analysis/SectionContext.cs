@@ -87,7 +87,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 consequenceAction();
             }
-            // Note to PR reviewers -- in the new flow, when a SimulationException is thrown, we have always already logged. Therefore, we no longer need the try block. 
 
             foreach (var scheduling in treatment.GetSchedulings())
             {

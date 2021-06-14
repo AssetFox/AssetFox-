@@ -342,7 +342,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SUBM_AGENCY"];
 
-                //worksheet.Cells[rowNo, columnNo++].Value = bridgeDataModel.PlanningPartner;
                 columnNo++; // for skipping planning partner
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY_ID"];
                 worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(sectionSummary.ValuePerTextAttribute["NHS_IND"],

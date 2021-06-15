@@ -160,7 +160,7 @@ namespace Simulation
                 {
                     case AppliedResearchAssociates.iAM.SimulationLogStatus.Error:
                         log.Info($"Error:  {messageBuilder.Message}");
-                        var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"Failed: {messageBuilder.Message}");
+                        var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"Error: {messageBuilder.Message}");
                         Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
                         break;
                     case AppliedResearchAssociates.iAM.SimulationLogStatus.Fatal:

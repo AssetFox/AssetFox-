@@ -170,7 +170,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
         private int FillBpnSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Cost Per BPN", "BPN");
-            currentCell.Row ++;
+            currentCell.Row++;
             return currentCell.Row;
         }
 

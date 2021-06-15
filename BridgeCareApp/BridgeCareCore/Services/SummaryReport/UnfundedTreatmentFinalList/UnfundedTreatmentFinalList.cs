@@ -55,8 +55,8 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
         private void AddDynamicDataCells(ExcelWorksheet worksheet, List<int> simulationYears, SimulationOutput simulationOutput, CurrentCell currentCell)
         {
             // facilityId, year, section, treatment
-            var treatmentsPerSection = new SortedDictionary<int, List<Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>>>();
-            foreach (var year in simulationOutput.Years)
+            var treatmentsPerSection = new SortedDictionary<int, Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>>();
+            foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
                 var untreatedSections =
                     year.Sections.Where(
@@ -76,11 +76,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
                     var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, filteredOptions.FirstOrDefault());
                     if (!treatmentsPerSection.ContainsKey(facilityId))
                     {
-                        treatmentsPerSection.Add(facilityId, new List<Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>> { newTuple });
-                    }
-                    else
-                    {
-                        treatmentsPerSection[facilityId].Add(newTuple);
+                        treatmentsPerSection.Add(facilityId,  newTuple);
                     }
                 }
             }
@@ -88,18 +84,14 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
             currentCell.Row += 1; // Data starts here
             currentCell.Column = 1;
 
-
-            foreach (var facilityList in treatmentsPerSection.Values)
+            foreach (var facilityTuple in treatmentsPerSection.Values)
             {
-                foreach (var facilityTuple in facilityList)
-                {
-                    var section = facilityTuple.Item2;
-                    var year = facilityTuple.Item1;
-                    var treatment = facilityTuple.Item3;
-                    FillDataInWorkSheet(worksheet, currentCell, section, year.Year, treatment);
-                    currentCell.Row++;
-                    currentCell.Column = 1;
-                }
+                var section = facilityTuple.Item2;
+                var year = facilityTuple.Item1;
+                var treatment = facilityTuple.Item3;
+                FillDataInWorkSheet(worksheet, currentCell, section, year.Year, treatment);
+                currentCell.Row++;
+                currentCell.Column = 1;
             }
         }
 
@@ -148,19 +140,52 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
 
             worksheet.Cells[row, columnNo++].Value = Year;
 
-            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["DECK_SEEDED"];
-            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUP_SEEDED"];
-            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUB_SEEDED"];
-            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["CULV_SEEDED"];
+            var familyId = int.Parse(section.ValuePerTextAttribute["FAMILY_ID"]);
+            if (familyId < 11)
+            {
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+                worksheet.Cells[row, ++columnNo].Value = section.ValuePerNumericAttribute["DECK_SEEDED"];
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+                worksheet.Cells[row, ++columnNo].Value = section.ValuePerNumericAttribute["SUP_SEEDED"];
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+                worksheet.Cells[row, ++columnNo].Value = section.ValuePerNumericAttribute["SUB_SEEDED"];
 
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["DECK_DURATION_N"];
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUP_DURATION_N"];
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUB_DURATION_N"];
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["CULV_DURATION_N"];
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+                worksheet.Cells[row, columnNo++].Value = "N"; // CULV_SEEDED     section.ValuePerNumericAttribute["CULV_SEEDED"];
+
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
+                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["DECK_DURATION_N"];
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
+                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUP_DURATION_N"];
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
+                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUB_DURATION_N"];
+
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
+                worksheet.Cells[row, columnNo++].Value = "N"; // CULV_DURATION_N
+            }
+            else
+            {
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+                worksheet.Cells[row, ++columnNo].Value = "N"; // DECK_SEEDED
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+                worksheet.Cells[row, ++columnNo].Value = "N"; // SUP_SEEDED
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+                worksheet.Cells[row, ++columnNo].Value = "N"; // SUB_SEEDED
+
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
+                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["CULV_SEEDED"];
+
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
+                worksheet.Cells[row, columnNo + 2].Value = "N"; // DECK_DURATION_N
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
+                worksheet.Cells[row, columnNo + 3].Value = "N"; // SUP_DURATION_N
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
+                worksheet.Cells[row, columnNo + 4].Value = "N"; // SUB_DURATION_N
+
+                worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
+                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["CULV_DURATION_N"];
+            }
+
 
             worksheet.Cells[row, columnNo++].Value = treatment?.TreatmentName;
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";

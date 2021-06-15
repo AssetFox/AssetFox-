@@ -352,9 +352,14 @@ export default class DeficientConditionGoalEditor extends Vue {
   onShowCriterionLibraryEditorDialog(deficientConditionGoal: DeficientConditionGoal) {
     this.selectedDeficientConditionGoalForCriteriaEdit = clone(deficientConditionGoal);
 
+    var fromScenario = false;
+    if(this.selectedScenarioId != this.uuidNIL){
+      fromScenario = true;
+    }
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
-      libraryId: deficientConditionGoal.criterionLibrary.id
+      libraryId: deficientConditionGoal.criterionLibrary.id,
+      isCallFromScenario: fromScenario
     };
   }
 

@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
             var explorer = accessor.GetExplorer();
 
             var errorIsPresent = false;
-            foreach (var result in explorer.GetAllValidationResults())
+            foreach (var result in explorer.GetAllValidationResults(Enumerable.Empty<string>()))
             {
                 errorIsPresent |= result.Status == ValidationStatus.Error;
                 logToConsoleAndFile($"[{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");
@@ -86,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
                     var networkSimulationLabel = $"{network.Name} ({networkId}) {simulation.Name} ({simulationId})";
 
-                    if (simulation.GetAllValidationResults().Any(result => result.Status == ValidationStatus.Error))
+                    if (simulation.GetAllValidationResults(Enumerable.Empty<string>()).Any(result => result.Status == ValidationStatus.Error))
                     {
                         logToConsoleAndFile($"Skipping {networkSimulationLabel} due to validation errors.");
                         continue;
@@ -95,9 +95,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
                     logToConsoleAndFile($"Running {networkSimulationLabel} ...");
 
                     var runner = new SimulationRunner(simulation);
-                    runner.Information += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
-                    runner.Warning += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
-                    runner.Failure += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
+                    runner.Progress += (sender, eventArgs) => logToConsoleAndFile(eventArgs.ToString());
+                    runner.SimulationLog += (sender, eventArgs) => logToConsoleAndFile(eventArgs.MessageBuilder.Message);
 
                     var timer = Stopwatch.StartNew();
 

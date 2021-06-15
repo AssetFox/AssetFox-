@@ -68,7 +68,7 @@
                   <v-tab-item>
                     <v-card>
                       <v-card-text class="card-tab-content">
-                        <CostsTab :selectedTreatmentCosts="selectedTreatment.costs"
+                        <CostsTab :selectedTreatmentCosts="selectedTreatment.costs" :callFromScenario="callComingFromScenario"
                                   @onAddCost="addSelectedTreatmentCost"
                                   @onModifyCost="modifySelectedTreatmentCost"
                                   @onRemoveCost="removeSelectedTreatmentCost"/>
@@ -78,7 +78,7 @@
                   <v-tab-item>
                     <v-card>
                       <v-card-text class="card-tab-content">
-                        <ConsequencesTab :selectedTreatmentConsequences="selectedTreatment.consequences" :rules="rules"
+                        <ConsequencesTab :selectedTreatmentConsequences="selectedTreatment.consequences" :rules="rules" :callFromScenario="callComingFromScenario"
                                          @onAddConsequence="addSelectedTreatmentConsequence"
                                          @onModifyConsequence="modifySelectedTreatmentConsequence"
                                          @onRemoveConsequence="removeSelectedTreatmentConsequence"/>
@@ -220,6 +220,7 @@ export default class TreatmentEditor extends Vue {
   rules: InputValidationRules = rules;
   uuidNIL: string = getBlankGuid();
   keepActiveTab: boolean = false;
+  callComingFromScenario: boolean = false;
 
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
@@ -228,6 +229,9 @@ export default class TreatmentEditor extends Vue {
         if (vm.selectedScenarioId === vm.uuidNIL) {
           vm.setErrorMessageAction({message: 'Found no selected scenario for edit'});
           vm.$router.push('/Scenarios/');
+        }
+        else{
+          vm.callComingFromScenario = true;
         }
 
         vm.treatmentTabs = [...vm.treatmentTabs, 'budgets'];
@@ -306,11 +310,17 @@ export default class TreatmentEditor extends Vue {
   @Watch('selectedTreatment')
   onSelectedTreatmentChanged() {
     this.hasSelectedTreatment = this.selectedTreatment.id !== this.uuidNIL;
+
+    var fromScenario = false;
+    if(this.selectedScenarioId != this.uuidNIL){
+      fromScenario = true;
+    }
     this.selectedTreatmentDetails = {
       description: this.selectedTreatment.description,
       shadowForSameTreatment: this.selectedTreatment.shadowForSameTreatment,
       shadowForAnyTreatment: this.selectedTreatment.shadowForAnyTreatment,
-      criterionLibrary: this.selectedTreatment.criterionLibrary
+      criterionLibrary: this.selectedTreatment.criterionLibrary,
+      isCallFromScenario: fromScenario
     };
   }
 
@@ -359,7 +369,7 @@ export default class TreatmentEditor extends Vue {
     if (this.hasSelectedTreatment) {
       this.modifySelectedTreatment({
         ...this.selectedTreatment,
-        costs: prepend(newCost, this.selectedTreatment.costs)
+        costs: prepend(newCost, this.selectedTreatment.costs),
       });
     }
   }

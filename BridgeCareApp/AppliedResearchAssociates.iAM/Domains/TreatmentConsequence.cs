@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
@@ -24,6 +25,14 @@ namespace AppliedResearchAssociates.iAM.Domains
             return results;
         }
 
-        internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope) => Change.GetApplicator(scope).Once();
+        public string ShortDescription => nameof(TreatmentConsequence);
+        
+        internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope, Treatment treatment)
+        {
+            var changeApplicator = Change.GetApplicator(scope);
+            return changeApplicator is null
+                ? Array.Empty<ChangeApplicator>()
+                : (new[] { changeApplicator });
+        }
     }
 }

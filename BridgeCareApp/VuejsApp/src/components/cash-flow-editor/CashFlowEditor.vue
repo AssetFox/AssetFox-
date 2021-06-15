@@ -505,10 +505,14 @@ export default class CashFlowEditor extends Vue {
 
   onEditCashFlowRuleCriterionLibrary(cashFlowRule: CashFlowRule) {
     this.selectedCashFlowRuleForCriteriaEdit = clone(cashFlowRule);
-
+    var fromScenario = false;
+    if(this.selectedScenarioId != this.uuidNIL){
+      fromScenario = true;
+    }
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
-      libraryId: this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id
+      libraryId: this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id,
+      isCallFromScenario: fromScenario
     };
   }
 

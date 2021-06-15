@@ -39,7 +39,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entities = _unitOfWork.Context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
 
-            entities.ForEach(_ => _.CreateSimulation(network));
+            // "GetAllInNetwork" is only getting used in testing. Therefore, passing DateTime.Now, instead of actual date
+            entities.ForEach(_ => _.CreateSimulation(network, DateTime.Now));
         }
 
         public List<SimulationDTO> GetAllInNetwork(Guid networkId)
@@ -81,8 +82,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking().Single(_ => _.Id == simulationId);
+            var simulationAnalysisDetail = _unitOfWork.Context.SimulationAnalysisDetail.AsNoTracking().SingleOrDefault(_ => _.SimulationId == simulationId);
 
-            simulationEntity.CreateSimulation(network);
+            simulationEntity.CreateSimulation(network, simulationAnalysisDetail.LastRun);
         }
 
         public void CreateSimulation(Guid networkId, SimulationDTO dto)
@@ -328,6 +330,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
+
+            _unitOfWork.Context.DeleteAll<SimulationLogEntity>(_ => _.Id == simulationId);
 
             _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
         }

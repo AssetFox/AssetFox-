@@ -173,6 +173,8 @@ namespace AppliedResearchAssociates.iAM.Domains
             }
         }
 
+        public string ShortDescription => nameof(AnalysisMethod);
+
         private readonly List<BudgetPriority> _BudgetPriorities = new List<BudgetPriority>();
 
         private readonly List<DeficientConditionGoal> _DeficientConditionGoals = new List<DeficientConditionGoal>();

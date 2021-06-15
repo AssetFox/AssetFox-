@@ -134,6 +134,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<SimulationEntity> Simulation { get; set; }
 
+        public virtual DbSet<SimulationLogEntity> SimulationLog { get; set; }
+
         public virtual DbSet<SimulationOutputEntity> SimulationOutput { get; set; }
 
         public virtual DbSet<TargetConditionGoalEntity> TargetConditionGoal { get; set; }
@@ -1138,6 +1140,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithMany(p => p.Simulations)
                     .HasForeignKey(d => d.NetworkId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<SimulationLogEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.HasOne(e => e.Simulation)
+                .WithMany(s => s.SimulationLogs)
+                .HasForeignKey(e => e.SimulationId);
             });
 
             modelBuilder.Entity<SimulationOutputEntity>(entity =>

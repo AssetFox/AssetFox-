@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,17 +13,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
-        public event EventHandler<FailureEventArgs> Failure;
-
-        public event EventHandler<InformationEventArgs> Information;
-
-        public event EventHandler<WarningEventArgs> Warning;
+        public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
         public event EventHandler<ProgressEventArgs> Progress;
 
         public Simulation Simulation { get; }
 
-        public void Run()
+        public void Run(bool withValidation = true)
         {
             // During the execution of this method and its dependencies, the "SimulationException"
             // type is used for errors that are caused by invalid user input. Other types like
@@ -38,32 +34,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             ReportProgress(ProgressStatus.Started);
 
-            var simulationValidationResults = Simulation.GetAllValidationResults();
-
-            var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
-            if (numberOfErrors > 0)
+            if (withValidation)
             {
-                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation errors.")
-                {
-                    ItemName = Simulation.Name,
-                    ItemId = Simulation.Id,
-                };
-
-                Fail(MessageBuilder.ToString());
+                RunValidation();
             }
-
-            var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
-            if (numberOfWarnings > 0)
-            {
-                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation warnings.")
-                {
-                    ItemName = Simulation.Name,
-                    ItemId = Simulation.Id,
-                };
-
-                Warn(MessageBuilder.ToString());
-            }
-
+            
             ActiveTreatments = Simulation.GetActiveTreatments();
 
             try
@@ -72,7 +47,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
             catch (SimulationException e)
             {
-                Fail(e.Message, false);
+                var logMessage = SimulationLogMessageBuilders.Exception(e, Simulation.Id);
+                Send(logMessage, false);
                 throw;
             }
 
@@ -119,7 +95,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     ItemId = Simulation.Id,
                 };
 
-                Fail(MessageBuilder.ToString());
+                var logMessage = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
+                Send(logMessage);
             }
 
             InParallel(SectionContexts, context => context.RollForward());
@@ -165,7 +142,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
-                var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod;
+                var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod * 100;
                 ReportProgress(ProgressStatus.Running, percentComplete, year);
 
                 var unhandledContexts = ApplyRequiredEvents(year);
@@ -184,27 +161,59 @@ namespace AppliedResearchAssociates.iAM.Analysis
             StatusCode = STATUS_CODE_NOT_RUNNING;
         }
 
+        public ValidationResultBag RunValidation()
+        {
+            var simulationValidationResults = Simulation.GetAllValidationResults(Enumerable.Empty<string>());
+
+            HandleValidationFailures(simulationValidationResults);
+            return simulationValidationResults;
+        }
+
+        public void HandleValidationFailures(ValidationResultBag simulationValidationResults)
+        {
+            var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
+            if (numberOfErrors > 0)
+            {
+                var errorsWord = numberOfErrors == 1 ? "error" : "errors";
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation {errorsWord}. Download the log to see all validation results.")
+                {
+                    ItemName = Simulation.Name,
+                    ItemId = Simulation.Id
+                };
+
+                var logMessageBuilder = SimulationLogMessageBuilders.HasValidationErrors(MessageBuilder, Simulation.Id);
+
+                Send(logMessageBuilder);
+            }
+
+            var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
+            if (numberOfWarnings > 0)
+            {
+                var warningsWord = numberOfWarnings == 1 ? "warning" : "warnings";
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation {warningsWord}.")
+                {
+                    ItemName = Simulation.Name,
+                    ItemId = Simulation.Id,
+                };
+
+                var logBuilder = new SimulationLogMessageBuilder
+                {
+                    Message = MessageBuilder.ToString(),
+                    SimulationId = Simulation.Id,
+                    Status = SimulationLogStatus.Warning,
+                    Subject = SimulationLogSubject.Validation,
+                };
+                Send(logBuilder);
+            }
+        }
+
         internal ILookup<Section, CommittedProject> CommittedProjectsPerSection { get; private set; }
 
         internal ILookup<NumberAttribute, PerformanceCurve> CurvesPerAttribute { get; private set; }
 
         internal IReadOnlyDictionary<string, NumberAttribute> NumberAttributeByName { get; private set; }
 
-        internal void Fail(string message, bool shouldThrow = true)
-        {
-            OnFailure(new FailureEventArgs(message));
-
-            if (shouldThrow)
-            {
-                throw new SimulationException(message);
-            }
-        }
-
         internal double GetInflationFactor(int year) => Simulation.InvestmentPlan.GetInflationFactor(year);
-
-        internal void Inform(string message) => OnInformation(new InformationEventArgs(message));
-
-        internal void Warn(string message) => OnWarning(new WarningEventArgs(message));
 
         internal void ReportProgress(ProgressStatus progressStatus, double percentComplete = 0, int? year = null) => OnProgress(new ProgressEventArgs(progressStatus, percentComplete, year));
 
@@ -319,7 +328,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 ItemId = treatment.Id,
                             };
 
-                            Warn(MessageBuilder.ToString());
+                            var warning = SimulationLogMessageBuilders.RuntimeWarning(MessageBuilder, Simulation.Id);
+
+                            Send(warning);
 
                             var actualSpendingLimit = SpendingLimit;
                             SpendingLimit = SpendingLimit.NoLimit;
@@ -354,6 +365,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
 
             return unhandledContexts;
+        }
+
+        private void OnProgress(ProgressEventArgs e) => Progress?.Invoke(this, e);
+
+        internal void Send(SimulationLogMessageBuilder message, bool throwOnFatal = true)
+        {
+            var args = new SimulationLogEventArgs(message);
+            OnLog(args);
+            if (message.Status == SimulationLogStatus.Fatal && throwOnFatal)
+            {
+                throw new SimulationException(message.Message);
+            }
         }
 
         private bool ConditionGoalsAreMet(int year)
@@ -505,6 +528,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
 
                     context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
+                    var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Section, treatment, cost, context.SimulationRunner.Simulation.Id);
+                    Send(messageBuilder);
                     return true;
                 });
 
@@ -600,13 +625,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private void OnFailure(FailureEventArgs e) => Failure?.Invoke(this, e);
-
-        private void OnInformation(InformationEventArgs e) => Information?.Invoke(this, e);
-
-        private void OnWarning(WarningEventArgs e) => Warning?.Invoke(this, e);
-
-        private void OnProgress(ProgressEventArgs e) => Progress?.Invoke(this, e);
+        private void OnLog(SimulationLogEventArgs e) => SimulationLog?.Invoke(this, e);
 
         private void RecordStatusOfConditionGoals(SimulationYearDetail detail)
         {

@@ -583,7 +583,7 @@ where simulationid = {simulationId}
                                 treatment.ShadowForSameTreatment = reader.GetInt32(3);
 
                                 var budgetField = reader.GetNullableString(4);
-                                var budgetNames = budgetField.Split(',');
+                                var budgetNames = budgetField?.Split(',') ?? Array.Empty<string>();
                                 foreach (var budgetName in budgetNames)
                                 {
                                     if (budgetPerName.TryGetValue(budgetName, out var budget))
@@ -639,11 +639,13 @@ where simulationid = {simulationId}
 
                         foreach (var treatmentId in expressionsPerTreatmentId.Keys)
                         {
-                            var treatment = treatmentPerId[treatmentId];
-                            var feasibility = treatment.AddFeasibilityCriterion();
-                            feasibility.Expression = expressionsPerTreatmentId[treatmentId].Any()
-                                ? $"({string.Join(") OR (", expressionsPerTreatmentId[treatmentId])})"
-                                : string.Empty;
+                            if (treatmentPerId.TryGetValue(treatmentId, out var treatment))
+                            {
+                                var feasibility = treatment.AddFeasibilityCriterion();
+                                feasibility.Expression = expressionsPerTreatmentId[treatmentId].Any()
+                                    ? $"({string.Join(") OR (", expressionsPerTreatmentId[treatmentId])})"
+                                    : string.Empty;
+                            }
                         }
                     }
 

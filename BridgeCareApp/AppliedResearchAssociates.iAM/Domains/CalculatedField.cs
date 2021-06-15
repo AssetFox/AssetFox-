@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
@@ -10,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.Domains
     {
         internal CalculatedField(string name, Explorer explorer) : base(name) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
+        public string ShortDescription => Name;
+
         public bool IsDecreasingWithDeterioration { get; set; }
 
         public ValidatorBag Subvalidators => new ValidatorBag { ValueSources };
@@ -17,6 +20,18 @@ namespace AppliedResearchAssociates.iAM.Domains
         public IReadOnlyCollection<CalculatedFieldValueSource> ValueSources => _ValueSources;
 
         public CalculatedFieldValueSource AddValueSource() => _ValueSources.GetAdd(new CalculatedFieldValueSource(Explorer));
+
+        private double Compute(Equation equation, SectionContext sectionContext)
+        {
+            double r = equation.Compute(sectionContext);
+            if (double.IsNaN(r) || double.IsInfinity(r))
+            {
+                var errorMessage = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, equation, Name, r);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, sectionContext.SimulationRunner.Simulation.Id);
+                sectionContext.SimulationRunner.Send(messageBuilder);
+            }
+            return r;
+        }
 
         internal double Calculate(SectionContext scope)
         {
@@ -43,10 +58,10 @@ namespace AppliedResearchAssociates.iAM.Domains
 
             if (operativeSources.Count == 1)
             {
-                return operativeSources[0].Equation.Compute(scope);
+                return Compute(operativeSources[0].Equation, scope);
             }
 
-            var potentialValues = operativeSources.Select(source => source.Equation.Compute(scope)).ToArray();
+            var potentialValues = operativeSources.Select(source => Compute(source.Equation, scope)).ToArray();
 
             return IsDecreasingWithDeterioration ? potentialValues.Min() : potentialValues.Max();
         }

@@ -776,11 +776,17 @@ export default class EquationEditorDialog extends Vue {
   onSubmitEditedDataPointValue(submit: boolean) {
     if (submit) {
       let dataPoints = this.selectedTab === 1 ? clone(this.piecewiseGridData) : clone(this.timeInRatingGridData);
-      dataPoints = update(
+      var timeValue = parseFloat(this.editedDataPoint.timeValue.toString());
+      var conditionValue = parseFloat(this.editedDataPoint.conditionValue.toString());
+      if (!isNaN(timeValue) && !isNaN(conditionValue)) {
+        this.editedDataPoint.timeValue = timeValue;
+        this.editedDataPoint.conditionValue = conditionValue;
+        dataPoints = update(
           findIndex(propEq('id', this.editedDataPoint.id), dataPoints), this.editedDataPoint, dataPoints
-      );
+        );
 
-      this.syncDataGridLists(dataPoints);
+        this.syncDataGridLists(dataPoints);
+      }
     }
 
     this.editedDataPoint = clone(emptyTimeConditionDataPoint);

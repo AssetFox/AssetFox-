@@ -72,18 +72,25 @@
             <v-btn @click="onShowEditBudgetsDialog" class="ara-blue-bg white--text">
               Edit Budgets
             </v-btn>
-            <v-btn :disabled="selectedBudgetLibrary.budgets.length === 0" @click="onAddBudgetYear"
+            <v-btn :disabled="selectedBudgetLibrary.budgets.length === 0"
+                   @click="onAddBudgetYear"
                    class="ara-blue-bg white--text">
-              Add Year
+              {{ addYearLabel }}
             </v-btn>
+            <v-btn :disabled="selectedBudgetLibrary.budgets.length === 0 || budgetYearsGridData.length === 0"
+                  @click="onRemoveLatestBudgetYear"
+                   class="ara-orange-bg white--text">
+              {{ deleteYearLabel }}
+            </v-btn>            
             <v-btn :disabled="selectedBudgetLibrary.budgets.length === 0"
                    @click="showSetRangeForAddingBudgetYearsDialog = true"
                    class="ara-blue-bg white--text">
-              Add Years by Range
+              Add Year Range
             </v-btn>
-            <v-btn :disabled="selectedGridRows.length === 0" @click="onRemoveBudgetYears"
+            <v-btn :disabled="selectedBudgetLibrary.budgets.length === 0 || budgetYearsGridData.length === 0"
+                   @click="showSetRangeForDeletingBudgetYearsDialog = true"
                    class="ara-orange-bg white--text">
-              Delete Budget Year(s)
+              Delete Year Range
             </v-btn>
           </v-layout>
         </v-flex>
@@ -92,12 +99,9 @@
         <v-flex xs8>
           <v-card>
             <v-data-table :headers="budgetYearsGridHeaders" :items="budgetYearsGridData"
-                          class="elevation-1 v-table__overflow" item-key="year" select-all
+                          class="elevation-1 v-table__overflow" item-key="year"
                           v-model="selectedGridRows">
               <template slot="items" slot-scope="props">
-                <td>
-                  <v-checkbox hide-details primary v-model="props.selected"></v-checkbox>
-                </td>
                 <td v-for="header in budgetYearsGridHeaders">
                   <div v-if="header.value !== 'year'">
                     <v-edit-dialog :return-value.sync="props.item[header.value]"
@@ -171,7 +175,13 @@
                                @submit="onUpsertInvestment"/>
 
     <SetRangeForAddingBudgetYearsDialog :showDialog="showSetRangeForAddingBudgetYearsDialog"
-                                        @submit="onSubmitBudgetYearRange"/>
+                                        :startYear="getNextYear()"
+                                        @submit="onSubmitAddBudgetYearRange"/>
+
+    <SetRangeForDeletingBudgetYearsDialog :showDialog="showSetRangeForDeletingBudgetYearsDialog"
+                                        :endYear="getLatestYear()"
+                                        :maxRange="yearsInAnalysisPeriod"
+                                        @submit="onSubmitRemoveBudgetYearRange"/>
 
     <EditBudgetsDialog :dialogData="editBudgetsDialogData" @submit="onSubmitEditBudgetsDialogResult"/>
   </v-layout>
@@ -183,6 +193,7 @@ import {Watch} from 'vue-property-decorator';
 import Component from 'vue-class-component';
 import {Action, State} from 'vuex-class';
 import SetRangeForAddingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForAddingBudgetYearsDialog.vue';
+import SetRangeForDeletingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForDeletingBudgetYearsDialog.vue';
 import EditBudgetsDialog from './investment-editor-dialogs/EditBudgetsDialog.vue';
 import {
   Budget,
@@ -219,6 +230,7 @@ import CreateBudgetLibraryDialog
   components: {
     CreateBudgetLibraryDialog,
     SetRangeForAddingBudgetYearsDialog,
+    SetRangeForDeletingBudgetYearsDialog,
     EditBudgetsDialog,
     ConfirmDeleteAlert: Alert
   }
@@ -250,9 +262,17 @@ export default class InvestmentEditor extends Vue {
   createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
   editBudgetsDialogData: EditBudgetsDialogData = clone(emptyEditBudgetsDialogData);
   showSetRangeForAddingBudgetYearsDialog: boolean = false;
+  showSetRangeForDeletingBudgetYearsDialog: boolean = false;
   confirmDeleteAlertData: AlertData = clone(emptyAlertData);
   uuidNIL: string = getBlankGuid();
   rules: InputValidationRules = clone(rules);
+
+  get addYearLabel() { return 'Add Year (' + this.getNextYear() + ')'; }
+  get deleteYearLabel() {
+    const latestYear = this.getLatestYear();
+    return latestYear ? 'Delete Year (' + latestYear + ')' : 'Delete Year';
+  }
+  get yearsInAnalysisPeriod() { return this.investmentPlan.numberOfYearsInAnalysisPeriod; }
 
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
@@ -470,9 +490,20 @@ export default class InvestmentEditor extends Vue {
     };
   }
 
-  onAddBudgetYear() {
+  getLatestYear(): number {
     const latestYear: number = getLastPropertyValue('year', this.budgetYearsGridData);
+    return latestYear;
+  }
+
+  getNextYear(): number {
+    const latestYear: number = this.getLatestYear();
     const nextYear = hasValue(latestYear) ? latestYear + 1 : moment().year();
+    return nextYear;  
+  }
+
+ 
+  onAddBudgetYear() {
+    const nextYear: number = this.getNextYear();
 
     const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
 
@@ -489,11 +520,26 @@ export default class InvestmentEditor extends Vue {
     this.selectedBudgetLibrary = clone(budgetLibrary);
   }
 
-  onSubmitBudgetYearRange(range: number) {
+
+  onRemoveLatestBudgetYear() {
+    const latestYear: number = this.getLatestYear();
+
+    const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
+
+    budgetLibrary.budgets.forEach((budget: Budget) => {
+      budget.budgetAmounts = budget.budgetAmounts.filter((budgetAmount: BudgetAmount) =>
+          !(budgetAmount.year == latestYear));
+    });
+
+    this.selectedBudgetLibrary = clone(budgetLibrary);
+  }
+
+
+  onSubmitAddBudgetYearRange(range: number) {
     this.showSetRangeForAddingBudgetYearsDialog = false;
 
     if (range > 0) {
-      const latestYear: number = getLastPropertyValue('year', this.budgetYearsGridData);
+      const latestYear: number = this.getLatestYear();
       const startYear: number = hasValue(latestYear) ? latestYear + 1 : moment().year();
       const endYear = moment().year(startYear).add(range, 'years').year();
 
@@ -514,15 +560,23 @@ export default class InvestmentEditor extends Vue {
     }
   }
 
-  onRemoveBudgetYears() {
-    const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
+  onSubmitRemoveBudgetYearRange(range: number) {
+    this.showSetRangeForDeletingBudgetYearsDialog = false;
 
-    budgetLibrary.budgets.forEach((budget: Budget) => {
-      budget.budgetAmounts = budget.budgetAmounts.filter((budgetAmount: BudgetAmount) =>
-          !contains(budgetAmount.year, this.selectedBudgetYears));
-    });
+    if (range > 0)
+    {
+      const endYear: number = this.getLatestYear();
+      const startYear: number = endYear - range + 1;
 
-    this.selectedBudgetLibrary = clone(budgetLibrary);
+      const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
+
+      budgetLibrary.budgets.forEach((budget: Budget) => {
+        budget.budgetAmounts = budget.budgetAmounts.filter((budgetAmount: BudgetAmount) =>
+            !(budgetAmount.year >= startYear && budgetAmount.year <= endYear));
+      });
+
+      this.selectedBudgetLibrary = clone(budgetLibrary);
+    }
   }
 
   onShowEditBudgetsDialog() {

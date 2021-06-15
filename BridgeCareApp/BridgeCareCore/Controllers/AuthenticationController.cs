@@ -44,9 +44,8 @@ namespace BridgeCareCore.Controllers
                 var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(response);
                 return Ok(userInfo);
             }
-            catch (Exception e)
+            catch 
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }
@@ -124,7 +123,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }
@@ -170,7 +168,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
 
@@ -222,7 +219,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }
@@ -245,7 +241,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Authentication error::{e.Message}");
                 throw;
             }
         }

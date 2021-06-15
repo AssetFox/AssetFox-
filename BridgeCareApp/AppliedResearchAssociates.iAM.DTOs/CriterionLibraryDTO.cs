@@ -9,5 +9,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string Description { get; set; }
 
         public string MergedCriteriaExpression { get; set; }
+
+        public bool IsSingleUse { get; set; }
     }
 }

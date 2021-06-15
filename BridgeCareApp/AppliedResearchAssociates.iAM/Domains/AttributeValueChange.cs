@@ -38,9 +38,17 @@ namespace AppliedResearchAssociates.iAM.Domains
             switch (Attribute)
             {
             case NumberAttribute _:
-                var oldNumber = scope.GetNumber(Attribute.Name);
-                var newNumber = ChangeNumber(oldNumber);
-                return new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newNumber), newNumber);
+                EnsureCompiled();
+                if (NumberChanger is null)
+                {
+                    return null;
+                }
+                else
+                {
+                    var oldNumber = scope.GetNumber(Attribute.Name);
+                    var newNumber = NumberChanger.Invoke(oldNumber);
+                    return new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newNumber), newNumber);
+                }
 
             case TextAttribute _:
                 var newText = Expression;
@@ -122,13 +130,6 @@ namespace AppliedResearchAssociates.iAM.Domains
         private Func<double, double> NumberChanger;
 
         private double Operand;
-
-        private double ChangeNumber(double value)
-        {
-            EnsureCompiled();
-            var newValue = NumberChanger?.Invoke(value) ?? value;
-            return newValue;
-        }
 
         #region Number-changing operations
 

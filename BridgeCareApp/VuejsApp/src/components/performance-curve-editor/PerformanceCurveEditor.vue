@@ -441,9 +441,14 @@ export default class PerformanceCurveEditor extends Vue {
     if (!isNil(this.selectedPerformanceCurve)) {
       this.hasSelectedPerformanceCurve = true;
 
+      var fromScenario = false;
+      if(this.selectedScenarioId != this.uuidNIL){
+        fromScenario = true;
+      }
       this.criterionLibraryEditorDialogData = {
         showDialog: true,
-        libraryId: this.selectedPerformanceCurve.criterionLibrary.id
+        libraryId: this.selectedPerformanceCurve.criterionLibrary.id,
+        isCallFromScenario: fromScenario
       };
     }
   }

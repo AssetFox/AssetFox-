@@ -44,5 +44,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
             return results;
         }
+
+        public string ShortDescription => $"{Name} {Minimum}-{Maximum}";
     }
 }

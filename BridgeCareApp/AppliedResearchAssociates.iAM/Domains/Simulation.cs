@@ -26,6 +26,8 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public string Name { get; set; }
 
+        public DateTime LastRun { get; set; }
+
         public Network Network { get; }
 
         public int NumberOfYearsOfTreatmentOutlook { get; set; } = 100;
@@ -84,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.Domains
             {
                 results.Add(ValidationStatus.Error, "Multiple projects are committed to the same section in the same year.", this, nameof(CommittedProjects));
             }
-            else if (InvestmentPlan.GetAllValidationResults().All(result => result.Status != ValidationStatus.Error))
+            else if (InvestmentPlan.GetAllValidationResults(new List<string>()).All(result => result.Status != ValidationStatus.Error))
             {
                 try
                 {
@@ -137,5 +139,7 @@ namespace AppliedResearchAssociates.iAM.Domains
         private readonly List<PerformanceCurve> _PerformanceCurves = new List<PerformanceCurve>();
 
         private readonly List<SelectableTreatment> _Treatments = new List<SelectableTreatment>();
+
+        public string ShortDescription => Name;
     }
 }

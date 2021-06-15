@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 
@@ -20,6 +25,8 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
         }
+
+        private readonly HashSet<string> LoggedMessages = new HashSet<string>();
 
         public Task CreateAndRunPermitted(Guid networkId, Guid simulationId)
         {
@@ -61,14 +68,6 @@ namespace BridgeCareCore.Services
 
             var runner = new SimulationRunner(simulation);
 
-            runner.Failure += (sender, eventArgs) =>
-            {
-                simulationAnalysisDetail.Status = eventArgs.Message;
-                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
-                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-            };
-
             runner.Progress += (sender, eventArgs) =>
             {
                 switch (eventArgs.ProgressStatus)
@@ -80,7 +79,7 @@ namespace BridgeCareCore.Services
                     _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
                     break;
                 case ProgressStatus.Running:
-                    simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete, 2)*100}%";
+                    simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete)}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                     _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
@@ -95,9 +94,28 @@ namespace BridgeCareCore.Services
                 }
                 _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             };
-            runner.Warning += (sender, eventArgs) =>
+
+            runner.SimulationLog += (sender, eventArgs) =>
             {
-                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.Message, simulationId);
+                var message = eventArgs.MessageBuilder;
+                if (LoggedMessages.Add(message.Message))
+                {
+                    var dto = SimulationLogMapper.ToDTO(message);
+                    _unitOfWork.SimulationLogRepo.CreateLog(dto);
+                }
+                switch (message.Status)
+                {
+                case SimulationLogStatus.Warning:
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
+                    break;
+                case SimulationLogStatus.Error:
+                case SimulationLogStatus.Fatal:
+                    simulationAnalysisDetail.Status = message.Message;
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                    break;
+                }
             };
 
             // resetting the report generation status.
@@ -105,9 +123,31 @@ namespace BridgeCareCore.Services
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
-            runner.Run();
+            RunValidation(runner);
+            runner.Run(false);
 
             return Task.CompletedTask;
+        }
+
+        private void RunValidation(SimulationRunner runner)
+        {
+            var validationResults = runner.Simulation.GetAllValidationResults(Enumerable.Empty<string>());
+            _unitOfWork.SimulationLogRepo.ClearLog(runner.Simulation.Id);
+            var simulationLogDtos = new List<SimulationLogDTO>();
+            foreach (var result in validationResults)
+            {
+                var breadcrumb = string.Join(".", result.Target.ValidationPath);
+                var simulationLogDto = new SimulationLogDTO
+                {
+                    Message = $"{result.Message} {breadcrumb}",
+                    Status = (int)result.Status,
+                    SimulationId = runner.Simulation.Id,
+                    Subject = (int)SimulationLogSubject.Validation,
+                };
+                simulationLogDtos.Add(simulationLogDto);
+            }
+            _unitOfWork.SimulationLogRepo.CreateLogs(simulationLogDtos);
+            runner.HandleValidationFailures(validationResults);
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationAnalysisDetailDTO simulationAnalysisDetail, DateTime? stopDateTime)

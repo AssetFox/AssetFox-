@@ -15,5 +15,22 @@ namespace BridgeCareCore.Services.SummaryReport.Models
 
         public static ExcelRowModel Empty
             => WithEntries();
+
+        public static ExcelRowModel WithCells(List<RelativeExcelRangeModel> cells)
+            => new ExcelRowModel
+            {
+                Values = cells,
+            };
+
+        public static ExcelRowModel IndentedHeader(int indentColumns, string headerText, int headerWidth, int headerHeight)
+        {
+            var values = new List<RelativeExcelRangeModel>();
+            for (int i=0; i<indentColumns; i++)
+            {
+                values.Add(RelativeExcelRangeModels.Empty());
+            }
+            values.Add(RelativeExcelRangeModels.Text(headerText, headerWidth, headerHeight));
+            return WithCells(values);
+        }
     }
 }

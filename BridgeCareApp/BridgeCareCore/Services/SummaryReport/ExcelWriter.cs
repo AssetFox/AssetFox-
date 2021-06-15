@@ -30,5 +30,14 @@ namespace BridgeCareCore.Services.SummaryReport
             cells.Value = model.Value;
             return Unit.Default;
         }
+
+        public Unit Visit(ExcelNothingModel nothing, ExcelRange cells)
+            => Unit.Default;
+
+        public Unit Visit(ExcelTextModel text, ExcelRange cells)
+        {
+            cells.Value = text.Text;
+            return Unit.Default;
+        }
     }
 }

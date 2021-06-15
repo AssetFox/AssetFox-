@@ -19,7 +19,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 BridgeCountPlusSix,
                 ExcelIntegerValueModels.WithValue(103)
                 );
-            for (var i = 2; i < numberOfYears; i++)
+            for (var i = 1; i < numberOfYears; i++)
             {
                 var function = ExcelRangeFunctions.Plus(
                     ExcelRangeFunctions.Left,

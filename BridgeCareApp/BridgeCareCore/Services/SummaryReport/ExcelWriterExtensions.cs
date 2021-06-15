@@ -27,7 +27,11 @@ namespace BridgeCareCore.Services.SummaryReport
             int width,
             int height)
         {
-            var range = worksheet.Cells[rowIndex, columnIndex, rowIndex+width-1, columnIndex+height-1];
+            var range = worksheet.Cells[rowIndex, columnIndex, rowIndex+height-1, columnIndex+width-1];
+            if (width > 1 || height > 1)
+            {
+                range.Merge = true;
+            }
             writer.Write(model, range);
         }
 
@@ -51,9 +55,9 @@ namespace BridgeCareCore.Services.SummaryReport
         public static void AddWorksheet(this ExcelWriter writer, ExcelWorkbook workbook, RowBasedExcelWorksheetModel worksheetModel)
         {
             var worksheet = workbook.Worksheets.Add(worksheetModel.TabName);
-            for (int zeroBasedIndex = 0; zeroBasedIndex < worksheetModel.Rows.Count; zeroBasedIndex++)
+            for (int i = 0; i < worksheetModel.Rows.Count; i++)
             {
-                writer.WriteRow(worksheetModel.Rows[zeroBasedIndex], worksheet, 1 + zeroBasedIndex);
+                writer.WriteRow(worksheetModel.Rows[i], worksheet, 1 + i);
             }
         }
     }

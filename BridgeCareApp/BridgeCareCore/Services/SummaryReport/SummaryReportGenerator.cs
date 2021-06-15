@@ -174,7 +174,7 @@ namespace BridgeCareCore.Services.SummaryReport
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
             var writer = new ExcelWriter();
-            var districtTotalsModel = DistrictTotalsModels.DistrictTotals;
+            var districtTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
             writer.AddWorksheet(excelPackage.Workbook, districtTotalsModel);
             reportDetailDto.Status = $"Creating Graph TABs";
             UpdateSimulationAnalysisDetail(reportDetailDto);

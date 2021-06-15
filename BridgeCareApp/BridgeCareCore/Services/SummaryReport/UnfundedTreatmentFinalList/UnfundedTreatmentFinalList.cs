@@ -69,12 +69,16 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
 
                     if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section
                     {
-                        var filteredOptions = section.TreatmentOptions.
+                        var treatmentOptions = section.TreatmentOptions.
                             Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
-                        filteredOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
+                        treatmentOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
 
-                        var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, filteredOptions.FirstOrDefault());
-                        treatmentsPerSection.Add(facilityId,  newTuple);
+                        var chosenTreatment = treatmentOptions.FirstOrDefault();
+                        if (chosenTreatment != null)
+                        {
+                            var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
+                            treatmentsPerSection.Add(facilityId, newTuple);
+                        }
                     }
                 }
             }

@@ -52,18 +52,22 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
                 {
                     var facilityId = int.Parse(section.FacilityName);
 
-                    var filteredOptions = section.TreatmentOptions.
+                    var treatmentOptions = section.TreatmentOptions.
                         Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
-                    filteredOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
+                    treatmentOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
 
-                    var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, filteredOptions.FirstOrDefault());
-                    if (!treatmentsPerSection.ContainsKey(facilityId))
-                    {
-                        treatmentsPerSection.Add(facilityId, new List<Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>> { newTuple });
-                    }
-                    else
-                    {
-                        treatmentsPerSection[facilityId].Add(newTuple);
+                    var chosenTreatment = treatmentOptions.FirstOrDefault();
+                    if (chosenTreatment != null)
+                    { 
+                        var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
+                        if (!treatmentsPerSection.ContainsKey(facilityId))
+                        {
+                            treatmentsPerSection.Add(facilityId, new List<Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>> { newTuple });
+                        }
+                        else
+                        {
+                            treatmentsPerSection[facilityId].Add(newTuple);
+                        }
                     }
                 }
             }

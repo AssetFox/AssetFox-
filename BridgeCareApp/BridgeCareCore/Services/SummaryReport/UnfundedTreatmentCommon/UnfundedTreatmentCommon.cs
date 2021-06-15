@@ -67,11 +67,11 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
             if (familyId < 11)
             {
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, ++columnNo].Value = section.ValuePerNumericAttribute["DECK_SEEDED"];
+                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["DECK_SEEDED"];
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, ++columnNo].Value = section.ValuePerNumericAttribute["SUP_SEEDED"];
+                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUP_SEEDED"];
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, ++columnNo].Value = section.ValuePerNumericAttribute["SUB_SEEDED"];
+                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUB_SEEDED"];
 
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = "N"; // CULV_SEEDED     section.ValuePerNumericAttribute["CULV_SEEDED"];
@@ -89,26 +89,25 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
             else
             {
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, ++columnNo].Value = "N"; // DECK_SEEDED
+                worksheet.Cells[row, columnNo++].Value = "N"; // DECK_SEEDED
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, ++columnNo].Value = "N"; // SUP_SEEDED
+                worksheet.Cells[row, columnNo++].Value = "N"; // SUP_SEEDED
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, ++columnNo].Value = "N"; // SUB_SEEDED
+                worksheet.Cells[row, columnNo++].Value = "N"; // SUB_SEEDED
 
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["CULV_SEEDED"];
 
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
-                worksheet.Cells[row, columnNo + 2].Value = "N"; // DECK_DURATION_N
+                worksheet.Cells[row, columnNo++].Value = "N"; // DECK_DURATION_N
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
-                worksheet.Cells[row, columnNo + 3].Value = "N"; // SUP_DURATION_N
+                worksheet.Cells[row, columnNo++].Value = "N"; // SUP_DURATION_N
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
-                worksheet.Cells[row, columnNo + 4].Value = "N"; // SUB_DURATION_N
+                worksheet.Cells[row, columnNo++].Value = "N"; // SUB_DURATION_N
 
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["CULV_DURATION_N"];
             }
-
 
             worksheet.Cells[row, columnNo++].Value = treatment?.TreatmentName;
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";

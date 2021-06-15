@@ -12,8 +12,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent
         BPN3,
         BPN4,
         BPNL,
-        BPNOther,
-        BPNTotal
+        BPNOther
     }
     public static class BPNNamesExtensions
     {
@@ -25,7 +24,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent
             BPNName.BPN4 => "BPN4",
             BPNName.BPNL => "BPNL",
             BPNName.BPNOther => "BPN Other (BPN D, BPN H,BPN N, BPN T)",
-            BPNName.BPNTotal => "Total BPN Cost",
             _ => name.ToString(),
         };
     }

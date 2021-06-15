@@ -185,12 +185,43 @@ Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear)
                 var rowIndex = firstContentRow + (int)bpnName;
                 worksheet.Cells[rowIndex, 1].Value = bpnName.ToSpreadsheetString();
             }
-            for (var columnIndex = startColumnIndex; columnIndex < startColumnIndex + numberOfYears; columnIndex++)
+            for (var i = 0; i < simulationYears.Count; i++)
             {
-
+                decimal nonOtherBpncost = 0;
+                for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
+                {
+                    var cost = GetCostForBPN(bpnCostPerYear, simulationYears[i], bpnName);
+                    decimal BpnCostPerRow;
+                    if (bpnName != BPNName.BPNOther)
+                    {
+                        BpnCostPerRow = cost;
+                        nonOtherBpncost += cost;
+                    }
+                    else
+                    {
+                        BpnCostPerRow = cost - nonOtherBpncost;
+                    }
+                    var rowIndex = firstContentRow + (int)bpnName;
+                    worksheet.Cells[rowIndex, startColumnIndex + i].Value = BpnCostPerRow;
+                }
             }
             currentCell.Row += bpnNames.Count();
             return currentCell.Row;
+        }
+
+        private decimal GetCostForBPN(Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear, int year, BPNName bpnValue)
+        {
+            decimal cost = 0;
+            switch (bpnValue)
+            {
+            case BPNName.BPNOther:
+                cost = bpnCostPerYear[year].Sum(_ => _.Value);
+                break;
+            default:
+                cost = bpnCostPerYear[year][bpnValue.ToSpreadsheetString()];
+                break;
+            }
+            return cost;
         }
 
         private void FillRemainingBudgetSection(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,

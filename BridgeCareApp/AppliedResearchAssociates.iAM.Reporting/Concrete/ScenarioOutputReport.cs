@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public ScenarioOutputReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexEntity results)
         {
-            _unitofwork = uow;
+            _unitofwork = unitOfWork;
             ReportTypeName = name;
             ID = Guid.NewGuid();
             Errors = new List<string>();

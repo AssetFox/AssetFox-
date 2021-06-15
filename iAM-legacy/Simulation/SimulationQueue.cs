@@ -155,28 +155,28 @@ namespace Simulation
             var runner = new SimulationRunner(newSimulation);
             runner.SimulationLog += (sender, eventArgs) =>
             {
+                static void handleLog(string prefix, SimulationLogMessageBuilder messageBuilder)
+                {
+                    var message = $"{prefix}{messageBuilder.Message}";
+                    log.Info(message);
+                    var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, message);
+                    Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+                }
+
                 var messageBuilder = eventArgs.MessageBuilder;
                 switch (messageBuilder.Status)
                 {
                     case AppliedResearchAssociates.iAM.SimulationLogStatus.Error:
-                        log.Info($"Error:  {messageBuilder.Message}");
-                        var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"Error: {messageBuilder.Message}");
-                        Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+                        handleLog("Error: ", messageBuilder);
                         break;
                     case AppliedResearchAssociates.iAM.SimulationLogStatus.Fatal:
-                        log.Info($"Failed:  {messageBuilder.Message}");
-                        var updateStatus2 = Builders<SimulationModel>.Update.Set(s => s.status, $"Failed: {messageBuilder.Message}");
-                        Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus2);
+                        handleLog("Failed: ", messageBuilder);
                         break;
                     case AppliedResearchAssociates.iAM.SimulationLogStatus.Information:
-                            log.Info(messageBuilder.Message);
-                            var updateStatus3 = Builders<SimulationModel>.Update.Set(s => s.status, $"{messageBuilder.Message}");
-                            Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus3);
-                            break;
+                        handleLog("", messageBuilder);
+                        break;
                     case AppliedResearchAssociates.iAM.SimulationLogStatus.Warning:
-                        log.Info(messageBuilder.Message);
-                        var updateStatus4 = Builders<SimulationModel>.Update.Set(s => s.status, $"{messageBuilder.Message}");
-                        Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus4);
+                        handleLog("Warning: ", messageBuilder);
                         break;
                 };
             };

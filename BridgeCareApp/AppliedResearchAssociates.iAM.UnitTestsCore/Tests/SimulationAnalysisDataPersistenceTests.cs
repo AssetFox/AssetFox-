@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
@@ -423,9 +424,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
                 var runner = new SimulationRunner(_testHelper.StandAloneSimulation);
                 var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) =>
+                runner.SimulationLog += (sender, eventArgs) =>
                 {
-                    if (eventArgs.Message == "Simulation complete.")
+                    if (eventArgs.MessageBuilder.Message == "Simulation complete.")
                     {
                         simulationIsRunning = false;
                     }
@@ -783,15 +784,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 simulation.ClearResults();
                 var runner = new SimulationRunner(simulation);
                 var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) =>
+                runner.SimulationLog += (sender, eventArgs) =>
                 {
-                    if (eventArgs.Message == "Simulation complete.")
+                    if (eventArgs.MessageBuilder.Message == "Simulation complete.")
                     {
                         simulationIsRunning = false;
                     }
                 };
                 runner.Run();
-
                 while (simulationIsRunning)
                 {
                     testOutputHelper.WriteLine("Simulation is running...");
@@ -800,9 +800,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 network.Simulations.First().ClearResults();
                 var dataSourceRunner = new SimulationRunner(network.Simulations.First());
                 var dataSourceSimulationIsRunning = true;
-                dataSourceRunner.Information += (sender, eventArgs) =>
+                dataSourceRunner.SimulationLog += (sender, eventArgs) =>
                 {
-                    if (eventArgs.Message == "Simulation complete.")
+                    if (eventArgs.MessageBuilder.Message == "Simulation complete.")
                     {
                         dataSourceSimulationIsRunning = false;
                     }
@@ -859,9 +859,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 simulation.ClearResults();
                 var runner = new SimulationRunner(simulation);
                 var simulationIsRunning = true;
-                runner.Information += (sender, eventArgs) =>
+                runner.SimulationLog += (sender, eventArgs) =>
                 {
-                    if (eventArgs.Message == "Simulation complete.")
+                    if (eventArgs.MessageBuilder.Message == "Simulation complete.")
                     {
                         simulationIsRunning = false;
                     }
@@ -876,9 +876,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 dataSourceSimulation.ClearResults();
                 var dataSourceRunner = new SimulationRunner(dataSourceSimulation);
                 var dataSourceSimulationIsRunning = true;
-                dataSourceRunner.Information += (sender, eventArgs) =>
+                runner.SimulationLog += (sender, eventArgs) =>
                 {
-                    if (eventArgs.Message == "Simulation complete.")
+                    if (eventArgs.MessageBuilder.Message == "Simulation complete.")
                     {
                         dataSourceSimulationIsRunning = false;
                     }

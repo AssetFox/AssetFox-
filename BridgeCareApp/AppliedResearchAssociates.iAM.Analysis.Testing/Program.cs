@@ -96,9 +96,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
                     var runner = new SimulationRunner(simulation);
                     runner.Progress += (sender, eventArgs) => logToConsoleAndFile(eventArgs.ToString());
-                    runner.Information += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
-                    runner.Warning += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
-                    runner.Failure += (sender, eventArgs) => logToConsoleAndFile(eventArgs.Message);
+                    runner.SimulationLog += (sender, eventArgs) => logToConsoleAndFile(eventArgs.MessageBuilder.Message);
 
                     var timer = Stopwatch.StartNew();
 

@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public string ShortDescription => nameof(TreatmentConsequence);
         
-        internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope)
+        internal virtual IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope, Treatment treatment)
         {
             var changeApplicator = Change.GetApplicator(scope);
             return changeApplicator is null

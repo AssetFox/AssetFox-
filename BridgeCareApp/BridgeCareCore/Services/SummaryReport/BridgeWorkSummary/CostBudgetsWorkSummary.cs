@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
@@ -25,7 +26,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, List<int> simulationYears, SortedSet<string> treatments, Dictionary<string, Budget> yearlyBudgetAmount)
+Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, List<int> simulationYears, SortedSet<string> treatments, Dictionary<string, Budget> yearlyBudgetAmount,
+Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear)
         {
             var committedTotalRow = FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
 
@@ -36,7 +38,7 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             var bridgeTotalRow = bridgeTotalRange.FooterRange.End.Value;
             var map = WorkTypeMap.Map;
             var workTypeTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, map, bridgeTotalRange.ContentRange, yearlyBudgetAmount);
-            var bpnTotalRow = FillBpnSection(worksheet, currentCell, simulationYears);
+            var bpnTotalRow = FillBpnSection(worksheet, currentCell, simulationYears, bpnCostPerYear);
             FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, bpnTotalRow, committedTotalRow);
         }
 
@@ -167,10 +169,27 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             return 666;
         }
 
-        private int FillBpnSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
+        private int FillBpnSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+            Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Cost Per BPN", "BPN");
+            var initialRow = currentCell.Row;
             currentCell.Row ++;
+            var bpnNames = EnumExtensions.GetValues<BPNName>();
+            var numberOfYears = simulationYears.Count;
+
+            var startColumnIndex = 3;
+            var firstContentRow = currentCell.Row;
+            for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
+            {
+                var rowIndex = firstContentRow + (int)bpnName;
+                worksheet.Cells[rowIndex, 1].Value = bpnName.ToSpreadsheetString();
+            }
+            for (var columnIndex = startColumnIndex; columnIndex < startColumnIndex + numberOfYears; columnIndex++)
+            {
+
+            }
+            currentCell.Row += bpnNames.Count();
             return currentCell.Row;
         }
 

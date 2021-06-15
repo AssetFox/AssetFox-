@@ -66,10 +66,6 @@ namespace BridgeCareCore.Services.SummaryReport
             var worksheet = workbook.Worksheets.Add(worksheetModel.TabName);
             for (int i = 0; i < worksheetModel.Rows.Count; i++)
             {
-                if (i == 4)
-                {
-                    int x = 666;
-                }
                 writer.WriteRow(worksheetModel.Rows[i], worksheet, 1 + i);
             }
         }

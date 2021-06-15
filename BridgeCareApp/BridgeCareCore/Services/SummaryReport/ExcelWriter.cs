@@ -54,5 +54,14 @@ namespace BridgeCareCore.Services.SummaryReport
             }
             return Unit.Default;
         }
+
+        public Unit Visit(ExcelBorderModel model, ExcelRange cells)
+        {
+            cells.Style.Border.Top.Style = model.BorderStyle;
+            cells.Style.Border.Right.Style = model.BorderStyle;
+            cells.Style.Border.Bottom.Style = model.BorderStyle;
+            cells.Style.Border.Left.Style = model.BorderStyle;
+            return Unit.Default;
+        }
     }
 }

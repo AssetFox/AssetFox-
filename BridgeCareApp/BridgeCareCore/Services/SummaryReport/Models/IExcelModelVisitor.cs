@@ -15,5 +15,6 @@ namespace BridgeCareCore.Services.SummaryReport.Models
         TOutput Visit(ExcelIntegerValueModel model, THelper helper);
         TOutput Visit(ExcelNothingModel nothing, THelper helper);
         TOutput Visit(StackedExcelModel model, THelper helper);
+        TOutput Visit(ExcelBorderModel model, THelper helper);
     }
 }

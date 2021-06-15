@@ -40,13 +40,14 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             {
                 values.Add(ExcelTextModels.Text(header));
             }
-            return ExcelRowModels.WithEntries(values, ExcelBoldModels.Bold);
+            return ExcelRowModels.WithEntries(values, ExcelBoldModels.Bold, ExcelBorderModels.Thin);
         }
 
         public static ExcelRowModel FirstYearRow(SimulationOutput output)
         {
             var year = output.Years.FirstOrDefault()?.Year ?? 0;
-            return ExcelRowModels.WithEntries(ExcelIntegerValueModels.WithValue(year));
+            return ExcelRowModels.WithEntries(
+                ExcelIntegerValueModels.WithValue(year));
         }
     }
 }

@@ -29,7 +29,7 @@ namespace BridgeCareCore.Services.SummaryReport.Models
             {
                 values.Add(RelativeExcelRangeModels.Empty());
             }
-            values.Add(RelativeExcelRangeModels.Text(headerText, headerWidth, headerHeight));
+            values.Add(RelativeExcelRangeModels.BoldText(headerText, headerWidth, headerHeight));
             return WithCells(values);
         }
     }

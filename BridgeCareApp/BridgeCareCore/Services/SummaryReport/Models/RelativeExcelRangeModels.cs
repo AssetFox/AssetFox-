@@ -27,5 +27,12 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Content = ExcelTextModels.Text(text),
                 Size = new ExcelRangeSize(width, height),
             };
+
+        public static RelativeExcelRangeModel BoldText(string text, int width = 1, int height = 1)
+            => new RelativeExcelRangeModel
+            {
+                Content = StackedExcelModels.BoldText(text),
+                Size = new ExcelRangeSize(width, height),
+            };
     }
 }

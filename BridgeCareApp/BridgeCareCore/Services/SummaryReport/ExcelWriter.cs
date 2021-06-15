@@ -39,5 +39,20 @@ namespace BridgeCareCore.Services.SummaryReport
             cells.Value = text.Text;
             return Unit.Default;
         }
+
+        public Unit Visit(ExcelBoldModel bold, ExcelRange cells)
+        {
+            cells.Style.Font.Bold = bold.Bold;
+            return Unit.Default;
+        }
+
+        public Unit Visit(StackedExcelModel model, ExcelRange cells)
+        {
+            foreach (var child in model.Content)
+            {
+                child.Accept(this, cells);
+            }
+            return Unit.Default;
+        }
     }
 }

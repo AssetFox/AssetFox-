@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Services.SummaryReport.Models;
 
 namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
@@ -11,8 +12,6 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         public static ExcelFormulaModel BridgeCountPlusSix
             => ExcelFormulaModels.Text(@"COUNT('Bridge Data'!C:C)+6");
      
-        public static ExcelRowModel TopRow()
-            => ExcelRowModels.WithEntries(BridgeCountPlusSix);
         public static ExcelRowModel IndexingRow(int numberOfYears)
         {
             var r = ExcelRowModels.WithEntries(
@@ -27,6 +26,12 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 r.AddCell(ExcelFormulaModels.FromFunction(function));
             }
             return r;
+        }
+
+        public static ExcelRowModel FirstYearRow(SimulationOutput output)
+        {
+            var year = output.Years.FirstOrDefault()?.Year ?? 0;
+            return ExcelRowModels.WithEntries(ExcelIntegerValueModels.WithValue(year));
         }
     }
 }

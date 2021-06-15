@@ -14,12 +14,11 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             var numberOfYears = output.Years.Count;
             return new RowBasedExcelWorksheetModel
             {
-
                 TabName = "District Totals",
                 Rows = new List<ExcelRowModel>
                 {
-                    DistrictTotalsRowModels.TopRow(),
                     DistrictTotalsRowModels.IndexingRow(numberOfYears),
+                    DistrictTotalsRowModels.FirstYearRow(output),
                     ExcelRowModels.Empty,
                     ExcelRowModels.IndentedHeader(1, "Dollars Spent on MPMS Projects by District", numberOfYears, 1),
                 },

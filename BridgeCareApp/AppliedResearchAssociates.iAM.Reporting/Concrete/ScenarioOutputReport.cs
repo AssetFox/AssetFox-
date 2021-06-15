@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public ScenarioOutputReport(UnitOfDataPersistenceWork uow, string name, ReportIndexEntity results)
+        public ScenarioOutputReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexEntity results)
         {
             _unitofwork = uow;
             ReportTypeName = name;

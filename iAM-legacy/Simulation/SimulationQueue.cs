@@ -173,7 +173,7 @@ namespace Simulation
                         handleLog("Failed: ", messageBuilder);
                         break;
                     case AppliedResearchAssociates.iAM.SimulationLogStatus.Information:
-                        handleLog("", messageBuilder);
+                        handleLog("Info: ", messageBuilder);
                         break;
                     case AppliedResearchAssociates.iAM.SimulationLogStatus.Warning:
                         handleLog("Warning: ", messageBuilder);

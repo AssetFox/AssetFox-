@@ -47,7 +47,16 @@ namespace BridgeCareCore.Services.SummaryReport
             for (int i = 0; i < model.Values.Count; i++)
             {
                 var size = model.Values[i].Size;
-                writer.Write(model.Values[i].Content, worksheet, rowIndex, columnIndex, size.Width, size.Height);
+                var range = worksheet.Cells[rowIndex, columnIndex, rowIndex + size.Height - 1, columnIndex + size.Width - 1];
+                if (size.Width > 1 || size.Height > 1)
+                {
+                    range.Merge = true;
+                }
+                foreach (var every in model.EveryCell.Content)
+                {
+                    writer.Write(every, range);
+                }
+                writer.Write(model.Values[i].Content, range);
                 columnIndex += size.Width;
             }
         }
@@ -57,6 +66,10 @@ namespace BridgeCareCore.Services.SummaryReport
             var worksheet = workbook.Worksheets.Add(worksheetModel.TabName);
             for (int i = 0; i < worksheetModel.Rows.Count; i++)
             {
+                if (i == 4)
+                {
+                    int x = 666;
+                }
                 writer.WriteRow(worksheetModel.Rows[i], worksheet, 1 + i);
             }
         }

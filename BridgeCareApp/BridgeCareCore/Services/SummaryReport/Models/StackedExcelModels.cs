@@ -13,6 +13,8 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Content = stack.ToList(),
             };
 
+        public static StackedExcelModel Empty => Stacked();
+
         public static StackedExcelModel BoldText(string text)
             => Stacked(
                 ExcelTextModels.Text(text),

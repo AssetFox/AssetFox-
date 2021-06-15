@@ -11,7 +11,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
     {
         public static ExcelFormulaModel BridgeCountPlusSix
             => ExcelFormulaModels.Text(@"COUNT('Bridge Data'!C:C)+6");
-     
+
         public static ExcelRowModel IndexingRow(int numberOfYears)
         {
             var r = ExcelRowModels.WithEntries(
@@ -26,6 +26,21 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 r.AddCell(ExcelFormulaModels.FromFunction(function));
             }
             return r;
+        }
+
+        internal static ExcelRowModel DistrictAndYearsHeaders(SimulationOutput output, params string[] additionalHeaders)
+        {
+            var values = new List<IExcelModel>();
+            values.Add(ExcelTextModels.Text("District"));
+            foreach (var year in output.Years)
+            {
+                values.Add(ExcelIntegerValueModels.WithValue(year.Year));
+            }
+            foreach (var header in additionalHeaders)
+            {
+                values.Add(ExcelTextModels.Text(header));
+            }
+            return ExcelRowModels.WithEntries(values, ExcelBoldModels.Bold);
         }
 
         public static ExcelRowModel FirstYearRow(SimulationOutput output)

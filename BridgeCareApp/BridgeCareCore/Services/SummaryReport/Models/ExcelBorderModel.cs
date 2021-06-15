@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BridgeCareCore.Services.SummaryReport.Visitors;
 using OfficeOpenXml.Style;
 
 namespace BridgeCareCore.Services.SummaryReport.Models

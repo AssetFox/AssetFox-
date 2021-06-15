@@ -9,12 +9,21 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
 {
     public static class DistrictTotalsModels
     {
-        public static RowBasedExcelWorksheetModel DistrictTotals(SimulationOutput output)
-        {
-            var numberOfYears = output.Years.Count;
-            return new RowBasedExcelWorksheetModel
+        public static ExcelWorksheetModel DistrictTotals(SimulationOutput output)
+            => new ExcelWorksheetModel
             {
                 TabName = "District Totals",
+                Content = new List<IExcelWorksheetContentModel>
+                {
+                    DistrictTotalsContent(output)
+                }
+            };
+
+        public static RowBasedExcelWorksheetContentModel DistrictTotalsContent(SimulationOutput output)
+        {
+            var numberOfYears = output.Years.Count;
+            return new RowBasedExcelWorksheetContentModel
+            {
                 Rows = new List<ExcelRowModel>
                 {
                     DistrictTotalsRowModels.IndexingRow(numberOfYears),

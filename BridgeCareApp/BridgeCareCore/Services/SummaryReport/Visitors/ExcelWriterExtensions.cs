@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using BridgeCareCore.Services.SummaryReport.Models;
 using OfficeOpenXml;
 
-namespace BridgeCareCore.Services.SummaryReport
+namespace BridgeCareCore.Services.SummaryReport.Visitors
 {
     public static class ExcelWriterExtensions
     {
@@ -61,13 +61,13 @@ namespace BridgeCareCore.Services.SummaryReport
             }
         }
 
-        public static void AddWorksheet(this ExcelWriter writer, ExcelWorkbook workbook, RowBasedExcelWorksheetModel worksheetModel)
+        public static ExcelWorksheet WriteWorksheet(this ExcelWriter writer, ExcelWorksheet worksheet, RowBasedExcelWorksheetContentModel worksheetModel)
         {
-            var worksheet = workbook.Worksheets.Add(worksheetModel.TabName);
             for (int i = 0; i < worksheetModel.Rows.Count; i++)
             {
                 writer.WriteRow(worksheetModel.Rows[i], worksheet, 1 + i);
             }
+            return worksheet;
         }
     }
 }

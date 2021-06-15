@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace BridgeCareCore.Services.SummaryReport.Models
 {
-    public class RowBasedExcelWorksheetModel
+    public class ExcelWorksheetModel
     {
         public string TabName { get; set; }
-        public List<ExcelRowModel> Rows { get; set; }
+        public List<IExcelWorksheetContentModel> Content { get; set; }
     }
 }

@@ -11,6 +11,7 @@ using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.DistrictTotals;
 using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
+using BridgeCareCore.Services.SummaryReport.Visitors;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
 
@@ -173,9 +174,8 @@ namespace BridgeCareCore.Services.SummaryReport
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
-            var writer = new ExcelWriter();
             var districtTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
-            writer.AddWorksheet(excelPackage.Workbook, districtTotalsModel);
+            ExcelWorksheetAdder.AddWorksheet(excelPackage.Workbook, districtTotalsModel);
             reportDetailDto.Status = $"Creating Graph TABs";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);

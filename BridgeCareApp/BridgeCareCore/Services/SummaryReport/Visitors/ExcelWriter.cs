@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using BridgeCareCore.Services.SummaryReport.Models;
 using OfficeOpenXml;
 
-namespace BridgeCareCore.Services.SummaryReport
+namespace BridgeCareCore.Services.SummaryReport.Visitors
 {
     public class ExcelWriter : IExcelModelVisitor<ExcelRange, Unit>
     {

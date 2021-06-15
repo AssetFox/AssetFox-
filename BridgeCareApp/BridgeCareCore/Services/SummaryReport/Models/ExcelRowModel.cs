@@ -7,7 +7,7 @@ namespace BridgeCareCore.Services.SummaryReport.Models
 {
     public class ExcelRowModel
     {
-        public List<IExcelModel> Values { get; set; }
+        public List<RelativeExcelRangeModel> Values { get; set; }
 
     }
 }

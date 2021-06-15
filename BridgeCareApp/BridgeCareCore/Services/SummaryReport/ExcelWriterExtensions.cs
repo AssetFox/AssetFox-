@@ -23,9 +23,11 @@ namespace BridgeCareCore.Services.SummaryReport
             IExcelModel model,
             ExcelWorksheet worksheet,
             int rowIndex,
-            int columnIndex)
+            int columnIndex,
+            int width,
+            int height)
         {
-            var range = worksheet.Cells[rowIndex, columnIndex];
+            var range = worksheet.Cells[rowIndex, columnIndex, rowIndex+width-1, columnIndex+height-1];
             writer.Write(model, range);
         }
 
@@ -37,9 +39,12 @@ namespace BridgeCareCore.Services.SummaryReport
             int rowIndex
             )
         {
+            var columnIndex = 1;
             for (int i = 0; i < model.Values.Count; i++)
             {
-                writer.Write(model.Values[i], worksheet, rowIndex, 1 + i);
+                var size = model.Values[i].Size;
+                writer.Write(model.Values[i].Content, worksheet, rowIndex, columnIndex, size.Width, size.Height);
+                columnIndex += size.Width;
             }
         }
 

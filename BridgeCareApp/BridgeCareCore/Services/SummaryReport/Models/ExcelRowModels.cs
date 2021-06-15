@@ -10,7 +10,7 @@ namespace BridgeCareCore.Services.SummaryReport.Models
         public static ExcelRowModel WithEntries(params IExcelModel[] entries)
             => new ExcelRowModel
             {
-                Values = entries.ToList(),
+                Values = entries.Select(RelativeExcelRangeModels.OneByOne).ToList(),
             };
 
         public static ExcelRowModel Empty

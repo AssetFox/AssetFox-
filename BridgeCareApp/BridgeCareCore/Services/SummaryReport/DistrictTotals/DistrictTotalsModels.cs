@@ -16,6 +16,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 {
                     DistrictTotalsRowModels.TopRow(),
                     DistrictTotalsRowModels.IndexingRow(10),
+                    ExcelRowModels.Empty
                 },
             };
     }

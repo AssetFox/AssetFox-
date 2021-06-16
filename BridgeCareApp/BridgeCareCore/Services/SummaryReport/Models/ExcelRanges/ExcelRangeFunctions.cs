@@ -9,6 +9,14 @@ namespace BridgeCareCore.Services.SummaryReport.Models
 {
     public static class ExcelRangeFunctions
     {
+        public static Func<ExcelRange, string> StartOffset(int columnDelta, int rowDelta)
+            => range =>
+            {
+                var start = range.Start;
+                var offsetStart = ExcelCellAddressFunctions.Offset(start, columnDelta, rowDelta);
+                return offsetStart.Address;
+            };
+
         /// <summary>
         /// Returns the left neighbor of the start of the range.
         /// For example, Left(B3:C4) = A3.
@@ -113,5 +121,26 @@ namespace BridgeCareCore.Services.SummaryReport.Models
             )
             => BuildExcelFunctionWithOptionalArguments(
                 "Address", row, column, optionalAbsolute, optionalStyle, optionalSheet);
+
+        public static Func<ExcelRange, string> RangeSum(
+            Func<ExcelRange, string> start,
+            Func<ExcelRange, string> end)
+            => range =>
+            {
+                var startValue = start(range);
+                var endValue = end(range);
+                return $"Sum({startValue}:{endValue})";
+            };
+
+        /// <summary>For example, if you pass in a range that starts at
+        /// C8, then StartOffsetRangeSum(-3, 0, -1, 0) would return
+        /// SUM(C5:C7).</summary>
+        public static Func<ExcelRange, string> StartOffsetRangeSum(
+            int dxStart, int dyStart, int dxEnd, int dyEnd)
+        {
+            var start = StartOffset(dxStart, dyStart);
+            var end = StartOffset(dxEnd, dyEnd);
+            return RangeSum(start, end);
+        }
     }
 }

@@ -17,6 +17,10 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             {
                 yield return DistrictTableContent(output, year, districtNumber);
             }
+            var sumStart = ExcelRangeFunctions.StartOffset(-output.Years.Count, 0);
+            var sumEnd = ExcelRangeFunctions.StartOffset(-1, 0);
+            var sumRange = ExcelRangeFunctions.RangeSum(sumStart, sumEnd);
+            yield return ExcelFormulaModels.FromFunction(sumRange);
         }
 
         internal static IExcelModel DistrictTableContent(
@@ -31,7 +35,6 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 var actualDistrict = section.ValuePerTextAttribute["DISTRICT"];
                 if (int.TryParse(actualDistrict, out var sectionDistrict) && sectionDistrict == district)
                 {
-                    
                     var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
                     totalMoney += cost;
                 }

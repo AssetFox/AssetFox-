@@ -23,10 +23,10 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                     ExcelRangeFunctions.Constant(SummaryReportTabNames.BridgeData)
                     ));
         public static Func<ExcelRange, string> DistrictTotalsTableContent()
-        {
-            var arguments = DistrictTotalsTableContentArguments();
-            var r = ExcelRangeFunctions.SumIfs(arguments);
-            return r;
-        }
+            => range =>
+            {
+                var row = range.Start.Row;
+                return $@"SUMIFS(INDIRECT(ADDRESS(6,B$1+1,,,""Bridge Data"")) :INDIRECT(ADDRESS($A$1,B$1+1,,,""Bridge Data"")),INDIRECT(ADDRESS(6,Legend!$F$10,,,""Bridge Data"")):INDIRECT(ADDRESS($A$1,Legend!$F$10,,,""Bridge Data"")),$A6,INDIRECT(ADDRESS(6,Legend!$F$12,,,""Bridge Data"")):INDIRECT(ADDRESS($A$1,Legend!$F$12,,,""Bridge Data"")),""<>31 - State Toll Authority"",INDIRECT(ADDRESS({row},B$1-2,,,""Bridge Data"")):INDIRECT(ADDRESS($A$1,B$1-2,,,""Bridge Data"")),""*MPMS*"")";
+            };
     }
 }

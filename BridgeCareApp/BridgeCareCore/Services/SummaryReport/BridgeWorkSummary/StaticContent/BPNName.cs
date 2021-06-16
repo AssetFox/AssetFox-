@@ -26,5 +26,16 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent
             BPNName.BPNOther => "BPN Other (BPN D, BPN H,BPN N, BPN T)",
             _ => name.ToString(),
         };
+
+        public static string ToMatchInDictionaryString(this BPNName name) => name switch
+        {
+            BPNName.BPN1 => "1",
+            BPNName.BPN2 => "2",
+            BPNName.BPN3 => "3",
+            BPNName.BPN4 => "4",
+            BPNName.BPNL => "L",
+            BPNName.BPNOther => "BPN Other (BPN D, BPN H,BPN N, BPN T)",
+            _ => name.ToString(),
+        };
     }
 }

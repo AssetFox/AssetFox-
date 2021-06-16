@@ -49,17 +49,12 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
 
             worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? "Y" : "N";
 
-            // ----------------------------------------------
-            // TODO: FIX THESE WHEN "FEDAID" PARAMETER IS AVAILABLE
-            //
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding185(section) ? " " : " "; // "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding581(section) ? " " : " "; // "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(section) ? " " : " "; // "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(section) ? " " : " "; // "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(section) ? " " : " "; // "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding183(section) ? " " : " "; // "Y" : "N";
-            //
-            // ----------------------------------------------
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding185(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding581(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding183(section) ? "Y" : "N";
 
             worksheet.Cells[row, columnNo++].Value = Year;
 
@@ -74,7 +69,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
                 worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUB_SEEDED"];
 
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = "N"; // CULV_SEEDED     section.ValuePerNumericAttribute["CULV_SEEDED"];
+                worksheet.Cells[row, columnNo++].Value = "N"; // CULV_SEEDED
 
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["DECK_DURATION_N"];

@@ -123,7 +123,71 @@ namespace BridgeCareCore.Services.SummaryReport
                 (functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
         }
 
+        public bool BridgeFunding183(SectionSummaryDetail section)
+        {
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
+            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
 
+            return
+                fedAid == "0" && bridgeLength >= 8 &&
+                (functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
+        }
+        public bool BridgeFunding185(SectionSummaryDetail section)
+        {
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
+            var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
+
+            return
+                fedAid == "1" ||
+                fedAid == "2" ||
+                fedAid == "0" && bridgeLength >= 20 ||
+                fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
+        }
+        public bool BridgeFunding581(SectionSummaryDetail section)
+        {
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
+            var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
+
+            return
+                fedAid == "1" ||
+                fedAid == "2" ||
+                fedAid == "0" && bridgeLength >= 20 ||
+                fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
+        }
+        public bool BridgeFundingBOF(SectionSummaryDetail section)
+        {
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
+            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
+
+            return
+                fedAid == "0" && bridgeLength >= 20 &&
+                (functionalClass == "08" || functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
+        }
+        public bool BridgeFundingNHPP(SectionSummaryDetail section)
+        {
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+
+            return
+                (fedAid == "1" || fedAid == "2") &&
+                (functionalClass == "01" || functionalClass == "02" || functionalClass == "11" || functionalClass == "12" || functionalClass == "14");
+        }
+        public bool BridgeFundingSTP(SectionSummaryDetail section)
+        {
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
+
+            return
+                fedAid == "1" && bridgeLength >= 20 ||
+                fedAid == "2" && bridgeLength >= 20 ||
+                fedAid == "0" && bridgeLength >= 20;
+        }
 
 
         private static readonly Dictionary<string, string> FunctionalClassDescriptions =
@@ -149,8 +213,5 @@ namespace BridgeCareCore.Services.SummaryReport
         {
             return FunctionalClassDescriptions.ContainsKey(functionalClassAbbreviation) ? FunctionalClassDescriptions[functionalClassAbbreviation] : functionalClassAbbreviation;
         }
-
-
-
     }
 }

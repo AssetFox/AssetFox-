@@ -17,6 +17,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         private readonly IHighlightWorkDoneCells _highlightWorkDoneCells;
         private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> valueForMinC;
         private readonly List<int> SimulationYears = new List<int>();
+        private readonly ISummaryReportHelper _summaryReportHelper;
 
         // This is also used in Bridge Work Summary TAB
         private readonly List<double> previousYearInitialMinC = new List<double>();
@@ -27,10 +28,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         // This will be used in Parameters TAB
         private readonly ParametersModel _parametersModel = new ParametersModel();
 
-        public BridgeDataForSummaryReport(IExcelHelper excelHelper, IHighlightWorkDoneCells highlightWorkDoneCells)
+        public BridgeDataForSummaryReport(IExcelHelper excelHelper, IHighlightWorkDoneCells highlightWorkDoneCells,
+            ISummaryReportHelper summaryReportHelper)
         {
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _highlightWorkDoneCells = highlightWorkDoneCells ?? throw new ArgumentNullException(nameof(highlightWorkDoneCells));
+            _summaryReportHelper = summaryReportHelper ?? throw new ArgumentNullException(nameof(summaryReportHelper));
         }
 
         public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
@@ -332,6 +335,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.SectionName;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.FacilityName;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DISTRICT"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["COUNTY"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BRIDGE_TYPE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["DECK_AREA"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LENGTH"];
@@ -342,7 +346,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SUBM_AGENCY"];
 
-                columnNo++; // for skipping planning partner
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["MPO_NAME"]; // planning partner
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY_ID"];
                 worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(sectionSummary.ValuePerTextAttribute["NHS_IND"],
                     out var numericValue) && numericValue > 0 ? "Y" : "N";
@@ -358,21 +362,32 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 // Fractural Critical, Deck surface type, Wearing surface cond, Paint cond, paint ext
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FRACT_CRIT"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DECKSURF_TYPE"];
-                columnNo++; // Wearing surface cond
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["WS_SEEDED"]; // Wearing surface cond
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["PAINT_COND"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["PAINT_EXTENT"];
 
                 worksheet.Cells[rowNo, columnNo++].Value = (int)sectionSummary.ValuePerNumericAttribute["YEAR_BUILT"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["AGE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["ADTTOTAL"];
+
+                _excelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo], "Number");
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISK_SCORE"];
+
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["P3"] > 0 ? "Y" : "N";
                 previousYearInitialMinC.Add(sectionSummary.ValuePerNumericAttribute["MINCOND"]);
 
                 // Add Parallel Structure, Internet Report, Federal Aid, Bridge Funding
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["PARALLEL"] > 0 ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["INTERNET_REPORT"];
-                columnNo += 7; //Bridge Funding takes 6 column
+
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FEDAID"];
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding185(sectionSummary) ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding581(sectionSummary) ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(sectionSummary) ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(sectionSummary) ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(sectionSummary) ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding183(sectionSummary) ? "Y" : "N";
             }
             currentCell.Row = rowNo;
             currentCell.Column = columnNo;
@@ -388,45 +403,46 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             return new List<string>
             {
-                "BridgeID",
-                "BRKey",
-                "District",
+                "BridgeID (5A01)",
+                "BRKey (5A03)",
+                "District (5A04)",
+                "County (5A05)",
                 "Bridge (B/C)",
-                "Deck Area",
-                "Structure Length",
+                "Deck Area (5B19)",
+                "Structure Length (5B18)",
 
                 "Span Type",
-                "Owner Code",
-                "Functional Class",
-                "Submitting Agency",
+                "Owner Code (5A21)",
+                "Functional Class (5C22)",
+                "Submitting Agency (6A06)",
 
-                "Planning Partner",
+                "Planning Partner (5A13)",
                 "Bridge Family",
-                "NHS",
+                "NHS (5C29)",
 
-                "NBIS Len",
+                "NBIS Len (5E01)",
 
-                "BPN",
+                "BPN (6A19)",
 
                 "Interstate",
 
-                "Struct Type",
+                "Struct Type (6A26-29)",
 
                 "Fractural Critical",
-                "Deck Surfacr Type",
-                "Wearing Surface Cond",
-                "Paint Cond",
-                "Paint Ext",
+                "Deck Surface Type (5B02)",
+                "Wearing Surface Cond (6B40)",
+                "Paint Cond (6B36)",
+                "Paint Ext (6B37)",
 
-                "Year Built",
+                "Year Built (5A15)",
                 "Age",
-                "ADTT",
+                "ADTT (5C10)",
                 "Risk Score",
                 "P3",
 
                 "Parallel Structure",
                 "Internet Report",
-                "Federal Aid",
+                "Federal Aid (6C06)",
                 "BridgeFunding"
             };
         }
@@ -584,7 +600,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 "Super Dur",
                 "Sub Dur",
                 "Culv Dur",
-                "GCR Min",
+                "Min GCR",
                 "Poor",
                 "Project Pick",
                 "Budget",

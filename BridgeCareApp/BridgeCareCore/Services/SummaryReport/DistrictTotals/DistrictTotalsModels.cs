@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Services.SummaryReport.Models;
+using BridgeCareCore.Services.SummaryReport.Models.Worksheets;
 
 namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
 {
@@ -15,7 +13,8 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 TabName = "District Totals",
                 Content = new List<IExcelWorksheetContentModel>
                 {
-                    DistrictTotalsContent(output)
+                    DistrictTotalsContent(output),
+                    ExcelWorksheetContentModels.AutoFitColumns(12.5)
                 }
             };
 

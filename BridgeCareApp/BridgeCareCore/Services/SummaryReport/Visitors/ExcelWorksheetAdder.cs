@@ -17,6 +17,7 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             {
                 content.Accept(writer, r);
             }
+            r.Cells.Calculate();
             return r;
         }
     }

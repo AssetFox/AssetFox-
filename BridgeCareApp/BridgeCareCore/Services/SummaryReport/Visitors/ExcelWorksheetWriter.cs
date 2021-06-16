@@ -11,5 +11,11 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             writer.WriteWorksheet(worksheet, model);
             return worksheet;
         }
+
+        public ExcelWorksheet Visit(AutoFitColumnsExcelWorksheetContentModel model, ExcelWorksheet worksheet)
+        {
+            worksheet.Cells.AutoFitColumns(model.MinWidth);
+            return worksheet;
+        }
     }
 }

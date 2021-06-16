@@ -320,7 +320,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 columnNo = 1;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.SectionName;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.FacilityName;
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DISTRICT"];
+                var districtValue = sectionSummary.ValuePerTextAttribute["DISTRICT"];
+                if (int.TryParse(districtValue, out var districtInteger))
+                {
+                    worksheet.Cells[rowNo, columnNo++].Value = districtInteger;
+                    worksheet.Cells[rowNo, columnNo++].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                } else
+                {
+                    worksheet.Cells[rowNo, columnNo++].Value = districtValue;
+                }
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BRIDGE_TYPE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["DECK_AREA"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LENGTH"];

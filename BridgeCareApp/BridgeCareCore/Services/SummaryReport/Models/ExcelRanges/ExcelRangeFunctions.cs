@@ -45,7 +45,7 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 {
                     var builder = new StringBuilder();
                     builder.Append(summands[0](range));
-                    for (int i=1; i<summands.Length; i++)
+                    for (int i = 1; i < summands.Length; i++)
                     {
                         builder.Append("+");
                         builder.Append(summands[i](range));
@@ -56,5 +56,62 @@ namespace BridgeCareCore.Services.SummaryReport.Models
             }
             return Empty;
         }
+        /// <summary>Any null arguments are replaced with the function that returns the empty string.
+        /// If that's not what you want, see BuildExcelFunctionWithOptionalArguments.</summary>
+        public static Func<ExcelRange, string> BuildExcelFunction(
+            string functionName,
+            IEnumerable<Func<ExcelRange, string>> arguments)
+            => range =>
+            {
+                var builder = new StringBuilder();
+                builder.Append($"{functionName}(");
+                var argumentsArray = arguments.Select(x => x ?? Empty).ToArray();
+                if (argumentsArray.Any())
+                {
+                    builder.Append(argumentsArray[0](range));
+                    for (int i = 1; i < argumentsArray.Length; i++)
+                    {
+                        builder.Append($",");
+                        var entry = argumentsArray[i](range);
+                        builder.Append(entry);
+                    }
+                }
+                builder.Append(")");
+                var r = builder.ToString();
+                return r;
+            };
+
+        public static Func<ExcelRange, string> BuildExcelFunctionWithOptionalArguments(
+            string functionName,
+            params Func<ExcelRange, string>[] arguments)
+        {
+            var argumentsWithoutTrailingNulls = arguments.ToList();
+            while (argumentsWithoutTrailingNulls.Any() && argumentsWithoutTrailingNulls.Last() == null)
+            {
+                argumentsWithoutTrailingNulls.RemoveAt(argumentsWithoutTrailingNulls.Count - 1);
+            }
+            return BuildExcelFunction(functionName, argumentsWithoutTrailingNulls);
+        }
+
+        public static Func<ExcelRange, string> BuildExcelFunction(
+            string functionName,
+            params Func<ExcelRange, string>[] arguments)
+            => BuildExcelFunction(functionName, arguments.AsEnumerable());
+
+        public static Func<ExcelRange, string> SumIfs(IEnumerable<Func<ExcelRange, string>> arguments)
+            => BuildExcelFunction("SUMIFS", arguments);
+
+        public static Func<ExcelRange, string> Indirect(Func<ExcelRange, string> argument)
+            => BuildExcelFunction("INDIRECT", argument);
+
+        public static Func<ExcelRange, string> Address(
+            Func<ExcelRange, string> row,
+            Func<ExcelRange, string> column,
+            Func<ExcelRange, string> optionalAbsolute = null,
+            Func<ExcelRange, string> optionalStyle = null,
+            Func<ExcelRange, string> optionalSheet = null
+            )
+            => BuildExcelFunctionWithOptionalArguments(
+                "Address", row, column, optionalAbsolute, optionalStyle, optionalSheet);
     }
 }

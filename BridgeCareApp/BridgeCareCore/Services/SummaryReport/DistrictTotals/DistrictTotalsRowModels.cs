@@ -43,6 +43,17 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             return ExcelRowModels.WithEntries(values, ExcelBoldModels.Bold, ExcelBorderModels.Thin);
         }
 
+        internal static ExcelRowModel District(SimulationOutput output, int districtNumber)
+        {
+            return new ExcelRowModel
+            {
+                Values = DistrictTotalsExcelModels.DistrictContent(output, districtNumber)
+                .Select(x => RelativeExcelRangeModels.OneByOne(x))
+                .ToList()
+            };
+        }
+
+
         public static ExcelRowModel FirstYearRow(SimulationOutput output)
         {
             var year = output.Years.FirstOrDefault()?.Year ?? 0;

@@ -146,7 +146,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             // Bridge Data TAB
-            var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
+            var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
             var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData);
 
             // Filling up parameters tab
@@ -159,7 +159,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _unfundedRecommendations.Fill(unfundedRecommendationWorksheet, reportOutputData);
 
             // Simulation Legend TAB
-            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add("Legend");
+            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
             _summaryReportGlossary.Fill(shortNameWorksheet);
             reportDetailDto.Status = $"Creating Bridge Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);

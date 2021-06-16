@@ -18,20 +18,25 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 }
             };
 
-        public static RowBasedExcelWorksheetContentModel DistrictTotalsContent(SimulationOutput output)
+        public static RowBasedExcelWorksheetModel DistrictTotalsContent(SimulationOutput output)
         {
             var numberOfYears = output.Years.Count;
-            return new RowBasedExcelWorksheetContentModel
+            return new RowBasedExcelWorksheetModel
             {
-                Rows = new List<ExcelRowModel>
+                Region = new RowBasedExcelRegionModel
                 {
-                    DistrictTotalsRowModels.IndexingRow(numberOfYears),
-                    DistrictTotalsRowModels.FirstYearRow(output),
-                    ExcelRowModels.Empty,
-                    ExcelRowModels.IndentedHeader(1, "Dollars Spent on MPMS Projects by District", numberOfYears, 1),
-                    DistrictTotalsRowModels.DistrictAndYearsHeaders(output, "District Total"),
-                    DistrictTotalsRowModels.District(output, 1)
+                    Rows = new List<ExcelRowModel>
+                    {
+                        DistrictTotalsRowModels.IndexingRow(numberOfYears),
+                        DistrictTotalsRowModels.FirstYearRow(output),
+                        ExcelRowModels.Empty,
+                        ExcelRowModels.IndentedHeader(1, "Dollars Spent on MPMS Projects by District", numberOfYears, 1),
+                        DistrictTotalsRowModels.DistrictAndYearsHeaders(output, "District Total"),
+                        DistrictTotalsRowModels.District(output, 1)
+                    },
                 },
+                StartColumn = 2,
+                StartRow = 3,
             };
         }
     }

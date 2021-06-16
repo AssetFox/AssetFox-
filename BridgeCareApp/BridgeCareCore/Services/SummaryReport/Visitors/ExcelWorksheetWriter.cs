@@ -5,10 +5,10 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
 {
     public class ExcelWorksheetWriter: IExcelWorksheetModelVisitor<ExcelWorksheet, ExcelWorksheet>
     {
-        public ExcelWorksheet Visit(RowBasedExcelWorksheetContentModel model, ExcelWorksheet worksheet)
+        public ExcelWorksheet Visit(RowBasedExcelWorksheetModel model, ExcelWorksheet worksheet)
         {
             var writer = new ExcelWriter();
-            writer.WriteWorksheet(worksheet, model);
+            writer.WriteWorksheet(worksheet, model.Region, model.StartRow, model.StartColumn);
             return worksheet;
         }
 

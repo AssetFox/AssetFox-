@@ -40,10 +40,11 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             this ExcelWriter writer,
             ExcelRowModel model,
             ExcelWorksheet worksheet,
-            int rowIndex
+            int rowIndex,
+            int startColumnIndex
             )
         {
-            var columnIndex = 1;
+            var columnIndex = startColumnIndex;
             for (int i = 0; i < model.Values.Count; i++)
             {
                 var size = model.Values[i].Size;
@@ -61,11 +62,11 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             }
         }
 
-        public static ExcelWorksheet WriteWorksheet(this ExcelWriter writer, ExcelWorksheet worksheet, RowBasedExcelWorksheetContentModel worksheetModel)
+        public static ExcelWorksheet WriteWorksheet(this ExcelWriter writer, ExcelWorksheet worksheet, RowBasedExcelRegionModel worksheetModel, int startRow, int startColumn)
         {
             for (int i = 0; i < worksheetModel.Rows.Count; i++)
             {
-                writer.WriteRow(worksheetModel.Rows[i], worksheet, 1 + i);
+                writer.WriteRow(worksheetModel.Rows[i], worksheet, startRow + i, startColumn);
             }
             return worksheet;
         }

@@ -26,7 +26,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             => range =>
             {
                 var row = range.Start.Row;
-                return $@"SUMIFS(INDIRECT(ADDRESS(6,B$1+1,,,""Bridge Data"")) :INDIRECT(ADDRESS($A$1,B$1+1,,,""Bridge Data"")),INDIRECT(ADDRESS(6,Legend!$F$10,,,""Bridge Data"")):INDIRECT(ADDRESS($A$1,Legend!$F$10,,,""Bridge Data"")),$A6,INDIRECT(ADDRESS(6,Legend!$F$12,,,""Bridge Data"")):INDIRECT(ADDRESS($A$1,Legend!$F$12,,,""Bridge Data"")),""<>31 - State Toll Authority"",INDIRECT(ADDRESS({row},B$1-2,,,""Bridge Data"")):INDIRECT(ADDRESS($A$1,B$1-2,,,""Bridge Data"")),""*MPMS*"")";
+                return $@"SUMIFS(INDIRECT(ADDRESS(6,B$1+1,,,""{SummaryReportTabNames.BridgeData}"")) :INDIRECT(ADDRESS($A$1,B$1+1,,,""{SummaryReportTabNames.BridgeData}"")),INDIRECT(ADDRESS(6,Legend!$F$10,,,""{SummaryReportTabNames.BridgeData}"")):INDIRECT(ADDRESS($A$1,Legend!$F$10,,,""{SummaryReportTabNames.BridgeData}"")),$A6,INDIRECT(ADDRESS(6,Legend!$F$12,,,""{SummaryReportTabNames.BridgeData}"")):INDIRECT(ADDRESS($A$1,Legend!$F$12,,,""{SummaryReportTabNames.BridgeData}"")),""<>31 - State Toll Authority"",INDIRECT(ADDRESS({row},B$1-2,,,""{SummaryReportTabNames.BridgeData}"")):INDIRECT(ADDRESS($A$1,B$1-2,,,""{SummaryReportTabNames.BridgeData}"")),""*MPMS*"")";
             };
     }
 }

@@ -13,16 +13,33 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         internal static IEnumerable<IExcelModel> DistrictContent(SimulationOutput output, int districtNumber)
         {
             yield return ExcelIntegerValueModels.WithValue(districtNumber);
-            foreach (var _ in output.Years)
+            foreach (var year in output.Years)
             {
-                yield return DistrictTableContent(output);
+                yield return DistrictTableContent(output, year, districtNumber);
             }
         }
 
-        internal static IExcelModel DistrictTableContent(SimulationOutput output)
+        internal static IExcelModel DistrictTableContent(
+            SimulationOutput output,
+            SimulationYearDetail year,
+            int district)
         {
-            var function = DistrictTotalsFunctions.DistrictTotalsTableContent();
-            return ExcelFormulaModels.FromFunction(function);
+            decimal totalMoney = 0;
+            var sections = year.Sections;
+            foreach (var section in sections)
+            {
+                var actualDistrict = section.ValuePerTextAttribute["DISTRICT"];
+                if (int.TryParse(actualDistrict, out var sectionDistrict) && sectionDistrict == district)
+                {
+                    
+                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    totalMoney += cost;
+                }
+            }
+            return new ExcelMoneyValueModel
+            {
+                Value = totalMoney,
+            };
         }
     }
 }

@@ -62,12 +62,20 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             }
         }
 
-        public static ExcelWorksheet WriteWorksheet(this ExcelWriter writer, ExcelWorksheet worksheet, RowBasedExcelRegionModel worksheetModel, int startRow, int startColumn)
+        public static ExcelWorksheet WriteRegion(this ExcelWriter writer, ExcelWorksheet worksheet, RowBasedExcelRegionModel worksheetModel, int startRow, int startColumn)
         {
             for (int i = 0; i < worksheetModel.Rows.Count; i++)
             {
                 writer.WriteRow(worksheetModel.Rows[i], worksheet, startRow + i, startColumn);
             }
+            return worksheet;
+        }
+
+        public static ExcelWorksheet WriteRegion(this ExcelWriter writer, ExcelWorksheet worksheet, RowBasedExcelRegionModel region, ExcelCellAddress startAtAddress)
+        {
+            var row = startAtAddress.Row;
+            var column = startAtAddress.Column;
+            writer.WriteRegion(worksheet, region, row, column);
             return worksheet;
         }
     }

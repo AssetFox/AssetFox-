@@ -32,11 +32,10 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                         ExcelRowModels.Empty,
                         ExcelRowModels.IndentedHeader(1, "Dollars Spent on MPMS Projects by District", numberOfYears, 1),
                         DistrictTotalsRowModels.DistrictAndYearsHeaders(output, "District Total"),
-                        DistrictTotalsRowModels.District(output, 1)
+                        DistrictTotalsRowModels.District(output, 1),
+                        DistrictTotalsRowModels.District(output, 8)
                     },
                 },
-                StartColumn = 2,
-                StartRow = 3,
             };
         }
     }

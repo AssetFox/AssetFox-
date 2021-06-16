@@ -8,7 +8,7 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
         public ExcelWorksheet Visit(RowBasedExcelWorksheetModel model, ExcelWorksheet worksheet)
         {
             var writer = new ExcelWriter();
-            writer.WriteWorksheet(worksheet, model.Region, model.StartRow, model.StartColumn);
+            writer.WriteRegion(worksheet, model.Region, model.StartRow, model.StartColumn);
             return worksheet;
         }
 

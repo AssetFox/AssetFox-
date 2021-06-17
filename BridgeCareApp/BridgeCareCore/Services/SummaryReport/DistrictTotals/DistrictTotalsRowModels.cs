@@ -32,14 +32,15 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         {
             var values = new List<IExcelModel>();
             values.Add(ExcelValueModels.String("District"));
-            foreach (var year in output.Years)
-            {
-                values.Add(ExcelValueModels.Integer(year.Year));
-            }
+            values.AddRange(output.Years.Select(x => ExcelValueModels.Integer(x.Year)));
+            //foreach (var year in output.Years)
+            //{
+            //    values.Add(ExcelValueModels.Integer(year.Year));
+            //}
             foreach (var header in additionalHeaders)
             {
                 values.Add(ExcelValueModels.String(header));
-            }
+            } // wjwjwj move the styles into a new class ExcelStyleModels.
             return ExcelRowModels.WithEntries(values, ExcelValueModels.Bold, ExcelBorderModels.Thin);
         }
 

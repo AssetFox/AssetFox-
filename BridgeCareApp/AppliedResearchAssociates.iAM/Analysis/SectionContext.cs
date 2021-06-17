@@ -79,6 +79,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void CopyDetailFrom(SectionContext other) => Detail = new SectionDetail(other.Detail);
 
+        public void FixCalculatedFieldValues()
+        {
+            foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
+            {
+                NumberCache_Override[calculatedField.Name] = GetNumber(calculatedField.Name);
+            }
+        }
+
         public double GetBenefit()
         {
             var rawBenefit = GetNumber(AnalysisMethod.Benefit.Attribute.Name);
@@ -113,7 +121,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
             GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
 
-            if (!NumberCache.TryGetValue(key, out var number))
+            if (!NumberCache_Override.TryGetValue(key, out var number) && !NumberCache.TryGetValue(key, out number))
             {
                 number = base.GetNumber(key);
 
@@ -212,6 +220,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             base.SetText(key, value);
         }
 
+        public void UnfixCalculatedFieldValues() => NumberCache_Override.Clear();
+
         public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
 
         public bool YearIsWithinShadowForSameTreatment(int year, Treatment treatment) => FirstUnshadowedYearForSameTreatment.TryGetValue(treatment.Name, out var firstUnshadowedYear) && year < firstUnshadowedYear;
@@ -223,6 +233,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private readonly Stack<string> GetNumber_ActiveKeysOfCurrentInvocation = new Stack<string>();
 
         private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(KeyComparer);
+
+        private readonly IDictionary<string, double> NumberCache_Override = new Dictionary<string, double>(KeyComparer);
 
         private Treatment AppliedTreatmentWithPendingMetadata;
 

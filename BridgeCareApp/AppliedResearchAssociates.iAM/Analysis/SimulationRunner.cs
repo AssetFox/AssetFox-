@@ -163,6 +163,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 treatment.UnsetConsequencesPerAttribute();
             }
+
             ReportProgress(ProgressStatus.Completed, 100);
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
@@ -325,11 +326,17 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
                 else
                 {
+                    if (Simulation.ShouldPreapplyPassiveTreatment)
+                    {
+                        context.FixCalculatedFieldValues();
+                    }
+
                     context.ApplyPerformanceCurves();
 
                     if (Simulation.ShouldPreapplyPassiveTreatment)
                     {
                         context.PreapplyPassiveTreatment();
+                        context.UnfixCalculatedFieldValues();
                     }
 
                     if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))

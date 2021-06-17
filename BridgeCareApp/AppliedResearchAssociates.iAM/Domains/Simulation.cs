@@ -28,6 +28,9 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public string ShortDescription => Name;
 
+        /// <summary>
+        ///     Whether to always pre-apply the passive treatment just after deterioration.
+        /// </summary>
         public bool ShouldPreapplyPassiveTreatment { get; set; } = true;
 
         public ValidatorBag Subvalidators => new ValidatorBag { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };

@@ -13,11 +13,49 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
-        public event EventHandler<SimulationLogEventArgs> SimulationLog;
-
         public event EventHandler<ProgressEventArgs> Progress;
 
+        public event EventHandler<SimulationLogEventArgs> SimulationLog;
+
         public Simulation Simulation { get; }
+
+        public void HandleValidationFailures(ValidationResultBag simulationValidationResults)
+        {
+            var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
+            if (numberOfErrors > 0)
+            {
+                var errorsWord = numberOfErrors == 1 ? "error" : "errors";
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation {errorsWord}. Download the log to see all validation results.")
+                {
+                    ItemName = Simulation.Name,
+                    ItemId = Simulation.Id,
+                };
+
+                var logMessageBuilder = SimulationLogMessageBuilders.HasValidationErrors(MessageBuilder, Simulation.Id);
+                Send(logMessageBuilder);
+            }
+
+            var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
+            if (numberOfWarnings > 0)
+            {
+                var warningsWord = numberOfWarnings == 1 ? "warning" : "warnings";
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation {warningsWord}.")
+                {
+                    ItemName = Simulation.Name,
+                    ItemId = Simulation.Id,
+                };
+
+                var logBuilder = new SimulationLogMessageBuilder
+                {
+                    Message = MessageBuilder.ToString(),
+                    SimulationId = Simulation.Id,
+                    Status = SimulationLogStatus.Warning,
+                    Subject = SimulationLogSubject.Validation,
+                };
+
+                Send(logBuilder);
+            }
+        }
 
         public void Run(bool withValidation = true)
         {
@@ -38,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 RunValidation();
             }
-            
+
             ActiveTreatments = Simulation.GetActiveTreatments();
 
             try
@@ -175,44 +213,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return simulationValidationResults;
         }
 
-        public void HandleValidationFailures(ValidationResultBag simulationValidationResults)
-        {
-            var numberOfErrors = simulationValidationResults.Count(result => result.Status == ValidationStatus.Error);
-            if (numberOfErrors > 0)
-            {
-                var errorsWord = numberOfErrors == 1 ? "error" : "errors";
-                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfErrors} validation {errorsWord}. Download the log to see all validation results.")
-                {
-                    ItemName = Simulation.Name,
-                    ItemId = Simulation.Id,
-                };
-
-                var logMessageBuilder = SimulationLogMessageBuilders.HasValidationErrors(MessageBuilder, Simulation.Id);
-                Send(logMessageBuilder);
-            }
-
-            var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
-            if (numberOfWarnings > 0)
-            {
-                var warningsWord = numberOfWarnings == 1 ? "warning" : "warnings";
-                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation {warningsWord}.")
-                {
-                    ItemName = Simulation.Name,
-                    ItemId = Simulation.Id,
-                };
-
-                var logBuilder = new SimulationLogMessageBuilder
-                {
-                    Message = MessageBuilder.ToString(),
-                    SimulationId = Simulation.Id,
-                    Status = SimulationLogStatus.Warning,
-                    Subject = SimulationLogSubject.Validation,
-                };
-
-                Send(logBuilder);
-            }
-        }
-
         internal ILookup<Section, CommittedProject> CommittedProjectsPerSection { get; private set; }
 
         internal ILookup<NumberAttribute, PerformanceCurve> CurvesPerAttribute { get; private set; }
@@ -222,6 +222,16 @@ namespace AppliedResearchAssociates.iAM.Analysis
         internal double GetInflationFactor(int year) => Simulation.InvestmentPlan.GetInflationFactor(year);
 
         internal void ReportProgress(ProgressStatus progressStatus, double percentComplete = 0, int? year = null) => OnProgress(new ProgressEventArgs(progressStatus, percentComplete, year));
+
+        internal void Send(SimulationLogMessageBuilder message, bool throwOnFatal = true)
+        {
+            var args = new SimulationLogEventArgs(message);
+            OnLog(args);
+            if (message.Status == SimulationLogStatus.Fatal && throwOnFatal)
+            {
+                throw new SimulationException(message.Message);
+            }
+        }
 
         private const int STATUS_CODE_NOT_RUNNING = 0;
 
@@ -381,18 +391,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
 
             return unhandledContexts;
-        }
-
-        private void OnProgress(ProgressEventArgs e) => Progress?.Invoke(this, e);
-
-        internal void Send(SimulationLogMessageBuilder message, bool throwOnFatal = true)
-        {
-            var args = new SimulationLogEventArgs(message);
-            OnLog(args);
-            if (message.Status == SimulationLogStatus.Fatal && throwOnFatal)
-            {
-                throw new SimulationException(message.Message);
-            }
         }
 
         private bool ConditionGoalsAreMet(int year)
@@ -646,6 +644,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         }
 
         private void OnLog(SimulationLogEventArgs e) => SimulationLog?.Invoke(this, e);
+
+        private void OnProgress(ProgressEventArgs e) => Progress?.Invoke(this, e);
 
         private void RecordStatusOfConditionGoals(SimulationYearDetail detail)
         {

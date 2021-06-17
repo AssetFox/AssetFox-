@@ -214,19 +214,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override void SetNumber(string key, double value)
         {
-            PrepareSet(key);
+            NumberCache.Clear();
             base.SetNumber(key, value);
         }
 
         public override void SetNumber(string key, Func<double> getValue)
         {
-            PrepareSet(key);
+            NumberCache.Clear();
             base.SetNumber(key, getValue);
         }
 
         public override void SetText(string key, string value)
         {
-            PrepareSet(key);
+            NumberCache.Clear();
             base.SetText(key, value);
         }
 
@@ -345,17 +345,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private void SendToSimulationLogIfNeeded(PerformanceCurve curve, double value)
-        {
-            if (double.IsNaN(value) || double.IsInfinity(value))
-            {
-                var key = curve.Attribute.Name;
-                var errorMessage = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, value);
-                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
-                SimulationRunner.Send(messageBuilder);
-            }
-        }
-
         private Func<double> GetCalculator(IGrouping<NumberAttribute, PerformanceCurve> curves)
         {
             curves.Channel(
@@ -445,14 +434,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
             base.SetNumber(Network.SpatialWeightIdentifier, GetSpatialWeight);
         }
 
-        private void PrepareSet(string key)
+        private void SendToSimulationLogIfNeeded(PerformanceCurve curve, double value)
         {
-            //if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key, KeyComparer))
-            //{
-            //    PreviousAge = GetNumber(key);
-            //}
-
-            NumberCache.Clear();
+            if (double.IsNaN(value) || double.IsInfinity(value))
+            {
+                var key = curve.Attribute.Name;
+                var errorMessage = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, value);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(messageBuilder);
+            }
         }
 
         private void SetHistoricalValues<T>(int referenceYear, bool fallForward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)

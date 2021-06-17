@@ -33,6 +33,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 rows.Add(DistrictTotalsRowModels.TopTableDistrict(output, districtNumber));
             }
             rows.Add(DistrictTotalsRowModels.TopTableTurnpike(output));
+            rows.Add(DistrictTotalsRowModels.TableBottomSumRow(output));
             return RowBasedExcelRegionModels.WithRows(rows);
         }
 

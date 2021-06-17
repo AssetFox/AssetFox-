@@ -27,8 +27,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             {
                 yield return DistrictTotalsExcelModels.DistrictTableTurnpikeContent(year);
             }
-            var sumRange = ExcelRangeFunctions.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0);
-            yield return ExcelFormulaModels.FromFunction(sumRange);
+            yield return ExcelFormulaModels.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0);
         }
     }
 }

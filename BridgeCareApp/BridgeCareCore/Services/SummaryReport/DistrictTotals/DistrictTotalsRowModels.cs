@@ -67,5 +67,18 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                .ToList();
             return ExcelRowModels.WithEntries(values);
         }
+
+        public static ExcelRowModel TableBottomSumRow(SimulationOutput output)
+        {
+            var totalText = StackedExcelModels.BoldText("Total");
+            var sumFormula = ExcelFormulaModels.StartOffsetRangeSum(0, -12, 0, -1);
+            var entries = new List<IExcelModel> { totalText };
+            for (int i=0; i<output.Years.Count; i++)
+            {
+                entries.Add(sumFormula);
+            }
+            entries.Add(ExcelFormulaModels.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0));
+            return ExcelRowModels.WithEntries(entries);
+        }
     }
 }

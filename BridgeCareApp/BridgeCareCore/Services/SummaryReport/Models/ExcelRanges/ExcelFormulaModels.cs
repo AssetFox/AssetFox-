@@ -18,5 +18,11 @@ namespace BridgeCareCore.Services.SummaryReport.Models
             {
                 Formula = function,
             };
+
+        public static ExcelFormulaModel StartOffsetRangeSum(int dxStart, int dyStart, int dxEnd, int dyEnd)
+        {
+            var sumRange = ExcelRangeFunctions.StartOffsetRangeSum(dxStart, dyStart, dxEnd, dyEnd);
+            return FromFunction(sumRange);
+        }
     }
 }

@@ -33,9 +33,17 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 var actualDistrict = section.ValuePerTextAttribute["DISTRICT"];
                 if (int.TryParse(actualDistrict, out var sectionDistrict) && sectionDistrict == district)
                 {
-                    // WjTodo tomorrow -- try to get the owner and project pick conditions in here
-                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
-                    totalMoney += cost;
+                    var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
+                    if (ownerCode.Trim() != "01")
+                    {
+                        if (section.TreatmentCause == TreatmentCause.CommittedProject)
+                        {
+                            var textString = DictionaryDebugConvenience.ToDebugString(section.ValuePerTextAttribute);
+                            var numericString = DictionaryDebugConvenience.ToDebugString(section.ValuePerNumericAttribute);
+                            var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                            totalMoney += cost;
+                        }
+                    }
                 }
             }
             return new ExcelMoneyValueModel

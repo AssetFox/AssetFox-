@@ -34,12 +34,6 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
         public Unit Visit(ExcelNothingModel nothing, ExcelRange cells)
             => Unit.Default;
 
-        public Unit Visit(ExcelTextModel text, ExcelRange cells)
-        {
-            cells.Value = text.Text;
-            return Unit.Default;
-        }
-
         public Unit Visit(ExcelBoldModel bold, ExcelRange cells)
         {
             cells.Style.Font.Bold = bold.Bold;

@@ -17,14 +17,14 @@ namespace BridgeCareCore.Services.SummaryReport.Models
         public static RelativeExcelRangeModel Empty(int width = 1, int height = 1)
             => new RelativeExcelRangeModel
             {
-                Content = ExcelNothingModels.Nothing,
+                Content = ExcelValueModels.Nothing,
                 Size = new ExcelRangeSize(width, height),
             };
 
         public static RelativeExcelRangeModel Text(string text, int width = 1, int height = 1)
             => new RelativeExcelRangeModel
             {
-                Content = ExcelTextModels.Text(text),
+                Content = ExcelValueModels.String(text),
                 Size = new ExcelRangeSize(width, height),
             };
 

@@ -10,46 +10,41 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
     public static class DistrictTotalsExcelModels
     {
 
-        internal static IEnumerable<IExcelModel> DistrictContent(SimulationOutput output, int districtNumber)
-        {
-            yield return ExcelIntegerValueModels.WithValue(districtNumber);
-            foreach (var year in output.Years)
-            {
-                yield return DistrictTableContent(output, year, districtNumber);
-            }
-            var sumRange = ExcelRangeFunctions.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0);
-            yield return ExcelFormulaModels.FromFunction(sumRange);
-        }
+
+
+        private static decimal TotalCost(SectionDetail section)
+            => section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+
+
 
         internal static IExcelModel DistrictTableContent(
-            SimulationOutput output,
             SimulationYearDetail year,
-            int district)
+            Func<SectionDetail, bool> inclusionPredicate)
         {
             decimal totalMoney = 0;
             var sections = year.Sections;
             foreach (var section in sections)
             {
-                var actualDistrict = section.ValuePerTextAttribute["DISTRICT"];
-                if (int.TryParse(actualDistrict, out var sectionDistrict) && sectionDistrict == district)
+                if (inclusionPredicate(section))
                 {
-                    var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
-                    if (ownerCode.Trim() != "01")
-                    {
-                        if (section.TreatmentCause == TreatmentCause.CommittedProject)
-                        {
-                            var textString = DictionaryDebugConvenience.ToDebugString(section.ValuePerTextAttribute);
-                            var numericString = DictionaryDebugConvenience.ToDebugString(section.ValuePerNumericAttribute);
-                            var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
-                            totalMoney += cost;
-                        }
-                    }
+                    var cost = TotalCost(section);
+                    totalMoney += cost;
                 }
             }
-            return new ExcelMoneyValueModel
-            {
-                Value = totalMoney,
-            };
+            return ExcelValueModels.Money(totalMoney);
+        }
+
+        internal static IExcelModel TopTableDistrictContent(SimulationYearDetail year, int districtNumber)
+        {
+            Func<SectionDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictTopTable(detail, districtNumber);
+            return DistrictTableContent(year, predicate);
+        }
+
+
+        internal static IExcelModel DistrictTableTurnpikeContent(SimulationYearDetail year)
+        {
+            Func<SectionDetail, bool> predicate = DistrictTotalsSectionDetailPredicates.IsCommittedTurnpike;
+            return DistrictTableContent(year, predicate);
         }
     }
 }

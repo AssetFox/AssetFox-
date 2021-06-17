@@ -16,7 +16,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         {
             var r = ExcelRowModels.WithEntries(
                 BridgeCountPlusSix,
-                ExcelIntegerValueModels.WithValue(103)
+                ExcelValueModels.Integer(103)
                 );
             for (var i = 1; i < numberOfYears; i++)
             {
@@ -31,23 +31,23 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         internal static ExcelRowModel DistrictAndYearsHeaders(SimulationOutput output, params string[] additionalHeaders)
         {
             var values = new List<IExcelModel>();
-            values.Add(ExcelTextModels.Text("District"));
+            values.Add(ExcelValueModels.String("District"));
             foreach (var year in output.Years)
             {
-                values.Add(ExcelIntegerValueModels.WithValue(year.Year));
+                values.Add(ExcelValueModels.Integer(year.Year));
             }
             foreach (var header in additionalHeaders)
             {
-                values.Add(ExcelTextModels.Text(header));
+                values.Add(ExcelValueModels.String(header));
             }
-            return ExcelRowModels.WithEntries(values, ExcelBoldModels.Bold, ExcelBorderModels.Thin);
+            return ExcelRowModels.WithEntries(values, ExcelValueModels.Bold, ExcelBorderModels.Thin);
         }
 
         internal static ExcelRowModel District(SimulationOutput output, int districtNumber)
         {
             return new ExcelRowModel
             {
-                Values = DistrictTotalsExcelModels.DistrictContent(output, districtNumber)
+                Values = DistrictTotalsExcelModelEnumerables.DistrictContent(output, districtNumber)
                 .Select(x => RelativeExcelRangeModels.OneByOne(x))
                 .ToList()
             };
@@ -58,7 +58,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         {
             var year = output.Years.FirstOrDefault()?.Year ?? 0;
             return ExcelRowModels.WithEntries(
-                ExcelIntegerValueModels.WithValue(year));
+                ExcelValueModels.Integer(year));
         }
     }
 }

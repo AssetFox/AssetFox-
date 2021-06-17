@@ -17,7 +17,7 @@ namespace BridgeCareCore.Services.SummaryReport.Models
 
         public static StackedExcelModel BoldText(string text)
             => Stacked(
-                ExcelTextModels.Text(text),
-                ExcelBoldModels.Bold);
+                ExcelValueModels.String(text),
+                ExcelValueModels.Bold);
     }
 }

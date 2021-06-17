@@ -28,16 +28,5 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Value = text,
             };
 
-        public static ExcelBoldModel Bold
-            => new ExcelBoldModel
-            {
-                Bold = true,
-            };
-
-        public static ExcelBoldModel NotBold
-            => new ExcelBoldModel
-            {
-                Bold = false,
-            };
     }
 }

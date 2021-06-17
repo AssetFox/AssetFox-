@@ -10,6 +10,8 @@ namespace BridgeCareCore.Services.SummaryReport.Models
         public static ExcelRowModel WithEntries(params IExcelModel[] entries)
             => WithEntries(entries.ToList());
 
+        /// <summary>The everyCell models will be applied to every cell in the row.
+        /// They might typically be used for styles such as bold, the border, or alignment.</summary>
         public static ExcelRowModel WithEntries<T>(List<T> entries, params IExcelModel[] everyCell)
             where T: IExcelModel
             => new ExcelRowModel

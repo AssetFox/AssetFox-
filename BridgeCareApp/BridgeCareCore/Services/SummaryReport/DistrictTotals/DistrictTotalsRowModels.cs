@@ -30,18 +30,26 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
 
         internal static ExcelRowModel DistrictAndYearsHeaders(SimulationOutput output, params string[] additionalHeaders)
         {
-            var values = new List<IExcelModel>();
-            values.Add(ExcelValueModels.String("District"));
-            values.AddRange(output.Years.Select(x => ExcelValueModels.Integer(x.Year)));
-            //foreach (var year in output.Years)
-            //{
-            //    values.Add(ExcelValueModels.Integer(year.Year));
-            //}
+            var values = new List<IExcelModel>
+            {
+                StackedExcelModels.Stacked(
+                    ExcelValueModels.String("District"),
+                    ExcelStyleModels.ThinBorder
+                    ),
+            };
+            foreach (var year in output.Years)
+            {
+                values.Add(
+                    StackedExcelModels.Stacked(
+                        ExcelValueModels.Integer(year.Year),
+                        ExcelStyleModels.HorizontalCenter,
+                        ExcelStyleModels.ThinBorder));
+            }
             foreach (var header in additionalHeaders)
             {
                 values.Add(ExcelValueModels.String(header));
-            } // wjwjwj move the styles into a new class ExcelStyleModels.
-            return ExcelRowModels.WithEntries(values, ExcelValueModels.Bold, ExcelBorderModels.Thin);
+            }
+            return ExcelRowModels.WithEntries(values, ExcelStyleModels.Bold, ExcelStyleModels.ThinBorder);
         }
 
         internal static ExcelRowModel TopTableDistrict(SimulationOutput output, int districtNumber)
@@ -50,7 +58,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             {
                 Values = DistrictTotalsExcelModelEnumerables.TopTableDistrictContent(output, districtNumber)
                 .Select(x => RelativeExcelRangeModels.OneByOne(x))
-                .ToList()
+                .ToList(),
             };
         }
 
@@ -73,12 +81,18 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         {
             var totalText = StackedExcelModels.BoldText("Total");
             var sumFormula = ExcelFormulaModels.StartOffsetRangeSum(0, -12, 0, -1);
+            var styledFormula = StackedExcelModels.Stacked(sumFormula, DistrictTotalsStyleModels.DarkGreenFill);
             var entries = new List<IExcelModel> { totalText };
             for (int i=0; i<output.Years.Count; i++)
             {
-                entries.Add(sumFormula);
+                entries.Add(styledFormula);
             }
-            entries.Add(ExcelFormulaModels.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0));
+            entries.Add(
+                StackedExcelModels.Stacked(
+                    ExcelFormulaModels.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0),
+                    ExcelStyleModels.MediumBorder,
+                    DistrictTotalsStyleModels.DarkGreenFill
+                ));
             return ExcelRowModels.WithEntries(entries);
         }
     }

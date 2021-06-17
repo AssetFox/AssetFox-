@@ -31,7 +31,12 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                     totalMoney += cost;
                 }
             }
-            return ExcelValueModels.Money(totalMoney);
+            return StackedExcelModels.Stacked(
+                ExcelValueModels.Money(totalMoney),
+                ExcelStyleModels.Right,
+                ExcelStyleModels.ThinBorder,
+                DistrictTotalsStyleModels.LightGreenFill
+                );
         }
 
         internal static IExcelModel TopTableDistrictContent(SimulationYearDetail year, int districtNumber)

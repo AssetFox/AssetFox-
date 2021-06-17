@@ -5,6 +5,10 @@ using System.Threading.Tasks;
 
 namespace BridgeCareCore.Services.SummaryReport.Models
 {
+    /// <summary>
+    /// All of the models will get applied in the same place. If two conflict,
+    /// the later one wins.
+    /// </summary>
     public static class StackedExcelModels
     {
         public static StackedExcelModel Stacked(params IExcelModel[] stack)
@@ -18,6 +22,6 @@ namespace BridgeCareCore.Services.SummaryReport.Models
         public static StackedExcelModel BoldText(string text)
             => Stacked(
                 ExcelValueModels.String(text),
-                ExcelValueModels.Bold);
+                ExcelStyleModels.Bold);
     }
 }

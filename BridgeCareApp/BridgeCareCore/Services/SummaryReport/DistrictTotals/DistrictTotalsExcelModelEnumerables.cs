@@ -11,23 +11,41 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
     {
         internal static IEnumerable<IExcelModel> TopTableDistrictContent(SimulationOutput output, int districtNumber)
         {
-            yield return ExcelValueModels.Integer(districtNumber);
+            yield return StackedExcelModels.Stacked(
+                ExcelValueModels.Integer(districtNumber),
+                ExcelStyleModels.HorizontalCenter,
+                ExcelStyleModels.ThinBorder
+                );
             foreach (var year in output.Years)
             {
                yield return DistrictTotalsExcelModels.TopTableDistrictContent(year, districtNumber);
             }
             var sumRange = ExcelRangeFunctions.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0);
-            yield return ExcelFormulaModels.FromFunction(sumRange);
+            yield return
+                StackedExcelModels.Stacked(
+                ExcelFormulaModels.FromFunction(sumRange),
+                ExcelStyleModels.Right,
+                ExcelStyleModels.MediumBorder,
+                DistrictTotalsStyleModels.DarkGreenFill
+                );
         }
 
         internal static IEnumerable<IExcelModel> TopTableTurnpikeContent(SimulationOutput output)
         {
-            yield return ExcelValueModels.String("Turnpike");
+            yield return StackedExcelModels.Stacked(
+                ExcelValueModels.String("Turnpike"),
+                ExcelStyleModels.HorizontalCenter,
+                ExcelStyleModels.ThinBorder
+                );
             foreach (var year in output.Years)
             {
                 yield return DistrictTotalsExcelModels.DistrictTableTurnpikeContent(year);
             }
-            yield return ExcelFormulaModels.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0);
+            yield return StackedExcelModels.Stacked(
+                ExcelFormulaModels.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0),
+                ExcelStyleModels.MediumBorder,
+                DistrictTotalsStyleModels.DarkGreenFill
+            );
         }
     }
 }

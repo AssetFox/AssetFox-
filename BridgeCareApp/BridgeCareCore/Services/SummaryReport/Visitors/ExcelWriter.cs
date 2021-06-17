@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BridgeCareCore.Services.SummaryReport.Models;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 
 namespace BridgeCareCore.Services.SummaryReport.Visitors
 {
@@ -55,6 +56,25 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             cells.Style.Border.Right.Style = model.BorderStyle;
             cells.Style.Border.Bottom.Style = model.BorderStyle;
             cells.Style.Border.Left.Style = model.BorderStyle;
+            return Unit.Default;
+        }
+
+        public Unit Visit(ExcelHorizontalAlignmentModel model, ExcelRange cells)
+        {
+            cells.Style.HorizontalAlignment = model.Alignment;
+            return Unit.Default;
+        }
+
+        public Unit Visit(ExcelFillModel model, ExcelRange cells)
+        {
+            cells.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            cells.Style.Fill.BackgroundColor.SetColor(model.Color);
+            return Unit.Default;
+        }
+
+        public Unit Visit(ExcelFontColorModel model, ExcelRange cells)
+        {
+            cells.Style.Font.Color.SetColor(model.Color);
             return Unit.Default;
         }
     }

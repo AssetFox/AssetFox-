@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
@@ -115,8 +115,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SectionName = Section.Name,
                     SectionId = Section.Id,
                 };
-
-                SimulationRunner.Fail(messageBuilder.ToString());
+                var logBuilder = SimulationLogMessageBuilders.CalculationFatal(messageBuilder.ToString(), SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(logBuilder);
             }
 
             GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
@@ -146,7 +146,17 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return number;
         }
 
-        public double GetSpatialWeight() => Section.SpatialWeighting.Compute(this);
+        public double GetSpatialWeight()
+        {
+            var r = Section.SpatialWeighting.Compute(this);
+            if (double.IsNaN(r) || double.IsInfinity(r))
+            {
+                var errorMessage = SimulationLogMessages.SpatialWeightCalculationReturned(Section, Section.SpatialWeighting, r);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(messageBuilder);
+            }
+            return r;
+        }
 
         public void MarkTreatmentProgress(Treatment treatment)
         {
@@ -252,18 +262,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private void ApplyTreatmentButNotMetadata(Treatment treatment)
         {
-            try
+            var consequenceActions = treatment.GetConsequenceActions(this);
+            foreach (var consequenceAction in consequenceActions)
             {
-                var consequenceActions = treatment.GetConsequenceActions(this);
-                foreach (var consequenceAction in consequenceActions)
-                {
-                    consequenceAction();
-                }
-            }
-            catch (SimulationException e)
-            {
-                SimulationRunner.Fail(e.Message, false);
-                throw;
+                consequenceAction();
             }
 
             AppliedTreatmentWithPendingMetadata = treatment;
@@ -297,6 +299,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve);
 
+        private double CalculateValueOnCurve(PerformanceCurve curve, Action<double> handle)
+        {
+            var value = CalculateValueOnCurve(curve);
+            handle(value);
+            return value;
+        }
+
         private void CheckPassiveTreatmentCostIsZero()
         {
             var cost = GetCostOfTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment);
@@ -310,7 +319,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SectionId = Section.Id,
                 };
 
-                SimulationRunner.Fail(messageBuilder.ToString());
+                var builder = new SimulationLogMessageBuilder
+                {
+                    SimulationId = SimulationRunner.Simulation.Id,
+                    Message = messageBuilder.ToString(),
+                    Status = SimulationLogStatus.Fatal,
+                    Subject = SimulationLogSubject.Runtime,
+                };
+                SimulationRunner.Send(builder);
             }
         }
 
@@ -326,6 +342,17 @@ namespace AppliedResearchAssociates.iAM.Analysis
             foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.TextAttributes)
             {
                 detail.ValuePerTextAttribute.Add(attribute.Name, GetText(attribute.Name));
+            }
+        }
+
+        private void SendToSimulationLogIfNeeded(PerformanceCurve curve, double value)
+        {
+            if (double.IsNaN(value) || double.IsInfinity(value))
+            {
+                var key = curve.Attribute.Name;
+                var errorMessage = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, value);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(messageBuilder);
             }
         }
 
@@ -349,7 +376,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SectionId = Section.Id,
                 };
 
-                SimulationRunner.Fail(messageBuilder.ToString());
+                var logBuilder = SimulationLogMessageBuilders.RuntimeFatal(messageBuilder, SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(logBuilder);
             }
 
             if (operativeCurves.Count > 1)
@@ -361,12 +389,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SectionId = Section.Id,
                 };
 
-                SimulationRunner.Warn(messageBuilder.ToString());
+                var logMessage = SimulationLogMessageBuilders.RuntimeWarning(messageBuilder, SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(logMessage);
             }
 
             Func<double>
-                calculateMinimum = () => operativeCurves.Min(CalculateValueOnCurve),
-                calculateMaximum = () => operativeCurves.Max(CalculateValueOnCurve);
+                calculateMinimum = () => operativeCurves.Min(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value))),
+                calculateMaximum = () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));
 
             return curves.Key.IsDecreasingWithDeterioration ? calculateMinimum : calculateMaximum;
         }
@@ -404,7 +433,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
                     catch (SimulationException e)
                     {
-                        SimulationRunner.Fail(e.Message, false);
+                        var logBuilder = SimulationLogMessageBuilders.Exception(e, SimulationRunner.Simulation.Id);
+                        SimulationRunner.Send(logBuilder, false);
                         throw;
                     }
                 }

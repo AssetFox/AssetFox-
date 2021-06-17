@@ -19,7 +19,8 @@ namespace BridgeCareCore.Services.SummaryReport
     {
         private readonly ILogger<SummaryReportGenerator> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
-        private readonly IUnfundedRecommendations _unfundedRecommendations;
+        private readonly IUnfundedTreatmentFinalList _unfundedTreatmentFinalList;
+        private readonly IUnfundedTreatmentTime _unfundedTreatmentTime;
         private readonly IBridgeWorkSummary _bridgeWorkSummary;
         private readonly IBridgeWorkSummaryByBudget _bridgeWorkSummaryByBudget;
         private readonly SummaryReportGlossary _summaryReportGlossary;
@@ -30,7 +31,8 @@ namespace BridgeCareCore.Services.SummaryReport
 
         public SummaryReportGenerator(IBridgeDataForSummaryReport bridgeDataForSummaryReport,
             ILogger<SummaryReportGenerator> logger,
-            IUnfundedRecommendations unfundedRecommendations,
+            IUnfundedTreatmentFinalList unfundedTreatmentFinalList,
+            IUnfundedTreatmentTime unfundedTreatmentTime,
             IBridgeWorkSummary bridgeWorkSummary, IBridgeWorkSummaryByBudget workSummaryByBudget,
             SummaryReportGlossary summaryReportGlossary, SummaryReportParameters summaryReportParameters,
             IHubService hubService,
@@ -38,7 +40,8 @@ namespace BridgeCareCore.Services.SummaryReport
             UnitOfDataPersistenceWork unitOfWork)
         {
             _bridgeDataForSummaryReport = bridgeDataForSummaryReport ?? throw new ArgumentNullException(nameof(bridgeDataForSummaryReport));
-            _unfundedRecommendations = unfundedRecommendations ?? throw new ArgumentNullException(nameof(unfundedRecommendations));
+            _unfundedTreatmentFinalList = unfundedTreatmentFinalList ?? throw new ArgumentNullException(nameof(unfundedTreatmentFinalList));
+            _unfundedTreatmentTime = unfundedTreatmentTime ?? throw new ArgumentNullException(nameof(unfundedTreatmentTime));
             _bridgeWorkSummary = bridgeWorkSummary ?? throw new ArgumentNullException(nameof(bridgeWorkSummary));
             _bridgeWorkSummaryByBudget = workSummaryByBudget ?? throw new ArgumentNullException(nameof(workSummaryByBudget));
             _summaryReportGlossary = summaryReportGlossary ?? throw new ArgumentNullException(nameof(summaryReportGlossary));
@@ -149,12 +152,20 @@ namespace BridgeCareCore.Services.SummaryReport
 
             // Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
-            reportDetailDto.Status = $"Creating Unfunded Recommendations TAB";
+
+            // Unfunded Treatment - Final List TAB
+            reportDetailDto.Status = $"Creating Unfunded Treatment - Final List TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
-            // Unfunded Recommendations TAB
-            var unfundedRecommendationWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Recommendations");
-            _unfundedRecommendations.Fill(unfundedRecommendationWorksheet, reportOutputData);
+            var unfundedTreatmentFinalListWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Final List");
+            _unfundedTreatmentFinalList.Fill(unfundedTreatmentFinalListWorksheet, reportOutputData);
+
+            // Unfunded Treatment - Time TAB
+            reportDetailDto.Status = $"Creating Unfunded Treatment - Time TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+            var unfundedTreatmentTimeWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Time");
+            _unfundedTreatmentTime.Fill(unfundedTreatmentTimeWorksheet, reportOutputData);
 
             // Simulation Legend TAB
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add("Legend");

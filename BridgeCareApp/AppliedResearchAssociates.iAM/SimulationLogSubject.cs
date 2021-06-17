@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AppliedResearchAssociates.iAM.DTOs.Static
+namespace AppliedResearchAssociates.iAM
 {
     public enum SimulationLogSubject
     {
         Validation,
         ExceptionThrown,
+        Calculation,
+        Started,
+        Runtime,
+        Completed,
     }
 }

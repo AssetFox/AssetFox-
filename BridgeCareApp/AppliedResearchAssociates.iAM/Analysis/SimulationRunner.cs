@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +13,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public SimulationRunner(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
-        public event EventHandler<FailureEventArgs> Failure;
-
-        public event EventHandler<InformationEventArgs> Information;
-
-        public event EventHandler<WarningEventArgs> Warning;
+        public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
         public event EventHandler<ProgressEventArgs> Progress;
 
@@ -51,7 +47,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
             catch (SimulationException e)
             {
-                Fail(e.Message, false);
+                var logMessage = SimulationLogMessageBuilders.Exception(e, Simulation.Id);
+                Send(logMessage, false);
                 throw;
             }
 
@@ -98,7 +95,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     ItemId = Simulation.Id,
                 };
 
-                Fail(MessageBuilder.ToString());
+                var logMessage = SimulationLogMessageBuilders.RuntimeFatal(MessageBuilder, Simulation.Id);
+                Send(logMessage);
             }
 
             InParallel(SectionContexts, context => context.RollForward());
@@ -189,19 +187,29 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     ItemId = Simulation.Id,
                 };
 
-                Fail(MessageBuilder.ToString());
+                var logMessageBuilder = SimulationLogMessageBuilders.HasValidationErrors(MessageBuilder, Simulation.Id);
+                Send(logMessageBuilder);
             }
 
             var numberOfWarnings = simulationValidationResults.Count(result => result.Status == ValidationStatus.Warning);
             if (numberOfWarnings > 0)
             {
-                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation warnings.")
+                var warningsWord = numberOfWarnings == 1 ? "warning" : "warnings";
+                MessageBuilder = new SimulationMessageBuilder($"Simulation has {numberOfWarnings} validation {warningsWord}.")
                 {
                     ItemName = Simulation.Name,
                     ItemId = Simulation.Id,
                 };
 
-                Warn(MessageBuilder.ToString());
+                var logBuilder = new SimulationLogMessageBuilder
+                {
+                    Message = MessageBuilder.ToString(),
+                    SimulationId = Simulation.Id,
+                    Status = SimulationLogStatus.Warning,
+                    Subject = SimulationLogSubject.Validation,
+                };
+
+                Send(logBuilder);
             }
         }
 
@@ -211,21 +219,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal IReadOnlyDictionary<string, NumberAttribute> NumberAttributeByName { get; private set; }
 
-        internal void Fail(string message, bool shouldThrow = true)
-        {
-            OnFailure(new FailureEventArgs(message));
-
-            if (shouldThrow)
-            {
-                throw new SimulationException(message);
-            }
-        }
-
         internal double GetInflationFactor(int year) => Simulation.InvestmentPlan.GetInflationFactor(year);
-
-        internal void Inform(string message) => OnInformation(new InformationEventArgs(message));
-
-        internal void Warn(string message) => OnWarning(new WarningEventArgs(message));
 
         internal void ReportProgress(ProgressStatus progressStatus, double percentComplete = 0, int? year = null) => OnProgress(new ProgressEventArgs(progressStatus, percentComplete, year));
 
@@ -351,7 +345,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                                 ItemId = treatment.Id,
                             };
 
-                            Warn(MessageBuilder.ToString());
+                            var warning = SimulationLogMessageBuilders.RuntimeWarning(MessageBuilder, Simulation.Id);
+                            Send(warning);
 
                             var actualSpendingLimit = SpendingLimit;
                             SpendingLimit = SpendingLimit.NoLimit;
@@ -386,6 +381,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
 
             return unhandledContexts;
+        }
+
+        private void OnProgress(ProgressEventArgs e) => Progress?.Invoke(this, e);
+
+        internal void Send(SimulationLogMessageBuilder message, bool throwOnFatal = true)
+        {
+            var args = new SimulationLogEventArgs(message);
+            OnLog(args);
+            if (message.Status == SimulationLogStatus.Fatal && throwOnFatal)
+            {
+                throw new SimulationException(message.Message);
+            }
         }
 
         private bool ConditionGoalsAreMet(int year)
@@ -541,6 +548,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
 
                     context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
+                    var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Section, treatment, cost, context.SimulationRunner.Simulation.Id);
+                    Send(messageBuilder);
                     return true;
                 });
 
@@ -636,13 +645,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private void OnFailure(FailureEventArgs e) => Failure?.Invoke(this, e);
-
-        private void OnInformation(InformationEventArgs e) => Information?.Invoke(this, e);
-
-        private void OnWarning(WarningEventArgs e) => Warning?.Invoke(this, e);
-
-        private void OnProgress(ProgressEventArgs e) => Progress?.Invoke(this, e);
+        private void OnLog(SimulationLogEventArgs e) => SimulationLog?.Invoke(this, e);
 
         private void RecordStatusOfConditionGoals(SimulationYearDetail detail)
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
@@ -49,13 +50,19 @@ namespace AppliedResearchAssociates.iAM.Domains
             return results;
         }
 
-        internal override IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope)
+        internal override IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope, Treatment treatment)
         {
-            var applicators = base.GetChangeApplicators(scope);
+            var applicators = base.GetChangeApplicators(scope, treatment);
 
             if (!Equation.ExpressionIsBlank && Attribute is NumberAttribute)
             {
                 var newValue = Equation.Compute(scope);
+                if (double.IsNaN(newValue) || double.IsInfinity(newValue))
+                {
+                    var errorMessage = SimulationLogMessages.TreatmentConsequenceReturned(scope.Section, treatment, Equation, this, newValue);
+                    var logBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, scope.SimulationRunner.Simulation.Id);
+                    scope.SimulationRunner.Send(logBuilder);
+                }
                 var equationApplicator = new ChangeApplicator(() => scope.SetNumber(Attribute.Name, newValue), newValue);
                 applicators = applicators.Append(equationApplicator);
             }

@@ -23,19 +23,24 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             var numberOfYears = output.Years.Count;
             return new RowBasedExcelWorksheetModel
             {
-                Region = new RowBasedExcelRegionModel
-                {
-                    Rows = new List<ExcelRowModel>
-                    {
-                        DistrictTotalsRowModels.IndexingRow(numberOfYears),
-                        DistrictTotalsRowModels.FirstYearRow(output),
-                        ExcelRowModels.Empty,
-                        ExcelRowModels.IndentedHeader(1, "Dollars Spent on MPMS Projects by District", numberOfYears, 1),
-                        DistrictTotalsRowModels.DistrictAndYearsHeaders(output, "District Total"),
-                        DistrictTotalsRowModels.District(output, 1),
-                        DistrictTotalsRowModels.District(output, 8)
-                    },
-                },
+                Region = RowBasedExcelRegionModels.Concat(
+                    DistrictTotalsRegions.TopPortion(output),
+                    RowBasedExcelRegionModels.BlankLine,
+                    DistrictTotalsRegions.MpmsTable(output)
+                    ),
+                //Region = new RowBasedExcelRegionModel
+                //{
+                //    Rows = new List<ExcelRowModel>
+                //    {
+                //        DistrictTotalsRowModels.IndexingRow(numberOfYears),
+                //        DistrictTotalsRowModels.FirstYearRow(output),
+                //        ExcelRowModels.Empty,
+                //        
+                //        DistrictTotalsRowModels.DistrictAndYearsHeaders(output, "District Total"),
+                //        DistrictTotalsRowModels.District(output, 1),
+                //        DistrictTotalsRowModels.District(output, 8)
+                //    },
+                //},
             };
         }
     }

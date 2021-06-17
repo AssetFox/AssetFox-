@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace BridgeCareCore.Services.SummaryReport.Models
+{
+    public static class RowBasedExcelRegionModels
+    {
+        public static RowBasedExcelRegionModel Concat(
+            List<RowBasedExcelRegionModel> regions)
+        {
+            var rows = new List<ExcelRowModel>();
+            foreach (var region in regions)
+            {
+                rows.AddRange(region.Rows);
+            }
+            return new RowBasedExcelRegionModel
+            {
+                Rows = rows,
+            };
+        }
+
+        public static RowBasedExcelRegionModel Concat(
+            params RowBasedExcelRegionModel[] regions)
+            => Concat(regions.ToList());
+
+        internal static RowBasedExcelRegionModel WithRows(List<ExcelRowModel> rows)
+            => new RowBasedExcelRegionModel
+            {
+                Rows = rows,
+            };
+
+        internal static RowBasedExcelRegionModel WithRows(params ExcelRowModel[] rows)
+            => WithRows(rows.ToList());
+
+        internal static RowBasedExcelRegionModel BlankLine =>
+            WithRows(ExcelRowModels.Empty);
+        
+    }
+}

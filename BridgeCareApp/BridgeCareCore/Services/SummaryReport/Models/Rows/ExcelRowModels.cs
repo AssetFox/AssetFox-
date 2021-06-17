@@ -10,10 +10,11 @@ namespace BridgeCareCore.Services.SummaryReport.Models
         public static ExcelRowModel WithEntries(params IExcelModel[] entries)
             => WithEntries(entries.ToList());
 
-        public static ExcelRowModel WithEntries(IList<IExcelModel> entries, params IExcelModel[] everyCell)
+        public static ExcelRowModel WithEntries<T>(List<T> entries, params IExcelModel[] everyCell)
+            where T: IExcelModel
             => new ExcelRowModel
             {
-                Values = entries.Select(RelativeExcelRangeModels.OneByOne).ToList(),
+                Values = entries.Select(x => RelativeExcelRangeModels.OneByOne(x)).ToList(),
                 EveryCell = StackedExcelModels.Stacked(everyCell),
             };
 

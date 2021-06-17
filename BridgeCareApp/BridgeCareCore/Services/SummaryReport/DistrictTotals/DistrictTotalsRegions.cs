@@ -30,8 +30,9 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             };
             foreach (var districtNumber in NumberedDistricts)
             {
-                rows.Add(DistrictTotalsRowModels.District(output, districtNumber));
+                rows.Add(DistrictTotalsRowModels.TopTableDistrict(output, districtNumber));
             }
+            rows.Add(DistrictTotalsRowModels.TopTableTurnpike(output));
             return RowBasedExcelRegionModels.WithRows(rows);
         }
 

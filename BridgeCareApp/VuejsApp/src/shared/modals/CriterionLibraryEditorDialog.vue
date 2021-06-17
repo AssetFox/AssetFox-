@@ -27,7 +27,7 @@
                         class="ara-blue-bg white--text"
                         @click="onBeforeSubmit(true)"
                     >
-                        Save
+                        Apply Changes
                     </v-btn>
                     <v-btn
                         class="ara-orange-bg white--text"

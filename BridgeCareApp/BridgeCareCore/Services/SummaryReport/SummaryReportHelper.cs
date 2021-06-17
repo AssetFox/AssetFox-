@@ -12,12 +12,6 @@ namespace BridgeCareCore.Services.SummaryReport
         // Identifying 185 Bridges
         public bool BridgeFunding185(SectionDetail section)
         {
-            // ----------------------------------------------------------
-            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
-            return false;
-            // ----------------------------------------------------------
-
-
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
             var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
             var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
@@ -32,12 +26,6 @@ namespace BridgeCareCore.Services.SummaryReport
         // Identifying 581 Bridges
         public bool BridgeFunding581(SectionDetail section)
         {
-            // ----------------------------------------------------------
-            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
-            return false;
-            // ----------------------------------------------------------
-
-
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
             var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
             var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
@@ -52,12 +40,6 @@ namespace BridgeCareCore.Services.SummaryReport
         // Identifing STP Bridges
         public bool BridgeFundingSTP(SectionDetail section)
         {
-            // ----------------------------------------------------------
-            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
-            return false;
-            // ----------------------------------------------------------
-
-
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
             var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
 
@@ -70,12 +52,6 @@ namespace BridgeCareCore.Services.SummaryReport
         // Identifying NHPP Bridges
         public bool BridgeFundingNHPP(SectionDetail section)
         {
-            // ----------------------------------------------------------
-            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
-            return false;
-            // ----------------------------------------------------------
-
-
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
             var functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
 
@@ -87,12 +63,6 @@ namespace BridgeCareCore.Services.SummaryReport
         // Identifying BOF Bridges
         public bool BridgeFundingBOF(SectionDetail section)
         {
-            // ----------------------------------------------------------
-            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
-            return false;
-            // ----------------------------------------------------------
-
-
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
             var functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
             var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
@@ -107,12 +77,6 @@ namespace BridgeCareCore.Services.SummaryReport
         // Identifying 183 Bridges
         public bool BridgeFunding183(SectionDetail section)
         {
-            // ----------------------------------------------------------
-            // TODO: REMOVE WHEN "FEDAID" PARAMETER IS AVAILABLE
-            return false;
-            // ----------------------------------------------------------
-
-
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
             var functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
             var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];

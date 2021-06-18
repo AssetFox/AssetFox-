@@ -57,7 +57,7 @@ namespace BridgeCareCore
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials()
-                .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com", "https://iam-demo.net/");
+                .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com", "https://iam-demo.net/", "https://test.iam-deploy.com");
             }));
 
             var securityType = Configuration.GetSection("SecurityType").Value;

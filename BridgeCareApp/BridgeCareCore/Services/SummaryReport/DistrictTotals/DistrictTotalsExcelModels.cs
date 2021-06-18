@@ -19,10 +19,17 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             var sections = year.Sections;
             foreach (var section in sections)
             {
-                if (inclusionPredicate(section))
+                try
                 {
-                    var cost = TotalCost(section);
-                    totalMoney += cost;
+                    if (inclusionPredicate(section))
+                    {
+                        var cost = TotalCost(section);
+                        totalMoney += cost;
+                    }
+                }
+                catch
+                {
+                    // just swallow the error and skip the section
                 }
             }
             return StackedExcelModels.Stacked(

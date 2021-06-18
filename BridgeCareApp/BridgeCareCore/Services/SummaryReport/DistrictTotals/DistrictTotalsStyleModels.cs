@@ -21,6 +21,6 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             => StackedExcelModels.Stacked(
                 ExcelStyleModels.Right,
                 ExcelStyleModels.MediumBorder,
-                DistrictTotalsStyleModels.DarkGreenFill);
+                DarkGreenFill);
     }
 }

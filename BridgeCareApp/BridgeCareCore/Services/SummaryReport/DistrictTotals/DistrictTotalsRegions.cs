@@ -26,7 +26,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             var rows = new List<ExcelRowModel>
             {
                 ExcelRowModels.IndentedHeader(1, "Dollars Spent on MPMS Projects by District", output.Years.Count, 1),
-                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotals)
+                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotal)
             };
             foreach (var districtNumber in NumberedDistricts)
             {
@@ -42,7 +42,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             var rows = new List<ExcelRowModel>
             {
                 ExcelRowModels.IndentedHeader(1, "Dollars Spent on BAMS Projects by District", output.Years.Count, 1),
-                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotals),
+                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotal),
             };
             foreach (var districtNumber in NumberedDistricts)
             {
@@ -58,7 +58,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             var rows = new List<ExcelRowModel>
             {
                 ExcelRowModels.IndentedHeader(1, "Overall Dollars Spent on Projects by District", output.Years.Count, 1),
-                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotals),
+                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotal),
             };
 
             foreach (var districtNumber in NumberedDistricts)

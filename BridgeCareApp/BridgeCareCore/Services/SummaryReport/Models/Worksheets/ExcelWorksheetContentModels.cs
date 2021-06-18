@@ -12,5 +12,11 @@ namespace BridgeCareCore.Services.SummaryReport.Models.Worksheets
             {
                 MinWidth = minWidth,
             };
+        internal static IExcelWorksheetContentModel SpecificColumnWidthDelta(int columnNumber, Func<double, double> columnWidthChange)
+            => new SpecificColumnWidthChangeExcelWorksheetModel
+            {
+                ColumnNumber = columnNumber,
+                WidthChange = columnWidthChange,
+            };
     }
 }

@@ -14,7 +14,8 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 Content = new List<IExcelWorksheetContentModel>
                 {
                     DistrictTotalsContent(output),
-                    ExcelWorksheetContentModels.AutoFitColumns(12.5)
+                    ExcelWorksheetContentModels.AutoFitColumns(12.5),
+                    ExcelWorksheetContentModels.SpecificColumnWidthDelta(output.Years.Count + 2, x => x+3),
                 }
             };
 

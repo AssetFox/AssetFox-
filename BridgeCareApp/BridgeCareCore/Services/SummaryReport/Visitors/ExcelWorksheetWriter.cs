@@ -17,5 +17,14 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             worksheet.Cells.AutoFitColumns(model.MinWidth);
             return worksheet;
         }
+
+        public ExcelWorksheet Visit(SpecificColumnWidthChangeExcelWorksheetModel model, ExcelWorksheet worksheet)
+        {
+            var column = worksheet.Column(model.ColumnNumber);
+            var oldWidth = column.Width;
+            var newWidth = model.WidthChange(oldWidth);
+            column.Width = newWidth;
+            return worksheet;
+        }
     }
 }

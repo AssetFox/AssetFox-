@@ -2,6 +2,6 @@
 {
     internal class DistrictTotalsStringConstants
     {
-        public const string DistrictTotals = "District Totals";
+        public const string DistrictTotal = "District Total";
     }
 }

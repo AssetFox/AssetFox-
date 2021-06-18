@@ -326,6 +326,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     Status = SimulationLogStatus.Fatal,
                     Subject = SimulationLogSubject.Runtime,
                 };
+
                 SimulationRunner.Send(builder);
             }
         }

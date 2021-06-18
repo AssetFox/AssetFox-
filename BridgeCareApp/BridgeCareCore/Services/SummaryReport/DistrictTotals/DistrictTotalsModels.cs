@@ -31,8 +31,9 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                     RowBasedExcelRegionModels.BlankLine,
                     DistrictTotalsRegions.BamsTable(output),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.TotalsTable(output)
-                    
+                    DistrictTotalsRegions.TotalsTable(output),
+                    RowBasedExcelRegionModels.BlankLine,
+                    DistrictTotalsRegions.PercentOverallDollarsByDistrictTable(output)
                     ),
             };
         }

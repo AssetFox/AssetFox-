@@ -16,5 +16,11 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
 
         public static Color LightOrange
             => Color.FromArgb(248, 203, 173);
+
+        public static Color LightBlue
+            => Color.FromArgb(180, 198, 231);
+
+        public static Color DarkBlue
+            => Color.FromArgb(0, 112, 192);
     }
 }

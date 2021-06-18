@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Services.SummaryReport.Models;
+using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
 {
@@ -36,6 +37,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             rows.Add(DistrictTotalsRowModels.TableBottomSumRow(output));
             return RowBasedExcelRegionModels.WithRows(rows);
         }
+
 
         public static RowBasedExcelRegionModel BamsTable(SimulationOutput output)
         {
@@ -74,6 +76,26 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 var percentYearlyAverage = DistrictTotalsExcelModels.PercentYearlyAverage(additionalRows.Count - 1 - rowIndex);
                 additionalRows[rowIndex].AddCells(yearlyAverage, percentYearlyAverage);
             }
+            return RowBasedExcelRegionModels.WithRows(rows);
+        }
+
+        internal static RowBasedExcelRegionModel PercentOverallDollarsByDistrictTable(SimulationOutput output)
+        {
+            var rows = new List<ExcelRowModel>
+            {
+                ExcelRowModels.IndentedHeader(1, "% of Overall Dollars Spent on Projects by District", output.Years.Count, 1),
+                DistrictTotalsRowModels.DistrictAndYearsHeaders(output)
+            };
+            var titles = new List<IExcelModel>();
+            titles.AddRange(NumberedDistricts.Select(x => ExcelValueModels.Integer(x)));
+            titles.Add(ExcelValueModels.String("Turnpike"));
+            var initialRowDelta = 4;
+            for (int i=0; i<titles.Count; i++)
+            {
+                var newRow = DistrictTotalsRowModels.PercentOverallDollarsContentRow(output, titles, initialRowDelta, i);
+                rows.Add(newRow);
+            }
+            rows.Add(DistrictTotalsRowModels.PercentOverallDollarsTotalsRow(output));
             return RowBasedExcelRegionModels.WithRows(rows);
         }
 

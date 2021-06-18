@@ -34,12 +34,6 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 BorderStyle = ExcelBorderStyle.Medium,
             };
 
-        public static ExcelBorderModel ThickBorder
-            => new ExcelBorderModel
-            {
-                BorderStyle = ExcelBorderStyle.Thick,
-            };
-
         public static ExcelHorizontalAlignmentModel HorizontalCenter
             => new ExcelHorizontalAlignmentModel
             {

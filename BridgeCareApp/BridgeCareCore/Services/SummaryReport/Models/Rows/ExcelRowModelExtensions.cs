@@ -14,5 +14,11 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 row.Values.Add(RelativeExcelRangeModels.OneByOne(model));
             }
         }
+
+        public static void AddRepeated(this ExcelRowModel row, int count, IExcelModel cellContent)
+        {
+            var cells = Enumerable.Repeat(cellContent, count).ToArray();
+            row.AddCells(cells);
+        }
     }
 }

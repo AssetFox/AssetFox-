@@ -77,5 +77,11 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             cells.Style.Font.Color.SetColor(model.Color);
             return Unit.Default;
         }
+
+        public Unit Visit(ExcelNumberFormatModel model, ExcelRange cells)
+        {
+            cells.Style.Numberformat.Format = model.Format;
+            return Unit.Default;
+        }
     }
 }

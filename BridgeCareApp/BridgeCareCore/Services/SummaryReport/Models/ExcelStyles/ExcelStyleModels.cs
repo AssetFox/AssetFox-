@@ -67,5 +67,11 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Color = color,
             };
 
+        public static ExcelNumberFormatModel CurrencyFormat =>
+            new ExcelNumberFormatModel
+            {
+                Format = ExcelFormatStrings.Currency
+            };
+
     }
 }

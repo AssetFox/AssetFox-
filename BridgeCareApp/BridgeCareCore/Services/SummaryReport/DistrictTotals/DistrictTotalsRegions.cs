@@ -30,9 +30,25 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             };
             foreach (var districtNumber in NumberedDistricts)
             {
-                rows.Add(DistrictTotalsRowModels.TopTableDistrict(output, districtNumber));
+                rows.Add(DistrictTotalsRowModels.MpmsTableDistrict(output, districtNumber));
             }
-            rows.Add(DistrictTotalsRowModels.TopTableTurnpike(output));
+            rows.Add(DistrictTotalsRowModels.MpmsTableTurnpike(output));
+            rows.Add(DistrictTotalsRowModels.TableBottomSumRow(output));
+            return RowBasedExcelRegionModels.WithRows(rows);
+        }
+
+        public static RowBasedExcelRegionModel BamsTable(SimulationOutput output)
+        {
+            var rows = new List<ExcelRowModel>
+            {
+                ExcelRowModels.IndentedHeader(1, "Dollars Spent on BAMS Projects by District", output.Years.Count, 1),
+                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotals),
+            };
+            foreach (var districtNumber in NumberedDistricts)
+            {
+                rows.Add(DistrictTotalsRowModels.BamsTableDistrict(output, districtNumber));
+            }
+            rows.Add(DistrictTotalsRowModels.BamsTableTurnpike(output));
             rows.Add(DistrictTotalsRowModels.TableBottomSumRow(output));
             return RowBasedExcelRegionModels.WithRows(rows);
         }

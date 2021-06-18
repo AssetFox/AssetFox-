@@ -29,11 +29,20 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             return r;
         }
 
-        public static bool IsNumberedDistrictTopTable(SectionDetail section, int districtNumber)
+        public static bool IsNumberedDistrictMpmsTable(SectionDetail section, int districtNumber)
         {
             var committed = IsCommittedProject(section);
             var district = IsDistrictNotTurnpike(section, districtNumber);
-            return committed && district;
+            return district && !committed;
+        }
+
+
+        public static bool IsNumberedDistrictBamsTable(SectionDetail section, int districtNumber)
+        {
+            var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
+            var committed = IsCommittedProject(section);
+            var district = IsDistrictNotTurnpike(section, districtNumber);
+            return district && !committed;
         }
 
         public static bool IsCommittedTurnpike(SectionDetail section)
@@ -41,6 +50,19 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             bool committed = IsCommittedProject(section);
             bool turnpike = IsTurnpike(section);
             return committed && turnpike;
+        }
+
+
+        public static bool IsTurnpikeButNotCommitted(SectionDetail section)
+        {
+
+            if (section.AppliedTreatment != "No Treatment")
+            {
+                int x = 666;
+            }
+            bool committed = IsCommittedProject(section);
+            bool turnpike = IsTurnpike(section);
+            return turnpike && !committed;
         }
     }
 }

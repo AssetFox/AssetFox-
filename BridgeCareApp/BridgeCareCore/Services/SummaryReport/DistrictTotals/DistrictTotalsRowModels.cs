@@ -52,16 +52,26 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             return ExcelRowModels.WithEntries(values, ExcelStyleModels.Bold, ExcelStyleModels.ThinBorder);
         }
 
-        internal static ExcelRowModel TopTableDistrict(SimulationOutput output, int districtNumber)
+        internal static ExcelRowModel MpmsTableDistrict(SimulationOutput output, int districtNumber)
         {
             return new ExcelRowModel
             {
-                Values = DistrictTotalsExcelModelEnumerables.TopTableDistrictContent(output, districtNumber)
+                Values = DistrictTotalsExcelModelEnumerables.MpmsTableDistrictContent(output, districtNumber)
                 .Select(x => RelativeExcelRangeModels.OneByOne(x))
                 .ToList(),
             };
         }
 
+
+        internal static ExcelRowModel BamsTableDistrict(SimulationOutput output, int districtNumber)
+        {
+            return new ExcelRowModel
+            {
+                Values = DistrictTotalsExcelModelEnumerables.BamsTableDistrictContent(output, districtNumber)
+                .Select(x => RelativeExcelRangeModels.OneByOne(x))
+                .ToList(),
+            };
+        }
 
         public static ExcelRowModel FirstYearRow(SimulationOutput output)
         {
@@ -70,9 +80,22 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 ExcelValueModels.Integer(year));
         }
 
-        public static ExcelRowModel TopTableTurnpike(SimulationOutput output)
+        public static ExcelRowModel MpmsTableTurnpike(SimulationOutput output)
         {
-            var values = DistrictTotalsExcelModelEnumerables.TopTableTurnpikeContent(output)
+            var title = ExcelValueModels.String("Turnpike");
+            var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title,
+                DistrictTotalsSectionDetailPredicates.IsCommittedTurnpike)
+               .ToList();
+            return ExcelRowModels.WithEntries(values);
+        }
+
+
+        public static ExcelRowModel BamsTableTurnpike(SimulationOutput output)
+        {
+
+            var title = ExcelValueModels.String("Turnpike");
+            var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title,
+                DistrictTotalsSectionDetailPredicates.IsTurnpikeButNotCommitted)
                .ToList();
             return ExcelRowModels.WithEntries(values);
         }
@@ -91,6 +114,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 StackedExcelModels.Stacked(
                     ExcelFormulaModels.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0),
                     ExcelStyleModels.MediumBorder,
+                    ExcelStyleModels.Right,
                     DistrictTotalsStyleModels.DarkGreenFill
                 ));
             return ExcelRowModels.WithEntries(entries);

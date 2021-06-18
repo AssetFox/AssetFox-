@@ -10,8 +10,6 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
     public static class DistrictTotalsExcelModels
     {
 
-
-
         private static decimal TotalCost(SectionDetail section)
             => section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
 
@@ -39,16 +37,22 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 );
         }
 
-        internal static IExcelModel TopTableDistrictContent(SimulationYearDetail year, int districtNumber)
+        internal static IExcelModel MpmsTableDistrictContent(SimulationYearDetail year, int districtNumber)
         {
-            Func<SectionDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictTopTable(detail, districtNumber);
+            Func<SectionDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber);
             return DistrictTableContent(year, predicate);
         }
 
 
-        internal static IExcelModel DistrictTableTurnpikeContent(SimulationYearDetail year)
+        internal static IExcelModel BamsTableDistrictContent(SimulationYearDetail year, int districtNumber)
         {
-            Func<SectionDetail, bool> predicate = DistrictTotalsSectionDetailPredicates.IsCommittedTurnpike;
+            Func<SectionDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber);
+            return DistrictTableContent(year, predicate);
+        }
+
+        internal static IExcelModel BamsTableTurnpikeContent(SimulationYearDetail year)
+        {
+            Func<SectionDetail, bool> predicate = DistrictTotalsSectionDetailPredicates.IsTurnpikeButNotCommitted;
             return DistrictTableContent(year, predicate);
         }
     }

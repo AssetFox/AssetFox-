@@ -26,7 +26,10 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 Region = RowBasedExcelRegionModels.Concat(
                     DistrictTotalsRegions.TopPortion(output),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.MpmsTable(output)
+                    DistrictTotalsRegions.MpmsTable(output),
+                    RowBasedExcelRegionModels.BlankLine,
+                    DistrictTotalsRegions.BamsTable(output),
+                    RowBasedExcelRegionModels.BlankLine
                     ),
                 //Region = new RowBasedExcelRegionModel
                 //{

@@ -53,5 +53,22 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             return RowBasedExcelRegionModels.WithRows(rows);
         }
 
+        public static RowBasedExcelRegionModel TotalsTable(SimulationOutput output)
+        {
+            var rows = new List<ExcelRowModel>
+            {
+                ExcelRowModels.IndentedHeader(1, "Overall Dollars Spent on Projects by District", output.Years.Count, 1),
+                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotals),
+            };
+
+            foreach (var districtNumber in NumberedDistricts)
+            {
+                rows.Add(DistrictTotalsRowModels.TotalsTableDistrict(output, districtNumber));
+            }
+            rows.Add(DistrictTotalsRowModels.TotalsTableTurnpike(output));
+            rows.Add(DistrictTotalsRowModels.TableBottomSumRow(output));
+            return RowBasedExcelRegionModels.WithRows(rows);
+        }
+
     }
 }

@@ -29,21 +29,10 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                     DistrictTotalsRegions.MpmsTable(output),
                     RowBasedExcelRegionModels.BlankLine,
                     DistrictTotalsRegions.BamsTable(output),
-                    RowBasedExcelRegionModels.BlankLine
+                    RowBasedExcelRegionModels.BlankLine,
+                    DistrictTotalsRegions.TotalsTable(output)
+                    
                     ),
-                //Region = new RowBasedExcelRegionModel
-                //{
-                //    Rows = new List<ExcelRowModel>
-                //    {
-                //        DistrictTotalsRowModels.IndexingRow(numberOfYears),
-                //        DistrictTotalsRowModels.FirstYearRow(output),
-                //        ExcelRowModels.Empty,
-                //        
-                //        DistrictTotalsRowModels.DistrictAndYearsHeaders(output, "District Total"),
-                //        DistrictTotalsRowModels.District(output, 1),
-                //        DistrictTotalsRowModels.District(output, 8)
-                //    },
-                //},
             };
         }
     }

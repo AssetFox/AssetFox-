@@ -8,7 +8,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
 {
     public static class DistrictTotalsSectionDetailPredicates
     {
-        private static bool IsTurnpike(SectionDetail section)
+        public static bool IsTurnpike(SectionDetail section)
         {
             var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
             bool r = ownerCode.Trim() == "01";

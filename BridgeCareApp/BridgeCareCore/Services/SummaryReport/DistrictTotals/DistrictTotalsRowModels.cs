@@ -71,6 +71,24 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             return ExcelRowModels.WithEntries(values);
         }
 
+        internal static ExcelRowModel TotalsTableDistrict(SimulationOutput output, int districtNumber)
+        {
+            var title = ExcelValueModels.Integer(districtNumber);
+            Func<SectionDetail, bool> predicate = section => DistrictTotalsSectionDetailPredicates.IsDistrictNotTurnpike(section, districtNumber);
+            var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
+                         .ToList();
+            return ExcelRowModels.WithEntries(values);
+        }
+
+        internal static ExcelRowModel TotalsTableTurnpike(SimulationOutput output)
+        {
+            var title = ExcelValueModels.String("Turnpike");
+            Func<SectionDetail, bool> predicate = DistrictTotalsSectionDetailPredicates.IsTurnpike;
+            var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
+                .ToList();
+            return ExcelRowModels.WithEntries(values);
+        }
+
         public static ExcelRowModel FirstYearRow(SimulationOutput output)
         {
             var year = output.Years.FirstOrDefault()?.Year ?? 0;

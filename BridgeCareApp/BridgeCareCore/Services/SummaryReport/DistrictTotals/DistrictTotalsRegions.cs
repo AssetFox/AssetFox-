@@ -58,15 +58,22 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             var rows = new List<ExcelRowModel>
             {
                 ExcelRowModels.IndentedHeader(1, "Overall Dollars Spent on Projects by District", output.Years.Count, 1),
-                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotal),
+                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotal, "Yearly Average", "% Yearly Average"),
             };
-
+            var additionalRows = new List<ExcelRowModel>();
             foreach (var districtNumber in NumberedDistricts)
             {
-                rows.Add(DistrictTotalsRowModels.TotalsTableDistrict(output, districtNumber));
+                additionalRows.Add(DistrictTotalsRowModels.TotalsTableDistrict(output, districtNumber));
             }
-            rows.Add(DistrictTotalsRowModels.TotalsTableTurnpike(output));
-            rows.Add(DistrictTotalsRowModels.TableBottomSumRow(output));
+            additionalRows.Add(DistrictTotalsRowModels.TotalsTableTurnpike(output));
+            additionalRows.Add(DistrictTotalsRowModels.TableBottomSumRow(output));
+            rows.AddRange(additionalRows);
+            for (var rowIndex = 0; rowIndex < additionalRows.Count; rowIndex++)
+            {
+                var yearlyAverage = DistrictTotalsExcelModels.YearlyAverage(output);
+                var percentYearlyAverage = DistrictTotalsExcelModels.PercentYearlyAverage(additionalRows.Count - 1 - rowIndex);
+                additionalRows[rowIndex].AddCells(yearlyAverage, percentYearlyAverage);
+            }
             return RowBasedExcelRegionModels.WithRows(rows);
         }
 

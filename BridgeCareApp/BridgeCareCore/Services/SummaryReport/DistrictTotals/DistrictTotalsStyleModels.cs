@@ -18,6 +18,9 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         public static ExcelFillModel LightGreenFill
             => ExcelStyleModels.BackgroundColor(DistrictTotalsColors.LightGreen);
 
+        public static ExcelFillModel LightOrangeFill
+            => ExcelStyleModels.BackgroundColor(DistrictTotalsColors.LightOrange);
+
         public static StackedExcelModel DarkGreenTotalsCells
             => StackedExcelModels.Stacked(
                 ExcelStyleModels.Right,

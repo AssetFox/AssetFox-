@@ -9,12 +9,14 @@ namespace BridgeCareCore.Services.SummaryReport.Models
 {
     public static class ExcelRangeFunctions
     {
-        public static Func<ExcelRange, string> StartOffset(int columnDelta, int rowDelta)
+        public static Func<ExcelRange, string> StartOffset(int columnDelta, int rowDelta, bool absoluteColumn = false, bool absoluteRow = false)
             => range =>
             {
                 var start = range.Start;
                 var offsetStart = ExcelCellAddressFunctions.Offset(start, columnDelta, rowDelta);
-                return offsetStart.Address;
+                var address = offsetStart.Address;
+                var r = ExcelAddressFunctions.ChangeAbsolute(address, absoluteColumn, absoluteRow);
+                return r;
             };
 
         /// <summary>
@@ -64,7 +66,7 @@ namespace BridgeCareCore.Services.SummaryReport.Models
             }
             return Empty;
         }
-        /// <summary>Any null arguments are replaced with the function that returns the empty string.
+        /// <summary>Any null arguments are repla,ced with the function that returns the empty string.
         /// If that's not what you want, see BuildExcelFunctionWithOptionalArguments.</summary>
         public static Func<ExcelRange, string> BuildExcelFunction(
             string functionName,

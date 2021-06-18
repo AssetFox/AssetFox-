@@ -23,7 +23,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 var function = ExcelRangeFunctions.Plus(
                     ExcelRangeFunctions.Left,
                     ExcelRangeFunctions.Constant("17"));
-                r.AddCell(ExcelFormulaModels.FromFunction(function));
+                r.AddCells(ExcelFormulaModels.FromFunction(function));
             }
             return r;
         }

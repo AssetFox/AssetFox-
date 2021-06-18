@@ -2,6 +2,7 @@
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Services.SummaryReport.Models;
+using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
 {
@@ -30,6 +31,35 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 ExcelStyleModels.ThinBorder,
                 ExcelStyleModels.CurrencyFormat,
                 DistrictTotalsStyleModels.LightGreenFill
+                );
+        }
+
+        internal static IExcelModel YearlyAverage(SimulationOutput output)
+        {
+            var sumFunction = ExcelRangeFunctions.StartOffsetRangeSum(-output.Years.Count - 1, 0, -2, 0);
+            string averageFunction(ExcelRange x) => $"{sumFunction(x)}/12";
+            return StackedExcelModels.Stacked(
+                ExcelFormulaModels.FromFunction(averageFunction),
+                ExcelStyleModels.Right,
+                ExcelStyleModels.ThinBorder,
+                ExcelStyleModels.CurrencyFormat,
+                DistrictTotalsStyleModels.LightOrangeFill);
+        }
+
+        internal static IExcelModel PercentYearlyAverage(int yOffset)
+        {
+            var localAddress = ExcelRangeFunctions.StartOffset(-1, 0);
+            var bottomAddress = ExcelRangeFunctions.StartOffset(-1, yOffset, false, true);
+            Func<ExcelRange, string> ratio = (ExcelRange range) =>
+            {
+                var r = $@"IFERROR({localAddress(range)}/{bottomAddress(range)},0)";
+                return r;
+            };
+            return StackedExcelModels.Stacked(
+                ExcelFormulaModels.FromFunction(ratio),
+                ExcelStyleModels.HorizontalCenter,
+                ExcelStyleModels.ThinBorder,
+                ExcelStyleModels.PercentageFormat(2)
                 );
         }
     }

@@ -73,5 +73,11 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Format = ExcelFormatStrings.Currency
             };
 
+        public static ExcelNumberFormatModel PercentageFormat(int digitsAfterDecimalPlace)
+            => new ExcelNumberFormatModel
+            {
+                Format = ExcelFormatStrings.Percentage(digitsAfterDecimalPlace),
+            };
+
     }
 }

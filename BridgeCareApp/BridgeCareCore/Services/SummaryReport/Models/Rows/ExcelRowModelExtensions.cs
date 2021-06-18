@@ -7,9 +7,12 @@ namespace BridgeCareCore.Services.SummaryReport.Models
 {
     public static class ExcelRowModelExtensions
     {
-        public static void AddCell(this ExcelRowModel row, IExcelModel cellContent)
+        public static void AddCells(this ExcelRowModel row, params IExcelModel[] cellContent)
         {
-            row.Values.Add(RelativeExcelRangeModels.OneByOne(cellContent));
+            foreach (var model in cellContent)
+            {
+                row.Values.Add(RelativeExcelRangeModels.OneByOne(model));
+            }
         }
     }
 }

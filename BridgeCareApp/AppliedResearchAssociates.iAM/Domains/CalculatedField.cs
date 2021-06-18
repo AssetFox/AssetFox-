@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DTOs.Static;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Domains
@@ -28,9 +27,8 @@ namespace AppliedResearchAssociates.iAM.Domains
             if (double.IsNaN(r) || double.IsInfinity(r))
             {
                 var errorMessage = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, equation, Name, r);
-                var messageBuilder = SimulationLogMessageBuilders.CalculationError(errorMessage, sectionContext.SimulationRunner.Simulation.Id);
-                sectionContext.SimulationRunner.SendToSimulationLog(messageBuilder);
-                sectionContext.SimulationRunner.Fail(errorMessage);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, sectionContext.SimulationRunner.Simulation.Id);
+                sectionContext.SimulationRunner.Send(messageBuilder);
             }
             return r;
         }
@@ -57,8 +55,6 @@ namespace AppliedResearchAssociates.iAM.Domains
 
                 throw new SimulationException(messageBuilder.ToString());
             }
-
-
 
             if (operativeSources.Count == 1)
             {

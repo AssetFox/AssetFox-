@@ -153,20 +153,32 @@ namespace Simulation
             }
 
             var runner = new SimulationRunner(newSimulation);
-            runner.Failure += (sender, eventArgs) => {
-                log.Info($"Failed:  {eventArgs.Message}");
-                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"Failed: {eventArgs.Message}");
-                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
-            };
-            runner.Information += (sender, eventArgs) => {
-                log.Info(eventArgs.Message);
-                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"{eventArgs.Message}");
-                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
-            };
-            runner.Warning += (sender, eventArgs) => { 
-                log.Info(eventArgs.Message);
-                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"{eventArgs.Message}");
-                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+            runner.SimulationLog += (sender, eventArgs) =>
+            {
+                static void handleLog(string prefix, SimulationLogMessageBuilder messageBuilder)
+                {
+                    var message = $"{prefix}{messageBuilder.Message}";
+                    log.Info(message);
+                    var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, message);
+                    Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+                }
+
+                var messageBuilder = eventArgs.MessageBuilder;
+                switch (messageBuilder.Status)
+                {
+                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Error:
+                        handleLog("Error: ", messageBuilder);
+                        break;
+                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Fatal:
+                        handleLog("Failed: ", messageBuilder);
+                        break;
+                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Information:
+                        handleLog("Info: ", messageBuilder);
+                        break;
+                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Warning:
+                        handleLog("Warning: ", messageBuilder);
+                        break;
+                };
             };
 
             var timer = Stopwatch.StartNew();

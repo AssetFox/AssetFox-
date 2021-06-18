@@ -15,6 +15,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             SimulationLogStatus.Error => "Error: ",
             SimulationLogStatus.Warning => "Warning: ",
             SimulationLogStatus.Information => "Info: ",
+            SimulationLogStatus.Progress => "Progress: ",
+            SimulationLogStatus.Fatal => "Fatal: ",
             _ => throw new NotImplementedException($"Unknown status {status}"),
         };
 

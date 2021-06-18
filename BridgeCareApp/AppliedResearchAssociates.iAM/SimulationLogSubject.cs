@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AppliedResearchAssociates.CalculateEvaluate
+namespace AppliedResearchAssociates.iAM
 {
     public enum SimulationLogSubject
     {
         Validation,
         ExceptionThrown,
         Calculation,
+        Started,
+        Runtime,
+        Completed,
     }
 }

@@ -18,14 +18,8 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
 
         public void FillModelBasedContent(ExcelWorksheet worksheet)
         {
-            var regionModel = new RowBasedExcelWorksheetModel
-            {
-                Region = ShortNameGlossaryColumns.GlossaryColumn(),
-                StartRow = 1,
-                StartColumn = 8,
-            };
-            var writer = new ExcelWorksheetWriter();
-            regionModel.Accept(writer, worksheet);
+            var regions = ShortNameGlossaryModels.Content;
+            ExcelWorksheetWriter.VisitList(worksheet, regions);
         }
 
         public void Fill(ExcelWorksheet worksheet)

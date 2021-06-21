@@ -23,6 +23,13 @@ namespace BridgeCareCore.Services.SummaryReport.Models
         public static ExcelRowModel Empty
             => WithEntries();
 
+
+        public static ExcelRowModel WithCells(params RelativeExcelRangeModel[] cells)
+            => new ExcelRowModel
+            {
+                Values = cells.ToList(),
+            };
+
         public static ExcelRowModel WithCells(List<RelativeExcelRangeModel> cells)
             => new ExcelRowModel
             {

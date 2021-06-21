@@ -10,6 +10,6 @@ namespace BridgeCareCore.Services.SummaryReport.Models
     public class RelativeExcelRangeModel
     {
         public IExcelModel Content { get; set; }
-        public ExcelRangeSize Size { get; set; }
+        public ExcelRangeSize Size { get; set; } = new ExcelRangeSize();
     }
 }

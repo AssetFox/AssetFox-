@@ -7,7 +7,7 @@ namespace BridgeCareCore.Services.SummaryReport.Models
 {
     public class ExcelRangeSize
     {
-        public ExcelRangeSize(int width, int height)
+        public ExcelRangeSize(int width = 1, int height = 1)
         {
             Width = width;
             Height = height;

@@ -19,6 +19,12 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Value = n
             };
 
+        public static ExcelDecimalValueModel Decimal(decimal x)
+            => new ExcelDecimalValueModel
+            {
+                Value = x
+            };
+
         public static ExcelNothingModel Nothing
             => new ExcelNothingModel();
 

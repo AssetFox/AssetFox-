@@ -6,7 +6,8 @@ using BridgeCareCore.Services.SummaryReport.Visitors;
 
 namespace BridgeCareCore.Services.SummaryReport.Models
 {
-    public class RowBasedExcelWorksheetModel: IExcelWorksheetContentModel
+    /// <summary>A region model, together with its location in the worksheet.</summary>
+    public class AnchoredExcelRegionModel: IExcelWorksheetContentModel
     {
         public RowBasedExcelRegionModel Region { get; set; }
         public int StartRow { get; set; } = 1;

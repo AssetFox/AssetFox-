@@ -22,6 +22,12 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Bold = false,
             };
 
+        public static ExcelWrapTextModel WrapText
+            => new ExcelWrapTextModel
+            {
+                Wrap = true,
+            };
+
         public static ExcelBorderModel ThinBorder
             => new ExcelBorderModel
             {

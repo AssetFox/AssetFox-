@@ -6,8 +6,85 @@ using BridgeCareCore.Services.SummaryReport.Models;
 
 namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
 {
-    public static class ShortNameGlossaryColumns
+    public static class ShortNameGlossaryModels
     {
+        public static List<IExcelWorksheetContentModel> Content
+            => new List<IExcelWorksheetContentModel>
+            {
+                ConditionRangeRegion,
+                GlossaryRegion()
+            };
+
+        public static AnchoredExcelRegionModel ConditionRangeRegion
+            => new AnchoredExcelRegionModel
+            {
+                Region = ConditionRangeContent(),
+                StartRow = 1,
+                StartColumn = 4
+            };
+
+        private static ExcelRowModel RowWithTwoColumnsThenOne(IExcelModel left, decimal number)
+            => ExcelRowModels.WithCells(
+                new RelativeExcelRangeModel
+                {
+                    Content = left,
+                    Size = new ExcelRangeSize(2, 1)
+                },
+                new RelativeExcelRangeModel
+                {
+                    Content = StackedExcelModels.Stacked(
+                        ExcelValueModels.Decimal(number),
+                        ExcelStyleModels.Right
+                        )
+                });
+
+        private static RowBasedExcelRegionModel ConditionRangeContent() =>
+            new RowBasedExcelRegionModel
+            {
+                Rows = new List<ExcelRowModel>
+                {
+                    ExcelRowModels.WithCells(
+                        new RelativeExcelRangeModel {
+                            Content =
+                        StackedExcelModels.Stacked(
+                            ExcelValueModels.String($"Posted / Closed Bridge Condition\r\n Range"),
+                            ExcelStyleModels.Bold,
+                            ExcelStyleModels.HorizontalCenter,
+                            ExcelStyleModels.WrapText),
+                            Size = new ExcelRangeSize(3, 1)
+                        }),
+                    ExcelRowModels.Empty,
+                    RowWithTwoColumnsThenOne(ExcelValueModels.String("Posted Condition"), 4.1m),
+                    RowWithTwoColumnsThenOne(ExcelValueModels.String("Closed Condition"), 3m),
+                    ExcelRowModels.Empty,
+                    ExcelRowModels.WithCells(
+                        new RelativeExcelRangeModel {
+                            Content = StackedExcelModels.Stacked(
+                                ExcelValueModels.String("Condition Limits"),
+                                ExcelStyleModels.Bold,
+                                ExcelStyleModels.HorizontalCenter),
+                            Size = new ExcelRangeSize(3, 1)
+                        }),
+
+                    ExcelRowModels.Empty,
+                    RowWithTwoColumnsThenOne(StackedExcelModels.Stacked(
+                        ExcelValueModels.String("Good Min Cond >"),
+                        ExcelStyleModels.HorizontalCenter),
+                        7),
+                    RowWithTwoColumnsThenOne(StackedExcelModels.Stacked(
+                        ExcelValueModels.String("Poor Min Cond <"),
+                        ExcelStyleModels.HorizontalCenter),
+                        5),
+                }
+            };
+
+        public static AnchoredExcelRegionModel GlossaryRegion()
+            => new AnchoredExcelRegionModel
+            {
+                Region = GlossaryColumn(),
+                StartRow = 1,
+                StartColumn = 8,
+            };
         public static RowBasedExcelRegionModel GlossaryColumn()
         {
             var content = TabDefinitionsContent();

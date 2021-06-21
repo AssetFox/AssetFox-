@@ -19,10 +19,10 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 }
             };
 
-        public static RowBasedExcelWorksheetModel DistrictTotalsContent(SimulationOutput output)
+        public static AnchoredExcelRegionModel DistrictTotalsContent(SimulationOutput output)
         {
             var numberOfYears = output.Years.Count;
-            return new RowBasedExcelWorksheetModel
+            return new AnchoredExcelRegionModel
             {
                 Region = RowBasedExcelRegionModels.Concat(
                     DistrictTotalsRegions.TopPortion(output),

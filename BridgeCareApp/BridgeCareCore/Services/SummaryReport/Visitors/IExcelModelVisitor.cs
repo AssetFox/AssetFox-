@@ -21,5 +21,8 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
         TOutput Visit(ExcelFontColorModel model, THelper helper);
         TOutput Visit(ExcelNumberFormatModel model, THelper helper);
         TOutput Visit(ExcelRichTextModel model, THelper helper);
+        TOutput Visit(ExcelDecimalValueModel model, THelper helper);
+
+        TOutput Visit(ExcelWrapTextModel model, THelper helper);
     }
 }

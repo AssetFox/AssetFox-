@@ -21,11 +21,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
         private readonly BridgeWorkCost _bridgeWorkCost;
         private readonly CommittedProjectCost _committedProjectCost;
         private readonly WorkTypeTotal _workTypeTotal;
-        private readonly ILog _log;
 
         public BridgeWorkSummaryByBudget(IExcelHelper excelHelper, BridgeWorkSummaryCommon bridgeWorkSummaryCommon,
-            CulvertCost culvertCost, BridgeWorkCost bridgeWorkCost, CommittedProjectCost committedProjectCost, WorkTypeTotal workTypeTotal,
-            ILog log)
+            CulvertCost culvertCost, BridgeWorkCost bridgeWorkCost, CommittedProjectCost committedProjectCost, WorkTypeTotal workTypeTotal)
         {
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
@@ -33,8 +31,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             _bridgeWorkCost = bridgeWorkCost ?? throw new ArgumentNullException(nameof(bridgeWorkCost));
             _committedProjectCost = committedProjectCost ?? throw new ArgumentNullException(nameof(committedProjectCost));
             _workTypeTotal = workTypeTotal ?? throw new ArgumentNullException(nameof(workTypeTotal));
-
-            _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,

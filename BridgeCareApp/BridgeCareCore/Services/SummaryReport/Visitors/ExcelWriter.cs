@@ -41,6 +41,13 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             return Unit.Default;
         }
 
+
+        public Unit Visit(ExcelItalicModel italic, ExcelRange cells)
+        {
+            cells.Style.Font.Italic = italic.Italic;
+            return Unit.Default;
+        }
+
         public Unit Visit(StackedExcelModel model, ExcelRange cells)
         {
             foreach (var child in model.Content)

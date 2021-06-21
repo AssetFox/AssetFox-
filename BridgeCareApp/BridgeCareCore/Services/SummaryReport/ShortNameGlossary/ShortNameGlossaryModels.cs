@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using BridgeCareCore.Services.SummaryReport.Models;
@@ -12,7 +13,8 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
             => new List<IExcelWorksheetContentModel>
             {
                 ConditionRangeRegion,
-                GlossaryRegion()
+                GlossaryRegion(),
+                ColorKeyRegion()
             };
 
         public static AnchoredExcelRegionModel ConditionRangeRegion
@@ -77,6 +79,77 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
                         5),
                 }
             };
+
+        private static AnchoredExcelRegionModel ColorKeyRegion()
+            => new AnchoredExcelRegionModel
+            {
+                Region = ColorKeyRows(),
+                StartRow = 39,
+                StartColumn = 1
+            };
+
+        private static ExcelRowModel CenteredHeader(string text)
+            => ExcelRowModels.WithCells(
+                new RelativeExcelRangeModel
+                {
+                    Content = StackedExcelModels.Stacked(
+                        ExcelValueModels.String(text),
+                        ExcelStyleModels.Bold,
+                        ExcelStyleModels.HorizontalCenter),
+                    Size = new ExcelRangeSize(2, 1)
+                });
+
+        private static IExcelModel ColoredText(string text, Color textColor, Color fillColor)
+            => StackedExcelModels.Stacked(
+                ExcelValueModels.String(text),
+                ExcelStyleModels.FontColor(textColor),
+                ExcelStyleModels.BackgroundColor(fillColor),
+                ExcelStyleModels.ThinBorder);
+
+        private static RelativeExcelRangeModel TwoByOne(IExcelModel content)
+            => new RelativeExcelRangeModel
+            {
+                Content = content,
+                Size = new ExcelRangeSize(2, 1)
+            };
+
+        private static ExcelRowModel TwoByOneRow(IExcelModel content)
+            => ExcelRowModels.WithCells(TwoByOne(content));
+
+        private static IExcelModel ItalicYear(int year)
+            => StackedExcelModels.Stacked(
+                ExcelValueModels.Integer(year),
+                ExcelStyleModels.HorizontalCenter,
+                ExcelStyleModels.Italic);
+
+        private static Color PureGreen => Color.FromArgb(0, 255, 0);
+
+        private static RowBasedExcelRegionModel ColorKeyRows()
+            => RowBasedExcelRegionModels.WithRows(
+                CenteredHeader("Color Key"),
+                ExcelRowModels.Empty,
+                CenteredHeader("Work Done Columns"),
+                TwoByOneRow(ColoredText("Bridge project is being cashed flowed.", Color.Red, PureGreen)),
+                TwoByOneRow(ColoredText("MPMS Project being Cach Flowed", Color.White, Color.Orange)),
+                TwoByOneRow(ExcelValueModels.Nothing),
+                CenteredHeader("Details Columns"),
+                TwoByOneRow(ColoredText("Bridge project is being cashed flowed.", Color.Red, PureGreen)),
+                TwoByOneRow(ColoredText("MPMS Project being Cach Flowed", Color.White, Color.Orange)),
+                TwoByOneRow(StackedExcelModels.Stacked(ColoredText("Min Condition is less than or equal to 3.5", Color.White, Color.Purple),
+                                                       ExcelStyleModels.HorizontalCenter)),
+                ExcelRowModels.Empty,
+                ExcelRowModels.WithEntries(ExcelValueModels.Nothing, ItalicYear(2021), ItalicYear(2022), ItalicYear(2023)),
+                ExcelRowModels.WithEntries(
+                    ExcelValueModels.String("example:"),
+                    ColoredText("Brdg_Repl", Color.Red, PureGreen),
+                    ColoredText("--", Color.Red, PureGreen),
+                    ColoredText("--", Color.Red, PureGreen)
+                    ),
+                ExcelRowModels.WithEntries(
+                    ExcelValueModels.Nothing,
+                    ExcelValueModels.String("    (Bridge being replaced also has a parallel bridge.  Bridge replacement is cash flowed over 3 years.")
+                    )
+                );  
 
         public static AnchoredExcelRegionModel GlossaryRegion()
             => new AnchoredExcelRegionModel

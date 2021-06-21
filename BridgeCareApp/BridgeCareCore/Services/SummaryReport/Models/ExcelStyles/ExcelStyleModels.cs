@@ -22,6 +22,12 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Bold = false,
             };
 
+        public static ExcelItalicModel Italic
+            => new ExcelItalicModel
+            {
+                Italic = true,
+            };
+
         public static ExcelWrapTextModel WrapText
             => new ExcelWrapTextModel
             {

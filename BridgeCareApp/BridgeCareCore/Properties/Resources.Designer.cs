@@ -369,6 +369,15 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Total BPN Cost.
+        /// </summary>
+        internal static string TotalBPNCost {
+            get {
+                return ResourceManager.GetString("TotalBPNCost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Total Bridge Care Budget.
         /// </summary>
         internal static string TotalBridgeCareBudget {

@@ -12,11 +12,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
     {
         private readonly IExcelHelper _excelHelper;
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
+        private readonly WorkTypeTotal _workTypeTotal;
 
-        public CommittedProjectCost(IExcelHelper excelHelper, BridgeWorkSummaryCommon bridgeWorkSummaryCommon)
+        public CommittedProjectCost(IExcelHelper excelHelper, BridgeWorkSummaryCommon bridgeWorkSummaryCommon, WorkTypeTotal workTypeTotal)
         {
             _excelHelper = excelHelper;
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
+            _workTypeTotal = workTypeTotal ?? throw new ArgumentNullException(nameof(workTypeTotal));
         }
 
         internal void FillCostOfCommittedWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
@@ -30,7 +32,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             currentCell.Row += 1;
             var startOfCommittedBudget = currentCell.Row;
             currentCell.Column = 1;
-            // var uniqueTreatments = new Dictionary<string, int>(); Fill Committed Budget
             var treatmentTracker = new Dictionary<string, int>();
             foreach (var treatment in committedTreatments)
             {
@@ -40,6 +41,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     currentCell.Column + 1 + simulationYears.Count].Value = 0.0;
                 currentCell.Row += 1;
             }
+            _workTypeTotal.MPMSpreservationCostPerYear.Clear();
             foreach (var item in costForCommittedBudgets)
             {
                 var rowNum = treatmentTracker[item.Treatment];
@@ -53,6 +55,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 }
                 totalAmount += item.Amount;
                 worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
+
+                FillWorkTypeTotals(item);
             }
 
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.BridgeTotal;
@@ -68,6 +72,64 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
             _excelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
             _excelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
+        }
+
+        private void FillWorkTypeTotals(YearsData item)
+        {
+            var treatment = MPMSTreatmentMap.Map[item.Treatment];
+            switch (treatment)
+            {
+            case MPMSTreatmentName.Preservation:
+                if (!_workTypeTotal.MPMSpreservationCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.MPMSpreservationCostPerYear.Add(item.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                }
+                _workTypeTotal.MPMSpreservationCostPerYear[item.Year] += item.Amount;
+                _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                break;
+            case MPMSTreatmentName.EmergencyRepair:
+                if (_workTypeTotal.MPMSEmergencyRepairCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.MPMSEmergencyRepairCostPerYear.Add(item.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                }
+                _workTypeTotal.MPMSEmergencyRepairCostPerYear[item.Year] += item.Amount;
+                _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                break;
+            case MPMSTreatmentName.Rehabilitation:
+            case MPMSTreatmentName.Repair:
+                if (_workTypeTotal.MPMSEmergencyRepairCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.MPMSEmergencyRepairCostPerYear.Add(item.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                }
+                _workTypeTotal.MPMSEmergencyRepairCostPerYear[item.Year] += item.Amount;
+                _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                break;
+            case MPMSTreatmentName.Removal:
+            case MPMSTreatmentName.Replacement:
+                if (_workTypeTotal.MPMSReplacementCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.MPMSReplacementCostPerYear.Add(item.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                }
+                _workTypeTotal.MPMSReplacementCostPerYear[item.Year] += item.Amount;
+                _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                break;
+            }
         }
     }
 }

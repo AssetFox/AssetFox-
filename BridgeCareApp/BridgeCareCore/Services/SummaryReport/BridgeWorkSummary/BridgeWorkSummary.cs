@@ -58,6 +58,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                     {
                         continue;
                     }
+                    if (!costPerBPNPerYear[yearData.Year].ContainsKey(section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]))
+                    {
+                        costPerBPNPerYear[yearData.Year].Add(section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], 0);
+                    }
+
                     if (section.TreatmentCause == TreatmentCause.CommittedProject)
                     {
                         var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
@@ -73,6 +78,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                             var newCostAndCount = (treatmentCost, bridgeCount);
                             yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = newCostAndCount;
                         }
+
+                         costPerBPNPerYear[yearData.Year][section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]] += commitedCost;
+
                         continue;
                     }
                     //[TODO] - ask Jake regarding cash flow project. It won't have anything in the TreartmentOptions barring 1st year
@@ -92,14 +100,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                     }
 
                     // Fill cost per BPN per Year
-                    if (!costPerBPNPerYear[yearData.Year].ContainsKey(section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]))
-                    {
-                        costPerBPNPerYear[yearData.Year].Add(section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], cost);
-                    }
-                    else
-                    {
-                        costPerBPNPerYear[yearData.Year][section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]] += cost;
-                    }
+                    costPerBPNPerYear[yearData.Year][section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]] += cost;
+
                     section.TreatmentOptions.ForEach(_ =>
                     {
                         if (!treatments.Contains(_.TreatmentName))

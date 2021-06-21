@@ -21,6 +21,12 @@ namespace BridgeCareCore.Services.SummaryReport.Models
             };
         }
 
+        public static RowBasedExcelRegionModel Column(List<IExcelModel> content) 
+        {
+            var rows = content.Select(x => ExcelRowModels.WithEntries(x)).ToList();
+            return WithRows(rows);
+        }
+
         public static RowBasedExcelRegionModel Concat(
             params RowBasedExcelRegionModel[] regions)
             => Concat(regions.ToList());

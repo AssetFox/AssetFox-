@@ -28,5 +28,7 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Value = text,
             };
 
+        public static ExcelRichTextModel RichString(string text, bool bold = false)
+            => new ExcelRichTextModel { Text = text, Bold = bold };
     }
 }

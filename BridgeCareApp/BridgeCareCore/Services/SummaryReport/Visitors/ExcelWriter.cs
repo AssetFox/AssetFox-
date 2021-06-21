@@ -83,5 +83,12 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             cells.Style.Numberformat.Format = model.Format;
             return Unit.Default;
         }
+
+        public Unit Visit(ExcelRichTextModel model, ExcelRange cells)
+        {
+            var foo = cells.RichText.Add(model.Text);
+            foo.Bold = model.Bold;
+            return Unit.Default;
+        }
     }
 }

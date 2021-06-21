@@ -1,6 +1,8 @@
 ﻿using System.Drawing;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeData;
+using BridgeCareCore.Services.SummaryReport.Models;
+using BridgeCareCore.Services.SummaryReport.Visitors;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
@@ -14,8 +16,27 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
             _excelHelper = excelHelper;
         }
 
+        public void FillModelBasedContent(ExcelWorksheet worksheet)
+        {
+            var regionModel = new RowBasedExcelWorksheetModel
+            {
+                Region = ShortNameGlossaryColumns.GlossaryColumn(),
+                StartRow = 1,
+                StartColumn = 8,
+            };
+            var writer = new ExcelWorksheetWriter();
+            regionModel.Accept(writer, worksheet);
+        }
+
         public void Fill(ExcelWorksheet worksheet)
         {
+            FillBridgeCareWorkType(worksheet);
+            FillModelBasedContent(worksheet);
+        }
+
+        public void FillBridgeCareWorkType(ExcelWorksheet worksheet)
+        {
+            
             var initialRow = 1;
             worksheet.Cells["A1"].Value = "Bridge Care Work Type";
             worksheet.Cells["B1"].Value = "Short Bridge Care Work Type";

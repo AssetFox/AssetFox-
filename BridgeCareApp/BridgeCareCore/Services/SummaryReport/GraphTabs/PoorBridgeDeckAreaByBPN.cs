@@ -29,13 +29,15 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
 
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPoorDeckAreaByBPNYearsRow, int count, ExcelChart chart)
         {
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 1, Properties.Resources.BPN1, Color.FromArgb(0, 176, 80));
-
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 2, Properties.Resources.BPN2, Color.FromArgb(255, 192, 0));
-
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 3, Properties.Resources.BPN3, Color.FromArgb(0, 32, 96));
-
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 4, Properties.Resources.BPN4, Color.FromArgb(143, 170, 220));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 1, Properties.Resources.BPN1, Color.FromArgb(68,114,196));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 2, Properties.Resources.BPN2, Color.FromArgb(237, 125, 49));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 3, Properties.Resources.BPN3, Color.FromArgb(165, 165, 165));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 4, Properties.Resources.BPN4, Color.FromArgb(255, 192, 0));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 5, Properties.Resources.BPND, Color.FromArgb(91, 155, 21));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 6, Properties.Resources.BPNH, Color.FromArgb(112, 173, 71));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 7, Properties.Resources.BPNL, Color.FromArgb(38, 68, 120));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 8, Properties.Resources.BPNN, Color.FromArgb(158, 72, 14));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorDeckAreaByBPNYearsRow, count, chart, totalPoorDeckAreaByBPNYearsRow + 9, Properties.Resources.BPNT, Color.FromArgb(99, 99, 99));
         }
 
         private void CreateSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPoorDeckAreaByBPNYearsRow, int count, ExcelChart chart, int fromRow, string header, Color color)

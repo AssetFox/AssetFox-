@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
@@ -135,6 +135,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
             chartRowsModel = _deckAreaBridgeWorkSummary.FillPoorDeckArea(worksheet, currentCell, simulationYears, reportOutputData, chartRowsModel);
 
+            chartRowsModel = _postedClosedBridgeWorkSummary.FillPostedBridgesCountByBPN(worksheet, currentCell, simulationYears, reportOutputData, chartRowsModel);
+            chartRowsModel = _postedClosedBridgeWorkSummary.FillPostedBridgesDeckAreaByBPN(worksheet, currentCell, simulationYears, reportOutputData, chartRowsModel);
+            chartRowsModel = _postedClosedBridgeWorkSummary.FillClosedBridgesCountByBPN(worksheet, currentCell, simulationYears, reportOutputData, chartRowsModel);
+            chartRowsModel = _postedClosedBridgeWorkSummary.FillClosedBridgesDeckAreaByBPN(worksheet, currentCell, simulationYears, reportOutputData, chartRowsModel);
+            _postedClosedBridgeWorkSummary.FillPostedAndClosedBridgesTotalCount(worksheet, currentCell, simulationYears, reportOutputData, chartRowsModel);
             chartRowsModel = _postedClosedBridgeWorkSummary.FillMoneyNeededByBPN(worksheet, currentCell, simulationYears, reportOutputData, chartRowsModel);
 
             worksheet.Calculate();

@@ -97,6 +97,51 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to BPN D.
+        /// </summary>
+        internal static string BPND {
+            get {
+                return ResourceManager.GetString("BPND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BPN H.
+        /// </summary>
+        internal static string BPNH {
+            get {
+                return ResourceManager.GetString("BPNH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BPN L.
+        /// </summary>
+        internal static string BPNL {
+            get {
+                return ResourceManager.GetString("BPNL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BPN N.
+        /// </summary>
+        internal static string BPNN {
+            get {
+                return ResourceManager.GetString("BPNN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BPN T.
+        /// </summary>
+        internal static string BPNT {
+            get {
+                return ResourceManager.GetString("BPNT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bridge Care.
         /// </summary>
         internal static string BridgeCare {
@@ -111,6 +156,15 @@ namespace BridgeCareCore.Properties {
         internal static string BridgeTotal {
             get {
                 return ResourceManager.GetString("BridgeTotal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Closed.
+        /// </summary>
+        internal static string Closed {
+            get {
+                return ResourceManager.GetString("Closed", resourceCulture);
             }
         }
         

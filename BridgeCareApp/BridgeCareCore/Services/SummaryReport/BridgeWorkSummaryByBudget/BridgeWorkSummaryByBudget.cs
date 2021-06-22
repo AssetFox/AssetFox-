@@ -82,10 +82,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                                 isCommitted = true,
                                 costPerBPN = (section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], budgetAmount)
                             });
-                            if(section.AppliedTreatment == "No Treatment")
-                            {
-                                var test = 0;
-                            }
                             committedTreatments.Add(section.AppliedTreatment);
                             continue;
                         }
@@ -166,12 +162,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 var amount = totalSpent.Sum(_ => _.amount);
                 if (amount > 0)
                 {
+                    _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets,
+                        committedTreatments, totalBudgetPerYearForMPMS);
+
                     _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget, totalBudgetPerYearForCulvert, simulationYears);
 
                     _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, totalBudgetPerYearForBridgeWork);
-
-                    _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets,
-                        committedTreatments, totalBudgetPerYearForMPMS);
                 }
 
                 currentCell.Row += 1;

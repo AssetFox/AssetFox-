@@ -160,6 +160,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void MarkTreatmentProgress(Treatment treatment)
         {
+            AppliedTreatmentWithPendingMetadata = null;
+
             Detail.AppliedTreatment = treatment.Name;
             Detail.TreatmentStatus = TreatmentStatus.Progressed;
         }

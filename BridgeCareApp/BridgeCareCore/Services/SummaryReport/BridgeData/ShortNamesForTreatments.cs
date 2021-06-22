@@ -19,16 +19,19 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 {"Painting (Full)", "Full_Paint" },
                 {"Structural Overlay/Joints/Coatings", "Struct_Overlay" },
                 {"Epoxy/Joint Glands/Coatings", "Epx" },
-                {"Bituminous Overlay", "Bit_Over" },
                 {"Deck Replacement", "Deck_Replc" },
                 {"Substructure Rehab", "Sub_Rehab" },
                 {"Superstructure Rep/Rehab", "Sup_Rpl" },
                 {"Bridge Replacement", "Brdg_Repl" },
                 {"Preservation","MPMS_Pres" },
+                {"Emergency Repair", "MPMS_EP" },
                 {"Rehabilitation", "MPMS_Rehab" },
                 {"Removal", "MPMS_Rem" },
                 {"Repair", "MPMS_Repair" },
-                {"Replacement", "MPMS_Repl" }
+                {"Replacement", "MPMS_Repl" },
+                {"Bituminous Overlay", "Bit_Over" },
+                {"Wishful Preservation/ Light Rehab", "Wish_Pres_Rehab" },
+                {"Wishful Replacement", "Wish_Repl" }
             };
             return shortNames;
         }

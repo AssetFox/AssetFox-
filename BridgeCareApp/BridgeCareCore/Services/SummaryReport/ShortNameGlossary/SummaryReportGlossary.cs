@@ -1,7 +1,4 @@
-﻿using System.Drawing;
-using BridgeCareCore.Interfaces.SummaryReport;
-using BridgeCareCore.Services.SummaryReport.BridgeData;
-using BridgeCareCore.Services.SummaryReport.Models;
+﻿
 using BridgeCareCore.Services.SummaryReport.Visitors;
 using OfficeOpenXml;
 

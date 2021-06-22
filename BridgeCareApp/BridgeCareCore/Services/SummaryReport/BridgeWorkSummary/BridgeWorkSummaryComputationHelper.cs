@@ -24,20 +24,26 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
 
 
-        internal double CalculatePoorDeckAreaForBPN(List<SectionDetail> sectionDetails, string bpn)
+        internal double CalculatePoorCountOrAreaForBPN(List<SectionDetail> sectionDetails, string bpn, bool isCount)
         {
             var postedBridges = sectionDetails.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
             var selectedBridges = postedBridges.FindAll(section => ConditionIsPoor(section));
+            if (isCount)
+            {
+                return selectedBridges.Count;
+            }
             return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
         }
 
-        internal double CalculatePoorDeckAreaForBPN(List<SectionSummaryDetail> initialSectionSummaries, string bpn)
+        internal double CalculatePoorCountOrAreaForBPN(List<SectionSummaryDetail> initialSectionSummaries, string bpn, bool isCount)
         {
-            var postedBridgesBpn = initialSectionSummaries.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
-            var selectedBridgesBpn = postedBridgesBpn.FindAll(section => ConditionIsPoor(section));
-            var poorDeckArea = selectedBridgesBpn.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
-
-            return poorDeckArea;
+            var postedBridges = initialSectionSummaries.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
+            var selectedBridges = postedBridges.FindAll(section => ConditionIsPoor(section));
+            if (isCount)
+            {
+                return selectedBridges.Count;
+            }
+            return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
         }
 
         internal double CalculateMoneyNeededByBPN(List<SectionDetail> sectionDetails, string bpn)
@@ -298,8 +304,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         internal static bool ConditionIsFair(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] < 7 && initialSection.ValuePerNumericAttribute["MINCOND"] >= 5;
         internal static bool ConditionIsFair(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] < 7 && section.ValuePerNumericAttribute["MINCOND"] >= 5;
 
-        internal static bool ConditionIsPoor(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] < 5 && initialSection.ValuePerNumericAttribute["MINCOND"] >= 3;
-        internal static bool ConditionIsPoor(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] < 5 && section.ValuePerNumericAttribute["MINCOND"] >= 3;
+        internal static bool ConditionIsPoor(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] < 5;
+        internal static bool ConditionIsPoor(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] < 5;
 
         internal static bool IsClosed(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] < 3;
         internal static bool IsClosed(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] < 3;

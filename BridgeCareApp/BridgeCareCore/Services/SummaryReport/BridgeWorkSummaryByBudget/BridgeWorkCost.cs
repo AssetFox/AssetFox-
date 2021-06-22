@@ -12,11 +12,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
     {
         private readonly IExcelHelper _excelHelper;
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-
-        public BridgeWorkCost(IExcelHelper excelHelper, BridgeWorkSummaryCommon bridgeWorkSummaryCommon)
+        private readonly WorkTypeTotal _workTypeTotal;
+        public BridgeWorkCost(IExcelHelper excelHelper, BridgeWorkSummaryCommon bridgeWorkSummaryCommon, WorkTypeTotal workTypeTotal)
         {
             _excelHelper = excelHelper;
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
+            _workTypeTotal = workTypeTotal ?? throw new ArgumentNullException(nameof(workTypeTotal));
         }
 
         internal void FillCostOfBridgeWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
@@ -42,6 +43,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     currentCell.Row += 1;
                 }
             }
+
+            _workTypeTotal.BAMSPreservationCostPerYear.Clear();
             foreach (var item in costForBridgeBudgets)
             {
                 var rowNum = treatmentTracker[item.Treatment];
@@ -54,6 +57,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 }
                 totalAmount += item.Amount;
                 worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
+
+                FillForWorkTypeTotals(item);
             }
 
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.BridgeTotal;
@@ -69,6 +74,71 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
             _excelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
             _excelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
+        }
+
+        private void FillForWorkTypeTotals(YearsData data)
+        {
+            BamsTreatmentMap.Map.TryGetValue(data.Treatment, out var treatment);
+            switch (treatment)
+            {
+            case BAMSTreatmentName.CountyMaintenanceDeckWork:
+            case BAMSTreatmentName.CountyMaintenanceSuperstructureWork:
+            case BAMSTreatmentName.CountyMaintenanceSubstructureWork:
+            case BAMSTreatmentName.BituminousOverlay:
+            case BAMSTreatmentName.StructuralOverlayJointsCoatings:
+            case BAMSTreatmentName.EpoxyJointGlandsCoatings:
+            case BAMSTreatmentName.PaintingJointSpotZone:
+            case BAMSTreatmentName.PaintingFull:
+                if (!_workTypeTotal.BAMSPreservationCostPerYear.ContainsKey(data.Year))
+                {
+                    _workTypeTotal.BAMSPreservationCostPerYear.Add(data.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(data.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(data.Year, 0);
+                }
+                _workTypeTotal.BAMSPreservationCostPerYear[data.Year] += data.Amount;
+                _workTypeTotal.TotalCostPerYear[data.Year] += data.Amount;
+                break;
+            case BAMSTreatmentName.DeckReplacement:
+            case BAMSTreatmentName.SubstructureRehab:
+            case BAMSTreatmentName.SuperstructureRepRehab:
+                if (!_workTypeTotal.BAMSRehabCostPerYear.ContainsKey(data.Year))
+                {
+                    _workTypeTotal.BAMSRehabCostPerYear.Add(data.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(data.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(data.Year, 0);
+                }
+                _workTypeTotal.BAMSRehabCostPerYear[data.Year] += data.Amount;
+                _workTypeTotal.TotalCostPerYear[data.Year] += data.Amount;
+                break;
+            case BAMSTreatmentName.BridgeReplacement:
+                if (!_workTypeTotal.BAMSReplacementCostPerYear.ContainsKey(data.Year))
+                {
+                    _workTypeTotal.BAMSReplacementCostPerYear.Add(data.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(data.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(data.Year, 0);
+                }
+                _workTypeTotal.BAMSReplacementCostPerYear[data.Year] += data.Amount;
+                _workTypeTotal.TotalCostPerYear[data.Year] += data.Amount;
+                break;
+            default:
+                if (!_workTypeTotal.OtherCostPerYear.ContainsKey(data.Year))
+                {
+                    _workTypeTotal.OtherCostPerYear.Add(data.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(data.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(data.Year, 0);
+                }
+                _workTypeTotal.OtherCostPerYear[data.Year] += data.Amount;
+                _workTypeTotal.TotalCostPerYear[data.Year] += data.Amount;
+                break;
+            }
         }
     }
 }

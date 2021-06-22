@@ -14,12 +14,10 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
     public class SummaryReportParameters
     {
         private readonly IExcelHelper _excelHelper;
-        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public SummaryReportParameters(IExcelHelper excelHelper, UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+        public SummaryReportParameters(IExcelHelper excelHelper)
         {
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
-            _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
 
         internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel, Simulation simulation)

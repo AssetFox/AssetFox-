@@ -10,6 +10,7 @@ using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Logging;
+using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
@@ -147,12 +148,13 @@ namespace BridgeCareCore
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
             services.AddScoped<ICommittedProjectService, CommittedProjectService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<WorkTypeTotal>();
 
-            // SQL SERVER SCOPINGS
-            //services.AddDbContext<IAMContext>(options =>
-            //    options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
+             // SQL SERVER SCOPINGS
+             //services.AddDbContext<IAMContext>(options =>
+             //    options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
 
-            services.AddDbContext<IAMContext>(options => options.UseSqlServer(
+             services.AddDbContext<IAMContext>(options => options.UseSqlServer(
             Configuration.GetConnectionString("BridgeCareConnex"),
             sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
                 );

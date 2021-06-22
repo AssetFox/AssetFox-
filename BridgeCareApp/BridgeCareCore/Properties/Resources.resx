@@ -257,6 +257,9 @@ Condition By Deck Area</value>
     <value>Total</value>
     <comment>Total number of Bridges (Culvert or non-culvert) in Work Summary TAB.</comment>
   </data>
+  <data name="TotalBPNCost" xml:space="preserve">
+    <value>Total BPN Cost</value>
+  </data>
   <data name="TotalBridgeCareBudget" xml:space="preserve">
     <value>Total Bridge Care Budget</value>
     <comment>Total Bridge Care Budget in Work Summary TAB</comment>

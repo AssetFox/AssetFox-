@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using BridgeCareCore.Interfaces.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.Models;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
@@ -62,7 +63,7 @@ namespace BridgeCareCore.Services.SummaryReport
         /// <param name="cells"></param>
         public void SetCurrencyFormat(ExcelRange cells)
         {
-            cells.Style.Numberformat.Format = "_-$* #,##0.00_-;_-$* #,##0.00_-;_-$* \"-\"??_-;_-@_-";
+            cells.Style.Numberformat.Format = ExcelFormatStrings.Currency;
         }
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace BridgeCareCore.Services.SummaryReport
             switch (type)
             {
             case "NegativeCurrency":
-                cells.Style.Numberformat.Format = "_-$* #,##0_-;$* (#,##0)_-;_-$* \"-\"??_-;_-@_-";
+                cells.Style.Numberformat.Format = ExcelFormatStrings.NegativeCurrency;
                 break;
 
             case "Number":

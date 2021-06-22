@@ -8,8 +8,10 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.DistrictTotals;
 using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
+using BridgeCareCore.Services.SummaryReport.Visitors;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
 
@@ -147,7 +149,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             // Bridge Data TAB
-            var worksheet = excelPackage.Workbook.Worksheets.Add("Bridge Data");
+            var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
             var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData);
 
             // Filling up parameters tab
@@ -168,7 +170,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _unfundedTreatmentTime.Fill(unfundedTreatmentTimeWorksheet, reportOutputData);
 
             // Simulation Legend TAB
-            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add("Legend");
+            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
             _summaryReportGlossary.Fill(shortNameWorksheet);
             reportDetailDto.Status = $"Creating Bridge Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
@@ -183,6 +185,8 @@ namespace BridgeCareCore.Services.SummaryReport
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
+            var districtTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
+            ExcelWorksheetAdder.AddWorksheet(excelPackage.Workbook, districtTotalsModel);
             reportDetailDto.Status = $"Creating Graph TABs";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);

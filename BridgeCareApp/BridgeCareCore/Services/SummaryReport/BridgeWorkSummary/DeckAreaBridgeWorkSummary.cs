@@ -4,6 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
@@ -44,53 +45,31 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column = ++column;
                 AddPoorDeckArea(worksheet, row, column, yearlyData.Sections);
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 3, column]);
-            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 4, column);
+            var bpnNames = EnumExtensions.GetValues<BPNName>();
+            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
+            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + bpnNames.Count, column);
         }
 
-        private void AddInitialPoorDeckArea(ExcelWorksheet worksheet, int row, int column,
-            List<SectionSummaryDetail> initialSectionSummaries)
+        private void AddInitialPoorDeckArea(ExcelWorksheet worksheet, int row, int column, List<SectionSummaryDetail> initialSectionSummaries)
         {
-            var postedBridgesBpn1 = initialSectionSummaries.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "1");
-            var selectedBridgesBpn1 = postedBridgesBpn1.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] < 5);
-            var poorDeckAreaBpn1 = selectedBridgesBpn1.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
-
-            worksheet.Cells[row++, column].Value = poorDeckAreaBpn1;
-
-            var postedBridgesBpn2H = initialSectionSummaries.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "2"
-            || b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "H");
-            var selectedBridgesBpn2H = postedBridgesBpn2H.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] < 5);
-            var poorDeckAreaBpn2H = selectedBridgesBpn2H.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
-
-            worksheet.Cells[row++, column].Value = poorDeckAreaBpn2H;
-
-            var postedBridgesBpn3 = initialSectionSummaries.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "3");
-            var selectedBridgesBpn3 = postedBridgesBpn1.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] < 5);
-            var poorDeckAreaBpn3 = selectedBridgesBpn3.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
-
-            worksheet.Cells[row++, column].Value = poorDeckAreaBpn3;
-
-            var postedBridgesRemainingBpn = initialSectionSummaries.FindAll(
-                b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "2" &&
-                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "H" && b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "1" &&
-                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "3"
-            );
-            var selectedBridgesRemainingBpn = postedBridgesRemainingBpn.FindAll(_ => _.ValuePerNumericAttribute["MINCOND"] < 5);
-
-            var poorDeckAreaRemainingBpn = selectedBridgesRemainingBpn.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
-            worksheet.Cells[row, column].Value = poorDeckAreaRemainingBpn;
+            var bpnNames = EnumExtensions.GetValues<BPNName>();
+            for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
+            {
+                var bpnKey = bpnName.ToMatchInDictionary();
+                var poorDeckArea = _bridgeWorkSummaryComputationHelper.CalculatePoorDeckAreaForBPN(initialSectionSummaries, bpnKey);
+                worksheet.Cells[row++, column].Value = poorDeckArea;
+            }
         }
 
         private void AddPoorDeckArea(ExcelWorksheet worksheet, int row, int column, List<SectionDetail> sectionDetails)
         {
-            var poorDeckArea = _bridgeWorkSummaryComputationHelper.CalculatePoorDeckAreaForBPN13(sectionDetails, "1");
-            worksheet.Cells[row++, column].Value = poorDeckArea;
-            poorDeckArea = _bridgeWorkSummaryComputationHelper.CalculatePoorDeckAreaForBPN2H(sectionDetails);
-            worksheet.Cells[row++, column].Value = poorDeckArea;
-            poorDeckArea = _bridgeWorkSummaryComputationHelper.CalculatePoorDeckAreaForBPN13(sectionDetails, "3");
-            worksheet.Cells[row++, column].Value = poorDeckArea;
-            poorDeckArea = _bridgeWorkSummaryComputationHelper.CalculatePoorDeckAreaForRemainingBPN(sectionDetails);
-            worksheet.Cells[row, column].Value = poorDeckArea;
+            var bpnNames = EnumExtensions.GetValues<BPNName>();
+            for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
+            {
+                var bpnKey = bpnName.ToMatchInDictionary();
+                var poorDeckArea = _bridgeWorkSummaryComputationHelper.CalculatePoorDeckAreaForBPN(sectionDetails, bpnKey);
+                worksheet.Cells[row++, column].Value = poorDeckArea;
+            }
         }
 
         #endregion

@@ -133,11 +133,35 @@
     <value>BPN 4</value>
     <comment>Bus plan network Label for Summary TABs</comment>
   </data>
+  <data name="BPND" xml:space="preserve">
+    <value>BPN D</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNH" xml:space="preserve">
+    <value>BPN H</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNL" xml:space="preserve">
+    <value>BPN L</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNN" xml:space="preserve">
+    <value>BPN N</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNT" xml:space="preserve">
+    <value>BPN T</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
   <data name="BridgeCare" xml:space="preserve">
     <value>Bridge Care</value>
   </data>
   <data name="BridgeTotal" xml:space="preserve">
     <value>Bridge Total</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Closed</value>
+    <comment>Label for Summary TABs</comment>
   </data>
   <data name="CombineNHSNonNHSConditionByBridgeCount" xml:space="preserve">
     <value>Combine NHS and Non-NHS Condition By Bridge Count</value>

@@ -290,7 +290,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
         private void InsertCostPerBPN(ExcelWorksheet worksheet, CurrentCell currentCell, int startYear, WorkSummaryByBudgetModel summaryData,
             List<int> simulationYears)
         {
-            var bpnNames = EnumExtensions.GetValues<BPNName>();
+            var bpnNames = EnumExtensions.GetValues<BPNCostBudgetName>();
             var bpnTracker = new Dictionary<string, int>();
             var firstBPNRow = currentCell.Row;
             for (var name = bpnNames[0]; name <= bpnNames.Last(); name++)

@@ -72,6 +72,11 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             return Unit.Default;
         }
 
+        public Unit Visit(ExcelVerticalAlignmentModel model, ExcelRange cells)
+        {
+            cells.Style.VerticalAlignment = model.Alignment;
+            return Unit.Default;
+        }
         public Unit Visit(ExcelFillModel model, ExcelRange cells)
         {
             cells.Style.Fill.PatternType = ExcelFillStyle.Solid;

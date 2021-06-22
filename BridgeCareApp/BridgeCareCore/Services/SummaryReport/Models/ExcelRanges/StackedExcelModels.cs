@@ -23,5 +23,15 @@ namespace BridgeCareCore.Services.SummaryReport.Models
             => Stacked(
                 ExcelValueModels.String(text),
                 ExcelStyleModels.Bold);
+
+        public static StackedExcelModel LeftHeader(string text)
+            => Stacked(
+                ExcelValueModels.String(text),
+                ExcelStyleModels.LeftHeader);
+
+        public static StackedExcelModel CenteredHeader(string text)
+            => Stacked(
+                ExcelValueModels.String(text),
+                ExcelStyleModels.CenteredHeader);
     }
 }

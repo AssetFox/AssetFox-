@@ -33,24 +33,20 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         {
             var values = new List<IExcelModel>
             {
-                StackedExcelModels.Stacked(
-                    ExcelValueModels.String("District"),
-                    ExcelStyleModels.ThinBorder
-                    ),
+                StackedExcelModels.LeftHeader("District"),
             };
             foreach (var year in output.Years)
             {
                 values.Add(
                     StackedExcelModels.Stacked(
                         ExcelValueModels.Integer(year.Year),
-                        ExcelStyleModels.HorizontalCenter,
-                        ExcelStyleModels.ThinBorder));
+                        ExcelStyleModels.CenteredHeader));
             }
             foreach (var header in additionalHeaders)
             {
-                values.Add(ExcelValueModels.String(header));
+                values.Add(StackedExcelModels.LeftHeader(header));
             }
-            return ExcelRowModels.WithEntries(values, ExcelStyleModels.Bold, ExcelStyleModels.ThinBorder);
+            return ExcelRowModels.WithEntries(values);
         }
 
         internal static ExcelRowModel MpmsTableDistrict(SimulationOutput output, int districtNumber)

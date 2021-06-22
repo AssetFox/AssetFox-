@@ -16,10 +16,31 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Bold = true,
             };
 
-        public static ExcelBoldModel NotBold
-            => new ExcelBoldModel
+        public static StackedExcelModel CenteredHeader
+            => StackedExcelModels.Stacked(
+                Bold,
+                HorizontalCenter,
+                VerticalCenter,
+                WrapText);
+
+        public static StackedExcelModel LeftHeader
+            => StackedExcelModels.Stacked(
+                Bold,
+                Left,
+                VerticalCenter,
+                WrapText);
+
+        public static StackedExcelModel RightHeader
+            => StackedExcelModels.Stacked(
+                Bold,
+                Right,
+                VerticalCenter,
+                WrapText);
+
+        public static ExcelHorizontalAlignmentModel Left
+            => new ExcelHorizontalAlignmentModel
             {
-                Bold = false,
+                Alignment = ExcelHorizontalAlignment.Left,
             };
 
         public static ExcelItalicModel Italic
@@ -50,6 +71,13 @@ namespace BridgeCareCore.Services.SummaryReport.Models
             => new ExcelHorizontalAlignmentModel
             {
                 Alignment = ExcelHorizontalAlignment.Center
+            };
+
+
+        public static ExcelVerticalAlignmentModel VerticalCenter
+            => new ExcelVerticalAlignmentModel
+            {
+                Alignment = ExcelVerticalAlignment.Center
             };
 
         public static ExcelHorizontalAlignmentModel Right

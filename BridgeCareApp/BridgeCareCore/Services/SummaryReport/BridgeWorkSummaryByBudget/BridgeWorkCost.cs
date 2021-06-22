@@ -78,7 +78,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
         private void FillForWorkTypeTotals(YearsData data)
         {
-            var treatment = BamsTreatmentMap.Map[data.Treatment];
+            BamsTreatmentMap.Map.TryGetValue(data.Treatment, out var treatment);
             switch (treatment)
             {
             case BAMSTreatmentName.CountyMaintenanceDeckWork:
@@ -124,6 +124,18 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     _workTypeTotal.TotalCostPerYear.Add(data.Year, 0);
                 }
                 _workTypeTotal.BAMSReplacementCostPerYear[data.Year] += data.Amount;
+                _workTypeTotal.TotalCostPerYear[data.Year] += data.Amount;
+                break;
+            default:
+                if (!_workTypeTotal.OtherCostPerYear.ContainsKey(data.Year))
+                {
+                    _workTypeTotal.OtherCostPerYear.Add(data.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(data.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(data.Year, 0);
+                }
+                _workTypeTotal.OtherCostPerYear[data.Year] += data.Amount;
                 _workTypeTotal.TotalCostPerYear[data.Year] += data.Amount;
                 break;
             }

@@ -78,7 +78,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
         private void FillWorkTypeTotals(YearsData item)
         {
-            var treatment = CulvertTreatmentMap.Map[item.Treatment];
+            CulvertTreatmentMap.Map.TryGetValue(item.Treatment, out var treatment);
             switch (treatment)
             {
             case CulvertTreatmentName.CulvertRehabOther:
@@ -105,6 +105,18 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
                 }
                 _workTypeTotal.CulvertReplacementCostPerYear[item.Year] += item.Amount;
+                _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                break;
+            default:
+                if (!_workTypeTotal.OtherCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.OtherCostPerYear.Add(item.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                }
+                _workTypeTotal.OtherCostPerYear[item.Year] += item.Amount;
                 _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 break;
             }

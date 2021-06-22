@@ -67,7 +67,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 {
                     foreach (var section in yearData.Sections)
                     {
-                        if (section.TreatmentCause == TreatmentCause.CommittedProject)
+                        if (section.TreatmentCause == TreatmentCause.CommittedProject &&
+                            section.AppliedTreatment.ToLower() != Properties.Resources.NoTreatment)
                         {
                             var committedtTreatment = section.TreatmentConsiderations;
                             var budgetAmount = (double)committedtTreatment.Sum(_ =>
@@ -81,6 +82,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                                 isCommitted = true,
                                 costPerBPN = (section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], budgetAmount)
                             });
+                            if(section.AppliedTreatment == "No Treatment")
+                            {
+                                var test = 0;
+                            }
                             committedTreatments.Add(section.AppliedTreatment);
                             continue;
                         }
@@ -119,7 +124,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                                                 .FindAll(_ => !_.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && !_.isCommitted);
 
                 costForCommittedBudgets = summaryData.YearlyData
-                                                    .FindAll(_ => _.isCommitted);
+                                                    .FindAll(_ => _.isCommitted && _.Treatment.ToLower() != Properties.Resources.NoTreatment);
 
                 var totalBudgetPerYearForCulvert = new Dictionary<int, double>();
                 var totalBudgetPerYearForBridgeWork = new Dictionary<int, double>();
@@ -192,18 +197,19 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 currentCell.Row++;
                 var firstContentRow = currentCell.Row;
                 var rowTrackerForColoring = firstContentRow;
-                for (var workType = workTypes[0]; workType < workTypes.Last(); workType++)
+                for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
                 {
                     var rowIndex = firstContentRow + (int)workType;
                     worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
+                    worksheet.Cells[rowIndex, 3, rowIndex, simulationYears.Count + 2].Value = 0.0;
                     currentCell.Row++;
                 }
 
                 InsertWorkTypeTotals(startYear, firstContentRow, worksheet);
 
-                _excelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 4, simulationYears.Count + 2], "NegativeCurrency");
-                _excelHelper.ApplyColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 4, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
-                _excelHelper.SetTextColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 4, simulationYears.Count + 2], Color.White);
+                _excelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], "NegativeCurrency");
+                _excelHelper.ApplyColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
+                _excelHelper.SetTextColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], Color.White);
 
                 currentCell.Row += 2;
                 currentCell.Column = 1;
@@ -238,7 +244,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 currentCell.Row++;
 
                 var firstBPNRowForFormat = currentCell.Row;
-                InsertCostPerBPN(worksheet, currentCell, startYear, summaryData);
+                InsertCostPerBPN(worksheet, currentCell, startYear, summaryData, simulationYears);
 
                 _excelHelper.ApplyBorder(worksheet.Cells[firstBPNRowForFormat, 1, currentCell.Row, simulationYears.Count + 2]);
                 _excelHelper.SetCustomFormat(worksheet.Cells[firstBPNRowForFormat, 3, currentCell.Row, simulationYears.Count + 2], "NegativeCurrency");
@@ -285,7 +291,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             worksheet.Cells.AutoFitColumns();
         }
 
-        private void InsertCostPerBPN(ExcelWorksheet worksheet, CurrentCell currentCell, int startYear, WorkSummaryByBudgetModel summaryData)
+        private void InsertCostPerBPN(ExcelWorksheet worksheet, CurrentCell currentCell, int startYear, WorkSummaryByBudgetModel summaryData,
+            List<int> simulationYears)
         {
             var bpnNames = EnumExtensions.GetValues<BPNName>();
             var bpnTracker = new Dictionary<string, int>();
@@ -294,6 +301,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             {
                 var rowIndex = firstBPNRow + (int)name;
                 worksheet.Cells[rowIndex, 1].Value = name.ToSpreadsheetString();
+                worksheet.Cells[rowIndex, 3, rowIndex, simulationYears.Count + 2].Value = 0.0;
 
                 if (!bpnTracker.ContainsKey(name.ToMatchInDictionaryString()))
                 {
@@ -400,6 +408,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
             // End BAMS work type totals "Replacement"
+
+            firstContentRow++; // this row is for "Other" category
+            foreach (var item in _workTypeTotal.OtherCostPerYear)
+            {
+                FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
+            }
 
             firstContentRow++;
             // Add data for BAMS Work Type Totals "Total Spent"

@@ -5,6 +5,7 @@ namespace BridgeCareCore.Services.SummaryReport
 {
     public enum MPMSTreatmentName
     {
+        Other,
         Preservation,
         EmergencyRepair,
         Rehabilitation,
@@ -14,6 +15,7 @@ namespace BridgeCareCore.Services.SummaryReport
     }
     public enum CulvertTreatmentName
     {
+        Other,
         CulvertRehabOther,
         CulvertReplacementBoxFrameArch,
         CulvertReplacementOther,
@@ -21,6 +23,7 @@ namespace BridgeCareCore.Services.SummaryReport
     }
     public enum BAMSTreatmentName
     {
+        Other,
         CountyMaintenanceDeckWork,
         CountyMaintenanceSuperstructureWork,
         CountyMaintenanceSubstructureWork,

@@ -15,6 +15,8 @@ namespace BridgeCareCore.Models.SummaryReport
         public Dictionary<int, double> CulvertReplacementCostPerYear { get; set; } = new Dictionary<int, double>();
         public Dictionary<int, double> BAMSReplacementCostPerYear { get; set; } = new Dictionary<int, double>();
 
+        public Dictionary<int, double> OtherCostPerYear { get; set; } = new Dictionary<int, double>();
+
         public Dictionary<int, double> TotalCostPerYear { get; set; } = new Dictionary<int, double>();
     }
 }

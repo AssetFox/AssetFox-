@@ -63,7 +63,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                         costPerBPNPerYear[yearData.Year].Add(section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], 0);
                     }
 
-                    if (section.TreatmentCause == TreatmentCause.CommittedProject)
+                    if (section.TreatmentCause == TreatmentCause.CommittedProject &&
+                        section.AppliedTreatment.ToLower() != Properties.Resources.NoTreatment)
                     {
                         var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
 

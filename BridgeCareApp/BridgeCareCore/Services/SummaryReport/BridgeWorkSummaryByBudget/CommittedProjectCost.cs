@@ -76,7 +76,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
         private void FillWorkTypeTotals(YearsData item)
         {
-            var treatment = MPMSTreatmentMap.Map[item.Treatment];
+            MPMSTreatmentMap.Map.TryGetValue(item.Treatment, out var treatment);
             switch (treatment)
             {
             case MPMSTreatmentName.Preservation:
@@ -92,7 +92,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 break;
             case MPMSTreatmentName.EmergencyRepair:
-                if (_workTypeTotal.MPMSEmergencyRepairCostPerYear.ContainsKey(item.Year))
+                if (!_workTypeTotal.MPMSEmergencyRepairCostPerYear.ContainsKey(item.Year))
                 {
                     _workTypeTotal.MPMSEmergencyRepairCostPerYear.Add(item.Year, 0);
                 }
@@ -105,7 +105,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 break;
             case MPMSTreatmentName.Rehabilitation:
             case MPMSTreatmentName.Repair:
-                if (_workTypeTotal.MPMSEmergencyRepairCostPerYear.ContainsKey(item.Year))
+                if (!_workTypeTotal.MPMSEmergencyRepairCostPerYear.ContainsKey(item.Year))
                 {
                     _workTypeTotal.MPMSEmergencyRepairCostPerYear.Add(item.Year, 0);
                 }
@@ -118,7 +118,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 break;
             case MPMSTreatmentName.Removal:
             case MPMSTreatmentName.Replacement:
-                if (_workTypeTotal.MPMSReplacementCostPerYear.ContainsKey(item.Year))
+                if (!_workTypeTotal.MPMSReplacementCostPerYear.ContainsKey(item.Year))
                 {
                     _workTypeTotal.MPMSReplacementCostPerYear.Add(item.Year, 0);
                 }
@@ -127,6 +127,18 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
                 }
                 _workTypeTotal.MPMSReplacementCostPerYear[item.Year] += item.Amount;
+                _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                break;
+            default:
+                if (!_workTypeTotal.OtherCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.OtherCostPerYear.Add(item.Year, 0);
+                }
+                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                {
+                    _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                }
+                _workTypeTotal.OtherCostPerYear[item.Year] += item.Amount;
                 _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 break;
             }

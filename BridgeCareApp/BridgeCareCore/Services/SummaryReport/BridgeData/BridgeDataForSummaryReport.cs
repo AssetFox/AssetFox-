@@ -12,18 +12,19 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 {
     public class BridgeDataForSummaryReport : IBridgeDataForSummaryReport
     {
-        private List<int> SpacerColumnNumbers;
+        private List<int> _spacerColumnNumbers;
         private readonly IExcelHelper _excelHelper;
         private readonly IHighlightWorkDoneCells _highlightWorkDoneCells;
-        private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> valueForMinC;
-        private readonly List<int> SimulationYears = new List<int>();
+        private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> _valueForMinC;
+        private readonly List<int> _simulationYears = new List<int>();
         private readonly ISummaryReportHelper _summaryReportHelper;
 
         // This is also used in Bridge Work Summary TAB
-        private readonly List<double> previousYearInitialMinC = new List<double>();
-
-        private List<double> previousYearSectionMinC = new List<double>();
-        private Dictionary<int, (int on, int off)> PoorOnOffCount = new Dictionary<int, (int on, int off)>();
+        private readonly List<double> _previousYearInitialMinC = new List<double>();
+        private Dictionary<int, (int on, int off)> _poorOnOffCount = new Dictionary<int, (int on, int off)>();
+        private Dictionary<int, Dictionary<string, int>> _bpnPoorOnPerYear = new Dictionary<int, Dictionary<string, int>>();
+        private Dictionary<int, int> _nhsPoorOnPerYear = new Dictionary<int, int>();
+        private Dictionary<int, int> _nonNhsPoorOnPerYear = new Dictionary<int, int>();
 
         // This will be used in Parameters TAB
         private readonly ParametersModel _parametersModel = new ParametersModel();
@@ -42,9 +43,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var headers = GetHeaders();
             var subHeaders = GetStaticSubHeaders();
 
-            reportOutputData.Years.ForEach(_ => SimulationYears.Add(_.Year));
+            reportOutputData.Years.ForEach(_ => _simulationYears.Add(_.Year));
 
-            var currentCell = AddHeadersCells(worksheet, headers, SimulationYears, subHeaders);
+            var currentCell = AddHeadersCells(worksheet, headers, _simulationYears, subHeaders);
 
             // Add row next to headers for filters and year numbers for dynamic data. Cover from
             // top, left to right, and bottom set of data.
@@ -57,9 +58,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             AddDynamicDataCells(worksheet, reportOutputData, currentCell);
 
             worksheet.Cells.AutoFitColumns();
-            var spacerBeforeFirstYear = SpacerColumnNumbers[0] - 11;
+            var spacerBeforeFirstYear = _spacerColumnNumbers[0] - 11;
             worksheet.Column(spacerBeforeFirstYear).Width = 3;
-            foreach (var spacerNumber in SpacerColumnNumbers)
+            foreach (var spacerNumber in _spacerColumnNumbers)
             {
                 worksheet.Column(spacerNumber).Width = 3;
             }
@@ -68,9 +69,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
             var workSummaryModel = new WorkSummaryModel
             {
-                PreviousYearInitialMinC = previousYearInitialMinC,
-                PoorOnOffCount = PoorOnOffCount,
-                ParametersModel = _parametersModel
+                PreviousYearInitialMinC = _previousYearInitialMinC,
+                PoorOnOffCount = _poorOnOffCount,
+                ParametersModel = _parametersModel,
+                BpnPoorOnPerYear = _bpnPoorOnPerYear,
+                NhsPoorOnPerYear = _nhsPoorOnPerYear,
+                NonNhsPoorOnPerYear = _nonNhsPoorOnPerYear,
             };
 
             return workSummaryModel;
@@ -88,13 +92,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var abbreviatedTreatmentNames = ShortNamesForTreatments.GetShortNamesForTreatments();
 
             // making dictionary to remove if else, which was used to enter value for MinC
-            valueForMinC = new Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>>();
-            valueForMinC.Add(MinCValue.defaultValue, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterDefaultMinCValue));
-            valueForMinC.Add(MinCValue.valueEqualsCulv, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterValueEqualsCulv));
-            valueForMinC.Add(MinCValue.minOfDeckSubSuper, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterMinDeckSuperSub));
-            valueForMinC.Add(MinCValue.minOfCulvDeckSubSuper, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterMinDeckSuperSubCulv));
+            _valueForMinC = new Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>>();
+            _valueForMinC.Add(MinCValue.defaultValue, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterDefaultMinCValue));
+            _valueForMinC.Add(MinCValue.valueEqualsCulv, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterValueEqualsCulv));
+            _valueForMinC.Add(MinCValue.minOfDeckSubSuper, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterMinDeckSuperSub));
+            _valueForMinC.Add(MinCValue.minOfCulvDeckSubSuper, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterMinDeckSuperSubCulv));
 
             var workDoneData = new List<int>();
+            var previousYearSectionMinC = new List<double>();
             if (outputResults.Years.Count > 0)
             {
                 workDoneData = new List<int>(new int[outputResults.Years[0].Sections.Count]);
@@ -106,7 +111,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var isInitialYear = true;
             foreach (var yearlySectionData in outputResults.Years)
             {
-                PoorOnOffCount.Add(yearlySectionData.Year, (on: 0, off: 0));
+                _poorOnOffCount.Add(yearlySectionData.Year, (on: 0, off: 0));
+
                 row = initialRow;
 
                 // Add work done cells
@@ -117,12 +123,45 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 {
                     TrackDataForParametersTAB(section.ValuePerNumericAttribute, section.ValuePerTextAttribute);
 
+                    if (!_bpnPoorOnPerYear.ContainsKey(yearlySectionData.Year))
+                    {
+                        _bpnPoorOnPerYear.Add(yearlySectionData.Year, new Dictionary<string, int>());
+                    }
+
+                    if (!_nhsPoorOnPerYear.ContainsKey(yearlySectionData.Year))
+                    {
+                        _nhsPoorOnPerYear.Add(yearlySectionData.Year, 0);
+                    }
+
+                    if (!_nonNhsPoorOnPerYear.ContainsKey(yearlySectionData.Year))
+                    {
+                        _nonNhsPoorOnPerYear.Add(yearlySectionData.Year, 0);
+                    }
+
+                    bool isNHS = int.TryParse(section.ValuePerTextAttribute["NHS_IND"], out var numericValue) && numericValue > 0;
+
+                    int nhsOrNonPoorOnCount = isNHS ? _nhsPoorOnPerYear[yearlySectionData.Year] : _nonNhsPoorOnPerYear[yearlySectionData.Year];
+
+                    Dictionary<string, int> bpnPoorOnDictionary = _bpnPoorOnPerYear[yearlySectionData.Year];
+                    var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
+                    int bpnPoorOnCount;
+                    // Create/Update BPN info for this Section/Year
+                    if (!bpnPoorOnDictionary.ContainsKey(busPlanNetwork))
+                    {
+                        bpnPoorOnCount = 0;
+                        bpnPoorOnDictionary.Add(busPlanNetwork, bpnPoorOnCount);
+                    }
+                    else
+                    {
+                        bpnPoorOnCount = bpnPoorOnDictionary[busPlanNetwork];
+                    }
+
                     var thisYrMinc = section.ValuePerNumericAttribute["MINCOND"];
                     // poor on off Rate
                     var prevYrMinc = 0.0;
                     if (index == 1)
                     {
-                        prevYrMinc = previousYearInitialMinC[i];
+                        prevYrMinc = _previousYearInitialMinC[i];
                     }
                     else
                     {
@@ -167,16 +206,28 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     worksheet.Cells[row, poorOnOffColumnStart].Value = prevYrMinc < 5 ? (thisYrMinc >= 5 ? "Off" : "--") :
                         (thisYrMinc < 5 ? "On" : "--");
 
-                    var onOffCount = PoorOnOffCount[yearlySectionData.Year];
+                    var onOffCount = _poorOnOffCount[yearlySectionData.Year];
                     if (worksheet.Cells[row, poorOnOffColumnStart].Value.ToString() == "On")
                     {
                         onOffCount.on += 1;
+                        bpnPoorOnCount += 1;
+                        nhsOrNonPoorOnCount += 1;
                     }
-                    else
+                    else if(worksheet.Cells[row, poorOnOffColumnStart].Value.ToString() == "Off")
                     {
                         onOffCount.off += 1;
                     }
-                    PoorOnOffCount[yearlySectionData.Year] = onOffCount;
+                    _poorOnOffCount[yearlySectionData.Year] = onOffCount;
+                    bpnPoorOnDictionary[busPlanNetwork] = bpnPoorOnCount;
+                    if (isNHS)
+                    {
+                        _nhsPoorOnPerYear[yearlySectionData.Year] = nhsOrNonPoorOnCount;
+                    }
+                    else
+                    {
+                        _nonNhsPoorOnPerYear[yearlySectionData.Year] = nhsOrNonPoorOnCount;
+                    }
+
                     previousYearSectionMinC[i] = thisYrMinc;
                     i++;
                     row++;
@@ -309,7 +360,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             column += 4; // this will take us to "Min cond" column
 
             // It returns the column number where MinC value is written
-            column = valueForMinC[minCActionCallDecider](worksheet, row, column, selectedSection.ValuePerNumericAttribute);
+            column = _valueForMinC[minCActionCallDecider](worksheet, row, column, selectedSection.ValuePerNumericAttribute);
             if (selectedSection.ValuePerNumericAttribute["P3"] > 0 && selectedSection.ValuePerNumericAttribute["MINCOND"] < 5)
             {
                 _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.Yellow);
@@ -374,7 +425,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISK_SCORE"];
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["P3"] > 0 ? "Y" : "N";
-                previousYearInitialMinC.Add(sectionSummary.ValuePerNumericAttribute["MINCOND"]);
+                _previousYearInitialMinC.Add(sectionSummary.ValuePerNumericAttribute["MINCOND"]);
 
                 // Add Parallel Structure, Internet Report, Federal Aid, Bridge Funding
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["PARALLEL"] > 0 ? "Y" : "N";
@@ -550,7 +601,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
             var yearHeaderColumn = currentCell.Column;
             simulationHeaderTexts.RemoveAll(_ => _.Equals("SD") || _.Equals("Posted"));
-            SpacerColumnNumbers = new List<int>();
+            _spacerColumnNumbers = new List<int>();
 
             foreach (var simulationYear in simulationYears)
             {
@@ -569,7 +620,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                 worksheet.Column(currentCell.Column).Style.Fill.PatternType = ExcelFillStyle.Solid;
                 worksheet.Column(currentCell.Column).Style.Fill.BackgroundColor.SetColor(Color.Gray);
-                SpacerColumnNumbers.Add(currentCell.Column);
+                _spacerColumnNumbers.Add(currentCell.Column);
 
                 currentCell.Column = ++column;
             }

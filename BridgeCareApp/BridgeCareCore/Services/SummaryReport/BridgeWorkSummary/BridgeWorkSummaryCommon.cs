@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
@@ -47,18 +49,23 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
             worksheet.Cells[row++, column].Value = Properties.Resources.Good;
             worksheet.Cells[row++, column].Value = Properties.Resources.Fair;
-            worksheet.Cells[row++, column++].Value = Properties.Resources.Poor;
-            worksheet.Cells[row - 3, column - 1, row - 1, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+            worksheet.Cells[row++, column].Value = Properties.Resources.Poor;
+            worksheet.Cells[row++, column++].Value = Properties.Resources.Closed;
+            worksheet.Cells[row - 4, column - 1, row - 1, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
         }
 
         public void InitializeBPNLabels(ExcelWorksheet worksheet, CurrentCell currentCell, out int startRow, out int startColumn, out int row, out int column)
         {
             SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-            worksheet.Cells[row++, column].Value = Properties.Resources.BPN1;
-            worksheet.Cells[row++, column].Value = Properties.Resources.BPN2;
-            worksheet.Cells[row++, column].Value = Properties.Resources.BPN3;
-            worksheet.Cells[row++, column++].Value = Properties.Resources.BPN4;
-            worksheet.Cells[row - 4, column - 1, row - 1, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+
+            var bpnNames = EnumExtensions.GetValues<BPNName>();
+            for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
+            {
+                worksheet.Cells[row++, column].Value = bpnName.ToReportLabel();
+            }
+
+            worksheet.Cells[row - bpnNames.Count, column, row - 1, column].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+            column++;
         }
 
         #region Private methods

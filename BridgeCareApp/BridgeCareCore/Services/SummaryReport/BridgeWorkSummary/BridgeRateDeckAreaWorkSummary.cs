@@ -181,13 +181,57 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-            worksheet.Cells[row, column++].Value = Properties.Resources.BridgeCare;
-            worksheet.Cells[row, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
-            worksheet.Cells[row, column].Value = _bridgeWorkSummaryComputationHelper.TotalInitialPoorBridgesCount(reportOutputData);
+
+            // Add Bridge All On row label
+            worksheet.Cells[row, column].Value = "Overall";
+            worksheet.Cells[row, column].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+            var bridgeAllOnRow = row;
+            row++;
+
+            // Add NHS/Non NHS row labels
+            worksheet.Cells[row++, column].Value = "NHS";
+            worksheet.Cells[row - 1, column].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+
+            worksheet.Cells[row++, column].Value = "Non NHS";
+            worksheet.Cells[row - 1, column].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+
+            // Add row labels per BPN
+            var bpnNames = EnumExtensions.GetValues<BPNName>();
+            for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
+            {
+                worksheet.Cells[row++, column].Value = bpnName.ToReportLabel();
+                worksheet.Cells[row - 1, column].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+            }
+
+            column++;
+            row = startRow;
+            worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.TotalInitialPoorBridgesCount(reportOutputData);
+
+            var poorBridgesNHSCountInitial = _bridgeWorkSummaryComputationHelper.InitialNHSBridgePoorCountOrArea(reportOutputData.InitialSectionSummaries, true);
+            worksheet.Cells[row++, column].Value = poorBridgesNHSCountInitial;
+            worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.TotalInitialPoorBridgesCount(reportOutputData) - poorBridgesNHSCountInitial;
+
+            for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
+            {
+                worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePoorCountOrAreaForBPN(reportOutputData.InitialSectionSummaries, bpnName.ToMatchInDictionary(), true);
+            }
+
             foreach (var yearlyData in reportOutputData.Years)
             {
-                column = ++column;
-                worksheet.Cells[row, column].Value = _bridgeWorkSummaryComputationHelper.TotalSectionalPoorBridgesCount(yearlyData);
+                column++;
+                row = startRow;
+
+                var totalPoorBridgesCount = _bridgeWorkSummaryComputationHelper.TotalSectionalPoorBridgesCount(yearlyData);
+                worksheet.Cells[row++, column].Value = totalPoorBridgesCount;
+
+                var poorBridgesNHSCount = _bridgeWorkSummaryComputationHelper.SectionalNHSBridgePoorCountOrArea(yearlyData.Sections, true);
+                worksheet.Cells[row++, column].Value = poorBridgesNHSCount;
+                worksheet.Cells[row++, column].Value = totalPoorBridgesCount - poorBridgesNHSCount;
+
+                for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
+                {
+                    worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePoorCountOrAreaForBPN(yearlyData.Sections, bpnName.ToMatchInDictionary(), true);
+                }
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
@@ -198,7 +242,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-            worksheet.Cells[row, column++].Value = Properties.Resources.BridgeCare;
+            worksheet.Cells[row, column++].Value = "Overall";
             worksheet.Cells[row, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
             worksheet.Cells[row, column].Value = _bridgeWorkSummaryComputationHelper.TotalInitialPoorBridgesDeckArea(reportOutputData);
             foreach (var yearlyData in reportOutputData.Years)

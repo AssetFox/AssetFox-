@@ -46,7 +46,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             {
                 values.Add(StackedExcelModels.LeftHeader(header));
             }
-            return ExcelRowModels.WithEntries(values);
+            return ExcelRowModels.WithEntries(values, ExcelStyleModels.ThinBorder);
         }
 
         internal static ExcelRowModel MpmsTableDistrict(SimulationOutput output, int districtNumber)
@@ -62,7 +62,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         internal static ExcelRowModel BamsTableDistrict(SimulationOutput output, int districtNumber)
         {
             var title = ExcelValueModels.Integer(districtNumber);
-            bool predicate(SectionDetail detail) => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber);
+            Func<SectionDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber);
             var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
                          .ToList();
             return ExcelRowModels.WithEntries(values);

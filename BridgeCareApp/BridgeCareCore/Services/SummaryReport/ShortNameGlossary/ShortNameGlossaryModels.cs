@@ -33,8 +33,8 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
         {
             var r = RowBasedExcelRegionModels.WithRows(
                     ExcelRowModels.WithEntries(
-                        StackedExcelModels.LeftHeader("Bridge Care Work Type"),
-                        StackedExcelModels.LeftHeader("Short Bridge Care Work type"))
+                        StackedExcelModels.LeftHeaderWrap("Bridge Care Work Type"),
+                        StackedExcelModels.LeftHeaderWrap("Short Bridge Care Work type"))
                 );
             var abbreviatedTreatmentNames = ShortNamesForTreatments.GetShortNamesForTreatments();
             foreach (var treatment in abbreviatedTreatmentNames)

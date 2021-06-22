@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 ExcelValueModels.Money(totalMoney),
                 ExcelStyleModels.Right,
                 ExcelStyleModels.ThinBorder,
-                ExcelStyleModels.CurrencyFormat,
+                ExcelStyleModels.CurrencyWithoutCentsFormat,
                 DistrictTotalsStyleModels.LightGreenFill
                 );
         }

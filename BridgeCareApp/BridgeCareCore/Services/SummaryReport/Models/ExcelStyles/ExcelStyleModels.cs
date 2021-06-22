@@ -20,10 +20,23 @@ namespace BridgeCareCore.Services.SummaryReport.Models
             => StackedExcelModels.Stacked(
                 Bold,
                 HorizontalCenter,
+                VerticalCenter);
+
+        public static StackedExcelModel CenteredHeaderWrap
+            => StackedExcelModels.Stacked(
+                Bold,
+                HorizontalCenter,
                 VerticalCenter,
                 WrapText);
 
         public static StackedExcelModel LeftHeader
+            => StackedExcelModels.Stacked(
+                Bold,
+                Left,
+                VerticalCenter);
+
+
+        public static StackedExcelModel LeftHeaderWrap
             => StackedExcelModels.Stacked(
                 Bold,
                 Left,
@@ -105,6 +118,12 @@ namespace BridgeCareCore.Services.SummaryReport.Models
             new ExcelNumberFormatModel
             {
                 Format = ExcelFormatStrings.Currency
+            };
+
+        public static ExcelNumberFormatModel CurrencyWithoutCentsFormat =>
+            new ExcelNumberFormatModel
+            {
+                Format = ExcelFormatStrings.CurrencyWithoutCents
             };
 
         public static ExcelNumberFormatModel PercentageFormat(int digitsAfterDecimalPlace)

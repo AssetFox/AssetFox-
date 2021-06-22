@@ -8,14 +8,6 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Simulation : WeakEntity, IValidator
     {
-        internal Simulation(Network network)
-        {
-            Network = network ?? throw new ArgumentNullException(nameof(network));
-
-            AnalysisMethod = new AnalysisMethod(this);
-            InvestmentPlan = new InvestmentPlan(this);
-        }
-
         public AnalysisMethod AnalysisMethod { get; }
 
         public ICollection<CommittedProject> CommittedProjects { get; } = new SetWithoutNulls<CommittedProject>();
@@ -35,6 +27,13 @@ namespace AppliedResearchAssociates.iAM.Domains
         public IReadOnlyCollection<PerformanceCurve> PerformanceCurves => _PerformanceCurves;
 
         public SimulationOutput Results { get; private set; } = new SimulationOutput();
+
+        public string ShortDescription => Name;
+
+        /// <summary>
+        ///     Whether to always pre-apply the passive treatment just after deterioration.
+        /// </summary>
+        public bool ShouldPreapplyPassiveTreatment { get; set; } = true;
 
         public ValidatorBag Subvalidators => new ValidatorBag { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
 
@@ -105,6 +104,14 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public void Remove(PerformanceCurve performanceCurve) => _PerformanceCurves.Remove(performanceCurve);
 
+        internal Simulation(Network network)
+        {
+            Network = network ?? throw new ArgumentNullException(nameof(network));
+
+            AnalysisMethod = new AnalysisMethod(this);
+            InvestmentPlan = new InvestmentPlan(this);
+        }
+
         internal BudgetContext[] GetBudgetContextsWithCostAllocationsForCommittedProjects()
         {
             var budgetContexts = InvestmentPlan.Budgets
@@ -139,7 +146,5 @@ namespace AppliedResearchAssociates.iAM.Domains
         private readonly List<PerformanceCurve> _PerformanceCurves = new List<PerformanceCurve>();
 
         private readonly List<SelectableTreatment> _Treatments = new List<SelectableTreatment>();
-
-        public string ShortDescription => Name;
     }
 }

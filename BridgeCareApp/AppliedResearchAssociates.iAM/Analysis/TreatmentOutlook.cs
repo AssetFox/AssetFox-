@@ -122,16 +122,29 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     throw new InvalidOperationException(MessageStrings.TreatmentOutlookIsConsumingAProgressEvent);
                 }
 
+                if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+                {
+                    AccumulationContext.FixCalculatedFieldValues();
+                }
+
                 AccumulationContext.ApplyPerformanceCurves();
+
+                if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+                {
+                    AccumulationContext.PreapplyPassiveTreatment();
+                    AccumulationContext.UnfixCalculatedFieldValues();
+                }
 
                 if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                 {
                     ApplyTreatment(treatment, year);
                 }
-                else
+                else if (!SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
                 {
                     AccumulationContext.ApplyPassiveTreatment(year);
                 }
+
+                AccumulationContext.ApplyTreatmentMetadataIfPending(year);
 
                 AccumulateBenefit();
                 updateRemainingLife?.Invoke();

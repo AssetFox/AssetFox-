@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using BridgeCareCore.Services.SummaryReport.BridgeData;
 using BridgeCareCore.Services.SummaryReport.Models;
+using BridgeCareCore.Services.SummaryReport.Models.Worksheets;
 
 namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
 {
@@ -12,10 +14,39 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
         public static List<IExcelWorksheetContentModel> Content
             => new List<IExcelWorksheetContentModel>
             {
+                TreatmentsRegion,
+                ExcelWorksheetContentModels.AutoFitColumns(70),
                 ConditionRangeRegion,
-                GlossaryRegion(),
-                ColorKeyRegion()
+                GlossaryRegion,
+                ColorKeyRegion
             };
+
+        public static AnchoredExcelRegionModel TreatmentsRegion
+            => new AnchoredExcelRegionModel
+            {
+                Region = TreatmentsRows(),
+                StartColumn = 1,
+                StartRow = 1,
+            };
+
+        public static RowBasedExcelRegionModel TreatmentsRows()
+        {
+            var r = RowBasedExcelRegionModels.WithRows(
+                    ExcelRowModels.WithEntries(
+                        StackedExcelModels.LeftHeader("Bridge Care Work Type"),
+                        StackedExcelModels.LeftHeader("Short Bridge Care Work type"))
+                );
+            var abbreviatedTreatmentNames = ShortNamesForTreatments.GetShortNamesForTreatments();
+            foreach (var treatment in abbreviatedTreatmentNames)
+            {
+                var row = ExcelRowModels.WithEntries(
+                    ExcelValueModels.String(treatment.Key),
+                    ExcelValueModels.String(treatment.Value));
+                row.EveryCell = ExcelStyleModels.ThinBorder;
+                r.Rows.Add(row);
+            }
+            return r;
+        }
 
         public static AnchoredExcelRegionModel ConditionRangeRegion
             => new AnchoredExcelRegionModel
@@ -80,7 +111,7 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
                 }
             };
 
-        private static AnchoredExcelRegionModel ColorKeyRegion()
+        private static AnchoredExcelRegionModel ColorKeyRegion
             => new AnchoredExcelRegionModel
             {
                 Region = ColorKeyRows(),
@@ -149,9 +180,9 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
                     ExcelValueModels.Nothing,
                     ExcelValueModels.String("    (Bridge being replaced also has a parallel bridge.  Bridge replacement is cash flowed over 3 years.")
                     )
-                );  
+                );
 
-        public static AnchoredExcelRegionModel GlossaryRegion()
+        public static AnchoredExcelRegionModel GlossaryRegion
             => new AnchoredExcelRegionModel
             {
                 Region = GlossaryColumn(),

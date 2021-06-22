@@ -24,7 +24,7 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
 
         public void Fill(ExcelWorksheet worksheet)
         {
-            FillBridgeCareWorkType(worksheet);
+          //  FillBridgeCareWorkType(worksheet);
             FillModelBasedContent(worksheet);
         }
 
@@ -48,8 +48,10 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
                 row++;
             }
             _excelHelper.ApplyBorder(worksheet.Cells[initialRow, 1, row, 2]);
-            row += 2;
 
+            //worksheet.Cells.AutoFitColumns(70);
+
+            //row += 2;
             //worksheet.Cells[row, 1].Value = "Color Key";
             //_excelHelper.MergeCells(worksheet, row, 1, row, 2);
             //row += 2;
@@ -140,7 +142,6 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
             //row++;
             //_excelHelper.ApplyBorder(worksheet.Cells[row - 1, 2, row - 1, 4]);
 
-            worksheet.Cells.AutoFitColumns(70);
             //worksheet.Cells[row, 2].Value = "(Bridge being replaced also has a parallel bridge.  Bridge replacement is cash flowed over 3 years.)";
         }
     }

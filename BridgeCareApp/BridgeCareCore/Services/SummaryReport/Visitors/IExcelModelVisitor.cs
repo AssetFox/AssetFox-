@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BridgeCareCore.Services.SummaryReport.Models;
+﻿using BridgeCareCore.Services.SummaryReport.Models;
 
 namespace BridgeCareCore.Services.SummaryReport.Visitors
 {

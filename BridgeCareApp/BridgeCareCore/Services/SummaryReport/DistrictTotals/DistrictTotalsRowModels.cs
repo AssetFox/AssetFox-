@@ -62,7 +62,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         internal static ExcelRowModel BamsTableDistrict(SimulationOutput output, int districtNumber)
         {
             var title = ExcelValueModels.Integer(districtNumber);
-            Func<SectionDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber);
+            bool predicate(SectionDetail detail) => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber);
             var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
                          .ToList();
             return ExcelRowModels.WithEntries(values);

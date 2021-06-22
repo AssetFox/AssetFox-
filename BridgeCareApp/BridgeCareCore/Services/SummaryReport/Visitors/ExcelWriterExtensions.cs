@@ -53,10 +53,7 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
                 {
                     range.Merge = true;
                 }
-                foreach (var every in model.EveryCell.Content)
-                {
-                    writer.Write(every, range);
-                }
+                writer.Write(model.EveryCell, range);
                 writer.Write(model.Values[i].Content, range);
                 columnIndex += size.Width;
             }

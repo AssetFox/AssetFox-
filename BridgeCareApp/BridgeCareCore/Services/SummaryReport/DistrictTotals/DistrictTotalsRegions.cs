@@ -12,15 +12,6 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
     {
         public static List<int> NumberedDistricts
             => new List<int> { 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12 }; // Seven is indeed skipped.
-        public static RowBasedExcelRegionModel TopPortion(SimulationOutput output)
-            => new RowBasedExcelRegionModel
-            {
-                Rows = new List<ExcelRowModel>
-                {
-                    DistrictTotalsRowModels.IndexingRow(output.Years.Count),
-                    DistrictTotalsRowModels.FirstYearRow(output),
-                }
-            };
 
         public static RowBasedExcelRegionModel MpmsTable(SimulationOutput output)
         {

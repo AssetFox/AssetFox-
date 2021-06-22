@@ -11,7 +11,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         public static bool IsTurnpike(SectionDetail section)
         {
             var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
-            bool r = ownerCode.Trim() == "01";
+            bool r = ownerCode.Trim() == "31";
             return r;
         }
 
@@ -33,7 +33,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         {
             var committed = IsCommittedProject(section);
             var district = IsDistrictNotTurnpike(section, districtNumber);
-            return district && !committed;
+            return district && committed;
         }
 
 

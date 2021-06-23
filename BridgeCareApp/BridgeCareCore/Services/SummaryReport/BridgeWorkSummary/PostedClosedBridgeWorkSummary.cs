@@ -60,8 +60,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
             {
                 var bpnKey = bpnName.ToMatchInDictionary();
-                var postedDeckArea = _bridgeWorkSummaryComputationHelper.CalculatePostedCountOrDeckAreaForBPN(initialSectionSummaries, bpnKey, true);
-                worksheet.Cells[row++, column].Value = postedDeckArea;
+                var postedBPNCount = _bridgeWorkSummaryComputationHelper.CalculatePostedCountOrDeckAreaForBPN(initialSectionSummaries, bpnKey, true);
+                worksheet.Cells[row++, column].Value = postedBPNCount;
             }
         }
 
@@ -71,8 +71,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
             {
                 var bpnKey = bpnName.ToMatchInDictionary();
-                var postedDeckArea = _bridgeWorkSummaryComputationHelper.CalculatePostedCountOrDeckAreaForBPN(sectionDetails, bpnKey, true);
-                worksheet.Cells[row++, column].Value = postedDeckArea;
+                var postedBPNCount = _bridgeWorkSummaryComputationHelper.CalculatePostedCountOrDeckAreaForBPN(sectionDetails, bpnKey, true);
+                worksheet.Cells[row++, column].Value = postedBPNCount;
             }
         }
 

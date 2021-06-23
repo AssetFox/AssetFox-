@@ -1,6 +1,7 @@
 ﻿using System;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.GraphTabs.BPN;
 using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
 using OfficeOpenXml;
 
@@ -17,11 +18,15 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         private readonly PoorBridgeDeckArea _poorBridgeDeckArea;
         private readonly PoorBridgeDeckAreaByBPN _poorBridgeDeckAreaByBPN;
 
+        private readonly PostedBPNCount _postedBPNCount;
+
         public AddGraphsInTabs(NHSConditionChart nhsConditionChart,
             NonNHSConditionBridgeCount nonNHSconditionBridgeCount,
             NonNHSConditionDeckArea nonNHSConditionDeckArea, ConditionBridgeCount conditionBridgeCount,
             ConditionDeckArea conditionDeckArea, PoorBridgeCount poorBridgeCount, PoorBridgeDeckArea poorBridgeDeckArea,
-            PoorBridgeDeckAreaByBPN poorBridgeDeckAreaByBPN)
+            PoorBridgeDeckAreaByBPN poorBridgeDeckAreaByBPN,
+
+            PostedBPNCount postedBPNCount)
         {
             _nhsConditionChart = nhsConditionChart ?? throw new ArgumentNullException(nameof(nhsConditionChart));
             _nonNHSconditionBridgeCount = nonNHSconditionBridgeCount ?? throw new ArgumentNullException(nameof(nonNHSconditionBridgeCount));
@@ -31,6 +36,8 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             _poorBridgeCount = poorBridgeCount ?? throw new ArgumentNullException(nameof(poorBridgeCount));
             _poorBridgeDeckArea = poorBridgeDeckArea ?? throw new ArgumentNullException(nameof(poorBridgeDeckArea));
             _poorBridgeDeckAreaByBPN = poorBridgeDeckAreaByBPN ?? throw new ArgumentNullException(nameof(poorBridgeDeckAreaByBPN));
+
+            _postedBPNCount = postedBPNCount ?? throw new ArgumentException(nameof(postedBPNCount));
         }
 
         public void Add(ExcelPackage excelPackage, ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet,
@@ -71,6 +78,10 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             // Poor Bridge DA By BPN TAB
             worksheet = excelPackage.Workbook.Worksheets.Add("Poor Bridge DA By BPN");
             _poorBridgeDeckAreaByBPN.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorDeckAreaByBPNSectionYearsRow, simulationYearsCount);
+
+            // Posted BPN count TAB
+            worksheet = excelPackage.Workbook.Worksheets.Add("Posted BPN Count");
+            _postedBPNCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgePostedCountByBPNYearsRow, simulationYearsCount);
         }
     }
 }

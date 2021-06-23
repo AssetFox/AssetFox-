@@ -54,16 +54,11 @@ namespace BridgeCareCore
             services.AddScoped<IHubService, HubService>();
             
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            
-             // SQL SERVER SCOPINGS
-             //services.AddDbContext<IAMContext>(options =>
-             //    options.UseSqlServer(Configuration.GetConnectionString("BridgeCareConnex")));
 
              services.AddDbContext<IAMContext>(options => options.UseSqlServer(
             Configuration.GetConnectionString("BridgeCareConnex"),
             sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
                 );
-            //services.AddScoped<UnitOfDataPersistenceWork>();
 
             // Setup reporting
             var reportLookup = new Dictionary<string, Type>();
@@ -77,7 +72,6 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILog logger)
         {
-            //UpdateDatabase(app);
 
             if (env.IsDevelopment())
             {

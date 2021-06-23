@@ -306,7 +306,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _bridgeWorkSummaryCommon.InitializeLabelCells(worksheet, currentCell, out startRow, out startColumn, out row, out column);
             for (var index = 0; index <= simulationYears.Count; index++)
             {
-                var sumFormula = "SUM(" + worksheet.Cells[dataStartRow, column, dataStartRow + 3, column] + ")";
+                var sumFormula = "SUM(" + worksheet.Cells[dataStartRow, column, dataStartRow + 2, column] + ")";   // Sum is Good + Fair + Poor; "Closed" is a subset of "Poor"
                 worksheet.Cells[startRow, column].Formula = worksheet.Cells[dataStartRow, column] + "/" + sumFormula;
                 worksheet.Cells[startRow + 1, column].Formula = worksheet.Cells[dataStartRow + 1, column] + "/" + sumFormula;
                 worksheet.Cells[startRow + 2, column].Formula = worksheet.Cells[dataStartRow + 2, column] + "/" + sumFormula;

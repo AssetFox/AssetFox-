@@ -39,7 +39,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var map = WorkTypeMap.Map;
             var workTypeTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, map, bridgeTotalRange.ContentRange, yearlyBudgetAmount);
             var bpnTotalRow = FillBpnSection(worksheet, currentCell, simulationYears, bpnCostPerYear);
-            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, bpnTotalRow, committedTotalRow);
+            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, workTypeTotalRow, committedTotalRow);
         }
 
         #region Private methods
@@ -166,7 +166,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _excelHelper.ApplyColor(grandTotalRange, Color.FromArgb(217, 217, 217));
             _excelHelper.ApplyBorder(totalRowRange);
             currentCell.Row++;
-            return currentCell.Row;
+            return currentCell.Row - 1;
         }
 
         private int FillBpnSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,

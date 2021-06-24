@@ -61,6 +61,10 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<StackedColumnChartCommon>();
 
             services.AddScoped<PostedBPNCount>();
+            services.AddScoped<PostedBPNDeckArea>();
+            services.AddScoped<ClosedBPNCount>();
+            services.AddScoped<ClosedBPNDeckArea>();
+            services.AddScoped<CombinedPostedAndClosed>();
         }
     }
 }

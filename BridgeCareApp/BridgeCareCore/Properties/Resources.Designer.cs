@@ -169,6 +169,33 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Closed Bridge Count By BPN.
+        /// </summary>
+        internal static string ClosedBridgeCountByBPN {
+            get {
+                return ResourceManager.GetString("ClosedBridgeCountByBPN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Closed Bridge Deck Area By BPN.
+        /// </summary>
+        internal static string ClosedBridgeDeckAreaByBPN {
+            get {
+                return ResourceManager.GetString("ClosedBridgeDeckAreaByBPN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combined Posted and Closed.
+        /// </summary>
+        internal static string CombinedPostedAndClosed {
+            get {
+                return ResourceManager.GetString("CombinedPostedAndClosed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Combine NHS and Non-NHS Condition By Bridge Count.
         /// </summary>
         internal static string CombineNHSNonNHSConditionByBridgeCount {
@@ -374,6 +401,15 @@ namespace BridgeCareCore.Properties {
         internal static string PostedBridgeCountByBPN {
             get {
                 return ResourceManager.GetString("PostedBridgeCountByBPN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Posted Bridge Deck Area By BPN.
+        /// </summary>
+        internal static string PostedBridgeDeckAreaByBPN {
+            get {
+                return ResourceManager.GetString("PostedBridgeDeckAreaByBPN", resourceCulture);
             }
         }
         

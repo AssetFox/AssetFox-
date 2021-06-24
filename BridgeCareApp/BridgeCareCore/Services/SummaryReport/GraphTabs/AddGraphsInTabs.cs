@@ -19,6 +19,10 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         private readonly PoorBridgeDeckAreaByBPN _poorBridgeDeckAreaByBPN;
 
         private readonly PostedBPNCount _postedBPNCount;
+        private readonly PostedBPNDeckArea _postedBPNDeckArea;
+        private readonly ClosedBPNCount _closedBPNCount;
+        private readonly ClosedBPNDeckArea _closedBPNDeckArea;
+        private readonly CombinedPostedAndClosed _combinedPostedAndClosed;
 
         public AddGraphsInTabs(NHSConditionChart nhsConditionChart,
             NonNHSConditionBridgeCount nonNHSconditionBridgeCount,
@@ -26,7 +30,8 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             ConditionDeckArea conditionDeckArea, PoorBridgeCount poorBridgeCount, PoorBridgeDeckArea poorBridgeDeckArea,
             PoorBridgeDeckAreaByBPN poorBridgeDeckAreaByBPN,
 
-            PostedBPNCount postedBPNCount)
+            PostedBPNCount postedBPNCount, PostedBPNDeckArea postedBPNDeckArea, ClosedBPNCount closedBPNCount, ClosedBPNDeckArea closedBPNDeckArea,
+            CombinedPostedAndClosed combinedPostedAndClosed)
         {
             _nhsConditionChart = nhsConditionChart ?? throw new ArgumentNullException(nameof(nhsConditionChart));
             _nonNHSconditionBridgeCount = nonNHSconditionBridgeCount ?? throw new ArgumentNullException(nameof(nonNHSconditionBridgeCount));
@@ -37,7 +42,11 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             _poorBridgeDeckArea = poorBridgeDeckArea ?? throw new ArgumentNullException(nameof(poorBridgeDeckArea));
             _poorBridgeDeckAreaByBPN = poorBridgeDeckAreaByBPN ?? throw new ArgumentNullException(nameof(poorBridgeDeckAreaByBPN));
 
-            _postedBPNCount = postedBPNCount ?? throw new ArgumentException(nameof(postedBPNCount));
+            _postedBPNCount = postedBPNCount ?? throw new ArgumentNullException(nameof(postedBPNCount));
+            _postedBPNDeckArea = postedBPNDeckArea ?? throw new ArgumentNullException(nameof(postedBPNDeckArea));
+            _closedBPNCount = closedBPNCount ?? throw new ArgumentNullException(nameof(closedBPNCount));
+            _closedBPNDeckArea = closedBPNDeckArea ?? throw new ArgumentNullException(nameof(closedBPNDeckArea));
+            _combinedPostedAndClosed = combinedPostedAndClosed ?? throw new ArgumentNullException(nameof(combinedPostedAndClosed));
         }
 
         public void Add(ExcelPackage excelPackage, ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet,
@@ -82,6 +91,22 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             // Posted BPN count TAB
             worksheet = excelPackage.Workbook.Worksheets.Add("Posted BPN Count");
             _postedBPNCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgePostedCountByBPNYearsRow, simulationYearsCount);
+
+            // Posted BPN DA TAB
+            worksheet = excelPackage.Workbook.Worksheets.Add("Posted BPN DA");
+            _postedBPNDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPostedBridgeDeckAreaByBPNYearsRow, simulationYearsCount);
+
+            // Closed BPN Count TAB
+            worksheet = excelPackage.Workbook.Worksheets.Add("Closed BPN Count");
+            _closedBPNCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalClosedBridgeCountByBPNYearsRow, simulationYearsCount);
+
+            // Closed BPN Deck Area TAB
+            worksheet = excelPackage.Workbook.Worksheets.Add("Closed BPN DA");
+            _closedBPNDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalClosedBridgeDeckAreaByBPNYearsRow, simulationYearsCount);
+
+            // Combined Posted and Closed TAB
+            worksheet = excelPackage.Workbook.Worksheets.Add("Combined Posted and Closed");
+            _combinedPostedAndClosed.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPostedAndClosedByBPNYearsRow, simulationYearsCount);
         }
     }
 }

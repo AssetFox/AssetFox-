@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
@@ -30,6 +30,8 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
 
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int nonNHSBridgeCountPercentRow, int count, ExcelChart chart)
         {
+            CreateSeries(bridgeWorkSummaryWorkSheet, nonNHSBridgeCountPercentRow, count, chart, nonNHSBridgeCountPercentRow + 4, Properties.Resources.Closed, Color.Black);
+
             CreateSeries(bridgeWorkSummaryWorkSheet, nonNHSBridgeCountPercentRow, count, chart, nonNHSBridgeCountPercentRow + 3, Properties.Resources.Poor, Color.Red);
 
             CreateSeries(bridgeWorkSummaryWorkSheet, nonNHSBridgeCountPercentRow, count, chart, nonNHSBridgeCountPercentRow + 2, Properties.Resources.Fair, Color.Yellow);

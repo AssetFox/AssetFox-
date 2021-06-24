@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
@@ -33,32 +34,23 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             _poorBridgeDeckAreaByBPN = poorBridgeDeckAreaByBPN ?? throw new ArgumentNullException(nameof(poorBridgeDeckAreaByBPN));
         }
 
+
         public void Add(ExcelPackage excelPackage, ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet,
             ChartRowsModel chartRowModel, int simulationYearsCount)
         {
-            // NHS Condition Bridge Cnt tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("NHS Condition Bridge Cnt");
-            _nhsConditionChart.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NHSBridgeCountPercentSectionYearsRow, Properties.Resources.NHSConditionByBridgeCountLLCC, simulationYearsCount);
+            var GraphDataDependentTabs = new Dictionary<string, ExcelWorksheet>();
+            void AddGraphDataDependentTab(string tabTitle) => GraphDataDependentTabs.Add(tabTitle, excelPackage.Workbook.Worksheets.Add(tabTitle));
 
-            // NHS Condition DA tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("NHS Condition DA");
-            _nhsConditionChart.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NHSBridgeDeckAreaPercentSectionYearsRow, Properties.Resources.NHSConditionByDeckAreaLLCC, simulationYearsCount);
+            // "Graph Data" tab is required for these, but we don't want "Graph Data" showing up until the end since it isn't really a report.
+            // Create the tabs and cache until "Graph Data" tab is available.
+            AddGraphDataDependentTab("NHS Condition DA");
+            AddGraphDataDependentTab("Non-NHS Condition Bridge Cnt");
+            AddGraphDataDependentTab("Non-NHS Condition DA");
+            AddGraphDataDependentTab("Combined Condition Bridge Cnt");
+            AddGraphDataDependentTab("Combined Condition DA");
 
-            // Non-NHS Condition Bridge Count
-            worksheet = excelPackage.Workbook.Worksheets.Add("Non-NHS Condition Bridge Cnt");
-            _nonNHSconditionBridgeCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NonNHSBridgeCountPercentSectionYearsRow, simulationYearsCount);
-
-            // Non-NHS Condition DA
-            worksheet = excelPackage.Workbook.Worksheets.Add("Non-NHS Condition DA");
-            _nonNHSConditionDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NonNHSDeckAreaPercentSectionYearsRow, simulationYearsCount);
-
-            // Condition Bridge Cnt tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Combined Condition Bridge Cnt");
-            _conditionBridgeCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgeCountPercentYearsRow, simulationYearsCount);
-
-            // Condition DA tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Combined Condition DA");
-            _conditionDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalDeckAreaPercentYearsRow, simulationYearsCount);
+            // Create the tabs that are NOT dependent on "Graph Data" tab
+            // (these will precede the "Graph Data" tab)
 
             // Poor Bridge Cnt tab
             worksheet = excelPackage.Workbook.Worksheets.Add("Poor Bridge Cnt");
@@ -68,9 +60,43 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             worksheet = excelPackage.Workbook.Worksheets.Add("Poor Bridge DA");
             _poorBridgeDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorBridgesDeckAreaSectionYearsRow, simulationYearsCount);
 
-            // Poor Bridge DA By BPN TAB
+            // Poor Bridge DA By BPN Tab
             worksheet = excelPackage.Workbook.Worksheets.Add("Poor Bridge DA By BPN");
             _poorBridgeDeckAreaByBPN.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorDeckAreaByBPNSectionYearsRow, simulationYearsCount);
+
+            // Create the "Graph Data" tab
+            worksheet = excelPackage.Workbook.Worksheets.Add("Graph Data");
+            // TODO: Fill Graph Data tab
+
+            // Create the tabs that are dependent on the "Graph Data" tab
+
+            // NHS Condition Bridge Cnt tab
+            worksheet = GraphDataDependentTabs["NHS Condition Bridge Cnt"];
+            _nhsConditionChart.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NHSBridgeCountPercentSectionYearsRow, Properties.Resources.NHSConditionByBridgeCountLLCC, simulationYearsCount);
+
+            // NHS Condition DA tab
+            worksheet = GraphDataDependentTabs["NHS Condition DA"];
+            _nhsConditionChart.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NHSBridgeDeckAreaPercentSectionYearsRow, Properties.Resources.NHSConditionByDeckAreaLLCC, simulationYearsCount);
+
+            // Non-NHS Condition Bridge Count
+            worksheet = GraphDataDependentTabs["Non-NHS Condition Bridge Cnt"];
+            _nonNHSconditionBridgeCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NonNHSBridgeCountPercentSectionYearsRow, simulationYearsCount);
+
+            // Non-NHS Condition DA
+            worksheet = GraphDataDependentTabs["Non-NHS Condition DA"];
+            _nonNHSConditionDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NonNHSDeckAreaPercentSectionYearsRow, simulationYearsCount);
+
+            // Condition Bridge Cnt tab
+            worksheet = GraphDataDependentTabs["Combined Condition Bridge Cnt"];
+            _conditionBridgeCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgeCountPercentYearsRow, simulationYearsCount);
+
+            // Condition DA tab
+            worksheet = GraphDataDependentTabs["Combined Condition DA"];
+            _conditionDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalDeckAreaPercentYearsRow, simulationYearsCount);
+
+
+
+
         }
     }
 }

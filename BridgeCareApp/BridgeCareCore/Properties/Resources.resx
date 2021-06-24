@@ -238,6 +238,9 @@ Condition By Deck Area</value>
   <data name="PoorDeckAreaByBPN" xml:space="preserve">
     <value>Poor Deck Area By BPN</value>
   </data>
+  <data name="PostedBridgeCountByBPN" xml:space="preserve">
+    <value>Posted Bridge Count By BPN</value>
+  </data>
   <data name="RemainingBudget" xml:space="preserve">
     <value>Remaining Budget</value>
   </data>

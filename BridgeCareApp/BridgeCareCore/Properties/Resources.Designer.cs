@@ -369,6 +369,15 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Posted Bridge Count By BPN.
+        /// </summary>
+        internal static string PostedBridgeCountByBPN {
+            get {
+                return ResourceManager.GetString("PostedBridgeCountByBPN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remaining Budget.
         /// </summary>
         internal static string RemainingBudget {

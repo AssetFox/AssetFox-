@@ -51,11 +51,7 @@ namespace BridgeCareCore.StartupExtension
         {
             services.AddScoped<IAddGraphsInTabs, AddGraphsInTabs>();
             services.AddScoped<GraphData>(); // Not a graph tab, but some graph tabs are dependent on this
-            services.AddScoped<NHSConditionChart>();
-            services.AddScoped<NonNHSConditionBridgeCount>();
-            services.AddScoped<NonNHSConditionDeckArea>();
-            services.AddScoped<ConditionBridgeCount>();
-            services.AddScoped<ConditionDeckArea>();
+            services.AddScoped<ConditionPercentageChart>();
             services.AddScoped<PoorBridgeCount>();
             services.AddScoped<PoorBridgeDeckArea>();
             services.AddScoped<PoorBridgeDeckAreaByBPN>();

@@ -10,11 +10,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
 {
     public class AddGraphsInTabs : IAddGraphsInTabs
     {
-        private readonly NHSConditionChart _nhsConditionChart;
-        private readonly NonNHSConditionBridgeCount _nonNHSconditionBridgeCount;
-        private readonly NonNHSConditionDeckArea _nonNHSConditionDeckArea;
-        private readonly ConditionBridgeCount _conditionBridgeCount;
-        private readonly ConditionDeckArea _conditionDeckArea;
+        private readonly ConditionPercentageChart _conditionPercentageChart;
         private readonly PoorBridgeCount _poorBridgeCount;
         private readonly PoorBridgeDeckArea _poorBridgeDeckArea;
         private readonly PoorBridgeDeckAreaByBPN _poorBridgeDeckAreaByBPN;
@@ -23,11 +19,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         private readonly PostedBPNCount _postedBPNCount;
 
         public AddGraphsInTabs(GraphData graphData,
-            NHSConditionChart nhsConditionChart,
-            NonNHSConditionBridgeCount nonNHSconditionBridgeCount,
-            NonNHSConditionDeckArea nonNHSConditionDeckArea,
-            ConditionBridgeCount conditionBridgeCount,
-            ConditionDeckArea conditionDeckArea,
+            ConditionPercentageChart conditionPercentageChart,
             PoorBridgeCount poorBridgeCount,
             PoorBridgeDeckArea poorBridgeDeckArea,
             PoorBridgeDeckAreaByBPN poorBridgeDeckAreaByBPN,
@@ -35,11 +27,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             PostedBPNCount postedBPNCount)
         {
             _graphData = graphData ?? throw new ArgumentNullException(nameof(graphData));
-            _nhsConditionChart = nhsConditionChart ?? throw new ArgumentNullException(nameof(nhsConditionChart));
-            _nonNHSconditionBridgeCount = nonNHSconditionBridgeCount ?? throw new ArgumentNullException(nameof(nonNHSconditionBridgeCount));
-            _nonNHSConditionDeckArea = nonNHSConditionDeckArea ?? throw new ArgumentNullException(nameof(nonNHSConditionDeckArea));
-            _conditionBridgeCount = conditionBridgeCount ?? throw new ArgumentNullException(nameof(conditionBridgeCount));
-            _conditionDeckArea = conditionDeckArea ?? throw new ArgumentNullException(nameof(conditionDeckArea));
+            _conditionPercentageChart = conditionPercentageChart ?? throw new ArgumentNullException(nameof(conditionPercentageChart));
             _poorBridgeCount = poorBridgeCount ?? throw new ArgumentNullException(nameof(poorBridgeCount));
             _poorBridgeDeckArea = poorBridgeDeckArea ?? throw new ArgumentNullException(nameof(poorBridgeDeckArea));
             _poorBridgeDeckAreaByBPN = poorBridgeDeckAreaByBPN ?? throw new ArgumentNullException(nameof(poorBridgeDeckAreaByBPN));
@@ -48,23 +36,36 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         }
 
 
+        private class GraphDataTab
+        {
+            public GraphDataTab(ExcelWorksheet workSheet, string title)
+            {
+                Worksheet = workSheet;
+                Title = title;
+            }
+            public string Title { get; }
+            public ExcelWorksheet Worksheet { get; }
+            public int DataColumn { get; set; } = 0;
+        }
+
+
         public void Add(ExcelPackage excelPackage, ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet,
             ChartRowsModel chartRowModel, int simulationYearsCount)
         {
-            var GraphDataDependentTabs = new Dictionary<string, ExcelWorksheet>();
-            void AddGraphDataDependentTab(string tabTitle) => GraphDataDependentTabs.Add(tabTitle, excelPackage.Workbook.Worksheets.Add(tabTitle));
+            var GraphDataDependentTabs = new Dictionary<string, GraphDataTab>();
+            void AddGraphDataDependentTab(string tabTitle, string graphTitle) => GraphDataDependentTabs.Add(tabTitle, new GraphDataTab(excelPackage.Workbook.Worksheets.Add(tabTitle), graphTitle));
 
             // "Graph Data" tab is required for these, but we don't want "Graph Data" showing up until the end since it isn't really a report.
             // Create the tabs and cache until "Graph Data" tab is available.
-            AddGraphDataDependentTab("NHS Condition Bridge Cnt");
-            AddGraphDataDependentTab("NHS Condition DA");
-            AddGraphDataDependentTab("Non-NHS Condition Bridge Cnt");
-            AddGraphDataDependentTab("Non-NHS Condition DA");
-            AddGraphDataDependentTab("Combined Condition Bridge Cnt");
-            AddGraphDataDependentTab("Combined Condition DA");
+            AddGraphDataDependentTab(Properties.Resources.Graph_NHSConditionByBridgeCount_Tab, Properties.Resources.Graph_NHSConditionByBridgeCount_Title);
+            AddGraphDataDependentTab(Properties.Resources.Graph_NHSConditionByDeckArea_Tab, Properties.Resources.Graph_NHSConditionByDeckArea_Title);
+            AddGraphDataDependentTab(Properties.Resources.Graph_NonNHSConditionByBridgeCount_Tab, Properties.Resources.Graph_NonNHSConditionByBridgeCount_Title);
+            AddGraphDataDependentTab(Properties.Resources.Graph_NonNHSConditionByDeckArea_Tab, Properties.Resources.Graph_NonNHSConditionByDeckArea_Title);
+            AddGraphDataDependentTab(Properties.Resources.Graph_CombineNHSNonNHSConditionByBridgeCount_Tab, Properties.Resources.Graph_CombineNHSNonNHSConditionByBridgeCount_Title);
+            AddGraphDataDependentTab(Properties.Resources.Graph_CombineNHSNonNHSConditionByDeckArea_Tab, Properties.Resources.Graph_CombineNHSNonNHSConditionByDeckArea_Title);
 
-            // Create the tabs that are NOT dependent on "Graph Data" tab
-            // (these will precede the "Graph Data" tab)
+
+            // Create the tabs that are NOT dependent on "Graph Data" tab (these will precede the "Graph Data" tab)
 
             // Poor Bridge Cnt tab
             worksheet = excelPackage.Workbook.Worksheets.Add("Poor Bridge Cnt");
@@ -84,41 +85,27 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
 
 
             // Create the "Graph Data" tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Graph Data");
+            var graphDataWorksheet = excelPackage.Workbook.Worksheets.Add("Graph Data");
             int startColumn = 1;
-            startColumn = _graphData.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NHSBridgeCountPercentSectionYearsRow, startColumn, simulationYearsCount);
-            startColumn = _graphData.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NHSBridgeDeckAreaPercentSectionYearsRow, startColumn, simulationYearsCount);
-            startColumn = _graphData.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NonNHSBridgeCountPercentSectionYearsRow, startColumn, simulationYearsCount);
-            startColumn = _graphData.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NonNHSDeckAreaPercentSectionYearsRow, startColumn, simulationYearsCount);
-            startColumn = _graphData.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgeCountPercentYearsRow, startColumn, simulationYearsCount);
-            _graphData.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalDeckAreaPercentYearsRow, startColumn, simulationYearsCount);
+            GraphDataDependentTabs[Properties.Resources.Graph_NHSConditionByBridgeCount_Tab].DataColumn = startColumn;
+            startColumn = _graphData.Fill(graphDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel.NHSBridgeCountPercentSectionYearsRow, startColumn, simulationYearsCount);
+            GraphDataDependentTabs[Properties.Resources.Graph_NHSConditionByDeckArea_Tab].DataColumn = startColumn;
+            startColumn = _graphData.Fill(graphDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel.NHSBridgeDeckAreaPercentSectionYearsRow, startColumn, simulationYearsCount);
+            GraphDataDependentTabs[Properties.Resources.Graph_NonNHSConditionByBridgeCount_Tab].DataColumn = startColumn;
+            startColumn = _graphData.Fill(graphDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel.NonNHSBridgeCountPercentSectionYearsRow, startColumn, simulationYearsCount);
+            GraphDataDependentTabs[Properties.Resources.Graph_NonNHSConditionByDeckArea_Tab].DataColumn = startColumn;
+            startColumn = _graphData.Fill(graphDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel.NonNHSDeckAreaPercentSectionYearsRow, startColumn, simulationYearsCount);
+            GraphDataDependentTabs[Properties.Resources.Graph_CombineNHSNonNHSConditionByBridgeCount_Tab].DataColumn = startColumn;
+            startColumn = _graphData.Fill(graphDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgeCountPercentYearsRow, startColumn, simulationYearsCount);
+            GraphDataDependentTabs[Properties.Resources.Graph_CombineNHSNonNHSConditionByDeckArea_Tab].DataColumn = startColumn;
+            _graphData.Fill(graphDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalDeckAreaPercentYearsRow, startColumn, simulationYearsCount);
 
 
-            // Create the tabs that are dependent on the "Graph Data" tab
-
-            // NHS Condition Bridge Cnt tab
-            worksheet = GraphDataDependentTabs["NHS Condition Bridge Cnt"];
-            _nhsConditionChart.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NHSBridgeCountPercentSectionYearsRow, Properties.Resources.NHSConditionByBridgeCountLLCC, simulationYearsCount);
-
-            // NHS Condition DA tab
-            worksheet = GraphDataDependentTabs["NHS Condition DA"];
-            _nhsConditionChart.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NHSBridgeDeckAreaPercentSectionYearsRow, Properties.Resources.NHSConditionByDeckAreaLLCC, simulationYearsCount);
-
-            // Non-NHS Condition Bridge Count
-            worksheet = GraphDataDependentTabs["Non-NHS Condition Bridge Cnt"];
-            _nonNHSconditionBridgeCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NonNHSBridgeCountPercentSectionYearsRow, simulationYearsCount);
-
-            // Non-NHS Condition DA
-            worksheet = GraphDataDependentTabs["Non-NHS Condition DA"];
-            _nonNHSConditionDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.NonNHSDeckAreaPercentSectionYearsRow, simulationYearsCount);
-
-            // Condition Bridge Cnt tab
-            worksheet = GraphDataDependentTabs["Combined Condition Bridge Cnt"];
-            _conditionBridgeCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgeCountPercentYearsRow, simulationYearsCount);
-
-            // Condition DA tab
-            worksheet = GraphDataDependentTabs["Combined Condition DA"];
-            _conditionDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalDeckAreaPercentYearsRow, simulationYearsCount);
+            // Fill the already created tabs that are dependent on the "Graph Data" tab; order of fill does not matter, worksheets were added in order
+            foreach (var graphDataTab in GraphDataDependentTabs.Values)
+            {
+                _conditionPercentageChart.Fill(graphDataTab.Worksheet, graphDataWorksheet, graphDataTab.DataColumn, graphDataTab.Title, simulationYearsCount);
+            }
         }
     }
 }

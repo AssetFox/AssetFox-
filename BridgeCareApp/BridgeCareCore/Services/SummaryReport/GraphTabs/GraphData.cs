@@ -37,6 +37,8 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             sourceRow++;
             graphDataSheet.Cells[destRow, destCol++].Formula = $"={bridgeWorkSummarySheet.Cells[sourceRow, sourceCol].FullAddress}";
 
+            simulationYearsCount++; // add one for current year
+
             // Data rows
             for (var i = 1; i <= simulationYearsCount; i++)
             { 
@@ -68,9 +70,6 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
                 // skip row
                 destRow++;
             }
-
-
-
 
             destCol += 2;
             return destCol;

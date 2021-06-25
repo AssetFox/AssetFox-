@@ -169,26 +169,6 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Combine NHS and Non-NHS Condition By Bridge Count.
-        /// </summary>
-        internal static string CombineNHSNonNHSConditionByBridgeCount {
-            get {
-                return ResourceManager.GetString("CombineNHSNonNHSConditionByBridgeCount", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Combine NHS and Non-NHS Without Committed Projects
-        ///Combine NHS and Non-NHS Without Committed Projects
-        ///Condition By Deck Area.
-        /// </summary>
-        internal static string CombineNHSNonNHSConditionByDeckArea {
-            get {
-                return ResourceManager.GetString("CombineNHSNonNHSConditionByDeckArea", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Committed Total.
         /// </summary>
         internal static string CommittedTotal {
@@ -270,38 +250,111 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Combined Condition Bridge Cnt.
+        /// </summary>
+        internal static string Graph_CombineNHSNonNHSConditionByBridgeCount_Tab {
+            get {
+                return ResourceManager.GetString("Graph_CombineNHSNonNHSConditionByBridgeCount_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combine NHS and Non-NHS Condition By Bridge Count.
+        /// </summary>
+        internal static string Graph_CombineNHSNonNHSConditionByBridgeCount_Title {
+            get {
+                return ResourceManager.GetString("Graph_CombineNHSNonNHSConditionByBridgeCount_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combined Condition DA.
+        /// </summary>
+        internal static string Graph_CombineNHSNonNHSConditionByDeckArea_Tab {
+            get {
+                return ResourceManager.GetString("Graph_CombineNHSNonNHSConditionByDeckArea_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combine NHS and Non-NHS Without Committed Projects
+        ///Condition By Deck Area.
+        /// </summary>
+        internal static string Graph_CombineNHSNonNHSConditionByDeckArea_Title {
+            get {
+                return ResourceManager.GetString("Graph_CombineNHSNonNHSConditionByDeckArea_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NHS Condition Bridge Cnt.
+        /// </summary>
+        internal static string Graph_NHSConditionByBridgeCount_Tab {
+            get {
+                return ResourceManager.GetString("Graph_NHSConditionByBridgeCount_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to NHS Condition By Bridge Count.
         /// </summary>
-        internal static string NHSConditionByBridgeCountLLCC {
+        internal static string Graph_NHSConditionByBridgeCount_Title {
             get {
-                return ResourceManager.GetString("NHSConditionByBridgeCountLLCC", resourceCulture);
+                return ResourceManager.GetString("Graph_NHSConditionByBridgeCount_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NHS Condition DA.
+        /// </summary>
+        internal static string Graph_NHSConditionByDeckArea_Tab {
+            get {
+                return ResourceManager.GetString("Graph_NHSConditionByDeckArea_Tab", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to NHS Condition By Deck Area.
         /// </summary>
-        internal static string NHSConditionByDeckAreaLLCC {
+        internal static string Graph_NHSConditionByDeckArea_Title {
             get {
-                return ResourceManager.GetString("NHSConditionByDeckAreaLLCC", resourceCulture);
+                return ResourceManager.GetString("Graph_NHSConditionByDeckArea_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Non-NHS Condition Bridge Cnt.
+        /// </summary>
+        internal static string Graph_NonNHSConditionByBridgeCount_Tab {
+            get {
+                return ResourceManager.GetString("Graph_NonNHSConditionByBridgeCount_Tab", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Non-NHS Condition By Bridge Count.
         /// </summary>
-        internal static string NonNHSConditionByBridgeCount {
+        internal static string Graph_NonNHSConditionByBridgeCount_Title {
             get {
-                return ResourceManager.GetString("NonNHSConditionByBridgeCount", resourceCulture);
+                return ResourceManager.GetString("Graph_NonNHSConditionByBridgeCount_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Non-NHS Condition DA.
+        /// </summary>
+        internal static string Graph_NonNHSConditionByDeckArea_Tab {
+            get {
+                return ResourceManager.GetString("Graph_NonNHSConditionByDeckArea_Tab", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Non-NHS Condition By Deck Area.
         /// </summary>
-        internal static string NonNHSConditionByDeckArea {
+        internal static string Graph_NonNHSConditionByDeckArea_Title {
             get {
-                return ResourceManager.GetString("NonNHSConditionByDeckArea", resourceCulture);
+                return ResourceManager.GetString("Graph_NonNHSConditionByDeckArea_Title", resourceCulture);
             }
         }
         

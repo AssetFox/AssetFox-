@@ -163,14 +163,6 @@
     <value>Closed</value>
     <comment>Label for Summary TABs</comment>
   </data>
-  <data name="CombineNHSNonNHSConditionByBridgeCount" xml:space="preserve">
-    <value>Combine NHS and Non-NHS Condition By Bridge Count</value>
-  </data>
-  <data name="CombineNHSNonNHSConditionByDeckArea" xml:space="preserve">
-    <value>Combine NHS and Non-NHS Without Committed Projects
-Combine NHS and Non-NHS Without Committed Projects
-Condition By Deck Area</value>
-  </data>
   <data name="CommittedTotal" xml:space="preserve">
     <value>Committed Total</value>
   </data>
@@ -200,21 +192,53 @@ Condition By Deck Area</value>
     <value>Good</value>
     <comment>Label for Summary TABs</comment>
   </data>
-  <data name="NHSConditionByBridgeCountLLCC" xml:space="preserve">
+  <data name="Graph_CombineNHSNonNHSConditionByBridgeCount_Tab" xml:space="preserve">
+    <value>Combined Condition Bridge Cnt</value>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByBridgeCount_Title" xml:space="preserve">
+    <value>Combine NHS and Non-NHS Condition By Bridge Count</value>
+    <comment>Graph Title for Combine NHS and Non-NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByDeckArea_Tab" xml:space="preserve">
+    <value>Combined Condition DA</value>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByDeckArea_Title" xml:space="preserve">
+    <value>Combine NHS and Non-NHS Without Committed Projects
+Condition By Deck Area</value>
+    <comment>Graph Title for Combine NHS and Non-NHS Without Committed Projects
+Condition By Deck Area TAB</comment>
+  </data>
+  <data name="Graph_NHSConditionByBridgeCount_Tab" xml:space="preserve">
+    <value>NHS Condition Bridge Cnt</value>
+    <comment>Tab label for NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_NHSConditionByBridgeCount_Title" xml:space="preserve">
     <value>NHS Condition By Bridge Count</value>
-    <comment>NHS Condition By Bridge Count TAB</comment>
+    <comment>Graph Title for NHS Condition By Bridge Count TAB</comment>
   </data>
-  <data name="NHSConditionByDeckAreaLLCC" xml:space="preserve">
+  <data name="Graph_NHSConditionByDeckArea_Tab" xml:space="preserve">
+    <value>NHS Condition DA</value>
+    <comment>Tab Label for NHS Condition By Deck Area TAB</comment>
+  </data>
+  <data name="Graph_NHSConditionByDeckArea_Title" xml:space="preserve">
     <value>NHS Condition By Deck Area</value>
-    <comment>NHS Condition By Deck Area TAB</comment>
+    <comment>Graph Title for NHS Condition By Deck Area TAB</comment>
   </data>
-  <data name="NonNHSConditionByBridgeCount" xml:space="preserve">
+  <data name="Graph_NonNHSConditionByBridgeCount_Tab" xml:space="preserve">
+    <value>Non-NHS Condition Bridge Cnt</value>
+    <comment>Tab Label for Non NHS Bridge Count graph TAB</comment>
+  </data>
+  <data name="Graph_NonNHSConditionByBridgeCount_Title" xml:space="preserve">
     <value>Non-NHS Condition By Bridge Count</value>
-    <comment>Label for Non NHS Bridge Count graph TAB</comment>
+    <comment>Graph Title for Non NHS Bridge Count graph TAB</comment>
   </data>
-  <data name="NonNHSConditionByDeckArea" xml:space="preserve">
+  <data name="Graph_NonNHSConditionByDeckArea_Tab" xml:space="preserve">
+    <value>Non-NHS Condition DA</value>
+    <comment>Tab Label for Non NHS Condition By Deck Area graph TAB</comment>
+  </data>
+  <data name="Graph_NonNHSConditionByDeckArea_Title" xml:space="preserve">
     <value>Non-NHS Condition By Deck Area</value>
-    <comment>Label for Non NHS Condition y deck area graph TAB</comment>
+    <comment>Graph Title for Non NHS Condition y deck area graph TAB</comment>
   </data>
   <data name="NoTreatment" xml:space="preserve">
     <value>no treatment</value>

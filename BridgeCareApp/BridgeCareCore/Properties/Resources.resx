@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AnnualizedAmount" xml:space="preserve">
+    <value>Annualized Amount</value>
+  </data>
   <data name="BPN1" xml:space="preserve">
     <value>BPN 1</value>
     <comment>Bus plan network Label for Summary TABs</comment>
@@ -158,6 +161,9 @@
   </data>
   <data name="BridgeTotal" xml:space="preserve">
     <value>Bridge Total</value>
+  </data>
+  <data name="CashNeededByBPN" xml:space="preserve">
+    <value>Cash Needed By BPN</value>
   </data>
   <data name="Closed" xml:space="preserve">
     <value>Closed</value>
@@ -246,6 +252,9 @@ Condition By Deck Area</value>
   </data>
   <data name="PoorDeckAreaByBPN" xml:space="preserve">
     <value>Poor Deck Area By BPN</value>
+  </data>
+  <data name="Posted" xml:space="preserve">
+    <value>Posted</value>
   </data>
   <data name="PostedBridgeCountByBPN" xml:space="preserve">
     <value>Posted Bridge Count By BPN</value>

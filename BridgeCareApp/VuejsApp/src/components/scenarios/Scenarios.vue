@@ -234,7 +234,7 @@
                                            persistent
                                            :return-value.sync='props.item.name'
                                            @save='onEditScenarioName(props.item, nameUpdate)'
-                                           @open='prepareForNameEdit(props.item.name)''>
+                                           @open='prepareForNameEdit(props.item.name)'>
                                 {{ props.item.name }}
                                 <template slot='input'>
                                     <v-text-field label='Edit'

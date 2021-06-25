@@ -1,6 +1,7 @@
 ﻿
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.SummaryReport;
+using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeData;
@@ -45,6 +46,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<BridgeWorkCost>();
             services.AddScoped<CommittedProjectCost>();
             services.AddScoped<ICommittedProjectService, CommittedProjectService>();
+            services.AddScoped<WorkSummaryModel>();
         }
 
         public static void AddSummaryReportGraphTABs(this IServiceCollection services)
@@ -65,6 +67,8 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<ClosedBPNCount>();
             services.AddScoped<ClosedBPNDeckArea>();
             services.AddScoped<CombinedPostedAndClosed>();
+            services.AddScoped<CashNeededByBPN>();
+            services.AddScoped<IAddBPNGraphTab, AddBPNGraphTab>();
         }
     }
 }

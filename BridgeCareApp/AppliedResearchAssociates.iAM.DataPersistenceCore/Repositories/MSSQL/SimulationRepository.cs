@@ -331,7 +331,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
 
-            _unitOfWork.Context.DeleteAll<SimulationLogEntity>(_ => _.Id == simulationId);
+            _unitOfWork.Context.DeleteAll<SimulationLogEntity>(_ => _.SimulationId == simulationId);
 
             _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
         }

@@ -16,15 +16,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
         private readonly IExcelHelper _excelHelper;
         private readonly BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
+        private readonly WorkSummaryModel _workSummaryModel;
 
-        private Dictionary<int, int> TotalPostedBridgeCount = new Dictionary<int, int>();
-        private Dictionary<int, int> TotalClosedBridgeCount = new Dictionary<int, int>();
-
-        public PostedClosedBridgeWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IExcelHelper excelHelper, BridgeWorkSummaryComputationHelper bridgeWorkSummaryComputationHelper)
+        public PostedClosedBridgeWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IExcelHelper excelHelper,
+            BridgeWorkSummaryComputationHelper bridgeWorkSummaryComputationHelper, WorkSummaryModel workSummaryModel)
         {
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
             _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryComputationHelper));
+            _workSummaryModel = workSummaryModel ?? throw new ArgumentNullException(nameof(workSummaryModel));
         }
 
         internal ChartRowsModel FillPostedBridgesCountByBPN(ExcelWorksheet worksheet, CurrentCell currentCell,
@@ -290,7 +290,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             }
             for (var i = 0; i < reportOutputData.Years.Count; i++)
             {
-                worksheet.Cells[row + bpnRowCount, startColumn + i + 2].Value = totalMoney / reportOutputData.Years.Count;
+                worksheet.Cells[row + bpnRowCount, startColumn + i + 2].Value = _workSummaryModel.AnnualizedAmount;
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column]);
             _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column], "NegativeCurrency");

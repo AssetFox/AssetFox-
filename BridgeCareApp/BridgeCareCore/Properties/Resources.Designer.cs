@@ -61,6 +61,15 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Annualized Amount.
+        /// </summary>
+        internal static string AnnualizedAmount {
+            get {
+                return ResourceManager.GetString("AnnualizedAmount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BPN 1.
         /// </summary>
         internal static string BPN1 {
@@ -156,6 +165,15 @@ namespace BridgeCareCore.Properties {
         internal static string BridgeTotal {
             get {
                 return ResourceManager.GetString("BridgeTotal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cash Needed By BPN.
+        /// </summary>
+        internal static string CashNeededByBPN {
+            get {
+                return ResourceManager.GetString("CashNeededByBPN", resourceCulture);
             }
         }
         
@@ -392,6 +410,15 @@ namespace BridgeCareCore.Properties {
         internal static string PoorDeckAreaByBPN {
             get {
                 return ResourceManager.GetString("PoorDeckAreaByBPN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Posted.
+        /// </summary>
+        internal static string Posted {
+            get {
+                return ResourceManager.GetString("Posted", resourceCulture);
             }
         }
         

@@ -17,11 +17,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private Dictionary<int, decimal> TotalCulvertSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalBridgeSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalCommittedSpent = new Dictionary<int, decimal>();
+        private readonly WorkSummaryModel _workSummaryModel;
 
-        public CostBudgetsWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IExcelHelper excelHelper)
+        public CostBudgetsWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IExcelHelper excelHelper,
+            WorkSummaryModel workSummaryModel)
         {
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon;
             _excelHelper = excelHelper;
+            _workSummaryModel = workSummaryModel ?? throw new ArgumentNullException(nameof(workSummaryModel));
         }
 
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
@@ -151,15 +154,22 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             worksheet.Cells[currentCell.Row, 1].Value = "Total Bridge Care Budget";
             var totalColumnRange = worksheet.Cells[firstContentRow, 3 + numberOfYears, totalSpentRow, 3 + numberOfYears];
             _excelHelper.ApplyColor(totalColumnRange, Color.FromArgb(217, 217, 217));
+
+            decimal averageAnnualBudget = 0;
             foreach (var year in simulationYears)
             {
                 var yearIndex = year - simulationYears[0];
                 var columnIndex = yearIndex + 3;
                 var budgetTotal = yearlyBudgetAmount.Sum(x => x.Value.YearlyAmounts[yearIndex].Value);
                 worksheet.Cells[currentCell.Row, columnIndex].Value = budgetTotal;
+                averageAnnualBudget += budgetTotal;
             }
 
-            worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(currentCell.Row, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1); ;
+            worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(currentCell.Row, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1);
+
+            // AnnualizedAmount is used to fill the "Annualized Amount" row of Bridge Work Summary
+            _workSummaryModel.AnnualizedAmount = (averageAnnualBudget / simulationYears.Count);
+
             var totalRowRange = worksheet.Cells[currentCell.Row, 3, currentCell.Row, 2 + numberOfYears];
             _excelHelper.ApplyColor(totalRowRange, Color.FromArgb(0, 128, 0));
             var grandTotalRange = worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears];

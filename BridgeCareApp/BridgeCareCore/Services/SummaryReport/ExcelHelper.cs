@@ -70,22 +70,22 @@ namespace BridgeCareCore.Services.SummaryReport
         ///     Set custom format for given cells
         /// </summary>
         /// <param name="cells"></param>
-        public void SetCustomFormat(ExcelRange cells, string type)
+        public void SetCustomFormat(ExcelRange cells, ExcelHelperCellFormat type)
         {
             switch (type)
             {
-            case "NegativeCurrency":
+            case ExcelHelperCellFormat.NegativeCurrency:
                 cells.Style.Numberformat.Format = ExcelFormatStrings.NegativeCurrency;
                 break;
 
-            case "Number":
+            case ExcelHelperCellFormat.Number:
                 cells.Style.Numberformat.Format = "_-* #,##0_-;* (#,##0)_-;_-* \"-\"??_-;_-@_-";
                 break;
 
-            case "Percentage":
+            case ExcelHelperCellFormat.Percentage:
                 cells.Style.Numberformat.Format = "#0%";
                 break;
-            case "PercentageDecimal2":
+            case ExcelHelperCellFormat.PercentageDecimal2:
                 cells.Style.Numberformat.Format = "#0.00%";
                 break;
             }

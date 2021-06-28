@@ -251,7 +251,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 worksheet.Cells[row, column].Value = _bridgeWorkSummaryComputationHelper.CalculateTotalPoorBridgesDeckArea(yearlyData);
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row, column], "Number");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row, column], ExcelHelperCellFormat.Number);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
         }
 
@@ -314,7 +314,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column++;
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, startRow + 3, column - 1]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 3, column], "PercentageDecimal2");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 3, column], ExcelHelperCellFormat.PercentageDecimal2);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row, column - 1);
         }
 
@@ -331,7 +331,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 AddTotalDeckArea(worksheet, yearlyData, row, column);
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 3, column]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row + 3, column], "Number");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row + 3, column], ExcelHelperCellFormat.Number);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 4, column);
         }
 

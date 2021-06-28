@@ -10,9 +10,6 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
     public class AddGraphsInTabs : IAddGraphsInTabs
     {
         private readonly ConditionPercentageChart _conditionPercentageChart;
-        private readonly PoorBridgeCount _poorBridgeCount;
-        private readonly PoorBridgeDeckArea _poorBridgeDeckArea;
-        private readonly PoorBridgeDeckAreaByBPN _poorBridgeDeckAreaByBPN;
         private readonly GraphData _graphData;
 
         private readonly IAddBPNGraphTab _addBPNGraphTab;
@@ -23,12 +20,10 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             PoorBridgeDeckArea poorBridgeDeckArea,
             PoorBridgeDeckAreaByBPN poorBridgeDeckAreaByBPN,
 
-            PostedBPNCount postedBPNCount, IAddBPNGraphTab addBPNGraphTab)
+            IAddBPNGraphTab addBPNGraphTab)
         {
             _graphData = graphData ?? throw new ArgumentNullException(nameof(graphData));
             _conditionPercentageChart = conditionPercentageChart ?? throw new ArgumentNullException(nameof(conditionPercentageChart));
-            _poorBridgeCount = poorBridgeCount ?? throw new ArgumentNullException(nameof(poorBridgeCount));
-            _poorBridgeDeckArea = poorBridgeDeckArea ?? throw new ArgumentNullException(nameof(poorBridgeDeckArea));
 
             _addBPNGraphTab = addBPNGraphTab ?? throw new ArgumentNullException(nameof(addBPNGraphTab));
         }
@@ -61,32 +56,6 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             AddGraphDataDependentTab(Properties.Resources.Graph_NonNHSConditionByDeckArea_Tab, Properties.Resources.Graph_NonNHSConditionByDeckArea_Title);
             AddGraphDataDependentTab(Properties.Resources.Graph_CombineNHSNonNHSConditionByBridgeCount_Tab, Properties.Resources.Graph_CombineNHSNonNHSConditionByBridgeCount_Title);
             AddGraphDataDependentTab(Properties.Resources.Graph_CombineNHSNonNHSConditionByDeckArea_Tab, Properties.Resources.Graph_CombineNHSNonNHSConditionByDeckArea_Title);
-
-            // Condition Bridge Cnt tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Combined Count");
-            _conditionBridgeCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgeCountPercentYearsRow, simulationYearsCount);
-
-            // Condition DA tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Combined DA");
-            _conditionDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalDeckAreaPercentYearsRow, simulationYearsCount);
-            // Create the tabs that are NOT dependent on "Graph Data" tab (these will precede the "Graph Data" tab)
-
-            // Poor Bridge Cnt tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Poor Count");
-            _poorBridgeCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorBridgesCountSectionYearsRow, simulationYearsCount);
-
-            // Poor Bridge DA tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Poor DA");
-            _poorBridgeDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorBridgesDeckAreaSectionYearsRow, simulationYearsCount);
-
-            // Poor Bridge DA By BPN Tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Poor Bridge DA By BPN");
-            _poorBridgeDeckAreaByBPN.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorDeckAreaByBPNSectionYearsRow, simulationYearsCount);
-
-            // Posted BPN count TAB
-            worksheet = excelPackage.Workbook.Worksheets.Add("Posted BPN Count");
-            _postedBPNCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgePostedCountByBPNYearsRow, simulationYearsCount);
-
 
             // Create the "Graph Data" tab
             var graphDataWorksheet = excelPackage.Workbook.Worksheets.Add("Graph Data");

@@ -10,57 +10,90 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs.BPN
 {
     public class AddBPNGraphTab : IAddBPNGraphTab
     {
-        private readonly PoorBridgeDeckAreaByBPN _poorBridgeDeckAreaByBPN;
-
-        private readonly PostedBPNCount _postedBPNCount;
-        private readonly PostedBPNDeckArea _postedBPNDeckArea;
-        private readonly ClosedBPNCount _closedBPNCount;
-        private readonly ClosedBPNDeckArea _closedBPNDeckArea;
         private readonly CombinedPostedAndClosed _combinedPostedAndClosed;
         private readonly CashNeededByBPN _cashNeededByBPN;
 
-        public AddBPNGraphTab(PoorBridgeDeckAreaByBPN poorBridgeDeckAreaByBPN, PostedBPNCount postedBPNCount,
-            PostedBPNDeckArea postedBPNDeckArea, ClosedBPNCount closedBPNCount, ClosedBPNDeckArea closedBPNDeckArea,
-            CombinedPostedAndClosed combinedPostedAndClosed, CashNeededByBPN cashNeededByBPN)
-        {
-            _poorBridgeDeckAreaByBPN = poorBridgeDeckAreaByBPN ?? throw new ArgumentNullException(nameof(poorBridgeDeckAreaByBPN));
+        private readonly BPNAreaChart _bpnAreaChart;
+        private readonly BPNCountChart _bpnCountChart;
 
-            _postedBPNCount = postedBPNCount ?? throw new ArgumentNullException(nameof(postedBPNCount));
-            _postedBPNDeckArea = postedBPNDeckArea ?? throw new ArgumentNullException(nameof(postedBPNDeckArea));
-            _closedBPNCount = closedBPNCount ?? throw new ArgumentNullException(nameof(closedBPNCount));
-            _closedBPNDeckArea = closedBPNDeckArea ?? throw new ArgumentNullException(nameof(closedBPNDeckArea));
+        public AddBPNGraphTab(CombinedPostedAndClosed combinedPostedAndClosed, CashNeededByBPN cashNeededByBPN,
+                                BPNAreaChart bpnAreaChart, BPNCountChart bpnCountChart)
+        {
             _combinedPostedAndClosed = combinedPostedAndClosed ?? throw new ArgumentNullException(nameof(combinedPostedAndClosed));
             _cashNeededByBPN = cashNeededByBPN ?? throw new ArgumentNullException(nameof(cashNeededByBPN));
+
+            _bpnAreaChart = bpnAreaChart ?? throw new ArgumentNullException(nameof(bpnAreaChart));
+            _bpnCountChart = bpnCountChart ?? throw new ArgumentNullException(nameof(bpnCountChart));
         }
         public void AddBPNTab(ExcelPackage excelPackage, ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, ChartRowsModel chartRowModel, int simulationYearsCount)
         {
-            // Poor Bridge DA By BPN TAB
-            worksheet = excelPackage.Workbook.Worksheets.Add("Poor DA By BPN");
-            _poorBridgeDeckAreaByBPN.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorDeckAreaByBPNSectionYearsRow, simulationYearsCount);
+            var GraphDataDependentTabs = new Dictionary<string, GraphDataTab>();
 
-            // Posted BPN count TAB
-            worksheet = excelPackage.Workbook.Worksheets.Add("Posted BPN Count");
-            _postedBPNCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgePostedCountByBPNYearsRow, simulationYearsCount);
+            void AddGraphDataDependentTab(string tabTitle, string graphTitle) => GraphDataDependentTabs.Add(tabTitle, new GraphDataTab(excelPackage.Workbook.Worksheets.Add(tabTitle), graphTitle));
 
-            // Posted BPN DA TAB
-            worksheet = excelPackage.Workbook.Worksheets.Add("Posted BPN DA");
-            _postedBPNDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPostedBridgeDeckAreaByBPNYearsRow, simulationYearsCount);
+            AddGraphDataDependentTab(Properties.Resources.Graph_PoorDAByBPN_Tab, Properties.Resources.PoorDeckAreaByBPN);
+            AddGraphDataDependentTab(Properties.Resources.Graph_PostedBPNCount_Tab, Properties.Resources.PostedBridgeCountByBPN);
+            AddGraphDataDependentTab(Properties.Resources.Graph_PostedBPNDA_Tab, Properties.Resources.PostedBridgeDeckAreaByBPN);
+            AddGraphDataDependentTab(Properties.Resources.Graph_ClosedBPNCount_Tab, Properties.Resources.ClosedBridgeCountByBPN);
+            AddGraphDataDependentTab(Properties.Resources.Graph_ClosedBPNDA_Tab, Properties.Resources.ClosedBridgeDeckAreaByBPN);
+            AddGraphDataDependentTab(Properties.Resources.Graph_CombinedPostedandClosed_Tab, Properties.Resources.CombinedPostedAndClosed);
+            AddGraphDataDependentTab(Properties.Resources.Graph_DollarNeededDABPN_Tab, Properties.Resources.CashNeededByBPN);
 
-            // Closed BPN Count TAB
-            worksheet = excelPackage.Workbook.Worksheets.Add("Closed BPN Count");
-            _closedBPNCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalClosedBridgeCountByBPNYearsRow, simulationYearsCount);
+            GraphDataDependentTabs[Properties.Resources.Graph_PoorDAByBPN_Tab].DataColumn = chartRowModel.TotalPoorDeckAreaByBPNSectionYearsRow;
+            GraphDataDependentTabs[Properties.Resources.Graph_PoorDAByBPN_Tab].type = ChartType.AreaChart;
+            GraphDataDependentTabs[Properties.Resources.Graph_PostedBPNCount_Tab].DataColumn = chartRowModel.TotalBridgePostedCountByBPNYearsRow;
+            GraphDataDependentTabs[Properties.Resources.Graph_PostedBPNCount_Tab].type = ChartType.CountChart;
+            GraphDataDependentTabs[Properties.Resources.Graph_PostedBPNDA_Tab].DataColumn = chartRowModel.TotalPostedBridgeDeckAreaByBPNYearsRow;
+            GraphDataDependentTabs[Properties.Resources.Graph_PostedBPNDA_Tab].type = ChartType.AreaChart;
+            GraphDataDependentTabs[Properties.Resources.Graph_ClosedBPNCount_Tab].DataColumn = chartRowModel.TotalClosedBridgeCountByBPNYearsRow;
+            GraphDataDependentTabs[Properties.Resources.Graph_ClosedBPNCount_Tab].type = ChartType.CountChart;
+            GraphDataDependentTabs[Properties.Resources.Graph_ClosedBPNDA_Tab].DataColumn = chartRowModel.TotalClosedBridgeDeckAreaByBPNYearsRow;
+            GraphDataDependentTabs[Properties.Resources.Graph_ClosedBPNDA_Tab].type = ChartType.AreaChart;
+            GraphDataDependentTabs[Properties.Resources.Graph_CombinedPostedandClosed_Tab].DataColumn = chartRowModel.TotalPostedAndClosedByBPNYearsRow;
+            GraphDataDependentTabs[Properties.Resources.Graph_CombinedPostedandClosed_Tab].type = ChartType.CombinedChart;
+            GraphDataDependentTabs[Properties.Resources.Graph_DollarNeededDABPN_Tab].DataColumn = chartRowModel.TotalCashNeededByBPNYearsRow;
+            GraphDataDependentTabs[Properties.Resources.Graph_DollarNeededDABPN_Tab].type = ChartType.CashChart;
 
-            // Closed BPN Deck Area TAB
-            worksheet = excelPackage.Workbook.Worksheets.Add("Closed BPN DA");
-            _closedBPNDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalClosedBridgeDeckAreaByBPNYearsRow, simulationYearsCount);
+            foreach (var graphDataTab in GraphDataDependentTabs.Values)
+            {
 
-            // Combined Posted and Closed TAB
-            worksheet = excelPackage.Workbook.Worksheets.Add("Combined Posted and Closed");
-            _combinedPostedAndClosed.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPostedAndClosedByBPNYearsRow, simulationYearsCount);
+                switch (graphDataTab.type)
+                {
+                case ChartType.AreaChart:
+                    _bpnAreaChart.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount);
+                    break;
+                    case ChartType.CountChart:
+                    _bpnCountChart.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount);
+                    break;
+                case ChartType.CombinedChart:
+                    _combinedPostedAndClosed.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount);
+                    break;
+                case ChartType.CashChart:
+                    _cashNeededByBPN.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount);
+                    break;
 
-            // $ Needed DA BPN TAB
-            worksheet = excelPackage.Workbook.Worksheets.Add("$ Needed DA BPN");
-            _cashNeededByBPN.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalCashNeededByBPNYearsRow, simulationYearsCount);
+                }
+            }
         }
+
+        private class GraphDataTab
+        {
+            public GraphDataTab(ExcelWorksheet workSheet, string title)
+            {
+                Worksheet = workSheet;
+                Title = title;
+            }
+            public string Title { get; }
+            public ExcelWorksheet Worksheet { get; }
+            public int DataColumn { get; set; } = 0;
+            public ChartType type { get; set; }
+        }
+    }
+    public enum ChartType
+    {
+        CountChart,
+        AreaChart,
+        CashChart,
+        CombinedChart
     }
 }

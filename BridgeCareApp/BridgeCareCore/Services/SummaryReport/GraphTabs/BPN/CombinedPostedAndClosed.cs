@@ -43,15 +43,5 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs.BPN
             excelChartSerie.Header = header;
             excelChartSerie.Fill.Color = color;
         }
-        //private void SetChartAxes(ExcelChart chart)
-        //{
-        //    _stackedColumnChartCommon.SetChartAxes(chart);
-        //    var yAxis = chart.YAxis;
-        //    yAxis.DisplayUnit = 100000;
-        //    yAxis.Format = "_($* #,##0_);_($* (#,##0);_($* -??_);_(@_)";
-        //    yAxis.Title.TextVertical = OfficeOpenXml.Drawing.eTextVerticalType.Vertical;
-        //    yAxis.Title.Font.Size = 10;
-        //    yAxis.Title.Text = "Millions ($)";
-        //}
     }
 }

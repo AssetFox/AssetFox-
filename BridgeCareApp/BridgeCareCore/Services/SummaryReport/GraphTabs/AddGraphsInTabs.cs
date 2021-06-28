@@ -16,9 +16,6 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
 
         public AddGraphsInTabs(GraphData graphData,
             ConditionPercentageChart conditionPercentageChart,
-            PoorBridgeCount poorBridgeCount,
-            PoorBridgeDeckArea poorBridgeDeckArea,
-            PoorBridgeDeckAreaByBPN poorBridgeDeckAreaByBPN,
 
             IAddBPNGraphTab addBPNGraphTab)
         {

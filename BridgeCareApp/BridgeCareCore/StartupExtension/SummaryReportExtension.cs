@@ -56,16 +56,14 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<ConditionPercentageChart>();
             services.AddScoped<PoorBridgeCount>();
             services.AddScoped<PoorBridgeDeckArea>();
-            services.AddScoped<PoorBridgeDeckAreaByBPN>();
             services.AddScoped<StackedColumnChartCommon>();
 
-            services.AddScoped<PostedBPNCount>();
-            services.AddScoped<PostedBPNDeckArea>();
-            services.AddScoped<ClosedBPNCount>();
-            services.AddScoped<ClosedBPNDeckArea>();
             services.AddScoped<CombinedPostedAndClosed>();
             services.AddScoped<CashNeededByBPN>();
             services.AddScoped<IAddBPNGraphTab, AddBPNGraphTab>();
+
+            services.AddScoped<BPNAreaChart>();
+            services.AddScoped<BPNCountChart>();
         }
     }
 }

@@ -315,6 +315,33 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Close BPN Count.
+        /// </summary>
+        internal static string Graph_ClosedBPNCount_Tab {
+            get {
+                return ResourceManager.GetString("Graph_ClosedBPNCount_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Closed BPN DA.
+        /// </summary>
+        internal static string Graph_ClosedBPNDA_Tab {
+            get {
+                return ResourceManager.GetString("Graph_ClosedBPNDA_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combined Posted and Closed.
+        /// </summary>
+        internal static string Graph_CombinedPostedandClosed_Tab {
+            get {
+                return ResourceManager.GetString("Graph_CombinedPostedandClosed_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Combined Count.
         /// </summary>
         internal static string Graph_CombineNHSNonNHSConditionByBridgeCount_Tab {
@@ -348,6 +375,15 @@ namespace BridgeCareCore.Properties {
         internal static string Graph_CombineNHSNonNHSConditionByDeckArea_Title {
             get {
                 return ResourceManager.GetString("Graph_CombineNHSNonNHSConditionByDeckArea_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to $ Needed DA BPN.
+        /// </summary>
+        internal static string Graph_DollarNeededDABPN_Tab {
+            get {
+                return ResourceManager.GetString("Graph_DollarNeededDABPN_Tab", resourceCulture);
             }
         }
         
@@ -420,6 +456,33 @@ namespace BridgeCareCore.Properties {
         internal static string Graph_NonNHSConditionByDeckArea_Title {
             get {
                 return ResourceManager.GetString("Graph_NonNHSConditionByDeckArea_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Poor DA By BPN.
+        /// </summary>
+        internal static string Graph_PoorDAByBPN_Tab {
+            get {
+                return ResourceManager.GetString("Graph_PoorDAByBPN_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Posted BPN Count.
+        /// </summary>
+        internal static string Graph_PostedBPNCount_Tab {
+            get {
+                return ResourceManager.GetString("Graph_PostedBPNCount_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Posted BPN DA.
+        /// </summary>
+        internal static string Graph_PostedBPNDA_Tab {
+            get {
+                return ResourceManager.GetString("Graph_PostedBPNDA_Tab", resourceCulture);
             }
         }
         

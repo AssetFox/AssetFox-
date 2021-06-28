@@ -215,6 +215,15 @@ Condition By Deck Area</value>
     <value>Good</value>
     <comment>Label for Summary TABs</comment>
   </data>
+  <data name="Graph_ClosedBPNCount_Tab" xml:space="preserve">
+    <value>Close BPN Count</value>
+  </data>
+  <data name="Graph_ClosedBPNDA_Tab" xml:space="preserve">
+    <value>Closed BPN DA</value>
+  </data>
+  <data name="Graph_CombinedPostedandClosed_Tab" xml:space="preserve">
+    <value>Combined Posted and Closed</value>
+  </data>
   <data name="Graph_CombineNHSNonNHSConditionByBridgeCount_Tab" xml:space="preserve">
     <value>Combined Count</value>
     <comment>Tab label for Combine NHS and Non-NHS Condition By Bridge Count TAB</comment>
@@ -232,6 +241,9 @@ Condition By Deck Area</value>
 Condition By Deck Area</value>
     <comment>Graph Title for Combine NHS and Non-NHS With Committed Projects
 Condition By Deck Area TAB</comment>
+  </data>
+  <data name="Graph_DollarNeededDABPN_Tab" xml:space="preserve">
+    <value>$ Needed DA BPN</value>
   </data>
   <data name="Graph_NHSConditionByBridgeCount_Tab" xml:space="preserve">
     <value>NHS Count</value>
@@ -264,6 +276,15 @@ Condition By Deck Area TAB</comment>
   <data name="Graph_NonNHSConditionByDeckArea_Title" xml:space="preserve">
     <value>Non-NHS Condition By Deck Area</value>
     <comment>Graph Title for Non NHS Condition y deck area graph TAB</comment>
+  </data>
+  <data name="Graph_PoorDAByBPN_Tab" xml:space="preserve">
+    <value>Poor DA By BPN</value>
+  </data>
+  <data name="Graph_PostedBPNCount_Tab" xml:space="preserve">
+    <value>Posted BPN Count</value>
+  </data>
+  <data name="Graph_PostedBPNDA_Tab" xml:space="preserve">
+    <value>Posted BPN DA</value>
   </data>
   <data name="NoTreatment" xml:space="preserve">
     <value>no treatment</value>

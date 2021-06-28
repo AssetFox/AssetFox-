@@ -293,7 +293,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 worksheet.Cells[row + bpnRowCount, startColumn + i + 2].Value = _workSummaryModel.AnnualizedAmount;
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column], "NegativeCurrency");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column], ExcelHelperCellFormat.NegativeCurrency);
             _excelHelper.ApplyColor(worksheet.Cells[startRow, startColumn + 2, row + bpnRowCount, column], Color.FromArgb(198, 224, 180));
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + bpnRowCount, column);
         }

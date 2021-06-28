@@ -135,7 +135,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _bridgeWorkSummaryCommon.InitializeLabelCells(worksheet, currentCell, out startRow, out startColumn, out row, out column);
             for (var index = 0; index <= simulationYears.Count; index++)
             {
-                var sumFormula = "SUM(" + worksheet.Cells[dataStartRow, column, dataStartRow + 3, column] + ")";
+                var sumFormula = "SUM(" + worksheet.Cells[dataStartRow, column, dataStartRow + 2, column] + ")";   // Sum is Good + Fair + Poor; "Closed" is a subset of "Poor"
                 worksheet.Cells[startRow, column].Formula = worksheet.Cells[dataStartRow, column] + "/" + sumFormula;
                 worksheet.Cells[startRow + 1, column].Formula = worksheet.Cells[dataStartRow + 1, column] + "/" + sumFormula;
                 worksheet.Cells[startRow + 2, column].Formula = worksheet.Cells[dataStartRow + 2, column] + "/" + sumFormula;
@@ -143,7 +143,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column++;
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, startRow + 3, column - 1]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 3, column], "Percentage");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 3, column], ExcelHelperCellFormat.PercentageDecimal2);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row, column - 1);
         }
 
@@ -179,7 +179,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _bridgeWorkSummaryCommon.InitializeLabelCells(worksheet, currentCell, out startRow, out startColumn, out row, out column);
             for (var index = 0; index <= simulationYears.Count; index++)
             {
-                var sumFormula = "SUM(" + worksheet.Cells[dataStartRow, column, dataStartRow + 3, column] + ")";
+                var sumFormula = "SUM(" + worksheet.Cells[dataStartRow, column, dataStartRow + 2, column] + ")";   // Sum is Good + Fair + Poor; "Closed" is a subset of "Poor"
                 worksheet.Cells[startRow, column].Formula = worksheet.Cells[dataStartRow, column] + "/" + sumFormula;
                 worksheet.Cells[startRow + 1, column].Formula = worksheet.Cells[dataStartRow + 1, column] + "/" + sumFormula;
                 worksheet.Cells[startRow + 2, column].Formula = worksheet.Cells[dataStartRow + 2, column] + "/" + sumFormula;
@@ -187,7 +187,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column++;
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, startRow + 3, column - 1]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 3, column], "Percentage");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 3, column], ExcelHelperCellFormat.PercentageDecimal2);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row, column - 1);
         }
 
@@ -221,7 +221,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             }
 
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row - 1, column - 1]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row - 1, column - 1], "Number");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row - 1, column - 1], ExcelHelperCellFormat.Number);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row, column);
         }
 
@@ -238,7 +238,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 AddNHSBridgeDeckArea(worksheet, row, column, null, yearlyData.Sections);
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 3, column]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row + 3, column], "Number");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row + 3, column], ExcelHelperCellFormat.Number);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 3, column);
         }
 

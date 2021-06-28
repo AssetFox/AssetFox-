@@ -148,7 +148,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             currentCell.Row += 2;
             var contentColor = Color.FromArgb(84, 130, 53);
             _excelHelper.ApplyBorder(worksheet.Cells[firstContentRow, 1, totalSpentRow, 3 + numberOfYears]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3 + numberOfYears], "NegativeCurrency");
+            _excelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3 + numberOfYears], ExcelHelperCellFormat.NegativeCurrency);
             _excelHelper.ApplyColor(worksheet.Cells[firstContentRow, 3, totalSpentRow, 3 + numberOfYears - 1], contentColor);
             _excelHelper.SetTextColor(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3 + numberOfYears - 1], Color.White);
             worksheet.Cells[currentCell.Row, 1].Value = "Total Bridge Care Budget";
@@ -315,7 +315,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var endColumn = simulationYears.Count + 2;
 
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, committedTotalRow, endColumn]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, committedTotalRow, endColumn], "NegativeCurrency");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, committedTotalRow, endColumn], ExcelHelperCellFormat.NegativeCurrency);
             _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, committedTotalRow, endColumn], Color.FromArgb(198, 224, 180));
 
             _excelHelper.ApplyColor(worksheet.Cells[committedTotalRow, fromColumn, committedTotalRow, endColumn], Color.FromArgb(84, 130, 53));
@@ -370,7 +370,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 TotalCulvertSpent.Add(yearlyValues.Key, culvertTotalCost);
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], "NegativeCurrency");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], ExcelHelperCellFormat.NegativeCurrency);
             _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(198, 224, 180));
 
             _excelHelper.ApplyColor(worksheet.Cells[culvertTotalRow, fromColumn, culvertTotalRow, column], Color.FromArgb(84, 130, 53));
@@ -424,7 +424,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 TotalBridgeSpent.Add(yearlyValues.Key, nonCulvertTotalCost);
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], "NegativeCurrency");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], ExcelHelperCellFormat.NegativeCurrency);
             _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(198, 224, 180));
 
             _excelHelper.ApplyColor(worksheet.Cells[bridgeTotalRow, fromColumn, bridgeTotalRow, column], Color.FromArgb(84, 130, 53));
@@ -459,7 +459,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             worksheet.Cells[row, column + 1].Formula = "SUM(" + worksheet.Cells[row, fromColumn, row, column] + ")";
 
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column + 1]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column + 1], "NegativeCurrency");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column + 1], ExcelHelperCellFormat.NegativeCurrency);
             _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(84, 130, 53));
             _excelHelper.SetTextColor(worksheet.Cells[startRow, fromColumn, row, column], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
@@ -510,8 +510,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column + 1]);
 
-            _excelHelper.SetCustomFormat(worksheet.Cells[row - 2, fromColumn, row - 2, column + 1], "NegativeCurrency");
-            _excelHelper.SetCustomFormat(worksheet.Cells[row - 1, fromColumn, row, column], "Percentage");
+            _excelHelper.SetCustomFormat(worksheet.Cells[row - 2, fromColumn, row - 2, column + 1], ExcelHelperCellFormat.NegativeCurrency);
+            _excelHelper.SetCustomFormat(worksheet.Cells[row - 1, fromColumn, row, column], ExcelHelperCellFormat.Percentage);
 
             _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Red);
             _excelHelper.ApplyColor(worksheet.Cells[startRow + 1, fromColumn, row, column], Color.FromArgb(248, 203, 173));

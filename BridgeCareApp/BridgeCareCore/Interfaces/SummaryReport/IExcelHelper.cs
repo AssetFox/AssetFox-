@@ -3,6 +3,14 @@ using OfficeOpenXml;
 
 namespace BridgeCareCore.Interfaces.SummaryReport
 {
+    public enum ExcelHelperCellFormat
+    {
+        NegativeCurrency,
+        Number,
+        Percentage,
+        PercentageDecimal2,
+    }
+
     public interface IExcelHelper
     {
         void ApplyBorder(ExcelRange cells);
@@ -15,7 +23,7 @@ namespace BridgeCareCore.Interfaces.SummaryReport
 
         void SetCurrencyFormat(ExcelRange cells);
 
-        void SetCustomFormat(ExcelRange cells, string type);
+        void SetCustomFormat(ExcelRange cells, ExcelHelperCellFormat type);
 
         void SetTextColor(ExcelRange cells, Color color);
     }

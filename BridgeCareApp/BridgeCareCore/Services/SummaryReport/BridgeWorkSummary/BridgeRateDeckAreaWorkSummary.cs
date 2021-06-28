@@ -314,7 +314,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column++;
             }
             _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, startRow + 3, column - 1]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 3, column], "Percentage");
+            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 3, column], "PercentageDecimal2");
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row, column - 1);
         }
 

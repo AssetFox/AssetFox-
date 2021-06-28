@@ -85,6 +85,9 @@ namespace BridgeCareCore.Services.SummaryReport
             case "Percentage":
                 cells.Style.Numberformat.Format = "#0%";
                 break;
+            case "PercentageDecimal2":
+                cells.Style.Numberformat.Format = "#0.00%";
+                break;
             }
         }
 

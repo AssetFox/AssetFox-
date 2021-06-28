@@ -250,7 +250,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Combined Condition Bridge Cnt.
+        ///   Looks up a localized string similar to Combined Count.
         /// </summary>
         internal static string Graph_CombineNHSNonNHSConditionByBridgeCount_Tab {
             get {
@@ -268,7 +268,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Combined Condition DA.
+        ///   Looks up a localized string similar to Combined DA.
         /// </summary>
         internal static string Graph_CombineNHSNonNHSConditionByDeckArea_Tab {
             get {
@@ -277,7 +277,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Combine NHS and Non-NHS Without Committed Projects
+        ///   Looks up a localized string similar to Combine NHS and Non-NHS With Committed Projects
         ///Condition By Deck Area.
         /// </summary>
         internal static string Graph_CombineNHSNonNHSConditionByDeckArea_Title {
@@ -287,7 +287,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NHS Condition Bridge Cnt.
+        ///   Looks up a localized string similar to NHS Count.
         /// </summary>
         internal static string Graph_NHSConditionByBridgeCount_Tab {
             get {
@@ -305,7 +305,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NHS Condition DA.
+        ///   Looks up a localized string similar to NHS DA.
         /// </summary>
         internal static string Graph_NHSConditionByDeckArea_Tab {
             get {
@@ -314,7 +314,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NHS Condition By Deck Area.
+        ///   Looks up a localized string similar to NHS Condition By DA.
         /// </summary>
         internal static string Graph_NHSConditionByDeckArea_Title {
             get {
@@ -323,7 +323,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Non-NHS Condition Bridge Cnt.
+        ///   Looks up a localized string similar to Non NHS Count.
         /// </summary>
         internal static string Graph_NonNHSConditionByBridgeCount_Tab {
             get {
@@ -341,7 +341,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Non-NHS Condition DA.
+        ///   Looks up a localized string similar to Non NHS DA.
         /// </summary>
         internal static string Graph_NonNHSConditionByDeckArea_Tab {
             get {

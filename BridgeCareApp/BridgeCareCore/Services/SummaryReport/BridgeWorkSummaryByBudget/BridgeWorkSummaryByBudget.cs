@@ -203,7 +203,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
                 InsertWorkTypeTotals(startYear, firstContentRow, worksheet);
 
-                _excelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], "NegativeCurrency");
+                _excelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
                 _excelHelper.ApplyColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
                 _excelHelper.SetTextColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], Color.White);
 
@@ -227,8 +227,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     yearTracker++;
                 }
                 _excelHelper.ApplyBorder(worksheet.Cells[startOfTotalBudget, currentCell.Column, currentCell.Row, simulationYears.Count + 2]);
-                _excelHelper.SetCustomFormat(worksheet.Cells[startOfTotalBudget, currentCell.Column + 2, startOfTotalBudget, simulationYears.Count + 2], "NegativeCurrency");
-                _excelHelper.SetCustomFormat(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], "NegativeCurrency");
+                _excelHelper.SetCustomFormat(worksheet.Cells[startOfTotalBudget, currentCell.Column + 2, startOfTotalBudget, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
+                _excelHelper.SetCustomFormat(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
 
                 _excelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2],
                     Color.FromArgb(84, 130, 53));
@@ -243,7 +243,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 InsertCostPerBPN(worksheet, currentCell, startYear, summaryData, simulationYears);
 
                 _excelHelper.ApplyBorder(worksheet.Cells[firstBPNRowForFormat, 1, currentCell.Row, simulationYears.Count + 2]);
-                _excelHelper.SetCustomFormat(worksheet.Cells[firstBPNRowForFormat, 3, currentCell.Row, simulationYears.Count + 2], "NegativeCurrency");
+                _excelHelper.SetCustomFormat(worksheet.Cells[firstBPNRowForFormat, 3, currentCell.Row, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
 
                 _excelHelper.ApplyColor(worksheet.Cells[firstBPNRowForFormat, 3, currentCell.Row, simulationYears.Count + 2],
                     Color.FromArgb(255, 230, 153));
@@ -275,9 +275,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 _excelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row + 2, simulationYears.Count + 2]);
 
                 _excelHelper.SetCustomFormat(worksheet.Cells[currentCell.Row + 1, currentCell.Column + 2,
-                    currentCell.Row + 2, simulationYears.Count + 2], "Percentage");
+                    currentCell.Row + 2, simulationYears.Count + 2], ExcelHelperCellFormat.Percentage);
                 _excelHelper.SetCustomFormat(worksheet.Cells[currentCell.Row, currentCell.Column + 2,
-                    currentCell.Row, simulationYears.Count + 2], "NegativeCurrency");
+                    currentCell.Row, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
 
                 _excelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2],
                     Color.Red);

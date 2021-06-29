@@ -66,7 +66,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs.BPN
         {
             _stackedColumnChartCommon.SetChartAxes(chart);
             var yAxis = chart.YAxis;
-            yAxis.DisplayUnit = 100000;
+            yAxis.DisplayUnit = 1000000;
             yAxis.Format = "_-$* #,##0_-;$* (#,##0)_-;_-$* \"-\"??_-;_-@_-";
             yAxis.Title.TextVertical = OfficeOpenXml.Drawing.eTextVerticalType.Vertical;
             yAxis.Title.Font.Size = 10;

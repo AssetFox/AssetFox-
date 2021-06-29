@@ -242,6 +242,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             // work done information
             row = 4; // setting row back to start
             column++;
+            var totalWorkMoreThanOnce = 0;
             foreach (var wdInfo in workDoneData)
             {
                 // Work Done
@@ -249,7 +250,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 // Work done more than once
                 worksheet.Cells[row, column].Value = wdInfo > 1 ? "Yes" : "--";
                 row++;
+                totalWorkMoreThanOnce += wdInfo > 1 ? 1 : 0;
             }
+
+            // "Total" column
+            worksheet.Cells[3, column + 1].Value = totalWorkMoreThanOnce;
+            _excelHelper.ApplyStyle(worksheet.Cells[3, column + 1]);
+
             column = column + outputResults.Years.Count + 2; // this will take us to the empty column after "poor on off"
             worksheet.Column(column).Style.Fill.PatternType = ExcelFillStyle.Solid;
             worksheet.Column(column).Style.Fill.BackgroundColor.SetColor(Color.Gray);
@@ -546,9 +553,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             {
                 _excelHelper.MergeCells(worksheet, row, ++column, row, ++column);
                 worksheet.Cells[row, column - 1].Value = HeaderConstText + year;
-                worksheet.Cells[row + 2, column -1].Value = year;
+                worksheet.Cells[row + 2, column -1].Value = "Work";
                 worksheet.Cells[row + 2, column].Value = "Cost";
-                _excelHelper.ApplyStyle(worksheet.Cells[row + 2, column - 1]);
+                _excelHelper.ApplyStyle(worksheet.Cells[row + 2, column - 1, row + 2, column]);
                 _excelHelper.ApplyColor(worksheet.Cells[row, column - 1], Color.FromArgb(244, 176, 132));
             }
 

@@ -32,11 +32,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent
     {
         public static string ToSpreadsheetString(this BPNCostBudgetName name) => name switch
         {
-            BPNCostBudgetName.BPN1 => "BPN1",
-            BPNCostBudgetName.BPN2 => "BPN2",
-            BPNCostBudgetName.BPN3 => "BPN3",
-            BPNCostBudgetName.BPN4 => "BPN4",
-            BPNCostBudgetName.BPNL => "BPNL",
+            BPNCostBudgetName.BPN1 => "BPN 1",
+            BPNCostBudgetName.BPN2 => "BPN 2",
+            BPNCostBudgetName.BPN3 => "BPN 3",
+            BPNCostBudgetName.BPN4 => "BPN 4",
+            BPNCostBudgetName.BPNL => "BPN L",
             BPNCostBudgetName.BPNOther => "BPN Other (BPN D, BPN H,BPN N, BPN T)",
             _ => name.ToString(),
         };

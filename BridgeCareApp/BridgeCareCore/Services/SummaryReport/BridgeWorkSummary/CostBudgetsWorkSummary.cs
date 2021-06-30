@@ -500,9 +500,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 worksheet.Cells[row, column].Formula = 1 + "-" + worksheet.Cells[row - 1, column];
             }
             worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column] + ")";
-            if (worksheet.Cells[budgetTotalRow, column + 1].Value != null)
+            if (_workSummaryModel.AnnualizedAmount != 0)
             {
-                worksheet.Cells[startRow, column + 2].Formula = worksheet.Cells[startRow, column + 1] + "/" + worksheet.Cells[budgetTotalRow, column + 1];
+                worksheet.Cells[startRow, column + 2].Formula = worksheet.Cells[startRow, column + 1] + "/"
+                    + (_workSummaryModel.AnnualizedAmount * simulationYears.Count);
             }
 
             worksheet.Cells[startRow, column + 2].Style.Numberformat.Format = "#0.00%";

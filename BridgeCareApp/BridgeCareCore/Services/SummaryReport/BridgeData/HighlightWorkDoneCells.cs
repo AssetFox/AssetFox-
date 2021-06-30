@@ -19,15 +19,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             if (treatment != null && treatment.ToLower() != Properties.Resources.NoTreatment)
             {
-                var range = worksheet.Cells[row, column];
-                var rangeForCashFlow = worksheet.Cells[row, column - 1, row, column];
+                var range = worksheet.Cells[row, column, row, column + 1];
+                var rangeForCashFlow = worksheet.Cells[row, column - 1, row, column + 2];
                 ParallelBridgeBAMs(parallelBridge, treatmentCause, range);
                 CashFlowedBridge(treatmentCause, rangeForCashFlow);
 
                 if (index != 1 && treatmentCause == TreatmentCause.CommittedProject
                     && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != Properties.Resources.NoTreatment)
                 {
-                    var rangeWithPreviousColumn = worksheet.Cells[row, column - 1];
+                    var rangeWithPreviousColumn = worksheet.Cells[row, column - 1, row, column];
                     CommittedForConsecutiveYears(rangeWithPreviousColumn);
                     CommittedForConsecutiveYears(range);
                 }

@@ -69,7 +69,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             _excelHelper.ApplyBorder(worksheet.Cells[3, 1, 4, 2]);
 
             worksheet.Cells["D3"].Value = "Simulation Last Run:";
-            worksheet.Cells["E3"].Value = "10/25/2019";
+            worksheet.Cells["E3"].Value = lastRun.ToShortDateString();
             _excelHelper.ApplyBorder(worksheet.Cells[3, 4, 3, 5]);
 
             _excelHelper.MergeCells(worksheet, 6, 1, 6, 2);

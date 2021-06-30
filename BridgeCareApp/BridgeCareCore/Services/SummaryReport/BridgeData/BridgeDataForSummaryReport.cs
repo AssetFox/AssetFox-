@@ -299,11 +299,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     if (section.TreatmentCause == TreatmentCause.CashFlowProject)
                     {
                         _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
-                        _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
+                        _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.FromArgb(255, 0, 0));
 
                         // Color the previous year project also
                         _excelHelper.ApplyColor(worksheet.Cells[row, column - 16], Color.FromArgb(0, 255, 0));
-                        _excelHelper.SetTextColor(worksheet.Cells[row, column - 16], Color.Black);
+                        _excelHelper.SetTextColor(worksheet.Cells[row, column - 16], Color.FromArgb(255, 0, 0));
                     }
 
                     var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
@@ -343,6 +343,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[row, column + 2].Value = selectedSection.ValuePerNumericAttribute["DECK_DURATION_N"];
                 worksheet.Cells[row, column + 3].Value = selectedSection.ValuePerNumericAttribute["SUP_DURATION_N"];
                 worksheet.Cells[row, column + 4].Value = selectedSection.ValuePerNumericAttribute["SUB_DURATION_N"];
+                _excelHelper.SetCustomFormat(worksheet.Cells[row, column - 2, row, column + 4], ExcelHelperCellFormat.DecimalPrecision3);
             }
             if (familyIdLessThanEleven)
             {
@@ -363,11 +364,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["CULV_SEEDED"];
 
                 worksheet.Cells[row, column + 4].Value = selectedSection.ValuePerNumericAttribute["CULV_DURATION_N"];
+                _excelHelper.SetCustomFormat(worksheet.Cells[row, column, row, column + 4], ExcelHelperCellFormat.DecimalPrecision3);
             }
             column += 4; // this will take us to "Min cond" column
 
             // It returns the column number where MinC value is written
             column = _valueForMinC[minCActionCallDecider](worksheet, row, column, selectedSection.ValuePerNumericAttribute);
+            _excelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+
             if (selectedSection.ValuePerNumericAttribute["P3"] > 0 && selectedSection.ValuePerNumericAttribute["MINCOND"] < 5)
             {
                 _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.Yellow);
@@ -399,9 +403,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LENGTH"];
 
                 // Add span type, owner code, functional class, submitting agency
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SPANTYPE"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["OWNER_CODE"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FUNC_CLASS"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SPANTYPE"] == SpanType.M.ToSpanTypeName() ?
+                    MappingContent.SpanTypeMap[SpanType.M] : MappingContent.SpanTypeMap[SpanType.S];
+                worksheet.Cells[rowNo, columnNo++].Value = MappingContent.OwnerCodeForReport(sectionSummary.ValuePerTextAttribute["OWNER_CODE"]);
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.FullFunctionalClassDescription(sectionSummary.ValuePerTextAttribute["FUNC_CLASS"]);
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SUBM_AGENCY"];
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["MPO_NAME"]; // planning partner

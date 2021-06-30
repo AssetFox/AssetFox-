@@ -169,9 +169,6 @@ namespace BridgeCareCore.Services.SummaryReport
             var unfundedTreatmentTimeWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Time");
             _unfundedTreatmentTime.Fill(unfundedTreatmentTimeWorksheet, reportOutputData);
 
-            // Simulation Legend TAB
-            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
-            _summaryReportGlossary.Fill(shortNameWorksheet);
             reportDetailDto.Status = $"Creating Bridge Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
@@ -192,6 +189,10 @@ namespace BridgeCareCore.Services.SummaryReport
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
+
+            // Simulation Legend TAB
+            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
+            _summaryReportGlossary.Fill(shortNameWorksheet);
 
             var folderPathForSimulation = $"DownloadedNewReports\\{simulationId}";
             var relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);

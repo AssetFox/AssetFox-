@@ -88,6 +88,9 @@ namespace BridgeCareCore.Services.SummaryReport
             case ExcelHelperCellFormat.PercentageDecimal2:
                 cells.Style.Numberformat.Format = "#0.00%";
                 break;
+            case ExcelHelperCellFormat.DecimalPrecision3:
+                cells.Style.Numberformat.Format = "#0.000";
+                break;
             }
         }
 

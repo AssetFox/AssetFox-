@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
-using BridgeCareCore.Services.SummaryReport.GraphTabs.BPN;
 using BridgeCareCore.Services.SummaryReport.GraphTabs.NHSConditionCharts;
 using OfficeOpenXml;
 
@@ -11,28 +10,19 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
     public class AddGraphsInTabs : IAddGraphsInTabs
     {
         private readonly ConditionPercentageChart _conditionPercentageChart;
-        private readonly PoorBridgeCount _poorBridgeCount;
-        private readonly PoorBridgeDeckArea _poorBridgeDeckArea;
-        private readonly PoorBridgeDeckAreaByBPN _poorBridgeDeckAreaByBPN;
         private readonly GraphData _graphData;
 
-        private readonly PostedBPNCount _postedBPNCount;
+        private readonly IAddBPNGraphTab _addBPNGraphTab;
 
         public AddGraphsInTabs(GraphData graphData,
             ConditionPercentageChart conditionPercentageChart,
-            PoorBridgeCount poorBridgeCount,
-            PoorBridgeDeckArea poorBridgeDeckArea,
-            PoorBridgeDeckAreaByBPN poorBridgeDeckAreaByBPN,
 
-            PostedBPNCount postedBPNCount)
+            IAddBPNGraphTab addBPNGraphTab)
         {
             _graphData = graphData ?? throw new ArgumentNullException(nameof(graphData));
             _conditionPercentageChart = conditionPercentageChart ?? throw new ArgumentNullException(nameof(conditionPercentageChart));
-            _poorBridgeCount = poorBridgeCount ?? throw new ArgumentNullException(nameof(poorBridgeCount));
-            _poorBridgeDeckArea = poorBridgeDeckArea ?? throw new ArgumentNullException(nameof(poorBridgeDeckArea));
-            _poorBridgeDeckAreaByBPN = poorBridgeDeckAreaByBPN ?? throw new ArgumentNullException(nameof(poorBridgeDeckAreaByBPN));
 
-            _postedBPNCount = postedBPNCount ?? throw new ArgumentException(nameof(postedBPNCount));
+            _addBPNGraphTab = addBPNGraphTab ?? throw new ArgumentNullException(nameof(addBPNGraphTab));
         }
 
 
@@ -64,26 +54,6 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             AddGraphDataDependentTab(Properties.Resources.Graph_CombineNHSNonNHSConditionByBridgeCount_Tab, Properties.Resources.Graph_CombineNHSNonNHSConditionByBridgeCount_Title);
             AddGraphDataDependentTab(Properties.Resources.Graph_CombineNHSNonNHSConditionByDeckArea_Tab, Properties.Resources.Graph_CombineNHSNonNHSConditionByDeckArea_Title);
 
-
-            // Create the tabs that are NOT dependent on "Graph Data" tab (these will precede the "Graph Data" tab)
-
-            // Poor Bridge Cnt tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Poor Bridge Cnt");
-            _poorBridgeCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorBridgesCountSectionYearsRow, simulationYearsCount);
-
-            // Poor Bridge DA tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Poor Bridge DA");
-            _poorBridgeDeckArea.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorBridgesDeckAreaSectionYearsRow, simulationYearsCount);
-
-            // Poor Bridge DA By BPN Tab
-            worksheet = excelPackage.Workbook.Worksheets.Add("Poor Bridge DA By BPN");
-            _poorBridgeDeckAreaByBPN.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorDeckAreaByBPNSectionYearsRow, simulationYearsCount);
-
-            // Posted BPN count TAB
-            worksheet = excelPackage.Workbook.Worksheets.Add("Posted BPN Count");
-            _postedBPNCount.Fill(worksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalBridgePostedCountByBPNYearsRow, simulationYearsCount);
-
-
             // Create the "Graph Data" tab
             var graphDataWorksheet = excelPackage.Workbook.Worksheets.Add("Graph Data");
             int startColumn = 1;
@@ -107,6 +77,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             {
                 _conditionPercentageChart.Fill(graphDataTab.Worksheet, graphDataWorksheet, graphDataTab.DataColumn, graphDataTab.Title, simulationYearsCount);
             }
+            _addBPNGraphTab.AddBPNTab(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
         }
     }
 }

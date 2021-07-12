@@ -61,6 +61,15 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Annualized Amount.
+        /// </summary>
+        internal static string AnnualizedAmount {
+            get {
+                return ResourceManager.GetString("AnnualizedAmount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BPN 1.
         /// </summary>
         internal static string BPN1 {
@@ -160,11 +169,67 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cash Needed By BPN.
+        /// </summary>
+        internal static string CashNeededByBPN {
+            get {
+                return ResourceManager.GetString("CashNeededByBPN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Closed.
         /// </summary>
         internal static string Closed {
             get {
                 return ResourceManager.GetString("Closed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Closed Bridge Count By BPN.
+        /// </summary>
+        internal static string ClosedBridgeCountByBPN {
+            get {
+                return ResourceManager.GetString("ClosedBridgeCountByBPN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Closed Bridge Deck Area By BPN.
+        /// </summary>
+        internal static string ClosedBridgeDeckAreaByBPN {
+            get {
+                return ResourceManager.GetString("ClosedBridgeDeckAreaByBPN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combined Posted and Closed.
+        /// </summary>
+        internal static string CombinedPostedAndClosed {
+            get {
+                return ResourceManager.GetString("CombinedPostedAndClosed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combine NHS and Non-NHS Condition By Bridge Count.
+        /// </summary>
+        internal static string CombineNHSNonNHSConditionByBridgeCount {
+            get {
+                return ResourceManager.GetString("CombineNHSNonNHSConditionByBridgeCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combine NHS and Non-NHS Without Committed Projects
+        ///Combine NHS and Non-NHS Without Committed Projects
+        ///Condition By Deck Area.
+        /// </summary>
+        internal static string CombineNHSNonNHSConditionByDeckArea {
+            get {
+                return ResourceManager.GetString("CombineNHSNonNHSConditionByDeckArea", resourceCulture);
             }
         }
         
@@ -250,6 +315,33 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Close BPN Count.
+        /// </summary>
+        internal static string Graph_ClosedBPNCount_Tab {
+            get {
+                return ResourceManager.GetString("Graph_ClosedBPNCount_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Closed BPN DA.
+        /// </summary>
+        internal static string Graph_ClosedBPNDA_Tab {
+            get {
+                return ResourceManager.GetString("Graph_ClosedBPNDA_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combined Posted and Closed.
+        /// </summary>
+        internal static string Graph_CombinedPostedandClosed_Tab {
+            get {
+                return ResourceManager.GetString("Graph_CombinedPostedandClosed_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Combined Count.
         /// </summary>
         internal static string Graph_CombineNHSNonNHSConditionByBridgeCount_Tab {
@@ -283,6 +375,15 @@ namespace BridgeCareCore.Properties {
         internal static string Graph_CombineNHSNonNHSConditionByDeckArea_Title {
             get {
                 return ResourceManager.GetString("Graph_CombineNHSNonNHSConditionByDeckArea_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to $ Needed DA BPN.
+        /// </summary>
+        internal static string Graph_DollarNeededDABPN_Tab {
+            get {
+                return ResourceManager.GetString("Graph_DollarNeededDABPN_Tab", resourceCulture);
             }
         }
         
@@ -359,6 +460,33 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Poor DA By BPN.
+        /// </summary>
+        internal static string Graph_PoorDAByBPN_Tab {
+            get {
+                return ResourceManager.GetString("Graph_PoorDAByBPN_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Posted BPN Count.
+        /// </summary>
+        internal static string Graph_PostedBPNCount_Tab {
+            get {
+                return ResourceManager.GetString("Graph_PostedBPNCount_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Posted BPN DA.
+        /// </summary>
+        internal static string Graph_PostedBPNDA_Tab {
+            get {
+                return ResourceManager.GetString("Graph_PostedBPNDA_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to no treatment.
         /// </summary>
         internal static string NoTreatment {
@@ -422,11 +550,29 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Posted.
+        /// </summary>
+        internal static string Posted {
+            get {
+                return ResourceManager.GetString("Posted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Posted Bridge Count By BPN.
         /// </summary>
         internal static string PostedBridgeCountByBPN {
             get {
                 return ResourceManager.GetString("PostedBridgeCountByBPN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Posted Bridge Deck Area By BPN.
+        /// </summary>
+        internal static string PostedBridgeDeckAreaByBPN {
+            get {
+                return ResourceManager.GetString("PostedBridgeDeckAreaByBPN", resourceCulture);
             }
         }
         
@@ -508,6 +654,15 @@ namespace BridgeCareCore.Properties {
         internal static string TotalSpent {
             get {
                 return ResourceManager.GetString("TotalSpent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Work.
+        /// </summary>
+        internal static string Work {
+            get {
+                return ResourceManager.GetString("Work", resourceCulture);
             }
         }
     }

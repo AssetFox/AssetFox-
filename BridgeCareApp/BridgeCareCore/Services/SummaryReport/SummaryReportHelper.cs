@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Interfaces.SummaryReport;
 
@@ -73,7 +70,6 @@ namespace BridgeCareCore.Services.SummaryReport
                 (functionalClass == "08" || functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
         }
 
-
         // Identifying 183 Bridges
         public bool BridgeFunding183(SectionDetail section)
         {
@@ -98,6 +94,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 fedAid == "0" && bridgeLength >= 8 &&
                 (functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
         }
+
         public bool BridgeFunding185(SectionSummaryDetail section)
         {
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -110,6 +107,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 fedAid == "0" && bridgeLength >= 20 ||
                 fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
         }
+
         public bool BridgeFunding581(SectionSummaryDetail section)
         {
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -122,6 +120,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 fedAid == "0" && bridgeLength >= 20 ||
                 fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
         }
+
         public bool BridgeFundingBOF(SectionSummaryDetail section)
         {
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -133,6 +132,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 fedAid == "0" && bridgeLength >= 20 &&
                 (functionalClass == "08" || functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
         }
+
         public bool BridgeFundingNHPP(SectionSummaryDetail section)
         {
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -142,6 +142,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 (fedAid == "1" || fedAid == "2") &&
                 (functionalClass == "01" || functionalClass == "02" || functionalClass == "11" || functionalClass == "12" || functionalClass == "14");
         }
+
         public bool BridgeFundingSTP(SectionSummaryDetail section)
         {
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -153,24 +154,23 @@ namespace BridgeCareCore.Services.SummaryReport
                 fedAid == "0" && bridgeLength >= 20;
         }
 
-
         private static readonly Dictionary<string, string> FunctionalClassDescriptions =
             new Dictionary<string, string>()
             {
-                {"01", "Rural Interstate"},
-                {"02", "Rural - Other Principal"},
-                {"06", "Rural Minor Arterial"},
-                {"07", "Rural Major Collector"},
-                {"08", "Rural Minor Collector"},
-                {"09", "Rural Local"},
-                {"11", "Urban Interstate"},
-                {"12", "Urban Other Freeway/Expressway"},
-                {"14", "Urban Other Principal"},
-                {"16", "Urban Minor Arterial"},
-                {"17", "Urban Major Collector"},
-                {"19", "Urban Local"},
-                {"NN", "Other"},
-                {"99", "Ramp" },
+                { "01", "01 - Rural - Principal Arterial - Interstate" },
+                { "02", "02 - Rural - Principal Arterial - Other" },
+                { "06", "06 - Rural - Minor Arterial" },
+                { "07", "07 - Rural - Major Collector" },
+                { "08", "08 - Rural - Minor Collector" },
+                { "09", "09 - Rural - Local" },
+                { "NN", "NN - Other" },
+                { "11", "11 - Urban - Principal Arterial - Interstate" },
+                { "12", "12 - Urban - Principal Arterial - Other Freeway & Expressways" },
+                { "14", "14 - Urban - Other Principal Arterial" },
+                { "16", "16 - Urban - Minor Arterial" },
+                { "17", "17 - Urban - Collector" },
+                { "19", "19 - Urban - Local" },
+                { "99", "99 - Urban - Ramp" }
             };
 
         public string FullFunctionalClassDescription(string functionalClassAbbreviation)

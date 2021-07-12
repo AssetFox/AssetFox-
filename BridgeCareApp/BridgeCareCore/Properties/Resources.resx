@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AnnualizedAmount" xml:space="preserve">
+    <value>Annualized Amount</value>
+  </data>
   <data name="BPN1" xml:space="preserve">
     <value>BPN 1</value>
     <comment>Bus plan network Label for Summary TABs</comment>
@@ -159,9 +162,29 @@
   <data name="BridgeTotal" xml:space="preserve">
     <value>Bridge Total</value>
   </data>
+  <data name="CashNeededByBPN" xml:space="preserve">
+    <value>Cash Needed By BPN</value>
+  </data>
   <data name="Closed" xml:space="preserve">
     <value>Closed</value>
     <comment>Label for Summary TABs</comment>
+  </data>
+  <data name="ClosedBridgeCountByBPN" xml:space="preserve">
+    <value>Closed Bridge Count By BPN</value>
+  </data>
+  <data name="ClosedBridgeDeckAreaByBPN" xml:space="preserve">
+    <value>Closed Bridge Deck Area By BPN</value>
+  </data>
+  <data name="CombinedPostedAndClosed" xml:space="preserve">
+    <value>Combined Posted and Closed</value>
+  </data>
+  <data name="CombineNHSNonNHSConditionByBridgeCount" xml:space="preserve">
+    <value>Combine NHS and Non-NHS Condition By Bridge Count</value>
+  </data>
+  <data name="CombineNHSNonNHSConditionByDeckArea" xml:space="preserve">
+    <value>Combine NHS and Non-NHS Without Committed Projects
+Combine NHS and Non-NHS Without Committed Projects
+Condition By Deck Area</value>
   </data>
   <data name="CommittedTotal" xml:space="preserve">
     <value>Committed Total</value>
@@ -192,6 +215,15 @@
     <value>Good</value>
     <comment>Label for Summary TABs</comment>
   </data>
+  <data name="Graph_ClosedBPNCount_Tab" xml:space="preserve">
+    <value>Close BPN Count</value>
+  </data>
+  <data name="Graph_ClosedBPNDA_Tab" xml:space="preserve">
+    <value>Closed BPN DA</value>
+  </data>
+  <data name="Graph_CombinedPostedandClosed_Tab" xml:space="preserve">
+    <value>Combined Posted and Closed</value>
+  </data>
   <data name="Graph_CombineNHSNonNHSConditionByBridgeCount_Tab" xml:space="preserve">
     <value>Combined Count</value>
     <comment>Tab label for Combine NHS and Non-NHS Condition By Bridge Count TAB</comment>
@@ -209,6 +241,9 @@
 Condition By Deck Area</value>
     <comment>Graph Title for Combine NHS and Non-NHS With Committed Projects
 Condition By Deck Area TAB</comment>
+  </data>
+  <data name="Graph_DollarNeededDABPN_Tab" xml:space="preserve">
+    <value>$ Needed DA BPN</value>
   </data>
   <data name="Graph_NHSConditionByBridgeCount_Tab" xml:space="preserve">
     <value>NHS Count</value>
@@ -242,6 +277,15 @@ Condition By Deck Area TAB</comment>
     <value>Non-NHS Condition By Deck Area</value>
     <comment>Graph Title for Non NHS Condition y deck area graph TAB</comment>
   </data>
+  <data name="Graph_PoorDAByBPN_Tab" xml:space="preserve">
+    <value>Poor DA By BPN</value>
+  </data>
+  <data name="Graph_PostedBPNCount_Tab" xml:space="preserve">
+    <value>Posted BPN Count</value>
+  </data>
+  <data name="Graph_PostedBPNDA_Tab" xml:space="preserve">
+    <value>Posted BPN DA</value>
+  </data>
   <data name="NoTreatment" xml:space="preserve">
     <value>no treatment</value>
   </data>
@@ -264,8 +308,14 @@ Condition By Deck Area TAB</comment>
   <data name="PoorDeckAreaByBPN" xml:space="preserve">
     <value>Poor Deck Area By BPN</value>
   </data>
+  <data name="Posted" xml:space="preserve">
+    <value>Posted</value>
+  </data>
   <data name="PostedBridgeCountByBPN" xml:space="preserve">
     <value>Posted Bridge Count By BPN</value>
+  </data>
+  <data name="PostedBridgeDeckAreaByBPN" xml:space="preserve">
+    <value>Posted Bridge Deck Area By BPN</value>
   </data>
   <data name="RemainingBudget" xml:space="preserve">
     <value>Remaining Budget</value>
@@ -296,5 +346,9 @@ Condition By Deck Area TAB</comment>
   <data name="TotalSpent" xml:space="preserve">
     <value>Total Spent</value>
     <comment>Total budget spent in Work summary TAB</comment>
+  </data>
+  <data name="Work" xml:space="preserve">
+    <value>Work</value>
+    <comment>Sub header for Bridge Data report tab</comment>
   </data>
 </root>

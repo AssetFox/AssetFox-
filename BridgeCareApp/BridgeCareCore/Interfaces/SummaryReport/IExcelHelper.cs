@@ -9,6 +9,7 @@ namespace BridgeCareCore.Interfaces.SummaryReport
         Number,
         Percentage,
         PercentageDecimal2,
+        DecimalPrecision3,
     }
 
     public interface IExcelHelper

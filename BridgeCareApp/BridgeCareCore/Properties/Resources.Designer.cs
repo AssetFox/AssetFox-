@@ -656,5 +656,14 @@ namespace BridgeCareCore.Properties {
                 return ResourceManager.GetString("TotalSpent", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Work.
+        /// </summary>
+        internal static string Work {
+            get {
+                return ResourceManager.GetString("Work", resourceCulture);
+            }
+        }
     }
 }

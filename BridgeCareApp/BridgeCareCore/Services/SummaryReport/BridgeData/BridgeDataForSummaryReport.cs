@@ -558,7 +558,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             {
                 _excelHelper.MergeCells(worksheet, row, ++column, row, ++column);
                 worksheet.Cells[row, column - 1].Value = HeaderConstText + year;
-                worksheet.Cells[row + 2, column -1].Value = "Work";
+                worksheet.Cells[row + 2, column -1].Value = Properties.Resources.Work;
                 worksheet.Cells[row + 2, column].Value = "Cost";
                 _excelHelper.ApplyStyle(worksheet.Cells[row + 2, column - 1, row + 2, column]);
                 _excelHelper.ApplyColor(worksheet.Cells[row, column - 1], Color.FromArgb(244, 176, 132));

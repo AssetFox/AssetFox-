@@ -347,4 +347,8 @@ Condition By Deck Area TAB</comment>
     <value>Total Spent</value>
     <comment>Total budget spent in Work summary TAB</comment>
   </data>
+  <data name="Work" xml:space="preserve">
+    <value>Work</value>
+    <comment>Sub header for Bridge Data report tab</comment>
+  </data>
 </root>

@@ -25,6 +25,11 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
 
+            if (row % 2 == 0)
+            {
+                _excelHelper.ApplyColor(worksheet.Cells[row, 1, row, worksheet.Dimension.Columns], Color.LightGray);
+            }
+
             worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["DISTRICT"];
             worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["COUNTY"];
             worksheet.Cells[row, columnNo++].Value = section.FacilityName;

@@ -325,6 +325,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var familyIdLessThanEleven = familyId < 11;
             if (familyId > 10)
             {
+                var columnForStyle = column + 1;
                 worksheet.Cells[row, ++column].Value = "N"; // deck cond
                 worksheet.Cells[row, ++column].Value = "N"; // super cond
                 worksheet.Cells[row, ++column].Value = "N"; // sub cond
@@ -333,23 +334,24 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[row, column + 3].Value = "N"; // super dur
                 worksheet.Cells[row, column + 4].Value = "N"; // sub dur
                 minCActionCallDecider = MinCValue.valueEqualsCulv;
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnForStyle, row, column + 4]);
             }
             else
             {
                 worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["DECK_SEEDED"];
                 worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["SUP_SEEDED"];
                 worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["SUB_SEEDED"];
+                _excelHelper.SetCustomFormat(worksheet.Cells[row, column - 2, row, column], ExcelHelperCellFormat.DecimalPrecision3);
 
-                worksheet.Cells[row, column + 2].Value = selectedSection.ValuePerNumericAttribute["DECK_DURATION_N"];
-                worksheet.Cells[row, column + 3].Value = selectedSection.ValuePerNumericAttribute["SUP_DURATION_N"];
-                worksheet.Cells[row, column + 4].Value = selectedSection.ValuePerNumericAttribute["SUB_DURATION_N"];
-                _excelHelper.SetCustomFormat(worksheet.Cells[row, column - 2, row, column + 4], ExcelHelperCellFormat.DecimalPrecision3);
+                worksheet.Cells[row, column + 2].Value = (int)selectedSection.ValuePerNumericAttribute["DECK_DURATION_N"];
+                worksheet.Cells[row, column + 3].Value = (int)selectedSection.ValuePerNumericAttribute["SUP_DURATION_N"];
+                worksheet.Cells[row, column + 4].Value = (int)selectedSection.ValuePerNumericAttribute["SUB_DURATION_N"];
             }
             if (familyIdLessThanEleven)
             {
                 worksheet.Cells[row, ++column].Value = "N"; // culv cond
                 worksheet.Cells[row, column + 4].Value = "N"; // culv seeded
-
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[row, column, row, column + 4]);
                 if (minCActionCallDecider == MinCValue.valueEqualsCulv)
                 {
                     minCActionCallDecider = MinCValue.defaultValue;
@@ -362,9 +364,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             else
             {
                 worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["CULV_SEEDED"];
+                _excelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
 
-                worksheet.Cells[row, column + 4].Value = selectedSection.ValuePerNumericAttribute["CULV_DURATION_N"];
-                _excelHelper.SetCustomFormat(worksheet.Cells[row, column, row, column + 4], ExcelHelperCellFormat.DecimalPrecision3);
+                worksheet.Cells[row, column + 4].Value = (int)selectedSection.ValuePerNumericAttribute["CULV_DURATION_N"];
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[row, column + 4]);           
             }
             column += 4; // this will take us to "Min cond" column
 
@@ -378,6 +381,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
             }
             worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["MINCOND"] < 5 ? "Y" : "N"; //poor
+            _excelHelper.HorizontalCenterAlign(worksheet.Cells[row, column]);
 
             return column;
         }
@@ -413,21 +417,27 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY_ID"];
                 worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(sectionSummary.ValuePerTextAttribute["NHS_IND"],
                     out var numericValue) && numericValue > 0 ? "Y" : "N";
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["NBISLEN"];
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
                 // Add Interstate
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["INTERSTATE"];
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["STRUCTURE_TYPE"];
 
                 // Fractural Critical, Deck surface type, Wearing surface cond, Paint cond, paint ext
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FRACT_CRIT"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DECKSURF_TYPE"];
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = MappingContent.GetDeckSurfaceType(sectionSummary.ValuePerTextAttribute["DECKSURF_TYPE"]);
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["WS_SEEDED"]; // Wearing surface cond
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["PAINT_COND"];
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["PAINT_EXTENT"];
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = (int)sectionSummary.ValuePerNumericAttribute["YEAR_BUILT"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["AGE"];
@@ -437,20 +447,24 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISK_SCORE"];
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["P3"] > 0 ? "Y" : "N";
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
                 _previousYearInitialMinC.Add(sectionSummary.ValuePerNumericAttribute["MINCOND"]);
 
                 // Add Parallel Structure, Internet Report, Federal Aid, Bridge Funding
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["PARALLEL"] > 0 ? "Y" : "N";
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["INTERNET_REPORT"];
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FEDAID"];
 
+                var columnForStyle = columnNo;
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding185(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding581(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding183(sectionSummary) ? "Y" : "N";
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnForStyle, rowNo, columnNo - 1]);
             }
             currentCell.Row = rowNo;
             currentCell.Column = columnNo;

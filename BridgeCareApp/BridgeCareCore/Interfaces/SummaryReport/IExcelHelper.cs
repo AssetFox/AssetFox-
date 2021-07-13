@@ -27,5 +27,7 @@ namespace BridgeCareCore.Interfaces.SummaryReport
         void SetCustomFormat(ExcelRange cells, ExcelHelperCellFormat type);
 
         void SetTextColor(ExcelRange cells, Color color);
+
+        void HorizontalCenterAlign(ExcelRange cells);
     }
 }

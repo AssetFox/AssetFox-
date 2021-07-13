@@ -104,5 +104,10 @@ namespace BridgeCareCore.Services.SummaryReport
         {
             cells.Style.Font.Color.SetColor(color);
         }
+
+        public void HorizontalCenterAlign(ExcelRange cells)
+        {
+            cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        }
     }
 }

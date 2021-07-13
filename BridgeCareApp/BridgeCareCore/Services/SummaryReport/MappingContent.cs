@@ -68,6 +68,36 @@ namespace BridgeCareCore.Services.SummaryReport
             default: return nameFromSimObject;
             }
         }
+
+        public static string GetDeckSurfaceType(string name)
+        {
+            switch (name)
+            {
+            case "None":
+                return "0 None (e.g., steel grid)";
+            case "Concrete":
+                return "1 Concrete";
+            case "Concrete Overlay":
+                return "2 Concrete Overlay*";
+            case "Latex Concrete":
+                return "3 Latex Concrete";
+            case "P":
+                return "4 Low Slump Concrete P PPC Overlay";
+            case "Epoxy Overlay":
+                return "5 Epoxy Overlay";
+            case "Bituminous":
+                return "6 Bituminous (applies only to structures with no deck)";  
+            case "Wood or Timber":
+                return "7 Wood or Timber";
+            case "Not applicable":
+                return "N Not applicable";          
+            case "Gravel":
+                return "8 Gravel";
+            case "Other":
+                return "9 Other";
+            default: return name;
+            }
+        }
     }
 
     public static class BridgeDataExtensions

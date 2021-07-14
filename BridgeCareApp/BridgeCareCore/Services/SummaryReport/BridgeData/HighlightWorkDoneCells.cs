@@ -21,7 +21,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             {
                 var range = worksheet.Cells[row, column, row, column + 1];
                 var rangeForCashFlow = worksheet.Cells[row, column - 1, row, column + 2];
-                ParallelBridgeBAMs(parallelBridge, treatmentCause, range);
+                //ParallelBridgeBAMs(parallelBridge, treatmentCause, range);
                 CashFlowedBridge(treatmentCause, rangeForCashFlow);
 
                 if (index != 1 && treatmentCause == TreatmentCause.CommittedProject
@@ -31,8 +31,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     CommittedForConsecutiveYears(rangeWithPreviousColumn);
                     CommittedForConsecutiveYears(range);
                 }
-                ParallelBridgeMPMS(parallelBridge, treatmentCause, range);
-                ParallelBridgeCashFlow(parallelBridge, treatmentCause, rangeForCashFlow);
+                //ParallelBridgeMPMS(parallelBridge, treatmentCause, range);
+                //ParallelBridgeCashFlow(parallelBridge, treatmentCause, rangeForCashFlow);
             }
         }
 

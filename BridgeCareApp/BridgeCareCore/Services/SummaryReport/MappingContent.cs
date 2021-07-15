@@ -90,7 +90,7 @@ namespace BridgeCareCore.Services.SummaryReport
             case "Wood or Timber":
                 return "07 - Wood or Timber";
             case "Not applicable":
-                return "N Not applicable";          
+                return "N - Not applicable";          
             case "Gravel":
                 return "08 - Gravel";
             case "Other":

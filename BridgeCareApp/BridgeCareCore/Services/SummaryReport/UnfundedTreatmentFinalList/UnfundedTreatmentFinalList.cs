@@ -11,11 +11,9 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
     public class UnfundedTreatmentFinalList : IUnfundedTreatmentFinalList
     {
         private readonly IUnfundedTreatmentCommon _unfundedTreatmentCommon;
-        private readonly IExcelHelper _excelHelper;
 
-        public UnfundedTreatmentFinalList(IExcelHelper excelHelper, IUnfundedTreatmentCommon unfundedTreatmentCommon)
+        public UnfundedTreatmentFinalList(IUnfundedTreatmentCommon unfundedTreatmentCommon)
         {
-            _excelHelper = excelHelper;
             _unfundedTreatmentCommon = unfundedTreatmentCommon;
         }
 
@@ -38,7 +36,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
             unfundedTreatmentTimeWorksheet.Cells[1, totalColumn].Value = "Total Unfunded Amount:";
             unfundedTreatmentTimeWorksheet.Cells[2, totalColumn].Formula = $"=SUM({costColumnLetter}:{costColumnLetter})";
             unfundedTreatmentTimeWorksheet.Cells[2, totalColumn].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";
-            _excelHelper.ApplyBorder(unfundedTreatmentTimeWorksheet.Cells[1, totalColumn]);
+            ExcelHelper.ApplyBorder(unfundedTreatmentTimeWorksheet.Cells[1, totalColumn]);
 
             unfundedTreatmentTimeWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 

@@ -249,6 +249,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[row, column - 1].Value = wdInfo >= 1 ? "Yes" : "--";
                 // Work done more than once
                 worksheet.Cells[row, column].Value = wdInfo > 1 ? "Yes" : "--";
+                _excelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1, row, column]);
                 row++;
                 totalWorkMoreThanOnce += wdInfo > 1 ? 1 : 0;
             }
@@ -580,6 +581,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
             worksheet.Cells[row, ++column].Value = "Work Done";
             worksheet.Cells[row, ++column].Value = "Work Done more than once";
+            _excelHelper.ApplyColor(worksheet.Cells[row, column - 1, row, column], Color.FromArgb(244, 176, 132));
+
             worksheet.Cells[row, ++column].Value = "Total";
             worksheet.Cells[row, ++column].Value = "Poor On/Off Rate";
             var poorOnOffRateColumn = column;

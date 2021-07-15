@@ -29,7 +29,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
             {
                 _excelHelper.ApplyColor(worksheet.Cells[row, 1, row, worksheet.Dimension.Columns], Color.LightGray);
             }
-
+            _excelHelper.ApplyBorder(worksheet.Cells[row, 1, row, worksheet.Dimension.Columns]);
             worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["DISTRICT"];
             worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["COUNTY"];
             worksheet.Cells[row, columnNo++].Value = section.FacilityName;

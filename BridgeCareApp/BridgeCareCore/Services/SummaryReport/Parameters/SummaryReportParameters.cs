@@ -141,6 +141,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
             worksheet.Cells[rowNo + 1, currentCell.Column + 1].Value = parametersModel.LengthBetween8and20;
             worksheet.Cells[rowNo + 2, currentCell.Column + 1].Value = parametersModel.LengthGreaterThan20;
+            _excelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 1, currentCell.Column + 1, rowNo + 2, currentCell.Column + 1]);
 
             _excelHelper.MergeCells(worksheet, rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1);
             _excelHelper.ApplyColor(worksheet.Cells[rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1], Color.Gray);

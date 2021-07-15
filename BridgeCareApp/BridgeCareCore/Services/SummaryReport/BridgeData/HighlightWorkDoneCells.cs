@@ -13,7 +13,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             if (treatment != null && treatment.ToLower() != Properties.Resources.NoTreatment)
             {
                 var range = worksheet.Cells[row, column, row, column + 1];
-                var rangeForCashFlow = worksheet.Cells[row, column - 1, row, column + 2];
+                var rangeForCashFlow = worksheet.Cells[row, column - 2, row, column + 1];
                 //ParallelBridgeBAMs(parallelBridge, treatmentCause, range);
                 CashFlowedBridge(treatmentCause, rangeForCashFlow);
 

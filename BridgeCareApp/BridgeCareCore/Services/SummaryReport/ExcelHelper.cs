@@ -65,6 +65,15 @@ namespace BridgeCareCore.Services.SummaryReport
             cells.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
         }
 
+        public static void ApplyLeftBorder(ExcelRange cells)
+        {
+            cells.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+        }
+        public static void ApplyRightBorder(ExcelRange cells)
+        {
+            cells.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+        }
+
         /// <summary>
         ///     Set currency format for given cells
         /// </summary>

@@ -172,7 +172,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
                     }
-
                     setColor((int)section.ValuePerNumericAttribute["PARALLEL"], section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
                         yearlySectionData.Year, index, worksheet, row, column);
 
@@ -228,6 +227,17 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                     previousYearSectionMinC[i] = thisYrMinc;
                     i++;
+                    if (row % 2 == 0)
+                    {
+                        if(section.TreatmentCause != TreatmentCause.CashFlowProject ||
+                            section.TreatmentCause == TreatmentCause.CommittedProject)
+                        {
+                            ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
+                        }
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, poorOnOffColumnStart], Color.LightGray);
+                    }
+                    ExcelHelper.ApplyLeftBorder(worksheet.Cells[row, column]);
+                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column + 1]);
                     row++;
                 }
                 index++;
@@ -248,6 +258,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 // Work done more than once
                 worksheet.Cells[row, column].Value = wdInfo > 1 ? "Yes" : "--";
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1, row, column]);
+                if (row % 2 == 0)
+                {
+                    ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1, row, column + 1], Color.LightGray);
+                }
                 row++;
                 totalWorkMoreThanOnce += wdInfo > 1 ? 1 : 0;
             }
@@ -271,6 +285,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             }
             currentCell.Column = column++;
             currentCell.Row = initialRow;
+            isInitialYear = true;
             foreach (var sectionData in outputResults.Years)
             {
                 row = currentCell.Row; // setting row back to start
@@ -279,7 +294,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 {
                     column = currentCell.Column;
                     column = AddSimulationYearData(worksheet, row, column, null, section);
-
+                    var initialColumnForShade = column;
                     worksheet.Cells[row, ++column].Value = section.TreatmentCause; // Project Pick
 
                     var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
@@ -309,15 +324,23 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
+
+                    if (row % 2 == 0)
+                    {
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+                    }
+
                     column = column + 1;
                     row++;
                 }
+                isInitialYear = false;
             }
         }
 
         private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column,
             SectionSummaryDetail initialSection, SectionDetail section)
         {
+            var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
             var minCActionCallDecider = MinCValue.minOfCulvDeckSubSuper;
             var familyId = int.Parse(selectedSection.ValuePerTextAttribute["FAMILY_ID"]);
@@ -382,6 +405,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["MINCOND"] < 5 ? "Y" : "N"; //poor
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column]);
 
+            if (row % 2 == 0)
+            {
+                ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+            }
+
             return column;
         }
 
@@ -392,10 +420,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             foreach (var sectionSummary in reportOutputData.InitialSectionSummaries)
             {
                 rowNo++;
-                if (rowNo % 2 == 0)
-                {
-                    ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, worksheet.Dimension.Columns], Color.LightGray);
-                }
                 columnNo = 1;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.SectionName;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.FacilityName;
@@ -464,6 +488,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding183(sectionSummary) ? "Y" : "N";
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnForStyle, rowNo, columnNo - 1]);
+
+                if (rowNo % 2 == 0)
+                {
+                    ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray);
+                }
             }
             currentCell.Row = rowNo;
             currentCell.Column = columnNo;

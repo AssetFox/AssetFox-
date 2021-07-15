@@ -23,11 +23,6 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
 
-            if (row % 2 == 0)
-            {
-                ExcelHelper.ApplyColor(worksheet.Cells[row, 1, row, worksheet.Dimension.Columns], Color.LightGray);
-            }
-            ExcelHelper.ApplyBorder(worksheet.Cells[row, 1, row, worksheet.Dimension.Columns]);
             worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["DISTRICT"];
             worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["COUNTY"];
             worksheet.Cells[row, columnNo++].Value = section.FacilityName;
@@ -110,6 +105,12 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
             worksheet.Cells[row, columnNo++].Value = treatment?.TreatmentName;
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";
             worksheet.Cells[row, columnNo++].Value = treatment?.Cost;
+
+            if (row % 2 == 0)
+            {
+                ExcelHelper.ApplyColor(worksheet.Cells[row, 1, row, columnNo - 1], Color.LightGray);
+            }
+            ExcelHelper.ApplyBorder(worksheet.Cells[row, 1, row, columnNo - 1]);
 
             currentCell.Column = columnNo;
         }

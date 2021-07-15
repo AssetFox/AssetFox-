@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
             unfundedTreatmentTimeWorksheet.Cells[1, totalColumn].Value = "Total Unfunded Amount:";
             unfundedTreatmentTimeWorksheet.Cells[2, totalColumn].Formula = $"=SUM({costColumnLetter}:{costColumnLetter})";
             unfundedTreatmentTimeWorksheet.Cells[2, totalColumn].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";
-            ExcelHelper.ApplyBorder(unfundedTreatmentTimeWorksheet.Cells[1, totalColumn]);
+            ExcelHelper.ApplyBorder(unfundedTreatmentTimeWorksheet.Cells[1, totalColumn, 2, totalColumn]);
 
             unfundedTreatmentTimeWorksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 

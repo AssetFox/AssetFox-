@@ -44,7 +44,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells["C2:J2"].Value = simulation.AnalysisMethod.Description;
             _excelHelper.ApplyBorder(worksheet.Cells[2, 1, 2, 10]);
 
-            FillData(worksheet, parametersModel, simulation.LastRun);
+            FillData(worksheet, parametersModel, simulation.LastRun, simulation.LastModifiedDate);
 
             FillSimulationDetails(worksheet, simulationYearsCount, simulation);
             FillAnalysisDetails(worksheet, simulation);
@@ -57,7 +57,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
         #region
 
-        private void FillData(ExcelWorksheet worksheet, ParametersModel parametersModel, DateTime lastRun)
+        private void FillData(ExcelWorksheet worksheet, ParametersModel parametersModel, DateTime lastRun, DateTime lastModifiedDate)
         {
             var bpnValueCellTracker = new Dictionary<string, string>();
             var statusValueCellTracker = new Dictionary<string, string>();
@@ -65,7 +65,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells["A3"].Value = "BridgeCare Rules Creator:";
             worksheet.Cells["B3"].Value = "Central Office";
             worksheet.Cells["A4"].Value = "BridgeCare Rules Date:";
-            worksheet.Cells["B4"].Value = "10/25/2019";
+            worksheet.Cells["B4"].Value = lastModifiedDate.ToShortDateString();
             _excelHelper.ApplyBorder(worksheet.Cells[3, 1, 4, 2]);
 
             worksheet.Cells["D3"].Value = "Simulation Last Run:";

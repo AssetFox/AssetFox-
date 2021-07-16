@@ -20,6 +20,8 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public DateTime LastRun { get; set; }
 
+        public DateTime LastModifiedDate { get; set; }
+
         public Network Network { get; }
 
         public int NumberOfYearsOfTreatmentOutlook { get; set; } = 100;

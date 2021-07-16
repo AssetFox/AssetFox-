@@ -20,7 +20,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitofwork = uow;
             var network = _unitofwork.NetworkRepo.GetPennDotNetwork();
             var facilities = _unitofwork.Context.Facility.Where(_ => _.NetworkId == network.Id).Include(_ => _.Sections);
-            //network.Facilities = facilities;
 
 
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();

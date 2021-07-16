@@ -53,6 +53,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     }
                 }).Single();
 
+            // Update last modified date
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+
             if (!simulationEntity.Network.MaintainableAssets.Any())
             {
                 throw new RowNotInTableException($"No maintainable assets found for simulation having id {simulationId}");
@@ -202,6 +205,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
+
+            // Update last modified date
+            var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
     }
 }

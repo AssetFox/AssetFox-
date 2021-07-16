@@ -24,7 +24,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var existingFacilities = _unitOfWork.Context.Facility.Select(_ => _.Name).ToList();
-            //var existingSections = _unitOfWork.Context.Section.Select(_ => $"{_.Name}{_.Area}").ToList();
 
             var facilityEntities = facilities.Where(_ => !existingFacilities.Contains(_.Name)).Select(_ => _.ToEntity())
                 .ToList();

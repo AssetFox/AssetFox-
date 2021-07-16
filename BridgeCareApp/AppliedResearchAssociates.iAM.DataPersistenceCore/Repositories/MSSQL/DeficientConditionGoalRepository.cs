@@ -39,6 +39,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 DeficientConditionGoalLibraryId = deficientConditionGoalLibraryEntity.Id,
                 SimulationId = simulationId
             });
+
+            // Update last modified date
+            var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
         public void CreateDeficientConditionGoals(List<DeficientConditionGoal> deficientConditionGoals, Guid simulationId)
@@ -83,6 +87,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(deficientIdsPerExpression,
                     DataPersistenceConstants.CriterionLibraryJoinEntities.DeficientConditionGoal, simulationEntity.Name);
+
+                // Update last modified date
+                _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
             }
         }
 
@@ -125,6 +132,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         DeficientConditionGoalLibraryId = dto.Id,
                         SimulationId = simulationId
                     }, _unitOfWork.UserEntity?.Id);
+
+                // Update last modified date
+                var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
+                _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
             }
         }
 

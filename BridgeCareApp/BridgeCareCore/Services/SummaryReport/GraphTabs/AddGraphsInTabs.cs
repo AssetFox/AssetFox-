@@ -13,16 +13,17 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
         private readonly GraphData _graphData;
 
         private readonly IAddBPNGraphTab _addBPNGraphTab;
+        private readonly IAddPoorCountGraphTab _addPoorCountGraphTab;
 
         public AddGraphsInTabs(GraphData graphData,
             ConditionPercentageChart conditionPercentageChart,
-
-            IAddBPNGraphTab addBPNGraphTab)
+            IAddBPNGraphTab addBPNGraphTab, IAddPoorCountGraphTab addPoorCountGraphTab)
         {
             _graphData = graphData ?? throw new ArgumentNullException(nameof(graphData));
             _conditionPercentageChart = conditionPercentageChart ?? throw new ArgumentNullException(nameof(conditionPercentageChart));
 
             _addBPNGraphTab = addBPNGraphTab ?? throw new ArgumentNullException(nameof(addBPNGraphTab));
+            _addPoorCountGraphTab = addPoorCountGraphTab ?? throw new ArgumentNullException(nameof(addPoorCountGraphTab));
         }
 
 
@@ -71,12 +72,15 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             _graphData.Fill(graphDataWorksheet, bridgeWorkSummaryWorksheet, chartRowModel.TotalDeckAreaPercentYearsRow, startColumn, simulationYearsCount);
             graphDataWorksheet.Hidden = eWorkSheetHidden.Hidden;
 
-
             // Fill the already created tabs that are dependent on the "Graph Data" tab; order of fill does not matter, worksheets were added in order
             foreach (var graphDataTab in GraphDataDependentTabs.Values)
             {
                 _conditionPercentageChart.Fill(graphDataTab.Worksheet, graphDataWorksheet, graphDataTab.DataColumn, graphDataTab.Title, simulationYearsCount);
             }
+                       
+            var poorCountGraphTab = excelPackage.Workbook.Worksheets.Add(Properties.Resources.Graph_PoorCountGraph_Tab);
+            _addPoorCountGraphTab.AddPoorCountTab(poorCountGraphTab, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorBridgesCountSectionYearsRow, simulationYearsCount);
+
             _addBPNGraphTab.AddBPNTab(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
         }
     }

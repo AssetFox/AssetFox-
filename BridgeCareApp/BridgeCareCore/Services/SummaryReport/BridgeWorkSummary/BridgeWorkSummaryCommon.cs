@@ -10,13 +10,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
     public class BridgeWorkSummaryCommon
     {
-        private readonly IExcelHelper _excelHelper;
-
-        public BridgeWorkSummaryCommon(IExcelHelper excelHelper)
-        {
-            _excelHelper = excelHelper;
-        }
-
         public void AddHeaders(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, string sectionName, string workTypeName)
         {
             AddWorkTypeHeader(worksheet, currentCell, workTypeName);
@@ -76,10 +69,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var column = currentCell.Column;
             worksheet.Cells[row, ++column].Value = headerText;
             var cells = worksheet.Cells[row, column];
-            _excelHelper.ApplyStyle(cells);
-            _excelHelper.MergeCells(worksheet, row, column, row, column + yearsCount - 1);
+            ExcelHelper.ApplyStyle(cells);
+            ExcelHelper.MergeCells(worksheet, row, column, row, column + yearsCount - 1);
             cells = worksheet.Cells[row, column, row, column + yearsCount - 1];
-            _excelHelper.ApplyBorder(cells);
+            ExcelHelper.ApplyBorder(cells);
             ++row;
             UpdateCurrentCell(currentCell, row, column);
         }
@@ -92,8 +85,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             {
                 worksheet.Cells[row, column].Value = year;
                 var cells = worksheet.Cells[row, column];
-                _excelHelper.ApplyStyle(cells);
-                _excelHelper.ApplyBorder(cells);
+                ExcelHelper.ApplyStyle(cells);
+                ExcelHelper.ApplyBorder(cells);
                 column++;
             }
             currentCell.Column = column - 1;
@@ -106,9 +99,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var column = 1;
             worksheet.Cells[++row, column].Value = WorkTypeHeader;
             var cells = worksheet.Cells[row, column, row + 1, column];
-            _excelHelper.ApplyStyle(cells);
-            _excelHelper.ApplyBorder(cells);
-            _excelHelper.MergeCells(worksheet, row, column, row + 1, column);
+            ExcelHelper.ApplyStyle(cells);
+            ExcelHelper.ApplyBorder(cells);
+            ExcelHelper.MergeCells(worksheet, row, column, row + 1, column);
 
             // Empty column
             column++;
@@ -121,10 +114,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var column = 1;
             worksheet.Cells[row, column].Value = headerText;
             var cells = worksheet.Cells[row, column];
-            _excelHelper.ApplyStyle(cells);
-            _excelHelper.MergeCells(worksheet, row, column, row, column + mergeColumns);
+            ExcelHelper.ApplyStyle(cells);
+            ExcelHelper.MergeCells(worksheet, row, column, row, column + mergeColumns);
             cells = worksheet.Cells[row, column, row, column + mergeColumns];
-            _excelHelper.ApplyBorder(cells);
+            ExcelHelper.ApplyBorder(cells);
             ++row;
             UpdateCurrentCell(currentCell, row, column);
         }
@@ -146,8 +139,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             }
             currentCell.Column = column - 1;
             var cells = worksheet.Cells[row, startColumn, row, currentCell.Column];
-            _excelHelper.ApplyStyle(cells);
-            _excelHelper.ApplyBorder(cells);
+            ExcelHelper.ApplyStyle(cells);
+            ExcelHelper.ApplyBorder(cells);
         }
 
         #endregion Private methods

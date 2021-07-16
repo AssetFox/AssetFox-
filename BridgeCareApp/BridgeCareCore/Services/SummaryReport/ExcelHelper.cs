@@ -6,7 +6,15 @@ using OfficeOpenXml.Style;
 
 namespace BridgeCareCore.Services.SummaryReport
 {
-    public class ExcelHelper : IExcelHelper
+    public enum ExcelHelperCellFormat
+    {
+        NegativeCurrency,
+        Number,
+        Percentage,
+        PercentageDecimal2,
+        DecimalPrecision3,
+    }
+    public static class ExcelHelper
     {
         /// <summary>
         ///     Merge given cells
@@ -16,7 +24,7 @@ namespace BridgeCareCore.Services.SummaryReport
         /// <param name="fromColumn"></param>
         /// <param name="toRow"></param>
         /// <param name="toColumn"></param>
-        public void MergeCells(ExcelWorksheet worksheet, int fromRow, int fromColumn, int toRow, int toColumn, bool makeTextBold = true)
+        public static void MergeCells(ExcelWorksheet worksheet, int fromRow, int fromColumn, int toRow, int toColumn, bool makeTextBold = true)
         {
             using (var cells = worksheet.Cells[fromRow, fromColumn, toRow, toColumn])
             {
@@ -37,7 +45,7 @@ namespace BridgeCareCore.Services.SummaryReport
         ///     Apply style to given cells
         /// </summary>
         /// <param name="cells"></param>
-        public void ApplyStyle(ExcelRange cells)
+        public static void ApplyStyle(ExcelRange cells)
         {
             cells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
@@ -49,7 +57,7 @@ namespace BridgeCareCore.Services.SummaryReport
         ///     Apply border to given cells
         /// </summary>
         /// <param name="cells"></param>
-        public void ApplyBorder(ExcelRange cells)
+        public static void ApplyBorder(ExcelRange cells)
         {
             cells.Style.Border.Top.Style = ExcelBorderStyle.Thin;
             cells.Style.Border.Left.Style = ExcelBorderStyle.Thin;
@@ -57,11 +65,20 @@ namespace BridgeCareCore.Services.SummaryReport
             cells.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
         }
 
+        public static void ApplyLeftBorder(ExcelRange cells)
+        {
+            cells.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+        }
+        public static void ApplyRightBorder(ExcelRange cells)
+        {
+            cells.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+        }
+
         /// <summary>
         ///     Set currency format for given cells
         /// </summary>
         /// <param name="cells"></param>
-        public void SetCurrencyFormat(ExcelRange cells)
+        public static void SetCurrencyFormat(ExcelRange cells)
         {
             cells.Style.Numberformat.Format = ExcelFormatStrings.Currency;
         }
@@ -70,7 +87,7 @@ namespace BridgeCareCore.Services.SummaryReport
         ///     Set custom format for given cells
         /// </summary>
         /// <param name="cells"></param>
-        public void SetCustomFormat(ExcelRange cells, ExcelHelperCellFormat type)
+        public static void SetCustomFormat(ExcelRange cells, ExcelHelperCellFormat type)
         {
             switch (type)
             {
@@ -94,15 +111,20 @@ namespace BridgeCareCore.Services.SummaryReport
             }
         }
 
-        public void ApplyColor(ExcelRange cells, Color color)
+        public static void ApplyColor(ExcelRange cells, Color color)
         {
             cells.Style.Fill.PatternType = ExcelFillStyle.Solid;
             cells.Style.Fill.BackgroundColor.SetColor(color);
         }
 
-        public void SetTextColor(ExcelRange cells, Color color)
+        public static void SetTextColor(ExcelRange cells, Color color)
         {
             cells.Style.Font.Color.SetColor(color);
+        }
+
+        public static void HorizontalCenterAlign(ExcelRange cells)
+        {
+            cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
         }
     }
 }

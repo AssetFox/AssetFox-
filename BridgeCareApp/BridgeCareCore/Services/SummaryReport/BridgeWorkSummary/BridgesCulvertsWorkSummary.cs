@@ -10,12 +10,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
     public class BridgesCulvertsWorkSummary
     {
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        private readonly IExcelHelper _excelHelper;
 
-        public BridgesCulvertsWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IExcelHelper excelHelper)
+        public BridgesCulvertsWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon)
         {
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon;
-            _excelHelper = excelHelper;
         }
 
         public void FillBridgesCulvertsWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
@@ -89,8 +87,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 }
                 worksheet.Cells[row, column].Value = culvertTotalCount;
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
-            _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.LightSteelBlue);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.LightSteelBlue);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
         }
 
@@ -132,8 +130,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 }
                 worksheet.Cells[row, column].Value = nonCulvertTotalCount;
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
-            _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.SlateGray);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.SlateGray);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
         }
 
@@ -170,10 +168,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 }
                 worksheet.Cells[row, column].Value = totalCount;
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
-            _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.LightBlue);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.LightBlue);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
-            _excelHelper.ApplyColor(worksheet.Cells[row + 1, startColumn, row + 1, column], Color.DimGray);
+            ExcelHelper.ApplyColor(worksheet.Cells[row + 1, startColumn, row + 1, column], Color.DimGray);
         }
 
         #endregion Private methods

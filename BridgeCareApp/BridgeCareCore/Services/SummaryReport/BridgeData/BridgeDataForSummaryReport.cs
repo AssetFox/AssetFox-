@@ -197,7 +197,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                             if (prevYearSection.AppliedTreatment == section.AppliedTreatment)
                             {
                                 range.Value = "--";
-                                worksheet.Cells[row, column + 1].Value = 0;
+                                worksheet.Cells[row, column + 1].Value = cost;
                             }
                         }
                         _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);

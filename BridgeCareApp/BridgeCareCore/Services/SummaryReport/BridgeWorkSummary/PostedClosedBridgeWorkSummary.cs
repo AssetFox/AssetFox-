@@ -14,15 +14,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
     public class PostedClosedBridgeWorkSummary
     {
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        private readonly IExcelHelper _excelHelper;
         private readonly BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
         private readonly WorkSummaryModel _workSummaryModel;
 
-        public PostedClosedBridgeWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IExcelHelper excelHelper,
+        public PostedClosedBridgeWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon,
             BridgeWorkSummaryComputationHelper bridgeWorkSummaryComputationHelper, WorkSummaryModel workSummaryModel)
         {
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
-            _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryComputationHelper));
             _workSummaryModel = workSummaryModel ?? throw new ArgumentNullException(nameof(workSummaryModel));
         }
@@ -49,7 +47,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 AddPostedBridgesCountBPN(worksheet, row, column, yearlyData.Sections);
             }
             var bpnNames = EnumExtensions.GetValues<BPNName>();
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + bpnNames.Count, column);
         }
 
@@ -99,7 +97,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 AddPostedBridgesDeckArea(worksheet, row, column, yearlyData.Sections);
             }
             var bpnNames = EnumExtensions.GetValues<BPNName>();
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + bpnNames.Count, column);
         }
 
@@ -149,7 +147,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 AddClosedBridgesCountBPN(worksheet, row, column, yearlyData.Sections);
             }
             var bpnNames = EnumExtensions.GetValues<BPNName>();
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + bpnNames.Count, column);
         }
 
@@ -199,7 +197,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 AddClosedBridgesDeckArea(worksheet, row, column, yearlyData.Sections);
             }
             var bpnNames = EnumExtensions.GetValues<BPNName>();
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + bpnNames.Count, column);
         }
 
@@ -255,7 +253,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             }
 
             worksheet.Cells[startRow, startColumn, row + 1, column].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 1, column]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 1, column]);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row - 1, column);
         }
 
@@ -292,9 +290,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             {
                 worksheet.Cells[row + bpnRowCount, startColumn + i + 2].Value = _workSummaryModel.AnnualizedAmount;
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column], ExcelHelperCellFormat.NegativeCurrency);
-            _excelHelper.ApplyColor(worksheet.Cells[startRow, startColumn + 2, row + bpnRowCount, column], Color.FromArgb(198, 224, 180));
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column], ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, startColumn + 2, row + bpnRowCount, column], Color.FromArgb(198, 224, 180));
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + bpnRowCount, column);
         }
 

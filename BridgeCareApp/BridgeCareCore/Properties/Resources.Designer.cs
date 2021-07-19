@@ -478,6 +478,15 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Poor DA.
+        /// </summary>
+        internal static string Graph_PoorDeckAreaGraph_Tab {
+            get {
+                return ResourceManager.GetString("Graph_PoorDeckAreaGraph_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Posted BPN Count.
         /// </summary>
         internal static string Graph_PostedBPNCount_Tab {

@@ -283,6 +283,9 @@ Condition By Deck Area TAB</comment>
   <data name="Graph_PoorDAByBPN_Tab" xml:space="preserve">
     <value>Poor DA By BPN</value>
   </data>
+  <data name="Graph_PoorDeckAreaGraph_Tab" xml:space="preserve">
+    <value>Poor DA</value>
+  </data>
   <data name="Graph_PostedBPNCount_Tab" xml:space="preserve">
     <value>Posted BPN Count</value>
   </data>

@@ -14,16 +14,18 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
 
         private readonly IAddBPNGraphTab _addBPNGraphTab;
         private readonly IAddPoorCountGraphTab _addPoorCountGraphTab;
+        private readonly IAddPoorDeckAreaGraphTab _addPoorDeckAreaGraphTab;
 
         public AddGraphsInTabs(GraphData graphData,
             ConditionPercentageChart conditionPercentageChart,
-            IAddBPNGraphTab addBPNGraphTab, IAddPoorCountGraphTab addPoorCountGraphTab)
+            IAddBPNGraphTab addBPNGraphTab, IAddPoorCountGraphTab addPoorCountGraphTab, IAddPoorDeckAreaGraphTab addPoorDeckAreaGraphTab)
         {
             _graphData = graphData ?? throw new ArgumentNullException(nameof(graphData));
             _conditionPercentageChart = conditionPercentageChart ?? throw new ArgumentNullException(nameof(conditionPercentageChart));
 
             _addBPNGraphTab = addBPNGraphTab ?? throw new ArgumentNullException(nameof(addBPNGraphTab));
             _addPoorCountGraphTab = addPoorCountGraphTab ?? throw new ArgumentNullException(nameof(addPoorCountGraphTab));
+            _addPoorDeckAreaGraphTab = addPoorDeckAreaGraphTab ?? throw new ArgumentNullException(nameof(addPoorDeckAreaGraphTab));
         }
 
 
@@ -80,6 +82,9 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
                        
             var poorCountGraphTab = excelPackage.Workbook.Worksheets.Add(Properties.Resources.Graph_PoorCountGraph_Tab);
             _addPoorCountGraphTab.AddPoorCountTab(poorCountGraphTab, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorBridgesCountSectionYearsRow, simulationYearsCount);
+
+            var poorDeckAreaGraphTab = excelPackage.Workbook.Worksheets.Add(Properties.Resources.Graph_PoorDeckAreaGraph_Tab);
+            _addPoorDeckAreaGraphTab.AddPoorDeckAreaTab(poorDeckAreaGraphTab, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorBridgesDeckAreaSectionYearsRow, simulationYearsCount);
 
             _addBPNGraphTab.AddBPNTab(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
         }

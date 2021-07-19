@@ -309,6 +309,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 {
                     column = currentCell.Column;
                     column = AddSimulationYearData(worksheet, row, column, null, section);
+                    var initialColumnForShade = column;
 
                     SectionDetail prevYearSection = null;
                     if (!isInitialYear)

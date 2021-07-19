@@ -116,7 +116,6 @@ namespace BridgeCareCore.Services.SummaryReport
             switch (treatmentCause)
             {
             case TreatmentCause.NoSelection:
-                return "No Treatment";
             case TreatmentCause.ScheduledTreatment:
             case TreatmentCause.SelectedTreatment:
                 return "BAMS Pick";

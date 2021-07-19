@@ -13,7 +13,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
     public class BridgeDataForSummaryReport : IBridgeDataForSummaryReport
     {
         private List<int> _spacerColumnNumbers;
-        private readonly IExcelHelper _excelHelper;
         private readonly IHighlightWorkDoneCells _highlightWorkDoneCells;
         private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> _valueForMinC;
         private readonly List<int> _simulationYears = new List<int>();
@@ -29,10 +28,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         // This will be used in Parameters TAB
         private readonly ParametersModel _parametersModel = new ParametersModel();
 
-        public BridgeDataForSummaryReport(IExcelHelper excelHelper, IHighlightWorkDoneCells highlightWorkDoneCells,
+        public BridgeDataForSummaryReport(IHighlightWorkDoneCells highlightWorkDoneCells,
             ISummaryReportHelper summaryReportHelper)
         {
-            _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _highlightWorkDoneCells = highlightWorkDoneCells ?? throw new ArgumentNullException(nameof(highlightWorkDoneCells));
             _summaryReportHelper = summaryReportHelper ?? throw new ArgumentNullException(nameof(summaryReportHelper));
         }
@@ -175,7 +173,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
                     }
-
                     setColor((int)section.ValuePerNumericAttribute["PARALLEL"], section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
                         yearlySectionData.Year, index, worksheet, row, column);
 
@@ -187,6 +184,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                         range.Value = abbreviatedTreatmentNames[section.AppliedTreatment];
                         worksheet.Cells[row, column + 1].Value = cost;
 
+                        
                         if (!isInitialYear && section.TreatmentCause == TreatmentCause.CashFlowProject)
                         {
                             if (prevYearSection == null)
@@ -200,7 +198,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                                 worksheet.Cells[row, column + 1].Value = cost;
                             }
                         }
-                        _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
+                        worksheet.Cells[row, column + 1].Value = cost;
+                        ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
+
                     }
                     else
                     {
@@ -208,7 +208,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                             section.AppliedTreatment.ToLower();
 
                         worksheet.Cells[row, column + 1].Value = cost;
-                        _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
+                        ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
                     }
                     if (!range.Value.Equals("--"))
                     {
@@ -242,6 +242,17 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                     previousYearSectionMinC[i] = thisYrMinc;
                     i++;
+                    if (row % 2 == 0)
+                    {
+                        if(section.TreatmentCause != TreatmentCause.CashFlowProject ||
+                            section.TreatmentCause == TreatmentCause.CommittedProject)
+                        {
+                            ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
+                        }
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, poorOnOffColumnStart], Color.LightGray);
+                    }
+                    ExcelHelper.ApplyLeftBorder(worksheet.Cells[row, column]);
+                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column + 1]);
                     row++;
                 }
                 index++;
@@ -261,13 +272,18 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[row, column - 1].Value = wdInfo >= 1 ? "Yes" : "--";
                 // Work done more than once
                 worksheet.Cells[row, column].Value = wdInfo > 1 ? "Yes" : "--";
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1, row, column]);
+                if (row % 2 == 0)
+                {
+                    ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1, row, column + 1], Color.LightGray);
+                }
                 row++;
                 totalWorkMoreThanOnce += wdInfo > 1 ? 1 : 0;
             }
 
             // "Total" column
             worksheet.Cells[3, column + 1].Value = totalWorkMoreThanOnce;
-            _excelHelper.ApplyStyle(worksheet.Cells[3, column + 1]);
+            ExcelHelper.ApplyStyle(worksheet.Cells[3, column + 1]);
 
             column = column + outputResults.Years.Count + 2; // this will take us to the empty column after "poor on off"
             worksheet.Column(column).Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -327,18 +343,24 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     worksheet.Cells[row, ++column].Value = section.AppliedTreatment;
                     if (section.TreatmentCause == TreatmentCause.CashFlowProject)
                     {
-                        _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
-                        _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.FromArgb(255, 0, 0));
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.FromArgb(255, 0, 0));
 
                         // Color the previous year project also
-                        _excelHelper.ApplyColor(worksheet.Cells[row, column - 16], Color.FromArgb(0, 255, 0));
-                        _excelHelper.SetTextColor(worksheet.Cells[row, column - 16], Color.FromArgb(255, 0, 0));
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, column - 16], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, column - 16], Color.FromArgb(255, 0, 0));
                     }
 
                     var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
                     worksheet.Cells[row, ++column].Value = cost; // cost
-                    _excelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
+                    ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
+
+                    if (row % 2 == 0)
+                    {
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+                    }
+
                     column = column + 1;
                     row++;
                 }
@@ -349,12 +371,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column,
             SectionSummaryDetail initialSection, SectionDetail section)
         {
+            var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
             var minCActionCallDecider = MinCValue.minOfCulvDeckSubSuper;
             var familyId = int.Parse(selectedSection.ValuePerTextAttribute["FAMILY_ID"]);
             var familyIdLessThanEleven = familyId < 11;
             if (familyId > 10)
             {
+                var columnForStyle = column + 1;
                 worksheet.Cells[row, ++column].Value = "N"; // deck cond
                 worksheet.Cells[row, ++column].Value = "N"; // super cond
                 worksheet.Cells[row, ++column].Value = "N"; // sub cond
@@ -363,23 +387,24 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[row, column + 3].Value = "N"; // super dur
                 worksheet.Cells[row, column + 4].Value = "N"; // sub dur
                 minCActionCallDecider = MinCValue.valueEqualsCulv;
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnForStyle, row, column + 4]);
             }
             else
             {
                 worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["DECK_SEEDED"];
                 worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["SUP_SEEDED"];
                 worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["SUB_SEEDED"];
+                ExcelHelper.SetCustomFormat(worksheet.Cells[row, column - 2, row, column], ExcelHelperCellFormat.DecimalPrecision3);
 
-                worksheet.Cells[row, column + 2].Value = selectedSection.ValuePerNumericAttribute["DECK_DURATION_N"];
-                worksheet.Cells[row, column + 3].Value = selectedSection.ValuePerNumericAttribute["SUP_DURATION_N"];
-                worksheet.Cells[row, column + 4].Value = selectedSection.ValuePerNumericAttribute["SUB_DURATION_N"];
-                _excelHelper.SetCustomFormat(worksheet.Cells[row, column - 2, row, column + 4], ExcelHelperCellFormat.DecimalPrecision3);
+                worksheet.Cells[row, column + 2].Value = (int)selectedSection.ValuePerNumericAttribute["DECK_DURATION_N"];
+                worksheet.Cells[row, column + 3].Value = (int)selectedSection.ValuePerNumericAttribute["SUP_DURATION_N"];
+                worksheet.Cells[row, column + 4].Value = (int)selectedSection.ValuePerNumericAttribute["SUB_DURATION_N"];
             }
             if (familyIdLessThanEleven)
             {
                 worksheet.Cells[row, ++column].Value = "N"; // culv cond
                 worksheet.Cells[row, column + 4].Value = "N"; // culv seeded
-
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column, row, column + 4]);
                 if (minCActionCallDecider == MinCValue.valueEqualsCulv)
                 {
                     minCActionCallDecider = MinCValue.defaultValue;
@@ -392,22 +417,29 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             else
             {
                 worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["CULV_SEEDED"];
+                ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
 
-                worksheet.Cells[row, column + 4].Value = selectedSection.ValuePerNumericAttribute["CULV_DURATION_N"];
-                _excelHelper.SetCustomFormat(worksheet.Cells[row, column, row, column + 4], ExcelHelperCellFormat.DecimalPrecision3);
+                worksheet.Cells[row, column + 4].Value = (int)selectedSection.ValuePerNumericAttribute["CULV_DURATION_N"];
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column + 4]);           
             }
             column += 4; // this will take us to "Min cond" column
 
             // It returns the column number where MinC value is written
             column = _valueForMinC[minCActionCallDecider](worksheet, row, column, selectedSection.ValuePerNumericAttribute);
-            _excelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
 
             if (selectedSection.ValuePerNumericAttribute["P3"] > 0 && selectedSection.ValuePerNumericAttribute["MINCOND"] < 5)
             {
-                _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.Yellow);
-                _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
+                ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.Yellow);
+                ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
             }
             worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["MINCOND"] < 5 ? "Y" : "N"; //poor
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column]);
+
+            if (row % 2 == 0)
+            {
+                ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+            }
 
             return column;
         }
@@ -419,10 +451,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             foreach (var sectionSummary in reportOutputData.InitialSectionSummaries)
             {
                 rowNo++;
-                if (rowNo % 2 == 0)
-                {
-                    _excelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, worksheet.Dimension.Columns], Color.LightGray);
-                }
                 columnNo = 1;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.SectionName;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.FacilityName;
@@ -443,44 +471,59 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY_ID"];
                 worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(sectionSummary.ValuePerTextAttribute["NHS_IND"],
                     out var numericValue) && numericValue > 0 ? "Y" : "N";
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["NBISLEN"];
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
                 // Add Interstate
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["INTERSTATE"];
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["STRUCTURE_TYPE"];
 
                 // Fractural Critical, Deck surface type, Wearing surface cond, Paint cond, paint ext
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FRACT_CRIT"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DECKSURF_TYPE"];
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+                worksheet.Cells[rowNo, columnNo++].Value = MappingContent.GetDeckSurfaceType(sectionSummary.ValuePerTextAttribute["DECKSURF_TYPE"]);
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["WS_SEEDED"]; // Wearing surface cond
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["PAINT_COND"];
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["PAINT_EXTENT"];
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = (int)sectionSummary.ValuePerNumericAttribute["YEAR_BUILT"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["AGE"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["ADTTOTAL"];
 
-                _excelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo], ExcelHelperCellFormat.Number);
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo], ExcelHelperCellFormat.Number);
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISK_SCORE"];
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["P3"] > 0 ? "Y" : "N";
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
                 _previousYearInitialMinC.Add(sectionSummary.ValuePerNumericAttribute["MINCOND"]);
 
                 // Add Parallel Structure, Internet Report, Federal Aid, Bridge Funding
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["PARALLEL"] > 0 ? "Y" : "N";
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["INTERNET_REPORT"];
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FEDAID"];
 
+                var columnForStyle = columnNo;
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding185(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding581(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(sectionSummary) ? "Y" : "N";
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding183(sectionSummary) ? "Y" : "N";
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnForStyle, rowNo, columnNo - 1]);
+
+                if (rowNo % 2 == 0)
+                {
+                    ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray);
+                }
             }
             currentCell.Row = rowNo;
             currentCell.Column = columnNo;
@@ -557,7 +600,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             int headerRow = 1;
 
-            _excelHelper.MergeCells(worksheet, 1, headers.Count, 1, headers.Count + 5);
+            ExcelHelper.MergeCells(worksheet, 1, headers.Count, 1, headers.Count + 5);
 
             for (int column = 0; column < headers.Count; column++)
             {
@@ -572,7 +615,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             }
 
             var currentCell = new CurrentCell { Row = headerRow, Column = headers.Count + 5 };
-            _excelHelper.ApplyBorder(worksheet.Cells[headerRow, 1, headerRow + 1, worksheet.Dimension.Columns]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, 1, headerRow + 1, worksheet.Dimension.Columns]);
 
             AddDynamicHeadersCells(worksheet, currentCell, simulationYears);
             return currentCell;
@@ -586,23 +629,25 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var initialColumn = column;
             foreach (var year in simulationYears)
             {
-                _excelHelper.MergeCells(worksheet, row, ++column, row, ++column);
+                ExcelHelper.MergeCells(worksheet, row, ++column, row, ++column);
                 worksheet.Cells[row, column - 1].Value = HeaderConstText + year;
                 worksheet.Cells[row + 2, column -1].Value = Properties.Resources.Work;
                 worksheet.Cells[row + 2, column].Value = "Cost";
-                _excelHelper.ApplyStyle(worksheet.Cells[row + 2, column - 1, row + 2, column]);
-                _excelHelper.ApplyColor(worksheet.Cells[row, column - 1], Color.FromArgb(244, 176, 132));
+                ExcelHelper.ApplyStyle(worksheet.Cells[row + 2, column - 1, row + 2, column]);
+                ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1], Color.FromArgb(244, 176, 132));
             }
 
             worksheet.Cells[row, ++column].Value = "Work Done";
             worksheet.Cells[row, ++column].Value = "Work Done more than once";
+            ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1, row, column], Color.FromArgb(244, 176, 132));
+
             worksheet.Cells[row, ++column].Value = "Total";
             worksheet.Cells[row, ++column].Value = "Poor On/Off Rate";
             var poorOnOffRateColumn = column;
             foreach (var year in simulationYears)
             {
                 worksheet.Cells[row + 2, column].Value = year;
-                _excelHelper.ApplyStyle(worksheet.Cells[row + 2, column]);
+                ExcelHelper.ApplyStyle(worksheet.Cells[row + 2, column]);
                 column++;
             }
 
@@ -610,22 +655,22 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             // Merge 2 rows for headers till column before Bridge Funding
             for (int cellColumn = 1; cellColumn < currentCell.Column - 5; cellColumn++)
             {
-                _excelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
+                ExcelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
             }
 
             // Merge 2 rows for headers of "Work Done" columns
             for (int cellColumn = currentCell.Column + 1; cellColumn < poorOnOffRateColumn - 4; cellColumn++)
             {
-                _excelHelper.MergeCells(worksheet, row, cellColumn, row + 1, ++cellColumn);
+                ExcelHelper.MergeCells(worksheet, row, cellColumn, row + 1, ++cellColumn);
             }
 
             // Merge "Work Done", "Work done more than once", "Total"
             for(var cellColumn = poorOnOffRateColumn - 3; cellColumn < poorOnOffRateColumn; cellColumn++)
             {
-                _excelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
+                ExcelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
             }
             // Merge columns for Poor On/Off Rate
-            _excelHelper.MergeCells(worksheet, row, poorOnOffRateColumn, row + 1, column - 1);
+            ExcelHelper.MergeCells(worksheet, row, poorOnOffRateColumn, row + 1, column - 1);
             currentCell.Column = column;
 
             // Add Years Data headers
@@ -633,7 +678,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             worksheet.Cells[row, ++column].Value = simulationYears[0] - 1;
             column = currentCell.Column;
             column = AddSimulationHeaderTexts(worksheet, column, row, simulationHeaderTexts, simulationHeaderTexts.Count - 5);
-            _excelHelper.MergeCells(worksheet, row, currentCell.Column + 1, row, column);
+            ExcelHelper.MergeCells(worksheet, row, currentCell.Column + 1, row, column);
 
             // Empty column
             currentCell.Column = ++column;
@@ -650,14 +695,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 worksheet.Cells[row, ++column].Value = simulationYear;
                 column = currentCell.Column;
                 column = AddSimulationHeaderTexts(worksheet, column, row, simulationHeaderTexts, simulationHeaderTexts.Count);
-                _excelHelper.MergeCells(worksheet, row, currentCell.Column + 1, row, column);
+                ExcelHelper.MergeCells(worksheet, row, currentCell.Column + 1, row, column);
                 if (simulationYear % 2 != 0)
                 {
-                    _excelHelper.ApplyColor(worksheet.Cells[row, currentCell.Column + 1, row, column], Color.Gray);
+                    ExcelHelper.ApplyColor(worksheet.Cells[row, currentCell.Column + 1, row, column], Color.Gray);
                 }
                 else
                 {
-                    _excelHelper.ApplyColor(worksheet.Cells[row, currentCell.Column + 1, row, column], Color.LightGray);
+                    ExcelHelper.ApplyColor(worksheet.Cells[row, currentCell.Column + 1, row, column], Color.LightGray);
                 }
 
                 worksheet.Column(currentCell.Column).Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -666,7 +711,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
 
                 currentCell.Column = ++column;
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[row, initialColumn, row + 1, worksheet.Dimension.Columns]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[row, initialColumn, row + 1, worksheet.Dimension.Columns]);
             currentCell.Row = currentCell.Row + 2;
         }
 
@@ -675,7 +720,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             for (var index = 0; index < length; index++)
             {
                 worksheet.Cells[row + 1, ++column].Value = simulationHeaderTexts[index];
-                _excelHelper.ApplyStyle(worksheet.Cells[row + 1, column]);
+                ExcelHelper.ApplyStyle(worksheet.Cells[row + 1, column]);
             }
 
             return column;
@@ -717,8 +762,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             worksheet.Cells[row, ++column].Value = numericAttribute["MINCOND"];
             if (numericAttribute["MINCOND"] <= 3.5)
             {
-                _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(112, 48, 160));
-                _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.White);
+                ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(112, 48, 160));
+                ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.White);
             }
             return column;
         }
@@ -730,8 +775,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             numericAttribute["MINCOND"] = minValue;
             if (numericAttribute["MINCOND"] <= 3.5)
             {
-                _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(112, 48, 160));
-                _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.White);
+                ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(112, 48, 160));
+                ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.White);
             }
             return column;
         }
@@ -741,8 +786,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             worksheet.Cells[row, ++column].Value = numericAttribute["MINCOND"];
             if (numericAttribute["MINCOND"] <= 3.5)
             {
-                _excelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(112, 48, 160));
-                _excelHelper.SetTextColor(worksheet.Cells[row, column], Color.White);
+                ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(112, 48, 160));
+                ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.White);
             }
             return column;
         }

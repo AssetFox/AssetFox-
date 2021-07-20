@@ -165,9 +165,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     {
                         prevYrMinc = previousYearSectionMinC[i];
                     }
+                    SectionDetail prevYearSection = null;
                     if (section.TreatmentCause == TreatmentCause.CommittedProject && !isInitialYear)
                     {
-                        var prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
+                        prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
                             .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
@@ -180,12 +181,26 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     var range = worksheet.Cells[row, column];
                     if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
                     {
-                        range.Value = string.IsNullOrEmpty(abbreviatedTreatmentNames[section.AppliedTreatment])
-                            || section.AppliedTreatment.ToLower() == Properties.Resources.NoTreatment
-                            ? "--" : abbreviatedTreatmentNames[section.AppliedTreatment];
+                        range.Value = abbreviatedTreatmentNames[section.AppliedTreatment];
+                        worksheet.Cells[row, column + 1].Value = cost;
 
+                        
+                        if (!isInitialYear && section.TreatmentCause == TreatmentCause.CashFlowProject)
+                        {
+                            if (prevYearSection == null)
+                            {
+                                prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
+                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                            }
+                            if (prevYearSection.AppliedTreatment == section.AppliedTreatment)
+                            {
+                                range.Value = "--";
+                                worksheet.Cells[row, column + 1].Value = cost;
+                            }
+                        }
                         worksheet.Cells[row, column + 1].Value = cost;
                         ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
+
                     }
                     else
                     {
@@ -295,7 +310,24 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     column = currentCell.Column;
                     column = AddSimulationYearData(worksheet, row, column, null, section);
                     var initialColumnForShade = column;
-                    worksheet.Cells[row, ++column].Value = section.TreatmentCause; // Project Pick
+
+                    SectionDetail prevYearSection = null;
+                    if (!isInitialYear)
+                    {
+                        prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == sectionData.Year - 1)
+                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                    }
+
+                    if(section.TreatmentCause == TreatmentCause.CashFlowProject && !isInitialYear)
+                    {
+                        var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
+                        worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
+                        worksheet.Cells[row, column - 16].Value = cashFlowMap.previousPick; //Project Pick previous year
+                    }
+                    else
+                    {
+                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause);//Project Pick
+                    }
 
                     var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
                     BudgetUsageDetail budgetUsage = null;

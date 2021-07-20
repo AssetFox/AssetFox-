@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Services.SummaryReport
 {
@@ -66,6 +67,62 @@ namespace BridgeCareCore.Services.SummaryReport
             case "XX":
                 return "XX - Demolished/Replaced";
             default: return nameFromSimObject;
+            }
+        }
+
+        public static string GetDeckSurfaceType(string name)
+        {
+            switch (name)
+            {
+            case "None":
+                return "00 - None (e.g., steel grid)";
+            case "Concrete":
+                return "01 - Concrete";
+            case "Concrete Overlay":
+                return "02 - Concrete Overlay*";
+            case "Latex Concrete":
+                return "03 - Latex Concrete";
+            case "P":
+                return "04 - Low Slump Concrete P PPC Overlay";
+            case "Epoxy Overlay":
+                return "05 - Epoxy Overlay";
+            case "Bituminous":
+                return "06 - Bituminous (applies only to structures with no deck)";  
+            case "Wood or Timber":
+                return "07 - Wood or Timber";
+            case "Not applicable":
+                return "N - Not applicable";          
+            case "Gravel":
+                return "08 - Gravel";
+            case "Other":
+                return "09 - Other";
+            default: return name;
+            }
+        }
+
+        public static (string previousPick, string currentPick) GetCashFlowProjectPick(TreatmentCause treatmentCause, SectionDetail prevYearSection)
+        {
+            if(prevYearSection.TreatmentCause == treatmentCause)
+            {
+                return ("BAMS Pick CF", "BAMS Pick CFE"); // middle and last year
+            }
+            else
+            {
+                return ("BAMS Pick CFB", "BAMS Pick CFE"); // first and last years
+            }
+        }
+        public static string GetNonCashFlowProjectPick(TreatmentCause treatmentCause)
+        {
+            switch (treatmentCause)
+            {
+            case TreatmentCause.NoSelection:
+            case TreatmentCause.ScheduledTreatment:
+            case TreatmentCause.SelectedTreatment:
+                return "BAMS Pick";
+            case TreatmentCause.CommittedProject:
+                return "MPMS Pick";
+            default:
+                return treatmentCause.ToString();
             }
         }
     }

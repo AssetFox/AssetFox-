@@ -12,13 +12,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
     public class DeckAreaBridgeWorkSummary
     {
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        private readonly IExcelHelper _excelHelper;
         private readonly BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
 
-        public DeckAreaBridgeWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IExcelHelper excelHelper, BridgeWorkSummaryComputationHelper bridgeWorkSummaryComputationHelper)
+        public DeckAreaBridgeWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, BridgeWorkSummaryComputationHelper bridgeWorkSummaryComputationHelper)
         {
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
-            _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryComputationHelper));
         }
 
@@ -46,7 +44,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 AddPoorDeckArea(worksheet, row, column, yearlyData.Sections);
             }
             var bpnNames = EnumExtensions.GetValues<BPNName>();
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnNames.Count - 1, column]);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + bpnNames.Count, column);
         }
 

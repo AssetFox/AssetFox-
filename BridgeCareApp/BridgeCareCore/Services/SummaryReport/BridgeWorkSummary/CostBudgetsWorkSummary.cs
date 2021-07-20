@@ -130,7 +130,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                         }
                     }
                 }
-                worksheet.Cells[rowIndex, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(rowIndex, startColumnIndex, rowIndex, startColumnIndex + numberOfYears - 1); ;
+                worksheet.Cells[rowIndex, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(rowIndex, startColumnIndex, rowIndex, startColumnIndex + numberOfYears - 1);
             }
             var lastContentRow = firstContentRow + workTypes.Count - 1;
             currentCell.Row += workTypes.Count();
@@ -143,12 +143,28 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 var endAddress = worksheet.Cells[lastContentRow, columnIndex].Address;
                 worksheet.Cells[currentCell.Row, columnIndex].Formula = ExcelFormulas.RangeSum(startAddress, endAddress);
             }
+
+            // Adding percentage after the Total (all years)
+            for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
+            {
+                var rowIndex = firstContentRow + (int)workType;
+                var col = startColumnIndex + numberOfYears + 1;
+                worksheet.Cells[rowIndex, col].Formula = ExcelFormulas.Percentage(rowIndex, col - 1, totalSpentRow, col - 1);
+
+                worksheet.Cells[rowIndex, col + 1].Value = $"Percentage Spent on {workType.ToSpreadsheetString().ToUpper()}";
+            }
             currentCell.Row += 2;
             var contentColor = Color.FromArgb(84, 130, 53);
             ExcelHelper.ApplyBorder(worksheet.Cells[firstContentRow, 1, totalSpentRow, 3 + numberOfYears]);
             ExcelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3 + numberOfYears], ExcelHelperCellFormat.NegativeCurrency);
             ExcelHelper.ApplyColor(worksheet.Cells[firstContentRow, 3, totalSpentRow, 3 + numberOfYears - 1], contentColor);
             ExcelHelper.SetTextColor(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3 + numberOfYears - 1], Color.White);
+
+            // Style for percentages
+            var percentColumn = startColumnIndex + numberOfYears + 1;
+            ExcelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, percentColumn, totalSpentRow, percentColumn], ExcelHelperCellFormat.Percentage);
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[firstContentRow, percentColumn, totalSpentRow, percentColumn]);
+
             worksheet.Cells[currentCell.Row, 1].Value = "Total Bridge Care Budget";
             var totalColumnRange = worksheet.Cells[firstContentRow, 3 + numberOfYears, totalSpentRow, 3 + numberOfYears];
             ExcelHelper.ApplyColor(totalColumnRange, Color.FromArgb(217, 217, 217));

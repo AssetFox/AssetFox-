@@ -45,16 +45,16 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             // cache to store total cost per treatment for a given year along with count of culvert
             // and non-culvert bridges
             var costPerBPNPerYear = new Dictionary<int,Dictionary<string, decimal>>();
-            var costPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
+            var costAndCountPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
             var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
             foreach (var yearData in reportOutputData.Years)
             {
-                costPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int bridgeCount)>());
+                costAndCountPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int bridgeCount)>());
                 yearlyCostCommittedProj.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int bridgeCount)>());
                 costPerBPNPerYear.Add(yearData.Year, new Dictionary<string, decimal>());
                 foreach (var section in yearData.Sections)
                 {
-                    if (section.TreatmentCause == TreatmentCause.NoSelection) //|| section.TreatmentOptions.Count <= 0
+                    if (section.TreatmentCause == TreatmentCause.NoSelection)
                     {
                         continue;
                     }
@@ -88,16 +88,16 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                     //var treatmentDetailOption = section.TreatmentOptions.Find(_ => _.TreatmentName == section.AppliedTreatment);
                     //var cost = treatmentDetailOption == null ? 0 : treatmentDetailOption.Cost;
                     var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
-                    if (!costPerTreatmentPerYear[yearData.Year].ContainsKey(section.AppliedTreatment))
+                    if (!costAndCountPerTreatmentPerYear[yearData.Year].ContainsKey(section.AppliedTreatment))
                     {
-                        costPerTreatmentPerYear[yearData.Year].Add(section.AppliedTreatment, (cost, 1));
+                        costAndCountPerTreatmentPerYear[yearData.Year].Add(section.AppliedTreatment, (cost, 1));
                     }
                     else
                     {
-                        var treatmentCost = costPerTreatmentPerYear[yearData.Year][section.AppliedTreatment].treatmentCost + cost;
-                        var bridgeCount = costPerTreatmentPerYear[yearData.Year][section.AppliedTreatment].bridgeCount + 1;
+                        var treatmentCost = costAndCountPerTreatmentPerYear[yearData.Year][section.AppliedTreatment].treatmentCost + cost;
+                        var bridgeCount = costAndCountPerTreatmentPerYear[yearData.Year][section.AppliedTreatment].bridgeCount + 1;
                         var newCostAndCount = (treatmentCost, bridgeCount);
-                        costPerTreatmentPerYear[yearData.Year][section.AppliedTreatment] = newCostAndCount;
+                        costAndCountPerTreatmentPerYear[yearData.Year][section.AppliedTreatment] = newCostAndCount;
                     }
 
                     // Fill cost per BPN per Year
@@ -123,10 +123,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
             #endregion Initial work to set some data, which will be used throughout the Work summary TAB
 
-            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costPerTreatmentPerYear, yearlyCostCommittedProj,
+            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
                 simulationYears, treatments, yearlyBudgetAmount, costPerBPNPerYear);
 
-            _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costPerTreatmentPerYear, simulationYears, treatments);
+            _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, simulationYears, treatments);
 
             var chartRowsModel = _bridgeRateDeckAreaWorkSummary.FillBridgeRateDeckAreaWorkSummarySections(worksheet, currentCell,
                 simulationYears, workSummaryModel, reportOutputData);

@@ -18,7 +18,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
             _stackedColumnChartCommon.SetWorksheetProperties(worksheet);
             var title = Properties.Resources.PoorBridgeCompareBridgeCount;
             var chart = worksheet.Drawings.AddChart(title, eChartType.ColumnStacked);
-            _stackedColumnChartCommon.SetChartProperties(chart, title, 1200, 820, 2, 6);
+            _stackedColumnChartCommon.SetChartProperties(chart, title, 1050, 800, 2, 5);
 
             _stackedColumnChartCommon.SetChartAxes(chart);
             AddSeries(bridgeWorkSummaryWorksheet, totalPoorBridgesCountSectionYearsRow, simulationYearsCount, chart);
@@ -28,7 +28,7 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs
 
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPoorBridgesCountSectionYearsRow, int count, ExcelChart chart)
         {
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorBridgesCountSectionYearsRow, count, chart, totalPoorBridgesCountSectionYearsRow + 1, Properties.Resources.BridgeCare, Color.Blue);
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPoorBridgesCountSectionYearsRow, count, chart, totalPoorBridgesCountSectionYearsRow + 1, Properties.Resources.Overall, Color.FromArgb(68, 114, 196));
         }
 
         private void CreateSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPoorBridgesCountSectionYearsRow, int count, ExcelChart chart, int fromRow, string header, Color color)

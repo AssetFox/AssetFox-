@@ -119,13 +119,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
                 costForCommittedBudgets = summaryData.YearlyData
                                                     .FindAll(_ => _.isCommitted && _.Treatment.ToLower() != Properties.Resources.NoTreatment);
-
+                 
                 var totalBudgetPerYearForCulvert = new Dictionary<int, double>();
                 var totalBudgetPerYearForBridgeWork = new Dictionary<int, double>();
                 var totalBudgetPerYearForMPMS = new Dictionary<int, double>();
 
                 var totalSpent = new List<(int year, double amount)>();
 
+                var numberOfYears = simulationYears.Count;                
                 // Filling up the total, "culvert" and "Bridge work" costs
                 foreach (var year in simulationYears)
                 {
@@ -187,7 +188,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 currentCell.Row += 2; // For BAMS Work type Totals
                 _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
 
-                var workTypes = EnumExtensions.GetValues<WorkTypeName>();
+                // TODO AB add Total (all years), % and text column : Take help from FillWorkTypeTotalsSection method totals added to Bridge Work Summary tab
+                var initialRow = currentCell.Row;
+                worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
+                var totalColumnHeaderRange = worksheet.Cells[initialRow, 3 + numberOfYears];
+                ExcelHelper.ApplyBorder(totalColumnHeaderRange);
+                ExcelHelper.ApplyStyle(totalColumnHeaderRange);
+
+                var workTypes = EnumExtensions.GetValues<WorkTypeName>();                
                 currentCell.Row++;
                 var firstContentRow = currentCell.Row;
                 var rowTrackerForColoring = firstContentRow;
@@ -199,7 +207,19 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     currentCell.Row++;
                 }
 
-                InsertWorkTypeTotals(startYear, firstContentRow, worksheet);
+                InsertWorkTypeTotals(startYear, firstContentRow, worksheet);                
+
+                var startColumnIndex = 3;
+                for (var row = firstContentRow; row <= currentCell.Row; row++)
+                {
+                    // Add Total(all years)
+                    worksheet.Cells[row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(row, startColumnIndex, row, startColumnIndex + numberOfYears - 1);
+
+                    // %
+
+                    // Text
+
+                }
 
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
                 ExcelHelper.ApplyColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
@@ -224,6 +244,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     worksheet.Cells[currentCell.Row, currentCell.Column + cellFortotalBudget + 2].Value = totalCost;
                     yearTracker++;
                 }
+
                 ExcelHelper.ApplyBorder(worksheet.Cells[startOfTotalBudget, currentCell.Column, currentCell.Row, simulationYears.Count + 2]);
                 ExcelHelper.SetCustomFormat(worksheet.Cells[startOfTotalBudget, currentCell.Column + 2, startOfTotalBudget, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
                 ExcelHelper.SetCustomFormat(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], ExcelHelperCellFormat.NegativeCurrency);
@@ -355,7 +376,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             foreach (var item in _workTypeTotal.MPMSpreservationCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
-            }
+            }            
+
             foreach (var item in _workTypeTotal.BAMSPreservationCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);

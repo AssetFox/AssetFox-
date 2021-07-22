@@ -277,8 +277,14 @@ Condition By Deck Area TAB</comment>
     <value>Non-NHS Condition By Deck Area</value>
     <comment>Graph Title for Non NHS Condition y deck area graph TAB</comment>
   </data>
+  <data name="Graph_PoorCountGraph_Tab" xml:space="preserve">
+    <value>Poor Count</value>
+  </data>
   <data name="Graph_PoorDAByBPN_Tab" xml:space="preserve">
     <value>Poor DA By BPN</value>
+  </data>
+  <data name="Graph_PoorDeckAreaGraph_Tab" xml:space="preserve">
+    <value>Poor DA</value>
   </data>
   <data name="Graph_PostedBPNCount_Tab" xml:space="preserve">
     <value>Posted BPN Count</value>
@@ -288,6 +294,9 @@ Condition By Deck Area TAB</comment>
   </data>
   <data name="NoTreatment" xml:space="preserve">
     <value>no treatment</value>
+  </data>
+  <data name="Overall" xml:space="preserve">
+    <value>Overall</value>
   </data>
   <data name="PercentBudgetSpentBAMS" xml:space="preserve">
     <value>Percent Budget Spent BAMS</value>

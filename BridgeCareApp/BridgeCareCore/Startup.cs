@@ -49,10 +49,11 @@ namespace BridgeCareCore
 
             services.AddSingleton<ILog, LogNLog>();
             services.AddScoped<LegacySimulationSynchronizerService>();
+            services.AddScoped<IInvestmentBudgetsService, InvestmentBudgetsService>();
 
             services.AddSignalR();
             services.AddScoped<IHubService, HubService>();
-            
+
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
              services.AddDbContext<IAMContext>(options => options.UseSqlServer(

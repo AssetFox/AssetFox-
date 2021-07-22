@@ -549,7 +549,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 // Act + Asset
                 var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
                     await _controller.ImportCommittedProjects());
-                Assert.Equal("Committed project files were not found.", exception.Message);
+                Assert.Equal("Committed project file not found.", exception.Message);
             }
             finally
             {

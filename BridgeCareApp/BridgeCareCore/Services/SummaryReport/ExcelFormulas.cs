@@ -71,5 +71,12 @@ namespace BridgeCareCore.Services.SummaryReport
             var toCell = CellAddress(toRow, toColumn);
             return $"Sum({fromCell}:{toCell})";
         }
+                
+        public static string Percentage(int rowNumenator, int colNumenator, int rowDenominator, int colDenominator)
+        {
+            var numenatorCell = CellAddress(rowNumenator, colNumenator);
+            var denominatorCell = CellAddress(rowDenominator, colDenominator);
+            return $"({numenatorCell}/{denominatorCell})";
+        }
     }
 }

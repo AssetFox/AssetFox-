@@ -24,7 +24,6 @@ namespace BridgeCareCore.StartupExtension
         public static void AddSummaryReportDataTABs(this IServiceCollection services)
         {
             services.AddScoped<ISummaryReportGenerator, SummaryReportGenerator>();
-            services.AddScoped<IExcelHelper, ExcelHelper>();
             services.AddScoped<ISummaryReportHelper, SummaryReportHelper>();
             services.AddScoped<IHighlightWorkDoneCells, HighlightWorkDoneCells>();
             services.AddScoped<IUnfundedTreatmentCommon, UnfundedTreatmentCommon>();
@@ -64,6 +63,9 @@ namespace BridgeCareCore.StartupExtension
 
             services.AddScoped<BPNAreaChart>();
             services.AddScoped<BPNCountChart>();
+
+            services.AddScoped<IAddPoorCountGraphTab, AddPoorCountGraphTab>();
+            services.AddScoped<IAddPoorDeckAreaGraphTab, AddPoorDeckAreaGraphTab>();
         }
     }
 }

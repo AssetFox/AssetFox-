@@ -12,11 +12,9 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
     public class UnfundedTreatmentCommon : IUnfundedTreatmentCommon
     {
         private readonly ISummaryReportHelper _summaryReportHelper;
-        private readonly IExcelHelper _excelHelper;
 
-        public UnfundedTreatmentCommon(IExcelHelper excelHelper, ISummaryReportHelper summaryReportHelper)
+        public UnfundedTreatmentCommon(ISummaryReportHelper summaryReportHelper)
         {
-            _excelHelper = excelHelper;
             _summaryReportHelper = summaryReportHelper;
         }
 
@@ -108,6 +106,12 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = @"_($* #,##0_);_($*  #,##0);_($* "" - ""??_);(@_)";
             worksheet.Cells[row, columnNo++].Value = treatment?.Cost;
 
+            if (row % 2 == 0)
+            {
+                ExcelHelper.ApplyColor(worksheet.Cells[row, 1, row, columnNo - 1], Color.LightGray);
+            }
+            ExcelHelper.ApplyBorder(worksheet.Cells[row, 1, row, columnNo - 1]);
+
             currentCell.Column = columnNo;
         }
 
@@ -143,24 +147,24 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
             worksheet.Cells.AutoFitColumns(0);
 
             // Merge Bridge Funding cells in Row 1
-            _excelHelper.MergeCells(worksheet, row, bridgeFundingColumn, row, analysisColumn - 1);
+            ExcelHelper.MergeCells(worksheet, row, bridgeFundingColumn, row, analysisColumn - 1);
 
             // Merge 2 rows for headers EXCEPT Bridge Funding columns
 
             // Merge rows for Columns prior to Bridge Funding
             for (int cellColumn = 1; cellColumn < bridgeFundingColumn; cellColumn++)
             {
-                _excelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
+                ExcelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
             }
 
             // Merge rows for Columns after Bridge Funding
             for (int cellColumn = analysisColumn; cellColumn <= worksheet.Dimension.Columns; cellColumn++)
             {
-                _excelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
+                ExcelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
             }
 
-            _excelHelper.ApplyBorder(worksheet.Cells[headerRow, 1, headerRow + 1, worksheet.Dimension.Columns]);
-            _excelHelper.ApplyStyle(worksheet.Cells[headerRow + 1, bridgeFundingColumn, headerRow + 1, analysisColumn - 1]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, 1, headerRow + 1, worksheet.Dimension.Columns]);
+            ExcelHelper.ApplyStyle(worksheet.Cells[headerRow + 1, bridgeFundingColumn, headerRow + 1, analysisColumn - 1]);
             worksheet.Cells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Bottom;
 
             var currentCell = new CurrentCell { Row = headerRow + 2, Column = worksheet.Dimension.Columns + 1 };

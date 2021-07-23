@@ -46,6 +46,8 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<CommittedProjectCost>();
             services.AddScoped<ICommittedProjectService, CommittedProjectService>();
             services.AddScoped<WorkSummaryModel>();
+
+            services.AddScoped<ProjectsCompletedCount>();
         }
 
         public static void AddSummaryReportGraphTABs(this IServiceCollection services)

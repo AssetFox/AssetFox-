@@ -261,6 +261,24 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to C.
+        /// </summary>
+        internal static string CulvertBridgeType {
+            get {
+                return ResourceManager.GetString("CulvertBridgeType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to C_No Treatment.
+        /// </summary>
+        internal static string CulvertNoTreatment {
+            get {
+                return ResourceManager.GetString("CulvertNoTreatment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Culvert Total.
         /// </summary>
         internal static string CulvertTotal {
@@ -487,11 +505,38 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to B.
+        /// </summary>
+        internal static string NonCulvertBridgeType {
+            get {
+                return ResourceManager.GetString("NonCulvertBridgeType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to B_No Treatment.
+        /// </summary>
+        internal static string NonCulvertNoTreatment {
+            get {
+                return ResourceManager.GetString("NonCulvertNoTreatment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to no treatment.
         /// </summary>
         internal static string NoTreatment {
             get {
                 return ResourceManager.GetString("NoTreatment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No Treatment.
+        /// </summary>
+        internal static string NoTreatmentForWorkSummary {
+            get {
+                return ResourceManager.GetString("NoTreatmentForWorkSummary", resourceCulture);
             }
         }
         

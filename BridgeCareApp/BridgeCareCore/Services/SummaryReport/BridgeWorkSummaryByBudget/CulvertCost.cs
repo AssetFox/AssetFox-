@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
 using OfficeOpenXml;
@@ -11,16 +10,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
     public class CulvertCost
     {
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        private readonly WorkTypeTotal _workTypeTotal;
 
-        public CulvertCost(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, WorkTypeTotal workTypeTotal)
+        public CulvertCost(BridgeWorkSummaryCommon bridgeWorkSummaryCommon)
         {
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
-            _workTypeTotal = workTypeTotal ?? throw new ArgumentNullException(nameof(workTypeTotal));
         }
 
         internal void FillCostOfCulvert(ExcelWorksheet worksheet, CurrentCell currentCell, List<YearsData> costForCulvertBudget,
-            Dictionary<int, double> totalBudgetPerYearForCulvert, List<int> simulationYears)
+            Dictionary<int, double> totalBudgetPerYearForCulvert, List<int> simulationYears, WorkTypeTotal workTypeTotal)
         {
             var startYear = simulationYears[0];
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Culvert Work", "BAMS Culvert Work Type");
@@ -56,7 +53,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 totalAmount += item.Amount;
                 worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
 
-                FillWorkTypeTotals(item);
+                FillWorkTypeTotals(item, workTypeTotal);
             }
 
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.CulvertTotal;
@@ -74,48 +71,48 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             ExcelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
         }
 
-        private void FillWorkTypeTotals(YearsData item)
+        private void FillWorkTypeTotals(YearsData item, WorkTypeTotal workTypeTotal)
         {
             CulvertTreatmentMap.Map.TryGetValue(item.Treatment, out var treatment);
             switch (treatment)
             {
             case CulvertTreatmentName.CulvertRehabOther:
-                if (!_workTypeTotal.CulvertRehabCostPerYear.ContainsKey(item.Year))
+                if (!workTypeTotal.CulvertRehabCostPerYear.ContainsKey(item.Year))
                 {
-                    _workTypeTotal.CulvertRehabCostPerYear.Add(item.Year, 0);
+                    workTypeTotal.CulvertRehabCostPerYear.Add(item.Year, 0);
                 }
-                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
                 {
-                    _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
                 }
-                _workTypeTotal.CulvertRehabCostPerYear[item.Year] += item.Amount;
-                _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                workTypeTotal.CulvertRehabCostPerYear[item.Year] += item.Amount;
+                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 break;
             case CulvertTreatmentName.CulvertReplacementBoxFrameArch:
             case CulvertTreatmentName.CulvertReplacementOther:
             case CulvertTreatmentName.CulvertReplacementPipe:
-                if (!_workTypeTotal.CulvertReplacementCostPerYear.ContainsKey(item.Year))
+                if (!workTypeTotal.CulvertReplacementCostPerYear.ContainsKey(item.Year))
                 {
-                    _workTypeTotal.CulvertReplacementCostPerYear.Add(item.Year, 0);
+                    workTypeTotal.CulvertReplacementCostPerYear.Add(item.Year, 0);
                 }
-                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
                 {
-                    _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
                 }
-                _workTypeTotal.CulvertReplacementCostPerYear[item.Year] += item.Amount;
-                _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                workTypeTotal.CulvertReplacementCostPerYear[item.Year] += item.Amount;
+                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 break;
             default:
-                if (!_workTypeTotal.OtherCostPerYear.ContainsKey(item.Year))
+                if (!workTypeTotal.OtherCostPerYear.ContainsKey(item.Year))
                 {
-                    _workTypeTotal.OtherCostPerYear.Add(item.Year, 0);
+                    workTypeTotal.OtherCostPerYear.Add(item.Year, 0);
                 }
-                if (!_workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
+                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
                 {
-                    _workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
+                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
                 }
-                _workTypeTotal.OtherCostPerYear[item.Year] += item.Amount;
-                _workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
+                workTypeTotal.OtherCostPerYear[item.Year] += item.Amount;
+                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
                 break;
             }
         }

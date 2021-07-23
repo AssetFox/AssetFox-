@@ -240,15 +240,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             // to store "Projects completed"
             if (section.TreatmentCause == TreatmentCause.CashFlowProject && !isInitialYear)
             {
-                var prevYearSection = reportOutputData.Years.FirstOrDefault(f => f.Year == year - 1)
-                    .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
-
-                // previous project pick is a middle year and the current one is Last
-                if (prevYearSection.TreatmentCause == section.TreatmentCause)
-                {
-                    // cash flowed projects are never No Treatment. Therefore, we are not handling No Treatment scenario here
-                    countForCompletedProject[year - 1][section.AppliedTreatment] -= 1;
-                }
+                // if current year status is TreatmentCause.CashFlowProject, then the previous year is either 1st year of cashflow or
+                // somewhere in between, in both cases, we will remove the previous year project as it has not been conmleted.
+                countForCompletedProject[year - 1][section.AppliedTreatment] -= 1;
             }
         }
 

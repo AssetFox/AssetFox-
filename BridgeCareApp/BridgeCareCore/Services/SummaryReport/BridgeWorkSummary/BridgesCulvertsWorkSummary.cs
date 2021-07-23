@@ -84,7 +84,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                         uniqueTreatments.Add(data.Key, currentCell.Row);
                         worksheet.Cells[currentCell.Row, column].Value = data.Key;
                         // setting up the row with zeros
-                        worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, currentCell.Column + 2 + simulationYears.Count].Value = 0;
+                        worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, currentCell.Column + 1 + simulationYears.Count].Value = 0;
 
                         var cellToEnterCount = yearlyItem.Key - startYear;
                         worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCount + 2].Value = data.Value.bridgeCount;

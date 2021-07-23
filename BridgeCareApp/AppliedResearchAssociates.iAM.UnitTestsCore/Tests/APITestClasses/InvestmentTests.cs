@@ -41,8 +41,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            var excelHelper = new ExcelHelper();
-            _service = new InvestmentBudgetsService(_testHelper.UnitOfWork, excelHelper);
+            _service = new InvestmentBudgetsService(_testHelper.UnitOfWork);
             _controller = new InvestmentController(_service, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }

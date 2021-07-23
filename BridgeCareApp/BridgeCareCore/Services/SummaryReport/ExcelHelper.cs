@@ -13,6 +13,7 @@ namespace BridgeCareCore.Services.SummaryReport
         Percentage,
         PercentageDecimal2,
         DecimalPrecision3,
+        Accounting
     }
     public static class ExcelHelper
     {

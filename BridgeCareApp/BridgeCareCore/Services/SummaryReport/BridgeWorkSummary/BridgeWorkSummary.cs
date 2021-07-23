@@ -145,7 +145,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
                     PopulateCompletedProjectCount(yearData.Year, section, countForCompletedProject);
 
-                    RemoveBridgesForCashFlowedProj(countForCompletedProject, reportOutputData, section, isInitialYear, yearData.Year);
+                    RemoveBridgesForCashFlowedProj(countForCompletedProject, section, isInitialYear, yearData.Year);
 
                     // Fill cost per BPN per Year
                     costPerBPNPerYear[yearData.Year][section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]] += cost;
@@ -234,7 +234,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 }
             }
         }
-        private void RemoveBridgesForCashFlowedProj(Dictionary<int, Dictionary<string, int>> countForCompletedProject, SimulationOutput reportOutputData,
+        private void RemoveBridgesForCashFlowedProj(Dictionary<int, Dictionary<string, int>> countForCompletedProject,
             SectionDetail section, bool isInitialYear, int year)
         {
             // to store "Projects completed"

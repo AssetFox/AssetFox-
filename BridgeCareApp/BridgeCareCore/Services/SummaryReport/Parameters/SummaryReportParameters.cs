@@ -42,7 +42,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells["C2:J2"].Value = simulation.AnalysisMethod.Description;
             ExcelHelper.ApplyBorder(worksheet.Cells[2, 1, 2, 10]);
 
-            currentCell = FillData(worksheet, parametersModel, simulation.LastRun, currentCell, simulation.LastModifiedDate);
+            currentCell = FillData(worksheet, parametersModel, simulation.LastRun, currentCell, simulation.LastModifiedDate, simulation.AnalysisMethod.Filter.Expression);
 
             currentCell = FillSimulationDetails(worksheet, simulationYearsCount, simulation, currentCell);
             currentCell = FillAnalysisDetails(worksheet, simulation, currentCell);
@@ -55,7 +55,8 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
 
         #region
 
-        private CurrentCell FillData(ExcelWorksheet worksheet, ParametersModel parametersModel, DateTime lastRun, CurrentCell currentCell, DateTime lastModifiedDate)
+        private CurrentCell FillData(ExcelWorksheet worksheet, ParametersModel parametersModel, DateTime lastRun, CurrentCell currentCell, DateTime lastModifiedDate,
+            string jurisdictionExpression)
         {
             var bpnValueCellTracker = new Dictionary<string, (int row, int col)>();
             var statusValueCellTracker = new Dictionary<string, (int row, int col)>();
@@ -150,23 +151,13 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             worksheet.Cells[rowNo + 7, currentCell.Column].Value = "P3";
             worksheet.Cells[rowNo + 8, currentCell.Column].Value = "Posted";
 
-            statusValueCellTracker.Add("open", (rowNo + 5, currentCell.Column + 1));
-            statusValueCellTracker.Add("closed", (rowNo + 6, currentCell.Column + 1));
-            statusValueCellTracker.Add("posted", (rowNo + 8, currentCell.Column + 1));
+            //[TODO]: setting up value based on a substring is a bad idea. It can slow down the app. Jake and PennDot has decided to this way
+            worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'OPEN'") ? "N" : "Y"; // open
+            worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'CLOSED'") ? "N" : "Y"; // closed
+            worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[P3]='0'") ? "N" : "Y"; // P3
+            worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'POSTED'") ? "N" : "Y"; // P3
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 5, currentCell.Column + 1, rowNo + 8, currentCell.Column + 1]);
 
-            foreach (var item in statusValueCellTracker)
-            {
-                if (parametersModel.Status.Contains(item.Key))
-                {
-                    worksheet.Cells[item.Value.row, item.Value.col].Value = "Y";
-                }
-                else
-                {
-                    worksheet.Cells[item.Value.row, item.Value.col].Value = "N";
-                }
-                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[item.Value.row, item.Value.col]);
-            }
-            worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = parametersModel.P3 > 0 ? "Y" : "N";
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 8, currentCell.Column + 1]);
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 7, currentCell.Column + 1]);
 

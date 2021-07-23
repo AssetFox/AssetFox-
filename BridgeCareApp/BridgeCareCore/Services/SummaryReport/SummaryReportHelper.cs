@@ -159,7 +159,7 @@ namespace BridgeCareCore.Services.SummaryReport
             {
                 { "01", "01 - Rural - Principal Arterial - Interstate" },
                 { "02", "02 - Rural - Principal Arterial - Other" },
-                {"03", "03 - Rural Other Freeway/Expressway" },
+                { "03", "03 - Rural - Other Freeway/Expressway" },
                 { "06", "06 - Rural - Minor Arterial" },
                 { "07", "07 - Rural - Major Collector" },
                 { "08", "08 - Rural - Minor Collector" },

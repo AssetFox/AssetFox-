@@ -4,7 +4,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.SummaryReport;
-using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.SummaryReport.BridgeData;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,7 +27,6 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
             services.AddScoped<IInvestmentBudgetsService, InvestmentBudgetsService>();
 
-            services.AddScoped<WorkTypeTotal>();
             services.AddScoped<UnitOfDataPersistenceWork>();
         }
     }

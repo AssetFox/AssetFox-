@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
@@ -141,6 +142,42 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var cells = worksheet.Cells[row, startColumn, row, currentCell.Column];
             ExcelHelper.ApplyStyle(cells);
             ExcelHelper.ApplyBorder(cells);
+        }
+
+        internal void SetNonCulvertSectionExcelString(ExcelWorksheet worksheet, SortedSet<string> treatments, ref int row, ref int column)
+        {
+            foreach (var item in treatments)
+            {
+                if (!item.Contains("culvert", StringComparison.OrdinalIgnoreCase) && item != Properties.Resources.CulvertNoTreatment)
+                {
+                    if (item == Properties.Resources.NonCulvertNoTreatment)
+                    {
+                        worksheet.Cells[row++, column].Value = Properties.Resources.NoTreatmentForWorkSummary;
+                    }
+                    else
+                    {
+                        worksheet.Cells[row++, column].Value = item;
+                    }
+                }
+            }
+        }
+
+        internal void SetCulvertSectionExcelString(ExcelWorksheet worksheet, SortedSet<string> treatments, ref int row, ref int column)
+        {
+            foreach (var item in treatments)
+            {
+                if (item.Contains("culvert", StringComparison.OrdinalIgnoreCase) || item == Properties.Resources.CulvertNoTreatment)
+                {
+                    if (item == Properties.Resources.CulvertNoTreatment)
+                    {
+                        worksheet.Cells[row++, column].Value = Properties.Resources.NoTreatmentForWorkSummary;
+                    }
+                    else
+                    {
+                        worksheet.Cells[row++, column].Value = item;
+                    }
+                }
+            }
         }
 
         #endregion Private methods

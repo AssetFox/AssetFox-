@@ -195,6 +195,12 @@ Condition By Deck Area</value>
   <data name="Culvert" xml:space="preserve">
     <value>culvert</value>
   </data>
+  <data name="CulvertBridgeType" xml:space="preserve">
+    <value>C</value>
+  </data>
+  <data name="CulvertNoTreatment" xml:space="preserve">
+    <value>C_No Treatment</value>
+  </data>
   <data name="CulvertTotal" xml:space="preserve">
     <value>Culvert Total</value>
   </data>
@@ -292,11 +298,20 @@ Condition By Deck Area TAB</comment>
   <data name="Graph_PostedBPNDA_Tab" xml:space="preserve">
     <value>Posted BPN DA</value>
   </data>
+  <data name="NonCulvertBridgeType" xml:space="preserve">
+    <value>B</value>
+  </data>
+  <data name="NonCulvertNoTreatment" xml:space="preserve">
+    <value>B_No Treatment</value>
+  </data>
   <data name="NoTreatment" xml:space="preserve">
     <value>no treatment</value>
   </data>
   <data name="Overall" xml:space="preserve">
     <value>Overall</value>
+  </data>
+  <data name="NoTreatmentForWorkSummary" xml:space="preserve">
+    <value>No Treatment</value>
   </data>
   <data name="PercentBudgetSpentBAMS" xml:space="preserve">
     <value>Percent Budget Spent BAMS</value>

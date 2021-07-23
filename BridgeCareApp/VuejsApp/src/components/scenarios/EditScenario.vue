@@ -28,7 +28,7 @@
                                         </v-list-tile-action>
                                         <v-list-tile-title>Run Scenario</v-list-tile-title>
                                     </v-list-tile>
-                                    <v-list-tile @click='showFileUploader = true'>
+                                    <v-list-tile @click='showImportExportCommittedProjectsDialog = true'>
                                         <v-list-tile-action>
                                             <v-icon>fas fa-cloud-upload-alt</v-icon>
                                         </v-list-tile-action>
@@ -45,7 +45,7 @@
                                 </v-btn>
                             </div>
                             <div>
-                                <v-btn @click='showFileUploader = true'
+                                <v-btn @click='showImportExportCommittedProjectsDialog = true'
                                        class='ara-blue-bg white--text'>
                                     Committed Projects
                                     <v-icon class='white--text' right>fas fa-cloud-upload-alt</v-icon>
@@ -67,8 +67,8 @@
 
         <Alert :dialogData='alertDataForDeletingCommittedProjects' @submit='onDeleteCommittedProjectsSubmit' />
 
-        <CommittedProjectsFileUploaderDialog :showDialog='showFileUploader'
-                                             @submit='onUploadCommittedProjectFiles'
+        <CommittedProjectsFileUploaderDialog :showDialog='showImportExportCommittedProjectsDialog'
+                                             @submit='onSubmitImportExportCommittedProjectsDialogResult'
                                              @delete='onDeleteCommittedProjects' />
     </v-layout>
 </template>
@@ -79,15 +79,15 @@ import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
-import CommittedProjectsFileUploaderDialog
-    from '@/components/scenarios/scenarios-dialogs/CommittedProjectsFileUploaderDialog.vue';
+import ImportExportCommittedProjectsDialog
+    from '@/components/scenarios/scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
 import { any, clone, isNil, propEq } from 'ramda';
 import { AxiosResponse } from 'axios';
 import CommittedProjectsService from '@/services/committed-projects.service';
 import { Network } from '@/shared/models/iAM/network';
 import FileDownload from 'js-file-download';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
-import { CommittedProjectsDialogResult } from '@/shared/models/modals/committed-projects-dialog-result';
+import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -97,7 +97,7 @@ import { FileInfo } from '@/shared/models/iAM/file-info';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 
 @Component({
-    components: { CommittedProjectsFileUploaderDialog, Alert },
+    components: { CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog, Alert },
 })
 export default class EditScenario extends Vue {
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
@@ -108,7 +108,6 @@ export default class EditScenario extends Vue {
     @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
     @State(state => state.authenticationModule.userId) userId: string;
 
-    @Action('getMongoScenarios') getMongoScenariosAction: any;
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('setSuccessMessage') setSuccessMessageAction: any;
     @Action('selectScenario') selectScenarioAction: any;
@@ -116,7 +115,7 @@ export default class EditScenario extends Vue {
     @Action('runNewSimulation') runNewSimulationAction: any;
 
     selectedScenarioId: string = getBlankGuid();
-    showFileUploader: boolean = false;
+    showImportExportCommittedProjectsDialog: boolean = false;
     networkId: string = getBlankGuid();
     selectedScenario: Scenario = clone(emptyScenario);
     navigationTabs: NavigationTab[] = [
@@ -266,26 +265,28 @@ export default class EditScenario extends Vue {
         this.selectScenarioAction({ scenarioId: getBlankGuid() });
     }
 
-    onUploadCommittedProjectFiles(result: CommittedProjectsDialogResult, isExport: boolean) {
-        this.showFileUploader = false;
+    onSubmitImportExportCommittedProjectsDialogResult(result: ImportExportCommittedProjectsDialogResult) {
+        this.showImportExportCommittedProjectsDialog = false;
 
-        if (isExport) {
-            CommittedProjectsService.exportCommittedProjects(this.selectedScenarioId)
-                .then((response: AxiosResponse) => {
-                    if (hasValue(response, 'data')) {
-                        const fileInfo: FileInfo = response.data as FileInfo;
-                        FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
-                    }
-                });
-        } else if (!isNil(result)) {
-            CommittedProjectsService.importCommittedProjects(result.files, result.applyNoTreatment, this.selectedScenarioId)
-                .then((response: AxiosResponse) => {
-                    if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                        this.setSuccessMessageAction({
-                            message: 'Successfully uploaded committed projects.',
-                        });
-                    }
-                });
+        if (hasValue(result)) {
+            if (result.isExport) {
+                CommittedProjectsService.exportCommittedProjects(this.selectedScenarioId)
+                    .then((response: AxiosResponse) => {
+                        if (hasValue(response, 'data')) {
+                            const fileInfo: FileInfo = response.data as FileInfo;
+                            FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                        }
+                    });
+            } else if (hasValue(result.file)) {
+                CommittedProjectsService.importCommittedProjects(result.file, result.applyNoTreatment, this.selectedScenarioId)
+                    .then((response: AxiosResponse) => {
+                        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                            this.setSuccessMessageAction({
+                                message: 'Successfully uploaded committed projects.',
+                            });
+                        }
+                    });
+            }
         }
     }
 
@@ -340,7 +341,7 @@ export default class EditScenario extends Vue {
         this.alertData = clone(emptyAlertData);
 
         if (runScenarioSimulation) {
-            this.runSimulationAction({ networkId: this.networkId, scenarioId: this.selectedScenarioId, });
+            this.runSimulationAction({ networkId: this.networkId, scenarioId: this.selectedScenarioId });
         }
     }
 }

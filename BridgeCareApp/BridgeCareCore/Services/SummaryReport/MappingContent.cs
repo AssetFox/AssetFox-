@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Services.SummaryReport
 {
@@ -96,6 +97,32 @@ namespace BridgeCareCore.Services.SummaryReport
             case "Other":
                 return "09 - Other";
             default: return name;
+            }
+        }
+
+        public static (string previousPick, string currentPick) GetCashFlowProjectPick(TreatmentCause treatmentCause, SectionDetail prevYearSection)
+        {
+            if(prevYearSection.TreatmentCause == treatmentCause)
+            {
+                return ("BAMS Pick CF", "BAMS Pick CFE"); // middle and last year
+            }
+            else
+            {
+                return ("BAMS Pick CFB", "BAMS Pick CFE"); // first and last years
+            }
+        }
+        public static string GetNonCashFlowProjectPick(TreatmentCause treatmentCause)
+        {
+            switch (treatmentCause)
+            {
+            case TreatmentCause.NoSelection:
+            case TreatmentCause.ScheduledTreatment:
+            case TreatmentCause.SelectedTreatment:
+                return "BAMS Pick";
+            case TreatmentCause.CommittedProject:
+                return "MPMS Pick";
+            default:
+                return treatmentCause.ToString();
             }
         }
     }

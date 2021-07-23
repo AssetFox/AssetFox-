@@ -13,6 +13,7 @@ namespace BridgeCareCore.Services.SummaryReport
         Percentage,
         PercentageDecimal2,
         DecimalPrecision3,
+        Accounting
     }
     public static class ExcelHelper
     {
@@ -107,6 +108,9 @@ namespace BridgeCareCore.Services.SummaryReport
                 break;
             case ExcelHelperCellFormat.DecimalPrecision3:
                 cells.Style.Numberformat.Format = "#0.000";
+                break;
+            case ExcelHelperCellFormat.Accounting:
+                cells.Style.Numberformat.Format = "_-$* #,##0.00_-;-$* #,##0.00_-;_-$* \"-\"??_-;_-@_-";
                 break;
             }
         }

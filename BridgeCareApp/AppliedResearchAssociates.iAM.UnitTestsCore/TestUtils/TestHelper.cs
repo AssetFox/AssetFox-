@@ -8,10 +8,12 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
+using BridgeCareCore.Services.SummaryReport;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;

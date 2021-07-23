@@ -18,7 +18,7 @@ using OfficeOpenXml;
 namespace BridgeCareCore.Controllers
 {
     using CommittedProjectGetMethod = Func<Guid, FileInfoDTO>;
-    using CommittedProjectCreateMethod = Action<Guid, List<ExcelPackage>, bool>;
+    using CommittedProjectCreateMethod = Action<Guid, ExcelPackage, bool>;
     using CommittedProjectDeleteMethod = Action<Guid>;
 
     [Route("api/[controller]")]
@@ -66,15 +66,15 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, CommittedProjectCreateMethod> CreateImportMethods()
         {
-            void CreateAny(Guid simulationId, List<ExcelPackage> excelPackages, bool applyNoTreatment)
+            void CreateAny(Guid simulationId, ExcelPackage excelPackage, bool applyNoTreatment)
             {
-                _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackages, applyNoTreatment);
+                _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, applyNoTreatment);
             }
 
-            void CreatePermitted(Guid simulationId, List<ExcelPackage> excelPackages, bool applyNoTreatment)
+            void CreatePermitted(Guid simulationId, ExcelPackage excelPackage, bool applyNoTreatment)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackages, applyNoTreatment);
+                _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, applyNoTreatment);
             }
 
             return new Dictionary<string, CommittedProjectCreateMethod>
@@ -122,7 +122,7 @@ namespace BridgeCareCore.Controllers
 
                 if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
                 {
-                    throw new ConstraintException("Committed project files were not found.");
+                    throw new ConstraintException("Committed project file not found.");
                 }
 
                 if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("simulationId", out var id))
@@ -132,15 +132,18 @@ namespace BridgeCareCore.Controllers
 
                 var simulationId = Guid.Parse(id.ToString());
 
-                var excelPackages = ContextAccessor.HttpContext.Request.Form.Files.Select(file => new ExcelPackage(file.OpenReadStream())).ToList();
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
 
-                ContextAccessor.HttpContext.Request.Form.TryGetValue("applyNoTreatment", out var applyNoTreatmentValue);
-                var applyNoTreatment = applyNoTreatmentValue.ToString() == "1";
+                var applyNoTreatment = false;
+                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("applyNoTreatment"))
+                {
+                    applyNoTreatment = ContextAccessor.HttpContext.Request.Form["applyNoTreatment"].ToString() == "1";
+                }
 
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _committedProjectImportMethods[UserInfo.Role](simulationId, excelPackages, applyNoTreatment);
+                    _committedProjectImportMethods[UserInfo.Role](simulationId, excelPackage, applyNoTreatment);
                     UnitOfWork.Commit();
                 });
 

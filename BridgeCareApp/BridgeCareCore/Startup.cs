@@ -52,7 +52,7 @@ namespace BridgeCareCore
 
             services.AddSignalR();
             services.AddScoped<IHubService, HubService>();
-            
+
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
              services.AddDbContext<IAMContext>(options => options.UseSqlServer(

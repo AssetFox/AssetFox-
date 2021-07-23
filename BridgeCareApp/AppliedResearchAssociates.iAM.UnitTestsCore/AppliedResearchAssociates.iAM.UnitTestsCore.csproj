@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.12" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.12" />
     <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="Moq.Contrib.HttpClient" Version="1.3.0" />
@@ -55,10 +56,16 @@
     <None Update="TestData\Files\TestInvestmentBudgets.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TestUtils\Files\TestInvestmentBudgets.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestUtils\Files\TestCommittedProjects.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="TestData\Files" />
+    <Folder Include="TestUtils\Files" />
   </ItemGroup>
 
 </Project>

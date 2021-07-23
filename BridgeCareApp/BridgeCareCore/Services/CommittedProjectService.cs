@@ -196,12 +196,6 @@ namespace BridgeCareCore.Services
         }
 
         /**
-         * Gets the value of an excel worksheet cell
-         */
-        /*private string GetCellValue(ExcelWorksheet worksheet, int row, int column) =>
-            worksheet.Cells[row, column].GetValue<string>().Trim();*/
-
-        /**
          * Creates CommittedProjectEntity data for Committed Project Import
          */
         private List<CommittedProjectEntity> CreateCommittedProjectEntitiesForImport(Guid simulationId,

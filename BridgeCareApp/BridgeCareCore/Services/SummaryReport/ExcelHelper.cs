@@ -91,6 +91,9 @@ namespace BridgeCareCore.Services.SummaryReport
             case ExcelHelperCellFormat.DecimalPrecision3:
                 cells.Style.Numberformat.Format = "#0.000";
                 break;
+            case ExcelHelperCellFormat.Accounting:
+                cells.Style.Numberformat.Format = "_-$* #,##0.00_-;-$* #,##0.00_-;_-$* \"-\"??_-;_-@_-";
+                break;
             }
         }
 

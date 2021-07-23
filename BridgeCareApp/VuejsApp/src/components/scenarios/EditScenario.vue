@@ -108,7 +108,6 @@ export default class EditScenario extends Vue {
     @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
     @State(state => state.authenticationModule.userId) userId: string;
 
-    @Action('getMongoScenarios') getMongoScenariosAction: any;
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('setSuccessMessage') setSuccessMessageAction: any;
     @Action('selectScenario') selectScenarioAction: any;

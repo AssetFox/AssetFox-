@@ -11,7 +11,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services;
+using BridgeCareCore.Services.SummaryReport;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -39,7 +41,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            _service = new InvestmentBudgetsService(_testHelper.UnitOfWork);
+            var excelHelper = new ExcelHelper();
+            _service = new InvestmentBudgetsService(_testHelper.UnitOfWork, excelHelper);
             _controller = new InvestmentController(_service, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
@@ -102,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.AddAuthorizationHeader(httpContext);
             httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
 
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData\\Files",
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
                 "TestInvestmentBudgets.xlsx");
             using var stream = File.OpenRead(filePath);
             var memStream = new MemoryStream();

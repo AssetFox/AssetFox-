@@ -9,6 +9,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Interfaces.SummaryReport;
+using BridgeCareCore.Services.SummaryReport;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 
@@ -17,9 +19,13 @@ namespace BridgeCareCore.Services
     public class InvestmentBudgetsService : IInvestmentBudgetsService
     {
         private static UnitOfDataPersistenceWork _unitOfWork;
+        private static IExcelHelper _excelHelper;
 
-        public InvestmentBudgetsService(UnitOfDataPersistenceWork unitOfWork) =>
+        public InvestmentBudgetsService(UnitOfDataPersistenceWork unitOfWork, IExcelHelper excelHelper)
+        {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
+        }
 
         private void AddHeaderCells(ExcelWorksheet worksheet, List<string> budgetNames)
         {
@@ -49,10 +55,13 @@ namespace BridgeCareCore.Services
                 budgetAmounts.ForEach(amount =>
                 {
                     worksheet.Cells[startRow, budgetCol].Value = amount;
-                    worksheet.Cells[startRow, budgetCol].Style.Numberformat.Format = "_-$* #,##0.00_-;-$* #,##0.00_-;_-$* \"-\"??_-;_-@_-";
                     budgetCol++;
                 });
             });
+
+            _excelHelper.SetCustomFormat(
+                worksheet.Cells[2, 2, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column],
+                ExcelHelperCellFormat.Accounting);
         }
 
         private FileInfoDTO CreateInvestmentBudgetsSampleFile()

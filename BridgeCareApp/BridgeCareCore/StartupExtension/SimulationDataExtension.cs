@@ -25,6 +25,8 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<IUserCriteriaRepository, UserCriteriaRepository>();
             services.AddScoped<IAssetData, PennDOTAssetDataRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
+            services.AddScoped<IInvestmentBudgetsService, InvestmentBudgetsService>();
+
             services.AddScoped<UnitOfDataPersistenceWork>();
         }
     }

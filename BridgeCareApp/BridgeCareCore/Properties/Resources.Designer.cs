@@ -478,11 +478,29 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Poor Count.
+        /// </summary>
+        internal static string Graph_PoorCountGraph_Tab {
+            get {
+                return ResourceManager.GetString("Graph_PoorCountGraph_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Poor DA By BPN.
         /// </summary>
         internal static string Graph_PoorDAByBPN_Tab {
             get {
                 return ResourceManager.GetString("Graph_PoorDAByBPN_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Poor DA.
+        /// </summary>
+        internal static string Graph_PoorDeckAreaGraph_Tab {
+            get {
+                return ResourceManager.GetString("Graph_PoorDeckAreaGraph_Tab", resourceCulture);
             }
         }
         
@@ -528,6 +546,15 @@ namespace BridgeCareCore.Properties {
         internal static string NoTreatment {
             get {
                 return ResourceManager.GetString("NoTreatment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overall.
+        /// </summary>
+        internal static string Overall {
+            get {
+                return ResourceManager.GetString("Overall", resourceCulture);
             }
         }
         

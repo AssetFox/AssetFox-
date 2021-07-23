@@ -65,6 +65,9 @@ namespace BridgeCareCore.StartupExtension
 
             services.AddScoped<BPNAreaChart>();
             services.AddScoped<BPNCountChart>();
+
+            services.AddScoped<IAddPoorCountGraphTab, AddPoorCountGraphTab>();
+            services.AddScoped<IAddPoorDeckAreaGraphTab, AddPoorDeckAreaGraphTab>();
         }
     }
 }

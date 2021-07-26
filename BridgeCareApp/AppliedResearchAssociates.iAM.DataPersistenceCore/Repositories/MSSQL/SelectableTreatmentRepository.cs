@@ -39,6 +39,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 TreatmentLibraryId = treatmentLibraryEntity.Id,
                 SimulationId = simulationId
             });
+
+            // Update last modified date
+            var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
         public void CreateSelectableTreatments(List<SelectableTreatment> selectableTreatments, Guid simulationId)
@@ -120,6 +124,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.TreatmentSupersessionRepo.CreateTreatmentSupersessions(
                     supersessionsPerTreatmentId, simulationEntity.Name);
             }
+
+            // Update last modified date
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
         private void JoinTreatmentsWithBudgets(Dictionary<Guid, List<Guid>> budgetIdsPerTreatmentId)
@@ -267,6 +274,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddEntity(
                     new TreatmentLibrarySimulationEntity { TreatmentLibraryId = dto.Id, SimulationId = simulationId },
                     _unitOfWork.UserEntity?.Id);
+
+                // Update last modified date
+                var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
+                _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
             }
         }
 

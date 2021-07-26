@@ -68,7 +68,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column, currentCell.Row + 3, currentCell.Column + 1]);
 
             worksheet.Cells[currentCell.Row + 2, currentCell.Column + 3].Value = "Simulation Last Run:";
-            worksheet.Cells[currentCell.Row + 2, currentCell.Column + 4].Value = "10/25/2019";
+            worksheet.Cells[currentCell.Row + 2, currentCell.Column + 4].Value = lastRun.ToShortDateString();
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column + 3, currentCell.Row + 2, currentCell.Column + 4]);
 
             currentCell.Row += 5; // moving on to the "NHS" block

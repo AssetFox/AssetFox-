@@ -55,11 +55,6 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
 
         public static bool IsTurnpikeButNotCommitted(SectionDetail section)
         {
-
-            if (section.AppliedTreatment != "No Treatment")
-            {
-                int x = 666;
-            }
             bool committed = IsCommittedProject(section);
             bool turnpike = IsTurnpike(section);
             return turnpike && !committed;

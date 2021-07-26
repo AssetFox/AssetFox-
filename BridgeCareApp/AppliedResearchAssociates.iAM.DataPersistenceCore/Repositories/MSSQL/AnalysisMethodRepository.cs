@@ -222,6 +222,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.Upsert(analysisMethodEntity, _ => _.Id == dto.Id, _unitOfWork.UserEntity?.Id);
 
+            // Update last modified date
+            var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+
             _unitOfWork.BenefitRepo.UpsertBenefit(dto.Benefit, dto.Id);
 
             _unitOfWork.Context.DeleteEntity<CriterionLibraryAnalysisMethodEntity>(_ => _.AnalysisMethodId == dto.Id);

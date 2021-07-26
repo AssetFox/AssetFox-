@@ -200,5 +200,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.DeleteEntity<BudgetLibraryEntity>(_ => _.Id == libraryId);
         }
+
+        public List<BudgetEntity> GetBudgetsWithBudgetAmounts(Guid libraryId)
+        {
+            if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException($"Could not find budget library.");
+            }
+
+            return _unitOfWork.Context.Budget
+                .Include(_ => _.BudgetAmounts)
+                .Where(_ => _.BudgetLibrary.Id == libraryId)
+                .ToList();
+        }
+
+        public BudgetLibraryDTO GetBudgetLibraryWithBudgetsAndBudgetAmounts(Guid libraryId)
+        {
+            if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException($"Could not find budget library.");
+            }
+
+            return _unitOfWork.Context.BudgetLibrary
+                .Include(_ => _.Budgets)
+                .ThenInclude(_ => _.BudgetAmounts)
+                .AsNoTracking()
+                .Single(_ => _.Id == libraryId)
+                .ToDto();
+        }
     }
 }

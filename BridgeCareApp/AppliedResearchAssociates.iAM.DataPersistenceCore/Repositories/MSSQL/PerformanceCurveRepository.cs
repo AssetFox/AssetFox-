@@ -35,6 +35,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 PerformanceCurveLibraryId = performanceCurveLibraryEntity.Id,
                 SimulationId = simulationId
             });
+
+            // Update last modified date
+            var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
         public void CreatePerformanceCurves(List<PerformanceCurve> performanceCurves, Guid simulationId)
@@ -94,6 +98,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(curveIdsPerExpression,
                     DataPersistenceConstants.CriterionLibraryJoinEntities.PerformanceCurve, simulationEntity.Name);
             }
+
+            // Update last modified date
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
         public void SimulationPerformanceCurves(Simulation simulation)
@@ -166,6 +173,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     PerformanceCurveLibraryId = performanceCurveLibraryEntity.Id,
                     SimulationId = simulationId
                 }, _unitOfWork.UserEntity?.Id);
+
+                // Update last modified date
+                var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
+                _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
             }
         }
 

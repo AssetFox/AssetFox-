@@ -10,6 +10,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         public static Dictionary<string, WorkTypeName> Map =
             new Dictionary<string, WorkTypeName>
             {
+                // Non-culverts
                 { "County Maintenance - Deck Work", WorkTypeName.Preservation },
                 { "County Maintenance - Superstructure Work", WorkTypeName.Preservation },
                 { "County Maintenance - Substructure Work", WorkTypeName.Preservation },
@@ -22,6 +23,21 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 { "Substructure Rehab", WorkTypeName.Rehab },
                 { "Superstructure Rep/Rehab", WorkTypeName.Rehab },
                 { "Bridge Replacement", WorkTypeName.Replacement},
+                // end of non-culverts
+
+                // culverts
+                {"Culvert Rehab (Other)", WorkTypeName.Rehab },
+                {"Culvert Replacement (Box/Frame/Arch)", WorkTypeName.Replacement },
+                { "Culvert Replacement (Other)", WorkTypeName.Replacement},
+                { "Culvert Replacement (Pipe)", WorkTypeName.Replacement },
+
+                // MPMS
+                {"Preservation", WorkTypeName.Preservation },
+                { "Emergency Repair", WorkTypeName.EmergencyRepair },
+                {"Rehabilitation", WorkTypeName.Rehab },
+                {"Repair", WorkTypeName.Rehab },
+                { "Removal", WorkTypeName.Replacement},
+                { "Replacement", WorkTypeName.Replacement }
             };
     }
 }

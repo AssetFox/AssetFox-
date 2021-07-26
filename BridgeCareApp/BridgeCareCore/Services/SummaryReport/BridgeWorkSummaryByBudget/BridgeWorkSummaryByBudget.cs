@@ -19,16 +19,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
         private readonly CulvertCost _culvertCost;
         private readonly BridgeWorkCost _bridgeWorkCost;
         private readonly CommittedProjectCost _committedProjectCost;
-        private readonly WorkTypeTotal _workTypeTotal;
 
         public BridgeWorkSummaryByBudget(BridgeWorkSummaryCommon bridgeWorkSummaryCommon,
-            CulvertCost culvertCost, BridgeWorkCost bridgeWorkCost, CommittedProjectCost committedProjectCost, WorkTypeTotal workTypeTotal)
+            CulvertCost culvertCost, BridgeWorkCost bridgeWorkCost, CommittedProjectCost committedProjectCost)
         {
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
             _culvertCost = culvertCost ?? throw new ArgumentNullException(nameof(culvertCost));
             _bridgeWorkCost = bridgeWorkCost ?? throw new ArgumentNullException(nameof(bridgeWorkCost));
             _committedProjectCost = committedProjectCost ?? throw new ArgumentNullException(nameof(committedProjectCost));
-            _workTypeTotal = workTypeTotal ?? throw new ArgumentNullException(nameof(workTypeTotal));
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
@@ -111,6 +109,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 var costForBridgeBudgets = new List<YearsData>();
                 var costForCommittedBudgets = new List<YearsData>();
 
+                var workTypeTotal = new WorkTypeTotal();
+
                 costForCulvertBudget = summaryData.YearlyData
                                             .FindAll(_ => _.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && !_.isCommitted);
 
@@ -162,11 +162,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 if (amount > 0)
                 {
                     _committedProjectCost.FillCostOfCommittedWork(worksheet, currentCell, simulationYears, costForCommittedBudgets,
-                        committedTreatments, totalBudgetPerYearForMPMS);
+                        committedTreatments, totalBudgetPerYearForMPMS, workTypeTotal);
 
-                    _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget, totalBudgetPerYearForCulvert, simulationYears);
+                    _culvertCost.FillCostOfCulvert(worksheet, currentCell, costForCulvertBudget, totalBudgetPerYearForCulvert, simulationYears, workTypeTotal);
 
-                    _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, totalBudgetPerYearForBridgeWork);
+                    _bridgeWorkCost.FillCostOfBridgeWork(worksheet, currentCell, simulationYears, costForBridgeBudgets, totalBudgetPerYearForBridgeWork, workTypeTotal);
                 }
 
                 currentCell.Row += 1;
@@ -206,7 +206,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     currentCell.Row++;
                 }
 
-                InsertWorkTypeTotals(startYear, firstContentRow, worksheet);                
+                InsertWorkTypeTotals(startYear, firstContentRow, worksheet, workTypeTotal);
                 insertTotalAndPercentagePerCategory(worksheet, currentCell, numberOfYears, firstContentRow);
 
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 3], ExcelHelperCellFormat.NegativeCurrency);
@@ -389,15 +389,14 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             }
         }
 
-        private void InsertWorkTypeTotals(int startYear, int firstContentRow, ExcelWorksheet worksheet)
+        private void InsertWorkTypeTotals(int startYear, int firstContentRow, ExcelWorksheet worksheet, WorkTypeTotal workTypeTotal)
         {
             // Add data for BAMS work type totals "Preservation"
-            foreach (var item in _workTypeTotal.MPMSpreservationCostPerYear)
+            foreach (var item in workTypeTotal.MPMSpreservationCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
-            }            
-
-            foreach (var item in _workTypeTotal.BAMSPreservationCostPerYear)
+            }
+            foreach (var item in workTypeTotal.BAMSPreservationCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
@@ -405,7 +404,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
             // Add data for Work type totals "Emergency repair"
             firstContentRow++;
-            foreach (var item in _workTypeTotal.MPMSEmergencyRepairCostPerYear)
+            foreach (var item in workTypeTotal.MPMSEmergencyRepairCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
@@ -413,15 +412,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
             firstContentRow++;
             // Add data for Work Type Totals "Rehab"
-            foreach (var item in _workTypeTotal.BAMSRehabCostPerYear)
+            foreach (var item in workTypeTotal.BAMSRehabCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-            foreach (var item in _workTypeTotal.CulvertRehabCostPerYear)
+            foreach (var item in workTypeTotal.CulvertRehabCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-            foreach (var item in _workTypeTotal.MPMSRehabRepairCostPerYear)
+            foreach (var item in workTypeTotal.MPMSRehabRepairCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
@@ -430,22 +429,22 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             firstContentRow++;
 
             // Add data for BAMS Work Type Totals "Replacement"
-            foreach (var item in _workTypeTotal.MPMSReplacementCostPerYear)
+            foreach (var item in workTypeTotal.MPMSReplacementCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-            foreach (var item in _workTypeTotal.CulvertReplacementCostPerYear)
+            foreach (var item in workTypeTotal.CulvertReplacementCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-            foreach (var item in _workTypeTotal.BAMSReplacementCostPerYear)
+            foreach (var item in workTypeTotal.BAMSReplacementCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
             // End BAMS work type totals "Replacement"
 
             firstContentRow++; // this row is for "Other" category
-            foreach (var item in _workTypeTotal.OtherCostPerYear)
+            foreach (var item in workTypeTotal.OtherCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
@@ -453,7 +452,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             firstContentRow++;
             // Add data for BAMS Work Type Totals "Total Spent"
             worksheet.Cells[firstContentRow, 1].Value = Properties.Resources.TotalSpent;
-            foreach (var item in _workTypeTotal.TotalCostPerYear)
+            foreach (var item in workTypeTotal.TotalCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }

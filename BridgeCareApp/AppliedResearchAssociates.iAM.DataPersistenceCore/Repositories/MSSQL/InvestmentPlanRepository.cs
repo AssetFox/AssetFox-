@@ -52,6 +52,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 CreateInvestmentPlanCashFlowRules(simulationEntity, investmentPlan.CashFlowRules.ToList());
             }
+
+            // Update last modified date
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
         private void CreateInvestmentPlanBudgets(SimulationEntity simulationEntity, List<Budget> budgets)
@@ -134,6 +137,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var investmentPlanEntity = dto.ToEntity(simulationId);
 
                 _unitOfWork.Context.Upsert(investmentPlanEntity, dto.Id, _unitOfWork.UserEntity?.Id);
+
+                // Update last modified date
+                var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
+                _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
             }
         }
     }

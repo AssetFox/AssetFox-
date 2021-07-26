@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 
@@ -20,5 +21,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId);
 
         void DeleteBudgetLibrary(Guid libraryId);
+
+        List<BudgetEntity> GetBudgetsWithBudgetAmounts(Guid libraryId);
+
+        BudgetLibraryDTO GetBudgetLibraryWithBudgetsAndBudgetAmounts(Guid libraryId);
     }
 }

@@ -79,7 +79,7 @@
     <Content Include="src\components\remaining-life-limit-editor\RemainingLifeLimitEditor.vue" />
     <Content Include="src\components\scenarios\EditAnalysisMethod.vue" />
     <Content Include="src\components\scenarios\EditScenario.vue" />
-    <Content Include="src\components\scenarios\scenarios-dialogs\CommittedProjectsFileUploaderDialog.vue" />
+    <Content Include="src\components\scenarios\scenarios-dialogs\ImportExportCommittedProjectsDialog.vue" />
     <Content Include="src\components\scenarios\scenarios-dialogs\CreateScenarioDialog.vue" />
     <Content Include="src\components\scenarios\scenarios-dialogs\ReportsDownloaderDialog.vue" />
     <Content Include="src\components\scenarios\Scenarios.vue" />

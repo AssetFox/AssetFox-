@@ -1535,6 +1535,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Content).IsRequired();
             });
+
+            modelBuilder.Entity<SimulationLogEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.HasOne(d => d.Simulation)
+                .WithMany(p => p.SimulationLogs)
+                .HasForeignKey(d => d.SimulationId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

@@ -26,6 +26,7 @@
     import Vue from 'vue';
     import Component from 'vue-class-component';
     import {State} from 'vuex-class';
+    import { hasValue } from '@/shared/utils/has-value-util';
 
     @Component
     export default class Logout extends Vue {
@@ -39,10 +40,10 @@
                  */
                 if (!window.location.hash) {
                     window.location.hash = 'refreshed';
-                    window.location.reload(true);
+                    window.location.reload();
                 }
 
-                if (this.$route.query.host === undefined) {
+                if (!hasValue(this.$route.query.host)) {
                     return;
                 }
                 /*

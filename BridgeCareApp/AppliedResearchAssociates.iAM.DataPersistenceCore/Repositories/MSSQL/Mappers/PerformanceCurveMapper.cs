@@ -19,11 +19,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Shift = domain.Shift
             };
 
-        public static PerformanceCurveEntity ToEntity(this PerformanceCurveDTO dto, Guid performanceCurveLibraryId, Guid attributeId) =>
+        public static PerformanceCurveEntity ToLibraryEntity(this PerformanceCurveDTO dto, Guid performanceCurveLibraryId, Guid attributeId) =>
             new PerformanceCurveEntity
             {
                 Id = dto.Id,
                 PerformanceCurveLibraryId = performanceCurveLibraryId,
+                AttributeId = attributeId,
+                Name = dto.Name,
+                Shift = dto.Shift
+            };
+
+        public static ScenarioPerformanceCurveEntity ToScenarioEntity(this PerformanceCurveDTO dto, Guid simulationId, Guid attributeId) =>
+            new ScenarioPerformanceCurveEntity
+            {
+                Id = dto.Id,
+                SimulationId = simulationId,
                 AttributeId = attributeId,
                 Name = dto.Name,
                 Shift = dto.Shift
@@ -53,10 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Description = entity.Description,
                 PerformanceCurves = entity.PerformanceCurves.Any()
                     ? entity.PerformanceCurves.Select(_ => _.ToDto()).ToList()
-                    : new List<PerformanceCurveDTO>(),
-                AppliedScenarioIds = entity.PerformanceCurveLibrarySimulationJoins.Any()
-                    ? entity.PerformanceCurveLibrarySimulationJoins.Select(_ => _.SimulationId).ToList()
-                    : new List<Guid>()
+                    : new List<PerformanceCurveDTO>()
             };
 
         public static PerformanceCurveDTO ToDto(this PerformanceCurveEntity entity) =>
@@ -70,6 +77,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new CriterionLibraryDTO(),
                 Equation = entity.PerformanceCurveEquationJoin != null
                     ? entity.PerformanceCurveEquationJoin.Equation.ToDto()
+                    : new EquationDTO()
+            };
+
+        public static PerformanceCurveDTO ToDto(this ScenarioPerformanceCurveEntity entity) =>
+            new PerformanceCurveDTO
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                Attribute = entity.Attribute.Name,
+                CriterionLibrary = entity.CriterionLibraryScenarioPerformanceCurveJoin != null
+                    ? entity.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary.ToDto()
+                    : new CriterionLibraryDTO(),
+                Equation = entity.ScenarioPerformanceCurveEquationJoin != null
+                    ? entity.ScenarioPerformanceCurveEquationJoin.Equation.ToDto()
                     : new EquationDTO()
             };
     }

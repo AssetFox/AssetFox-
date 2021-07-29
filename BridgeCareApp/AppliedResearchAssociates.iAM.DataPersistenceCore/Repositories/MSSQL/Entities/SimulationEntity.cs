@@ -56,5 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
 
         public virtual ICollection<SimulationUserEntity> SimulationUserJoins { get; set; }
+
+        public virtual ICollection<ScenarioPerformanceCurveEntity> PerformanceCurves { get; set; }
     }
 }

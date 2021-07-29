@@ -13,12 +13,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void SimulationPerformanceCurves(Simulation simulation);
 
-        List<PerformanceCurveLibraryDTO> PerformanceCurveLibrariesWithPerformanceCurves();
+        List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibrariesWithPerformanceCurves();
 
         void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto, Guid simulationId);
 
         void UpsertOrDeletePerformanceCurves(List<PerformanceCurveDTO> performanceCurves, Guid libraryId);
 
         void DeletePerformanceCurveLibrary(Guid libraryId);
+
+        List<PerformanceCurveDTO> GetScenarioPerformanceCurves(Guid simulationId);
+
+        void UpsertOrDeleteScenarioPerformanceCurves(List<PerformanceCurveDTO> scenarioPerformanceCurves, Guid simulationId);
     }
 }

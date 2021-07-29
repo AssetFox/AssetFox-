@@ -75,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Act
-                var result = await _controller.PerformanceCurveLibraries();
+                var result = await _controller.GetPerformanceCurveLibraries();
 
                 // Assert
                 Assert.IsType<OkObjectResult>(result);
@@ -133,7 +133,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 SetupForGet();
 
                 // Act
-                var result = await _controller.PerformanceCurveLibraries();
+                var result = await _controller.GetPerformanceCurveLibraries();
 
                 // Assert
                 var okObjResult = result as OkObjectResult;
@@ -162,7 +162,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var getResult = await _controller.PerformanceCurveLibraries();
+                var getResult = await _controller.GetPerformanceCurveLibraries();
                 var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<PerformanceCurveLibraryDTO>));
 
@@ -181,7 +181,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 timer.Elapsed += delegate
                 {
                     var modifiedDto = _testHelper.UnitOfWork.PerformanceCurveRepo
-                        .PerformanceCurveLibrariesWithPerformanceCurves()[0];
+                        .GetPerformanceCurveLibrariesWithPerformanceCurves()[0];
                     Assert.Equal(dto.Description, modifiedDto.Description);
                     Assert.Single(modifiedDto.AppliedScenarioIds);
                     Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
@@ -209,7 +209,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 // Arrange
                 SetupForUpsertOrDelete();
-                var getResult = await _controller.PerformanceCurveLibraries();
+                var getResult = await _controller.GetPerformanceCurveLibraries();
                 var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<PerformanceCurveLibraryDTO>));
 

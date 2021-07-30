@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibrariesWithPerformanceCurves();
 
-        void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto, Guid simulationId);
+        void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto);
 
         void UpsertOrDeletePerformanceCurves(List<PerformanceCurveDTO> performanceCurves, Guid libraryId);
 

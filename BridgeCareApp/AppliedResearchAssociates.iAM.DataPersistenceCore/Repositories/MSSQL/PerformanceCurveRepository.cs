@@ -155,32 +155,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto, Guid simulationId)
+        public void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto)
         {
             var performanceCurveLibraryEntity = dto.ToEntity();
 
             _unitOfWork.Context.Upsert(performanceCurveLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
-
-            if (simulationId != Guid.Empty)
-            {
-                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-                {
-                    throw new RowNotInTableException($"No simulation found having id {simulationId}.");
-                }
-
-                _unitOfWork.Context.DeleteEntity<PerformanceCurveLibrarySimulationEntity>(_ =>
-                    _.SimulationId == simulationId);
-
-                _unitOfWork.Context.AddEntity(
-                    new PerformanceCurveLibrarySimulationEntity
-                    {
-                        PerformanceCurveLibraryId = performanceCurveLibraryEntity.Id, SimulationId = simulationId
-                    }, _unitOfWork.UserEntity?.Id);
-
-                // Update last modified date
-                var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
-                _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
-            }
         }
 
         public void UpsertOrDeletePerformanceCurves(List<PerformanceCurveDTO> performanceCurves, Guid libraryId)
@@ -288,6 +267,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Attribute)
                 .Select(_ => _.ToDto())
                 .AsNoTracking()
                 .ToList();
@@ -374,6 +354,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.Context.AddAll(curveCriterionJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }
+
+            // Update last modified date
+            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+            _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
         }
     }
 }

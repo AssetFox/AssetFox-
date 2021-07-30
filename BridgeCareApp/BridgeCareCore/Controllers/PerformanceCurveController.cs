@@ -15,45 +15,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using PerformanceCurveUpsertMethod = Action<Guid, PerformanceCurveLibraryDTO>;
     using ScenarioPerformanceCurveUpsertMethod = Action<Guid, List<PerformanceCurveDTO>>;
 
     [Route("api/[controller]")]
     [ApiController]
     public class PerformanceCurveController : BridgeCareCoreBaseController
     {
-        private readonly IReadOnlyDictionary<string, PerformanceCurveUpsertMethod> _performanceCurveUpsertMethods;
         private readonly IReadOnlyDictionary<string, ScenarioPerformanceCurveUpsertMethod> _scenarioPerformanceCurveUpsertMethods;
 
         public PerformanceCurveController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
-        {
-            _performanceCurveUpsertMethods = CreatePerformanceCurveUpsertMethods();
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _scenarioPerformanceCurveUpsertMethods = CreateScenarioPerformanceCurveUpsertMethods();
-        }
-
-
-        private Dictionary<string, PerformanceCurveUpsertMethod> CreatePerformanceCurveUpsertMethods()
-        {
-            void UpsertAny(Guid simulationId, PerformanceCurveLibraryDTO dto)
-            {
-                UnitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto, simulationId);
-                UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
-            }
-
-            void UpsertPermitted(Guid simulationId, PerformanceCurveLibraryDTO dto)
-            {
-                CheckUserSimulationModifyAuthorization(simulationId);
-                UpsertAny(simulationId, dto);
-            }
-
-            return new Dictionary<string, PerformanceCurveUpsertMethod>
-            {
-                [Role.Administrator] = UpsertAny,
-                [Role.DistrictEngineer] = UpsertPermitted
-            };
-        }
 
         private Dictionary<string, ScenarioPerformanceCurveUpsertMethod> CreateScenarioPerformanceCurveUpsertMethods()
         {
@@ -112,16 +85,17 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertPerformanceCurveLibrary/{simulationId}")]
+        [Route("UpsertPerformanceCurveLibrary")]
         [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
-        public async Task<IActionResult> UpsertPerformanceCurveLibrary(Guid simulationId, PerformanceCurveLibraryDTO dto)
+        public async Task<IActionResult> UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _performanceCurveUpsertMethods[UserInfo.Role](simulationId, dto);
+                    UnitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto);
+                    UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
                     UnitOfWork.Commit();
                 });
 

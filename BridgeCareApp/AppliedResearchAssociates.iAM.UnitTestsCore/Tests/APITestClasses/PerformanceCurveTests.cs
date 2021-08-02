@@ -4,6 +4,8 @@ using System.Linq;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
@@ -279,8 +281,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     var modifiedDto = _testHelper.UnitOfWork.PerformanceCurveRepo
                         .GetPerformanceCurveLibrariesWithPerformanceCurves()[0];
                     Assert.Equal(dto.Description, modifiedDto.Description);
-                    Assert.Single(modifiedDto.AppliedScenarioIds);
-                    Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
 
                     Assert.Equal(dto.PerformanceCurves[0].Shift, modifiedDto.PerformanceCurves[0].Shift);
                     Assert.Equal(dto.PerformanceCurves[0].CriterionLibrary.Id,

@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -121,8 +123,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<PerformanceCurveEquationEntity> PerformanceCurveEquation { get; set; }
 
         public virtual DbSet<PerformanceCurveLibraryEntity> PerformanceCurveLibrary { get; set; }
-
-        public virtual DbSet<PerformanceCurveLibrarySimulationEntity> PerformanceCurveLibrarySimulation { get; set; }
 
         public virtual DbSet<RemainingLifeLimitEntity> RemainingLifeLimit { get; set; }
 
@@ -1071,27 +1071,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Name).IsRequired();
-            });
-
-            modelBuilder.Entity<PerformanceCurveLibrarySimulationEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.PerformanceCurveLibraryId, e.SimulationId });
-
-                entity.ToTable("PerformanceCurveLibrary_Simulation");
-
-                entity.HasIndex(e => e.PerformanceCurveLibraryId);
-
-                entity.HasIndex(e => e.SimulationId).IsUnique();
-
-                entity.HasOne(d => d.PerformanceCurveLibrary)
-                    .WithMany(p => p.PerformanceCurveLibrarySimulationJoins)
-                    .HasForeignKey(d => d.PerformanceCurveLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.PerformanceCurveLibrarySimulationJoin)
-                    .HasForeignKey<PerformanceCurveLibrarySimulationEntity>(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<RemainingLifeLimitEntity>(entity =>

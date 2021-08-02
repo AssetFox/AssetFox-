@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using Newtonsoft.Json;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {

@@ -50,6 +50,7 @@ export default class BudgetsTab extends Vue {
   @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
 
   @Prop() selectedTreatmentBudgets: string[];
+  @Prop() isNewTreatment: boolean;
 
   budgetHeaders: DataTableHeader[] = [
     {text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300px'}
@@ -59,13 +60,19 @@ export default class BudgetsTab extends Vue {
 
   @Watch('stateScenarioSimpleBudgetDetails')
   onStateScenarioInvestmentLibraryChanged() {
-    this.budgets = clone(this.stateScenarioSimpleBudgetDetails);
+    this.budgets = clone(this.stateScenarioSimpleBudgetDetails);    
   }
 
   @Watch('selectedTreatmentBudgets')
   onBudgetsTabDataChanged() {
-    this.selectedBudgets = this.budgets
+    if(this.isNewTreatment){
+    this.selectedBudgets = this.budgets;
+    }
+    else
+    {
+      this.selectedBudgets = this.budgets
         .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id, this.selectedTreatmentBudgets));
+    }
   }
 
   @Watch('selectedBudgets')
@@ -74,6 +81,11 @@ export default class BudgetsTab extends Vue {
     if (!isEqual(this.selectedTreatmentBudgets, selectedBudgetIds)) {
       this.$emit('onModifyBudgets', this.selectedBudgets);
     }
+  }
+
+  @Watch('budgets')
+  onBudgetsChanged(){
+    this.selectedBudgets = clone(this.budgets);
   }
 }
 </script>

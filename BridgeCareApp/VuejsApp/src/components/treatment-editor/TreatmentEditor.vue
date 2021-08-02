@@ -88,7 +88,7 @@
                   <v-tab-item>
                     <v-card>
                       <v-card-text class="card-tab-content">
-                        <BudgetsTab :selectedTreatmentBudgets="selectedTreatment.budgetIds"
+                        <BudgetsTab :selectedTreatmentBudgets="selectedTreatment.budgetIds" :isNewTreatment="selectedTreatment.isNew"
                                     @onModifyBudgets="modifySelectedTreatmentBudgets"/>
                       </v-card-text>
                     </v-card>
@@ -327,7 +327,7 @@ export default class TreatmentEditor extends Vue {
   onShowCreateTreatmentLibraryDialog(createAsNewLibrary: boolean) {
     this.createTreatmentLibraryDialogData = {
       showDialog: true,
-      selectedTreatmentLibraryTreatments: createAsNewLibrary ? this.selectedTreatmentLibrary.treatments : [],
+      selectedTreatmentLibraryTreatments: createAsNewLibrary ? this.selectedTreatmentLibrary.treatments : [],      
       scenarioId: createAsNewLibrary ? this.selectedScenarioId : this.uuidNIL
     };
   }
@@ -341,8 +341,7 @@ export default class TreatmentEditor extends Vue {
   }
 
   onAddTreatment(newTreatment: Treatment) {
-    this.showCreateTreatmentDialog = false;
-
+    this.showCreateTreatmentDialog = false;        
     if (!isNil(newTreatment) && this.selectedTreatmentLibrary.id !== this.uuidNIL) {
       this.selectedTreatmentLibrary = {
         ...this.selectedTreatmentLibrary,

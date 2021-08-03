@@ -1,5 +1,6 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -14,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 OffsetToFutureYear = domain.OffsetToFutureYear
             };
 
-        public static void CreateTreatmentScheduling(this TreatmentSchedulingEntity entity,
+        public static void CreateTreatmentScheduling(this ScenarioTreatmentSchedulingEntity entity,
             SelectableTreatment selectableTreatment)
         {
             var scheduling = selectableTreatment.Schedulings.GetAdd(new TreatmentScheduling());

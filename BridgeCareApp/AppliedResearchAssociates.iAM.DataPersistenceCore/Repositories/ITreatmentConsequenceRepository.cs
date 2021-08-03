@@ -11,5 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertOrDeleteTreatmentConsequences(
             Dictionary<Guid, List<TreatmentConsequenceDTO>> treatmentConsequencePerTreatmentId, Guid libraryId);
+
+        void UpsertOrDeleteScenarioTreatmentConsequences(
+            Dictionary<Guid, List<TreatmentConsequenceDTO>> treatmentConsequencePerTreatmentId, Guid simulationId);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -43,8 +44,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual TargetConditionGoalLibrarySimulationEntity TargetConditionGoalLibrarySimulationJoin { get; set; }
 
-        public virtual TreatmentLibrarySimulationEntity TreatmentLibrarySimulationJoin { get; set; }
-
         public virtual SimulationAnalysisDetailEntity SimulationAnalysisDetail { get; set; }
 
         public virtual SimulationReportDetailEntity SimulationReportDetail { get; set; }
@@ -56,5 +55,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
 
         public virtual ICollection<SimulationUserEntity> SimulationUserJoins { get; set; }
+
+
+
+        public virtual ICollection<ScenarioSelectableTreatmentEntity> SelectableTreatment { get; set; }
     }
 }

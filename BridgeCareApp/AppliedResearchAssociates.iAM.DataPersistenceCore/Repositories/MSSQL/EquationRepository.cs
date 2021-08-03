@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -31,6 +33,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             case DataPersistenceConstants.EquationJoinEntities.TreatmentCost:
                 JoinEquationsWithTreatmentCosts(equationEntityPerJoinEntityId);
+                break;
+
+            case DataPersistenceConstants.EquationJoinEntities.ScenarioTreatmentCost:
+                JoinEquationsWithScenarioTreatmentCosts(equationEntityPerJoinEntityId);
+                break;
+
+            case DataPersistenceConstants.EquationJoinEntities.ScenarioTreatmentConsequence:
+                JoinScenarioEquationsWithTreatmentConsequences(equationEntityPerJoinEntityId);
                 break;
 
             default:
@@ -70,6 +80,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
 
             _unitOfWork.Context.AddAll(treatmentCostEquationJoinEntities, _unitOfWork.UserEntity?.Id);
+        }
+        private void JoinEquationsWithScenarioTreatmentCosts(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId)
+        {
+            var treatmentCostEquationJoinEntities = equationEntityPerJoinEntityId
+                .Select(_ => new ScenarioTreatmentCostEquationEntity { EquationId = _.Value.Id, ScenarioTreatmentCostId = _.Key })
+                .ToList();
+
+            _unitOfWork.Context.AddAll(treatmentCostEquationJoinEntities, _unitOfWork.UserEntity?.Id);
+        }
+        private void JoinScenarioEquationsWithTreatmentConsequences(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId)
+        {
+            var treatmentConsequenceEquationJoinEntities = equationEntityPerJoinEntityId
+                .Select(_ => new ScenarioConditionalTreatmentConsequenceEquationEntity { EquationId = _.Value.Id, ScenarioConditionalTreatmentConsequenceId = _.Key })
+                .ToList();
+
+            _unitOfWork.Context.AddAll(treatmentConsequenceEquationJoinEntities, _unitOfWork.UserEntity?.Id);
         }
     }
 }

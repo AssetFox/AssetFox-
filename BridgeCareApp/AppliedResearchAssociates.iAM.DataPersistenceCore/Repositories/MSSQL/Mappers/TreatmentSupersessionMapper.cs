@@ -1,5 +1,6 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 using AppliedResearchAssociates.iAM.Domains;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -13,13 +14,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 TreatmentId = treatmentId
             };
 
-        public static void CreateTreatmentSupersession(this TreatmentSupersessionEntity entity,
+        public static void CreateTreatmentSupersession(this ScenarioTreatmentSupersessionEntity entity,
             SelectableTreatment selectableTreatment)
         {
             var supersession = selectableTreatment.AddSupersession();
             supersession.Treatment = selectableTreatment;
             supersession.Criterion.Expression =
-                entity.CriterionLibraryTreatmentSupersessionJoin?.CriterionLibrary.MergedCriteriaExpression ??
+                entity.CriterionLibraryScenarioTreatmentSupersessionJoin?.CriterionLibrary.MergedCriteriaExpression ??
                 string.Empty;
         }
     }

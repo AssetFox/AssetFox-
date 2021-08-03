@@ -19,7 +19,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
         public static class EquationJoinEntities
         {
             public const string PerformanceCurve = "PerformanceCurveEntity";
-            public const string ScenarioPerformanceCurve = "ScenarioPerformanceCurveEntity";
             public const string TreatmentCost = "TreatmentCostEntity";
             public const string TreatmentConsequence = "ConditionalTreatmentConsequenceEntity";
         }

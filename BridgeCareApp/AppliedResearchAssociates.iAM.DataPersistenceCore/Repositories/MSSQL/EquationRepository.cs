@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -23,6 +25,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
             case DataPersistenceConstants.EquationJoinEntities.PerformanceCurve:
                 JoinEquationsWithPerformanceCurves(equationEntityPerJoinEntityId);
+                break;
+
+            case DataPersistenceConstants.EquationJoinEntities.ScenarioPerformanceCurve:
+                JoinEquationsWithScenarioPerformanceCurves(equationEntityPerJoinEntityId);
                 break;
 
             case DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence:
@@ -52,6 +58,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
 
             _unitOfWork.Context.AddAll(performanceCurveEquationJoinEntities, _unitOfWork.UserEntity?.Id);
+        }
+
+        private void JoinEquationsWithScenarioPerformanceCurves(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId)
+        {
+            var scenarioPerformanceCurveEquationJoinEntities = equationEntityPerJoinEntityId
+                .Select(_ => new ScenarioPerformanceCurveEquationEntity { EquationId = _.Value.Id, ScenarioPerformanceCurveId = _.Key })
+                .ToList();
+
+            _unitOfWork.Context.AddAll(scenarioPerformanceCurveEquationJoinEntities, _unitOfWork.UserEntity?.Id);
         }
 
         private void JoinEquationsWithTreatmentConsequences(Dictionary<Guid, EquationEntity> equationEntityPerJoinEntityId)

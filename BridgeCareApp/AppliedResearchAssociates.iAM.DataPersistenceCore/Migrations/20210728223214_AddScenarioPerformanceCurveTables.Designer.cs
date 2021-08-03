@@ -4,14 +4,16 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    partial class IAMContextModelSnapshot : ModelSnapshot
+    [Migration("20210728223214_AddScenarioPerformanceCurveTables")]
+    partial class AddScenarioPerformanceCurveTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1167,6 +1169,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("CriterionLibrary");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryPerformanceCurveEntity", b =>
+                {
+                    b.Property<Guid>("CriterionLibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PerformanceCurveId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("CriterionLibraryId", "PerformanceCurveId");
+
+                    b.HasIndex("CriterionLibraryId");
+
+                    b.HasIndex("PerformanceCurveId")
+                        .IsUnique();
+
+                    b.ToTable("CriterionLibrary_PerformanceCurve");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryRemainingLifeLimitEntity", b =>
                 {
                     b.Property<Guid>("CriterionLibraryId")
@@ -1195,6 +1227,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsUnique();
 
                     b.ToTable("CriterionLibrary_RemainingLifeLimit");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryScenarioPerformanceCurveEntity", b =>
+                {
+                    b.Property<Guid>("CriterionLibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ScenarioPerformanceCurveId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("CriterionLibraryId", "ScenarioPerformanceCurveId");
+
+                    b.HasIndex("CriterionLibraryId");
+
+                    b.HasIndex("ScenarioPerformanceCurveId")
+                        .IsUnique();
+
+                    b.ToTable("CriterionLibrary_ScenarioPerformanceCurve");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibrarySelectableTreatmentEntity", b =>
@@ -1538,107 +1600,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("InvestmentPlan");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CriterionLibraryPerformanceCurveEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("PerformanceCurveId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CriterionLibraryId", "PerformanceCurveId");
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.HasIndex("PerformanceCurveId")
-                        .IsUnique();
-
-                    b.ToTable("CriterionLibrary_PerformanceCurve");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("PerformanceCurveLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("Shift")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttributeId");
-
-                    b.HasIndex("PerformanceCurveLibraryId");
-
-                    b.ToTable("PerformanceCurve");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEquationEntity", b =>
-                {
-                    b.Property<Guid>("PerformanceCurveId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("EquationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("PerformanceCurveId", "EquationId");
-
-                    b.HasIndex("EquationId")
-                        .IsUnique();
-
-                    b.HasIndex("PerformanceCurveId")
-                        .IsUnique();
-
-                    b.ToTable("PerformanceCurve_Equation");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1816,6 +1777,77 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("NumericAttributeValueHistory");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PerformanceCurveLibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Shift")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeId");
+
+                    b.HasIndex("PerformanceCurveLibraryId");
+
+                    b.ToTable("PerformanceCurve");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEquationEntity", b =>
+                {
+                    b.Property<Guid>("PerformanceCurveId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EquationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PerformanceCurveId", "EquationId");
+
+                    b.HasIndex("EquationId")
+                        .IsUnique();
+
+                    b.HasIndex("PerformanceCurveId")
+                        .IsUnique();
+
+                    b.ToTable("PerformanceCurve_Equation");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibraryEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1844,6 +1876,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PerformanceCurveLibrary");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibrarySimulationEntity", b =>
+                {
+                    b.Property<Guid>("PerformanceCurveLibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SimulationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PerformanceCurveLibraryId", "SimulationId");
+
+                    b.HasIndex("PerformanceCurveLibraryId");
+
+                    b.HasIndex("SimulationId")
+                        .IsUnique();
+
+                    b.ToTable("PerformanceCurveLibrary_Simulation");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitEntity", b =>
@@ -1980,37 +2042,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("ReportIndex");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioPerformanceCurveEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ScenarioPerformanceCurveId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CriterionLibraryId", "ScenarioPerformanceCurveId");
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.HasIndex("ScenarioPerformanceCurveId")
-                        .IsUnique();
-
-                    b.ToTable("CriterionLibrary_ScenarioPerformanceCurve");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioPerformanceCurveEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -2050,7 +2082,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("ScenarioPerformanceCurve");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEquationEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioPerformanceCurveEquationEntity", b =>
                 {
                     b.Property<Guid>("ScenarioPerformanceCurveId")
                         .HasColumnType("uniqueidentifier");
@@ -3236,6 +3268,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("DeficientConditionGoal");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryPerformanceCurveEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                        .WithMany("CriterionLibraryPerformanceCurveJoins")
+                        .HasForeignKey("CriterionLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEntity", "PerformanceCurve")
+                        .WithOne("CriterionLibraryPerformanceCurveJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryPerformanceCurveEntity", "PerformanceCurveId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CriterionLibrary");
+
+                    b.Navigation("PerformanceCurve");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryRemainingLifeLimitEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
@@ -3253,6 +3304,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("CriterionLibrary");
 
                     b.Navigation("RemainingLifeLimit");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryScenarioPerformanceCurveEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                        .WithMany("CriterionLibraryScenarioPerformanceCurveJoins")
+                        .HasForeignKey("CriterionLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioPerformanceCurveEntity", "ScenarioPerformanceCurve")
+                        .WithOne("CriterionLibraryScenarioPerformanceCurveJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryScenarioPerformanceCurveEntity", "ScenarioPerformanceCurveId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CriterionLibrary");
+
+                    b.Navigation("ScenarioPerformanceCurve");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibrarySelectableTreatmentEntity", b =>
@@ -3410,63 +3480,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("Simulation");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CriterionLibraryPerformanceCurveEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryPerformanceCurveJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEntity", "PerformanceCurve")
-                        .WithOne("CriterionLibraryPerformanceCurveJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CriterionLibraryPerformanceCurveEntity", "PerformanceCurveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CriterionLibrary");
-
-                    b.Navigation("PerformanceCurve");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("PerformanceCurves")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibraryEntity", "PerformanceCurveLibrary")
-                        .WithMany("PerformanceCurves")
-                        .HasForeignKey("PerformanceCurveLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Attribute");
-
-                    b.Navigation("PerformanceCurveLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEquationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
-                        .WithOne("PerformanceCurveEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEquationEntity", "EquationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEntity", "PerformanceCurve")
-                        .WithOne("PerformanceCurveEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEquationEntity", "PerformanceCurveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Equation");
-
-                    b.Navigation("PerformanceCurve");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
@@ -3519,6 +3532,63 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("Section");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                        .WithMany("PerformanceCurves")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibraryEntity", "PerformanceCurveLibrary")
+                        .WithMany("PerformanceCurves")
+                        .HasForeignKey("PerformanceCurveLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Attribute");
+
+                    b.Navigation("PerformanceCurveLibrary");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEquationEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                        .WithOne("PerformanceCurveEquationJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEquationEntity", "EquationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEntity", "PerformanceCurve")
+                        .WithOne("PerformanceCurveEquationJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEquationEntity", "PerformanceCurveId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Equation");
+
+                    b.Navigation("PerformanceCurve");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibrarySimulationEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibraryEntity", "PerformanceCurveLibrary")
+                        .WithMany("PerformanceCurveLibrarySimulationJoins")
+                        .HasForeignKey("PerformanceCurveLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                        .WithOne("PerformanceCurveLibrarySimulationJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibrarySimulationEntity", "SimulationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PerformanceCurveLibrary");
+
+                    b.Navigation("Simulation");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
@@ -3567,26 +3637,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("Simulation");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioPerformanceCurveEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryScenarioPerformanceCurveJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEntity", "ScenarioPerformanceCurve")
-                        .WithOne("CriterionLibraryScenarioPerformanceCurveJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioPerformanceCurveEntity", "ScenarioPerformanceCurveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CriterionLibrary");
-
-                    b.Navigation("ScenarioPerformanceCurve");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioPerformanceCurveEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
                         .WithMany("ScenarioPerformanceCurves")
@@ -3605,17 +3656,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("Simulation");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEquationEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioPerformanceCurveEquationEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
                         .WithOne("ScenarioPerformanceCurveEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEquationEntity", "EquationId")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioPerformanceCurveEquationEntity", "EquationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEntity", "ScenarioPerformanceCurve")
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioPerformanceCurveEntity", "ScenarioPerformanceCurve")
                         .WithOne("ScenarioPerformanceCurveEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEquationEntity", "ScenarioPerformanceCurveId")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioPerformanceCurveEquationEntity", "ScenarioPerformanceCurveId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -4048,13 +4099,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("Sections");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryPerformanceCurveJoin");
-
-                    b.Navigation("PerformanceCurveEquationJoin");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
                 {
                     b.Navigation("AggregatedResults");
@@ -4079,8 +4123,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("Simulations");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveEntity", b =>
+                {
+                    b.Navigation("CriterionLibraryPerformanceCurveJoin");
+
+                    b.Navigation("PerformanceCurveEquationJoin");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibraryEntity", b =>
                 {
+                    b.Navigation("PerformanceCurveLibrarySimulationJoins");
+
                     b.Navigation("PerformanceCurves");
                 });
 
@@ -4096,7 +4149,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("RemainingLifeLimits");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEntity", b =>
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioPerformanceCurveEntity", b =>
                 {
                     b.Navigation("CriterionLibraryScenarioPerformanceCurveJoin");
 
@@ -4142,6 +4195,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("DeficientConditionGoalLibrarySimulationJoin");
 
                     b.Navigation("InvestmentPlan");
+
+                    b.Navigation("PerformanceCurveLibrarySimulationJoin");
 
                     b.Navigation("PerformanceCurves");
 

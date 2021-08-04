@@ -202,17 +202,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.AddAll(scenarioConditionalTreatmentConsequenceEntities
                 .Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
 
-            //if (treatmentConsequences.Any(_ =>
-            //    _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression)))
-            //{
-            //    var equationEntitiesPerJoinEntityId = treatmentConsequences
-            //        .Where(_ => _.Equation?.Id != null && _.Equation?.Id != Guid.Empty &&
-            //                    !string.IsNullOrEmpty(_.Equation.Expression))
-            //        .ToDictionary(_ => _.Id, _ => _.Equation.ToEntity());
-
-            //    _unitOfWork.EquationRepo.CreateEquations(equationEntitiesPerJoinEntityId,
-            //        DataPersistenceConstants.EquationJoinEntities.ScenarioTreatmentConsequence);
-            //}
             if (treatmentConsequences.Any(_ =>
                 _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression)))
             {

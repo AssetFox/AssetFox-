@@ -16,7 +16,7 @@
             <v-layout v-else>
               <v-data-table :headers="budgetHeaders" :items="budgets"
                             class="elevation-1 fixed-header v-table__overflow budgets-data-table" hide-actions
-                            item-key="id" select-all
+                            item-key="id" select-all 
                             v-model="selectedBudgets">
                 <template slot="items" slot-scope="props">
                   <td>
@@ -51,7 +51,7 @@ export default class BudgetsTab extends Vue {
 
   @Prop() selectedTreatmentBudgets: string[];
   @Prop() isNewTreatment: boolean;
-
+  
   budgetHeaders: DataTableHeader[] = [
     {text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300px'}
   ];
@@ -65,13 +65,14 @@ export default class BudgetsTab extends Vue {
 
   @Watch('selectedTreatmentBudgets')
   onBudgetsTabDataChanged() {
-    if(this.isNewTreatment){
-    this.selectedBudgets = this.budgets;
+    // if it is a new treatment or no selectedTreatmentBudgets (Treatment selection changed)
+    if((this.isNewTreatment && this.selectedTreatmentBudgets.length == 0) || this.selectedTreatmentBudgets.length == 0){
+      this.selectedBudgets = this.budgets;
     }
     else
     {
       this.selectedBudgets = this.budgets
-        .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id, this.selectedTreatmentBudgets));
+        .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id, this.selectedTreatmentBudgets));        
     }
   }
 

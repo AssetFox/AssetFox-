@@ -7,8 +7,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class TreatmentSupersessionMapper
     {
-        public static TreatmentSupersessionEntity ToEntity(this TreatmentSupersession domain, Guid treatmentId) =>
+        public static TreatmentSupersessionEntity ToLibraryEntity(this TreatmentSupersession domain, Guid treatmentId) =>
             new TreatmentSupersessionEntity
+            {
+                Id = domain.Id,
+                TreatmentId = treatmentId
+            };
+        public static ScenarioTreatmentSupersessionEntity ToScenarioEntity(this TreatmentSupersession domain, Guid treatmentId) =>
+            new ScenarioTreatmentSupersessionEntity
             {
                 Id = domain.Id,
                 TreatmentId = treatmentId

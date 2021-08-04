@@ -18,12 +18,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ChangeValue = domain.Change.Expression
             };
 
-        public static ConditionalTreatmentConsequenceEntity ToEntity(this TreatmentConsequenceDTO dto, Guid treatmentId,
+        public static ConditionalTreatmentConsequenceEntity ToLibraryEntity(this TreatmentConsequenceDTO dto, Guid treatmentId,
             Guid attributeId) =>
             new ConditionalTreatmentConsequenceEntity
             {
                 Id = dto.Id,
                 SelectableTreatmentId = treatmentId,
+                AttributeId = attributeId,
+                ChangeValue = dto.ChangeValue
+            };
+
+        public static ScenarioConditionalTreatmentConsequenceEntity ToScenarioEntity(this TreatmentConsequenceDTO dto, Guid treatmentId,
+            Guid attributeId) =>
+            new ScenarioConditionalTreatmentConsequenceEntity
+            {
+                Id = dto.Id,
+                ScenarioSelectableTreatmentId = treatmentId,
                 AttributeId = attributeId,
                 ChangeValue = dto.ChangeValue
             };

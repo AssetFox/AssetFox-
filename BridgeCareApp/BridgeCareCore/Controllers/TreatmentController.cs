@@ -31,7 +31,6 @@ namespace BridgeCareCore.Controllers
         {
             void UpsertAny(Guid simulationId, List<TreatmentDTO> dtos)
             {
-                //UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
                 UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
             }
 

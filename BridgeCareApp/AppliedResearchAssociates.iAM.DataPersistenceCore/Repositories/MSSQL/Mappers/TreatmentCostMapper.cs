@@ -15,8 +15,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 TreatmentId = treatmentId
             };
 
-        public static TreatmentCostEntity ToEntity(this TreatmentCostDTO dto, Guid treatmentId) =>
+        public static TreatmentCostEntity ToLibraryEntity(this TreatmentCostDTO dto, Guid treatmentId) =>
             new TreatmentCostEntity { Id = dto.Id, TreatmentId = treatmentId };
+
+        public static ScenarioTreatmentCostEntity ToScenarioEntity(this TreatmentCostDTO dto, Guid treatmentId) =>
+            new ScenarioTreatmentCostEntity { Id = dto.Id, ScenarioTreatmentId = treatmentId };
 
         public static void CreateTreatmentCost(this ScenarioTreatmentCostEntity entity, SelectableTreatment selectableTreatment)
         {

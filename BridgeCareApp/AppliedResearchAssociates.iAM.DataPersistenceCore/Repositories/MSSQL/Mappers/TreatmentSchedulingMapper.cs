@@ -7,8 +7,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class TreatmentSchedulingMapper
     {
-        public static TreatmentSchedulingEntity ToEntity(this TreatmentScheduling domain, Guid treatmentId) =>
+        public static TreatmentSchedulingEntity ToLibraryEntity(this TreatmentScheduling domain, Guid treatmentId) =>
             new TreatmentSchedulingEntity
+            {
+                Id = domain.Id,
+                TreatmentId = treatmentId,
+                OffsetToFutureYear = domain.OffsetToFutureYear
+            };
+        public static ScenarioTreatmentSchedulingEntity ToScenarioEntity(this TreatmentScheduling domain, Guid treatmentId) =>
+            new ScenarioTreatmentSchedulingEntity
             {
                 Id = domain.Id,
                 TreatmentId = treatmentId,

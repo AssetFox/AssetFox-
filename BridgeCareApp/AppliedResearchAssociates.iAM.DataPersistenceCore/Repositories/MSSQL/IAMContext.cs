@@ -162,11 +162,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<TreatmentLibraryEntity> TreatmentLibrary { get; set; }
 
-        //public virtual DbSet<TreatmentLibrarySimulationEntity> TreatmentLibrarySimulation { get; set; }
-
         public virtual DbSet<TreatmentSchedulingEntity> TreatmentScheduling { get; set; }
 
+        public virtual DbSet<ScenarioTreatmentSchedulingEntity> ScenarioTreatmentScheduling { get; set; }
+
         public virtual DbSet<TreatmentSupersessionEntity> TreatmentSupersession { get; set; }
+
+        public virtual DbSet<ScenarioTreatmentSupersessionEntity> ScenarioTreatmentSupersession { get; set; }
 
         public virtual DbSet<NumericAttributeValueHistoryEntity> NumericAttributeValueHistory { get; set; }
 
@@ -1516,27 +1518,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
-            //modelBuilder.Entity<TreatmentLibrarySimulationEntity>(entity =>
-            //{
-            //    entity.HasKey(e => new { e.TreatmentLibraryId, e.SimulationId });
-
-            //    entity.ToTable("TreatmentLibrary_Simulation");
-
-            //    entity.HasIndex(e => e.TreatmentLibraryId);
-
-            //    entity.HasIndex(e => e.SimulationId).IsUnique();
-
-            //    entity.HasOne(d => d.Simulation)
-            //        .WithOne(p => p.TreatmentLibrarySimulationJoin)
-            //        .HasForeignKey<TreatmentLibrarySimulationEntity>(d => d.SimulationId)
-            //        .OnDelete(DeleteBehavior.Cascade);
-
-            //    entity.HasOne(d => d.TreatmentLibrary)
-            //        .WithMany(p => p.TreatmentLibrarySimulationJoins)
-            //        .HasForeignKey(d => d.TreatmentLibraryId)
-            //        .OnDelete(DeleteBehavior.Cascade);
-            //});
-
             modelBuilder.Entity<TreatmentSchedulingEntity>(entity =>
             {
                 entity.HasIndex(e => e.TreatmentId);
@@ -1551,6 +1532,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioTreatmentSchedulingEntity>(entity =>
+            {
+                entity.HasIndex(e => e.TreatmentId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.OffsetToFutureYear).IsRequired();
+
+                entity.HasOne(d => d.ScenarioSelectableTreatment)
+                    .WithMany(p => p.ScenarioTreatmentSchedulings)
+                    .HasForeignKey(d => d.TreatmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<TreatmentSupersessionEntity>(entity =>
             {
                 entity.HasIndex(e => e.TreatmentId);
@@ -1559,6 +1554,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.SelectableTreatment)
                     .WithMany(p => p.TreatmentSupersessions)
+                    .HasForeignKey(d => d.TreatmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ScenarioTreatmentSupersessionEntity>(entity =>
+            {
+                entity.HasIndex(e => e.TreatmentId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.ScenarioSelectableTreatment)
+                    .WithMany(p => p.ScenarioTreatmentSupersessions)
                     .HasForeignKey(d => d.TreatmentId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

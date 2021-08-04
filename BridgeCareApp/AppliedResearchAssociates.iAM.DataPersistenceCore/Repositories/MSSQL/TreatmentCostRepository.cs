@@ -75,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> treatmentCostPerTreatmentId, Guid libraryId)
         {
-            var treatmentCostEntities = treatmentCostPerTreatmentId.SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key)))
+            var treatmentCostEntities = treatmentCostPerTreatmentId.SelectMany(_ => _.Value.Select(__ => __.ToLibraryEntity(_.Key)))
                 .ToList();
 
             var entityIds = treatmentCostEntities.Select(_ => _.Id).ToList();
@@ -125,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertOrDeleteScenarioTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> scenarioTreatmentCostPerTreatmentId,
             Guid SimulationId)
         {
-            var scenarioTreatmentCostEntities = scenarioTreatmentCostPerTreatmentId.SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key)))
+            var scenarioTreatmentCostEntities = scenarioTreatmentCostPerTreatmentId.SelectMany(_ => _.Value.Select(__ => __.ToScenarioEntity(_.Key)))
                 .ToList();
 
             var entityIds = scenarioTreatmentCostEntities.Select(_ => _.Id).ToList();

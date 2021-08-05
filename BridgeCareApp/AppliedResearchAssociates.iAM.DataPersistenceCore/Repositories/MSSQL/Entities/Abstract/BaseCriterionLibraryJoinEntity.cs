@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract
 {

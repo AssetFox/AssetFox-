@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
+﻿namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics
 {
     /// <summary>
     /// A datum specifically representing an attribute on an asset

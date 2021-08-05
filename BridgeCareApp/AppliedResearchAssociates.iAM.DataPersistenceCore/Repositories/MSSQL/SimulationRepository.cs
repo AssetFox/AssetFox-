@@ -141,7 +141,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
                 .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
                 .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
-                .Include(_ => _.PerformanceCurveLibrarySimulationJoin)
+                .Include(_ => _.PerformanceCurves)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.PerformanceCurves)
+                .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.PerformanceCurves)
+                .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
+                .ThenInclude(_ => _.Equation)
                 .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
                 .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
 
@@ -254,12 +261,48 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         simulationToClone.DeficientConditionGoalLibrarySimulationJoin, _unitOfWork.UserEntity?.Id);
             }
 
-            if (simulationToClone.PerformanceCurveLibrarySimulationJoin != null)
+            if (simulationToClone.PerformanceCurves.Any())
             {
-                simulationToClone.PerformanceCurveLibrarySimulationJoin.SimulationId = newSimulationId;
-                _unitOfWork.Context
-                    .ReInitializeAllEntityBaseProperties(simulationToClone.PerformanceCurveLibrarySimulationJoin,
-                        _unitOfWork.UserEntity?.Id);
+                simulationToClone.PerformanceCurves.ForEach(curve =>
+                {
+                    var newCurveId = Guid.NewGuid();
+                    curve.Id = newCurveId;
+                    curve.SimulationId = simulationId;
+                    curve.Attribute = null;
+                    _unitOfWork.Context
+                        .ReInitializeAllEntityBaseProperties(curve, _unitOfWork.UserEntity?.Id);
+
+                    if (curve.CriterionLibraryScenarioPerformanceCurveJoin != null)
+                    {
+                        var criterionLibraryId = Guid.NewGuid();
+                        curve.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary.Id = criterionLibraryId;
+                        curve.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibraryId = criterionLibraryId;
+                        curve.CriterionLibraryScenarioPerformanceCurveJoin.ScenarioPerformanceCurveId = newCurveId;
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                curve.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary,
+                                _unitOfWork.UserEntity?.Id);
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(curve.CriterionLibraryScenarioPerformanceCurveJoin,
+                                _unitOfWork.UserEntity?.Id);
+                    }
+
+                    if (curve.ScenarioPerformanceCurveEquationJoin != null)
+                    {
+                        var newEquationId = Guid.NewGuid();
+                        curve.ScenarioPerformanceCurveEquationJoin.Equation.Id = newEquationId;
+                        curve.ScenarioPerformanceCurveEquationJoin.EquationId = newEquationId;
+                        curve.ScenarioPerformanceCurveEquationJoin.ScenarioPerformanceCurveId = newCurveId;
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                curve.ScenarioPerformanceCurveEquationJoin.Equation,
+                                _unitOfWork.UserEntity?.Id);
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(curve.ScenarioPerformanceCurveEquationJoin,
+                                _unitOfWork.UserEntity?.Id);
+                    }
+                });
+
             }
 
             if (simulationToClone.RemainingLifeLimitLibrarySimulationJoin != null)

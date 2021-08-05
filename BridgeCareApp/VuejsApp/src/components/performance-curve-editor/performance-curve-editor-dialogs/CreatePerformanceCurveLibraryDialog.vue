@@ -73,7 +73,7 @@ export default class CreatePerformanceCurveLibraryDialog extends Vue {
 
   onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newPerformanceCurveLibrary, this.dialogData.scenarioId);
+      this.$emit('submit', this.newPerformanceCurveLibrary);
     } else {
       this.$emit('submit', null);
     }

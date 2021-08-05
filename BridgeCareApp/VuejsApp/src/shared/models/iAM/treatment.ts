@@ -5,7 +5,6 @@ import {
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { clone } from 'ramda';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
-import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
 
 export interface TreatmentCost {
     id: string;
@@ -38,7 +37,6 @@ export interface TreatmentLibrary {
     name: string;
     description: string;
     treatments: Treatment[];
-    //appliedScenarioIds: string[];
     owner?: string;
     shared?: boolean;
 }
@@ -86,7 +84,6 @@ export const emptyTreatmentLibrary: TreatmentLibrary = {
     name: '',
     description: '',
     treatments: [],
-    //appliedScenarioIds: [],
 };
 
 export const emptyTreatmentDetails: TreatmentDetails = {

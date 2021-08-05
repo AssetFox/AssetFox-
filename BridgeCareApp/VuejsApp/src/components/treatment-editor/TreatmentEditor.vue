@@ -265,10 +265,6 @@ export default class TreatmentEditor extends Vue {
       text: library.name,
       value: library.id.toString()
     }));
-
-    // if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateTreatmentLibraries, this.selectedScenarioId)) {
-    //   this.librarySelectItemValue = getAppliedLibraryId(this.stateTreatmentLibraries, this.selectedScenarioId);
-    // }
   }
 
   @Watch('librarySelectItemValue')

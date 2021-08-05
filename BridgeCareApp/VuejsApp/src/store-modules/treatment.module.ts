@@ -93,58 +93,30 @@ const actions = {
         );
     },
     async upsertTreatmentLibrary({ dispatch, commit }: any, payload: any) {
-        await TreatmentService.upsertTreatmentLibrary(
-            payload.library
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
+        await TreatmentService.upsertTreatmentLibrary(payload.library).then(
+            (response: AxiosResponse) => {
                 if (
-                    payload.scenarioId !== getBlankGuid() &&
-                    hasAppliedLibrary(
-                        state.treatmentLibraries,
-                        payload.scenarioId,
-                    )
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
                 ) {
-                    const unAppliedLibrary: TreatmentLibrary = unapplyLibrary(
-                        getAppliedLibrary(
-                            state.treatmentLibraries,
-                            payload.scenarioId,
-                        ),
-                        payload.scenarioId,
-                    );
+                    const message: string = any(
+                        propEq('id', payload.library.id),
+                        state.treatmentLibraries,
+                    )
+                        ? 'Updated treatment library'
+                        : 'Added treatment library';
                     commit(
                         'addedOrUpdatedTreatmentLibraryMutator',
-                        unAppliedLibrary,
+                        payload.library,
                     );
+                    commit(
+                        'selectedTreatmentLibraryMutator',
+                        payload.library.id,
+                    );
+                    dispatch('setSuccessMessage', { message: message });
                 }
-
-                const library: TreatmentLibrary = {
-                    ...payload.library,
-                    appliedScenarioIds:
-                        payload.scenarioId !== getBlankGuid() &&
-                        payload.library.appliedScenarioIds.indexOf(
-                            payload.scenarioId,
-                        ) === -1
-                            ? append(
-                                  payload.scenarioId,
-                                  payload.library.appliedScenarioIds,
-                              )
-                            : payload.library.appliedScenarioIds,
-                };
-
-                const message: string = any(
-                    propEq('id', library.id),
-                    state.treatmentLibraries,
-                )
-                    ? 'Updated treatment library'
-                    : 'Added treatment library';
-                commit('addedOrUpdatedTreatmentLibraryMutator', library);
-                commit('selectedTreatmentLibraryMutator', library.id);
-                dispatch('setSuccessMessage', { message: message });
-            }
-        });
+            },
+        );
     },
     async getScenarioSelectableTreatments({ commit }: any, scenarioId: string) {
         await TreatmentService.getScenarioSelectedTreatments(scenarioId).then(

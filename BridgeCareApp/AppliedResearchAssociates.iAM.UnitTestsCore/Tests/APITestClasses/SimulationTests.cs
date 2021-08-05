@@ -588,8 +588,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         originalSimulation.RemainingLifeLimitLibrarySimulationJoin.RemainingLifeLimitLibraryId);
                     Assert.Equal(clonedSimulation.TargetConditionGoalLibrarySimulationJoin.TargetConditionGoalLibraryId,
                         originalSimulation.TargetConditionGoalLibrarySimulationJoin.TargetConditionGoalLibraryId);
-                    //Assert.Equal(clonedSimulation.TreatmentLibrarySimulationJoin.TreatmentLibraryId,
-                    //    originalSimulation.TreatmentLibrarySimulationJoin.TreatmentLibraryId);
                     var clonedCommittedProjects = clonedSimulation.CommittedProjects.ToList();
                     var originalCommittedProjects = originalSimulation.CommittedProjects.ToList();
                     Assert.Equal(clonedCommittedProjects.Count, originalCommittedProjects.Count);

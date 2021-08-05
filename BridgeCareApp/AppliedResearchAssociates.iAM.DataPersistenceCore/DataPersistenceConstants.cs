@@ -20,9 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
         {
             public const string PerformanceCurve = "PerformanceCurveEntity";
             public const string TreatmentCost = "TreatmentCostEntity";
-            public const string ScenarioTreatmentCost = "ScenarioTreatmentCostEntity";
             public const string TreatmentConsequence = "ConditionalTreatmentConsequenceEntity";
-            public const string ScenarioTreatmentConsequence = "ScenarioConditionalTreatmentConsequenceEntity";
         }
 
         public static class CriterionLibraryJoinEntities

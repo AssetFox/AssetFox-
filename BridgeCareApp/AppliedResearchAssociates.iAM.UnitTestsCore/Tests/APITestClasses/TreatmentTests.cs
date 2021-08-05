@@ -308,8 +308,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
                 Assert.True(!_testHelper.UnitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == TreatmentLibraryId));
                 Assert.True(!_testHelper.UnitOfWork.Context.SelectableTreatment.Any(_ => _.Id == TreatmentId));
-                //Assert.True(!_testHelper.UnitOfWork.Context.TreatmentLibrarySimulation.Any(_ =>
-                //    _.TreatmentLibraryId == TreatmentLibraryId));
                 Assert.True(
                     !_testHelper.UnitOfWork.Context.CriterionLibrarySelectableTreatment.Any(_ =>
                         _.SelectableTreatmentId == TreatmentId));

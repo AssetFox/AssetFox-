@@ -7,9 +7,7 @@ export default class TreatmentService {
         return coreAxiosInstance.get(`${API.Treatment}/GetTreatmentLibraries`);
     }
 
-    static upsertTreatmentLibrary(
-        data: TreatmentLibrary
-    ): AxiosPromise {
+    static upsertTreatmentLibrary(data: TreatmentLibrary): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.Treatment}/UpsertTreatmentLibrary/`,
             data,

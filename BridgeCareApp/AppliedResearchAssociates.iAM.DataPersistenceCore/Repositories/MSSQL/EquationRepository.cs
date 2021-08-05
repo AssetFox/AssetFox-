@@ -35,14 +35,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 JoinEquationsWithTreatmentCosts(equationEntityPerJoinEntityId);
                 break;
 
-            case DataPersistenceConstants.EquationJoinEntities.ScenarioTreatmentCost:
-                JoinEquationsWithScenarioTreatmentCosts(equationEntityPerJoinEntityId);
-                break;
-
-            case DataPersistenceConstants.EquationJoinEntities.ScenarioTreatmentConsequence:
-                JoinScenarioEquationsWithTreatmentConsequences(equationEntityPerJoinEntityId);
-                break;
-
             default:
                 throw new InvalidOperationException("Unable to determine equation join entity type.");
             }

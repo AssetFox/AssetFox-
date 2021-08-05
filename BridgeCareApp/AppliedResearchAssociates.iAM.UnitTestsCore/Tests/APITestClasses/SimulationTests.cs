@@ -132,10 +132,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var treatmentLibraryId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(
                 new TreatmentLibraryEntity {Id = treatmentLibraryId, Name = "Test Name"});
-            _testHelper.UnitOfWork.Context.AddEntity(new TreatmentLibrarySimulationEntity
-            {
-                TreatmentLibraryId = treatmentLibraryId, SimulationId = _testHelper.TestSimulation.Id
-            });
 
             var maintainableAssetId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(new MaintainableAssetEntity
@@ -662,19 +658,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Assert.Equal(TreatmentIdsDiff.Count, clonedSimulation.SelectableTreatment.Count);
                     Assert.True(clonedSimulation.SelectableTreatment.All(_ => TreatmentIdsDiff.Contains(_.Id)));
 
-                    var clonedCriteria =
+                    clonedCriteria =
                         clonedSimulation.SelectableTreatment.Where(_ =>
                             _.CriterionLibraryScenarioSelectableTreatmentJoin != null)
                             .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary).ToList();
-                    var originalCriteria =
+                    originalCriteria =
                         originalSimulation.SelectableTreatment.Where(_ =>
                                 _.CriterionLibraryScenarioSelectableTreatmentJoin != null)
                             .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary).ToList();
                     Assert.Equal(clonedCriteria.Count, originalCriteria.Count);
 
-                    var clonedCriteriaIds = clonedCriteria.Select(_ => _.Id).ToList();
-                    var originalCriteriaIds = originalCriteria.Select(_ => _.Id).ToList();
-                    var criteriaIdsDiff = clonedCriteriaIds.Except(originalCriteriaIds).ToList();
+                    clonedCriteriaIds = clonedCriteria.Select(_ => _.Id).ToList();
+                    originalCriteriaIds = originalCriteria.Select(_ => _.Id).ToList();
+                    criteriaIdsDiff = clonedCriteriaIds.Except(originalCriteriaIds).ToList();
                     Assert.NotEmpty(criteriaIdsDiff);
                     Assert.Equal(criteriaIdsDiff.Count, clonedCriteria.Count);
                     Assert.True(clonedCriteria.All(_ => criteriaIdsDiff.Contains(_.Id)));

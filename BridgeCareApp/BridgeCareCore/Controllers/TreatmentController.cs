@@ -114,9 +114,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertScenarioSelectableTreatments/{simulationId}")]
+        [Route("UpsertScenarioSelectedTreatments/{simulationId}")]
         [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
-        public async Task<IActionResult> UpsertScenarioSelectableTreatments(Guid SimulationId, List<TreatmentDTO> dtos)
+        public async Task<IActionResult> UpsertScenarioSelectedTreatments(Guid SimulationId, List<TreatmentDTO> dtos)
         {
             try
             {

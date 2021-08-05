@@ -40,7 +40,7 @@
       <div class="priorities-data-table">
         <v-data-table :headers="budgetPriorityGridHeaders" :items="budgetPriorityGridRows"
                       class="elevation-1 v-table__overflow" item-key="id" select-all
-                      v-model="selectedBudgetPriorityGridRows">
+                      v-model="selectedBudgetPriorityGridRows" :must-sort="true">
           <template slot="items" slot-scope="props">
             <td>
               <v-checkbox hide-details primary v-model="props.selected"></v-checkbox>
@@ -227,7 +227,7 @@ export default class BudgetPriorityEditor extends Vue {
   selectedBudgetPriorityLibrary: BudgetPriorityLibrary = clone(emptyBudgetPriorityLibrary);
   budgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
   budgetPriorityGridHeaders: DataTableHeader[] = [
-    {text: 'Priority', value: 'priorityLevel', align: 'left', sortable: false, class: '', width: ''},
+    {text: 'Priority', value: 'priorityLevel', align: 'left', sortable: true, class: '', width: ''},
     {text: 'Year', value: 'year', align: 'left', sortable: false, class: '', width: '7%'},
     {text: 'Criteria', value: 'criteria', align: 'left', sortable: false, class: '', width: ''}
   ];

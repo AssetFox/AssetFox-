@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -14,8 +16,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             AttributeData = new HashSet<AttributeDatumEntity>();
             AnalysisMethods = new HashSet<AnalysisMethodEntity>();
             PerformanceCurves = new HashSet<PerformanceCurveEntity>();
+            ScenarioPerformanceCurves = new HashSet<ScenarioPerformanceCurveEntity>();
             RemainingLifeLimits = new HashSet<RemainingLifeLimitEntity>();
             TreatmentConsequences = new HashSet<ConditionalTreatmentConsequenceEntity>();
+            ScenarioTreatmentConsequences = new HashSet<ScenarioConditionalTreatmentConsequenceEntity>();
             NumericAttributeValueHistories = new HashSet<NumericAttributeValueHistoryEntity>();
             TextAttributeValueHistories = new HashSet<TextAttributeValueHistoryEntity>();
             AttributeEquationCriterionLibraryJoins = new HashSet<AttributeEquationCriterionLibraryEntity>();
@@ -58,9 +62,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<PerformanceCurveEntity> PerformanceCurves { get; set; }
 
+        public virtual ICollection<ScenarioPerformanceCurveEntity> ScenarioPerformanceCurves { get; set; }
+
         public virtual ICollection<RemainingLifeLimitEntity> RemainingLifeLimits { get; set; }
 
         public virtual ICollection<ConditionalTreatmentConsequenceEntity> TreatmentConsequences { get; set; }
+
+        public virtual ICollection<ScenarioConditionalTreatmentConsequenceEntity> ScenarioTreatmentConsequences { get; set; }
 
         public virtual ICollection<DeficientConditionGoalEntity> DeficientConditionGoals { get; set; }
 

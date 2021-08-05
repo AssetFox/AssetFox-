@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void CreateTreatmentSchedulings(Dictionary<Guid, List<TreatmentScheduling>> treatmentSchedulingsPerTreatmentId)
         {
             var treatmentSchedulingEntities = treatmentSchedulingsPerTreatmentId
-                .SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key)))
+                .SelectMany(_ => _.Value.Select(__ => __.ToScenarioEntity(_.Key)))
                 .ToList();
 
             _unitOfWork.Context.AddAll(treatmentSchedulingEntities);

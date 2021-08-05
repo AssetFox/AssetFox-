@@ -39,7 +39,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var entities = _unitOfWork.Context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
 
-            // "GetAllInNetwork" is only getting used in testing. Therefore, passing DateTime.Now, instead of actual date
+            // "GetAllInNetwork" is only getting used in testing. Therefore, passing DateTime.Now,
+            // instead of actual date
             entities.ForEach(_ => _.CreateSimulation(network, DateTime.Now, DateTime.Now));
         }
 
@@ -150,7 +151,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
                 .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
-                .Include(_ => _.TreatmentLibrarySimulationJoin)
+
+                .Include(_ => _.SelectableTreatment)
+                .ThenInclude(_ => _.ScenarioTreatmentBudgetJoins)
+                .ThenInclude(_ => _.Budget)
+                .ThenInclude(_ => _.BudgetAmounts)
+                .Include(_ => _.SelectableTreatment)
+                .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.SelectableTreatment)
+                .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.SelectableTreatment)
+                .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.SelectableTreatment)
+                .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.SelectableTreatment)
+                .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.SelectableTreatment)
+                .ThenInclude(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.SelectableTreatment)
+                .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
+                .Include(_ => _.SelectableTreatment)
+                .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
+
                 .Include(_ => _.CommittedProjects)
                 .ThenInclude(_ => _.CommittedProjectConsequences)
                 .Single(_ => _.Id == simulationId);
@@ -289,12 +321,154 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         _unitOfWork.UserEntity?.Id);
             }
 
-            if (simulationToClone.TreatmentLibrarySimulationJoin != null)
+            if (simulationToClone.SelectableTreatment.Any())
             {
-                simulationToClone.TreatmentLibrarySimulationJoin.SimulationId = newSimulationId;
-                _unitOfWork.Context
-                    .ReInitializeAllEntityBaseProperties(simulationToClone.TreatmentLibrarySimulationJoin,
-                        _unitOfWork.UserEntity?.Id);
+                simulationToClone.SelectableTreatment.ForEach(treatment =>
+                {
+                    var newTreatmentId = Guid.NewGuid();
+                    treatment.Id = newTreatmentId;
+                    treatment.SimulationId = simulationId;
+
+                    _unitOfWork.Context
+                        .ReInitializeAllEntityBaseProperties(treatment, _unitOfWork.UserEntity?.Id);
+
+                    if (treatment.CriterionLibraryScenarioSelectableTreatmentJoin != null)
+                    {
+                        var criterionLibraryId = Guid.NewGuid();
+                        treatment.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary.Id = criterionLibraryId;
+                        treatment.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibraryId = criterionLibraryId;
+                        treatment.CriterionLibraryScenarioSelectableTreatmentJoin.ScenarioSelectableTreatmentId = newTreatmentId;
+
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                treatment.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary,
+                                _unitOfWork.UserEntity?.Id);
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(treatment.CriterionLibraryScenarioSelectableTreatmentJoin,
+                                _unitOfWork.UserEntity?.Id);
+                    }
+
+                    if (treatment.ScenarioTreatmentConsequences.Any())
+                    {
+                        treatment.ScenarioTreatmentConsequences.ForEach(consequence =>
+                        {
+                            var newConsequenceId = Guid.NewGuid();
+                            consequence.Id = newConsequenceId;
+                            consequence.Attribute = null;
+                            _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(consequence,
+                                _unitOfWork.UserEntity?.Id);
+
+                            if (consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin != null)
+                            {
+                                _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin,
+                                _unitOfWork.UserEntity?.Id);
+
+                                _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin.ScenarioConditionalTreatmentConsequence,
+                                _unitOfWork.UserEntity?.Id);
+                            }
+
+                            if(consequence.ScenarioConditionalTreatmentConsequenceEquationJoin != null)
+                            {
+                                var newEquationId = Guid.NewGuid();
+                                consequence.ScenarioConditionalTreatmentConsequenceEquationJoin.EquationId = newEquationId;
+                                consequence.ScenarioConditionalTreatmentConsequenceEquationJoin.Equation.Id = newEquationId;
+
+                                consequence.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequenceId = newConsequenceId;
+                                
+                                _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                consequence.ScenarioConditionalTreatmentConsequenceEquationJoin,
+                                _unitOfWork.UserEntity?.Id);
+
+                                _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                consequence.ScenarioConditionalTreatmentConsequenceEquationJoin.Equation,
+                                _unitOfWork.UserEntity?.Id);
+                            }
+                        });
+                    }
+                    if (treatment.ScenarioTreatmentCosts.Any())
+                    {
+                        treatment.ScenarioTreatmentCosts.ForEach(cost =>
+                        {
+                            var newCostId = Guid.NewGuid();
+                            cost.Id = newCostId;
+                            cost.ScenarioTreatmentId = newTreatmentId;
+                            _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(cost,
+                                _unitOfWork.UserEntity?.Id);
+
+                            if(cost.CriterionLibraryScenarioTreatmentCostJoin != null)
+                            {
+                                cost.CriterionLibraryScenarioTreatmentCostJoin.ScenarioTreatmentCostId = newCostId;
+
+                                cost.CriterionLibraryScenarioTreatmentCostJoin.ScenarioTreatmentCost.Id = newCostId;
+                                cost.CriterionLibraryScenarioTreatmentCostJoin.ScenarioTreatmentCost.ScenarioTreatmentId = newTreatmentId;
+
+                                _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                cost.CriterionLibraryScenarioTreatmentCostJoin,
+                                _unitOfWork.UserEntity?.Id);
+
+                                _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                cost.CriterionLibraryScenarioTreatmentCostJoin.ScenarioTreatmentCost,
+                                _unitOfWork.UserEntity?.Id);
+                            }
+                            if (cost.ScenarioTreatmentCostEquationJoin != null)
+                            {
+                                var newEquationId = Guid.NewGuid();
+                                cost.ScenarioTreatmentCostEquationJoin.EquationId = newEquationId;
+                                cost.ScenarioTreatmentCostEquationJoin.Equation.Id = newEquationId;
+
+                                cost.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCostId = newCostId;
+
+                                _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                cost.ScenarioTreatmentCostEquationJoin,
+                                _unitOfWork.UserEntity?.Id);
+
+                                _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                cost.ScenarioTreatmentCostEquationJoin.Equation,
+                                _unitOfWork.UserEntity?.Id);
+                            }
+                        });
+                    }
+                    if (treatment.ScenarioTreatmentSchedulings.Any())
+                    {
+                        treatment.ScenarioTreatmentSchedulings.ForEach(scheduling =>
+                        {
+                            var newScheduleId = Guid.NewGuid();
+                            scheduling.Id = newScheduleId;
+                            scheduling.TreatmentId = newTreatmentId;
+
+                            _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                scheduling,
+                                _unitOfWork.UserEntity?.Id);
+                        });
+                    }
+                    if (treatment.ScenarioTreatmentSupersessions.Any())
+                    {
+                        treatment.ScenarioTreatmentSupersessions.ForEach(supersession =>
+                        {
+                            var newSupersessionId = Guid.NewGuid();
+                            supersession.Id = newSupersessionId;
+                            supersession.TreatmentId = newTreatmentId;
+
+                            _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                supersession,
+                                _unitOfWork.UserEntity?.Id);
+                        });
+                    }
+                });
             }
 
             if (simulationToClone.CommittedProjects.Any())

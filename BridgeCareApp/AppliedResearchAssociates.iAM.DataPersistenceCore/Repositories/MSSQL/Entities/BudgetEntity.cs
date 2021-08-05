@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -11,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             BudgetAmounts = new HashSet<BudgetAmountEntity>();
             BudgetPercentagePairs = new HashSet<BudgetPercentagePairEntity>();
             TreatmentBudgetJoins = new HashSet<SelectableTreatmentBudgetEntity>();
+            ScenarioSelectableTreatmentBudgetJoins = new HashSet<ScenarioSelectableTreatmentBudgetEntity>();
         }
 
         public Guid Id { get; set; }
@@ -28,6 +30,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<BudgetPercentagePairEntity> BudgetPercentagePairs { get; set; }
 
         public virtual ICollection<SelectableTreatmentBudgetEntity> TreatmentBudgetJoins { get; set; }
+
+        public virtual ICollection<ScenarioSelectableTreatmentBudgetEntity> ScenarioSelectableTreatmentBudgetJoins { get; set; }
 
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
     }

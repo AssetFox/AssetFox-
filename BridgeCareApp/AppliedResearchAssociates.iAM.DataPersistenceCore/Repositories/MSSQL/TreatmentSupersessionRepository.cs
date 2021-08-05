@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var supersessionEntities = treatmentSupersessionsPerTreatmentId.SelectMany(_ =>
                 _.Value.Select(__ =>
                 {
-                    var entity = __.ToEntity(_.Key);
+                    var entity = __.ToScenarioEntity(_.Key);
 
                     if (!__.Criterion.ExpressionIsBlank)
                     {

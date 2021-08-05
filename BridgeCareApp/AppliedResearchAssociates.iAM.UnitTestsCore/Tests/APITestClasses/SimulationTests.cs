@@ -132,10 +132,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var treatmentLibraryId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(
                 new TreatmentLibraryEntity {Id = treatmentLibraryId, Name = "Test Name"});
-            _testHelper.UnitOfWork.Context.AddEntity(new TreatmentLibrarySimulationEntity
-            {
-                TreatmentLibraryId = treatmentLibraryId, SimulationId = _testHelper.TestSimulation.Id
-            });
 
             var maintainableAssetId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(new MaintainableAssetEntity
@@ -456,58 +452,118 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 timer.Elapsed += delegate
                 {
                     var originalSimulation = _testHelper.UnitOfWork.Context.Simulation
-                        .Include(_ => _.AnalysisMethod)
-                        .ThenInclude(_ => _.Benefit)
-                        .Include(_ => _.AnalysisMethod)
-                        .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
-                        .Include(_ => _.InvestmentPlan)
-                        .Include(_ => _.BudgetLibrarySimulationJoin)
-                        .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
-                        .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
-                        .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
-                        .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
-                        .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
-                        .Include(_ => _.TreatmentLibrarySimulationJoin)
-                        .Include(_ => _.CommittedProjects)
-                        .ThenInclude(_ => _.CommittedProjectConsequences)
-                        .Include(_ => _.SimulationUserJoins)
-                        .Include(_ => _.PerformanceCurves)
-                        .ThenInclude(_ => _.Attribute)
-                        .Include(_ => _.PerformanceCurves)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        .Include(_ => _.PerformanceCurves)
-                        .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
-                        .ThenInclude(_ => _.Equation)
-                        .AsNoTracking()
-                        .Single(_ => _.Id == _testHelper.TestSimulation.Id);
+                    .Include(_ => _.AnalysisMethod)
+                    .ThenInclude(_ => _.Benefit)
+                    .Include(_ => _.AnalysisMethod)
+                    .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
+                    .Include(_ => _.InvestmentPlan)
+                    .Include(_ => _.BudgetLibrarySimulationJoin)
+                    .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
+                    .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
+                    .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
+                    .Include(_ => _.PerformanceCurves)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.PerformanceCurves)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.PerformanceCurves)
+                    .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
+                    .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
 
-                    var clonedSimulation = _testHelper.UnitOfWork.Context.Simulation
-                        .Include(_ => _.AnalysisMethod)
-                        .ThenInclude(_ => _.Benefit)
-                        .Include(_ => _.AnalysisMethod)
-                        .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
-                        .Include(_ => _.InvestmentPlan)
-                        .Include(_ => _.BudgetLibrarySimulationJoin)
-                        .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
-                        .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
-                        .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
-                        .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
-                        .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
-                        .Include(_ => _.TreatmentLibrarySimulationJoin)
-                        .Include(_ => _.CommittedProjects)
-                        .ThenInclude(_ => _.CommittedProjectConsequences)
-                        .Include(_ => _.SimulationUserJoins)
-                        .Include(_ => _.PerformanceCurves)
-                        .ThenInclude(_ => _.Attribute)
-                        .Include(_ => _.PerformanceCurves)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        .Include(_ => _.PerformanceCurves)
-                        .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
-                        .ThenInclude(_ => _.Equation)
-                        .AsNoTracking()
-                        .Single(_ => _.Id == dto.Id);
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentBudgetJoins)
+                    .ThenInclude(_ => _.Budget)
+                    .ThenInclude(_ => _.BudgetAmounts)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                    .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
+
+                    .Include(_ => _.CommittedProjects)
+                    .ThenInclude(_ => _.CommittedProjectConsequences)
+                    .Include(_ => _.SimulationUserJoins)
+                    .Single(_ => _.Id == _testHelper.TestSimulation.Id);
+
+                var clonedSimulation = _testHelper.UnitOfWork.Context.Simulation
+                    .Include(_ => _.AnalysisMethod)
+                    .ThenInclude(_ => _.Benefit)
+                    .Include(_ => _.AnalysisMethod)
+                    .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
+                    .Include(_ => _.InvestmentPlan)
+                    .Include(_ => _.BudgetLibrarySimulationJoin)
+                    .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
+                    .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
+                    .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
+                    .Include(_ => _.PerformanceCurves)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.PerformanceCurves)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.PerformanceCurves)
+                    .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
+                    .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
+
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentBudgetJoins)
+                    .ThenInclude(_ => _.Budget)
+                    .ThenInclude(_ => _.BudgetAmounts)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                    .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
+                    .Include(_ => _.SelectableTreatment)
+                    .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
+
+                    .Include(_ => _.CommittedProjects)
+                    .ThenInclude(_ => _.CommittedProjectConsequences)
+                    .Include(_ => _.SimulationUserJoins)
+                    .Single(_ => _.Id == dto.Id);
 
                     Assert.NotEqual(clonedSimulation.Id, originalSimulation.Id);
                     Assert.Equal(clonedSimulation.Name, originalSimulation.Name);
@@ -532,8 +588,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         originalSimulation.RemainingLifeLimitLibrarySimulationJoin.RemainingLifeLimitLibraryId);
                     Assert.Equal(clonedSimulation.TargetConditionGoalLibrarySimulationJoin.TargetConditionGoalLibraryId,
                         originalSimulation.TargetConditionGoalLibrarySimulationJoin.TargetConditionGoalLibraryId);
-                    Assert.Equal(clonedSimulation.TreatmentLibrarySimulationJoin.TreatmentLibraryId,
-                        originalSimulation.TreatmentLibrarySimulationJoin.TreatmentLibraryId);
                     var clonedCommittedProjects = clonedSimulation.CommittedProjects.ToList();
                     var originalCommittedProjects = originalSimulation.CommittedProjects.ToList();
                     Assert.Equal(clonedCommittedProjects.Count, originalCommittedProjects.Count);
@@ -593,6 +647,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Assert.NotEmpty(equationIdsDiff);
                     Assert.Equal(equationIdsDiff.Count, clonedCriteria.Count);
                     Assert.True(clonedEquations.All(_ => equationIdsDiff.Contains(_.Id)));
+
+                    Assert.Equal(clonedSimulation.SelectableTreatment.Count, originalSimulation.SelectableTreatment.Count);
+                    var clonedTreatmentIds = clonedSimulation.SelectableTreatment.Select(_ => _.Id).ToList();
+                    var originalTreatmentIds = originalSimulation.SelectableTreatment.Select(_ => _.Id).ToList();
+                    var TreatmentIdsDiff = clonedTreatmentIds.Except(originalTreatmentIds).ToList();
+                    Assert.NotEmpty(TreatmentIdsDiff);
+                    Assert.Equal(TreatmentIdsDiff.Count, clonedSimulation.SelectableTreatment.Count);
+                    Assert.True(clonedSimulation.SelectableTreatment.All(_ => TreatmentIdsDiff.Contains(_.Id)));
+
+                    clonedCriteria =
+                        clonedSimulation.SelectableTreatment.Where(_ =>
+                            _.CriterionLibraryScenarioSelectableTreatmentJoin != null)
+                            .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary).ToList();
+                    originalCriteria =
+                        originalSimulation.SelectableTreatment.Where(_ =>
+                                _.CriterionLibraryScenarioSelectableTreatmentJoin != null)
+                            .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary).ToList();
+                    Assert.Equal(clonedCriteria.Count, originalCriteria.Count);
+
+                    clonedCriteriaIds = clonedCriteria.Select(_ => _.Id).ToList();
+                    originalCriteriaIds = originalCriteria.Select(_ => _.Id).ToList();
+                    criteriaIdsDiff = clonedCriteriaIds.Except(originalCriteriaIds).ToList();
+                    Assert.NotEmpty(criteriaIdsDiff);
+                    Assert.Equal(criteriaIdsDiff.Count, clonedCriteria.Count);
+                    Assert.True(clonedCriteria.All(_ => criteriaIdsDiff.Contains(_.Id)));
+                    //[TODO]: add more scenarios for the treatment
                 };
             }
             finally

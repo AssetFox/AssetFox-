@@ -1,6 +1,6 @@
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { AxiosPromise } from 'axios';
-import { BudgetLibrary, InvestmentPlan } from '@/shared/models/iAM/investment';
+import { BudgetLibrary, Investment } from '@/shared/models/iAM/investment';
 
 export default class InvestmentService {
     static getInvestment(scenarioId: string): AxiosPromise {
@@ -10,16 +10,23 @@ export default class InvestmentService {
     }
 
     static upsertInvestment(
-        budgetLibrary: BudgetLibrary,
-        investmentPlan: InvestmentPlan,
+        investment: Investment,
         scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.Investment}/UpsertInvestment/${scenarioId}`,
-            {
-                budgetLibrary: budgetLibrary,
-                investmentPlan: investmentPlan,
-            },
+            investment,
+        );
+    }
+
+    static getBudgetLibraries(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Investment}/GetBudgetLibraries/`);
+    }
+
+    static upsertBudgetLibrary(budgetLibrary: BudgetLibrary): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.Investment}/UpsertBudgetLibrary`,
+            budgetLibrary,
         );
     }
 
@@ -36,31 +43,40 @@ export default class InvestmentService {
     }
 
     static exportInvestmentBudgets(
-        libraryId: string,
-        scenarioId: string,
+        id: string,
+        forScenario: boolean = false,
     ): AxiosPromise {
-        return coreAxiosInstance.get(
-            `${API.Investment}/ExportInvestmentBudgetsExcelFile/${libraryId}/${scenarioId}`,
-        );
+        return forScenario
+            ? coreAxiosInstance.get(
+                  `${API.Investment}/ExportScenarioInvestmentBudgetsExcelFile/${id}`,
+              )
+            : coreAxiosInstance.get(
+                  `${API.Investment}/ExportLibraryInvestmentBudgetsExcelFile/${id}`,
+              );
     }
 
     static importInvestmentBudgets(
         file: File,
         overwriteBudgets: boolean,
-        libraryId: string,
-        scenarioId: string,
+        id: string,
+        forScenario: boolean = false,
     ) {
         let formData = new FormData();
 
         formData.append('file', file);
         formData.append('overwriteBudgets', overwriteBudgets ? '1' : '0');
-        formData.append('libraryId', libraryId);
-        formData.append('simulationId', scenarioId);
+        formData.append(forScenario ? 'simulationId' : 'libraryId', id);
 
-        return coreAxiosInstance.post(
-            `${API.Investment}/ImportInvestmentBudgetsExcelFile`,
-            formData,
-            { headers: { 'Content-Type': 'multipart/form-data' } },
-        );
+        return forScenario
+            ? coreAxiosInstance.post(
+                  `${API.Investment}/ImportScenarioInvestmentBudgetsExcelFile`,
+                  formData,
+                  { headers: { 'Content-Type': 'multipart/form-data' } },
+              )
+            : coreAxiosInstance.post(
+                  `${API.Investment}/ImportLibraryInvestmentBudgetsExcelFile`,
+                  formData,
+                  { headers: { 'Content-Type': 'multipart/form-data' } },
+              );
     }
 }

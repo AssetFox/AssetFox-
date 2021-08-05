@@ -32,7 +32,7 @@ namespace BridgeCareCore.Services
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new RowNotInTableException($"No simulation found for given scenario.");
             }
 
             if (!_unitOfWork.Context.Simulation.Any(_ =>

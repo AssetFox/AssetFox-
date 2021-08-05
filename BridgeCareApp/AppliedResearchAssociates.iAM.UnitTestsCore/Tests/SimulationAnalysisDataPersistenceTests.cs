@@ -3,7 +3,7 @@ using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Domains;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using MoreLinq.Extensions;
 using Newtonsoft.Json;
 using Xunit;

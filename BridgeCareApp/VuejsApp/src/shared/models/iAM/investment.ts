@@ -1,11 +1,14 @@
-import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
-import {getBlankGuid} from '@/shared/utils/uuid-utils';
-import {clone} from 'ramda';
+import {
+    CriterionLibrary,
+    emptyCriterionLibrary,
+} from '@/shared/models/iAM/criteria';
+import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import { clone } from 'ramda';
 import moment from 'moment';
 
 export interface Investment {
     investmentPlan: InvestmentPlan;
-    budgetLibraries: BudgetLibrary[];
+    scenarioBudgets: Budget[];
 }
 
 export interface BudgetAmount {
@@ -50,26 +53,41 @@ export interface SimpleBudgetDetail {
     name: string;
 }
 
+export interface InvestmentBudgetFileImport {
+    file: File;
+    overwriteBudgets: boolean;
+}
+
+export interface LibraryInvestmentBudgetFileImport
+    extends InvestmentBudgetFileImport {
+    libraryId: string;
+}
+
+export interface ScenarioInvestmentBudgetFileImport
+    extends InvestmentBudgetFileImport {
+    scenarioId: string;
+}
+
 export const emptyBudgetLibrary: BudgetLibrary = {
     id: getBlankGuid(),
     name: '',
     description: '',
     budgets: [],
-    appliedScenarioIds: []
+    appliedScenarioIds: [],
 };
 
 export const emptyBudget: Budget = {
     id: getBlankGuid(),
     name: '',
     budgetAmounts: [],
-    criterionLibrary: clone(emptyCriterionLibrary)
+    criterionLibrary: clone(emptyCriterionLibrary),
 };
 
 export const emptyBudgetAmount: BudgetAmount = {
     id: getBlankGuid(),
     budgetName: '',
     year: moment().year(),
-    value: 0
+    value: 0,
 };
 
 export const emptyInvestmentPlan: InvestmentPlan = {
@@ -77,5 +95,5 @@ export const emptyInvestmentPlan: InvestmentPlan = {
     firstYearOfAnalysisPeriod: moment().year(),
     inflationRatePercentage: 0,
     minimumProjectCostLimit: 500000,
-    numberOfYearsInAnalysisPeriod: 1
+    numberOfYearsInAnalysisPeriod: 1,
 };

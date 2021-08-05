@@ -5,6 +5,8 @@ import {
     emptyInvestmentPlan,
     Investment,
     InvestmentPlan,
+    LibraryInvestmentBudgetFileImport,
+    ScenarioInvestmentBudgetFileImport,
     SimpleBudgetDetail,
 } from '@/shared/models/iAM/investment';
 import InvestmentService from '@/services/investment.service';
@@ -34,6 +36,7 @@ const state = {
     selectedBudgetLibrary: clone(emptyBudgetLibrary) as BudgetLibrary,
     investmentPlan: clone(emptyInvestmentPlan) as InvestmentPlan,
     scenarioSimpleBudgetDetails: [] as SimpleBudgetDetail[],
+    scenarioBudgets: [] as Budget[],
 };
 
 const mutations = {
@@ -50,7 +53,7 @@ const mutations = {
             state.selectedBudgetLibrary = clone(emptyBudgetLibrary);
         }
     },
-    addedOrUpdatedBudgetLibraryMutator(state: any, library: BudgetLibrary) {
+    budgetLibraryMutator(state: any, library: BudgetLibrary) {
         state.budgetLibraries = any(
             propEq('id', library.id),
             state.budgetLibraries,
@@ -62,14 +65,6 @@ const mutations = {
               )
             : append(library, state.budgetLibraries);
     },
-    deletedBudgetLibraryMutator(state: any, deletedLibraryId: string) {
-        if (any(propEq('id', deletedLibraryId), state.budgetLibraries)) {
-            state.budgetLibraries = reject(
-                (library: BudgetLibrary) => deletedLibraryId === library.id,
-                state.budgetLibraries,
-            );
-        }
-    },
     investmentPlanMutator(state: any, investmentPlan: InvestmentPlan) {
         state.investmentPlan = clone(investmentPlan);
     },
@@ -79,22 +74,8 @@ const mutations = {
     ) {
         state.scenarioSimpleBudgetDetails = clone(simpleBudgetDetails);
     },
-    updatedBudgetsCriterionLibrariesMutator(
-        state: any,
-        criterionLibrary: CriterionLibrary,
-    ) {
-        state.budgetLibraries = state.budgetLibraries.map(
-            (library: BudgetLibrary) => ({
-                ...library,
-                budgets: library.budgets.map((budget: Budget) => ({
-                    ...budget,
-                    criterionLibrary:
-                        budget.criterionLibrary.id == criterionLibrary.id
-                            ? clone(criterionLibrary)
-                            : budget.criterionLibrary,
-                })),
-            }),
-        );
+    scenarioBudgetsMutator(state: any, budgets: Budget[]) {
+        state.scenarioBudgets = clone(budgets);
     },
 };
 
@@ -102,20 +83,14 @@ const actions = {
     selectBudgetLibrary({ commit }: any, payload: any) {
         commit('selectedBudgetLibraryMutator', payload.libraryId);
     },
-    updateBudgetsCriterionLibraries({ commit }: any, payload: any) {
-        commit(
-            'updatedBudgetsCriterionLibrariesMutator',
-            payload.criterionLibrary,
-        );
-    },
     async getInvestment({ commit }: any, payload: any) {
         await InvestmentService.getInvestment(payload.scenarioId).then(
             (response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const investmentData: Investment = response.data as Investment;
                     commit(
-                        'budgetLibrariesMutator',
-                        investmentData.budgetLibraries,
+                        'scenarioBudgetsMutator',
+                        investmentData.scenarioBudgets,
                     );
                     commit(
                         'investmentPlanMutator',
@@ -127,63 +102,71 @@ const actions = {
     },
     async upsertInvestment({ dispatch, commit }: any, payload: any) {
         await InvestmentService.upsertInvestment(
-            payload.library,
-            payload.investmentPlan,
+            payload.investment,
             payload.scenarioId,
         ).then((response: AxiosResponse) => {
             if (
                 hasValue(response, 'status') &&
                 http2XX.test(response.status.toString())
             ) {
-                if (
-                    payload.scenarioId !== getBlankGuid() &&
-                    hasAppliedLibrary(state.budgetLibraries, payload.scenarioId)
-                ) {
-                    const unAppliedLibrary: BudgetLibrary = unapplyLibrary(
-                        getAppliedLibrary(
-                            state.budgetLibraries,
-                            payload.scenarioId,
-                        ),
-                        payload.scenarioId,
-                    );
-                    commit(
-                        'addedOrUpdatedBudgetLibraryMutator',
-                        unAppliedLibrary,
-                    );
-                }
+                commit(
+                    'scenarioBudgetsMutator',
+                    payload.investment.scenarioBudgets,
+                );
 
-                const library: BudgetLibrary = {
-                    ...payload.library,
-                    appliedScenarioIds:
-                        payload.scenarioId !== getBlankGuid() &&
-                        payload.library.appliedScenarioIds.indexOf(
-                            payload.scenarioId,
-                        ) === -1
-                            ? append(
-                                  payload.scenarioId,
-                                  payload.library.appliedScenarioIds,
-                              )
-                            : payload.library.appliedScenarioIds,
-                };
-
-                commit('addedOrUpdatedBudgetLibraryMutator', library);
-                commit('selectedBudgetLibraryMutator', library.id);
                 commit('investmentPlanMutator', payload.investmentPlan);
 
                 dispatch('setSuccessMessage', {
-                    message: 'Upsertted investment data',
+                    message: 'Modified investment',
                 });
             }
         });
     },
-    async deleteBudgetLibrary({ dispatch, commit, state }: any, payload: any) {
-        await InvestmentService.deleteBudgetLibrary(payload.libraryId).then(
+    async getBudgetLibraries({ commit }: any) {
+        await InvestmentService.getBudgetLibraries().then(
+            (response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit(
+                        'budgetLibrariesMutator',
+                        response.data as BudgetLibrary[],
+                    );
+                }
+            },
+        );
+    },
+    async upsertBudgetLibrary(
+        { dispatch, commit }: any,
+        budgetLibrary: BudgetLibrary,
+    ) {
+        await InvestmentService.upsertBudgetLibrary(budgetLibrary).then(
             (response: AxiosResponse) => {
                 if (
                     hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
-                    commit('deletedBudgetLibraryMutator', payload.libraryId);
+                    dispatch('setSuccessMessage', {
+                        message: 'Modified budget library',
+                    });
+                }
+            },
+        );
+    },
+    async deleteBudgetLibrary(
+        { dispatch, commit, state }: any,
+        libraryId: string,
+    ) {
+        await InvestmentService.deleteBudgetLibrary(libraryId).then(
+            (response: AxiosResponse) => {
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    const budgetLibraries: BudgetLibrary[] = reject(
+                        propEq('id', libraryId),
+                        state.budgetLibraries,
+                    );
+                    commit('budgetLibrariesMutator', budgetLibraries);
+
                     dispatch('setSuccessMessage', {
                         message: 'Deleted budget library',
                     });
@@ -203,16 +186,37 @@ const actions = {
             }
         });
     },
-    async importInvestmentBudgetsFile({ commit, dispatch }: any, payload: any) {
+    async importScenarioInvestmentBudgetsFile(
+        { commit, dispatch }: any,
+        payload: any,
+    ) {
         await InvestmentService.importInvestmentBudgets(
             payload.file,
             payload.overwriteBudgets,
-            payload.libraryId,
-            payload.scenarioId,
+            payload.id,
+            true,
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                const budgets: Budget[] = response.data as Budget[];
+                commit('scenarioBudgetsMutator', budgets);
+                dispatch('setSuccessMessage', {
+                    message: 'Investment budgets file imported',
+                });
+            }
+        });
+    },
+    async importLibraryInvestmentBudgetsFile(
+        { commit, dispatch }: any,
+        payload: any,
+    ) {
+        await InvestmentService.importInvestmentBudgets(
+            payload.file,
+            payload.overwriteBudgets,
+            payload.id,
         ).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
                 const library: BudgetLibrary = response.data as BudgetLibrary;
-                commit('addedOrUpdatedBudgetLibraryMutator', library);
+                commit('budgetLibraryMutator', library);
                 commit('selectedBudgetLibraryMutator', library.id);
                 dispatch('setSuccessMessage', {
                     message: 'Investment budgets file imported',

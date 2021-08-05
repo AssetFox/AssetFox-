@@ -78,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new RowNotInTableException($"No simulation found for given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking().Single(_ => _.Id == simulationId);
@@ -109,7 +109,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException($"No simulation found for the given scenario.");
             }
 
             var users = _unitOfWork.Context.User.ToList();
@@ -127,7 +127,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException($"No simulation found for the given scenario.");
             }
 
             var simulationToClone = _unitOfWork.Context.Simulation.AsNoTracking()
@@ -136,7 +136,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.AnalysisMethod)
                 .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
                 .Include(_ => _.InvestmentPlan)
-                .Include(_ => _.BudgetLibrarySimulationJoin)
+                .Include(_ => _.Budgets)
+                .ThenInclude(_ => _.ScenarioBudgetAmounts)
+                .Include(_ => _.Budgets)
+                .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
                 .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
                 .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
@@ -197,12 +201,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .ReInitializeAllEntityBaseProperties(simulationToClone.InvestmentPlan, _unitOfWork.UserEntity?.Id);
             }
 
-            if (simulationToClone.BudgetLibrarySimulationJoin != null)
+            if (simulationToClone.Budgets.Any())
             {
-                simulationToClone.BudgetLibrarySimulationJoin.SimulationId = newSimulationId;
-                _unitOfWork.Context
-                    .ReInitializeAllEntityBaseProperties(simulationToClone.BudgetLibrarySimulationJoin,
-                        _unitOfWork.UserEntity?.Id);
+                simulationToClone.Budgets.ForEach(budget =>
+                {
+                    var newBudgetId = Guid.NewGuid();
+                    budget.Id = newBudgetId;
+                    budget.SimulationId = simulationId;
+                    _unitOfWork.Context
+                        .ReInitializeAllEntityBaseProperties(budget, _unitOfWork.UserEntity?.Id);
+
+                    if (budget.CriterionLibraryScenarioBudgetJoin != null)
+                    {
+                        var criterionLibraryId = Guid.NewGuid();
+                        budget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary.Id = criterionLibraryId;
+                        budget.CriterionLibraryScenarioBudgetJoin.CriterionLibraryId = criterionLibraryId;
+                        budget.CriterionLibraryScenarioBudgetJoin.ScenarioBudgetId = newBudgetId;
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                budget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary,
+                                _unitOfWork.UserEntity?.Id);
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(budget.CriterionLibraryScenarioBudgetJoin,
+                                _unitOfWork.UserEntity?.Id);
+                    }
+                });
             }
 
             if (simulationToClone.BudgetPriorityLibrarySimulationJoin != null)
@@ -371,6 +394,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 return;
             }
+
+            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
+
             _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
         }
 

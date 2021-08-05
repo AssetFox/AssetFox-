@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new RowNotInTableException($"No simulation found for given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
@@ -81,15 +81,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.InvestmentPlan
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.BudgetLibrarySimulationJoin)
-                .ThenInclude(_ => _.BudgetLibrary)
                 .ThenInclude(_ => _.Budgets)
-                .ThenInclude(_ => _.BudgetAmounts)
+                .ThenInclude(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.BudgetLibrarySimulationJoin)
-                .ThenInclude(_ => _.BudgetLibrary)
                 .ThenInclude(_ => _.Budgets)
-                .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
+                .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Simulation)
                 .ThenInclude(_ => _.CashFlowRuleLibrarySimulationJoin)
@@ -107,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .FillSimulationInvestmentPlan(simulation);
         }
 
-        public InvestmentPlanDTO ScenarioInvestmentPlan(Guid simulationId)
+        public InvestmentPlanDTO GetInvestmentPlan(Guid simulationId)
         {
             if (simulationId == Guid.Empty)
             {
@@ -116,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException($"No simulation found for the given scenario.");
             }
 
             var investmentPlan =
@@ -131,7 +127,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
-                    throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                    throw new RowNotInTableException($"No simulation found for the given scenario.");
                 }
 
                 var investmentPlanEntity = dto.ToEntity(simulationId);

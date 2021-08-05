@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.SignalR;
 

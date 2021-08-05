@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException($"No simulation found for the given scenario.");
             }
 
             var cashFlowRuleLibraryEntity = new CashFlowRuleLibraryEntity { Id = Guid.NewGuid(), Name = name };
@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException($"No simulation found for the given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation
@@ -112,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
-                    throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                    throw new RowNotInTableException($"No simulation found for the given scenario.");
                 }
 
                 _unitOfWork.Context.DeleteEntity<CashFlowRuleLibrarySimulationEntity>(_ => _.SimulationId == simulationId);

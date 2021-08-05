@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException($"No simulation found for the given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation
@@ -131,7 +131,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void JoinTreatmentsWithBudgets(Dictionary<Guid, List<Guid>> budgetIdsPerTreatmentId)
         {
-            var treatmentBudgetJoins = new List<SelectableTreatmentBudgetEntity>();
+            var treatmentBudgetJoins = new List<SelectableTreatmentScenarioBudgetEntity>();
 
             budgetIdsPerTreatmentId.Keys.ForEach(treatmentId =>
             {
@@ -145,10 +145,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     throw new RowNotInTableException("No budgets for treatments were found.");
                 }
 
-                treatmentBudgetJoins.AddRange(budgetIds.Select(budgetId => new SelectableTreatmentBudgetEntity
+                treatmentBudgetJoins.AddRange(budgetIds.Select(budgetId => new SelectableTreatmentScenarioBudgetEntity
                 {
                     SelectableTreatmentId = treatmentId,
-                    BudgetId = budgetId
+                    ScenarioBudgetId = budgetId
                 }));
             });
 
@@ -167,8 +167,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.TreatmentLibrary)
                 .ThenInclude(_ => _.Treatments)
                 .ThenInclude(_ => _.TreatmentBudgetJoins)
-                .ThenInclude(_ => _.Budget)
-                .ThenInclude(_ => _.BudgetAmounts)
+                .ThenInclude(_ => _.ScenarioBudget)
+                .ThenInclude(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.TreatmentLibrarySimulationJoin)
                 .ThenInclude(_ => _.TreatmentLibrary)
                 .ThenInclude(_ => _.Treatments)
@@ -247,7 +247,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Treatments)
                 .ThenInclude(_ => _.TreatmentBudgetJoins)
-                .ThenInclude(_ => _.Budget)
+                .ThenInclude(_ => _.ScenarioBudget)
                 .Include(_ => _.Treatments)
                 .ThenInclude(_ => _.CriterionLibrarySelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
@@ -266,7 +266,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
-                    throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                    throw new RowNotInTableException($"No simulation found for the given scenario.");
                 }
 
                 _unitOfWork.Context.DeleteEntity<TreatmentLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
@@ -310,7 +310,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
                     .TreatmentLibraryId == libraryId);
 
-            _unitOfWork.Context.DeleteAll<SelectableTreatmentBudgetEntity>(_ =>
+            _unitOfWork.Context.DeleteAll<SelectableTreatmentScenarioBudgetEntity>(_ =>
                 _.SelectableTreatment.TreatmentLibraryId == libraryId);
 
             _unitOfWork.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
@@ -340,7 +340,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 var treatmentBudgetJoinsToAdd = treatments.Where(_ => _.BudgetIds.Any()).SelectMany(_ =>
                     _.BudgetIds.Select(budgetId =>
-                        new SelectableTreatmentBudgetEntity { SelectableTreatmentId = _.Id, BudgetId = budgetId })).ToList();
+                        new SelectableTreatmentScenarioBudgetEntity { SelectableTreatmentId = _.Id, ScenarioBudgetId = budgetId })).ToList();
 
                 _unitOfWork.Context.AddAll(treatmentBudgetJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }

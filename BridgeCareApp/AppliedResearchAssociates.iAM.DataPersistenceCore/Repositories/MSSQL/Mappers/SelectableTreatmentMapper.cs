@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.TreatmentBudgetJoins.Any())
             {
-                var budgetIds = entity.TreatmentBudgetJoins.Select(_ => _.Budget.Id).ToList();
+                var budgetIds = entity.TreatmentBudgetJoins.Select(_ => _.ScenarioBudget.Id).ToList();
                 simulation.InvestmentPlan.Budgets.Where(_ => budgetIds.Contains(_.Id)).ToList()
                     .ForEach(budget => selectableTreatment.Budgets.Add(budget));
             }
@@ -80,8 +80,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static SimpleBudgetDetailDTO ToDto(this SelectableTreatmentBudgetEntity entity) =>
-            new SimpleBudgetDetailDTO { Id = entity.BudgetId, Name = entity.Budget.Name };
+        public static SimpleBudgetDetailDTO ToDto(this SelectableTreatmentScenarioBudgetEntity entity) =>
+            new SimpleBudgetDetailDTO { Id = entity.ScenarioBudgetId, Name = entity.ScenarioBudget.Name };
 
         public static TreatmentDTO ToDto(this SelectableTreatmentEntity entity) =>
             new TreatmentDTO
@@ -92,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                 ShadowForSameTreatment = entity.ShadowForSameTreatment,
                 BudgetIds = entity.TreatmentBudgetJoins.Any()
-                    ? entity.TreatmentBudgetJoins.Select(_ => _.BudgetId).ToList()
+                    ? entity.TreatmentBudgetJoins.Select(_ => _.ScenarioBudgetId).ToList()
                     : new List<Guid>(),
                 Costs = entity.TreatmentCosts.Any()
                     ? entity.TreatmentCosts.Select(_ => _.ToDto()).ToList()

@@ -51,7 +51,7 @@ namespace BridgeCareCore.Controllers
         [HttpGet]
         [Route("GetBudgetPriorityLibraries")]
         [Authorize]
-        public async Task<IActionResult> BudgetPriorityLibraries()
+        public async Task<IActionResult> GetBudgetPriorityLibraries()
         {
             try
             {

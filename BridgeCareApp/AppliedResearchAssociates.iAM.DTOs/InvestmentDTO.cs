@@ -6,6 +6,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
     {
         public InvestmentPlanDTO InvestmentPlan { get; set; }
 
-        public List<BudgetLibraryDTO> BudgetLibraries { get; set; }
+        public List<BudgetDTO> ScenarioBudgets { get; set; }
     }
 }

@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new RowNotInTableException($"No simulation found for given scenario.");
             }
 
             var budgetPriorityLibraryEntity = new BudgetPriorityLibraryEntity { Id = Guid.NewGuid(), Name = name };
@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new RowNotInTableException($"No simulation found for given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation
@@ -90,10 +90,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.BudgetPriorities)
                 .ThenInclude(_ => _.CriterionLibraryBudgetPriorityJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.BudgetPriorities)
-                .ThenInclude(_ => _.BudgetPercentagePairs)
-                .ThenInclude(_ => _.Budget)
-                .Include(_ => _.BudgetPriorityLibrarySimulationJoins)
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -108,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
-                    throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                    throw new RowNotInTableException($"No simulation found for the given scenario.");
                 }
 
                 _unitOfWork.Context.DeleteEntity<BudgetPriorityLibrarySimulationEntity>(_ => _.SimulationId == simulationId);

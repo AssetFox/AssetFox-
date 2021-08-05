@@ -5,12 +5,15 @@ using System.IO;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -19,9 +22,8 @@ using OfficeOpenXml;
 
 namespace BridgeCareCore.Controllers
 {
-    using InvestmentUpsertMethod = Action<Guid, UpsertInvestmentDataDTO>;
-    using InvestmentExportMethod = Func<Guid, Guid, FileInfoDTO>;
-    using InvestmentImportMethod = Func<bool, Guid, ExcelPackage, Guid, BudgetLibraryDTO>;
+    using InvestmentUpsertMethod = Action<Guid, InvestmentDTO>;
+    using InvestmentImportMethod = Func<bool, ExcelPackage, Guid, List<BudgetDTO>>;
 
 
     [Route("api/[controller]")]
@@ -30,7 +32,6 @@ namespace BridgeCareCore.Controllers
     {
         private static IInvestmentBudgetsService _investmentBudgetsService;
         private readonly IReadOnlyDictionary<string, InvestmentUpsertMethod> _investmentUpsertMethods;
-        private readonly IReadOnlyDictionary<string, InvestmentExportMethod> _investmentExportMethods;
         private readonly IReadOnlyDictionary<string, InvestmentImportMethod> _investmentImportMethods;
 
         public InvestmentController(IInvestmentBudgetsService investmentBudgetsService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
@@ -40,25 +41,20 @@ namespace BridgeCareCore.Controllers
             _investmentBudgetsService = investmentBudgetsService ??
                                         throw new ArgumentNullException(nameof(investmentBudgetsService));
             _investmentUpsertMethods = CreateUpsertMethods();
-            _investmentExportMethods = CreateExportMethods();
             _investmentImportMethods = CreateImportMethods();
         }
 
         private Dictionary<string, InvestmentUpsertMethod> CreateUpsertMethods()
         {
-            void UpsertAny(Guid simulationId, UpsertInvestmentDataDTO data)
+            void UpsertAny(Guid simulationId, InvestmentDTO data)
             {
-                UnitOfWork.BudgetRepo.UpsertBudgetLibrary(data.BudgetLibrary, simulationId);
-                UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(data.BudgetLibrary.Budgets, data.BudgetLibrary.Id);
+                UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(data.ScenarioBudgets, simulationId);
                 UnitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(data.InvestmentPlan, simulationId);
             }
 
-            void UpsertPermitted(Guid simulationId, UpsertInvestmentDataDTO data)
+            void UpsertPermitted(Guid simulationId, InvestmentDTO data)
             {
-                if (simulationId != Guid.Empty)
-                {
-                    CheckUserSimulationModifyAuthorization(simulationId);
-                }
+                CheckUserSimulationModifyAuthorization(simulationId);
                 UpsertAny(simulationId, data);
             }
 
@@ -71,49 +67,21 @@ namespace BridgeCareCore.Controllers
             };
         }
 
-        private Dictionary<string, InvestmentExportMethod> CreateExportMethods()
-        {
-            FileInfoDTO GetAny(Guid budgetLibraryId, Guid simulationId)
-            {
-                return _investmentBudgetsService.ExportInvestmentBudgetsFile(budgetLibraryId);
-            }
-
-            FileInfoDTO GetPermitted(Guid budgetLibraryId, Guid simulationId)
-            {
-                if (simulationId != Guid.Empty)
-                {
-                    CheckUserSimulationModifyAuthorization(simulationId);
-                }
-                return GetAny(budgetLibraryId, simulationId);
-            }
-
-            return new Dictionary<string, InvestmentExportMethod>
-            {
-                [Role.Administrator] = GetAny,
-                [Role.DistrictEngineer] = GetPermitted,
-                [Role.Cwopa] = GetPermitted,
-                [Role.PlanningPartner] = GetPermitted
-            };
-        }
-
         private Dictionary<string, InvestmentImportMethod> CreateImportMethods()
         {
-            BudgetLibraryDTO UpsertAny(bool overwriteBudgets, Guid budgetLibraryId, ExcelPackage excelPackage, Guid simulationId)
+            List<BudgetDTO> UpsertAny(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId)
             {
                 if (overwriteBudgets)
                 {
-                    UnitOfWork.Context.DeleteAll<BudgetEntity>(_ => _.BudgetLibrary.Id == budgetLibraryId);
+                    UnitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
                 }
-                return _investmentBudgetsService.ImportInvestmentBudgetsFile(budgetLibraryId, excelPackage);
+                return _investmentBudgetsService.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage);
             }
 
-            BudgetLibraryDTO UpsertPermitted(bool overwriteBudgets, Guid budgetLibraryId, ExcelPackage excelPackage, Guid simulationId)
+            List<BudgetDTO> UpsertPermitted(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId)
             {
-                if (simulationId != Guid.Empty)
-                {
-                    CheckUserSimulationModifyAuthorization(simulationId);
-                }
-                return UpsertAny(overwriteBudgets, budgetLibraryId, excelPackage, simulationId);
+                CheckUserSimulationModifyAuthorization(simulationId);
+                return UpsertAny(overwriteBudgets, excelPackage, simulationId);
             }
 
             return new Dictionary<string, InvestmentImportMethod>
@@ -134,14 +102,15 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    var budgetLibraries = UnitOfWork.BudgetRepo
-                        .BudgetLibrariesWithBudgets();
+                    var budgets = UnitOfWork.BudgetRepo
+                        .GetScenarioBudgets(simulationId);
 
                     var scenarioInvestmentPlan = UnitOfWork.InvestmentPlanRepo
-                        .ScenarioInvestmentPlan(simulationId);
+                        .GetInvestmentPlan(simulationId);
+
                     return new InvestmentDTO
                     {
-                        BudgetLibraries = budgetLibraries, InvestmentPlan = scenarioInvestmentPlan
+                        ScenarioBudgets = budgets, InvestmentPlan = scenarioInvestmentPlan
                     };
                 });
 
@@ -158,7 +127,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertInvestment/{simulationId}")]
         [Authorize]
-        public async Task<IActionResult> UpsertInvestment(Guid simulationId, [FromBody] UpsertInvestmentDataDTO data)
+        public async Task<IActionResult> UpsertInvestment(Guid simulationId, [FromBody] InvestmentDTO data)
         {
             try
             {
@@ -175,6 +144,49 @@ namespace BridgeCareCore.Controllers
             {
                 UnitOfWork.Rollback();
                 return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetBudgetLibraries")]
+        [Authorize]
+        public async Task<IActionResult> GetBudgetLibraries()
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.BudgetRepo.GetBudgetLibrariesWithBudgets());
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertBudgetLibrary")]
+        [Authorize]
+        public async Task<IActionResult> UpsertBudgetLibrary([FromBody] BudgetLibraryDTO data)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(data);
+                    UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(data.Budgets, data.Id);
+                    UnitOfWork.Commit();
+                });
+
+                return Ok();
             }
             catch (Exception e)
             {
@@ -227,9 +239,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("ImportInvestmentBudgetsExcelFile")]
+        [Route("ImportLibraryInvestmentBudgetsExcelFile")]
         [Authorize]
-        public async Task<IActionResult> ImportInvestmentBudgetsExcelFile()
+        public async Task<IActionResult> ImportLibraryInvestmentBudgetsExcelFile()
         {
             try
             {
@@ -258,15 +270,58 @@ namespace BridgeCareCore.Controllers
                     overwriteBudgets = ContextAccessor.HttpContext.Request.Form["overwriteBudgets"].ToString() == "1";
                 }
 
-                var simulationId = Guid.Empty;
-                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("simulationId"))
+                var result = await Task.Factory.StartNew(() =>
                 {
-                    simulationId = Guid.Parse(ContextAccessor.HttpContext.Request.Form["simulationId"].ToString());
+                    if (overwriteBudgets)
+                    {
+                        UnitOfWork.Context.DeleteAll<BudgetEntity>(_ => _.BudgetLibraryId == budgetLibraryId);
+                    }
+                    return _investmentBudgetsService.ImportLibraryInvestmentBudgetsFile(budgetLibraryId, excelPackage);
+                });
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("ImportScenarioInvestmentBudgetsExcelFile")]
+        [Authorize]
+        public async Task<IActionResult> ImportScenarioInvestmentBudgetsExcelFile()
+        {
+            try
+            {
+                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+                {
+                    throw new ConstraintException("Request MIME type is invalid.");
+                }
+
+                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+                {
+                    throw new ConstraintException("Investment budgets file not found.");
+                }
+
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("simulationId", out var id))
+                {
+                    throw new ConstraintException("Request contained no simulation id.");
+                }
+
+                var simulationId = Guid.Parse(id.ToString());
+
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+
+                var overwriteBudgets = false;
+                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("overwriteBudgets"))
+                {
+                    overwriteBudgets = ContextAccessor.HttpContext.Request.Form["overwriteBudgets"].ToString() == "1";
                 }
 
                 var result = await Task.Factory.StartNew(() =>
-                    _investmentImportMethods[UserInfo.Role](overwriteBudgets, budgetLibraryId, excelPackage,
-                        simulationId));
+                    _investmentImportMethods[UserInfo.Role](overwriteBudgets, excelPackage, simulationId));
 
                 return Ok(result);
             }
@@ -282,14 +337,37 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("ExportInvestmentBudgetsExcelFile/{budgetLibraryId}/{simulationId}")]
+        [Route("ExportScenarioInvestmentBudgetsExcelFile/{simulationId}")]
         [Authorize]
-        public async Task<IActionResult> ExportInvestmentBudgetsExcelFile(Guid budgetLibraryId, Guid simulationId)
+        public async Task<IActionResult> ExportScenarioInvestmentBudgetsExcelFile(Guid simulationId)
         {
             try
             {
                 var result =
-                    await Task.Factory.StartNew(() => _investmentExportMethods[UserInfo.Role](budgetLibraryId, simulationId));
+                    await Task.Factory.StartNew(() => _investmentBudgetsService.ExportScenarioInvestmentBudgetsFile(simulationId));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("ExportLibraryInvestmentBudgetsExcelFile/{budgetLibraryId}")]
+        [Authorize]
+        public async Task<IActionResult> ExportLibraryInvestmentBudgetsExcelFile(Guid budgetLibraryId)
+        {
+            try
+            {
+                var result =
+                    await Task.Factory.StartNew(() => _investmentBudgetsService.ExportLibraryInvestmentBudgetsFile(budgetLibraryId));
 
                 return Ok(result);
             }

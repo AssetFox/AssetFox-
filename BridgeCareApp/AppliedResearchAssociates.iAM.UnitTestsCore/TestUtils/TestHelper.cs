@@ -1,27 +1,22 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using BridgeCareCore.Hubs;
-using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
-using BridgeCareCore.Services.SummaryReport;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.SqlServer.Management.Smo;
 using Moq;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class TestHelper
     {

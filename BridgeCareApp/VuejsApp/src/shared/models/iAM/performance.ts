@@ -25,14 +25,6 @@ export interface PerformanceCurveLibrary {
     shared?: boolean;
 }
 
-export interface PerformanceCurveGridItem {
-    id: string;
-    name: string;
-    attribute: string;
-    equation: Equation;
-    criterion: CriterionLibrary;
-}
-
 export const emptyPerformanceCurve: PerformanceCurve = {
     id: getBlankGuid(),
     attribute: '',

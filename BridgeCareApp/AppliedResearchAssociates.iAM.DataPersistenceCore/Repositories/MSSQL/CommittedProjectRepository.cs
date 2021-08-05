@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -24,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new RowNotInTableException($"No simulation found for given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation
@@ -42,15 +44,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             //Area = asset.Area
                         }).ToList()
                     },
-                    BudgetLibrarySimulationJoin = new BudgetLibrarySimulationEntity
-                    {
-                        BudgetLibrary = new BudgetLibraryEntity
-                        {
-                            Budgets = simulation.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets
-                                .Select(budget => new BudgetEntity { Id = budget.Id, Name = budget.Name })
-                                .ToList()
-                        }
-                    }
+                    Budgets = simulation.Budgets
+                        .Select(budget => new ScenarioBudgetEntity { Id = budget.Id, Name = budget.Name })
+                        .ToList()
                 }).Single();
 
             // Update last modified date
@@ -58,12 +54,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (!simulationEntity.Network.MaintainableAssets.Any())
             {
-                throw new RowNotInTableException($"No maintainable assets found for simulation having id {simulationId}");
+                throw new RowNotInTableException($"No maintainable assets found for given scenario.");
             }
 
-            if (simulationEntity.BudgetLibrarySimulationJoin == null || !simulationEntity.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.Any())
+            if (!simulationEntity.Budgets.Any())
             {
-                throw new RowNotInTableException($"No budgets found for simulation having id {simulationId}");
+                throw new RowNotInTableException($"No budgets found for given scenario.");
             }
 
             var committedProjectEntities = committedProjects
@@ -129,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 LocationIdentifier = project.MaintainableAsset.MaintainableAssetLocation.LocationIdentifier
                             }
                         },
-                    Budget = new BudgetEntity {Name = project.Budget.Name},
+                    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
                         new CommittedProjectConsequenceEntity
                         {
@@ -150,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException($"No simulation found for the given scenario.");
             }
 
             return _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
@@ -161,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     ShadowForAnyTreatment = project.ShadowForAnyTreatment,
                     ShadowForSameTreatment = project.ShadowForSameTreatment,
                     Cost = project.Cost,
-                    Budget = new BudgetEntity {Name = project.Budget.Name},
+                    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
                     MaintainableAsset = new MaintainableAssetEntity
                     {
                         MaintainableAssetLocation = new MaintainableAssetLocationEntity
@@ -196,7 +192,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException($"No simulation found for the given scenario.");
             }
 
             if (!_unitOfWork.Context.CommittedProject.Any(_ => _.SimulationId == simulationId))
@@ -207,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
 
             // Update last modified date
-            var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
+            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
     }

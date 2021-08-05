@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 
@@ -14,9 +14,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<SimpleBudgetDetailDTO> ScenarioSimpleBudgetDetails(Guid simulationId);
 
-        List<BudgetLibraryDTO> BudgetLibrariesWithBudgets();
+        List<BudgetLibraryDTO> GetBudgetLibrariesWithBudgets();
 
-        void UpsertBudgetLibrary(BudgetLibraryDTO dto, Guid simulationId);
+        void UpsertBudgetLibrary(BudgetLibraryDTO dto);
 
         void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId);
 
@@ -25,5 +25,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<BudgetEntity> GetBudgetsWithBudgetAmounts(Guid libraryId);
 
         BudgetLibraryDTO GetBudgetLibraryWithBudgetsAndBudgetAmounts(Guid libraryId);
+
+        List<BudgetDTO> GetScenarioBudgets(Guid simulationId);
+
+        void UpsertOrDeleteScenarioBudgets(List<BudgetDTO> budgets, Guid simulationId);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics
 {
     public class KeySegmentDatum
     {

@@ -88,8 +88,8 @@
                   <v-tab-item>
                     <v-card>
                       <v-card-text class="card-tab-content">
-                        <BudgetsTab :selectedTreatmentBudgets="selectedTreatment.budgetIds" :isNewTreatment="selectedTreatment.isNew"
-                                    @onModifyBudgets="modifySelectedTreatmentBudgets"/>
+                        <BudgetsTab :selectedTreatmentBudgets="selectedTreatment.budgetIds" :isNewTreatment="selectedTreatment.isNew" :selectedTreatmentLibraryId="librarySelectItemValue" 
+                        :scenarioTreatmentLibraryId="scenarioTreatmentLibraryId" @onModifyBudgets="modifySelectedTreatmentBudgets"/>
                       </v-card-text>
                     </v-card>
                   </v-tab-item>
@@ -207,6 +207,7 @@ export default class TreatmentEditor extends Vue {
   hasSelectedLibrary: boolean = false;
   librarySelectItems: SelectItem[] = [];
   librarySelectItemValue: string | null = null;
+  scenarioTreatmentLibraryId: string | null = null;
   treatmentSelectItems: SelectItem[] = [];
   treatmentSelectItemValue: string | null = null;
   selectedTreatment: Treatment = clone(emptyTreatment);
@@ -256,6 +257,7 @@ export default class TreatmentEditor extends Vue {
 
     if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateTreatmentLibraries, this.selectedScenarioId)) {
       this.librarySelectItemValue = getAppliedLibraryId(this.stateTreatmentLibraries, this.selectedScenarioId);
+      this.scenarioTreatmentLibraryId = this.librarySelectItemValue;
     }
   }
 

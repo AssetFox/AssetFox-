@@ -51,6 +51,8 @@ export default class BudgetsTab extends Vue {
 
   @Prop() selectedTreatmentBudgets: string[];
   @Prop() isNewTreatment: boolean;
+  @Prop() scenarioTreatmentLibraryId: string;
+  @Prop() selectedTreatmentLibraryId: string;
   
   budgetHeaders: DataTableHeader[] = [
     {text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300px'}
@@ -64,15 +66,15 @@ export default class BudgetsTab extends Vue {
   }
 
   @Watch('selectedTreatmentBudgets')
-  onBudgetsTabDataChanged() {
-    // if it is a new treatment or no selectedTreatmentBudgets (Treatment selection changed)
-    if((this.isNewTreatment && this.selectedTreatmentBudgets.length == 0) || this.selectedTreatmentBudgets.length == 0){
+  onBudgetsTabDataChanged() { 
+    // if it is a new treatment or (Treatment library is not scenario's treatment library)
+    if((this.isNewTreatment && this.selectedTreatmentBudgets.length == 0) || this.scenarioTreatmentLibraryId != this.selectedTreatmentLibraryId){
       this.selectedBudgets = this.budgets;
     }
     else
     {
       this.selectedBudgets = this.budgets
-        .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id, this.selectedTreatmentBudgets));        
+        .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id, this.selectedTreatmentBudgets));
     }
   }
 

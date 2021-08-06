@@ -174,8 +174,7 @@
                                     <v-tab-item>
                                         <v-card>
                                             <v-card-text class="card-tab-content">
-                                                <BudgetsTab :selectedTreatmentBudgets="selectedTreatment.budgetIds" :isNewTreatment="selectedTreatment.isNew" 
-                                                :selectedTreatmentLibraryId="librarySelectItemValue" :scenarioTreatmentLibraryId="scenarioTreatmentLibraryId" 
+                                                <BudgetsTab :selectedTreatmentBudgets="selectedTreatment.budgetIds" :isNewTreatment="selectedTreatment.isNew"                                                  
                                                 @onModifyBudgets="modifySelectedTreatmentBudgets"/>
                                             </v-card-text>
                                         </v-card>
@@ -363,8 +362,7 @@ export default class TreatmentEditor extends Vue {
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
-    librarySelectItemValue: string | null = null;
-    scenarioTreatmentLibraryId: string | null = null;
+    librarySelectItemValue: string | null = null;    
     treatmentSelectItems: SelectItem[] = [];
     treatmentSelectItemValue: string | null = null;
     selectedTreatment: Treatment = clone(emptyTreatment);
@@ -423,11 +421,6 @@ export default class TreatmentEditor extends Vue {
                 value: library.id.toString(),
             }),
         );
-
-      if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateTreatmentLibraries, this.selectedScenarioId)) {
-      this.librarySelectItemValue = getAppliedLibraryId(this.stateTreatmentLibraries, this.selectedScenarioId);
-      this.scenarioTreatmentLibraryId = this.librarySelectItemValue;
-      }
     }
 
     @Watch('librarySelectItemValue')

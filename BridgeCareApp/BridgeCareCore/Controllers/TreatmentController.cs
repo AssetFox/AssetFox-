@@ -15,33 +15,32 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using TreatmentUpsertMethod = Action<Guid, TreatmentLibraryDTO>;
+    using ScenarioTreatmentUpsertMethod = Action<Guid, List<TreatmentDTO>>;
 
     [Route("api/[controller]")]
     [ApiController]
     public class TreatmentController : BridgeCareCoreBaseController
     {
-        private readonly IReadOnlyDictionary<string, TreatmentUpsertMethod> _treatmentUpsertMethods;
+        private readonly IReadOnlyDictionary<string, ScenarioTreatmentUpsertMethod> _scenarioTreatmentUpsertMethods;
 
         public TreatmentController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
-            _treatmentUpsertMethods = CreateUpsertMethods();
+            _scenarioTreatmentUpsertMethods = CreateScenarioUpsertMethods();
 
-        private Dictionary<string, TreatmentUpsertMethod> CreateUpsertMethods()
+        private Dictionary<string, ScenarioTreatmentUpsertMethod> CreateScenarioUpsertMethods()
         {
-            void UpsertAny(Guid simulationId, TreatmentLibraryDTO dto)
+            void UpsertAny(Guid simulationId, List<TreatmentDTO> dtos)
             {
-                UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto, simulationId);
-                UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
+                UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
             }
 
-            void UpsertPermitted(Guid simulationId, TreatmentLibraryDTO dto)
+            void UpsertPermitted(Guid simulationId, List<TreatmentDTO> dtos)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                UpsertAny(simulationId, dto);
+                UpsertAny(simulationId, dtos);
             }
 
-            return new Dictionary<string, TreatmentUpsertMethod>
+            return new Dictionary<string, ScenarioTreatmentUpsertMethod>
             {
                 [Role.Administrator] = UpsertAny,
                 [Role.DistrictEngineer] = UpsertPermitted
@@ -56,7 +55,25 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await Task.Factory.StartNew(() => UnitOfWork.SelectableTreatmentRepo
-                    .TreatmentLibrariesWithTreatments());
+                    .GetTreatmentLibrariesWithTreatments());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetScenarioSelectedTreatments/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetScenarioSelectedTreatments(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.SelectableTreatmentRepo
+                    .GetScenarioSelectableTreatments(simulationId));
                 return Ok(result);
             }
             catch (Exception e)
@@ -67,16 +84,17 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertTreatmentLibrary/{simulationId}")]
+        [Route("UpsertTreatmentLibrary")]
         [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
-        public async Task<IActionResult> UpsertTreatmentLibrary(Guid simulationId, TreatmentLibraryDTO dto)
+        public async Task<IActionResult> UpsertTreatmentLibrary(TreatmentLibraryDTO dto)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _treatmentUpsertMethods[UserInfo.Role](simulationId, dto);
+                    UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
+                    UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
                     UnitOfWork.Commit();
                 });
 
@@ -88,6 +106,34 @@ namespace BridgeCareCore.Controllers
                 return Unauthorized();
             }
             catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertScenarioSelectedTreatments/{simulationId}")]
+        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        public async Task<IActionResult> UpsertScenarioSelectedTreatments(Guid SimulationId, List<TreatmentDTO> dtos)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    _scenarioTreatmentUpsertMethods[UserInfo.Role](SimulationId, dtos);
+                    UnitOfWork.Commit();
+                });
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UnitOfWork.Rollback();
+                return Unauthorized();
+            }
+            catch(Exception e)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");

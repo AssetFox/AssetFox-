@@ -41,8 +41,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual TargetConditionGoalLibrarySimulationEntity TargetConditionGoalLibrarySimulationJoin { get; set; }
 
-        public virtual TreatmentLibrarySimulationEntity TreatmentLibrarySimulationJoin { get; set; }
-
         public virtual SimulationAnalysisDetailEntity SimulationAnalysisDetail { get; set; }
 
         public virtual SimulationReportDetailEntity SimulationReportDetail { get; set; }
@@ -56,6 +54,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<SimulationUserEntity> SimulationUserJoins { get; set; }
 
         public virtual ICollection<ScenarioPerformanceCurveEntity> PerformanceCurves { get; set; }
+
+
+        public virtual ICollection<ScenarioSelectableTreatmentEntity> SelectableTreatment { get; set; }
 
         public virtual ICollection<ScenarioBudgetEntity> Budgets { get; set; }
     }

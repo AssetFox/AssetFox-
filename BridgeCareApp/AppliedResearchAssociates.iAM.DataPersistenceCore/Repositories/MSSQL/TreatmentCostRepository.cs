@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.Domains;
@@ -74,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> treatmentCostPerTreatmentId, Guid libraryId)
         {
-            var treatmentCostEntities = treatmentCostPerTreatmentId.SelectMany(_ => _.Value.Select(__ => __.ToEntity(_.Key)))
+            var treatmentCostEntities = treatmentCostPerTreatmentId.SelectMany(_ => _.Value.Select(__ => __.ToLibraryEntity(_.Key)))
                 .ToList();
 
             var entityIds = treatmentCostEntities.Select(_ => _.Id).ToList();
@@ -118,6 +119,85 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         }).ToList();
 
                 _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, _unitOfWork.UserEntity?.Id);
+            }
+        }
+
+        public void UpsertOrDeleteScenarioTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> scenarioTreatmentCostPerTreatmentId,
+            Guid SimulationId)
+        {
+            var scenarioTreatmentCostEntities = scenarioTreatmentCostPerTreatmentId.SelectMany(_ => _.Value.Select(__ => __.ToScenarioEntity(_.Key)))
+                .ToList();
+
+            var entityIds = scenarioTreatmentCostEntities.Select(_ => _.Id).ToList();
+
+            var existingEntityIds = _unitOfWork.Context.ScenarioTreatmentCost
+                .Where(_ => _.ScenarioSelectableTreatment.SimulationId == SimulationId && entityIds.Contains(_.Id))
+                .Select(_ => _.Id).ToList();
+
+            _unitOfWork.Context.DeleteAll<ScenarioTreatmentCostEntity>(_ =>
+                _.ScenarioSelectableTreatment.SimulationId == SimulationId && !entityIds.Contains(_.Id));
+
+            _unitOfWork.Context.UpdateAll(scenarioTreatmentCostEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
+
+            _unitOfWork.Context.AddAll(scenarioTreatmentCostEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
+
+            var treatmentCosts = scenarioTreatmentCostPerTreatmentId.SelectMany(_ => _.Value).ToList();
+
+            if (treatmentCosts.Any(_ =>
+                _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression)))
+            {
+                var equationEntities = new List<EquationEntity>();
+                var equationJoinEntities = new List<ScenarioTreatmentCostEquationEntity>();
+
+                treatmentCosts.Where(_ =>
+                _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression))
+                    .ForEach(curve =>
+                    {
+                        var equationEntity = new EquationEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            Expression = curve.Equation.Expression,
+                        };
+                        equationEntities.Add(equationEntity);
+                        equationJoinEntities.Add(new ScenarioTreatmentCostEquationEntity
+                        {
+                            EquationId = equationEntity.Id,
+                            ScenarioTreatmentCostId = curve.Id
+                        });
+                    });
+                _unitOfWork.Context.AddAll(equationEntities, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(equationJoinEntities, _unitOfWork.UserEntity?.Id);
+            }
+
+            if (treatmentCosts.Any(_ =>
+                _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+            {
+                var criterionLibraryEntities = new List<CriterionLibraryEntity>();
+                var criterionLibraryJoinEntities = new List<CriterionLibraryScenarioTreatmentCostEntity>();
+
+                treatmentCosts
+                    .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary.Id != Guid.Empty &&
+                                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
+                    .ForEach(treatment =>
+                    {
+                        var criterionLibraryEntity = new CriterionLibraryEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            MergedCriteriaExpression = treatment.CriterionLibrary.MergedCriteriaExpression,
+                            Name = $"{treatment} Criterion",
+                            IsSingleUse = true
+                        };
+                        criterionLibraryEntities.Add(criterionLibraryEntity);
+                        criterionLibraryJoinEntities.Add(new CriterionLibraryScenarioTreatmentCostEntity
+                        {
+                            CriterionLibraryId = criterionLibraryEntity.Id,
+                            ScenarioTreatmentCostId = treatment.Id
+                        });
+                    });
+
+                _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
             }
         }
     }

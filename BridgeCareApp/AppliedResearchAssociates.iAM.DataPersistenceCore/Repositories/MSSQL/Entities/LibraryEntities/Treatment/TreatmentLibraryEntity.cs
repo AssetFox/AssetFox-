@@ -7,11 +7,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public TreatmentLibraryEntity()
         {
-            TreatmentLibrarySimulationJoins = new HashSet<TreatmentLibrarySimulationEntity>();
             Treatments = new HashSet<SelectableTreatmentEntity>();
         }
-
-        public virtual ICollection<TreatmentLibrarySimulationEntity> TreatmentLibrarySimulationJoins { get; set; }
 
         public virtual ICollection<SelectableTreatmentEntity> Treatments { get; set; }
     }

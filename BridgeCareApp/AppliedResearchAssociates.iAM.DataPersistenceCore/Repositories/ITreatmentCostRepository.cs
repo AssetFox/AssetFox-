@@ -12,5 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertOrDeleteTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> treatmentCostPerTreatmentId,
             Guid libraryId);
+
+        void UpsertOrDeleteScenarioTreatmentCosts(Dictionary<Guid, List<TreatmentCostDTO>> scenarioTreatmentCostPerTreatmentId,
+            Guid SimulationId);
     }
 }

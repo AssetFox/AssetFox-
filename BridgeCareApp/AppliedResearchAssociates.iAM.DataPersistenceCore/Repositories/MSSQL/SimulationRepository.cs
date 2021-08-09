@@ -124,6 +124,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return simulationEntity.ToDto(users.FirstOrDefault(_ => _.Id == simulationEntity.CreatedBy));
         }
 
+        public string GetSimulationName(Guid simulationId)
+        {
+            var selectedSimulation = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulationId);
+            // We either need to return null here or an error.  An empty string is possible for an existing simulation.
+            return (selectedSimulation == null) ? null : selectedSimulation.Name;
+        }
+
         public SimulationDTO CloneSimulation(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

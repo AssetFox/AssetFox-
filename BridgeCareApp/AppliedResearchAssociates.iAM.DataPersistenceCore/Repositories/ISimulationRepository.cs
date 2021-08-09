@@ -27,5 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void DeleteSimulation(Guid simulationId);
 
         void UpdateLastModifiedDate(SimulationEntity entity);
+
+        string GetSimulationName(Guid simulationId);
     }
 }

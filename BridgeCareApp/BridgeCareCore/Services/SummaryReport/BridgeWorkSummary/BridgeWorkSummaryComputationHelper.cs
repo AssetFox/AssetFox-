@@ -14,43 +14,39 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         public double CalculateTotalPoorBridgesDeckArea(SimulationYearDetail yearlyData) => CountAndAreaOfBridges.TotalPoorBridgesDeckArea(yearlyData.Sections);
 
-        internal int TotalInitialBridgeGoodCount(SimulationOutput reportOutputData)
-        {
-            var initialGoodCount = 0;
-            foreach (var initialSection in reportOutputData.InitialSectionSummaries)
-            {
-                initialGoodCount += IsMinCondGreaterOrEqualSevenInitialSection(initialSection) ? 1 : 0;
-            }
-            return initialGoodCount;
-        }
+        internal int TotalInitialBridgeGoodCount(SimulationOutput reportOutputData) => reportOutputData.InitialSectionSummaries.Where(_ => ConditionIsGood(_)).Count();
 
-        internal int CalculateTotalBridgeGoodCount(SimulationYearDetail yearlyData)
-        {
-            var goodCount = 0;
-            foreach (var section in yearlyData.Sections)
-            {
-                goodCount += IsMinCondGreaterOrEqualSevenSection(section) ? 1 : 0;
-            }
-            return goodCount;
-        }
+        internal int CalculateTotalBridgeGoodCount(SimulationYearDetail yearlyData) => yearlyData.Sections.Where(_ => ConditionIsGood(_)).Count();
 
-        internal double CalculatePoorDeckAreaForBPN13(List<SectionDetail> sectionDetails, string bpn)
+        internal int TotalInitialBridgeClosedCount(SimulationOutput reportOutputData) => reportOutputData.InitialSectionSummaries.Where(_ => IsClosed(_)).Count();
+
+        internal int CalculateTotalBridgeClosedCount(SimulationYearDetail yearlyData) => yearlyData.Sections.Where(_ => IsClosed(_)).Count();
+
+
+
+        internal double CalculatePoorCountOrAreaForBPN(List<SectionDetail> sectionDetails, string bpn, bool isCount)
         {
             var postedBridges = sectionDetails.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
-            var selectedBridges = postedBridges.FindAll(section => CountAndAreaOfBridges.IsMinCondLessThanFiveForSections(section));
+            var selectedBridges = postedBridges.FindAll(section => ConditionIsPoor(section));
+            if (isCount)
+            {
+                return selectedBridges.Count;
+            }
             return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
         }
 
-        internal double CalculatePoorDeckAreaForBPN2H(List<SectionDetail> sectionDetails)
+        internal double CalculatePoorCountOrAreaForBPN(List<SectionSummaryDetail> initialSectionSummaries, string bpn, bool isCount)
         {
-            var postedBridges = sectionDetails.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "2"
-            || b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "H");
-
-            var selectedBridges = postedBridges.FindAll(section => CountAndAreaOfBridges.IsMinCondLessThanFiveForSections(section));
+            var postedBridges = initialSectionSummaries.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
+            var selectedBridges = postedBridges.FindAll(section => ConditionIsPoor(section));
+            if (isCount)
+            {
+                return selectedBridges.Count;
+            }
             return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
         }
 
-        internal double CalculateMoneyNeededByBPN13(List<SectionDetail> sectionDetails, string bpn)
+        internal double CalculateMoneyNeededByBPN(List<SectionDetail> sectionDetails, string bpn)
         {
             var filteredBPNBridges = sectionDetails.FindAll(b =>
             b.TreatmentCause != TreatmentCause.NoSelection &&
@@ -62,51 +58,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             return totalCost;
         }
 
-        internal double CalculateMoneyNeededByBPN2H(List<SectionDetail> sectionDetails)
-        {
-            var filteredBPNBridges = sectionDetails.FindAll(
-                b => b.TreatmentCause != TreatmentCause.NoSelection && b.TreatmentOptions.Count > 0 && (
-                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "2" ||
-                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == "H")
-                );
-            var totalCost = filteredBPNBridges.Sum(_ => _.TreatmentOptions.FirstOrDefault(t =>
-            t.TreatmentName == _.AppliedTreatment).Cost);
-
-            return totalCost;
-        }
-
-        internal double CalculateMoneyNeededByRemainingBPN(List<SectionDetail> sectionDetails)
-        {
-            var filteredBPNBridges = sectionDetails.FindAll(
-                b => b.TreatmentCause != TreatmentCause.NoSelection && b.TreatmentOptions.Count > 0 &&
-                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "2" &&
-                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "H" && b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "1" &&
-                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "3"
-            );
-            var totalCost = filteredBPNBridges.Sum(_ => _.TreatmentOptions.FirstOrDefault(t =>
-            t.TreatmentName == _.AppliedTreatment).Cost);
-
-            return totalCost;
-        }
-
-        internal double CalculatePoorDeckAreaForRemainingBPN(List<SectionDetail> sectionDetails)
-        {
-            var postedBridges = sectionDetails.FindAll(
-                b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "2" &&
-                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "H" && b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "1" &&
-                b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] != "3"
-            );
-            var selectedBridges = postedBridges.FindAll(section => CountAndAreaOfBridges.IsMinCondLessThanFiveForSections(section));
-
-            return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
-        }
 
         internal int CalculateTotalBridgePoorCount(SimulationYearDetail yearlyData)
         {
             var poorCount = 0;
             foreach (var section in yearlyData.Sections)
             {
-                poorCount += CountAndAreaOfBridges.IsMinCondLessThanFiveForSections(section) ? 1 : 0;
+                poorCount += ConditionIsPoor(section) ? 1 : 0;
             }
             return poorCount;
         }
@@ -116,7 +74,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             double sum = 0;
             foreach (var initialSection in reportOutputData.InitialSectionSummaries)
             {
-                var area = IsMinCondGreaterOrEqualSevenInitialSection(initialSection) ? initialSection.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                var area = ConditionIsGood(initialSection) ? initialSection.ValuePerNumericAttribute["DECK_AREA"] : 0;
                 sum += area;
             }
 
@@ -136,23 +94,47 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             return sum;
         }
 
-        internal double CalculateTotalGoodDeckArea(SimulationYearDetail yearlyData)
+
+        internal double TotalInitialClosedDeckArea(SimulationOutput reportOutputData)
         {
             double sum = 0;
-            foreach (var section in yearlyData.Sections)
+            foreach (var initialSection in reportOutputData.InitialSectionSummaries)
             {
-                var area = IsMinCondGreaterOrEqualSevenSection(section) ? section.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                var area = IsClosed(initialSection) ? initialSection.ValuePerNumericAttribute["DECK_AREA"] : 0;
                 sum += area;
             }
 
             return sum;
         }
 
+        internal double CalculateTotalGoodDeckArea(SimulationYearDetail yearlyData)
+        {
+            double sum = 0;
+            foreach (var section in yearlyData.Sections)
+            {
+                var area = ConditionIsGood(section) ? section.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                sum += area;
+            }
+
+            return sum;
+        }
+
+        internal double CalculateTotalClosedDeckArea(SimulationYearDetail yearlyData)
+        {
+            double sum = 0;
+            foreach (var section in yearlyData.Sections)
+            {
+                var area = IsClosed(section) ? section.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                sum += area;
+            }
+
+            return sum;
+        }
         internal double SectionalNHSBridgeGoodCountOrArea(List<SectionDetail> sectionDetails, bool isCount)
         {
             var filteredSection = sectionDetails.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
              && numericValue > 0);
-            var goodSections = filteredSection.FindAll(s => IsMinCondGreaterOrEqualSevenSection(s));
+            var goodSections = filteredSection.FindAll(s => ConditionIsGood(s));
             if (isCount)
             {
                 return goodSections.Count;
@@ -186,19 +168,31 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         {
             var filteredSection = sectionDetails.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
             && numericValue > 0);
-            var poorSections = filteredSection.FindAll(section => CountAndAreaOfBridges.IsMinCondLessThanFiveForSections(section));
+            var poorSections = filteredSection.FindAll(section => ConditionIsPoor(section));
             if (isCount)
             {
                 return poorSections.Count;
             }
             return poorSections.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
+        internal double SectionalNHSBridgeClosedCountOrArea(List<SectionDetail> sectionDetails, bool isCount)
+        {
+            var filteredSection = sectionDetails.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
+            && numericValue > 0);
+            var closedSections = filteredSection.FindAll(section => IsClosed(section));
+            if (isCount)
+            {
+                return closedSections.Count;
+            }
+            return closedSections.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
         }
 
         internal double InitialNHSBridgePoorCountOrArea(List<SectionSummaryDetail> initialSectionSummaries, bool isCount)
         {
             var filteredSection = initialSectionSummaries.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
             && numericValue > 0);
-            var poorSections = filteredSection.FindAll(s => CountAndAreaOfBridges.IsMinCondLessThanFiveForInitialSection(s));
+            var poorSections = filteredSection.FindAll(s => ConditionIsPoor(s));
             if (isCount)
             {
                 return poorSections.Count;
@@ -206,11 +200,23 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             return poorSections.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
         }
 
+        internal double InitialNHSBridgeClosedCountOrArea(List<SectionSummaryDetail> initialSectionSummaries, bool isCount)
+        {
+            var filteredSection = initialSectionSummaries.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
+            && numericValue > 0);
+            var closedSections = filteredSection.FindAll(s => IsClosed(s));
+            if (isCount)
+            {
+                return closedSections.Count;
+            }
+            return closedSections.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
         internal double InitialNHSBridgeGoodCountOrArea(List<SectionSummaryDetail> initialSectionSummaries, bool isCount)
         {
             var filteredSection = initialSectionSummaries.FindAll(_ => int.TryParse(_.ValuePerTextAttribute["NHS_IND"], out var numericValue)
             && numericValue > 0);
-            var goodSections = filteredSection.FindAll(s => IsMinCondGreaterOrEqualSevenInitialSection(s));
+            var goodSections = filteredSection.FindAll(s => ConditionIsGood(s));
             if (isCount)
             {
                 return goodSections.Count;
@@ -223,7 +229,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             double sum = 0;
             foreach (var section in yearlyData.Sections)
             {
-                var area = CountAndAreaOfBridges.IsMinCondLessThanFiveForSections(section) ? section.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                var area = ConditionIsPoor(section) ? section.ValuePerNumericAttribute["DECK_AREA"] : 0;
                 sum += area;
             }
 
@@ -241,11 +247,71 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             return sum;
         }
 
+        internal double CalculateClosedCountOrDeckAreaForBPN(List<SectionDetail> sectionDetails, string bpn, bool isCount)
+        {
+            var postedBridges = sectionDetails.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
+            var selectedBridges = postedBridges.FindAll(section => IsClosed(section));
+            if (isCount)
+            {
+                return selectedBridges.Count;
+            }
+            return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
+        internal double CalculateClosedCountOrDeckAreaForBPN(List<SectionSummaryDetail> initialSectionSummaries, string bpn, bool isCount)
+        {
+            var postedBridges = initialSectionSummaries.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
+            var selectedBridges = postedBridges.FindAll(section => IsClosed(section));
+            if (isCount)
+            {
+                return selectedBridges.Count;
+            }
+            return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
+        internal double CalculatePostedCountOrDeckAreaForBPN(List<SectionDetail> sectionDetails, string bpn, bool isCount)
+        {
+            var postedBridges = sectionDetails.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
+            var selectedBridges = postedBridges.FindAll(section => IsPosted(section));
+            if (isCount)
+            {
+                return selectedBridges.Count;
+            }
+            return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
+        internal double CalculatePostedCountOrDeckAreaForBPN(List<SectionSummaryDetail> initialSectionSummaries, string bpn, bool isCount)
+        {
+            var postedBridges = initialSectionSummaries.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);           
+            var selectedBridges = postedBridges.FindAll(section => IsPosted(section));
+            if (isCount)
+            {
+                return selectedBridges.Count;
+            }
+            return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
+        }
+
+        internal double CalculatePostedCount(List<SectionDetail> sectionDetails) => sectionDetails.Count(_ => IsPosted(_));
+        internal double CalculatePostedCount(List<SectionSummaryDetail> initialSectionSummaries) => initialSectionSummaries.Count(section => IsPosted(section));
+        internal double CalculateClosedCount(List<SectionDetail> sectionDetails) => sectionDetails.Count(_ => IsClosed(_));
+        internal double CalculateClosedCount(List<SectionSummaryDetail> initialSectionSummaries) => initialSectionSummaries.Count(_ => IsClosed(_));
+
         #region Private methods
 
-        private bool IsMinCondGreaterOrEqualSevenInitialSection(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] >= 7;
+        internal static bool ConditionIsGood(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] >= 7;
+        internal static bool ConditionIsGood(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] >= 7;
 
-        private bool IsMinCondGreaterOrEqualSevenSection(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] >= 7;
+        internal static bool ConditionIsFair(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] < 7 && initialSection.ValuePerNumericAttribute["MINCOND"] >= 5;
+        internal static bool ConditionIsFair(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] < 7 && section.ValuePerNumericAttribute["MINCOND"] >= 5;
+
+        internal static bool ConditionIsPoor(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] < 5;
+        internal static bool ConditionIsPoor(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] < 5;
+
+        internal static bool IsClosed(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] < 3;
+        internal static bool IsClosed(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] < 3;
+
+        internal static bool IsPosted(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] >= 3 && initialSection.ValuePerNumericAttribute["SUP_SEEDED"] <= 4.1;
+        internal static bool IsPosted(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] >= 3 && section.ValuePerNumericAttribute["SUP_SEEDED"] <= 4.1;
 
         #endregion Private methods
 
@@ -256,7 +322,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 var count = 0;
                 foreach (var initialSection in initialSectionSummaries)
                 {
-                    count += IsMinCondLessThanFiveForInitialSection(initialSection) ? 1 : 0;
+                    count += ConditionIsPoor(initialSection) ? 1 : 0;
                 }
                 return count;
             }
@@ -266,7 +332,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 var count = 0;
                 foreach (var section in sections)
                 {
-                    count += IsMinCondLessThanFiveForSections(section) ? 1 : 0;
+                    count += ConditionIsPoor(section) ? 1 : 0;
                 }
                 return count;
             }
@@ -276,7 +342,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 double sum = 0;
                 foreach (var initialSection in initialSectionSummaries)
                 {
-                    var deckArea = IsMinCondLessThanFiveForInitialSection(initialSection) ? initialSection.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                    var deckArea = ConditionIsPoor(initialSection) ? initialSection.ValuePerNumericAttribute["DECK_AREA"] : 0;
                     sum += deckArea;
                 }
 
@@ -288,16 +354,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 double sum = 0;
                 foreach (var section in sections)
                 {
-                    var deckArea = IsMinCondLessThanFiveForSections(section) ? section.ValuePerNumericAttribute["DECK_AREA"] : 0;
+                    var deckArea = ConditionIsPoor(section) ? section.ValuePerNumericAttribute["DECK_AREA"] : 0;
                     sum += deckArea;
                 }
 
                 return sum;
             }
-
-            internal static bool IsMinCondLessThanFiveForInitialSection(SectionSummaryDetail initialSection) => initialSection.ValuePerNumericAttribute["MINCOND"] < 5;
-
-            internal static bool IsMinCondLessThanFiveForSections(SectionDetail section) => section.ValuePerNumericAttribute["MINCOND"] < 5;
         }
     }
 }

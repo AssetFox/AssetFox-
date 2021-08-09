@@ -255,7 +255,7 @@
             <v-flex xs12>
               <div>
                 <v-layout justify-space-between row>
-                  <v-btn @click="onCheckEquation" class="ara-blue-bg white--text">Check</v-btn>
+                  <v-btn :disabled="cannotCheck" @click="onCheckEquation" class="ara-blue-bg white--text">Check</v-btn>
                   <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
                          class="ara-blue-bg white--text">Save
                   </v-btn>
@@ -400,6 +400,7 @@ export default class EquationEditorDialog extends Vue {
   textareaInput: HTMLTextAreaElement = {} as HTMLTextAreaElement;
   cursorPosition: number = 0;
   cannotSubmit: boolean = true;
+  cannotCheck: boolean = true;
   invalidExpressionMessage: string = '';
   validExpressionMessage: string = '';
   piecewiseGridHeaders: DataTableHeader[] = [
@@ -509,6 +510,7 @@ export default class EquationEditorDialog extends Vue {
     this.invalidExpressionMessage = '';
     this.validExpressionMessage = '';
     this.cannotSubmit = !(this.expression === '' && !this.isPiecewise);
+    this.cannotCheck = this.expression === ''  && !this.isPiecewise;
   }
 
   /**

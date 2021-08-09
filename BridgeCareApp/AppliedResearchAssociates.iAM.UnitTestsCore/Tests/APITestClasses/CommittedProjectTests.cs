@@ -146,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.AddAuthorizationHeader(httpContext);
             httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
 
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData\\Files",
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
                 "TestCommittedProjects.xlsx");
             using var stream = File.OpenRead(filePath);
             var memStream = new MemoryStream();
@@ -543,13 +543,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     _testHelper.MockHubService.Object,
                     _testHelper.MockHttpContextAccessor.Object);
                 CreateRequestForExceptionTesting();
-                /*_controller.ControllerContext.HttpContext.Request.Form =
-                    new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection());*/
 
                 // Act + Asset
                 var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
                     await _controller.ImportCommittedProjects());
-                Assert.Equal("Committed project files were not found.", exception.Message);
+                Assert.Equal("Committed project file not found.", exception.Message);
             }
             finally
             {
@@ -572,8 +570,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                     "dummy.txt");
                 CreateRequestForExceptionTesting(file);
-                /*_controller.ControllerContext.HttpContext.Request.Form =
-                    new FormCollection(new Dictionary<string, StringValues>(), new FormFileCollection{file});*/
 
                 // Act + Asset
                 var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>

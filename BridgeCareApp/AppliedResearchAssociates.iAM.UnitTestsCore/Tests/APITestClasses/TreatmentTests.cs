@@ -139,7 +139,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Act
-                var result = await _controller.UpsertTreatmentLibrary(Guid.Empty, TestTreatmentLibrary.ToDto());
+                var result = await _controller.UpsertTreatmentLibrary(TestTreatmentLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result);
@@ -231,14 +231,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 dto.Treatments[0].BudgetIds.Add(BudgetId);
 
                 // Act
-                await _controller.UpsertTreatmentLibrary(_testHelper.TestSimulation.Id, dto);
+                await _controller.UpsertTreatmentLibrary(dto);
 
                 // Assert
                 var timer = new Timer {Interval = 5000};
                 timer.Elapsed += delegate
                 {
                     var modifiedDto =
-                        _testHelper.UnitOfWork.SelectableTreatmentRepo.TreatmentLibrariesWithTreatments()[0];
+                        _testHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibrariesWithTreatments()[0];
                     Assert.Equal(dto.Description, modifiedDto.Description);
                     Assert.Single(modifiedDto.AppliedScenarioIds);
                     Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
@@ -298,7 +298,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 treatmentLibraryDTO.Treatments[0].Consequences.Add(consequenceDTO);
                 treatmentLibraryDTO.Treatments[0].BudgetIds.Add(BudgetId);
 
-                await _controller.UpsertTreatmentLibrary(_testHelper.TestSimulation.Id, treatmentLibraryDTO);
+                await _controller.UpsertTreatmentLibrary(treatmentLibraryDTO);
 
                 // Act
                 var result = await _controller.DeleteTreatmentLibrary(TreatmentLibraryId);
@@ -308,8 +308,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
                 Assert.True(!_testHelper.UnitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == TreatmentLibraryId));
                 Assert.True(!_testHelper.UnitOfWork.Context.SelectableTreatment.Any(_ => _.Id == TreatmentId));
-                Assert.True(!_testHelper.UnitOfWork.Context.TreatmentLibrarySimulation.Any(_ =>
-                    _.TreatmentLibraryId == TreatmentLibraryId));
                 Assert.True(
                     !_testHelper.UnitOfWork.Context.CriterionLibrarySelectableTreatment.Any(_ =>
                         _.SelectableTreatmentId == TreatmentId));

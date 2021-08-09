@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AnnualizedAmount" xml:space="preserve">
+    <value>Annualized Amount</value>
+  </data>
   <data name="BPN1" xml:space="preserve">
     <value>BPN 1</value>
     <comment>Bus plan network Label for Summary TABs</comment>
@@ -133,11 +136,47 @@
     <value>BPN 4</value>
     <comment>Bus plan network Label for Summary TABs</comment>
   </data>
+  <data name="BPND" xml:space="preserve">
+    <value>BPN D</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNH" xml:space="preserve">
+    <value>BPN H</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNL" xml:space="preserve">
+    <value>BPN L</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNN" xml:space="preserve">
+    <value>BPN N</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNT" xml:space="preserve">
+    <value>BPN T</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
   <data name="BridgeCare" xml:space="preserve">
     <value>Bridge Care</value>
   </data>
   <data name="BridgeTotal" xml:space="preserve">
     <value>Bridge Total</value>
+  </data>
+  <data name="CashNeededByBPN" xml:space="preserve">
+    <value>Cash Needed By BPN</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Closed</value>
+    <comment>Label for Summary TABs</comment>
+  </data>
+  <data name="ClosedBridgeCountByBPN" xml:space="preserve">
+    <value>Closed Bridge Count By BPN</value>
+  </data>
+  <data name="ClosedBridgeDeckAreaByBPN" xml:space="preserve">
+    <value>Closed Bridge Deck Area By BPN</value>
+  </data>
+  <data name="CombinedPostedAndClosed" xml:space="preserve">
+    <value>Combined Posted and Closed</value>
   </data>
   <data name="CombineNHSNonNHSConditionByBridgeCount" xml:space="preserve">
     <value>Combine NHS and Non-NHS Condition By Bridge Count</value>
@@ -155,6 +194,12 @@ Condition By Deck Area</value>
   </data>
   <data name="Culvert" xml:space="preserve">
     <value>culvert</value>
+  </data>
+  <data name="CulvertBridgeType" xml:space="preserve">
+    <value>C</value>
+  </data>
+  <data name="CulvertNoTreatment" xml:space="preserve">
+    <value>C_No Treatment</value>
   </data>
   <data name="CulvertTotal" xml:space="preserve">
     <value>Culvert Total</value>
@@ -176,24 +221,97 @@ Condition By Deck Area</value>
     <value>Good</value>
     <comment>Label for Summary TABs</comment>
   </data>
-  <data name="NHSConditionByBridgeCountLLCC" xml:space="preserve">
+  <data name="Graph_ClosedBPNCount_Tab" xml:space="preserve">
+    <value>Close BPN Count</value>
+  </data>
+  <data name="Graph_ClosedBPNDA_Tab" xml:space="preserve">
+    <value>Closed BPN DA</value>
+  </data>
+  <data name="Graph_CombinedPostedandClosed_Tab" xml:space="preserve">
+    <value>Combined Posted and Closed</value>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByBridgeCount_Tab" xml:space="preserve">
+    <value>Combined Count</value>
+    <comment>Tab label for Combine NHS and Non-NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByBridgeCount_Title" xml:space="preserve">
+    <value>Combine NHS and Non-NHS Condition By Bridge Count</value>
+    <comment>Graph Title for Combine NHS and Non-NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByDeckArea_Tab" xml:space="preserve">
+    <value>Combined DA</value>
+    <comment>Tab label for Combine NHS and Non-NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByDeckArea_Title" xml:space="preserve">
+    <value>Combine NHS and Non-NHS With Committed Projects
+Condition By Deck Area</value>
+    <comment>Graph Title for Combine NHS and Non-NHS With Committed Projects
+Condition By Deck Area TAB</comment>
+  </data>
+  <data name="Graph_DollarNeededDABPN_Tab" xml:space="preserve">
+    <value>$ Needed DA BPN</value>
+  </data>
+  <data name="Graph_NHSConditionByBridgeCount_Tab" xml:space="preserve">
+    <value>NHS Count</value>
+    <comment>Tab label for NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_NHSConditionByBridgeCount_Title" xml:space="preserve">
     <value>NHS Condition By Bridge Count</value>
-    <comment>NHS Condition By Bridge Count TAB</comment>
+    <comment>Graph Title for NHS Condition By Bridge Count TAB</comment>
   </data>
-  <data name="NHSConditionByDeckAreaLLCC" xml:space="preserve">
-    <value>NHS Condition By Deck Area</value>
-    <comment>NHS Condition By Deck Area TAB</comment>
+  <data name="Graph_NHSConditionByDeckArea_Tab" xml:space="preserve">
+    <value>NHS DA</value>
+    <comment>Tab Label for NHS Condition By Deck Area TAB</comment>
   </data>
-  <data name="NonNHSConditionByBridgeCount" xml:space="preserve">
+  <data name="Graph_NHSConditionByDeckArea_Title" xml:space="preserve">
+    <value>NHS Condition By DA</value>
+    <comment>Graph Title for NHS Condition By Deck Area TAB</comment>
+  </data>
+  <data name="Graph_NonNHSConditionByBridgeCount_Tab" xml:space="preserve">
+    <value>Non NHS Count</value>
+    <comment>Tab Label for Non NHS Bridge Count graph TAB</comment>
+  </data>
+  <data name="Graph_NonNHSConditionByBridgeCount_Title" xml:space="preserve">
     <value>Non-NHS Condition By Bridge Count</value>
-    <comment>Label for Non NHS Bridge Count graph TAB</comment>
+    <comment>Graph Title for Non NHS Bridge Count graph TAB</comment>
   </data>
-  <data name="NonNHSConditionByDeckArea" xml:space="preserve">
+  <data name="Graph_NonNHSConditionByDeckArea_Tab" xml:space="preserve">
+    <value>Non NHS DA</value>
+    <comment>Tab Label for Non NHS Condition By Deck Area graph TAB</comment>
+  </data>
+  <data name="Graph_NonNHSConditionByDeckArea_Title" xml:space="preserve">
     <value>Non-NHS Condition By Deck Area</value>
-    <comment>Label for Non NHS Condition y deck area graph TAB</comment>
+    <comment>Graph Title for Non NHS Condition y deck area graph TAB</comment>
+  </data>
+  <data name="Graph_PoorCountGraph_Tab" xml:space="preserve">
+    <value>Poor Count</value>
+  </data>
+  <data name="Graph_PoorDAByBPN_Tab" xml:space="preserve">
+    <value>Poor DA By BPN</value>
+  </data>
+  <data name="Graph_PoorDeckAreaGraph_Tab" xml:space="preserve">
+    <value>Poor DA</value>
+  </data>
+  <data name="Graph_PostedBPNCount_Tab" xml:space="preserve">
+    <value>Posted BPN Count</value>
+  </data>
+  <data name="Graph_PostedBPNDA_Tab" xml:space="preserve">
+    <value>Posted BPN DA</value>
+  </data>
+  <data name="NonCulvertBridgeType" xml:space="preserve">
+    <value>B</value>
+  </data>
+  <data name="NonCulvertNoTreatment" xml:space="preserve">
+    <value>B_No Treatment</value>
   </data>
   <data name="NoTreatment" xml:space="preserve">
     <value>no treatment</value>
+  </data>
+  <data name="Overall" xml:space="preserve">
+    <value>Overall</value>
+  </data>
+  <data name="NoTreatmentForWorkSummary" xml:space="preserve">
+    <value>No Treatment</value>
   </data>
   <data name="PercentBudgetSpentBAMS" xml:space="preserve">
     <value>Percent Budget Spent BAMS</value>
@@ -214,6 +332,15 @@ Condition By Deck Area</value>
   <data name="PoorDeckAreaByBPN" xml:space="preserve">
     <value>Poor Deck Area By BPN</value>
   </data>
+  <data name="Posted" xml:space="preserve">
+    <value>Posted</value>
+  </data>
+  <data name="PostedBridgeCountByBPN" xml:space="preserve">
+    <value>Posted Bridge Count By BPN</value>
+  </data>
+  <data name="PostedBridgeDeckAreaByBPN" xml:space="preserve">
+    <value>Posted Bridge Deck Area By BPN</value>
+  </data>
   <data name="RemainingBudget" xml:space="preserve">
     <value>Remaining Budget</value>
   </data>
@@ -233,6 +360,9 @@ Condition By Deck Area</value>
     <value>Total</value>
     <comment>Total number of Bridges (Culvert or non-culvert) in Work Summary TAB.</comment>
   </data>
+  <data name="TotalBPNCost" xml:space="preserve">
+    <value>Total BPN Cost</value>
+  </data>
   <data name="TotalBridgeCareBudget" xml:space="preserve">
     <value>Total Bridge Care Budget</value>
     <comment>Total Bridge Care Budget in Work Summary TAB</comment>
@@ -240,5 +370,9 @@ Condition By Deck Area</value>
   <data name="TotalSpent" xml:space="preserve">
     <value>Total Spent</value>
     <comment>Total budget spent in Work summary TAB</comment>
+  </data>
+  <data name="Work" xml:space="preserve">
+    <value>Work</value>
+    <comment>Sub header for Bridge Data report tab</comment>
   </data>
 </root>

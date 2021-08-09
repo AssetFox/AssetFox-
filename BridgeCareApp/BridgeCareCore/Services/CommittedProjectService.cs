@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Utils;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using OfficeOpenXml;
@@ -19,7 +20,15 @@ namespace BridgeCareCore.Services
 
         private static readonly List<string> InitialHeaders = new List<string>
         {
-            "BRKEY","BMSID","TREATMENT","YEAR","YEARANY","YEARSAME","BUDGET","COST","AREA"
+            "BRKEY",
+            "BMSID",
+            "TREATMENT",
+            "YEAR",
+            "YEARANY",
+            "YEARSAME",
+            "BUDGET",
+            "COST",
+            "AREA"
         };
 
         private static readonly string NoTreatment = "No Treatment";
@@ -168,7 +177,7 @@ namespace BridgeCareCore.Services
         /**
          * Gets a Dictionary of MaintainableAssetEntity Id per MaintainableAssetLocationEntity LocationIdentifier
          */
-        private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier(List<string> locationIdentifiers)
+        private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier()
         {
             if (!_unitOfWork.Context.MaintainableAsset.Any())
             {
@@ -176,7 +185,6 @@ namespace BridgeCareCore.Services
             }
 
             return _unitOfWork.Context.MaintainableAssetLocation
-                .Where(_ => locationIdentifiers.Contains(_.LocationIdentifier))
                 .Select(maintainableAssetLocation => new MaintainableAssetEntity
                 {
                     Id = maintainableAssetLocation.MaintainableAssetId,
@@ -188,160 +196,134 @@ namespace BridgeCareCore.Services
         }
 
         /**
-         * Gets the value of an excel worksheet cell
-         */
-        private string GetCellValue(ExcelWorksheet worksheet, int row, int column) =>
-            worksheet.Cells[row, column].GetValue<string>().Trim();
-
-        /**
          * Creates CommittedProjectEntity data for Committed Project Import
          */
         private List<CommittedProjectEntity> CreateCommittedProjectEntitiesForImport(Guid simulationId,
-            List<ExcelPackage> excelPackages, bool applyNoTreatment)
+            ExcelPackage excelPackage, bool applyNoTreatment)
         {
             var simulationEntity = GetSimulationEntityForCommittedProjectImport(simulationId);
             ValidateSimulationEntityForCommittedProjectImport(simulationEntity);
 
-            var locationIdentifiers = new List<string>();
-            var consequenceAttributeNames = new List<string>();
+            var worksheet = excelPackage.Workbook.Worksheets[0];
+            var end = worksheet.Dimension.End;
 
-            excelPackages.ForEach(excelPackage =>
-            {
-                var worksheet = excelPackage.Workbook.Worksheets[0];
-
-                var headers = worksheet.Cells.GroupBy(cell => cell.Start.Row).First().Select(_ => _.GetValue<string>()).ToList();
-                consequenceAttributeNames.AddRange(headers.Skip(9));
-
-                var end = worksheet.Dimension.End;
-                for (var row = 2; row <= end.Row; row++)
-                {
-                    var brKey = GetCellValue(worksheet, row, 1);
-                    var bmsId = GetCellValue(worksheet, row, 2);
-                    var locationIdentifier = $"{brKey}-{bmsId}";
-                    if (!locationIdentifiers.Contains(locationIdentifier))
-                    {
-                        locationIdentifiers.Add(locationIdentifier);
-                    }
-                }
-            });
+            var headers = worksheet.Cells.GroupBy(cell => cell.Start.Row).First().Select(_ => _.GetValue<string>())
+                .ToList();
+            var consequenceAttributeNames = headers.Skip(9).ToList();
 
             var attributeIdsPerAttributeName =
                 GetAttributeIdsPerAttributeName(consequenceAttributeNames.Distinct().ToList());
 
-            var maintainableAssetIdsPerLocationIdentifier =
-                GetMaintainableAssetsPerLocationIdentifier(locationIdentifiers);
+            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier();
 
-            return excelPackages.SelectMany(excelPackage =>
+            var projectsPerLocationIdentifierAndYearTuple = new Dictionary<(string, int), CommittedProjectEntity>();
+
+            for (var row = 2; row <= end.Row; row++)
             {
-                var worksheet = excelPackage.Workbook.Worksheets[0];
-                var end = worksheet.Dimension.End;
+                var brKey = worksheet.GetCellValue<string>(row, 1);
+                var bmsId = worksheet.GetCellValue<string>(row, 2);
+                var locationIdentifier = $"{brKey}-{bmsId}";
 
-                var projectsPerLocationIdentifierAndYearTuple = new Dictionary<(string, int), CommittedProjectEntity>();
+                var projectYear = worksheet.GetCellValue<int>(row, 4);
 
-                for (var row = 2; row <= end.Row; row++)
+                if (projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifier, projectYear)))
                 {
-                    var brKey = GetCellValue(worksheet, row, 1);
-                    var bmsId = GetCellValue(worksheet, row, 2);
-                    var locationIdentifier = $"{brKey}-{bmsId}";
-
-                    var projectYear = int.Parse(GetCellValue(worksheet, row, 4));
-
-                    if (projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifier, projectYear)))
-                    {
-                        continue;
-                    }
-
-                    var budgetName = GetCellValue(worksheet, row, 7);
-
-                    if (simulationEntity.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.All(
-                        _ => _.Name != budgetName))
-                    {
-                        throw new RowNotInTableException(
-                            $"Budget {budgetName} does not exist in the applied budget library.");
-                    }
-
-                    var budgetEntity = simulationEntity.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.Single(
-                        _ => _.Name == budgetName);
-
-                    var maintainableAssetId = maintainableAssetIdsPerLocationIdentifier[locationIdentifier];
-
-                    var project = new CommittedProjectEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        SimulationId = simulationEntity.Id,
-                        BudgetId = budgetEntity.Id,
-                        MaintainableAssetId = maintainableAssetId,
-                        Name = GetCellValue(worksheet, row, 3),
-                        Year = projectYear,
-                        ShadowForAnyTreatment = int.Parse(GetCellValue(worksheet, row, 5)),
-                        ShadowForSameTreatment = int.Parse(GetCellValue(worksheet, row, 6)),
-                        Cost = double.Parse(GetCellValue(worksheet, row, 8)),
-                        CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
-                    };
-
-                    if (end.Column >= 10)
-                    {
-                        for (var column = 10; column <= end.Column; column++)
-                        {
-                            project.CommittedProjectConsequences.Add(new CommittedProjectConsequenceEntity
-                            {
-                                Id = Guid.NewGuid(),
-                                CommittedProjectId = project.Id,
-                                AttributeId = attributeIdsPerAttributeName[GetCellValue(worksheet, 1, column)],
-                                ChangeValue = GetCellValue(worksheet, row, column)
-                            });
-                        }
-                    }
-
-                    projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifier, projectYear), project);
+                    continue;
                 }
 
-                if (applyNoTreatment && projectsPerLocationIdentifierAndYearTuple.Keys.Any(_ => _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod))
+                var budgetName = worksheet.GetCellValue<string>(row, 7);
+
+                if (simulationEntity.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.All(
+                    _ => _.Name != budgetName))
                 {
-                    var locationIdentifierAndYearTuples = projectsPerLocationIdentifierAndYearTuple.Keys
-                        .Where(_ => _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod).ToList();
-                    locationIdentifierAndYearTuples.ForEach(locationIdentifierAndYearTuple =>
+                    throw new RowNotInTableException(
+                        $"Budget {budgetName} does not exist in the applied budget library.");
+                }
+
+                var budgetEntity = simulationEntity.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.Single(
+                    _ => _.Name == budgetName);
+
+                var project = new CommittedProjectEntity
+                {
+                    Id = Guid.NewGuid(),
+                    SimulationId = simulationEntity.Id,
+                    BudgetId = budgetEntity.Id,
+                    MaintainableAssetId = maintainableAssetIdsPerLocationIdentifier[locationIdentifier],
+                    Name = worksheet.GetCellValue<string>(row, 3),
+                    Year = projectYear,
+                    ShadowForAnyTreatment = worksheet.GetCellValue<int>(row, 5),
+                    ShadowForSameTreatment = worksheet.GetCellValue<int>(row, 6),
+                    Cost = worksheet.GetCellValue<double>(row, 8),
+                    CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
+                };
+
+                if (end.Column >= 10)
+                {
+                    for (var column = 10; column <= end.Column; column++)
+                    {
+                        project.CommittedProjectConsequences.Add(new CommittedProjectConsequenceEntity
                         {
-                            var project = projectsPerLocationIdentifierAndYearTuple[locationIdentifierAndYearTuple];
-                            var year = simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod;
-                            while (year < project.Year && !projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifierAndYearTuple.Item1, year)))
-                            {
-                                var noTreatmentProjectId = Guid.NewGuid();
-                                var noTreatmentProject = new CommittedProjectEntity
-                                {
-                                    Id = noTreatmentProjectId,
-                                    SimulationId = project.SimulationId,
-                                    BudgetId = project.BudgetId,
-                                    MaintainableAssetId = project.MaintainableAssetId,
-                                    Name = NoTreatment,
-                                    Year = year,
-                                    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-                                    ShadowForSameTreatment = project.ShadowForSameTreatment,
-                                    Cost = 0,
-                                    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(_ =>
-                                        new CommittedProjectConsequenceEntity
-                                        {
-                                            Id = Guid.NewGuid(),
-                                            CommittedProjectId = noTreatmentProjectId,
-                                            AttributeId = _.AttributeId,
-                                            ChangeValue = "+0"
-                                        }).ToList()
-                                };
-
-                                projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifierAndYearTuple.Item1, year), noTreatmentProject);
-
-                                year++;
-                            }
+                            Id = Guid.NewGuid(),
+                            CommittedProjectId = project.Id,
+                            AttributeId = attributeIdsPerAttributeName[worksheet.GetCellValue<string>(1, column)],
+                            ChangeValue = worksheet.GetCellValue<string>(row, column)
                         });
+                    }
                 }
-                return projectsPerLocationIdentifierAndYearTuple.Values;
-            }).ToList();
+
+                projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifier, projectYear), project);
+            }
+
+            if (applyNoTreatment && projectsPerLocationIdentifierAndYearTuple.Keys.Any(_ =>
+                _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod))
+            {
+                var locationIdentifierAndYearTuples = projectsPerLocationIdentifierAndYearTuple.Keys
+                    .Where(_ => _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod).ToList();
+                locationIdentifierAndYearTuples.ForEach(locationIdentifierAndYearTuple =>
+                {
+                    var project = projectsPerLocationIdentifierAndYearTuple[locationIdentifierAndYearTuple];
+                    var year = simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod;
+                    while (year < project.Year &&
+                           !projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifierAndYearTuple.Item1,
+                               year)))
+                    {
+                        var noTreatmentProjectId = Guid.NewGuid();
+                        var noTreatmentProject = new CommittedProjectEntity
+                        {
+                            Id = noTreatmentProjectId,
+                            SimulationId = project.SimulationId,
+                            BudgetId = project.BudgetId,
+                            MaintainableAssetId = project.MaintainableAssetId,
+                            Name = NoTreatment,
+                            Year = year,
+                            ShadowForAnyTreatment = project.ShadowForAnyTreatment,
+                            ShadowForSameTreatment = project.ShadowForSameTreatment,
+                            Cost = 0,
+                            CommittedProjectConsequences = project.CommittedProjectConsequences.Select(_ =>
+                                new CommittedProjectConsequenceEntity
+                                {
+                                    Id = Guid.NewGuid(),
+                                    CommittedProjectId = noTreatmentProjectId,
+                                    AttributeId = _.AttributeId,
+                                    ChangeValue = "+0"
+                                }).ToList()
+                        };
+
+                        projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifierAndYearTuple.Item1, year),
+                            noTreatmentProject);
+
+                        year++;
+                    }
+                });
+            }
+
+            return projectsPerLocationIdentifierAndYearTuple.Values.ToList();
         }
 
-        public void ImportCommittedProjectFiles(Guid simulationId, List<ExcelPackage> excelPackages, bool applyNoTreatment)
+        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, bool applyNoTreatment)
         {
             var committedProjectEntities =
-                CreateCommittedProjectEntitiesForImport(simulationId, excelPackages, applyNoTreatment);
+                CreateCommittedProjectEntitiesForImport(simulationId, excelPackage, applyNoTreatment);
 
             _unitOfWork.CommittedProjectRepo.DeleteCommittedProjects(simulationId);
 

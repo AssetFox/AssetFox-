@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -238,8 +239,11 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario error::{e.Message}");
-                var logDto = SimulationLogDtos.GenericException(simulationId, e);
-                UnitOfWork.SimulationLogRepo.CreateLog(logDto);
+                if (!(e is SimulationException))
+                {
+                    var logDto = SimulationLogDtos.GenericException(simulationId, e);
+                    UnitOfWork.SimulationLogRepo.CreateLog(logDto);
+                }
                 throw;
             }
         }

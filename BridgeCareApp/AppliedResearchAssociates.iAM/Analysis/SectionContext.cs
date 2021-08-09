@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
@@ -55,19 +55,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void ApplyPassiveTreatment(int year)
         {
-            var cost = GetCostOfTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment);
-            if (cost != 0)
-            {
-                var messageBuilder = new SimulationMessageBuilder(MessageStrings.CostOfPassiveTreatmentIsNonZero)
-                {
-                    ItemName = SimulationRunner.Simulation.DesignatedPassiveTreatment.Name,
-                    ItemId = SimulationRunner.Simulation.DesignatedPassiveTreatment.Id,
-                    SectionName = Section.Name,
-                    SectionId = Section.Id,
-                };
-
-                SimulationRunner.Fail(messageBuilder.ToString());
-            }
+            CheckPassiveTreatmentCostIsZero();
             ApplyTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment, year);
         }
 
@@ -75,44 +63,29 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void ApplyTreatment(Treatment treatment, int year)
         {
-            try
+            ApplyTreatmentButNotMetadata(treatment);
+            ApplyTreatmentMetadata(year);
+        }
+
+        public void ApplyTreatmentMetadataIfPending(int year)
+        {
+            if (AppliedTreatmentWithPendingMetadata is object)
             {
-                var consequenceActions = treatment.GetConsequenceActions(this);
-                foreach (var consequenceAction in consequenceActions)
-                {
-                    consequenceAction();
-                }
+                ApplyTreatmentMetadata(year);
             }
-            catch (SimulationException e)
-            {
-                SimulationRunner.Fail(e.Message, false);
-                throw;
-            }
-
-            foreach (var scheduling in treatment.GetSchedulings())
-            {
-                var schedulingYear = year + scheduling.OffsetToFutureYear;
-
-                if (EventSchedule.ContainsKey(schedulingYear))
-                {
-                    Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.Treatment.Name));
-                }
-                else
-                {
-                    EventSchedule.Add(schedulingYear, scheduling.Treatment);
-                }
-            }
-
-            FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
-            FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
-
-            Detail.AppliedTreatment = treatment.Name;
-            Detail.TreatmentStatus = TreatmentStatus.Applied;
         }
 
         public void CopyAttributeValuesToDetail() => CopyAttributeValuesToDetail(Detail);
 
         public void CopyDetailFrom(SectionContext other) => Detail = new SectionDetail(other.Detail);
+
+        public void FixCalculatedFieldValues()
+        {
+            foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
+            {
+                NumberCache_Override[calculatedField.Name] = GetNumber(calculatedField.Name);
+            }
+        }
 
         public double GetBenefit()
         {
@@ -142,13 +115,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SectionName = Section.Name,
                     SectionId = Section.Id,
                 };
-
-                SimulationRunner.Fail(messageBuilder.ToString());
+                var logBuilder = SimulationLogMessageBuilders.CalculationFatal(messageBuilder.ToString(), SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(logBuilder);
             }
 
             GetNumber_ActiveKeysOfCurrentInvocation.Push(key);
 
-            if (!NumberCache.TryGetValue(key, out var number))
+            if (!NumberCache_Override.TryGetValue(key, out var number) && !NumberCache.TryGetValue(key, out number))
             {
                 number = base.GetNumber(key);
 
@@ -173,12 +146,30 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return number;
         }
 
-        public double GetSpatialWeight() => Section.SpatialWeighting.Compute(this);
+        public double GetSpatialWeight()
+        {
+            var r = Section.SpatialWeighting.Compute(this);
+            if (double.IsNaN(r) || double.IsInfinity(r))
+            {
+                var errorMessage = SimulationLogMessages.SpatialWeightCalculationReturned(Section, Section.SpatialWeighting, r);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(messageBuilder);
+            }
+            return r;
+        }
 
         public void MarkTreatmentProgress(Treatment treatment)
         {
+            AppliedTreatmentWithPendingMetadata = null;
+
             Detail.AppliedTreatment = treatment.Name;
             Detail.TreatmentStatus = TreatmentStatus.Progressed;
+        }
+
+        public void PreapplyPassiveTreatment()
+        {
+            CheckPassiveTreatmentCostIsZero();
+            ApplyTreatmentButNotMetadata(SimulationRunner.Simulation.DesignatedPassiveTreatment);
         }
 
         public void ResetDetail() => Detail = new SectionDetail(Section);
@@ -225,21 +216,23 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override void SetNumber(string key, double value)
         {
-            PrepareSet(key);
+            NumberCache.Clear();
             base.SetNumber(key, value);
         }
 
         public override void SetNumber(string key, Func<double> getValue)
         {
-            PrepareSet(key);
+            NumberCache.Clear();
             base.SetNumber(key, getValue);
         }
 
         public override void SetText(string key, string value)
         {
-            PrepareSet(key);
+            NumberCache.Clear();
             base.SetText(key, value);
         }
+
+        public void UnfixCalculatedFieldValues() => NumberCache_Override.Clear();
 
         public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
 
@@ -253,6 +246,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private readonly IDictionary<string, double> NumberCache = new Dictionary<string, double>(KeyComparer);
 
+        private readonly IDictionary<string, double> NumberCache_Override = new Dictionary<string, double>(KeyComparer);
+
+        private Treatment AppliedTreatmentWithPendingMetadata;
+
         private int? FirstUnshadowedYearForAnyTreatment;
 
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
@@ -265,7 +262,76 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
+        private void ApplyTreatmentButNotMetadata(Treatment treatment)
+        {
+            var consequenceActions = treatment.GetConsequenceActions(this);
+            foreach (var consequenceAction in consequenceActions)
+            {
+                consequenceAction();
+            }
+
+            AppliedTreatmentWithPendingMetadata = treatment;
+        }
+
+        private void ApplyTreatmentMetadata(int year)
+        {
+            var treatment = AppliedTreatmentWithPendingMetadata;
+            AppliedTreatmentWithPendingMetadata = null;
+
+            foreach (var scheduling in treatment.GetSchedulings())
+            {
+                var schedulingYear = year + scheduling.OffsetToFutureYear;
+
+                if (EventSchedule.ContainsKey(schedulingYear))
+                {
+                    Detail.TreatmentSchedulingCollisions.Add(new TreatmentSchedulingCollisionDetail(schedulingYear, scheduling.Treatment.Name));
+                }
+                else
+                {
+                    EventSchedule.Add(schedulingYear, scheduling.Treatment);
+                }
+            }
+
+            FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
+            FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+
+            Detail.AppliedTreatment = treatment.Name;
+            Detail.TreatmentStatus = TreatmentStatus.Applied;
+        }
+
         private double CalculateValueOnCurve(PerformanceCurve curve) => curve.Equation.Compute(this, curve);
+
+        private double CalculateValueOnCurve(PerformanceCurve curve, Action<double> handle)
+        {
+            var value = CalculateValueOnCurve(curve);
+            handle(value);
+            return value;
+        }
+
+        private void CheckPassiveTreatmentCostIsZero()
+        {
+            var cost = GetCostOfTreatment(SimulationRunner.Simulation.DesignatedPassiveTreatment);
+            if (cost != 0)
+            {
+                var messageBuilder = new SimulationMessageBuilder(MessageStrings.CostOfPassiveTreatmentIsNonZero)
+                {
+                    ItemName = SimulationRunner.Simulation.DesignatedPassiveTreatment.Name,
+                    ItemId = SimulationRunner.Simulation.DesignatedPassiveTreatment.Id,
+                    SectionName = Section.Name,
+                    SectionId = Section.Id,
+                };
+
+                var builder = new SimulationLogMessageBuilder
+                {
+                    SimulationId = SimulationRunner.Simulation.Id,
+                    Message = messageBuilder.ToString(),
+                    Status = SimulationLogStatus.Fatal,
+                    Subject = SimulationLogSubject.Runtime,
+                };
+
+                SimulationRunner.Send(builder);
+            }
+        }
 
         private void CopyAttributeValuesToDetail(SectionSummaryDetail detail)
         {
@@ -302,7 +368,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SectionId = Section.Id,
                 };
 
-                SimulationRunner.Fail(messageBuilder.ToString());
+                var logBuilder = SimulationLogMessageBuilders.RuntimeFatal(messageBuilder, SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(logBuilder);
             }
 
             if (operativeCurves.Count > 1)
@@ -314,12 +381,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     SectionId = Section.Id,
                 };
 
-                SimulationRunner.Warn(messageBuilder.ToString());
+                var logMessage = SimulationLogMessageBuilders.RuntimeWarning(messageBuilder, SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(logMessage);
             }
 
             Func<double>
-                calculateMinimum = () => operativeCurves.Min(CalculateValueOnCurve),
-                calculateMaximum = () => operativeCurves.Max(CalculateValueOnCurve);
+                calculateMinimum = () => operativeCurves.Min(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value))),
+                calculateMaximum = () => operativeCurves.Max(curve => CalculateValueOnCurve(curve, value => SendToSimulationLogIfNeeded(curve, value)));
 
             return curves.Key.IsDecreasingWithDeterioration ? calculateMinimum : calculateMaximum;
         }
@@ -357,7 +425,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     }
                     catch (SimulationException e)
                     {
-                        SimulationRunner.Fail(e.Message, false);
+                        var logBuilder = SimulationLogMessageBuilders.Exception(e, SimulationRunner.Simulation.Id);
+                        SimulationRunner.Send(logBuilder, false);
                         throw;
                     }
                 }
@@ -368,14 +437,15 @@ namespace AppliedResearchAssociates.iAM.Analysis
             base.SetNumber(Network.SpatialWeightIdentifier, GetSpatialWeight);
         }
 
-        private void PrepareSet(string key)
+        private void SendToSimulationLogIfNeeded(PerformanceCurve curve, double value)
         {
-            //if (KeyComparer.Equals(key, SimulationRunner.Simulation.Network.Explorer.AgeAttribute.Name) && NumberKeys.Contains(key, KeyComparer))
-            //{
-            //    PreviousAge = GetNumber(key);
-            //}
-
-            NumberCache.Clear();
+            if (double.IsNaN(value) || double.IsInfinity(value))
+            {
+                var key = curve.Attribute.Name;
+                var errorMessage = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, value);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
+                SimulationRunner.Send(messageBuilder);
+            }
         }
 
         private void SetHistoricalValues<T>(int referenceYear, bool fallForward, IEnumerable<Attribute<T>> attributes, Action<string, T> setValue)

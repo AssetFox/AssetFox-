@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
@@ -12,71 +13,297 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
     public class CostBudgetsWorkSummary
     {
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        private readonly IExcelHelper _excelHelper;
         private Dictionary<int, decimal> TotalCulvertSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalBridgeSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalCommittedSpent = new Dictionary<int, decimal>();
+        private readonly WorkSummaryModel _workSummaryModel;
 
-        public CostBudgetsWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IExcelHelper excelHelper)
+        public CostBudgetsWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon,
+            WorkSummaryModel workSummaryModel)
         {
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon;
-            _excelHelper = excelHelper;
+            _workSummaryModel = workSummaryModel ?? throw new ArgumentNullException(nameof(workSummaryModel));
         }
 
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, List<int> simulationYears, SortedSet<string> treatments, Dictionary<string, Budget> yearlyBudgetAmount)
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, List<int> simulationYears, SortedSet<string> treatments, Dictionary<string, Budget> yearlyBudgetAmount,
+            Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear)
         {
-            var committedTotalRow = FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
+            var localTreatments = new SortedSet<string>(treatments);
+            localTreatments.Remove(Properties.Resources.CulvertNoTreatment);
+            localTreatments.Remove(Properties.Resources.NonCulvertNoTreatment);
 
-            var culvertTotalRow = FillCostOfCulvertWorkSection(worksheet, currentCell,
-                simulationYears, treatments, costPerTreatmentPerYear);
-            var bridgeTotalRow = FillCostOfBridgeWorkSection(worksheet, currentCell,
-                simulationYears, treatments, costPerTreatmentPerYear);
-            var budgetTotalRow = FillTotalBudgetSection(worksheet, currentCell, simulationYears,
-                costPerTreatmentPerYear, yearlyBudgetAmount);
-            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
+            var committedTotalRange = FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
+
+            var culvertTotalRange = FillCostOfCulvertWorkSection(worksheet, currentCell,
+                simulationYears, localTreatments, costPerTreatmentPerYear);
+            var bridgeTotalRange = FillCostOfBridgeWorkSection(worksheet, currentCell,
+                simulationYears, localTreatments, costPerTreatmentPerYear);
+
+            var bridgeTotalRow = bridgeTotalRange.FooterRange.End.Value;
+            var culvertTotalRow = culvertTotalRange.FooterRange.End.Value;
+            var committedTotalRow = committedTotalRange.FooterRange.End.Value;
+
+            var map = WorkTypeMap.Map;
+            var workTypeTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, map, bridgeTotalRange.ContentRange,
+                culvertTotalRange.ContentRange, committedTotalRange.ContentRange, yearlyBudgetAmount);
+
+            var bpnTotalRow = FillBpnSection(worksheet, currentCell, simulationYears, bpnCostPerYear);
+            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, workTypeTotalRow, committedTotalRow);
         }
 
         #region Private methods
 
-        private int FillCostOfCommittedWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+        private ExcelTableRowRanges FillCostOfCommittedWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj)
         {
+            var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of MPMS Work", "MPMS Work Type");
             var committedTotalRow = AddCostsOfCommittedWork(worksheet, simulationYears, currentCell, yearlyCostCommittedProj);
-            return committedTotalRow;
+
+            var contentRange = new Range(headerRange.End.Value + 1, committedTotalRow - 1);
+            var footerRange = new Range(committedTotalRow, committedTotalRow);
+            return new ExcelTableRowRanges
+            {
+                HeaderRange = headerRange,
+                ContentRange = contentRange,
+                FooterRange = footerRange,
+            };
         }
 
-        private int FillCostOfCulvertWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
+        private ExcelTableRowRanges FillCostOfCulvertWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, SortedSet<string> treatments,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
         {
+            var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Culvert Work", "BAMS Culvert Work Type");
             var culvertTotalRow = AddCostsOfCulvertWork(worksheet, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
-            return culvertTotalRow;
+            var contentRange = new Range(headerRange.End.Value + 1, culvertTotalRow - 1);
+            var footerRange = new Range(culvertTotalRow, culvertTotalRow);
+            return new ExcelTableRowRanges
+            {
+                HeaderRange = headerRange,
+                ContentRange = contentRange,
+                FooterRange = footerRange,
+            };
         }
 
-        private int FillCostOfBridgeWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
+        private ExcelTableRowRanges FillCostOfBridgeWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, SortedSet<string> treatments,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
         {
+            var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Bridge Work", "BAMS Bridge Work Type");
             var bridgeTotalRow = AddCostsOfBridgeWork(worksheet, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
-            return bridgeTotalRow;
+            var contentRange = new Range(headerRange.End.Value + 1, bridgeTotalRow - 1);
+            var footerRange = new Range(bridgeTotalRow, bridgeTotalRow);
+            return new ExcelTableRowRanges
+            {
+                HeaderRange = headerRange,
+                ContentRange = contentRange,
+                FooterRange = footerRange,
+            };
         }
 
-        private int FillTotalBudgetSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+
+        private int FillWorkTypeTotalsSection(
+            ExcelWorksheet worksheet,
+            CurrentCell currentCell,
+            List<int> simulationYears,
+            Dictionary<string, WorkTypeName> workTypeMap,
+            Range rangeForSummands,
+            Range culvertRangeForSummands,
+            Range committedRangeForSummands,
             Dictionary<string, Budget> yearlyBudgetAmount)
         {
-            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Totals");
-            worksheet.Cells[currentCell.Row, simulationYears.Count + 3].Value = "Total Analysis Budget (all year)";
-            _excelHelper.ApplyStyle(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
-            _excelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
-            var budgetTotalRow = AddDetailsForTotalBudget(worksheet, simulationYears[0], currentCell,
-                costPerTreatmentPerYear, yearlyBudgetAmount);
-            return budgetTotalRow;
+            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
+            var initialRow = currentCell.Row;
+            currentCell.Row++;
+            var workTypes = EnumExtensions.GetValues<WorkTypeName>();
+            var numberOfYears = simulationYears.Count;
+            worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
+            var totalColumnHeaderRange = worksheet.Cells[initialRow, 3 + numberOfYears];
+            ExcelHelper.ApplyBorder(totalColumnHeaderRange);
+            ExcelHelper.ApplyStyle(totalColumnHeaderRange);
+
+
+            var startColumnIndex = 3;
+            var firstContentRow = currentCell.Row;
+            for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
+            {
+                var rowIndex = firstContentRow + (int)workType;
+                worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
+                for (var columnIndex = startColumnIndex; columnIndex < startColumnIndex + numberOfYears; columnIndex++)
+                {
+                    var cellsToSum = new List<ExcelRange>();
+                    // for committed project data
+                    AddWorkTypeTotalData(committedRangeForSummands, cellsToSum, workType, worksheet, workTypeMap, rowIndex, columnIndex);
+
+                    // For culvert data
+                    AddWorkTypeTotalData(culvertRangeForSummands, cellsToSum, workType, worksheet, workTypeMap, rowIndex, columnIndex);
+
+                    // For non culvert data
+                    AddWorkTypeTotalData(rangeForSummands, cellsToSum, workType, worksheet, workTypeMap, rowIndex, columnIndex);
+                }
+                worksheet.Cells[rowIndex, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(rowIndex, startColumnIndex, rowIndex, startColumnIndex + numberOfYears - 1);
+            }
+            var lastContentRow = firstContentRow + workTypes.Count - 1;
+            currentCell.Row += workTypes.Count();
+            var totalSpentRow = currentCell.Row;
+            worksheet.Cells[totalSpentRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(totalSpentRow, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1); ;
+            worksheet.Cells[totalSpentRow, 1].Value = "Total Spent";
+            for (var columnIndex = 3; columnIndex < 3 + numberOfYears; columnIndex++)
+            {
+                var startAddress = worksheet.Cells[firstContentRow, columnIndex].Address;
+                var endAddress = worksheet.Cells[lastContentRow, columnIndex].Address;
+                worksheet.Cells[currentCell.Row, columnIndex].Formula = ExcelFormulas.RangeSum(startAddress, endAddress);
+            }
+
+            // Adding percentage after the Total (all years)
+            for (var workType = workTypes[0]; workType <= workTypes.Last(); workType++)
+            {
+                var rowIndex = firstContentRow + (int)workType;
+                var col = startColumnIndex + numberOfYears + 1;
+                worksheet.Cells[rowIndex, col].Formula = ExcelFormulas.Percentage(rowIndex, col - 1, totalSpentRow, col - 1);
+
+                worksheet.Cells[rowIndex, col + 1].Value = $"Percentage Spent on {workType.ToSpreadsheetString().ToUpper()}";
+            }
+            currentCell.Row += 2;
+            var contentColor = Color.FromArgb(84, 130, 53);
+            ExcelHelper.ApplyBorder(worksheet.Cells[firstContentRow, 1, totalSpentRow, 3 + numberOfYears]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3 + numberOfYears], ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.ApplyColor(worksheet.Cells[firstContentRow, 3, totalSpentRow, 3 + numberOfYears - 1], contentColor);
+            ExcelHelper.SetTextColor(worksheet.Cells[firstContentRow, 3, currentCell.Row, 3 + numberOfYears - 1], Color.White);
+
+            // Style for percentages
+            var percentColumn = startColumnIndex + numberOfYears + 1;
+            ExcelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, percentColumn, totalSpentRow, percentColumn], ExcelHelperCellFormat.Percentage);
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[firstContentRow, percentColumn, totalSpentRow, percentColumn]);
+
+            worksheet.Cells[currentCell.Row, 1].Value = "Total Bridge Care Budget";
+            var totalColumnRange = worksheet.Cells[firstContentRow, 3 + numberOfYears, totalSpentRow, 3 + numberOfYears];
+            ExcelHelper.ApplyColor(totalColumnRange, Color.FromArgb(217, 217, 217));
+
+            decimal averageAnnualBudget = 0;
+            foreach (var year in simulationYears)
+            {
+                var yearIndex = year - simulationYears[0];
+                var columnIndex = yearIndex + 3;
+                var budgetTotal = yearlyBudgetAmount.Sum(x => x.Value.YearlyAmounts[yearIndex].Value);
+                worksheet.Cells[currentCell.Row, columnIndex].Value = budgetTotal;
+                averageAnnualBudget += budgetTotal;
+            }
+
+            worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(currentCell.Row, startColumnIndex, currentCell.Row, startColumnIndex + numberOfYears - 1);
+
+            // AnnualizedAmount is used to fill the "Annualized Amount" row of Bridge Work Summary
+            _workSummaryModel.AnnualizedAmount = (averageAnnualBudget / simulationYears.Count);
+
+            var totalRowRange = worksheet.Cells[currentCell.Row, 3, currentCell.Row, 2 + numberOfYears];
+            ExcelHelper.ApplyColor(totalRowRange, Color.FromArgb(0, 128, 0));
+            var grandTotalRange = worksheet.Cells[currentCell.Row, startColumnIndex + numberOfYears];
+            ExcelHelper.ApplyColor(grandTotalRange, Color.FromArgb(217, 217, 217));
+            ExcelHelper.ApplyBorder(totalRowRange);
+            currentCell.Row++;
+            return currentCell.Row - 1;
+        }
+
+        private void AddWorkTypeTotalData(Range rangeForSummands, List<ExcelRange> cellsToSum,
+            WorkTypeName workType, ExcelWorksheet worksheet, Dictionary<string, WorkTypeName> workTypeMap,
+            int rowIndex, int columnIndex)
+        {
+            for (var summandRowIndex = rangeForSummands.Start.Value; summandRowIndex <= rangeForSummands.End.Value; summandRowIndex++)
+            {
+                var summandRowTitle = worksheet.Cells[summandRowIndex, 1].Value?.ToString();
+                if (summandRowTitle != null)
+                {
+                    var summandWorkType = workTypeMap.ContainsKey(summandRowTitle) ? workTypeMap[summandRowTitle] : WorkTypeName.Other;
+                    if (workType == summandWorkType)
+                    {
+                        var cell = worksheet.Cells[summandRowIndex, columnIndex];
+                        cellsToSum.Add(cell);
+                    }
+                }
+                if (cellsToSum.Any())
+                {
+                    worksheet.Cells[rowIndex, columnIndex].Formula = ExcelFormulas.SumOrReference(cellsToSum);
+                }
+                else
+                {
+                    worksheet.Cells[rowIndex, columnIndex].Value = 0;
+                }
+            }
+        }
+
+        private int FillBpnSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+            Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear)
+        {
+            // Add budget category headers & year columns
+            _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Cost Per BPN", "BPN");
+            currentCell.Row ++;
+            var bpnCostBudgetNames = EnumExtensions.GetValues<BPNCostBudgetName>();
+
+            // Add row labels
+            var firstContentRow = currentCell.Row;
+            for (var bpnCostBudgetName = bpnCostBudgetNames[0]; bpnCostBudgetName <= bpnCostBudgetNames.Last(); bpnCostBudgetName++)
+            {
+                var rowIndex = firstContentRow + (int)bpnCostBudgetName;
+                worksheet.Cells[rowIndex, 1].Value = bpnCostBudgetName.ToSpreadsheetString();
+            }
+            worksheet.Cells[firstContentRow + bpnCostBudgetNames.Count, 1].Value = "Total BPN Cost";
+
+            // Add cost data
+            var startColumnIndex = 3;
+            var totalCostPerYear = new Dictionary<int, decimal>();
+            for (var i = 0; i < simulationYears.Count; i++)
+            {
+                decimal totalCost = 0;
+                for (var bpnCostBudgetName = bpnCostBudgetNames[0]; bpnCostBudgetName <= bpnCostBudgetNames.Last(); bpnCostBudgetName++)
+                {
+                    var cost = GetCostForBPNCostBudgetName(bpnCostPerYear, simulationYears[i], bpnCostBudgetName);
+                    totalCost += cost;
+                    var rowIndex = firstContentRow + (int)bpnCostBudgetName;
+                    worksheet.Cells[rowIndex, startColumnIndex + i].Value = cost;
+                    ExcelHelper.SetCurrencyFormat(worksheet.Cells[rowIndex, startColumnIndex + i]);
+                }
+                totalCostPerYear.Add(simulationYears[i], totalCost);
+            }
+
+            // Set formatting for cost rows
+            var r = 0;
+            foreach (var item in totalCostPerYear)
+            {
+                worksheet.Cells[firstContentRow + bpnCostBudgetNames.Count, startColumnIndex + r].Value = item.Value;
+                ExcelHelper.SetCurrencyFormat(worksheet.Cells[firstContentRow + bpnCostBudgetNames.Count, startColumnIndex + r]);
+                r++;
+            }
+            var numberOfYears = simulationYears.Count;
+            var totalRowRange = worksheet.Cells[currentCell.Row, 1, currentCell.Row + bpnCostBudgetNames.Count, 2 + numberOfYears];
+            ExcelHelper.ApplyBorder(totalRowRange);
+            var rowColorRange = worksheet.Cells[currentCell.Row, startColumnIndex, currentCell.Row + bpnCostBudgetNames.Count, startColumnIndex + numberOfYears - 1];
+            ExcelHelper.ApplyColor(rowColorRange, Color.FromArgb(255, 230, 153));
+
+            // Return index of next row
+            currentCell.Row += bpnCostBudgetNames.Count() + 1;
+            return currentCell.Row;
+        }
+
+        private decimal GetCostForBPNCostBudgetName(Dictionary<int, Dictionary<string, decimal>> bpnInfoPerYear, int year, BPNCostBudgetName bpnValue)
+        {
+            decimal cost = 0;
+            if (bpnValue == BPNCostBudgetName.BPNOther)
+            {
+                cost = bpnInfoPerYear[year].Where(_ => _.Key.IsBpnOther()).Sum(_ => _.Value);
+            }
+            else
+            { 
+                if (bpnInfoPerYear[year].ContainsKey(bpnValue.ToMatchInDictionaryString()))
+                {
+                    cost = bpnInfoPerYear[year][bpnValue.ToMatchInDictionaryString()];
+                }
+            }
+            return cost;
         }
 
         private void FillRemainingBudgetSection(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
@@ -84,13 +311,13 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");
             worksheet.Cells[currentCell.Row, simulationYears.Count + 3].Value = "Total Remaining Budget(all years)";
-            _excelHelper.ApplyStyle(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
-            _excelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
+            ExcelHelper.ApplyStyle(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
             AddDetailsForRemainingBudget(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
         }
 
         private int AddCostsOfCommittedWork(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
-    Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj)
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj)
         {
             if (simulationYears.Count <= 0)
             {
@@ -144,12 +371,12 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             fromColumn = column + 1;
             var endColumn = simulationYears.Count + 2;
 
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, committedTotalRow, endColumn]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, committedTotalRow, endColumn], "NegativeCurrency");
-            _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, committedTotalRow, endColumn], Color.FromArgb(198, 224, 180));
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, committedTotalRow, endColumn]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, committedTotalRow, endColumn], ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, committedTotalRow, endColumn], Color.FromArgb(198, 224, 180));
 
-            _excelHelper.ApplyColor(worksheet.Cells[committedTotalRow, fromColumn, committedTotalRow, endColumn], Color.FromArgb(84, 130, 53));
-            _excelHelper.SetTextColor(worksheet.Cells[committedTotalRow, fromColumn, committedTotalRow, endColumn], Color.White);
+            ExcelHelper.ApplyColor(worksheet.Cells[committedTotalRow, fromColumn, committedTotalRow, endColumn], Color.FromArgb(84, 130, 53));
+            ExcelHelper.SetTextColor(worksheet.Cells[committedTotalRow, fromColumn, committedTotalRow, endColumn], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, committedTotalRow + 1, endColumn);
 
             return committedTotalRow;
@@ -168,13 +395,8 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             int culvertTotalRow = 0;
 
             // filling in the culvert treatments in the excel TAB
-            foreach (var item in treatments)
-            {
-                if (item.Contains("culvert", StringComparison.OrdinalIgnoreCase))
-                {
-                    worksheet.Cells[row++, column].Value = item;
-                }
-            }
+            _bridgeWorkSummaryCommon.SetCulvertSectionExcelString(worksheet, treatments, ref row, ref column);
+
             worksheet.Cells[row++, column].Value = Properties.Resources.CulvertTotal;
             column++;
             var fromColumn = column + 1;
@@ -199,12 +421,12 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 culvertTotalRow = row;
                 TotalCulvertSpent.Add(yearlyValues.Key, culvertTotalCost);
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], "NegativeCurrency");
-            _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(198, 224, 180));
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(198, 224, 180));
 
-            _excelHelper.ApplyColor(worksheet.Cells[culvertTotalRow, fromColumn, culvertTotalRow, column], Color.FromArgb(84, 130, 53));
-            _excelHelper.SetTextColor(worksheet.Cells[culvertTotalRow, fromColumn, culvertTotalRow, column], Color.White);
+            ExcelHelper.ApplyColor(worksheet.Cells[culvertTotalRow, fromColumn, culvertTotalRow, column], Color.FromArgb(84, 130, 53));
+            ExcelHelper.SetTextColor(worksheet.Cells[culvertTotalRow, fromColumn, culvertTotalRow, column], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
             return culvertTotalRow;
         }
@@ -220,14 +442,8 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
             int bridgeTotalRow = 0;
-            foreach (var item in treatments)
-            {
-                if (!item.Contains("culvert", StringComparison.OrdinalIgnoreCase) &&
-                    !item.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
-                {
-                    worksheet.Cells[row++, column].Value = item;
-                }
-            }
+            _bridgeWorkSummaryCommon.SetNonCulvertSectionExcelString(worksheet, treatments, ref row, ref column);
+
             worksheet.Cells[row++, column].Value = Properties.Resources.BridgeTotal;
             column++;
             var fromColumn = column + 1;
@@ -253,12 +469,12 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 bridgeTotalRow = row;
                 TotalBridgeSpent.Add(yearlyValues.Key, nonCulvertTotalCost);
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], "NegativeCurrency");
-            _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(198, 224, 180));
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(198, 224, 180));
 
-            _excelHelper.ApplyColor(worksheet.Cells[bridgeTotalRow, fromColumn, bridgeTotalRow, column], Color.FromArgb(84, 130, 53));
-            _excelHelper.SetTextColor(worksheet.Cells[bridgeTotalRow, fromColumn, bridgeTotalRow, column], Color.White);
+            ExcelHelper.ApplyColor(worksheet.Cells[bridgeTotalRow, fromColumn, bridgeTotalRow, column], Color.FromArgb(84, 130, 53));
+            ExcelHelper.SetTextColor(worksheet.Cells[bridgeTotalRow, fromColumn, bridgeTotalRow, column], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
             return bridgeTotalRow;
         }
@@ -288,10 +504,10 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
             }
             worksheet.Cells[row, column + 1].Formula = "SUM(" + worksheet.Cells[row, fromColumn, row, column] + ")";
 
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column + 1]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column + 1], "NegativeCurrency");
-            _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(84, 130, 53));
-            _excelHelper.SetTextColor(worksheet.Cells[startRow, fromColumn, row, column], Color.White);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column + 1]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column + 1], ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(84, 130, 53));
+            ExcelHelper.SetTextColor(worksheet.Cells[startRow, fromColumn, row, column], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
             return budgetTotalRow;
         }
@@ -330,23 +546,24 @@ Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> ye
                 worksheet.Cells[row, column].Formula = 1 + "-" + worksheet.Cells[row - 1, column];
             }
             worksheet.Cells[startRow, column + 1].Formula = "SUM(" + worksheet.Cells[startRow, fromColumn, startRow, column] + ")";
-            if (worksheet.Cells[budgetTotalRow, column + 1].Value != null)
+            if (_workSummaryModel.AnnualizedAmount != 0)
             {
-                worksheet.Cells[startRow, column + 2].Formula = worksheet.Cells[startRow, column + 1] + "/" + worksheet.Cells[budgetTotalRow, column + 1];
+                worksheet.Cells[startRow, column + 2].Formula = worksheet.Cells[startRow, column + 1] + "/"
+                    + (_workSummaryModel.AnnualizedAmount * simulationYears.Count);
             }
 
             worksheet.Cells[startRow, column + 2].Style.Numberformat.Format = "#0.00%";
             worksheet.Cells[startRow, column + 3].Value = "Percentage of Total Budget that was Unspent";
 
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column + 1]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column + 1]);
 
-            _excelHelper.SetCustomFormat(worksheet.Cells[row - 2, fromColumn, row - 2, column + 1], "NegativeCurrency");
-            _excelHelper.SetCustomFormat(worksheet.Cells[row - 1, fromColumn, row, column], "Percentage");
+            ExcelHelper.SetCustomFormat(worksheet.Cells[row - 2, fromColumn, row - 2, column + 1], ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[row - 1, fromColumn, row, column], ExcelHelperCellFormat.Percentage);
 
-            _excelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Red);
-            _excelHelper.ApplyColor(worksheet.Cells[startRow + 1, fromColumn, row, column], Color.FromArgb(248, 203, 173));
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, startRow, column], Color.Red);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow + 1, fromColumn, row, column], Color.FromArgb(248, 203, 173));
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 3, column);
-            _excelHelper.ApplyColor(worksheet.Cells[row + 2, startColumn, row + 2, column], Color.DimGray);
+            ExcelHelper.ApplyColor(worksheet.Cells[row + 2, startColumn, row + 2, column], Color.DimGray);
         }
     }
 

@@ -10,13 +10,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
     public class NHSBridgeDeckAreaWorkSummary
     {
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        private readonly IExcelHelper _excelHelper;
         private readonly BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
 
-        public NHSBridgeDeckAreaWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, IExcelHelper excelHelper, BridgeWorkSummaryComputationHelper bridgeWorkSummaryComputationHelper)
+        public NHSBridgeDeckAreaWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, BridgeWorkSummaryComputationHelper bridgeWorkSummaryComputationHelper)
         {
             _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
-            _excelHelper = excelHelper ?? throw new ArgumentNullException(nameof(excelHelper));
             _bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryComputationHelper));
         }
 
@@ -75,8 +73,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column = ++column;
                 AddNHSBridgeCount(worksheet, row, column, null, yearlyData.Sections);
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 2, column]);
-            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 3, column);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 3, column]);
+            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 4, column);
         }
 
         private void FillNHSBridgeCountPercentSection(ExcelWorksheet worksheet, CurrentCell currentCell,
@@ -135,14 +133,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _bridgeWorkSummaryCommon.InitializeLabelCells(worksheet, currentCell, out startRow, out startColumn, out row, out column);
             for (var index = 0; index <= simulationYears.Count; index++)
             {
-                var sumFormula = "SUM(" + worksheet.Cells[dataStartRow, column, dataStartRow + 2, column] + ")";
+                var sumFormula = "SUM(" + worksheet.Cells[dataStartRow, column, dataStartRow + 2, column] + ")";   // Sum is Good + Fair + Poor; "Closed" is a subset of "Poor"
                 worksheet.Cells[startRow, column].Formula = worksheet.Cells[dataStartRow, column] + "/" + sumFormula;
                 worksheet.Cells[startRow + 1, column].Formula = worksheet.Cells[dataStartRow + 1, column] + "/" + sumFormula;
                 worksheet.Cells[startRow + 2, column].Formula = worksheet.Cells[dataStartRow + 2, column] + "/" + sumFormula;
+                worksheet.Cells[startRow + 3, column].Formula = worksheet.Cells[dataStartRow + 3, column] + "/" + sumFormula;
                 column++;
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, startRow + 2, column - 1]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 2, column], "Percentage");
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, startRow + 3, column - 1]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 3, column], ExcelHelperCellFormat.PercentageDecimal2);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row, column - 1);
         }
 
@@ -151,21 +150,25 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         {
             int goodCount;
             int poorCount;
+            int closedCount;
             if (initialSectionSummaries != null)
             {
                 goodCount = (int)_bridgeWorkSummaryComputationHelper.InitialNHSBridgeGoodCountOrArea(initialSectionSummaries, true);
                 poorCount = (int)_bridgeWorkSummaryComputationHelper.InitialNHSBridgePoorCountOrArea(initialSectionSummaries, true);
+                closedCount = (int)_bridgeWorkSummaryComputationHelper.InitialNHSBridgeClosedCountOrArea(initialSectionSummaries, true);
             }
             else
             {
                 goodCount = (int)_bridgeWorkSummaryComputationHelper.SectionalNHSBridgeGoodCountOrArea(sectionDetails, true);
                 poorCount = (int)_bridgeWorkSummaryComputationHelper.SectionalNHSBridgePoorCountOrArea(sectionDetails, true);
+                closedCount = (int)_bridgeWorkSummaryComputationHelper.SectionalNHSBridgeClosedCountOrArea(sectionDetails, true);
             }
             worksheet.Cells[row, column].Value = goodCount;
             worksheet.Cells[row + 2, column].Value = poorCount;
+            worksheet.Cells[row + 3, column].Value = closedCount;
 
             var yNHSCount = _bridgeWorkSummaryComputationHelper.TotalNHSBridgeCountOrArea(initialSectionSummaries, sectionDetails, true);
-            worksheet.Cells[row + 1, column].Value = yNHSCount - (goodCount + poorCount);
+            worksheet.Cells[row + 1, column].Value = yNHSCount - (goodCount + poorCount + closedCount);
         }
 
         private void AddDetailsForNHSPercentSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, int dataStartRow)
@@ -174,14 +177,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             _bridgeWorkSummaryCommon.InitializeLabelCells(worksheet, currentCell, out startRow, out startColumn, out row, out column);
             for (var index = 0; index <= simulationYears.Count; index++)
             {
-                var sumFormula = "SUM(" + worksheet.Cells[dataStartRow, column, dataStartRow + 2, column] + ")";
+                var sumFormula = "SUM(" + worksheet.Cells[dataStartRow, column, dataStartRow + 2, column] + ")";   // Sum is Good + Fair + Poor; "Closed" is a subset of "Poor"
                 worksheet.Cells[startRow, column].Formula = worksheet.Cells[dataStartRow, column] + "/" + sumFormula;
                 worksheet.Cells[startRow + 1, column].Formula = worksheet.Cells[dataStartRow + 1, column] + "/" + sumFormula;
                 worksheet.Cells[startRow + 2, column].Formula = worksheet.Cells[dataStartRow + 2, column] + "/" + sumFormula;
+                worksheet.Cells[startRow + 3, column].Formula = worksheet.Cells[dataStartRow + 3, column] + "/" + sumFormula;
                 column++;
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, startRow + 2, column - 1]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 2, column], "Percentage");
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, startRow + 3, column - 1]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, startRow + 3, column], ExcelHelperCellFormat.PercentageDecimal2);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row, column - 1);
         }
 
@@ -195,24 +199,28 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 var bridgeGood = Convert.ToDouble(worksheet.Cells[totalBridgeCountOrDeckAreaStartRow + 1, column].Value);
                 var bridgeFair = Convert.ToDouble(worksheet.Cells[totalBridgeCountOrDeckAreaStartRow + 2, column].Value);
                 var bridgePoor = Convert.ToDouble(worksheet.Cells[totalBridgeCountOrDeckAreaStartRow + 3, column].Value);
+                var bridgeClosed = Convert.ToDouble(worksheet.Cells[totalBridgeCountOrDeckAreaStartRow + 4, column].Value);
 
                 var NHSGood = Convert.ToDouble(worksheet.Cells[nHSBridgeCountOrDeckAreaStartRow + 1, column].Value);
                 var NHSFair = Convert.ToDouble(worksheet.Cells[nHSBridgeCountOrDeckAreaStartRow + 2, column].Value);
                 var NHSPoor = Convert.ToDouble(worksheet.Cells[nHSBridgeCountOrDeckAreaStartRow + 3, column].Value);
+                var NHSClosed = Convert.ToDouble(worksheet.Cells[nHSBridgeCountOrDeckAreaStartRow + 4, column].Value);
 
                 var nonNHSGood = bridgeGood - NHSGood;
                 var nonNHSFair = bridgeFair - NHSFair;
                 var nonNHSPoor = bridgePoor - NHSPoor;
+                var nonNHSClosed = bridgeClosed - NHSClosed;
 
                 worksheet.Cells[startRow, column].Value = nonNHSGood;
                 worksheet.Cells[startRow + 1, column].Value = nonNHSFair;
                 worksheet.Cells[startRow + 2, column].Value = nonNHSPoor;
+                worksheet.Cells[startRow + 3, column].Value = nonNHSClosed;
                 column++;
             }
 
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column - 1]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row, column - 1], "Number");
-            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 1, column);
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row - 1, column - 1]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row - 1, column - 1], ExcelHelperCellFormat.Number);
+            _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row, column);
         }
 
         private void AddDetailsForNHSBridgeDeckArea(ExcelWorksheet worksheet, CurrentCell currentCell,
@@ -227,8 +235,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column = ++column;
                 AddNHSBridgeDeckArea(worksheet, row, column, null, yearlyData.Sections);
             }
-            _excelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 2, column]);
-            _excelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row + 2, column], "Number");
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 3, column]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row + 3, column], ExcelHelperCellFormat.Number);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 3, column);
         }
 
@@ -237,21 +245,25 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         {
             double goodDeckArea;
             double poorDeckArea;
+            double closedDeckArea;
             if (initialSectionSummaries != null)
             {
                 goodDeckArea = _bridgeWorkSummaryComputationHelper.InitialNHSBridgeGoodCountOrArea(initialSectionSummaries, false);
                 poorDeckArea = _bridgeWorkSummaryComputationHelper.InitialNHSBridgePoorCountOrArea(initialSectionSummaries, false);
+                closedDeckArea = _bridgeWorkSummaryComputationHelper.InitialNHSBridgeClosedCountOrArea(initialSectionSummaries, false);
             }
             else
             {
                 goodDeckArea = _bridgeWorkSummaryComputationHelper.SectionalNHSBridgeGoodCountOrArea(sectionDetails, false);
                 poorDeckArea = _bridgeWorkSummaryComputationHelper.SectionalNHSBridgePoorCountOrArea(sectionDetails, false); ;
+                closedDeckArea = _bridgeWorkSummaryComputationHelper.SectionalNHSBridgeClosedCountOrArea(sectionDetails, false); ;
             }
             worksheet.Cells[row, column].Value = goodDeckArea;
             worksheet.Cells[row + 2, column].Value = poorDeckArea;
+            worksheet.Cells[row + 3, column].Value = closedDeckArea;
 
             var totalDeckArea = _bridgeWorkSummaryComputationHelper.TotalNHSBridgeCountOrArea(initialSectionSummaries, sectionDetails, false);
-            worksheet.Cells[row + 1, column].Value = totalDeckArea - (goodDeckArea + poorDeckArea);
+            worksheet.Cells[row + 1, column].Value = totalDeckArea - (goodDeckArea + poorDeckArea + closedDeckArea);
         }
 
         #endregion

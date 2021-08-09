@@ -69,5 +69,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.BulkUpsertOrDelete(budgetAmountEntities, predicatesPerCrudOperation, _unitOfWork.UserEntity?.Id);
         }
+
+        public List<BudgetAmountEntity> GetBudgetAmountsByBudgetLibraryId(Guid libraryId)
+        {
+            if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException($"Could not find budget library.");
+            }
+
+            return _unitOfWork.Context.BudgetAmount.Where(_ => _.Budget.BudgetLibrary.Id == libraryId)
+                .Select(budgetAmount => new BudgetAmountEntity
+                {
+                    Year = budgetAmount.Year,
+                    Value = budgetAmount.Value,
+                    Budget = new BudgetEntity {Name = budgetAmount.Budget.Name}
+                }).AsNoTracking().ToList();
+        }
     }
 }

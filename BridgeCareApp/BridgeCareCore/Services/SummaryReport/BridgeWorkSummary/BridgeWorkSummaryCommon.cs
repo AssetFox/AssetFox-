@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
+using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
@@ -8,13 +11,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
     public class BridgeWorkSummaryCommon
     {
-        private readonly IExcelHelper _excelHelper;
-
-        public BridgeWorkSummaryCommon(IExcelHelper excelHelper)
-        {
-            _excelHelper = excelHelper;
-        }
-
         public void AddHeaders(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, string sectionName, string workTypeName)
         {
             AddWorkTypeHeader(worksheet, currentCell, workTypeName);
@@ -47,18 +43,23 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
             worksheet.Cells[row++, column].Value = Properties.Resources.Good;
             worksheet.Cells[row++, column].Value = Properties.Resources.Fair;
-            worksheet.Cells[row++, column++].Value = Properties.Resources.Poor;
-            worksheet.Cells[row - 3, column - 1, row - 1, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+            worksheet.Cells[row++, column].Value = Properties.Resources.Poor;
+            worksheet.Cells[row++, column++].Value = Properties.Resources.Closed;
+            worksheet.Cells[row - 4, column - 1, row - 1, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
         }
 
         public void InitializeBPNLabels(ExcelWorksheet worksheet, CurrentCell currentCell, out int startRow, out int startColumn, out int row, out int column)
         {
             SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-            worksheet.Cells[row++, column].Value = Properties.Resources.BPN1;
-            worksheet.Cells[row++, column].Value = Properties.Resources.BPN2;
-            worksheet.Cells[row++, column].Value = Properties.Resources.BPN3;
-            worksheet.Cells[row++, column++].Value = Properties.Resources.BPN4;
-            worksheet.Cells[row - 4, column - 1, row - 1, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+
+            var bpnNames = EnumExtensions.GetValues<BPNName>();
+            for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
+            {
+                worksheet.Cells[row++, column].Value = bpnName.ToReportLabel();
+            }
+
+            worksheet.Cells[row - bpnNames.Count, column, row - 1, column].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+            column++;
         }
 
         #region Private methods
@@ -69,10 +70,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var column = currentCell.Column;
             worksheet.Cells[row, ++column].Value = headerText;
             var cells = worksheet.Cells[row, column];
-            _excelHelper.ApplyStyle(cells);
-            _excelHelper.MergeCells(worksheet, row, column, row, column + yearsCount - 1);
+            ExcelHelper.ApplyStyle(cells);
+            ExcelHelper.MergeCells(worksheet, row, column, row, column + yearsCount - 1);
             cells = worksheet.Cells[row, column, row, column + yearsCount - 1];
-            _excelHelper.ApplyBorder(cells);
+            ExcelHelper.ApplyBorder(cells);
             ++row;
             UpdateCurrentCell(currentCell, row, column);
         }
@@ -85,8 +86,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             {
                 worksheet.Cells[row, column].Value = year;
                 var cells = worksheet.Cells[row, column];
-                _excelHelper.ApplyStyle(cells);
-                _excelHelper.ApplyBorder(cells);
+                ExcelHelper.ApplyStyle(cells);
+                ExcelHelper.ApplyBorder(cells);
                 column++;
             }
             currentCell.Column = column - 1;
@@ -99,9 +100,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var column = 1;
             worksheet.Cells[++row, column].Value = WorkTypeHeader;
             var cells = worksheet.Cells[row, column, row + 1, column];
-            _excelHelper.ApplyStyle(cells);
-            _excelHelper.ApplyBorder(cells);
-            _excelHelper.MergeCells(worksheet, row, column, row + 1, column);
+            ExcelHelper.ApplyStyle(cells);
+            ExcelHelper.ApplyBorder(cells);
+            ExcelHelper.MergeCells(worksheet, row, column, row + 1, column);
 
             // Empty column
             column++;
@@ -114,10 +115,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             var column = 1;
             worksheet.Cells[row, column].Value = headerText;
             var cells = worksheet.Cells[row, column];
-            _excelHelper.ApplyStyle(cells);
-            _excelHelper.MergeCells(worksheet, row, column, row, column + mergeColumns);
+            ExcelHelper.ApplyStyle(cells);
+            ExcelHelper.MergeCells(worksheet, row, column, row, column + mergeColumns);
             cells = worksheet.Cells[row, column, row, column + mergeColumns];
-            _excelHelper.ApplyBorder(cells);
+            ExcelHelper.ApplyBorder(cells);
             ++row;
             UpdateCurrentCell(currentCell, row, column);
         }
@@ -139,8 +140,44 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             }
             currentCell.Column = column - 1;
             var cells = worksheet.Cells[row, startColumn, row, currentCell.Column];
-            _excelHelper.ApplyStyle(cells);
-            _excelHelper.ApplyBorder(cells);
+            ExcelHelper.ApplyStyle(cells);
+            ExcelHelper.ApplyBorder(cells);
+        }
+
+        internal void SetNonCulvertSectionExcelString(ExcelWorksheet worksheet, SortedSet<string> treatments, ref int row, ref int column)
+        {
+            foreach (var item in treatments)
+            {
+                if (!item.Contains("culvert", StringComparison.OrdinalIgnoreCase) && item != Properties.Resources.CulvertNoTreatment)
+                {
+                    if (item == Properties.Resources.NonCulvertNoTreatment)
+                    {
+                        worksheet.Cells[row++, column].Value = Properties.Resources.NoTreatmentForWorkSummary;
+                    }
+                    else
+                    {
+                        worksheet.Cells[row++, column].Value = item;
+                    }
+                }
+            }
+        }
+
+        internal void SetCulvertSectionExcelString(ExcelWorksheet worksheet, SortedSet<string> treatments, ref int row, ref int column)
+        {
+            foreach (var item in treatments)
+            {
+                if (item.Contains("culvert", StringComparison.OrdinalIgnoreCase) || item == Properties.Resources.CulvertNoTreatment)
+                {
+                    if (item == Properties.Resources.CulvertNoTreatment)
+                    {
+                        worksheet.Cells[row++, column].Value = Properties.Resources.NoTreatmentForWorkSummary;
+                    }
+                    else
+                    {
+                        worksheet.Cells[row++, column].Value = item;
+                    }
+                }
+            }
         }
 
         #endregion Private methods

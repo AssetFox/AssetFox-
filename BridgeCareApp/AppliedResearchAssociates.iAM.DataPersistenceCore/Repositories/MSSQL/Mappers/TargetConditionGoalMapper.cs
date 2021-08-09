@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 
@@ -20,13 +21,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Year = domain.Year
             };
 
-        public static TargetConditionGoalEntity ToEntity(this TargetConditionGoalDTO dto, Guid libraryId,
+        public static ScenarioTargetConditionGoalEntity ToScenarioEntity(this TargetConditionGoal domain, Guid simulatoinId, Guid attributeId) =>
+            new ScenarioTargetConditionGoalEntity
+            {
+                Id = domain.Id,
+                SimulationId = simulatoinId,
+                AttributeId = attributeId,
+                Name = domain.Name,
+                Target = domain.Target,
+                Year = domain.Year
+            };
+
+        public static TargetConditionGoalEntity ToLibraryEntity(this TargetConditionGoalDTO dto, Guid libraryId,
             Guid attributeId) =>
             new TargetConditionGoalEntity
             {
                 Id = dto.Id,
                 Name = dto.Name,
                 TargetConditionGoalLibraryId = libraryId,
+                AttributeId = attributeId,
+                Target = dto.Target,
+                Year = dto.Year
+            };
+
+        public static ScenarioTargetConditionGoalEntity ToScenarioEntity(this TargetConditionGoalDTO dto, Guid simulationId,
+            Guid attributeId) =>
+            new ScenarioTargetConditionGoalEntity
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+                SimulationId = simulationId,
                 AttributeId = attributeId,
                 Target = dto.Target,
                 Year = dto.Year
@@ -63,6 +87,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? entity.CriterionLibraryTargetConditionGoalJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO()
             };
+        public static TargetConditionGoalDTO ToDto(this ScenarioTargetConditionGoalEntity entity) =>
+            new TargetConditionGoalDTO
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                Attribute = entity.Attribute != null
+                    ? entity.Attribute.Name
+                    : "",
+                Target = entity.Target,
+                Year = entity.Year,
+                CriterionLibrary = entity.CriterionLibraryScenarioTargetConditionGoalJoin != null
+                    ? entity.CriterionLibraryScenarioTargetConditionGoalJoin.CriterionLibrary.ToDto()
+                    : new CriterionLibraryDTO()
+            };
 
         public static TargetConditionGoalLibraryDTO ToDto(this TargetConditionGoalLibraryEntity entity) =>
             new TargetConditionGoalLibraryDTO
@@ -72,10 +110,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Description = entity.Description,
                 TargetConditionGoals = entity.TargetConditionGoals.Any()
                     ? entity.TargetConditionGoals.Select(_ => _.ToDto()).ToList()
-                    : new List<TargetConditionGoalDTO>(),
-                AppliedScenarioIds = entity.TargetConditionGoalLibrarySimulationJoins.Any()
-                    ? entity.TargetConditionGoalLibrarySimulationJoins.Select(_ => _.SimulationId).ToList()
-                    : new List<Guid>()
+                    : new List<TargetConditionGoalDTO>()
+                //AppliedScenarioIds = entity.TargetConditionGoalLibrarySimulationJoins.Any()
+                //    ? entity.TargetConditionGoalLibrarySimulationJoins.Select(_ => _.SimulationId).ToList()
+                //    : new List<Guid>()
             };
     }
 }

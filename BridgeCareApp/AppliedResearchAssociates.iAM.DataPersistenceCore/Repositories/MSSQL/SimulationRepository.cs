@@ -150,7 +150,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
-                .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
+
+                .Include(_ => _.ScenarioTargetConditionalGoals)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.ScenarioTargetConditionalGoals)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
 
                 .Include(_ => _.SelectableTreatment)
                 .ThenInclude(_ => _.ScenarioTreatmentBudgetJoins)
@@ -313,11 +318,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         _unitOfWork.UserEntity?.Id);
             }
 
-            if (simulationToClone.TargetConditionGoalLibrarySimulationJoin != null)
+            if (simulationToClone.ScenarioTargetConditionalGoals.Any())
             {
-                simulationToClone.TargetConditionGoalLibrarySimulationJoin.SimulationId = newSimulationId;
+                simulationToClone.ScenarioTargetConditionalGoals.ForEach(target =>
+                {
+                    var newTargetId = Guid.NewGuid();
+                    target.Id = newTargetId;
+                    target.SimulationId = simulationId;
+                    target.Attribute = null;
+                    _unitOfWork.Context
+                        .ReInitializeAllEntityBaseProperties(target, _unitOfWork.UserEntity?.Id);
+
+                    if (target.CriterionLibraryScenarioTargetConditionGoalJoin != null)
+                    {
+                        var criterionLibraryId = Guid.NewGuid();
+                        target.CriterionLibraryScenarioTargetConditionGoalJoin.CriterionLibrary.Id = criterionLibraryId;
+                        target.CriterionLibraryScenarioTargetConditionGoalJoin.CriterionLibraryId = criterionLibraryId;
+                        target.CriterionLibraryScenarioTargetConditionGoalJoin.ScenarioTargetConditionGoalId = newTargetId;
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                target.CriterionLibraryScenarioTargetConditionGoalJoin.CriterionLibrary,
+                                _unitOfWork.UserEntity?.Id);
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(target.CriterionLibraryScenarioTargetConditionGoalJoin,
+                                _unitOfWork.UserEntity?.Id);
+                    }
+                });
+
+                simulationToClone.RemainingLifeLimitLibrarySimulationJoin.SimulationId = newSimulationId;
                 _unitOfWork.Context
-                    .ReInitializeAllEntityBaseProperties(simulationToClone.TargetConditionGoalLibrarySimulationJoin,
+                    .ReInitializeAllEntityBaseProperties(simulationToClone.RemainingLifeLimitLibrarySimulationJoin,
                         _unitOfWork.UserEntity?.Id);
             }
 

@@ -618,7 +618,7 @@ export default class TreatmentEditor extends Vue {
             this.upsertScenarioSelectableTreatmentsAction({
                 scenarioSelectableTreatments: localScenarioSelectedTreatments,
                 scenarioId: scenarioId,
-            });
+            }).then(() => this.librarySelectItemValue = null);
         }
     }
 

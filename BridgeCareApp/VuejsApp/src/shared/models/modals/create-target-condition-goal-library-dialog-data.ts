@@ -4,11 +4,11 @@ import {getBlankGuid} from '@/shared/utils/uuid-utils';
 export interface CreateTargetConditionGoalLibraryDialogData {
     showDialog: boolean;
     targetConditionGoals: TargetConditionGoal[];
-    scenarioId: string;
+    //scenarioId: string;
 }
 
 export const emptyCreateTargetConditionGoalLibraryDialogData: CreateTargetConditionGoalLibraryDialogData = {
     showDialog: false,
     targetConditionGoals: [],
-    scenarioId: getBlankGuid()
+    //scenarioId: getBlankGuid()
 };

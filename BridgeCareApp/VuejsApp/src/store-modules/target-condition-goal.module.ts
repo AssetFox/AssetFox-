@@ -186,6 +186,28 @@ const actions = {
             }
         )
     },
+    async upsertScenarioTargetConditionGoals(
+        {dispatch, commit}: any,
+        payload: any
+    ){
+        await TargetConditionGoalService.upsertScenarioTargetConditionGoals(
+            payload.scenarioTargetConditionGoals,
+            payload.scenarioId,
+        ).then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                commit(
+                    'scenarioTargetConditionGoalsMutator',
+                    payload.scenarioTargetConditionGoals,
+                );
+                dispatch('setSuccessMessage', {
+                    message: 'Modified target condition goals',
+                });
+            }
+        })
+    },
     async deleteTargetConditionGoalLibrary(
         { dispatch, commit, state }: any,
         payload: any,

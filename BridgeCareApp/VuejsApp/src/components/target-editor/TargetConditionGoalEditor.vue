@@ -183,6 +183,7 @@ import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
 import {getAppliedLibraryId, hasAppliedLibrary} from '@/shared/utils/library-utils';
 import {CriterionLibrary} from '@/shared/models/iAM/criteria';
+import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 
 @Component({
   components: {
@@ -196,6 +197,8 @@ export default class TargetConditionGoalEditor extends Vue {
   @State(state => state.targetConditionGoalModule.targetConditionGoalLibraries) stateTargetConditionGoalLibraries: TargetConditionGoalLibrary[];
   @State(state => state.targetConditionGoalModule.selectedTargetConditionGoalLibrary) stateSelectedTargetConditionLibrary: TargetConditionGoalLibrary;
   @State(state => state.attributeModule.numericAttributeNames) stateNumericAttributes: Attribute[];
+  @State(state => state.targetConditionGoalModule.scenarioTargetConditionGoals) stateScenarioTargetConditionGoals: TargetConditionGoal[];
+  @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
 
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('getTargetConditionGoalLibraries') getTargetConditionGoalLibrariesAction: any;
@@ -204,6 +207,9 @@ export default class TargetConditionGoalEditor extends Vue {
   @Action('deleteTargetConditionGoalLibrary') deleteTargetConditionGoalLibraryAction: any;
   @Action('getAttributes') getAttributesAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+  @Action('getScenarioTargetConditionGoals') getScenarioTargetConditionGoalsAction: any;
+  @Action('upsertScenarioTargetConditionGoals') upsertScenarioTargetConditionGoalsAction: any;
+
 
   @Getter('getNumericAttributes') getNumericAttributesGetter: any;
 
@@ -230,19 +236,23 @@ export default class TargetConditionGoalEditor extends Vue {
   confirmDeleteAlertData: AlertData = clone(emptyAlertData);
   rules: InputValidationRules = rules;
   uuidNIL: string = getBlankGuid();
+  hasScenario: boolean = false;
+  currentUrl: string = window.location.href;
 
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
-      if (to.path.indexOf('TargetConditionGoalEditor/Scenario') !== -1) {
+      vm.librarySelectItemValue = null;
+      vm.getTargetConditionGoalLibrariesAction();
+
+      if (to.path.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) {
         vm.selectedScenarioId = to.query.scenarioId;
         if (vm.selectedScenarioId === vm.uuidNIL) {
           vm.setErrorMessageAction({message: 'Found no selected scenario for edit'});
           vm.$router.push('/Scenarios/');
         }
+        vm.hasScenario = true;
+        vm.getScenarioTargetConditionGoalsAction(vm.selectedScenarioId);
       }
-
-      vm.librarySelectItemValue = null;
-      vm.getTargetConditionGoalLibrariesAction();
     });
   }
 
@@ -257,9 +267,9 @@ export default class TargetConditionGoalEditor extends Vue {
       value: library.id
     }));
 
-    if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateTargetConditionGoalLibraries, this.selectedScenarioId)) {
-      this.librarySelectItemValue = getAppliedLibraryId(this.stateTargetConditionGoalLibraries, this.selectedScenarioId);
-    }
+    // if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateTargetConditionGoalLibraries, this.selectedScenarioId)) {
+    //   this.librarySelectItemValue = getAppliedLibraryId(this.stateTargetConditionGoalLibraries, this.selectedScenarioId);
+    // }
   }
 
   @Watch('librarySelectItemValue')
@@ -274,11 +284,11 @@ export default class TargetConditionGoalEditor extends Vue {
 
   @Watch('selectedTargetConditionGoalLibrary')
   onSelectedTargetConditionGoalLibraryChanged() {
-    this.setHasUnsavedChangesAction({
-      value: hasUnsavedChangesCore(
-          'target-condition-goal', this.selectedTargetConditionGoalLibrary, this.stateSelectedTargetConditionLibrary
-      )
-    });
+    // this.setHasUnsavedChangesAction({
+    //   value: hasUnsavedChangesCore(
+    //       'target-condition-goal', this.selectedTargetConditionGoalLibrary, this.stateSelectedTargetConditionLibrary
+    //   )
+    // });
     this.hasSelectedLibrary = this.selectedTargetConditionGoalLibrary.id !== this.uuidNIL;
     this.targetConditionGoalGridData = clone(this.selectedTargetConditionGoalLibrary.targetConditionGoals);
     if (this.numericAttributeNames.length === 0) {

@@ -173,17 +173,9 @@
                                     </v-tab-item>
                                     <v-tab-item>
                                         <v-card>
-                                            <v-card-text
-                                                class="card-tab-content"
-                                            >
-                                                <BudgetsTab
-                                                    :selectedTreatmentBudgets="
-                                                        selectedTreatment.budgetIds
-                                                    "
-                                                    @onModifyBudgets="
-                                                        modifySelectedTreatmentBudgets
-                                                    "
-                                                />
+                                            <v-card-text class="card-tab-content">
+                                                <BudgetsTab :selectedTreatmentBudgets="selectedTreatment.budgetIds" :isNewTreatment="selectedTreatment.isNew"                                                  
+                                                @onModifyBudgets="modifySelectedTreatmentBudgets"/>
                                             </v-card-text>
                                         </v-card>
                                     </v-tab-item>
@@ -370,7 +362,7 @@ export default class TreatmentEditor extends Vue {
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
-    librarySelectItemValue: string | null = null;
+    librarySelectItemValue: string | null = null;    
     treatmentSelectItems: SelectItem[] = [];
     treatmentSelectItemValue: string | null = null;
     selectedTreatment: Treatment = clone(emptyTreatment);

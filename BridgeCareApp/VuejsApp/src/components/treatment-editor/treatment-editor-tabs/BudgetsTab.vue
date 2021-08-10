@@ -16,7 +16,7 @@
             <v-layout v-else>
               <v-data-table :headers="budgetHeaders" :items="budgets"
                             class="elevation-1 fixed-header v-table__overflow budgets-data-table" hide-actions
-                            item-key="id" select-all
+                            item-key="id" select-all 
                             v-model="selectedBudgets">
                 <template slot="items" slot-scope="props">
                   <td>
@@ -50,7 +50,8 @@ export default class BudgetsTab extends Vue {
   @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
 
   @Prop() selectedTreatmentBudgets: string[];
-
+  @Prop() isNewTreatment: boolean;
+  
   budgetHeaders: DataTableHeader[] = [
     {text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300px'}
   ];
@@ -59,13 +60,20 @@ export default class BudgetsTab extends Vue {
 
   @Watch('stateScenarioSimpleBudgetDetails')
   onStateScenarioInvestmentLibraryChanged() {
-    this.budgets = clone(this.stateScenarioSimpleBudgetDetails);
+    this.budgets = clone(this.stateScenarioSimpleBudgetDetails);    
   }
 
   @Watch('selectedTreatmentBudgets')
-  onBudgetsTabDataChanged() {
-    this.selectedBudgets = this.budgets
+  onBudgetsTabDataChanged() { 
+    // if it is a new treatment or (Treatment is having set of budgets)
+    if((this.isNewTreatment && this.selectedTreatmentBudgets.length == 0) || this.selectedTreatmentBudgets.length == 0){
+      this.selectedBudgets = this.budgets;
+    }
+    else
+    {
+      this.selectedBudgets = this.budgets
         .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id, this.selectedTreatmentBudgets));
+    }
   }
 
   @Watch('selectedBudgets')
@@ -74,6 +82,11 @@ export default class BudgetsTab extends Vue {
     if (!isEqual(this.selectedTreatmentBudgets, selectedBudgetIds)) {
       this.$emit('onModifyBudgets', this.selectedBudgets);
     }
+  }
+
+  @Watch('budgets')
+  onBudgetsChanged(){
+    this.selectedBudgets = clone(this.budgets);
   }
 }
 </script>

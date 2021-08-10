@@ -14,7 +14,6 @@ export default class TargetConditionGoalService {
 
     static upsertTargetConditionGoalLibrary(
         data: TargetConditionGoalLibrary,
-        scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.TargetConditionGoal}/UpsertTargetConditionGoalLibrary/`,

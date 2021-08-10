@@ -4,15 +4,15 @@
       <v-layout justify-center>
         <v-flex xs3>
           <v-btn @click="onShowCreateTargetConditionGoalLibraryDialog(false)" class="ara-blue-bg white--text"
-                 v-show="selectedScenarioId === uuidNIL">
+                 v-show="!hasScenario">
             New Library
           </v-btn>
           <v-select :items="librarySelectItems"
                     label="Select a Target Condition Goal Library"
-                    outline v-if="!hasSelectedLibrary || selectedScenarioId !== uuidNIL"
+                    outline v-if="!hasSelectedLibrary || hasScenario"
                     v-model="librarySelectItemValue">
           </v-select>
-          <v-text-field label="Library Name" v-if="hasSelectedLibrary && selectedScenarioId === uuidNIL"
+          <v-text-field label="Library Name" v-if="hasSelectedLibrary && !hasScenario"
                         v-model="selectedTargetConditionGoalLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]">
             <template slot="append">
@@ -21,16 +21,16 @@
               </v-btn>
             </template>
           </v-text-field>
-          <div v-if="hasSelectedLibrary && selectedScenarioId === uuidNIL">
+          <div v-if="hasSelectedLibrary && !hasScenario">
             Owner:
             {{ selectedTargetConditionGoalLibrary.owner ? selectedTargetConditionGoalLibrary.owner : "[ No Owner ]" }}
           </div>
           <v-checkbox class="sharing" label="Shared"
-                      v-if="hasSelectedLibrary && selectedScenarioId === uuidNIL"
+                      v-if="hasSelectedLibrary && !hasScenario"
                       v-model="selectedTargetConditionGoalLibrary.shared"/>
         </v-flex>
       </v-layout>
-      <v-flex v-show="hasSelectedLibrary" xs3>
+      <v-flex v-show="hasSelectedLibrary || hasScenario" xs3>
         <v-btn @click="showCreateTargetConditionGoalDialog = true" class="ara-blue-bg white--text">Add</v-btn>
         <v-btn :disabled="selectedTargetConditionGoalIds.length === 0" @click="onRemoveTargetConditionGoals"
                class="ara-orange-bg white--text">
@@ -38,7 +38,7 @@
         </v-btn>
       </v-flex>
     </v-flex>
-    <v-flex v-show="hasSelectedLibrary" xs12>
+    <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
       <div class="targets-data-table">
         <v-data-table :headers="targetConditionGoalGridHeaders" :items="targetConditionGoalGridData"
                       class="elevation-1 fixed-header v-table__overflow" item-key="id"
@@ -98,7 +98,7 @@
         </v-data-table>
       </div>
     </v-flex>
-    <v-flex v-show="hasSelectedLibrary && selectedScenarioId === uuidNIL" xs12>
+    <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
       <v-layout justify-center>
         <v-flex xs6>
           <v-textarea label="Description" no-resize outline rows="4"
@@ -107,16 +107,16 @@
         </v-flex>
       </v-layout>
     </v-flex>
-    <v-flex v-show="hasSelectedLibrary" xs12>
+    <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
       <v-layout justify-end row>
-        <v-btn @click="onUpsertTargetConditionGoalLibrary(selectedTargetConditionGoalLibrary, selectedScenarioId)"
+        <v-btn @click="onSaveScenarioTargetConditionGoal(selectedScenarioId)"
                class="ara-blue-bg white--text"
-               v-show="selectedScenarioId !== uuidNIL" :disabled="disableCrudButton()">
+               v-show="hasScenario" :disabled="disableCrudButton()">
           Save
         </v-btn>
-        <v-btn @click="onUpsertTargetConditionGoalLibrary(selectedTargetConditionGoalLibrary, uuidNIL)"
+        <v-btn @click="onUpsertTargetConditionGoalLibrary(selectedTargetConditionGoalLibrary)"
                class="ara-blue-bg white--text"
-               v-show="selectedScenarioId === uuidNIL" :disabled="disableCrudButton()">
+               v-show="!hasScenario" :disabled="disableCrudButton()">
           Update Library
         </v-btn>
         <v-btn @click="onShowCreateTargetConditionGoalLibraryDialog(true)" class="ara-blue-bg white--text"
@@ -124,11 +124,11 @@
           Create as New Library
         </v-btn>
         <v-btn @click="onShowConfirmDeleteAlert" class="ara-orange-bg white--text"
-               v-show="selectedScenarioId === uuidNIL" :disabled="!hasSelectedLibrary">
+               v-show="!hasScenario" :disabled="!hasSelectedLibrary">
           Delete Library
         </v-btn>
         <v-btn @click="onDiscardChanges" class="ara-orange-bg white--text"
-               v-show="selectedScenarioId !== uuidNIL">
+               v-show="hasScenario">
           Discard Changes
         </v-btn>
       </v-layout>
@@ -159,7 +159,7 @@ import {
   TargetConditionGoal,
   TargetConditionGoalLibrary
 } from '@/shared/models/iAM/target-condition-goal';
-import {clone, contains, findIndex, isNil, prepend, propEq, update} from 'ramda';
+import {clone, contains, findIndex, isNil, prepend, propEq, reject, update} from 'ramda';
 import {
   CriterionLibraryEditorDialogData,
   emptyCriterionLibraryEditorDialogData
@@ -180,10 +180,11 @@ import {AlertData, emptyAlertData} from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import {hasUnsavedChangesCore} from '@/shared/utils/has-unsaved-changes-helper';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
-import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import {getBlankGuid, getNewGuid} from '@/shared/utils/uuid-utils';
 import {getAppliedLibraryId, hasAppliedLibrary} from '@/shared/utils/library-utils';
-import {CriterionLibrary} from '@/shared/models/iAM/criteria';
+import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { hasValue } from '@/shared/utils/has-value-util';
 
 @Component({
   components: {
@@ -266,10 +267,6 @@ export default class TargetConditionGoalEditor extends Vue {
       text: library.name,
       value: library.id
     }));
-
-    // if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateTargetConditionGoalLibraries, this.selectedScenarioId)) {
-    //   this.librarySelectItemValue = getAppliedLibraryId(this.stateTargetConditionGoalLibraries, this.selectedScenarioId);
-    // }
   }
 
   @Watch('librarySelectItemValue')
@@ -284,13 +281,17 @@ export default class TargetConditionGoalEditor extends Vue {
 
   @Watch('selectedTargetConditionGoalLibrary')
   onSelectedTargetConditionGoalLibraryChanged() {
-    // this.setHasUnsavedChangesAction({
-    //   value: hasUnsavedChangesCore(
-    //       'target-condition-goal', this.selectedTargetConditionGoalLibrary, this.stateSelectedTargetConditionLibrary
-    //   )
-    // });
     this.hasSelectedLibrary = this.selectedTargetConditionGoalLibrary.id !== this.uuidNIL;
-    this.targetConditionGoalGridData = clone(this.selectedTargetConditionGoalLibrary.targetConditionGoals);
+    if (this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal) && this.hasSelectedLibrary){
+            this.targetConditionGoalGridData = this.selectedTargetConditionGoalLibrary.targetConditionGoals
+                    .map((targetGoal: TargetConditionGoal) => ({
+                        ...targetGoal,
+                        id: getNewGuid()
+                    }));
+    }else if (!this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal)) {
+            this.targetConditionGoalGridData = clone(this.selectedTargetConditionGoalLibrary.targetConditionGoals);
+        }
+    
     if (this.numericAttributeNames.length === 0) {
       this.numericAttributeNames = getPropertyValues('name', this.getNumericAttributesGetter);
     }
@@ -306,11 +307,30 @@ export default class TargetConditionGoalEditor extends Vue {
     this.numericAttributeNames = getPropertyValues('name', this.stateNumericAttributes);
   }
 
+  @Watch('stateScenarioTargetConditionGoals')
+  onStateScenarioTargetConditionGoalsChanged(){
+    if (this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) {
+            this.targetConditionGoalGridData = clone(this.stateScenarioTargetConditionGoals);
+        }
+  }
+
+  @Watch('targetConditionGoalGridData')
+    ontargetConditionGoalGridDataChanged() {
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore(
+            'target-condition-goal',
+            this.targetConditionGoalGridData,
+            this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1
+                ? this.stateScenarioTargetConditionGoals
+                : this.stateSelectedTargetConditionLibrary.targetConditionGoals,
+        );
+
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
   onShowCreateTargetConditionGoalLibraryDialog(createAsNewLibrary: boolean) {
     this.createTargetConditionGoalLibraryDialogData = {
       showDialog: true,
-      targetConditionGoals: createAsNewLibrary ? this.selectedTargetConditionGoalLibrary.targetConditionGoals : [],
-      scenarioId: createAsNewLibrary ? this.selectedScenarioId : this.uuidNIL
+      targetConditionGoals: createAsNewLibrary ? this.targetConditionGoalGridData : [],
     };
   }
 
@@ -318,24 +338,18 @@ export default class TargetConditionGoalEditor extends Vue {
     this.showCreateTargetConditionGoalDialog = false;
 
     if (!isNil(newTargetConditionGoal)) {
-      this.selectedTargetConditionGoalLibrary = {
-        ...this.selectedTargetConditionGoalLibrary,
-        targetConditionGoals: prepend(newTargetConditionGoal, this.selectedTargetConditionGoalLibrary.targetConditionGoals)
-      };
+      this.targetConditionGoalGridData = prepend(newTargetConditionGoal, this.targetConditionGoalGridData);
     }
   }
 
   onEditTargetConditionGoalProperty(targetConditionGoal: TargetConditionGoal, property: string, value: any) {
-    this.selectedTargetConditionGoalLibrary = {
-      ...this.selectedTargetConditionGoalLibrary,
-      targetConditionGoals: update(
-          findIndex(propEq('id', targetConditionGoal.id), this.selectedTargetConditionGoalLibrary.targetConditionGoals),
-          setItemPropertyValue(property, value, targetConditionGoal) as TargetConditionGoal,
-          this.selectedTargetConditionGoalLibrary.targetConditionGoals
-      )
-    };
+    this.targetConditionGoalGridData = update(
+      findIndex(propEq('id', targetConditionGoal.id), this.targetConditionGoalGridData),
+      setItemPropertyValue(property, value, targetConditionGoal) as TargetConditionGoal,
+      this.targetConditionGoalGridData
+    );
   }
-
+ 
   onShowCriterionLibraryEditorDialog(targetConditionGoal: TargetConditionGoal) {
     this.selectedTargetConditionGoalForCriteriaEdit = clone(targetConditionGoal);
 
@@ -367,30 +381,37 @@ export default class TargetConditionGoalEditor extends Vue {
     this.selectedTargetConditionGoalForCriteriaEdit = clone(emptyTargetConditionGoal);
   }
 
-  onUpsertTargetConditionGoalLibrary(library: TargetConditionGoalLibrary, scenarioId: string) {
+  onUpsertTargetConditionGoalLibrary(library: TargetConditionGoalLibrary) {
     this.createTargetConditionGoalLibraryDialogData = clone(emptyCreateTargetConditionGoalLibraryDialogData);
 
     if (!isNil(library)) {
-      this.createTargetConditionGoalLibraryAction({library: library, scenarioId: scenarioId});
+      this.createTargetConditionGoalLibraryAction({library: library});
     }
   }
+
+  onSaveScenarioTargetConditionGoal(
+        scenarioId: string,
+    ) {
+        if (!isNil(this.targetConditionGoalGridData)) {
+            this.upsertScenarioTargetConditionGoalsAction({
+                scenarioTargetConditionGoals: this.targetConditionGoalGridData,
+                scenarioId: scenarioId,
+            }).then(() => this.librarySelectItemValue = null);
+        }
+    }
 
   onDiscardChanges() {
     this.librarySelectItemValue = null;
     setTimeout(() => {
-      if (this.selectedScenarioId !== this.uuidNIL &&
-          hasAppliedLibrary(this.stateTargetConditionGoalLibraries, this.selectedScenarioId)) {
-        this.librarySelectItemValue = getAppliedLibraryId(this.stateTargetConditionGoalLibraries, this.selectedScenarioId);
-      }
+
+      if (this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) {
+                this.targetConditionGoalGridData = clone(this.stateScenarioTargetConditionGoals);
+            }
     });
   }
 
   onRemoveTargetConditionGoals() {
-    this.selectedTargetConditionGoalLibrary = {
-      ...this.selectedTargetConditionGoalLibrary,
-      targetConditionGoals: this.selectedTargetConditionGoalLibrary.targetConditionGoals
-          .filter((targetConditionGoal: TargetConditionGoal) => !contains(targetConditionGoal.id, this.selectedTargetConditionGoalIds))
-    };
+    this.targetConditionGoalGridData = this.targetConditionGoalGridData.filter((_: TargetConditionGoal) => !contains(_.id, this.selectedTargetConditionGoalIds));
   }
 
   onShowConfirmDeleteAlert() {
@@ -412,18 +433,18 @@ export default class TargetConditionGoalEditor extends Vue {
   }
 
   disableCrudButton() {
-    if (this.hasSelectedLibrary) {
-      const allDataIsValid = this.selectedTargetConditionGoalLibrary.targetConditionGoals.every((t: TargetConditionGoal) => {
-        return this.rules['generalRules'].valueIsNotEmpty(t.attribute) === true &&
-            this.rules['generalRules'].valueIsNotEmpty(t.name) === true &&
-            this.rules['generalRules'].valueIsNotEmpty(t.target) === true;
-      });
+    const dataIsValid: boolean = this.targetConditionGoalGridData
+            .every((targetGoal: TargetConditionGoal) => {
+                return this.rules['generalRules'].valueIsNotEmpty(targetGoal.name) === true &&
+                    this.rules['generalRules'].valueIsNotEmpty(targetGoal.attribute) === true;
+            });
 
-      return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedTargetConditionGoalLibrary.name) === true &&
-          allDataIsValid);
-    }
+        if (this.hasSelectedLibrary) {
+            return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedTargetConditionGoalLibrary.name) === true &&
+                dataIsValid && this.hasUnsavedChanges);
+        }
 
-    return true;
+        return !(dataIsValid && this.hasUnsavedChanges);
   }
 }
 </script>

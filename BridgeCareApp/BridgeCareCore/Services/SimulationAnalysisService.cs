@@ -62,8 +62,8 @@ namespace BridgeCareCore.Services
             var simulation = network.Simulations.Single(_ => _.Id == simulationId);
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _unitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
-            _unitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
 
             var runner = new SimulationRunner(simulation);

@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             MockEsecSecurityNotAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo
                 {
-                    Name = "b-bamsadmin", Role = "PD-BAMS-PlanningPartner", Email = "jmalmberg@ara.com"
+                    Name = "b-bamsadmin", Role = "PD-BAMS-DBEngineer", Email = "jmalmberg@ara.com"
                 });
 
             MockHttpContextAccessor = new Mock<IHttpContextAccessor>();

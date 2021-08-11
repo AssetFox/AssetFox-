@@ -11,11 +11,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             ScenarioBudgetAmounts = new List<ScenarioBudgetAmountEntity>();
             BudgetPercentagePairs = new List<BudgetPercentagePairEntity>();
             CommittedProjects = new HashSet<CommittedProjectEntity>();
-            TreatmentScenarioBudgetJoins = new HashSet<SelectableTreatmentScenarioBudgetEntity>();
+            ScenarioSelectableTreatmentScenarioBudgetJoins = new HashSet<ScenarioSelectableTreatmentScenarioBudgetEntity>();
         }
 
         public Guid SimulationId { get; set; }
-
 
         public virtual SimulationEntity Simulation { get; set; }
 
@@ -25,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
 
-        public virtual ICollection<SelectableTreatmentScenarioBudgetEntity> TreatmentScenarioBudgetJoins { get; set; }
+        public virtual ICollection<ScenarioSelectableTreatmentScenarioBudgetEntity> ScenarioSelectableTreatmentScenarioBudgetJoins { get; set; }
 
         public virtual CriterionLibraryScenarioBudgetEntity CriterionLibraryScenarioBudgetJoin { get; set; }
     }

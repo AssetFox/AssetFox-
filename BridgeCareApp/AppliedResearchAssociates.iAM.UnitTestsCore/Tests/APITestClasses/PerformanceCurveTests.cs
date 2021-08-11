@@ -282,7 +282,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 timer.Elapsed += delegate
                 {
                     var modifiedDto = _testHelper.UnitOfWork.PerformanceCurveRepo
-                        .GetPerformanceCurveLibrariesWithPerformanceCurves()[0];
+                        .GetPerformanceCurveLibraries()[0];
                     Assert.Equal(dto.Description, modifiedDto.Description);
 
                     Assert.Equal(dto.PerformanceCurves[0].Shift, modifiedDto.PerformanceCurves[0].Shift);

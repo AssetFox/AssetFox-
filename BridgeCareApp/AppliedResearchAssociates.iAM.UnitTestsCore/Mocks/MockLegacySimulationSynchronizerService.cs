@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
             {
-                throw new RowNotInTableException($"No network found having id {network.Id}.");
+                throw new RowNotInTableException($"The specified network was not found.");
             }
 
             var facilitySectionNames = network.Facilities
@@ -91,8 +91,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
 
             if (simulation.PerformanceCurves.Any())
             {
-                _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{simulation.Name} Performance Curve Library", simulation.Id);
-                _unitOfWork.PerformanceCurveRepo.CreatePerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
+                _unitOfWork.PerformanceCurveRepo.CreateScenarioPerformanceCurves(simulation.PerformanceCurves.ToList(), simulation.Id);
             }
 
             if (simulation.CommittedProjects.Any())
@@ -102,8 +101,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
 
             if (simulation.Treatments.Any())
             {
-                _unitOfWork.SelectableTreatmentRepo.CreateTreatmentLibrary($"{simulation.Name} Treatment Library", simulation.Id);
-                _unitOfWork.SelectableTreatmentRepo.CreateSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
+                _unitOfWork.SelectableTreatmentRepo.CreateScenarioSelectableTreatments(simulation.Treatments.ToList(), simulation.Id);
             }
         }
 

@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +17,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private static readonly bool IsRunningFromXUnit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public DeficientConditionGoalRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork)
+        public DeficientConditionGoalRepository(UnitOfDataPersistenceWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
@@ -27,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
             var deficientConditionGoalLibraryEntity = new DeficientConditionGoalLibraryEntity { Id = Guid.NewGuid(), Name = name };
@@ -49,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation
@@ -121,7 +122,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
-                    throw new RowNotInTableException($"No simulation found for the given scenario.");
+                    throw new RowNotInTableException("No simulation was found for the given scenario.");
                 }
 
                 _unitOfWork.Context.DeleteEntity<DeficientConditionGoalLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
@@ -144,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId))
             {
-                throw new RowNotInTableException($"No deficient condition goal library found having id {libraryId}.");
+                throw new RowNotInTableException("The specified deficient condition goal library was not found.");
             }
 
             if (deficientConditionGoals.Any(_ => string.IsNullOrEmpty(_.Attribute)))

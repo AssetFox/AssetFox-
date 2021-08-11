@@ -8,13 +8,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IBudgetRepository
     {
-        void CreateBudgetLibrary(string name, Guid simulationId);
+        void CreateScenarioBudgets(List<Budget> budgets, Guid simulationId);
 
-        void CreateBudgets(List<Budget> budgets, Guid simulationId);
+        List<SimpleBudgetDetailDTO> GetScenarioSimpleBudgetDetails(Guid simulationId);
 
-        List<SimpleBudgetDetailDTO> ScenarioSimpleBudgetDetails(Guid simulationId);
-
-        List<BudgetLibraryDTO> GetBudgetLibrariesWithBudgets();
+        List<BudgetLibraryDTO> GetBudgetLibraries();
 
         void UpsertBudgetLibrary(BudgetLibraryDTO dto);
 
@@ -22,9 +20,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void DeleteBudgetLibrary(Guid libraryId);
 
-        List<BudgetEntity> GetBudgetsWithBudgetAmounts(Guid libraryId);
+        List<BudgetEntity> GetLibraryBudgets(Guid libraryId);
 
-        BudgetLibraryDTO GetBudgetLibraryWithBudgetsAndBudgetAmounts(Guid libraryId);
+        BudgetLibraryDTO GetBudgetLibrary(Guid libraryId);
 
         List<BudgetDTO> GetScenarioBudgets(Guid simulationId);
 

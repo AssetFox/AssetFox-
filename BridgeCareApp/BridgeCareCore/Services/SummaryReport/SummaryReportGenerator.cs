@@ -124,8 +124,8 @@ namespace BridgeCareCore.Services.SummaryReport
             var simulation = network.Simulations.First();
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-            _unitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
-            _unitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             foreach (var budget in simulation.InvestmentPlan.Budgets)

@@ -6,20 +6,22 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Network = AppliedResearchAssociates.iAM.DataAssignment.Networking.Network;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class NetworkRepository : INetworkRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public NetworkRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ??
+        public NetworkRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateNetwork(DataAssignment.Networking.Network network)
+        public void CreateNetwork(Network network)
         {
             // prevent EF from attempting to create the network's child entities (create them
             // separately as part of a bulk insert)
@@ -35,9 +37,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(network.MaintainableAssets.ToList(), network.Id);
         }
 
-        public void CreateNetwork(Network network) => _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);
+        public void CreateNetwork(Domains.Network network) => _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);
 
-        public List<DataAssignment.Networking.Network> GetAllNetworks() =>
+        public List<Network> GetAllNetworks() =>
             _unitOfWork.Context.Network.Select(_ => _.ToDomain()).ToList();
 
         public Task<List<NetworkDTO>> Networks()
@@ -151,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
-                throw new RowNotInTableException($"No network found having id {networkId}.");
+                throw new RowNotInTableException("The specified network was not found.");
             }
 
             var networkRollupDetailEntity = new NetworkRollupDetailEntity {NetworkId = networkId, Status = status};

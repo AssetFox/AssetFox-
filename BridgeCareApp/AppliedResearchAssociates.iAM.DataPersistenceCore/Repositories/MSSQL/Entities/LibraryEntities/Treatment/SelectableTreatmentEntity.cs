@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment
 {
     public class SelectableTreatmentEntity : TreatmentEntity
     {
         public SelectableTreatmentEntity()
         {
-            TreatmentBudgetJoins = new HashSet<SelectableTreatmentScenarioBudgetEntity>();
             TreatmentConsequences = new HashSet<ConditionalTreatmentConsequenceEntity>();
             TreatmentCosts = new HashSet<TreatmentCostEntity>();
             TreatmentSchedulings = new HashSet<TreatmentSchedulingEntity>();
@@ -22,8 +21,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual TreatmentLibraryEntity TreatmentLibrary { get; set; }
 
         public virtual CriterionLibrarySelectableTreatmentEntity CriterionLibrarySelectableTreatmentJoin { get; set; }
-
-        public virtual ICollection<SelectableTreatmentScenarioBudgetEntity> TreatmentBudgetJoins { get; set; }
 
         public virtual ICollection<ConditionalTreatmentConsequenceEntity> TreatmentConsequences { get; set; }
 

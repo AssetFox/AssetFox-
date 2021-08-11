@@ -2,21 +2,22 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using MoreLinq;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AggregatedResultRepository : IAggregatedResultRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public AggregatedResultRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+        public AggregatedResultRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void AddAggregatedResults(List<IAggregatedResult> aggregatedResults)
@@ -41,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
 
             return !maintainableAssets.Any()
-                ? throw new RowNotInTableException($"The network has no maintainable assets for rollup")
+                ? throw new RowNotInTableException("The network has no maintainable assets for rollup")
                 : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToList().ToDomain());
         }
 

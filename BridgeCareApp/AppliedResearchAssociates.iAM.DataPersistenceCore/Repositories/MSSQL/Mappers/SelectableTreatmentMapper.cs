@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using MoreLinq;
@@ -11,17 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class SelectableTreatmentMapper
     {
-        public static SelectableTreatmentEntity ToEntity(this SelectableTreatment domain, Guid treatmentLibraryId) =>
-            new SelectableTreatmentEntity
-            {
-                Id = domain.Id,
-                TreatmentLibraryId = treatmentLibraryId,
-                Name = domain.Name,
-                ShadowForAnyTreatment = domain.ShadowForAnyTreatment,
-                ShadowForSameTreatment = domain.ShadowForSameTreatment,
-                Description = domain.Description
-            };
-
         public static SelectableTreatmentEntity ToLibraryEntity(this TreatmentDTO dto, Guid libraryId) =>
             new SelectableTreatmentEntity
             {
@@ -67,9 +56,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             selectableTreatment.ShadowForSameTreatment = entity.ShadowForSameTreatment;
             selectableTreatment.Description = entity.Description;
 
-            if (entity.ScenarioTreatmentBudgetJoins.Any())
+            if (entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
             {
-                var budgetIds = entity.ScenarioTreatmentBudgetJoins.Select(_ => _.ScenarioBudget.Id).ToList();
+                var budgetIds = entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Select(_ => _.ScenarioBudget.Id).ToList();
                 simulation.InvestmentPlan.Budgets.Where(_ => budgetIds.Contains(_.Id)).ToList()
                     .ForEach(budget => selectableTreatment.Budgets.Add(budget));
             }
@@ -103,9 +92,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static SimpleBudgetDetailDTO ToDto(this SelectableTreatmentScenarioBudgetEntity entity) =>
-            new SimpleBudgetDetailDTO { Id = entity.ScenarioBudgetId, Name = entity.ScenarioBudget.Name };
-
         public static TreatmentDTO ToDto(this SelectableTreatmentEntity entity) =>
             new TreatmentDTO
             {
@@ -114,9 +100,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Description = entity.Description,
                 ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
                 ShadowForSameTreatment = entity.ShadowForSameTreatment,
-                BudgetIds = entity.TreatmentBudgetJoins.Any()
-                    ? entity.TreatmentBudgetJoins.Select(_ => _.ScenarioBudgetId).ToList()
-                    : new List<Guid>(),
+                BudgetIds = new List<Guid>(),
                 Costs = entity.TreatmentCosts.Any()
                     ? entity.TreatmentCosts.Select(_ => _.ToDto()).ToList()
                     : new List<TreatmentCostDTO>(),
@@ -145,8 +129,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Name = entity.Name,
                 Description = entity.Description,
-                BudgetIds = entity.ScenarioTreatmentBudgetJoins.Any()
-                        ? entity.ScenarioTreatmentBudgetJoins.Select(_ => _.BudgetId).ToList()
+                BudgetIds = entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any()
+                        ? entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Select(_ => _.ScenarioBudgetId).ToList()
                         : new List<Guid>(),
                 Consequences = entity.ScenarioTreatmentConsequences.Any()
                         ? entity.ScenarioTreatmentConsequences.Select(_ => _.ToDto()).ToList()

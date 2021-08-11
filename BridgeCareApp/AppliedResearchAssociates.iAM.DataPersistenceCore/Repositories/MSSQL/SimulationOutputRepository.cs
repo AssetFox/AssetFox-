@@ -5,23 +5,25 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class SimulationOutputRepository : ISimulationOutputRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public SimulationOutputRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
@@ -32,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new InvalidOperationException($"No results found for simulation {simulationEntity.Name}. Please ensure that the simulation analysis has been run.");
             }
 
-            var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
+            var settings = new StringEnumConverter();
             var simulationOutputString = JsonConvert.SerializeObject(simulationOutput, settings);
 
             _unitOfWork.Context.Upsert(
@@ -44,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
-                throw new RowNotInTableException($"Found no simulation having id {simulation.Id}");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             if (_unitOfWork.Context.SimulationOutput.Any(_ => _.SimulationId == simulation.Id))

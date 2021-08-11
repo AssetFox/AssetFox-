@@ -4,18 +4,19 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
+using Network = AppliedResearchAssociates.iAM.DataAssignment.Networking.Network;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface INetworkRepository
     {
-        void CreateNetwork(DataAssignment.Networking.Network network);
-
         void CreateNetwork(Network network);
+
+        void CreateNetwork(Domains.Network network);
 
         Task<List<NetworkDTO>> Networks();
 
-        List<DataAssignment.Networking.Network> GetAllNetworks();
+        List<Network> GetAllNetworks();
 
         NetworkEntity GetPennDotNetwork();
 

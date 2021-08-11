@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -56,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<ScenarioPerformanceCurveEntity> PerformanceCurves { get; set; }
 
 
-        public virtual ICollection<ScenarioSelectableTreatmentEntity> SelectableTreatment { get; set; }
+        public virtual ICollection<ScenarioSelectableTreatmentEntity> SelectableTreatments { get; set; }
 
         public virtual ICollection<ScenarioBudgetEntity> Budgets { get; set; }
     }

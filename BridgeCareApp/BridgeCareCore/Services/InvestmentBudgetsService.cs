@@ -142,7 +142,7 @@ namespace BridgeCareCore.Services
 
         public FileInfoDTO ExportLibraryInvestmentBudgetsFile(Guid budgetLibraryId)
         {
-            var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetBudgetAmounts(budgetLibraryId);
+            var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetLibraryBudgetAmounts(budgetLibraryId);
 
             if (budgetAmounts.Any())
             {
@@ -253,7 +253,7 @@ namespace BridgeCareCore.Services
             var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheetEnd.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
 
-            var existingBudgetEntities = _unitOfWork.BudgetRepo.GetBudgetsWithBudgetAmounts(budgetLibraryId);
+            var existingBudgetEntities = _unitOfWork.BudgetRepo.GetLibraryBudgets(budgetLibraryId);
 
             var existingBudgetNames = existingBudgetEntities.Select(existingBudget => existingBudget.Name).ToList();
             var newBudgetEntities = worksheetBudgetNames.Where(budgetName => !existingBudgetNames.Contains(budgetName))
@@ -304,7 +304,7 @@ namespace BridgeCareCore.Services
             _unitOfWork.Context.AddAll(newBudgetAmountEntities);
             _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList());
 
-            return _unitOfWork.BudgetRepo.GetBudgetLibraryWithBudgetsAndBudgetAmounts(budgetLibraryId);
+            return _unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryId);
         }
     }
 }

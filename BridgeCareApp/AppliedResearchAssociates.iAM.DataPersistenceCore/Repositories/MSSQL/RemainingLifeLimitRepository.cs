@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -13,16 +14,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class RemainingLifeLimitRepository : IRemainingLifeLimitRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public RemainingLifeLimitRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+        public RemainingLifeLimitRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateRemainingLifeLimitLibrary(string name, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
             var remainingLifeLimitLibraryEntity = new RemainingLifeLimitLibraryEntity { Id = Guid.NewGuid(), Name = name };
@@ -44,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation
@@ -115,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
                 {
-                    throw new RowNotInTableException($"No simulation found for the given scenario.");
+                    throw new RowNotInTableException("No simulation was found for the given scenario.");
                 }
 
                 _unitOfWork.Context.DeleteEntity<RemainingLifeLimitLibrarySimulationEntity>(_ =>
@@ -139,7 +140,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == libraryId))
             {
-                throw new RowNotInTableException($"No remaining life limit library found having id {libraryId}.");
+                throw new RowNotInTableException("The specified remaining life limit library was not found.");
             }
 
             if (remainingLifeLimits.Any(_ => string.IsNullOrEmpty(_.Attribute)))

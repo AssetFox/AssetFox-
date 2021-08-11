@@ -9,14 +9,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IBudgetAmountRepository
     {
-        void CreateBudgetAmounts(Dictionary<Guid, List<BudgetAmount>> budgetAmountsPerBudgetEntityId, Guid simulationId);
+        void CreateScenarioBudgetAmounts(Dictionary<Guid, List<BudgetAmount>> budgetAmountsPerBudgetEntityId, Guid simulationId);
 
         void UpsertOrDeleteBudgetAmounts(Dictionary<Guid, List<BudgetAmountDTO>> budgetAmountsPerBudgetId, Guid libraryId);
 
         void UpsertOrDeleteScenarioBudgetAmounts(Dictionary<Guid, List<BudgetAmountDTO>> budgetAmountsPerBudgetId,
             Guid simulationId);
 
-        List<BudgetAmountEntity> GetBudgetAmounts(Guid libraryId);
+        List<BudgetAmountEntity> GetLibraryBudgetAmounts(Guid libraryId);
 
         List<ScenarioBudgetAmountEntity> GetScenarioBudgetAmounts(Guid simulationId);
     }

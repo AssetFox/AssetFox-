@@ -45,8 +45,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             StandAloneSimulation = network.Simulations.First();
             UnitOfWorkForAnalysis.InvestmentPlanRepo.GetSimulationInvestmentPlan(StandAloneSimulation);
             UnitOfWorkForAnalysis.AnalysisMethodRepo.GetSimulationAnalysisMethod(StandAloneSimulation);
-            UnitOfWorkForAnalysis.PerformanceCurveRepo.SimulationPerformanceCurves(StandAloneSimulation);
-            UnitOfWorkForAnalysis.SelectableTreatmentRepo.GetSimulationTreatments(StandAloneSimulation);
+            UnitOfWorkForAnalysis.PerformanceCurveRepo.GetScenarioPerformanceCurves(StandAloneSimulation);
+            UnitOfWorkForAnalysis.SelectableTreatmentRepo.GetScenarioSelectableTreatments(StandAloneSimulation);
 
             StandAloneSimulation.Network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
         }

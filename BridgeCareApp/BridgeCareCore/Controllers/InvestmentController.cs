@@ -160,7 +160,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.BudgetRepo.GetBudgetLibrariesWithBudgets());
+                var result = await Task.Factory.StartNew(() => UnitOfWork.BudgetRepo.GetBudgetLibraries());
 
                 return Ok(result);
             }
@@ -228,7 +228,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await Task.Factory.StartNew(() => UnitOfWork.BudgetRepo
-                    .ScenarioSimpleBudgetDetails(simulationId));
+                    .GetScenarioSimpleBudgetDetails(simulationId));
                 return Ok(result);
             }
             catch (Exception e)

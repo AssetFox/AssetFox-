@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +17,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AttributeRepository : IAttributeRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public AttributeRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+        public AttributeRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -106,7 +107,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.Name.Contains("Explorer Attribute"))
                 .Select(_ => _.Name).ToList();
 
-            var newCriterionLibraryName = $"Explorer Attribute Criterion Library";
+            var newCriterionLibraryName = "Explorer Attribute Criterion Library";
             if (criterionLibraryNames.Contains(newCriterionLibraryName))
             {
                 var version = 2;

@@ -43,19 +43,19 @@ namespace BridgeCareCore.Controllers
             return new Dictionary<string, ScenarioTreatmentUpsertMethod>
             {
                 [Role.Administrator] = UpsertAny,
-                [Role.DistrictEngineer] = UpsertPermitted
+                [Role.DistrictEngineer] = UpsertPermitted,
             };
         }
 
         [HttpGet]
         [Route("GetTreatmentLibraries")]
         [Authorize]
-        public async Task<IActionResult> TreatmentLibraries()
+        public async Task<IActionResult> GetTreatmentLibraries()
         {
             try
             {
                 var result = await Task.Factory.StartNew(() => UnitOfWork.SelectableTreatmentRepo
-                    .GetTreatmentLibrariesWithTreatments());
+                    .GetTreatmentLibraries());
                 return Ok(result);
             }
             catch (Exception e)

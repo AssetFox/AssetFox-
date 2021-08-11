@@ -80,11 +80,11 @@ const mutations = {
 };
 
 const actions = {
-    selectBudgetLibrary({ commit }: any, payload: any) {
-        commit('selectedBudgetLibraryMutator', payload.libraryId);
+    selectBudgetLibrary({ commit }: any, libraryId: string) {
+        commit('selectedBudgetLibraryMutator', libraryId);
     },
-    async getInvestment({ commit }: any, payload: any) {
-        await InvestmentService.getInvestment(payload.scenarioId).then(
+    async getInvestment({ commit }: any, scenarioId: string) {
+        await InvestmentService.getInvestment(scenarioId).then(
             (response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const investmentData: Investment = response.data as Investment;
@@ -114,7 +114,10 @@ const actions = {
                     payload.investment.scenarioBudgets,
                 );
 
-                commit('investmentPlanMutator', payload.investmentPlan);
+                commit(
+                    'investmentPlanMutator',
+                    payload.investment.investmentPlan,
+                );
 
                 dispatch('setSuccessMessage', {
                     message: 'Modified investment',
@@ -144,8 +147,18 @@ const actions = {
                     hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
+                    const message: string = any(
+                        propEq('id', budgetLibrary.id),
+                        state.budgetLibraries,
+                    )
+                        ? 'Updated budget library'
+                        : 'Added budget library';
+
+                    commit('budgetLibraryMutator', budgetLibrary);
+                    commit('selectedBudgetLibraryMutator', budgetLibrary.id);
+
                     dispatch('setSuccessMessage', {
-                        message: 'Modified budget library',
+                        message: message,
                     });
                 }
             },

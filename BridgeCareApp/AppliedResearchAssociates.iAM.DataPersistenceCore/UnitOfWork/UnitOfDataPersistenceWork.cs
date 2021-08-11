@@ -45,7 +45,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ICommittedProjectRepository _committedProjectRepo;
         private ICriterionLibraryRepository _criterionLibraryRepo;
         private IDeficientConditionGoalRepository _deficientConditionGoalRepo;
-        private IEquationRepository _equationRepo;
         private IFacilityRepository _facilityRepo;
         private IInvestmentPlanRepository _investmentPlanRepo;
         private IMaintainableAssetRepository _maintainableAssetRepo;
@@ -104,8 +103,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ICriterionLibraryRepository CriterionLibraryRepo => _criterionLibraryRepo ??= new CriterionLibraryRepository(this);
 
         public IDeficientConditionGoalRepository DeficientConditionGoalRepo => _deficientConditionGoalRepo ??= new DeficientConditionGoalRepository(this);
-
-        public IEquationRepository EquationRepo => _equationRepo ??= new EquationRepository(this);
 
         public IFacilityRepository FacilityRepo => _facilityRepo ??= new FacilityRepository(this);
 

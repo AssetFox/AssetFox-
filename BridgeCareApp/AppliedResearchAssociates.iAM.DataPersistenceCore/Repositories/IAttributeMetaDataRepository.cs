@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeMetaDataRepository
     {
-        List<DataMiner.Attributes.Attribute> GetAllAttributes();
+        List<Attribute> GetAllAttributes();
 
-        (DataMiner.Attributes.Attribute Attribute, string DefaultEquation) GetNetworkDefinitionAttribute();
+        (Attribute Attribute, string DefaultEquation) GetNetworkDefinitionAttribute();
     }
 }

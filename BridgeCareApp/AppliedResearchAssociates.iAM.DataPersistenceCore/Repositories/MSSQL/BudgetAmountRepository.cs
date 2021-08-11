@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -16,24 +17,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class BudgetAmountRepository : IBudgetAmountRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public BudgetAmountRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public BudgetAmountRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateBudgetAmounts(Dictionary<Guid, List<BudgetAmount>> budgetAmountsPerBudgetEntityId, Guid simulationId)
+        public void CreateScenarioBudgetAmounts(Dictionary<Guid, List<BudgetAmount>> budgetAmountsPerBudgetEntityId, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for the given scenario.");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            var simulationEntity = _unitOfWork.Context.Simulation
-                .Include(_ => _.InvestmentPlan)
-                .Single(_ => _.Id == simulationId);
+            var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
+                .Where(_ => _.Id == simulationId)
+                .Select(simulation => new SimulationEntity
+                {
+                    InvestmentPlan = simulation.InvestmentPlan != null
+                        ? new InvestmentPlanEntity
+                            {
+                                FirstYearOfAnalysisPeriod = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod
+                            }
+                        : null
+                }).Single();
 
             if (simulationEntity.InvestmentPlan == null)
             {
-                throw new RowNotInTableException($"No investment plan found for given scenario.");
+                throw new RowNotInTableException("No investment plan found for given scenario.");
             }
 
             var budgetAmountEntities = new List<ScenarioBudgetAmountEntity>();
@@ -53,11 +62,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertOrDeleteBudgetAmounts(Dictionary<Guid, List<BudgetAmountDTO>> budgetAmountsPerBudgetId, Guid libraryId)
         {
-            var budgetAmountEntities = budgetAmountsPerBudgetId.SelectMany(_ => _.Value.Select(__ => __.ToLibraryEntity(_.Key))).ToList();
+            var budgetAmountEntities = budgetAmountsPerBudgetId
+                .SelectMany(_ => _.Value.Select(__ => __.ToLibraryEntity(_.Key))).ToList();
 
             var entityIds = budgetAmountEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfWork.Context.BudgetAmount
+            var existingEntityIds = _unitOfWork.Context.BudgetAmount.AsNoTracking()
                 .Where(_ => _.Budget.BudgetLibraryId == libraryId && entityIds.Contains(_.Id)).Select(_ => _.Id)
                 .ToList();
 
@@ -74,11 +84,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertOrDeleteScenarioBudgetAmounts(Dictionary<Guid, List<BudgetAmountDTO>> budgetAmountsPerBudgetId, Guid simulationId)
         {
             var budgetAmountEntities = budgetAmountsPerBudgetId
-                .SelectMany(_ => _.Value.Select(__ => __.ToScenarioEntity(_.Key))).ToList();
+                .SelectMany(_ => _.Value.Select(amount => amount.ToScenarioEntity(_.Key))).ToList();
 
             var entityIds = budgetAmountEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfWork.Context.ScenarioBudgetAmount
+            var existingEntityIds = _unitOfWork.Context.ScenarioBudgetAmount.AsNoTracking()
                 .Where(_ => _.ScenarioBudget.SimulationId == simulationId && entityIds.Contains(_.Id)).Select(_ => _.Id)
                 .ToList();
 
@@ -92,11 +102,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 budgetAmountEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
         }
 
-        public List<BudgetAmountEntity> GetBudgetAmounts(Guid libraryId)
+        public List<BudgetAmountEntity> GetLibraryBudgetAmounts(Guid libraryId)
         {
             if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))
             {
-                throw new RowNotInTableException($"Could not find budget library.");
+                throw new RowNotInTableException("The specified budget library was not found.");
             }
 
             return _unitOfWork.Context.BudgetAmount.Where(_ => _.Budget.BudgetLibrary.Id == libraryId)
@@ -112,10 +122,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"Could not find simulation.");
+                throw new RowNotInTableException("The specified simulation was not found for the given scenario.");
             }
 
-            return _unitOfWork.Context.ScenarioBudgetAmount.Where(_ => _.ScenarioBudget.SimulationId == simulationId)
+            return _unitOfWork.Context.ScenarioBudgetAmount.AsNoTracking()
+                .Where(_ => _.ScenarioBudget.SimulationId == simulationId)
                 .Select(budgetAmount => new ScenarioBudgetAmountEntity
                 {
                     Year = budgetAmount.Year,

@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +15,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class SimulationRepository : ISimulationRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public SimulationRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+        public SimulationRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -24,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == simulation.Network.Id))
             {
-                throw new RowNotInTableException($"No network found having id {simulation.Network.Id}");
+                throw new RowNotInTableException("The specified network was not found.");
             }
 
             _unitOfWork.Context.AddEntity(simulation.ToEntity(), _unitOfWork.UserEntity?.Id);
@@ -34,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
             {
-                throw new RowNotInTableException($"No network found having id {network.Id}");
+                throw new RowNotInTableException("The specified network was not found.");
             }
 
             var entities = _unitOfWork.Context.Simulation.Where(_ => _.NetworkId == network.Id).ToList();
@@ -74,12 +75,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == network.Id))
             {
-                throw new RowNotInTableException($"No network found having id {network.Id}");
+                throw new RowNotInTableException("The specified network was not found.");
             }
 
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking().Single(_ => _.Id == simulationId);
@@ -110,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for the given scenario.");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             var users = _unitOfWork.Context.User.ToList();
@@ -128,7 +129,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for the given scenario.");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             var simulationToClone = _unitOfWork.Context.Simulation.AsNoTracking()
@@ -156,35 +157,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
                 .Include(_ => _.TargetConditionGoalLibrarySimulationJoin)
 
-                .Include(_ => _.SelectableTreatment)
-                .ThenInclude(_ => _.ScenarioTreatmentBudgetJoins)
-                .ThenInclude(_ => _.Budget)
-                .ThenInclude(_ => _.BudgetAmounts)
-                .Include(_ => _.SelectableTreatment)
+                .Include(_ => _.SelectableTreatments)
+                .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                .ThenInclude(_ => _.ScenarioBudget)
+                .ThenInclude(_ => _.ScenarioBudgetAmounts)
+                .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioTreatmentConsequences)
                 .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.SelectableTreatment)
+                .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioTreatmentConsequences)
                 .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
                 .ThenInclude(_ => _.Equation)
-                .Include(_ => _.SelectableTreatment)
+                .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioTreatmentConsequences)
                 .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.SelectableTreatment)
+                .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioTreatmentCosts)
                 .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
-                .Include(_ => _.SelectableTreatment)
+                .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioTreatmentCosts)
                 .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.SelectableTreatment)
+                .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.SelectableTreatment)
+                .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
-                .Include(_ => _.SelectableTreatment)
+                .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
 
                 .Include(_ => _.CommittedProjects)
@@ -344,9 +345,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         _unitOfWork.UserEntity?.Id);
             }
 
-            if (simulationToClone.SelectableTreatment.Any())
+            if (simulationToClone.SelectableTreatments.Any())
             {
-                simulationToClone.SelectableTreatment.ForEach(treatment =>
+                simulationToClone.SelectableTreatments.ForEach(treatment =>
                 {
                     var newTreatmentId = Guid.NewGuid();
                     treatment.Id = newTreatmentId;
@@ -402,7 +403,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 consequence.ScenarioConditionalTreatmentConsequenceEquationJoin.Equation.Id = newEquationId;
 
                                 consequence.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequenceId = newConsequenceId;
-                                
+
                                 _unitOfWork.Context
                             .ReInitializeAllEntityBaseProperties(
                                 consequence.ScenarioConditionalTreatmentConsequenceEquationJoin,
@@ -421,7 +422,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         {
                             var newCostId = Guid.NewGuid();
                             cost.Id = newCostId;
-                            cost.ScenarioTreatmentId = newTreatmentId;
+                            cost.ScenarioSelectableTreatmentId = newTreatmentId;
                             _unitOfWork.Context
                             .ReInitializeAllEntityBaseProperties(cost,
                                 _unitOfWork.UserEntity?.Id);
@@ -431,7 +432,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 cost.CriterionLibraryScenarioTreatmentCostJoin.ScenarioTreatmentCostId = newCostId;
 
                                 cost.CriterionLibraryScenarioTreatmentCostJoin.ScenarioTreatmentCost.Id = newCostId;
-                                cost.CriterionLibraryScenarioTreatmentCostJoin.ScenarioTreatmentCost.ScenarioTreatmentId = newTreatmentId;
+                                cost.CriterionLibraryScenarioTreatmentCostJoin.ScenarioTreatmentCost.ScenarioSelectableTreatmentId = newTreatmentId;
 
                                 _unitOfWork.Context
                             .ReInitializeAllEntityBaseProperties(
@@ -542,7 +543,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == dto.Id))
             {
-                throw new RowNotInTableException($"No simulation found having id {dto.Id}");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == dto.Id);

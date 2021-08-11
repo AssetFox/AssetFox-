@@ -7,13 +7,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IPerformanceCurveRepository
     {
-        void CreatePerformanceCurveLibrary(string name, Guid simulationId);
+        void CreateScenarioPerformanceCurves(List<PerformanceCurve> performanceCurves, Guid simulationId);
 
-        void CreatePerformanceCurves(List<PerformanceCurve> performanceCurves, Guid simulationId);
+        void GetScenarioPerformanceCurves(Simulation simulation);
 
-        void SimulationPerformanceCurves(Simulation simulation);
-
-        List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibrariesWithPerformanceCurves();
+        List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibraries();
 
         void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto);
 

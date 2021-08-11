@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -14,9 +15,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     /// </remarks>
     public class PennDOTAssetDataRepository : IAssetData
     {
-        UnitOfWork.UnitOfDataPersistenceWork _unitofwork;
+        UnitOfDataPersistenceWork _unitofwork;
 
-        public PennDOTAssetDataRepository(UnitOfWork.UnitOfDataPersistenceWork uow)
+        public PennDOTAssetDataRepository(UnitOfDataPersistenceWork uow)
         {
             _unitofwork = uow;
             var network = _unitofwork.NetworkRepo.GetPennDotNetwork();
@@ -35,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var sectionList = facilities.SelectMany(_ => _.Sections);
                     foreach (var section in sectionList)    
                     {
-                        keyValues.Add(new KeySegmentDatum()
+                        keyValues.Add(new KeySegmentDatum
                         {
                             SegmentId = section.Id,
                             KeyValue = new SegmentAttributeDatum(key, section.Name)
@@ -70,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 .First()
                                 .Value;
 
-                            keyValues.Add(new KeySegmentDatum()
+                            keyValues.Add(new KeySegmentDatum
                             {
                                 SegmentId = group.Key,
                                 KeyValue = new SegmentAttributeDatum(key, lastValue)
@@ -87,7 +88,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 .First()
                                 .Value;
 
-                            keyValues.Add(new KeySegmentDatum()
+                            keyValues.Add(new KeySegmentDatum
                             {
                                 SegmentId = group.Key,
                                 KeyValue = new SegmentAttributeDatum(key, lastValue.ToString())

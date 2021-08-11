@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -26,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation
@@ -54,12 +53,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (!simulationEntity.Network.MaintainableAssets.Any())
             {
-                throw new RowNotInTableException($"No maintainable assets found for given scenario.");
+                throw new RowNotInTableException("No maintainable assets found for given scenario.");
             }
 
             if (!simulationEntity.Budgets.Any())
             {
-                throw new RowNotInTableException($"No budgets found for given scenario.");
+                throw new RowNotInTableException("No budgets found for given scenario.");
             }
 
             var committedProjectEntities = committedProjects
@@ -102,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             var projects = _unitOfWork.Context.CommittedProject
@@ -146,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for the given scenario.");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             return _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
@@ -192,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for the given scenario.");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             if (!_unitOfWork.Context.CommittedProject.Any(_ => _.SimulationId == simulationId))

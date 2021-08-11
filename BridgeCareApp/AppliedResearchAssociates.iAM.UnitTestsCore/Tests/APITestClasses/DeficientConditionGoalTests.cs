@@ -174,7 +174,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 timer.Elapsed += delegate
                 {
                     var modifiedDto = _testHelper.UnitOfWork.DeficientConditionGoalRepo
-                        .DeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
+                        .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
                     Assert.Equal(dto.Description, modifiedDto.Description);
                     Assert.Single(modifiedDto.AppliedScenarioIds);
                     Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);

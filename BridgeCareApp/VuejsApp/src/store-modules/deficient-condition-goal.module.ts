@@ -1,4 +1,5 @@
 import {
+    DeficientConditionGoal,
     DeficientConditionGoalLibrary,
     emptyDeficientConditionGoalLibrary
 } from '@/shared/models/iAM/deficient-condition-goal';
@@ -12,7 +13,8 @@ import DeficientConditionGoalService from '@/services/deficient-condition-goal.s
 
 const state = {
     deficientConditionGoalLibraries: [] as DeficientConditionGoalLibrary[],
-    selectedDeficientConditionGoalLibrary: clone(emptyDeficientConditionGoalLibrary) as DeficientConditionGoalLibrary
+    selectedDeficientConditionGoalLibrary: clone(emptyDeficientConditionGoalLibrary) as DeficientConditionGoalLibrary,
+    scenarioDeficientConditionGoals: [] as DeficientConditionGoal[],
 };
 
 const mutations = {
@@ -39,7 +41,13 @@ const mutations = {
                 state.deficientConditionGoalLibraries
             );
         }
-    }
+    },
+    scenarioDeficientConditionGoalsMutator(
+        state: any,
+        deficientConditionGoals: DeficientConditionGoal[],
+    ) {
+        state.scenarioDeficientConditionGoals = clone(deficientConditionGoals);
+    },
 };
 
 const actions = {
@@ -55,31 +63,68 @@ const actions = {
             });
     },
     async upsertDeficientConditionGoalLibrary({dispatch, commit}: any, payload: any) {
-        await DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(payload.library, payload.scenarioId)
+        await DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(payload.library)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.deficientConditionGoalLibraries, payload.scenarioId)) {
-                        const unAppliedLibrary: DeficientConditionGoalLibrary = unapplyLibrary(getAppliedLibrary(
-                            state.deficientConditionGoalLibraries, payload.scenarioId), payload.scenarioId);
-                        commit('addedOrUpdatedDeficientConditionGoalLibraryMutator', unAppliedLibrary);
-                    }
+                    // if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.deficientConditionGoalLibraries, payload.scenarioId)) {
+                    //     const unAppliedLibrary: DeficientConditionGoalLibrary = unapplyLibrary(getAppliedLibrary(
+                    //         state.deficientConditionGoalLibraries, payload.scenarioId), payload.scenarioId);
+                    //     commit('addedOrUpdatedDeficientConditionGoalLibraryMutator', unAppliedLibrary);
+                    // }
 
-                    const library: DeficientConditionGoalLibrary = {
-                        ...payload.library,
-                        appliedScenarioIds: payload.scenarioId !== getBlankGuid() &&
-                        payload.library.appliedScenarioIds.indexOf(payload.scenarioId) === -1
-                            ? append(payload.scenarioId, payload.library.appliedScenarioIds)
-                            : payload.library.appliedScenarioIds
-                    };
+                    // const library: DeficientConditionGoalLibrary = {
+                    //     ...payload.library,
+                    //     appliedScenarioIds: payload.scenarioId !== getBlankGuid() &&
+                    //     payload.library.appliedScenarioIds.indexOf(payload.scenarioId) === -1
+                    //         ? append(payload.scenarioId, payload.library.appliedScenarioIds)
+                    //         : payload.library.appliedScenarioIds
+                    // };
 
-                    const message: string = any(propEq('id', library.id), state.deficientConditionGoalLibraries)
-                        ? 'Updated target condition goal library'
-                        : 'Added target condition goal library';
-                    commit('addedOrUpdatedDeficientConditionGoalLibraryMutator', library);
-                    commit('selectedDeficientConditionGoalLibraryMutator', library.id);
+                    const message: string = any(propEq('id', payload.library.id), state.deficientConditionGoalLibraries)
+                        ? 'Updated deficient condition goal library'
+                        : 'Added deficient condition goal library';
+                    commit('addedOrUpdatedDeficientConditionGoalLibraryMutator', payload.library);
+                    commit('selectedDeficientConditionGoalLibraryMutator', payload.library.id);
                     dispatch('setSuccessMessage', {message: message});
                 }
             });
+    },
+    async getScenarioDeficientConditionGoals(
+        {commit} : any,
+        scenarioId: string,
+    ){
+        await DeficientConditionGoalService.getScenarioDeficientConditionGoals(scenarioId).then(
+            (response: AxiosResponse) => {
+                if(hasValue(response, 'data')){
+                    commit(
+                        'scenarioDeficientConditionGoalsMutator',
+                        response.data as DeficientConditionGoal[],
+                    )
+                }
+            }
+        )
+    },
+    async upsertScenarioDeficientConditionGoals(
+        {dispatch, commit}: any,
+        payload: any
+    ){
+        await DeficientConditionGoalService.upsertScenarioDeficientConditionGoals(
+            payload.scenarioDeficientConditionGoals,
+            payload.scenarioId,
+        ).then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                commit(
+                    'scenarioDeficientConditionGoalsMutator',
+                    payload.scenarioDeficientConditionGoals,
+                );
+                dispatch('setSuccessMessage', {
+                    message: 'Modified deficient condition goals',
+                });
+            }
+        })
     },
     async deleteDeficientConditionGoalLibrary({dispatch, commit, state}: any, payload: any) {
         await DeficientConditionGoalService.deleteDeficientConditionGoalLibrary(payload.libraryId)

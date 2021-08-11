@@ -147,7 +147,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.BudgetLibrarySimulationJoin)
                 .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
                 .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
-                .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
+
+                .Include(_ => _.ScenarioDeficientConditionGoals)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.ScenarioDeficientConditionGoals)
+                .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+
                 .Include(_ => _.PerformanceCurves)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.PerformanceCurves)
@@ -265,13 +271,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         _unitOfWork.UserEntity?.Id);
             }
 
-            if (simulationToClone.DeficientConditionGoalLibrarySimulationJoin != null)
+            if (simulationToClone.ScenarioDeficientConditionGoals.Any())
             {
-                simulationToClone.DeficientConditionGoalLibrarySimulationJoin.SimulationId = newSimulationId;
-                _unitOfWork.Context
-                    .ReInitializeAllEntityBaseProperties(
-                        simulationToClone.DeficientConditionGoalLibrarySimulationJoin, _unitOfWork.UserEntity?.Id);
+                simulationToClone.ScenarioDeficientConditionGoals.ForEach(deficient =>
+                {
+                    var newDeficientId = Guid.NewGuid();
+                    deficient.Id = newDeficientId;
+                    deficient.SimulationId = simulationId;
+                    deficient.Attribute = null;
+                    _unitOfWork.Context
+                        .ReInitializeAllEntityBaseProperties(deficient, _unitOfWork.UserEntity?.Id);
+
+                    if (deficient.CriterionLibraryScenarioDeficientConditionGoalJoin != null)
+                    {
+                        var criterionLibraryId = Guid.NewGuid();
+                        deficient.CriterionLibraryScenarioDeficientConditionGoalJoin.CriterionLibrary.Id = criterionLibraryId;
+                        deficient.CriterionLibraryScenarioDeficientConditionGoalJoin.CriterionLibraryId = criterionLibraryId;
+                        deficient.CriterionLibraryScenarioDeficientConditionGoalJoin.ScenarioDeficientConditionGoalId = newDeficientId;
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                deficient.CriterionLibraryScenarioDeficientConditionGoalJoin.CriterionLibrary,
+                                _unitOfWork.UserEntity?.Id);
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(deficient.CriterionLibraryScenarioDeficientConditionGoalJoin,
+                                _unitOfWork.UserEntity?.Id);
+                    }
+                });
             }
+
+            //if (simulationToClone.DeficientConditionGoalLibrarySimulationJoin != null)
+            //{
+            //    simulationToClone.DeficientConditionGoalLibrarySimulationJoin.SimulationId = newSimulationId;
+            //    _unitOfWork.Context
+            //        .ReInitializeAllEntityBaseProperties(
+            //            simulationToClone.DeficientConditionGoalLibrarySimulationJoin, _unitOfWork.UserEntity?.Id);
+            //}
 
             if (simulationToClone.PerformanceCurves.Any())
             {
@@ -351,11 +385,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 _unitOfWork.UserEntity?.Id);
                     }
                 });
-
-                simulationToClone.RemainingLifeLimitLibrarySimulationJoin.SimulationId = newSimulationId;
-                _unitOfWork.Context
-                    .ReInitializeAllEntityBaseProperties(simulationToClone.RemainingLifeLimitLibrarySimulationJoin,
-                        _unitOfWork.UserEntity?.Id);
             }
 
             if (simulationToClone.SelectableTreatment.Any())

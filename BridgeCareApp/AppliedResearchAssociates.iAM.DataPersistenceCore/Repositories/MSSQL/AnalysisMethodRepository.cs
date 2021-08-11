@@ -83,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private void CreateAnalysisMethodTargetConditionGoals(SimulationEntity simulationEntity, List<TargetConditionGoal> targetConditionGoals)
         {
             _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoalLibrary(
-                $"{simulationEntity.Name} Target Condition Goal Library", simulationEntity.Id);
+                $"{simulationEntity.Name} Target Condition Goal Library");
 
             _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoals(targetConditionGoals, simulationEntity.Id);
         }
@@ -91,7 +91,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private void CreateAnalysisMethodDeficientConditionGoals(SimulationEntity simulationEntity, List<DeficientConditionGoal> deficientConditionGoals)
         {
             _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoalLibrary(
-                $"{simulationEntity.Name} Deficient Condition Goal Library", simulationEntity.Id);
+                $"{simulationEntity.Name} Deficient Condition Goal Library");
 
             _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoals(deficientConditionGoals, simulationEntity.Id);
         }
@@ -132,20 +132,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 .Include(_ => _.Simulation)
                 .ThenInclude(_ => _.ScenarioTargetConditionalGoals)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.Simulation)
+                .ThenInclude(_ => _.ScenarioTargetConditionalGoals)
                 .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
 
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.DeficientConditionGoalLibrarySimulationJoin)
-                .ThenInclude(_ => _.DeficientConditionGoalLibrary)
-                .ThenInclude(_ => _.DeficientConditionGoals)
+                .ThenInclude(_ => _.ScenarioDeficientConditionGoals)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.DeficientConditionGoalLibrarySimulationJoin)
-                .ThenInclude(_ => _.DeficientConditionGoalLibrary)
-                .ThenInclude(_ => _.DeficientConditionGoals)
-                .ThenInclude(_ => _.CriterionLibraryDeficientConditionGoalJoin)
+                .ThenInclude(_ => _.ScenarioDeficientConditionGoals)
+                .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+
                 .Include(_ => _.Simulation)
                 .ThenInclude(_ => _.RemainingLifeLimitLibrarySimulationJoin)
                 .ThenInclude(_ => _.RemainingLifeLimitLibrary)

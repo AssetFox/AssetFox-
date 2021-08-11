@@ -4,15 +4,15 @@
       <v-layout justify-center>
         <v-flex xs3>
           <v-btn @click="onShowCreateDeficientConditionGoalLibraryDialog(false)" class="ara-blue-bg white--text"
-                 v-show="selectedScenarioId === uuidNIL">
+                 v-show="!hasScenario">
             New Library
           </v-btn>
           <v-select :items="librarySelectItems"
                     label="Select a Deficient Condition Goal Library"
-                    outline v-if="!hasSelectedLibrary || selectedScenarioId !== uuidNIL"
+                    outline v-if="!hasSelectedLibrary || hasScenario"
                     v-model="librarySelectItemValue">
           </v-select>
-          <v-text-field label="Library Name" v-if="hasSelectedLibrary && selectedScenarioId === uuidNIL"
+          <v-text-field label="Library Name" v-if="hasSelectedLibrary && !hasScenario"
                         v-model="selectedDeficientConditionGoalLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]">
             <template slot="append">
@@ -21,17 +21,17 @@
               </v-btn>
             </template>
           </v-text-field>
-          <div v-if="hasSelectedLibrary && selectedScenarioId === uuidNIL">
+          <div v-if="hasSelectedLibrary && !hasScenario">
             Owner: {{
               selectedDeficientConditionGoalLibrary.owner ? selectedDeficientConditionGoalLibrary.owner : "[ No Owner ]"
             }}
           </div>
           <v-checkbox class="sharing" label="Shared"
-                      v-if="hasSelectedLibrary && selectedScenarioId === uuidNIL"
+                      v-if="hasSelectedLibrary && !hasScenario"
                       v-model="selectedDeficientConditionGoalLibrary.shared"/>
         </v-flex>
       </v-layout>
-      <v-flex v-show="hasSelectedLibrary" xs3>
+      <v-flex v-show="hasSelectedLibrary || hasScenario" xs3>
         <v-btn @click="showCreateDeficientConditionGoalDialog = true" class="ara-blue-bg white--text">Add</v-btn>
         <v-btn :disabled="selectedDeficientConditionGoalIds.length === 0"
                @click="onRemoveSelectedDeficientConditionGoals"
@@ -40,7 +40,7 @@
         </v-btn>
       </v-flex>
     </v-flex>
-    <v-flex xs12 v-show="hasSelectedLibrary">
+    <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
       <div class="deficients-data-table">
         <v-data-table :headers="deficientConditionGoalGridHeaders" :items="deficientConditionGoalGridData"
                       class="elevation-1 fixed-header v-table__overflow"
@@ -111,7 +111,7 @@
         </v-data-table>
       </div>
     </v-flex>
-    <v-flex v-show="hasSelectedLibrary && selectedScenarioId === uuidNIL"
+    <v-flex v-show="hasSelectedLibrary && !hasScenario"
             xs12>
       <v-layout justify-center>
         <v-flex xs6>
@@ -121,17 +121,17 @@
         </v-flex>
       </v-layout>
     </v-flex>
-    <v-flex v-show="hasSelectedLibrary" xs12>
+    <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
       <v-layout justify-end row>
         <v-btn
             @click="onUpsertDeficientConditionGoalLibrary(selectedDeficientConditionGoalLibrary, selectedScenarioId)"
             class="ara-blue-bg white--text"
-            v-show="selectedScenarioId !== uuidNIL" :disabled="disableCrudButton()">
+            v-show="hasScenario" :disabled="disableCrudButton()">
           Save
         </v-btn>
         <v-btn @click="onUpsertDeficientConditionGoalLibrary(selectedDeficientConditionGoalLibrary, uuidNIL)"
                class="ara-blue-bg white--text"
-               v-show="selectedScenarioId === uuidNIL" :disabled="disableCrudButton()">
+               v-show="!hasScenario" :disabled="disableCrudButton()">
           Update Library
         </v-btn>
         <v-btn @click="onShowCreateDeficientConditionGoalLibraryDialog" class="ara-blue-bg white--text"
@@ -139,11 +139,11 @@
           Create as New Library
         </v-btn>
         <v-btn @click="onShowConfirmDeleteAlert" class="ara-orange-bg white--text"
-               v-show="selectedScenarioId === uuidNIL" :disabled="!hasSelectedLibrary">
+               v-show="!hasScenario" :disabled="!hasSelectedLibrary">
           Delete Library
         </v-btn>
         <v-btn @click="onDiscardChanges" class="ara-orange-bg white--text"
-               v-show="selectedScenarioId !== uuidNIL" :disabled="!hasSelectedLibrary">
+               v-show="hasScenario" :disabled="!hasSelectedLibrary">
           Discard Changes
         </v-btn>
       </v-layout>
@@ -252,6 +252,7 @@ export default class DeficientConditionGoalEditor extends Vue {
   confirmDeleteAlertData: AlertData = clone(emptyAlertData);
   rules: InputValidationRules = rules;
   uuidNIL: string = getBlankGuid();
+  hasScenario: boolean = false;
 
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {

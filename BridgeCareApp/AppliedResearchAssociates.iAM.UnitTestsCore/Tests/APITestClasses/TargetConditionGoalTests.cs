@@ -86,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 // Act
                 var result = await _controller
-                    .UpsertTargetConditionGoalLibrary(Guid.Empty, TestTargetConditionGoalLibrary.ToDto());
+                    .UpsertTargetConditionGoalLibrary(TestTargetConditionGoalLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result);
@@ -165,7 +165,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     _testHelper.TestCriterionLibrary.ToDto();
 
                 // Act
-                await _controller.UpsertTargetConditionGoalLibrary(_testHelper.TestSimulation.Id, dto);
+                await _controller.UpsertTargetConditionGoalLibrary(dto);
 
                 // Assert
                 var timer = new Timer {Interval = 5000};
@@ -205,7 +205,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 targetConditionGoalLibraryDTO.TargetConditionGoals[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
-                await _controller.UpsertTargetConditionGoalLibrary(_testHelper.TestSimulation.Id,
+                await _controller.UpsertTargetConditionGoalLibrary(
                     targetConditionGoalLibraryDTO);
 
                 // Act
@@ -216,8 +216,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
                 Assert.True(!_testHelper.UnitOfWork.Context.TargetConditionGoalLibrary.Any(_ => _.Id == TargetConditionGoalLibraryId));
                 Assert.True(!_testHelper.UnitOfWork.Context.TargetConditionGoal.Any(_ => _.Id == TargetConditionGoalId));
-                Assert.True(!_testHelper.UnitOfWork.Context.TargetConditionGoalLibrarySimulation.Any(_ =>
-                    _.TargetConditionGoalLibraryId == TargetConditionGoalLibraryId));
                 Assert.True(
                     !_testHelper.UnitOfWork.Context.CriterionLibraryTargetConditionGoal.Any(_ =>
                         _.TargetConditionGoalId == TargetConditionGoalId));

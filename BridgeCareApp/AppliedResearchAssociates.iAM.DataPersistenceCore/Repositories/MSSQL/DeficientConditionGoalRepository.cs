@@ -173,7 +173,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 deficientConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(),
                 _unitOfWork.UserEntity?.Id);
 
-            _unitOfWork.Context.UpdateAll(
+            _unitOfWork.Context.AddAll(
                 deficientConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(),
                 _unitOfWork.UserEntity?.Id);
 

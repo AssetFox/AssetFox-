@@ -282,13 +282,13 @@ export default class TargetConditionGoalEditor extends Vue {
   @Watch('selectedTargetConditionGoalLibrary')
   onSelectedTargetConditionGoalLibraryChanged() {
     this.hasSelectedLibrary = this.selectedTargetConditionGoalLibrary.id !== this.uuidNIL;
-    if (this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal) && this.hasSelectedLibrary){
+    if (this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal) != -1 && this.hasSelectedLibrary){
             this.targetConditionGoalGridData = this.selectedTargetConditionGoalLibrary.targetConditionGoals
                     .map((targetGoal: TargetConditionGoal) => ({
                         ...targetGoal,
                         id: getNewGuid()
                     }));
-    }else if (!this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal)) {
+    }else if (this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal) == -1) {
             this.targetConditionGoalGridData = clone(this.selectedTargetConditionGoalLibrary.targetConditionGoals);
         }
     
@@ -353,14 +353,18 @@ export default class TargetConditionGoalEditor extends Vue {
   onShowCriterionLibraryEditorDialog(targetConditionGoal: TargetConditionGoal) {
     this.selectedTargetConditionGoalForCriteriaEdit = clone(targetConditionGoal);
 
-    var fromScenario = false;
-    if(this.selectedScenarioId != this.uuidNIL){
-      fromScenario = true;
+    let fromScenario = false;
+    let criterionForLibrary = false;
+    if (this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) {
+        fromScenario = true;
+    }
+    else{
+        criterionForLibrary = true;
     }
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
       libraryId: targetConditionGoal.criterionLibrary.id,
-      isCallFromScenario: fromScenario
+      isCallFromScenario: fromScenario,
     };
   }
 
@@ -378,6 +382,17 @@ export default class TargetConditionGoalEditor extends Vue {
       };
     }
 
+      //   this.targetConditionGoalGridData = update(
+      //   findIndex(propEq('id', this.selectedTargetConditionGoalForCriteriaEdit.id), this.targetConditionGoalGridData),
+      //   {...this.selectedTargetConditionGoalForCriteriaEdit, criterionLibrary: criterionLibrary},
+      //   this.targetConditionGoalGridData
+      // );
+    // if(this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal) == -1){
+    //   this.selectedTargetConditionGoalLibrary = {
+    //     ...this.selectedTargetConditionGoalLibrary,
+    //     targetConditionGoals: this.targetConditionGoalGridData
+    //   };
+    // }
     this.selectedTargetConditionGoalForCriteriaEdit = clone(emptyTargetConditionGoal);
   }
 

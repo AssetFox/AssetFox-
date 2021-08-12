@@ -9,5 +9,5 @@ export interface CriterionLibraryEditorDialogData {
 export const emptyCriterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = {
     showDialog: false,
     libraryId: getBlankGuid(),
-    isCallFromScenario: false
+    isCallFromScenario: false,
 };

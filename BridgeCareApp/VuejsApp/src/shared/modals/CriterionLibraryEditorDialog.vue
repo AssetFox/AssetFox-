@@ -22,7 +22,7 @@
             <v-card-actions>
                 <v-layout justify-space-between row>
                     <v-btn
-                        :disabled="!dialogData.isCallFromScenario || !stateSelectedCriterionIsValid
+                        :disabled="(!dialogData.isCallFromScenario) || !stateSelectedCriterionIsValid
                         "
                         class="ara-blue-bg white--text"
                         @click="onBeforeSubmit(true)"

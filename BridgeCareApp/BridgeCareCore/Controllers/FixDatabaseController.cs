@@ -22,7 +22,7 @@ namespace BridgeCareCore.Controllers
 
         public FixDatabaseController(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork;
 
-        /*[HttpPost]
+        [HttpPost]
         [Route("FixCommittedProjects")]
         public async Task FixCommittedProjects()
         {
@@ -51,7 +51,7 @@ namespace BridgeCareCore.Controllers
 
                     committedProjects.ForEach(_ =>
                     {
-                        if (budgets.All(budget => budget.Id != _.BudgetId))
+                        if (budgets.All(budget => budget.Id != _.BudgetId.Value))
                         {
                             var budget = new ScenarioBudgetEntity
                             {
@@ -94,7 +94,7 @@ namespace BridgeCareCore.Controllers
                                 criteria.Add(criterion);
                                 criterionJoins.Add(new CriterionLibraryScenarioBudgetEntity
                                 {
-                                    ScenarioBudgetId = _.BudgetId, CriterionLibraryId = criterion.Id
+                                    ScenarioBudgetId = _.BudgetId.Value, CriterionLibraryId = criterion.Id
                                 });
                             }
                         }
@@ -229,7 +229,7 @@ namespace BridgeCareCore.Controllers
                                     percentagePairs.Add(new BudgetPercentagePairEntity
                                     {
                                         Id = Guid.NewGuid(),
-                                        BudgetId = _.BudgetId,
+                                        BudgetId = _.BudgetId.Value,
                                         ScenarioBudgetId = budget.Id,
                                         BudgetPriorityId = _.BudgetPriorityId,
                                         Percentage = _.Percentage,
@@ -249,7 +249,7 @@ namespace BridgeCareCore.Controllers
                                     percentagePairs.Add(new BudgetPercentagePairEntity
                                     {
                                         Id = Guid.NewGuid(),
-                                        BudgetId = _.BudgetId,
+                                        BudgetId = _.BudgetId.Value,
                                         ScenarioBudgetId = budget.Id,
                                         BudgetPriorityId = _.BudgetPriorityId,
                                         Percentage = _.Percentage,
@@ -280,6 +280,6 @@ namespace BridgeCareCore.Controllers
                 _unitOfWork.Rollback();
                 throw;
             }
-        }*/
+        }
     }
 }

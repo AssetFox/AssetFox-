@@ -215,10 +215,10 @@ import {
     BudgetLibrary,
     BudgetYearsGridData,
     emptyBudgetLibrary,
-    emptyInvestmentPlan, Investment, InvestmentBudgetFileImport,
+    emptyInvestmentPlan, InvestmentBudgetFileImport,
     InvestmentPlan,
 } from '@/shared/models/iAM/investment';
-import { any, append, clone, contains, find, findIndex, groupBy, isNil, keys, propEq, update } from 'ramda';
+import { any, append, clone, find, findIndex, groupBy, isNil, keys, propEq, update } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -232,10 +232,9 @@ import { getLastPropertyValue, getPropertyValues } from '@/shared/utils/getter-u
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import { hasUnsavedChangesCore, isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
+import { isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { getAppliedLibraryId, hasAppliedLibrary } from '@/shared/utils/library-utils';
 import { sorter } from '@/shared/utils/sorter-utils';
 import CreateBudgetLibraryDialog
     from '@/components/investment-editor/investment-editor-dialogs/CreateBudgetLibraryDialog.vue';
@@ -248,8 +247,6 @@ import { FileInfo } from '@/shared/models/iAM/file-info';
 import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
-import { PerformanceCurveLibrary } from '@/shared/models/iAM/performance';
-import { emptyCreatePerformanceLibraryDialogData } from '@/shared/models/modals/create-performance-curve-library-dialog-data';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 
 @Component({
@@ -300,7 +297,6 @@ export default class InvestmentEditor extends Vue {
     uuidNIL: string = getBlankGuid();
     rules: InputValidationRules = clone(rules);
     showImportExportInvestmentBudgetsDialog: boolean = false;
-    currentUrl: string = window.location.href;
     hasScenario: boolean = false;
     budgets: Budget[] = [];
 

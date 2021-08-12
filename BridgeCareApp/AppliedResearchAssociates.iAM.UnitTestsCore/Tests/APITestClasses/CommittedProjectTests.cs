@@ -203,8 +203,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Assert.Equal(1, committedProjects[0].ShadowForAnyTreatment);
                 Assert.Equal(2, committedProjects[0].ShadowForSameTreatment);
                 Assert.Equal(_testHelper.TestSimulation.Id, committedProjects[0].SimulationId);
-                /*Assert.Equal(BudgetId, committedProjects[0].BudgetId);
-                Assert.Equal(MaintainableAssetId, committedProjects[0].MaintainableAssetId);*/
 
                 var consequences = committedProjects[0].CommittedProjectConsequences.ToList();
                 Assert.Equal(8, consequences.Count);

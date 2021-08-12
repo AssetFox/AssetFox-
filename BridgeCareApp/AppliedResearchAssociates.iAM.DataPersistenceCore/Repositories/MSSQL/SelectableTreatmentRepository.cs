@@ -74,6 +74,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .SelectMany(_ => _.FeasibilityCriteria.Select(criterion =>
                     {
                         var entity = criterion.ToEntity($"{_.Name} Criterion");
+                        entity.IsSingleUse = true;
                         criterionJoins.Add(new CriterionLibraryScenarioSelectableTreatmentEntity
                         {
                             CriterionLibraryId = entity.Id, ScenarioSelectableTreatmentId = _.Id

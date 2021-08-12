@@ -3,7 +3,7 @@ using System.Linq;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Domains;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using MoreLinq.Extensions;
 using Newtonsoft.Json;
 using Xunit;
@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 // Arrange
                 _testHelper.CreateAttributes();
                 _testHelper.SetStandAloneSimulation(SimulationId);
-                
+
 
                 // Act
                 _testHelper.UnitOfWork.BeginTransaction();
@@ -107,7 +107,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 // Arrange
                 _testHelper.CreateAttributes();
                 _testHelper.SetStandAloneSimulation(SimulationId);
-                
+
                 _testHelper.ReduceNumberOfFacilitiesAndSections(_testHelper.StandAloneSimulation);
 
                 // Act
@@ -371,8 +371,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
                 // Act
                 _testHelper.UnitOfWork.BeginTransaction();
-                _testHelper.UnitOfWork.PerformanceCurveRepo.CreatePerformanceCurveLibrary($"{_testHelper.StandAloneSimulation.Name} Performance Curve Library", _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfWork.PerformanceCurveRepo.CreatePerformanceCurves(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), _testHelper.StandAloneSimulation.Id);
+                _testHelper.UnitOfWork.PerformanceCurveRepo.CreateScenarioPerformanceCurves(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), _testHelper.StandAloneSimulation.Id);
                 _testHelper.UnitOfWork.Commit();
 
                 // Assert
@@ -381,7 +380,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     .GetSimulationAnalysisNetwork(_testHelper.StandAloneSimulation.Network.Id, explorer);
                 _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
-                _testHelper.UnitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(dataSourceSimulation);
+                _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(dataSourceSimulation);
                 var dataSourcePerformanceCurves = dataSourceSimulation.PerformanceCurves.ToList();
                 AssertPerformanCurveProperties(_testHelper.StandAloneSimulation.PerformanceCurves.ToList(), dataSourcePerformanceCurves);
             }
@@ -637,9 +636,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
                 // Act
                 _testHelper.UnitOfWork.BeginTransaction();
-                _testHelper.UnitOfWork.SelectableTreatmentRepo
-                    .CreateTreatmentLibrary($"{_testHelper.StandAloneSimulation.Name} Simulation Treatment Library", _testHelper.StandAloneSimulation.Id);
-                _testHelper.UnitOfWork.SelectableTreatmentRepo.CreateSelectableTreatments(_testHelper.StandAloneSimulation.Treatments.ToList(), _testHelper.StandAloneSimulation.Id);
+                _testHelper.UnitOfWork.SelectableTreatmentRepo.CreateScenarioSelectableTreatments(_testHelper.StandAloneSimulation.Treatments.ToList(), _testHelper.StandAloneSimulation.Id);
                 _testHelper.UnitOfWork.Commit();
 
                 // Assert
@@ -649,7 +646,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
                 _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
-                _testHelper.UnitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(dataSourceSimulation);
+                _testHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(dataSourceSimulation);
                 AssertSelectableTreatmentProperties(_testHelper.StandAloneSimulation.Treatments.ToList(), dataSourceSimulation.Treatments.ToList());
             }
             finally
@@ -775,9 +772,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 {
                     _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
                     _testHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-                    _testHelper.UnitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
+                    _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
                     _testHelper.UnitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
-                    _testHelper.UnitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+                    _testHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
                 });
 
                 var simulation = _testHelper.StandAloneSimulation;
@@ -848,9 +845,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 {
                     _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
                     _testHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-                    _testHelper.UnitOfWork.PerformanceCurveRepo.SimulationPerformanceCurves(simulation);
+                    _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
                     _testHelper.UnitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
-                    _testHelper.UnitOfWork.SelectableTreatmentRepo.GetSimulationTreatments(simulation);
+                    _testHelper.UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
                 });
 
                 var dataSourceSimulation = network.Simulations.ToList().First();

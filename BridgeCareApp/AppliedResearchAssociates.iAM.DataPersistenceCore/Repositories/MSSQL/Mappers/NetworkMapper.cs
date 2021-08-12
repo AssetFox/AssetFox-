@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using MoreLinq;
 using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Domains;
@@ -12,15 +11,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class NetworkMapper
     {
-        public static DataAssignment.Networking.Network ToDomain(this NetworkEntity entity) =>
-            new DataAssignment.Networking.Network(
+        public static Network ToDomain(this NetworkEntity entity) =>
+            new Network(
                 entity.MaintainableAssets.Any()
                     ? entity.MaintainableAssets.Select(e => e.ToDomain()).ToList()
                     : new List<MaintainableAsset>(),
                 entity.Id,
                 entity.Name);
 
-        public static SimulationAnalysisDomains.Network ToDomain(this NetworkEntity entity, Explorer explorer)
+        public static SimulationAnalysisDomains.Network ToDomain(this NetworkEntity entity, SimulationAnalysisDomains.Explorer explorer)
         {
             var network = explorer.AddNetwork();
             network.Id = entity.Id;
@@ -34,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return network;
         }
 
-        public static NetworkEntity ToEntity(this DataAssignment.Networking.Network domain) =>
+        public static NetworkEntity ToEntity(this Network domain) =>
             new NetworkEntity {Id = domain.Id, Name = domain.Name};
 
         public static NetworkEntity ToEntity(this SimulationAnalysisDomains.Network domain) =>

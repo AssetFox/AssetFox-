@@ -1,9 +1,9 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve
 {
-    public class PerformanceCurveEquationEntity : BaseEquationJoinEntity
+    public class CriterionLibraryPerformanceCurveEntity : BaseCriterionLibraryJoinEntity
     {
         public Guid PerformanceCurveId { get; set; }
 

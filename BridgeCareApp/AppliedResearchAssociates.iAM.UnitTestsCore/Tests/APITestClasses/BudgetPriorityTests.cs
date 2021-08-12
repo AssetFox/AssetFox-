@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
@@ -17,11 +20,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private readonly TestHelper _testHelper;
         private readonly BudgetPriorityController _controller;
 
-        private static readonly Guid BudgetPriorityLibraryId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
-        private static readonly Guid BudgetPriorityId = Guid.Parse("ce1c926b-4df7-4c3c-987f-9146756111b8");
-        private static readonly Guid BudgetLibraryId = Guid.Parse("a6c65132-e45c-4a48-a0b2-72cd274c9cc2");
-        private static readonly Guid BudgetId = Guid.Parse("874e7a81-999e-4477-9913-68e878835344");
-        private static readonly Guid BudgetPercentagePairId = Guid.Parse("ba45571b-1bb5-43c1-b0d3-3705e80b3cf3");
+        private ScenarioBudgetEntity _testScenarioBudget;
+        private BudgetPriorityLibraryEntity _testBudgetPriorityLibrary;
+        private BudgetPriorityEntity _testBudgetPriority;
+        private BudgetPercentagePairEntity _testBudgetPercentagePair;
 
         public BudgetPriorityTests()
         {
@@ -30,53 +32,80 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            _controller = new BudgetPriorityController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            _controller = new BudgetPriorityController(_testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+
+            CreateBudgetPriorityTestData();
         }
 
-        public BudgetPriorityLibraryEntity TestBudgetPriorityLibrary { get; } = new BudgetPriorityLibraryEntity
+        private void CreateBudgetPriorityTestData()
         {
-            Id = BudgetPriorityLibraryId,
-            Name = "Test Name"
-        };
+            _testScenarioBudget = new ScenarioBudgetEntity
+            {
+                Id = Guid.NewGuid(),
+                SimulationId = _testHelper.TestSimulation.Id,
+                Name = "ScenarioBudgetEntity",
+                ScenarioBudgetAmounts =
+                    new List<ScenarioBudgetAmountEntity>
+                    {
+                        new ScenarioBudgetAmountEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            ScenarioBudget = _testScenarioBudget,
+                            Year = DateTime.Now.Year,
+                            Value = 500000
+                        }
+                    },
+                CriterionLibraryScenarioBudgetJoin = new CriterionLibraryScenarioBudgetEntity
+                {
+                    ScenarioBudget = _testScenarioBudget,
+                    CriterionLibrary = new CriterionLibraryEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Scenario Budget Criterion",
+                        IsSingleUse = true,
+                        MergedCriteriaExpression = ""
+                    }
+                }
+            };
+            _testHelper.UnitOfWork.Context.AddEntity(_testScenarioBudget);
 
-        public BudgetPriorityEntity TestBudgetPriority { get; } = new BudgetPriorityEntity
-        {
-            Id = BudgetPriorityId,
-            BudgetPriorityLibraryId = BudgetPriorityLibraryId,
-            PriorityLevel = 1
-        };
 
-        public BudgetLibraryEntity TestBudgetLibrary { get; } = new BudgetLibraryEntity
-        {
-            Id = BudgetLibraryId,
-            Name = "Test Name"
-        };
+            _testBudgetPriorityLibrary = new BudgetPriorityLibraryEntity {Id = Guid.NewGuid(), Name = "BudgetPriorityLibraryEntity"};
+            _testHelper.UnitOfWork.Context.AddEntity(_testBudgetPriorityLibrary);
 
-        public BudgetEntity TestBudget { get; } = new BudgetEntity { Id = BudgetId, BudgetLibraryId = BudgetLibraryId, Name = "Test Name", };
 
-        public BudgetPercentagePairEntity TestBudgetPercentagePair { get; } = new BudgetPercentagePairEntity
-        {
-            Id = BudgetPercentagePairId,
-            BudgetPriorityId = BudgetPriorityId,
-            BudgetId = BudgetId,
-            Percentage = 100
-        };
+            _testBudgetPriority = new BudgetPriorityEntity
+            {
+                Id = Guid.NewGuid(),
+                BudgetPriorityLibraryId = _testBudgetPriorityLibrary.Id,
+                PriorityLevel = 1,
+                CriterionLibraryBudgetPriorityJoin = new CriterionLibraryBudgetPriorityEntity
+                {
+                    BudgetPriority = _testBudgetPriority,
+                    CriterionLibrary = new CriterionLibraryEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Budget Priority Criterion",
+                        IsSingleUse = true,
+                        MergedCriteriaExpression = ""
+                    }
+                }
+            };
+            _testHelper.UnitOfWork.Context.AddEntity(_testBudgetPriority);
 
-        private void SetupForGet()
-        {
-            _testHelper.UnitOfWork.Context.BudgetPriorityLibrary.Add(TestBudgetPriorityLibrary);
-            _testHelper.UnitOfWork.Context.BudgetPriority.Add(TestBudgetPriority);
-            _testHelper.UnitOfWork.Context.SaveChanges();
-        }
 
-        private void SetupForUpsertOrDelete()
-        {
-            SetupForGet();
-            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfWork.Context.BudgetLibrary.Add(TestBudgetLibrary);
-            _testHelper.UnitOfWork.Context.Budget.Add(TestBudget);
-            _testHelper.UnitOfWork.Context.BudgetPercentagePair.Add(TestBudgetPercentagePair);
+            _testBudgetPercentagePair = new BudgetPercentagePairEntity
+            {
+                Id = Guid.NewGuid(),
+                BudgetPriorityId = _testBudgetPriority.Id,
+                ScenarioBudgetId = _testScenarioBudget.Id,
+                Percentage = 100
+            };
+            _testHelper.UnitOfWork.Context.AddEntity(_testBudgetPercentagePair);
+
+
             _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
@@ -86,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Act
-                var result = await _controller.BudgetPriorityLibraries();
+                var result = await _controller.GetBudgetPriorityLibraries();
 
                 // Assert
                 Assert.IsType<OkObjectResult>(result);
@@ -105,7 +134,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 // Act
                 var result = await _controller
-                    .UpsertBudgetPriorityLibrary(Guid.Empty, TestBudgetPriorityLibrary.ToDto());
+                    .UpsertBudgetPriorityLibrary(Guid.Empty, _testBudgetPriorityLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result);
@@ -140,11 +169,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             try
             {
-                // Arrange
-                SetupForGet();
-
                 // Act
-                var result = await _controller.BudgetPriorityLibraries();
+                var result = await _controller.GetBudgetPriorityLibraries();
 
                 // Assert
                 var okObjResult = result as OkObjectResult;
@@ -154,10 +180,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     typeof(List<BudgetPriorityLibraryDTO>));
                 Assert.Single(dtos);
 
-                Assert.Equal(BudgetPriorityLibraryId, dtos[0].Id);
+                Assert.Equal(_testBudgetPriorityLibrary.Id, dtos[0].Id);
                 Assert.Single(dtos[0].BudgetPriorities);
 
-                Assert.Equal(BudgetPriorityId, dtos[0].BudgetPriorities[0].Id);
+                Assert.Equal(_testBudgetPriority.Id, dtos[0].BudgetPriorities[0].Id);
             }
             finally
             {
@@ -172,16 +198,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
-                SetupForUpsertOrDelete();
-                var getResult = await _controller.BudgetPriorityLibraries();
+                var getResult = await _controller.GetBudgetPriorityLibraries();
                 var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<BudgetPriorityLibraryDTO>));
 
                 var dto = dtos[0];
                 dto.Description = "Updated Description";
                 dto.BudgetPriorities[0].PriorityLevel = 2;
-                dto.BudgetPriorities[0].CriterionLibrary =
-                    _testHelper.TestCriterionLibrary.ToDto();
+                dto.BudgetPriorities[0].CriterionLibrary = new CriterionLibraryDTO
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Updated Criterion",
+                    Description = "",
+                    MergedCriteriaExpression = "Criterion Expression",
+                    IsSingleUse = true
+                };
                 dto.BudgetPriorities[0].BudgetPercentagePairs[0].Percentage = 90;
 
                 // Act
@@ -218,33 +249,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             try
             {
-                // Arrange
-                SetupForUpsertOrDelete();
-                var getResult = await _controller.BudgetPriorityLibraries();
-                var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                    typeof(List<BudgetPriorityLibraryDTO>));
-
-                var budgetPriorityLibraryDTO = dtos[0];
-                budgetPriorityLibraryDTO.BudgetPriorities[0].CriterionLibrary =
-                    _testHelper.TestCriterionLibrary.ToDto();
-
-                await _controller.UpsertBudgetPriorityLibrary(_testHelper.TestSimulation.Id,
-                    budgetPriorityLibraryDTO);
-
                 // Act
-                var result = await _controller.DeleteBudgetPriorityLibrary(BudgetPriorityLibraryId);
+                var result = await _controller.DeleteBudgetPriorityLibrary(_testBudgetPriorityLibrary.Id);
 
                 // Assert
                 Assert.IsType<OkResult>(result);
 
-                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == BudgetPriorityLibraryId));
-                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriority.Any(_ => _.Id == BudgetPriorityId));
+                Assert.True(
+                    !_testHelper.UnitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == _testBudgetPriorityLibrary.Id));
+                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriority.Any(_ => _.Id == _testBudgetPriority.Id));
                 Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriorityLibrarySimulation.Any(_ =>
-                    _.BudgetPriorityLibraryId == BudgetPriorityLibraryId));
+                    _.BudgetPriorityLibraryId == _testBudgetPriorityLibrary.Id));
                 Assert.True(
                     !_testHelper.UnitOfWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
-                        _.BudgetPriorityId == BudgetPriorityId));
-                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPercentagePair.Any(_ => _.Id == BudgetPercentagePairId));
+                        _.BudgetPriorityId == _testBudgetPriority.Id));
+                Assert.True(
+                    !_testHelper.UnitOfWork.Context.BudgetPercentagePair.Any(_ => _.Id == _testBudgetPercentagePair.Id));
             }
             finally
             {

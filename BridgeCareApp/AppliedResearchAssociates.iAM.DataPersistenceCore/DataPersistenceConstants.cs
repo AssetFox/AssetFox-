@@ -57,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
 
         public static class PennDOTKeyFields
         {
-            public static readonly List<string> Keys = new List<string>()
+            public static readonly List<string> Keys = new List<string>
             {
                 "BRKEY_",
                 "BMSID"

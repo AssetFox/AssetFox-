@@ -49,15 +49,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             simulation.InvestmentPlan.MinimumProjectCostLimit = entity.MinimumProjectCostLimit;
             simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod = entity.NumberOfYearsInAnalysisPeriod;
 
-            entity.Simulation.BudgetLibrarySimulationJoin?.BudgetLibrary.Budgets.ForEach(_ =>
+            entity.Simulation.Budgets?.ForEach(_ =>
             {
                 var budget = simulation.InvestmentPlan.AddBudget();
                 budget.Id = _.Id;
                 budget.Name = _.Name;
 
-                if (_.BudgetAmounts.Any())
+                if (_.ScenarioBudgetAmounts.Any())
                 {
-                    var sortedBudgetAmountEntities = _.BudgetAmounts.OrderBy(__ => __.Year);
+                    var sortedBudgetAmountEntities = _.ScenarioBudgetAmounts.OrderBy(__ => __.Year);
                     sortedBudgetAmountEntities.ForEach(__ =>
                     {
                         var year = __.Year;
@@ -69,7 +69,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 var budgetCondition = simulation.InvestmentPlan.AddBudgetCondition();
                 budgetCondition.Budget = budget;
-                budgetCondition.Criterion.Expression = _.CriterionLibraryBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
+                budgetCondition.Criterion.Expression =
+                    _.CriterionLibraryScenarioBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
             });
 
             entity.Simulation.CashFlowRuleLibrarySimulationJoin?.CashFlowRuleLibrary.CashFlowRules.ForEach(_ =>
@@ -77,7 +78,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var cashFlowRule = simulation.InvestmentPlan.AddCashFlowRule();
                 cashFlowRule.Id = _.Id;
                 cashFlowRule.Name = _.Name;
-                cashFlowRule.Criterion.Expression = _.CriterionLibraryCashFlowRuleJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
+                cashFlowRule.Criterion.Expression =
+                    _.CriterionLibraryCashFlowRuleJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
 
                 if (_.CashFlowDistributionRules.Any())
                 {

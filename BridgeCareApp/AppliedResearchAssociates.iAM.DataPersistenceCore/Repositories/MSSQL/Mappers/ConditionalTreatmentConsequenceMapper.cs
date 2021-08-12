@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
+using Attribute = AppliedResearchAssociates.iAM.Domains.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
     public static class ConditionalTreatmentConsequenceMapper
     {
-        public static ConditionalTreatmentConsequenceEntity ToEntity(this ConditionalTreatmentConsequence domain, Guid treatmentId, Guid attributeId) =>
-            new ConditionalTreatmentConsequenceEntity
+        public static ScenarioConditionalTreatmentConsequenceEntity ToScenarioEntity(this ConditionalTreatmentConsequence domain, Guid treatmentId, Guid attributeId) =>
+            new ScenarioConditionalTreatmentConsequenceEntity
             {
                 Id = domain.Id,
-                SelectableTreatmentId = treatmentId,
+                ScenarioSelectableTreatmentId = treatmentId,
                 AttributeId = attributeId,
                 ChangeValue = domain.Change.Expression
             };
@@ -38,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ChangeValue = dto.ChangeValue
             };
 
-        public static void CreateConditionalTreatmentConsequence(this ScenarioConditionalTreatmentConsequenceEntity entity, SelectableTreatment treatment, IEnumerable<Domains.Attribute> attributes)
+        public static void CreateConditionalTreatmentConsequence(this ScenarioConditionalTreatmentConsequenceEntity entity, SelectableTreatment treatment, IEnumerable<Attribute> attributes)
         {
             var consequence = treatment.AddConsequence();
             consequence.Id = entity.Id;

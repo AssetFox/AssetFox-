@@ -56,7 +56,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await Task.Factory.StartNew(() => UnitOfWork.PerformanceCurveRepo
-                    .GetPerformanceCurveLibrariesWithPerformanceCurves());
+                    .GetPerformanceCurveLibraries());
                 return Ok(result);
             }
             catch (Exception e)

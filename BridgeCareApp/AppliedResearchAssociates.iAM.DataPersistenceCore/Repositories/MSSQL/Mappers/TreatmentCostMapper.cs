@@ -1,6 +1,6 @@
 ﻿using System;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 
@@ -8,18 +8,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class TreatmentCostMapper
     {
-        public static TreatmentCostEntity ToEntity(this TreatmentCost domain, Guid treatmentId) =>
-            new TreatmentCostEntity
+        public static ScenarioTreatmentCostEntity ToScenarioEntity(this TreatmentCost domain, Guid treatmentId) =>
+            new ScenarioTreatmentCostEntity
             {
                 Id = domain.Id,
-                TreatmentId = treatmentId
+                ScenarioSelectableTreatmentId = treatmentId
             };
 
         public static TreatmentCostEntity ToLibraryEntity(this TreatmentCostDTO dto, Guid treatmentId) =>
             new TreatmentCostEntity { Id = dto.Id, TreatmentId = treatmentId };
 
         public static ScenarioTreatmentCostEntity ToScenarioEntity(this TreatmentCostDTO dto, Guid treatmentId) =>
-            new ScenarioTreatmentCostEntity { Id = dto.Id, ScenarioTreatmentId = treatmentId };
+            new ScenarioTreatmentCostEntity { Id = dto.Id, ScenarioSelectableTreatmentId = treatmentId };
 
         public static void CreateTreatmentCost(this ScenarioTreatmentCostEntity entity, SelectableTreatment selectableTreatment)
         {

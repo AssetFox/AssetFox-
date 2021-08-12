@@ -1,15 +1,17 @@
 <template>
     <v-layout column>
-        <v-layout justify-center v-show='selectedScenarioId !== uuidNIL'>
+        <v-layout justify-center v-if='hasScenario'>
             <v-flex xs12>
                 <v-layout justify-space-between row>
                     <v-spacer></v-spacer>
                     <v-flex xs2>
                         <v-text-field label='First Year of Analysis Period' readonly outline
+                                      @change='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
                                       v-model='investmentPlan.firstYearOfAnalysisPeriod' />
                     </v-flex>
                     <v-flex xs2>
                         <v-text-field label='Number of Years in Analysis Period' readonly outline
+                                      @change='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
                                       v-model='investmentPlan.numberOfYearsInAnalysisPeriod' />
                     </v-flex>
                     <v-spacer></v-spacer>
@@ -19,14 +21,15 @@
                     <v-spacer></v-spacer>
                     <v-flex xs2>
                         <v-text-field label='Minimum Project Cost Limit' outline id='min-proj-cost-limit-txt'
+                                      @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
                                       v-model='investmentPlan.minimumProjectCostLimit'
-                                      @input='syncAllBudgetAmountsWithMinimumProjectCostLimit'
                                       v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]" />
                     </v-flex>
                     <v-flex xs2>
                         <v-text-field label='Inflation Rate Percentage' outline
                                       v-model='investmentPlan.inflationRatePercentage'
+                                      @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
                                       :mask="'###'"
                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]" />
                     </v-flex>
@@ -34,20 +37,20 @@
                 </v-layout>
             </v-flex>
         </v-layout>
-        <v-divider v-if='selectedScenarioId !== uuidNIL' />
+        <v-divider v-if='hasScenario' />
         <v-flex xs12>
             <v-layout justify-center>
                 <v-flex xs3>
                     <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='ara-blue-bg white--text'
-                           v-show='selectedScenarioId === uuidNIL'>
+                           v-show='!hasScenario'>
                         New Library
                     </v-btn>
                     <v-select :items='librarySelectItems'
                               label='Select an Investment library'
-                              outline v-if='!hasSelectedLibrary || selectedScenarioId !== uuidNIL'
+                              outline v-if='!hasSelectedLibrary || hasScenario'
                               v-model='librarySelectItemValue'>
                     </v-select>
-                    <v-text-field label='Library Name' v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
+                    <v-text-field label='Library Name' v-if='hasSelectedLibrary && !hasScenario'
                                   v-model='selectedBudgetLibrary.name'
                                   :rules="[rules['generalRules'].valueIsNotEmpty]">
                         <template slot='append'>
@@ -56,41 +59,41 @@
                             </v-btn>
                         </template>
                     </v-text-field>
-                    <div v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
+                    <div v-if='hasSelectedLibrary && !hasScenario'>
                         Owner: {{ selectedBudgetLibrary.owner ? selectedBudgetLibrary.owner : '[ No Owner ]' }}
                     </div>
                     <v-checkbox class='sharing' label='Shared'
-                                v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
+                                v-if='hasSelectedLibrary && !hasScenario'
                                 v-model='selectedBudgetLibrary.shared' />
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-divider v-show='hasSelectedLibrary'></v-divider>
-        <v-flex v-show='hasSelectedLibrary' xs12>
+        <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
+        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
             <v-layout justify-center>
                 <v-flex xs6>
                     <v-layout justify-space-between>
                         <v-btn @click='onShowEditBudgetsDialog' class='ara-blue-bg white--text'>
                             Edit Budgets
                         </v-btn>
-                        <v-btn :disabled='selectedBudgetLibrary.budgets.length === 0'
+                        <v-btn :disabled='budgets.length === 0'
                                @click='onAddBudgetYear'
                                class='ara-blue-bg white--text'>
                             {{ addYearLabel }}
                         </v-btn>
                         <v-btn
-                            :disabled='selectedBudgetLibrary.budgets.length === 0 || budgetYearsGridData.length === 0'
+                            :disabled='budgets.length === 0 || budgetYearsGridData.length === 0'
                             @click='onRemoveLatestBudgetYear'
                             class='ara-orange-bg white--text'>
                             {{ deleteYearLabel }}
                         </v-btn>
-                        <v-btn :disabled='selectedBudgetLibrary.budgets.length === 0'
+                        <v-btn :disabled='budgets.length === 0'
                                @click='showSetRangeForAddingBudgetYearsDialog = true'
                                class='ara-blue-bg white--text'>
                             Add Year Range
                         </v-btn>
                         <v-btn
-                            :disabled='selectedBudgetLibrary.budgets.length === 0 || budgetYearsGridData.length === 0'
+                            :disabled='budgets.length === 0 || budgetYearsGridData.length === 0'
                             @click='showSetRangeForDeletingBudgetYearsDialog = true'
                             class='ara-orange-bg white--text'>
                             Delete Year Range
@@ -135,9 +138,9 @@
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-divider v-show='hasSelectedLibrary'></v-divider>
+        <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
         <v-flex
-            v-show='hasSelectedLibrary && selectedScenarioId === uuidNIL'
+            v-show='hasSelectedLibrary && !hasScenario'
             xs12>
             <v-layout justify-center>
                 <v-flex xs6>
@@ -148,29 +151,30 @@
             </v-layout>
         </v-flex>
         <v-flex xs12>
-            <v-layout justify-end row v-show='hasSelectedLibrary'>
-                <v-btn :disabled='disableCrudButton()'
-                       @click='onUpsertInvestment(selectedBudgetLibrary, selectedScenarioId)'
+            <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
+                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                       @click='onUpsertInvestment()'
                        class='ara-blue-bg white--text'
                        v-show='selectedScenarioId !== uuidNIL'>
                     Save
                 </v-btn>
-                <v-btn :disabled='disableCrudButton()'
-                       @click='onUpsertInvestment(selectedBudgetLibrary, uuidNIL)'
+                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                       @click='onUpsertBudgetLibrary()'
                        class='ara-blue-bg white--text'
                        v-show='selectedScenarioId === uuidNIL'>
                     Update Library
                 </v-btn>
-                <v-btn :disabled='disableCrudButton()' @click='onShowCreateBudgetLibraryDialog(true)'
+                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                       @click='onShowCreateBudgetLibraryDialog(true)'
                        class='ara-blue-bg white--text'>
                     Create as New Library
                 </v-btn>
-                <v-btn @click='onShowConfirmDeleteAlert' class='ara-orange-bg white--text'
-                       v-show='selectedScenarioId === uuidNIL' :disabled='!hasSelectedLibrary'>
+                <v-btn @click='onShowConfirmDeleteAlert' class='ara-orange-bg white--text' v-show='!hasScenario'
+                       :disabled='!hasSelectedLibrary'>
                     Delete Library
                 </v-btn>
-                <v-btn :disabled='!hasSelectedLibrary' @click='onDiscardChanges'
-                       class='ara-orange-bg white--text' v-show='selectedScenarioId !== uuidNIL'>
+                <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges' class='ara-orange-bg white--text'
+                       v-show='hasScenario'>
                     Discard Changes
                 </v-btn>
             </v-layout>
@@ -179,7 +183,7 @@
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
 
         <CreateBudgetLibraryDialog :dialogData='createBudgetLibraryDialogData'
-                                   @submit='onUpsertInvestment' />
+                                   @submit='onSubmitCreateCreateBudgetLibraryDialogResult' />
 
         <SetRangeForAddingBudgetYearsDialog :showDialog='showSetRangeForAddingBudgetYearsDialog'
                                             :startYear='getNextYear()'
@@ -211,10 +215,10 @@ import {
     BudgetLibrary,
     BudgetYearsGridData,
     emptyBudgetLibrary,
-    emptyInvestmentPlan,
+    emptyInvestmentPlan, InvestmentBudgetFileImport,
     InvestmentPlan,
 } from '@/shared/models/iAM/investment';
-import { any, append, clone, contains, find, findIndex, groupBy, isNil, keys, propEq, update } from 'ramda';
+import { any, append, clone, find, findIndex, groupBy, isNil, keys, propEq, update } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -228,10 +232,9 @@ import { getLastPropertyValue, getPropertyValues } from '@/shared/utils/getter-u
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import { isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
-import { getAppliedLibraryId, hasAppliedLibrary } from '@/shared/utils/library-utils';
 import { sorter } from '@/shared/utils/sorter-utils';
 import CreateBudgetLibraryDialog
     from '@/components/investment-editor/investment-editor-dialogs/CreateBudgetLibraryDialog.vue';
@@ -243,6 +246,8 @@ import { AxiosResponse } from 'axios';
 import { FileInfo } from '@/shared/models/iAM/file-info';
 import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
+import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 
 @Component({
     components: {
@@ -258,14 +263,19 @@ export default class InvestmentEditor extends Vue {
     @State(state => state.investmentModule.budgetLibraries) stateBudgetLibraries: BudgetLibrary[];
     @State(state => state.investmentModule.selectedBudgetLibrary) stateSelectedBudgetLibrary: BudgetLibrary;
     @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
+    @State(state => state.investmentModule.scenarioBudgets) stateScenarioBudgets: Budget[];
+    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
 
     @Action('getInvestment') getInvestmentAction: any;
+    @Action('getBudgetLibraries') getBudgetLibrariesAction: any;
     @Action('selectBudgetLibrary') selectBudgetLibraryAction: any;
     @Action('upsertInvestment') upsertInvestmentAction: any;
+    @Action('upsertBudgetLibrary') upsertBudgetLibraryAction: any;
     @Action('deleteBudgetLibrary') deleteBudgetLibraryAction: any;
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('importInvestmentBudgetsFile') importInvestmentBudgetsFileAction: any;
+    @Action('importScenarioInvestmentBudgetsFile') importScenarioInvestmentBudgetsFileAction: any;
+    @Action('importLibraryInvestmentBudgetsFile') importLibraryInvestmentBudgetsFileAction: any;
 
     selectedBudgetLibrary: BudgetLibrary = clone(emptyBudgetLibrary);
     investmentPlan: InvestmentPlan = clone(emptyInvestmentPlan);
@@ -287,6 +297,8 @@ export default class InvestmentEditor extends Vue {
     uuidNIL: string = getBlankGuid();
     rules: InputValidationRules = clone(rules);
     showImportExportInvestmentBudgetsDialog: boolean = false;
+    hasScenario: boolean = false;
+    budgets: Budget[] = [];
 
     get addYearLabel() {
         return 'Add Year (' + this.getNextYear() + ')';
@@ -303,28 +315,19 @@ export default class InvestmentEditor extends Vue {
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
-            if (to.path.indexOf('InvestmentEditor/Scenario') !== -1) {
+            vm.librarySelectItemValue = null;
+            vm.getBudgetLibrariesAction();
+
+            if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
+
                 if (vm.selectedScenarioId === vm.uuidNIL) {
                     vm.setErrorMessageAction({ message: 'Found no selected scenario for edit' });
                     vm.$router.push('/Scenarios/');
                 }
-            }
 
-            vm.selectItemValue = null;
-            vm.getInvestmentAction({ scenarioId: vm.selectedScenarioId });
-        });
-    }
-
-    mounted() {
-        this.$nextTick(() => {
-            const minimumProjectCostLimitTextField: HTMLElement = document
-                .getElementById('min-proj-cost-limit-txt') as HTMLElement;
-            if (hasValue(minimumProjectCostLimitTextField)) {
-                setTimeout(() => {
-                    minimumProjectCostLimitTextField.click();
-                    setTimeout(() => minimumProjectCostLimitTextField.blur());
-                });
+                vm.hasScenario = true;
+                vm.getInvestmentAction(vm.selectedScenarioId);
             }
         });
     }
@@ -340,16 +343,11 @@ export default class InvestmentEditor extends Vue {
                 text: library.name,
                 value: library.id,
             }));
-
-        if (this.selectedScenarioId !== this.uuidNIL && this.selectedBudgetLibrary.id === this.uuidNIL &&
-            hasAppliedLibrary(this.stateBudgetLibraries, this.selectedScenarioId)) {
-            this.librarySelectItemValue = getAppliedLibraryId(this.stateBudgetLibraries, this.selectedScenarioId);
-        }
     }
 
     @Watch('librarySelectItemValue')
     onLibrarySelectItemValueChanged() {
-        this.selectBudgetLibraryAction({ libraryId: this.librarySelectItemValue });
+        this.selectBudgetLibraryAction(this.librarySelectItemValue);
     }
 
     @Watch('stateSelectedBudgetLibrary')
@@ -359,56 +357,36 @@ export default class InvestmentEditor extends Vue {
 
     @Watch('selectedBudgetLibrary')
     onSelectedBudgetLibraryChanged() {
-        this.setHasUnsavedChangesAction({
-            value: hasUnsavedChangesCore(
-                'budget-library', this.selectedBudgetLibrary, this.stateSelectedBudgetLibrary,
-            ),
-        });
-
-        this.selectedGridRows = [];
         this.hasSelectedLibrary = this.selectedBudgetLibrary.id !== this.uuidNIL;
-
-        this.setGridHeaders();
-        this.setGridData();
-
-        this.syncInvestmentPlanWithSelectedBudgetLibrary();
-
-        if (!this.hasBudgetsThatMeetMinimumProjectCostLimit()) {
-            this.syncAllBudgetAmountsWithMinimumProjectCostLimit();
+        if (this.hasSelectedLibrary) {
+            this.budgets = clone(this.selectedBudgetLibrary.budgets);
         }
     }
 
     @Watch('stateInvestmentPlan')
     onStateInvestmentPlanChanged() {
-        this.investmentPlan = {
-            ...this.stateInvestmentPlan,
-            id: this.stateInvestmentPlan.id === this.uuidNIL ? getNewGuid() : this.stateInvestmentPlan.id,
-        };
+        this.cloneStateInvestmentPlan();
+    }
+
+    @Watch('stateScenarioBudgets')
+    onStateScenarioBudgetsChanged() {
+        if (this.hasScenario) {
+            this.selectedGridRows = [];
+            this.budgets = clone(this.stateScenarioBudgets);
+        }
+    }
+
+    @Watch('budgets')
+    onScenarioBudgetsChanged() {
+        this.setGridHeaders(this.budgets);
+        this.setGridData(this.budgets);
+        this.syncInvestmentPlanWithBudgets(this.stateScenarioBudgets);
+        this.setHasUnsavedChangesFlag();
     }
 
     @Watch('investmentPlan')
     onInvestmentPlanChanged() {
-        this.setHasUnsavedChangesAction({
-            value: hasUnsavedChangesCore('investmentModule-plan',
-                {
-                    ...this.investmentPlan,
-                    minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
-                        ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
-                        : 0,
-                },
-                {
-                    ...this.stateInvestmentPlan,
-                    minimumProjectCostLimit: hasValue(this.stateInvestmentPlan.minimumProjectCostLimit)
-                        ? parseFloat(this.stateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
-                        : 0,
-                }),
-        });
-
-        this.syncInvestmentPlanWithSelectedBudgetLibrary();
-
-        if (!this.hasBudgetsThatMeetMinimumProjectCostLimit()) {
-            this.syncAllBudgetAmountsWithMinimumProjectCostLimit();
-        }
+        this.setHasUnsavedChangesFlag();
     }
 
     @Watch('selectedGridRows')
@@ -416,8 +394,50 @@ export default class InvestmentEditor extends Vue {
         this.selectedBudgetYears = getPropertyValues('year', this.selectedGridRows) as number[];
     }
 
-    setGridHeaders() {
-        const budgetNames: string[] = sorter(getPropertyValues('name', this.selectedBudgetLibrary.budgets)) as string[];
+    cloneStateInvestmentPlan() {
+        const investmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
+        this.investmentPlan = {
+            ...investmentPlan,
+            id: investmentPlan.id === this.uuidNIL ? getNewGuid() : investmentPlan.id,
+        };
+    }
+
+    setHasUnsavedChangesFlag() {
+        if (this.hasScenario) {
+            const localBudgets: Budget[] = sortNonObjectLists(clone(this.budgets));
+            const stateBudgets: Budget[] = sortNonObjectLists(clone(this.stateScenarioBudgets));
+
+            const investmentPlan: InvestmentPlan = clone(this.investmentPlan);
+            const localInvestmentPlan: InvestmentPlan = sortNonObjectLists({
+                ...investmentPlan,
+                minimumProjectCostLimit: hasValue(investmentPlan.minimumProjectCostLimit)
+                    ? parseFloat(investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                    : 0,
+            });
+
+            const clonedStateInvestmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
+            const stateInvestmentPlan: InvestmentPlan = sortNonObjectLists({
+                ...clonedStateInvestmentPlan,
+                minimumProjectCostLimit: hasValue(clonedStateInvestmentPlan.minimumProjectCostLimit)
+                    ? parseFloat(clonedStateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                    : 0,
+            });
+
+            this.setHasUnsavedChangesAction({ value: !isEqual(localBudgets, stateBudgets) || !isEqual(localInvestmentPlan, stateInvestmentPlan) });
+        } else if (this.hasSelectedLibrary) {
+            const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
+            const localLibrary: BudgetLibrary = sortNonObjectLists({
+                ...budgetLibrary,
+                budgets: clone(this.budgets),
+            });
+            const stateLibrary: BudgetLibrary = sortNonObjectLists(clone(this.stateSelectedBudgetLibrary));
+
+            this.setHasUnsavedChangesAction({ value: !isEqual(localLibrary, stateLibrary) });
+        }
+    }
+
+    setGridHeaders(budgets: Budget[]) {
+        const budgetNames: string[] = sorter(getPropertyValues('name', budgets)) as string[];
         const budgetHeaders: DataTableHeader[] = budgetNames
             .map((name: string) => ({
                 text: name,
@@ -430,10 +450,10 @@ export default class InvestmentEditor extends Vue {
         this.budgetYearsGridHeaders = [this.budgetYearsGridHeaders[0], ...budgetHeaders];
     }
 
-    setGridData() {
+    setGridData(budgets: Budget[]) {
         this.budgetYearsGridData = [];
 
-        const budgetAmounts: BudgetAmount[] = this.selectedBudgetLibrary.budgets
+        const budgetAmounts: BudgetAmount[] = budgets
             .flatMap((budget: Budget) => budget.budgetAmounts);
         const groupBudgetAmountsByYear = groupBy((budgetAmount: BudgetAmount) => budgetAmount.year.toString());
         const groupedBudgetAmounts = groupBudgetAmountsByYear(budgetAmounts);
@@ -443,7 +463,7 @@ export default class InvestmentEditor extends Vue {
 
             const budgetAmounts: BudgetAmount[] = groupedBudgetAmounts[year];
 
-            const budgetNames: string[] = sorter(getPropertyValues('name', this.selectedBudgetLibrary.budgets)) as string[];
+            const budgetNames: string[] = sorter(getPropertyValues('name', budgets)) as string[];
             for (let i = 0; i < budgetNames.length; i++) {
                 const budgetAmount: BudgetAmount = budgetAmounts
                     .find((ba: BudgetAmount) => ba.budgetName === budgetNames[i]) as BudgetAmount;
@@ -455,67 +475,30 @@ export default class InvestmentEditor extends Vue {
         });
     }
 
-    syncInvestmentPlanWithSelectedBudgetLibrary() {
-        if (this.selectedScenarioId !== this.uuidNIL) {
-            const allBudgetAmounts: BudgetAmount[] = this.selectedBudgetLibrary.budgets
-                .flatMap((budget: Budget) => budget.budgetAmounts);
-            const allBudgetYears: number[] = sorter(getPropertyValues('year', allBudgetAmounts)) as number[];
+    syncInvestmentPlanWithBudgets(budgets: Budget[]) {
+        const allBudgetAmounts: BudgetAmount[] = budgets
+            .flatMap((budget: Budget) => budget.budgetAmounts);
+        const allBudgetYears: number[] = sorter(getPropertyValues('year', allBudgetAmounts)) as number[];
 
-            this.investmentPlan.firstYearOfAnalysisPeriod = hasValue(allBudgetYears)
-                ? allBudgetYears[0] : this.investmentPlan.firstYearOfAnalysisPeriod;
-            this.investmentPlan.numberOfYearsInAnalysisPeriod = hasValue(allBudgetYears)
-                ? allBudgetYears.length : 1;
-        }
-    }
-
-    hasBudgetsThatMeetMinimumProjectCostLimit() {
-        if (this.selectedScenarioId !== this.uuidNIL) {
-            const minProjectCostLimit: number = hasValue(this.investmentPlan.minimumProjectCostLimit)
-                ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
-                : 0;
-
-            return this.selectedBudgetLibrary.budgets
-                .flatMap((budget: Budget) => budget.budgetAmounts)
-                .every((budgetAmount: BudgetAmount) => {
-                    const budgetAmountValue = hasValue(budgetAmount.value)
-                        ? parseFloat(budgetAmount.value.toString().replace(/(\$*)(\,*)/g, ''))
-                        : 0;
-
-                    return budgetAmountValue >= minProjectCostLimit;
-                });
-        }
-
-        return true;
-    }
-
-    syncAllBudgetAmountsWithMinimumProjectCostLimit() {
-        const minProjectCostLimit: number = hasValue(this.investmentPlan.minimumProjectCostLimit)
-            ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
-            : 0;
-
-        if (minProjectCostLimit > 0 && this.selectedScenarioId !== this.uuidNIL) {
-            this.selectedBudgetLibrary = {
-                ...this.selectedBudgetLibrary,
-                budgets: this.selectedBudgetLibrary.budgets.map((budget: Budget) => ({
-                    ...budget,
-                    budgetAmounts: budget.budgetAmounts.map((budgetAmount: BudgetAmount) => {
-                        const budgetAmountValue = parseFloat(budgetAmount.value.toString().replace(/(\$*)(\,*)/g, ''));
-                        if (budgetAmountValue < minProjectCostLimit) {
-                            budgetAmount.value = minProjectCostLimit;
-                        }
-                        return budgetAmount;
-                    }),
-                })),
-            };
-        }
+        this.investmentPlan.firstYearOfAnalysisPeriod = hasValue(allBudgetYears)
+            ? allBudgetYears[0] : this.investmentPlan.firstYearOfAnalysisPeriod;
+        this.investmentPlan.numberOfYearsInAnalysisPeriod = hasValue(allBudgetYears)
+            ? allBudgetYears.length : 1;
     }
 
     onShowCreateBudgetLibraryDialog(createAsNewLibrary: boolean) {
         this.createBudgetLibraryDialogData = {
             showDialog: true,
-            budgets: createAsNewLibrary ? this.selectedBudgetLibrary.budgets : [],
-            scenarioId: createAsNewLibrary ? this.selectedScenarioId : this.uuidNIL,
+            budgets: createAsNewLibrary ? this.budgets : [],
         };
+    }
+
+    onSubmitCreateCreateBudgetLibraryDialogResult(budgetLibrary: BudgetLibrary) {
+        this.createBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
+
+        if (!isNil(budgetLibrary)) {
+            this.upsertBudgetLibraryAction(budgetLibrary);
+        }
     }
 
     getLatestYear(): number {
@@ -533,33 +516,33 @@ export default class InvestmentEditor extends Vue {
     onAddBudgetYear() {
         const nextYear: number = this.getNextYear();
 
-        const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
+        const budgets: Budget[] = clone(this.budgets);
 
-        budgetLibrary.budgets.forEach((budget: Budget) => {
+        budgets.forEach((budget: Budget) => {
             const newBudgetAmount: BudgetAmount = {
                 id: getNewGuid(),
                 budgetName: budget.name,
                 year: nextYear,
-                value: this.selectedScenarioId !== this.uuidNIL ? this.investmentPlan.minimumProjectCostLimit : 0,
+                value: 0,
             };
             budget.budgetAmounts = append(newBudgetAmount, budget.budgetAmounts);
         });
 
-        this.selectedBudgetLibrary = clone(budgetLibrary);
+        this.budgets = clone(budgets);
     }
 
 
     onRemoveLatestBudgetYear() {
         const latestYear: number = this.getLatestYear();
 
-        const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
+        const budgets: Budget[] = clone(this.budgets);
 
-        budgetLibrary.budgets.forEach((budget: Budget) => {
+        budgets.forEach((budget: Budget) => {
             budget.budgetAmounts = budget.budgetAmounts.filter((budgetAmount: BudgetAmount) =>
                 !(budgetAmount.year == latestYear));
         });
 
-        this.selectedBudgetLibrary = clone(budgetLibrary);
+        this.budgets = clone(budgets);
     }
 
     onSubmitAddBudgetYearRange(range: number) {
@@ -570,20 +553,20 @@ export default class InvestmentEditor extends Vue {
             const startYear: number = hasValue(latestYear) ? latestYear + 1 : moment().year();
             const endYear = moment().year(startYear).add(range, 'years').year();
 
-            const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
+            const budgets: Budget[] = clone(this.budgets);
 
             for (let currentYear = startYear; currentYear < endYear; currentYear++) {
-                budgetLibrary.budgets.forEach((budget: Budget) => {
+                budgets.forEach((budget: Budget) => {
                     budget.budgetAmounts.push({
                         id: getNewGuid(),
                         budgetName: budget.name,
                         year: currentYear,
-                        value: this.selectedScenarioId !== this.uuidNIL ? this.investmentPlan.minimumProjectCostLimit : 0,
+                        value: 0,
                     });
                 });
             }
 
-            this.selectedBudgetLibrary = clone(budgetLibrary);
+            this.budgets = clone(budgets);
         }
     }
 
@@ -594,21 +577,22 @@ export default class InvestmentEditor extends Vue {
             const endYear: number = this.getLatestYear();
             const startYear: number = endYear - range + 1;
 
-            const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
+            const budgets: Budget[] = clone(this.budgets);
 
-            budgetLibrary.budgets.forEach((budget: Budget) => {
+            budgets.forEach((budget: Budget) => {
                 budget.budgetAmounts = budget.budgetAmounts.filter((budgetAmount: BudgetAmount) =>
                     !(budgetAmount.year >= startYear && budgetAmount.year <= endYear));
             });
 
-            this.selectedBudgetLibrary = clone(budgetLibrary);
+            this.budgets = clone(budgets);
         }
     }
 
     onShowEditBudgetsDialog() {
         this.editBudgetsDialogData = {
             showDialog: true,
-            budgets: this.selectedBudgetLibrary.budgets,
+            budgets: this.budgets,
+            scenarioId: this.selectedScenarioId,
         };
     }
 
@@ -616,10 +600,7 @@ export default class InvestmentEditor extends Vue {
         this.editBudgetsDialogData = clone(emptyEditBudgetsDialogData);
 
         if (!isNil(budgets)) {
-            this.selectedBudgetLibrary = {
-                ...this.selectedBudgetLibrary,
-                budgets: budgets,
-            };
+            this.budgets = clone(budgets);
         }
     }
 
@@ -628,27 +609,40 @@ export default class InvestmentEditor extends Vue {
 
         if (hasValue(result)) {
             if (result.isExport) {
-                InvestmentService.exportInvestmentBudgets(this.selectedBudgetLibrary.id, this.selectedScenarioId)
-                .then((response: AxiosResponse) => {
-                    if (hasValue(response, 'data')) {
-                        const fileInfo: FileInfo = response.data as FileInfo;
-                        FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
-                    }
-                });
+                const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedBudgetLibrary.id;
+                InvestmentService.exportInvestmentBudgets(id, this.hasScenario)
+                    .then((response: AxiosResponse) => {
+                        if (hasValue(response, 'data')) {
+                            const fileInfo: FileInfo = response.data as FileInfo;
+                            FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                        }
+                    });
+
             } else if (hasValue(result.file)) {
-                this.importInvestmentBudgetsFileAction({
+                const data: InvestmentBudgetFileImport = {
                     file: result.file,
                     overwriteBudgets: result.overwriteBudgets,
-                    libraryId: this.selectedBudgetLibrary.id,
-                    scenarioId: this.selectedScenarioId,
-                })
+                };
+
+                if (this.hasScenario) {
+                    this.importScenarioInvestmentBudgetsFileAction({
+                        ...data,
+                        id: this.selectedScenarioId,
+                    });
+                } else {
+                    this.importLibraryInvestmentBudgetsFileAction({
+                        ...data,
+                        id: this.selectedBudgetLibrary.id,
+                    });
+                }
+
             }
         }
     }
 
     onEditBudgetYearValue(year: number, budgetName: string, value: number) {
-        if (any(propEq('name', budgetName), this.selectedBudgetLibrary.budgets)) {
-            const budget: Budget = find(propEq('name', budgetName), this.selectedBudgetLibrary.budgets) as Budget;
+        if (any(propEq('name', budgetName), this.budgets)) {
+            const budget: Budget = find(propEq('name', budgetName), this.budgets) as Budget;
 
             if (any(propEq('year', year), budget.budgetAmounts)) {
                 const budgetAmount: BudgetAmount = find(propEq('year', year), budget.budgetAmounts) as BudgetAmount;
@@ -661,51 +655,50 @@ export default class InvestmentEditor extends Vue {
                             : 0,
                     }, budget.budgetAmounts);
 
-                this.selectedBudgetLibrary = {
-                    ...this.selectedBudgetLibrary,
-                    budgets: update(findIndex(propEq('id', budget.id), this.selectedBudgetLibrary.budgets),
-                        { ...budget }, this.selectedBudgetLibrary.budgets),
-                };
+                this.budgets = update(findIndex(propEq('id', budget.id), this.budgets), clone(budget), this.budgets);
             }
         }
     }
 
-    onUpsertInvestment(library: BudgetLibrary, scenarioId: string) {
-        this.createBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
+    onEditInvestmentPlan(property: string, value: any) {
+        this.investmentPlan = setItemPropertyValue(property, value, this.investmentPlan);
+    }
 
-        if (!isNil(library)) {
-            this.upsertInvestmentAction({
-                library: {
-                    ...library,
-                    budgets: library.budgets.map((budget: Budget) => ({
-                        ...budget,
-                        budgetAmounts: budget.budgetAmounts.map((budgetAmount: BudgetAmount) => ({
-                            ...budgetAmount,
-                            value: parseFloat(budgetAmount.value.toString().replace(/(\$*)(\,*)/g, '')),
-                        })),
-                    })),
-                },
+    onUpsertInvestment() {
+        this.selectedGridRows = [];
+
+        const investmentPlan: InvestmentPlan = clone(this.investmentPlan);
+
+        this.upsertInvestmentAction({
+            investment: {
+                scenarioBudgets: clone(this.budgets),
                 investmentPlan: {
-                    ...this.investmentPlan,
-                    minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
-                        ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                    ...investmentPlan,
+                    minimumProjectCostLimit: hasValue(investmentPlan.minimumProjectCostLimit)
+                        ? parseFloat(investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                         : 500000,
                 },
-                scenarioId: scenarioId,
-            });
-        }
+            },
+            scenarioId: this.selectedScenarioId,
+        })
+        .then(() => this.librarySelectItemValue = null);
+    }
+
+    onUpsertBudgetLibrary() {
+        this.selectedGridRows = [];
+
+        const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
+
+        this.upsertBudgetLibraryAction({ ...budgetLibrary, budgets: clone(this.budgets) });
     }
 
     onDiscardChanges() {
         this.librarySelectItemValue = null;
         setTimeout(() => {
-            this.investmentPlan = clone(this.stateInvestmentPlan);
-            setTimeout(() => {
-                if (this.selectedScenarioId !== this.uuidNIL &&
-                    hasAppliedLibrary(this.stateBudgetLibraries, this.selectedScenarioId)) {
-                    this.librarySelectItemValue = getAppliedLibraryId(this.stateBudgetLibraries, this.selectedScenarioId);
-                }
-            });
+            if (this.hasScenario) {
+                this.cloneStateInvestmentPlan();
+                this.budgets = clone(this.stateScenarioBudgets);
+            }
         });
     }
 
@@ -731,30 +724,27 @@ export default class InvestmentEditor extends Vue {
 
         if (submit) {
             this.librarySelectItemValue = null;
-            this.deleteBudgetLibraryAction({ libraryId: this.selectedBudgetLibrary.id });
+            this.deleteBudgetLibraryAction(this.selectedBudgetLibrary.id);
         }
     }
 
     disableCrudButton() {
+        const allBudgetDataIsValid: boolean = this.budgets.every((budget: Budget) => {
+            return budget.budgetAmounts
+                .every((budgetAmount: BudgetAmount) => this.rules['generalRules'].valueIsNotEmpty(budgetAmount.year) &&
+                    this.rules['generalRules'].valueIsNotEmpty(budgetAmount.value) === true);
+        });
+
         if (this.hasSelectedLibrary) {
-            const allBudgetLibraryDataIsValid: boolean = this.selectedBudgetLibrary.budgets.every((budget: Budget) => {
-                return budget.budgetAmounts
-                    .every((budgetAmount: BudgetAmount) => this.rules['generalRules'].valueIsNotEmpty(budgetAmount.year) &&
-                        this.rules['generalRules'].valueIsNotEmpty(budgetAmount.value) === true);
-            });
+            return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedBudgetLibrary.name) === true &&
+                allBudgetDataIsValid);
+        } else if (this.hasScenario) {
+            const allInvestmentPlanDataIsValid: boolean = this.rules['generalRules'].valueIsNotEmpty(this.investmentPlan.minimumProjectCostLimit) === true &&
+                this.rules['investmentRules'].minCostLimitGreaterThanZero(this.investmentPlan.minimumProjectCostLimit) === true &&
+                this.rules['generalRules'].valueIsNotEmpty(this.investmentPlan.inflationRatePercentage) === true &&
+                this.rules['generalRules'].valueIsWithinRange(this.investmentPlan.inflationRatePercentage, [0, 100]);
 
-            if (this.selectedScenarioId !== this.uuidNIL) {
-                const allInvestmentPlanDataIsValid: boolean = this.rules['generalRules'].valueIsNotEmpty(this.investmentPlan.minimumProjectCostLimit) === true &&
-                    this.rules['investmentRules'].minCostLimitGreaterThanZero(this.investmentPlan.minimumProjectCostLimit) === true &&
-                    this.rules['generalRules'].valueIsNotEmpty(this.investmentPlan.inflationRatePercentage) === true &&
-                    this.rules['generalRules'].valueIsWithinRange(this.investmentPlan.inflationRatePercentage, [0, 100]);
-
-                return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedBudgetLibrary.name) === true &&
-                    allBudgetLibraryDataIsValid && allInvestmentPlanDataIsValid);
-            } else {
-                return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedBudgetLibrary.name) === true &&
-                    allBudgetLibraryDataIsValid);
-            }
+            return !(allBudgetDataIsValid && allInvestmentPlanDataIsValid);
         }
 
         return true;

@@ -7,13 +7,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ISelectableTreatmentRepository
     {
-        void CreateTreatmentLibrary(string name, Guid simulationId);
+        void CreateScenarioSelectableTreatments(List<SelectableTreatment> selectableTreatments, Guid simulationId);
 
-        void CreateSelectableTreatments(List<SelectableTreatment> selectableTreatments, Guid simulationId);
+        void GetScenarioSelectableTreatments(Simulation simulation);
 
-        void GetSimulationTreatments(Simulation simulation);
-
-        List<TreatmentLibraryDTO> GetTreatmentLibrariesWithTreatments();
+        List<TreatmentLibraryDTO> GetTreatmentLibraries();
 
         void UpsertTreatmentLibrary(TreatmentLibraryDTO dto);
 
@@ -23,6 +21,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<TreatmentDTO> GetScenarioSelectableTreatments(Guid simulationId);
 
-        void UpsertOrDeleteScenarioSelectableTreatment(List<TreatmentDTO> scenarioSelectableTreatment, Guid simulationId);
+        void UpsertOrDeleteScenarioSelectableTreatment(List<TreatmentDTO> scenarioSelectableTreatments, Guid simulationId);
     }
 }

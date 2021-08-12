@@ -125,30 +125,30 @@ const actions = {
                     'addedOrUpdatedTargetConditionGoalLibraryMutator',
                     payload.library,
                 );
-                commit('selectedTargetConditionGoalLibraryMutator', payload.library.id);
+                commit(
+                    'selectedTargetConditionGoalLibraryMutator',
+                    payload.library.id,
+                );
                 dispatch('setSuccessMessage', { message: message });
             }
         });
     },
-    async getScenarioTargetConditionGoals(
-        {commit} : any,
-        scenarioId: string,
-    ){
-        await TargetConditionGoalService.getScenarioTargetConditionGoals(scenarioId).then(
-            (response: AxiosResponse) => {
-                if(hasValue(response, 'data')){
-                    commit(
-                        'scenarioTargetConditionGoalsMutator',
-                        response.data as TargetConditionGoal[],
-                    )
-                }
+    async getScenarioTargetConditionGoals({ commit }: any, scenarioId: string) {
+        await TargetConditionGoalService.getScenarioTargetConditionGoals(
+            scenarioId,
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                commit(
+                    'scenarioTargetConditionGoalsMutator',
+                    response.data as TargetConditionGoal[],
+                );
             }
-        )
+        });
     },
     async upsertScenarioTargetConditionGoals(
-        {dispatch, commit}: any,
-        payload: any
-    ){
+        { dispatch, commit }: any,
+        payload: any,
+    ) {
         await TargetConditionGoalService.upsertScenarioTargetConditionGoals(
             payload.scenarioTargetConditionGoals,
             payload.scenarioId,
@@ -165,7 +165,7 @@ const actions = {
                     message: 'Modified target condition goals',
                 });
             }
-        })
+        });
     },
     async deleteTargetConditionGoalLibrary(
         { dispatch, commit, state }: any,

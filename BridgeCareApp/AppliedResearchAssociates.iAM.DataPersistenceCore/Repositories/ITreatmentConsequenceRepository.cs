@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ITreatmentConsequenceRepository
     {
-        void CreateTreatmentConsequences(Dictionary<Guid, List<ConditionalTreatmentConsequence>> consequencesPerTreatmentId, string simulationName);
+        void CreateScenarioConditionalTreatmentConsequences(Dictionary<Guid, List<ConditionalTreatmentConsequence>> consequencesPerTreatmentId);
 
         void UpsertOrDeleteTreatmentConsequences(
             Dictionary<Guid, List<TreatmentConsequenceDTO>> treatmentConsequencePerTreatmentId, Guid libraryId);

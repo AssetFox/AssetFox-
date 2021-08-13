@@ -2,34 +2,37 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
+using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class TreatmentConsequenceRepository : ITreatmentConsequenceRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public TreatmentConsequenceRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+        public TreatmentConsequenceRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateTreatmentConsequences(Dictionary<Guid, List<ConditionalTreatmentConsequence>> consequencesPerTreatmentId, string simulationName)
+        public void CreateScenarioConditionalTreatmentConsequences(Dictionary<Guid, List<ConditionalTreatmentConsequence>> consequencesPerTreatmentId)
         {
-            var consequenceEntities = new List<ConditionalTreatmentConsequenceEntity>();
-            var equationEntityPerConsequenceEntityId = new Dictionary<Guid, EquationEntity>();
-            var consequenceEntityIdsPerExpression = new Dictionary<string, List<Guid>>();
+            var consequenceEntities = new List<ScenarioConditionalTreatmentConsequenceEntity>();
+            var equationEntities = new List<EquationEntity>();
+            var equationJoinEntities = new List<ScenarioConditionalTreatmentConsequenceEquationEntity>();
+            var criterionEntities = new List<CriterionLibraryEntity>();
+            var criterionJoinEntities = new List<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>();
 
             var allConsequences = consequencesPerTreatmentId.Values.SelectMany(_ => _).ToList();
-            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
+            var attributeEntities = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
             var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
             if (!allConsequences.All(_ => attributeNames.Contains(_.Attribute.Name)))
             {
@@ -46,51 +49,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             consequencesPerTreatmentId.Keys.ForEach(treatmentId =>
             {
-                var entities = consequencesPerTreatmentId[treatmentId].Select(_ =>
+                consequenceEntities.AddRange(consequencesPerTreatmentId[treatmentId].Select(_ =>
                     {
-                        var consequenceEntity = _.ToEntity(treatmentId,
+                        var consequenceEntity = _.ToScenarioEntity(treatmentId,
                             attributeEntities.Single(__ => __.Name == _.Attribute.Name).Id);
 
                         if (!_.Equation.ExpressionIsBlank)
                         {
-                            equationEntityPerConsequenceEntityId.Add(consequenceEntity.Id, _.Equation.ToEntity());
+                            var equationEntity = _.Equation.ToEntity();
+                            equationEntities.Add(equationEntity);
+                            equationJoinEntities.Add(new ScenarioConditionalTreatmentConsequenceEquationEntity
+                            {
+                                ScenarioConditionalTreatmentConsequenceId = _.Id, EquationId = equationEntity.Id
+                            });
                         }
 
                         if (!_.Criterion.ExpressionIsBlank)
                         {
-                            if (consequenceEntityIdsPerExpression.ContainsKey(_.Criterion.Expression))
+                            var criterionEntity = _.Criterion.ToEntity("");
+                            criterionEntity.IsSingleUse = true;
+                            criterionEntities.Add(criterionEntity);
+                            criterionJoinEntities.Add(new CriterionLibraryScenarioConditionalTreatmentConsequenceEntity
                             {
-                                consequenceEntityIdsPerExpression[_.Criterion.Expression].Add(consequenceEntity.Id);
-                            }
-                            else
-                            {
-                                consequenceEntityIdsPerExpression.Add(_.Criterion.Expression, new List<Guid>
-                                {
-                                    consequenceEntity.Id
-                                });
-                            }
+                                CriterionLibraryId = criterionEntity.Id, ScenarioConditionalTreatmentConsequenceId = _.Id
+                            });
                         }
 
                         return consequenceEntity;
-                    })
-                    .ToList();
-
-                consequenceEntities.AddRange(entities);
+                    }).ToList());
             });
 
             _unitOfWork.Context.AddAll(consequenceEntities);
-
-            if (equationEntityPerConsequenceEntityId.Values.Any())
-            {
-                _unitOfWork.EquationRepo.CreateEquations(equationEntityPerConsequenceEntityId,
-                    DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence);
-            }
-
-            if (consequenceEntityIdsPerExpression.Values.Any())
-            {
-                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(consequenceEntityIdsPerExpression,
-                    DataPersistenceConstants.CriterionLibraryJoinEntities.ConditionalTreatmentConsequence, simulationName);
-            }
+            _unitOfWork.Context.AddAll(equationEntities);
+            _unitOfWork.Context.AddAll(equationJoinEntities);
+            _unitOfWork.Context.AddAll(criterionEntities);
+            _unitOfWork.Context.AddAll(criterionJoinEntities);
         }
 
         public void UpsertOrDeleteTreatmentConsequences(Dictionary<Guid, List<TreatmentConsequenceDTO>> treatmentConsequencePerTreatmentId,
@@ -113,14 +106,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     $"No attributes found having the names: {string.Join(", ", missingAttributes)}.");
             }
 
-            var conditionalTreatmentConsequenceEntities = treatmentConsequencePerTreatmentId.SelectMany(_ =>
-                    _.Value.Select(__ =>
-                        __.ToLibraryEntity(_.Key, attributeEntities.Single(___ => ___.Name == __.Attribute).Id)))
+            var conditionalTreatmentConsequenceEntities = treatmentConsequencePerTreatmentId
+                .SelectMany(_ => _.Value.Select(consequence => consequence
+                    .ToLibraryEntity(_.Key, attributeEntities
+                        .Single(attribute => attribute.Name == consequence.Attribute).Id)))
                 .ToList();
 
             var entityIds = conditionalTreatmentConsequenceEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfWork.Context.TreatmentConsequence
+            var existingEntityIds = _unitOfWork.Context.TreatmentConsequence.AsNoTracking()
                 .Where(_ => _.SelectableTreatment.TreatmentLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
@@ -136,29 +130,58 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (treatmentConsequences.Any(_ =>
                 _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression)))
             {
-                var equationEntitiesPerJoinEntityId = treatmentConsequences
+                var equationJoins = new List<ConditionalTreatmentConsequenceEquationEntity>();
+
+                var equations = treatmentConsequences
                     .Where(_ => _.Equation?.Id != null && _.Equation?.Id != Guid.Empty &&
                                 !string.IsNullOrEmpty(_.Equation.Expression))
-                    .ToDictionary(_ => _.Id, _ => _.Equation.ToEntity());
+                    .Select(consequence =>
+                    {
+                        var equation = new EquationEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            Expression = consequence.Equation.Expression,
+                        };
+                        equationJoins.Add(new ConditionalTreatmentConsequenceEquationEntity
+                        {
+                            EquationId = equation.Id,
+                            ConditionalTreatmentConsequenceId = consequence.Id
+                        });
+                        return equation;
+                    }).ToList();
 
-                _unitOfWork.EquationRepo.CreateEquations(equationEntitiesPerJoinEntityId,
-                    DataPersistenceConstants.EquationJoinEntities.TreatmentConsequence);
+                _unitOfWork.Context.AddAll(equations, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(equationJoins, _unitOfWork.UserEntity?.Id);
             }
 
             if (treatmentConsequences.Any(_ =>
                 _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
                 !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
             {
-                var criterionLibraryJoinsToAdd = treatmentConsequences
-                    .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)).Select(_ =>
-                        new CriterionLibraryConditionalTreatmentConsequenceEntity
-                        {
-                            CriterionLibraryId = _.CriterionLibrary.Id,
-                            ConditionalTreatmentConsequenceId = _.Id
-                        }).ToList();
+                var criterionJoins = new List<CriterionLibraryConditionalTreatmentConsequenceEntity>();
 
-                _unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, _unitOfWork.UserEntity?.Id);
+                var criteria = treatmentConsequences
+                    .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary.Id != Guid.Empty &&
+                                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
+                    .Select(treatment =>
+                    {
+                        var criterion = new CriterionLibraryEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            MergedCriteriaExpression = treatment.CriterionLibrary.MergedCriteriaExpression,
+                            Name = $"{treatment} Criterion",
+                            IsSingleUse = true
+                        };
+                        criterionJoins.Add(new CriterionLibraryConditionalTreatmentConsequenceEntity
+                        {
+                            CriterionLibraryId = criterion.Id,
+                            ConditionalTreatmentConsequenceId = treatment.Id
+                        });
+                        return criterion;
+                    }).ToList();
+
+                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
         }
 
@@ -167,7 +190,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var treatmentConsequences = treatmentConsequencePerTreatmentId.SelectMany(_ => _.Value.ToList()).ToList();
 
-            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
+            var attributeEntities = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
             var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
             if (!treatmentConsequences.All(_ => attributeNames.Contains(_.Attribute)))
             {
@@ -182,9 +205,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     $"No attributes found having the names: {string.Join(", ", missingAttributes)}.");
             }
 
-            var scenarioConditionalTreatmentConsequenceEntities = treatmentConsequencePerTreatmentId.SelectMany(_ =>
-                    _.Value.Select(__ =>
-                        __.ToScenarioEntity(_.Key, attributeEntities.Single(___ => ___.Name == __.Attribute).Id)))
+            var scenarioConditionalTreatmentConsequenceEntities = treatmentConsequencePerTreatmentId
+                .SelectMany(_ => _.Value.Select(consequence => consequence
+                    .ToScenarioEntity(_.Key, attributeEntities
+                        .Single(attribute => attribute.Name == consequence.Attribute).Id)))
                 .ToList();
 
             var entityIds = scenarioConditionalTreatmentConsequenceEntities.Select(_ => _.Id).ToList();
@@ -205,59 +229,58 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (treatmentConsequences.Any(_ =>
                 _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression)))
             {
-                var equationEntities = new List<EquationEntity>();
-                var equationJoinEntities = new List<ScenarioConditionalTreatmentConsequenceEquationEntity>();
+                var equationJoins = new List<ScenarioConditionalTreatmentConsequenceEquationEntity>();
 
-                treatmentConsequences.Where(_ =>
-                _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression))
-                    .ForEach(consequence =>
+                var equations = treatmentConsequences
+                    .Where(_ => _.Equation?.Id != null && _.Equation?.Id != Guid.Empty &&
+                                !string.IsNullOrEmpty(_.Equation.Expression))
+                    .Select(consequence =>
                     {
                         var equationEntity = new EquationEntity
                         {
                             Id = Guid.NewGuid(),
                             Expression = consequence.Equation.Expression,
                         };
-                        equationEntities.Add(equationEntity);
-                        equationJoinEntities.Add(new ScenarioConditionalTreatmentConsequenceEquationEntity
+                        equationJoins.Add(new ScenarioConditionalTreatmentConsequenceEquationEntity
                         {
                             EquationId = equationEntity.Id,
                             ScenarioConditionalTreatmentConsequenceId = consequence.Id
                         });
-                    });
+                        return equationEntity;
+                    }).ToList();
 
-                _unitOfWork.Context.AddAll(equationEntities, _unitOfWork.UserEntity?.Id);
-                _unitOfWork.Context.AddAll(equationJoinEntities, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(equations, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(equationJoins, _unitOfWork.UserEntity?.Id);
             }
 
             if (treatmentConsequences.Any(_ =>
                 _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
                 !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
             {
-                var criterionLibraryEntities = new List<CriterionLibraryEntity>();
-                var criterionLibraryJoinEntities = new List<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>();
+                var criterionJoins = new List<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>();
 
-                treatmentConsequences
+                var criteria = treatmentConsequences
                     .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary.Id != Guid.Empty &&
                                 !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
-                    .ForEach(treatment =>
+                    .Select(treatment =>
                     {
-                        var criterionLibraryEntity = new CriterionLibraryEntity
+                        var criterion = new CriterionLibraryEntity
                         {
                             Id = Guid.NewGuid(),
                             MergedCriteriaExpression = treatment.CriterionLibrary.MergedCriteriaExpression,
                             Name = $"{treatment} Criterion",
                             IsSingleUse = true
                         };
-                        criterionLibraryEntities.Add(criterionLibraryEntity);
-                        criterionLibraryJoinEntities.Add(new CriterionLibraryScenarioConditionalTreatmentConsequenceEntity
+                        criterionJoins.Add(new CriterionLibraryScenarioConditionalTreatmentConsequenceEntity
                         {
-                            CriterionLibraryId = criterionLibraryEntity.Id,
+                            CriterionLibraryId = criterion.Id,
                             ScenarioConditionalTreatmentConsequenceId = treatment.Id
                         });
-                    });
+                        return criterion;
+                    }).ToList();
 
-                _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
-                _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
         }
     }

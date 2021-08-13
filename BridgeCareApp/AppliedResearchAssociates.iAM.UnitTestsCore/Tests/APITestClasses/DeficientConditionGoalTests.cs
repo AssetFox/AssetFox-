@@ -5,7 +5,7 @@ using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;

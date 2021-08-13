@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 
@@ -12,9 +13,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class BudgetPercentagePairRepository : IBudgetPercentagePairRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public BudgetPercentagePairRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        public BudgetPercentagePairRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateBudgetPercentagePairs(Dictionary<Guid, List<(Guid budgetId, BudgetPercentagePair percentagePair)>> percentagePairPerBudgetIdPerPriorityId)
         {

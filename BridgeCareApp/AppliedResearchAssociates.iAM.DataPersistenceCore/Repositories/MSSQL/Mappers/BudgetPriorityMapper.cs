@@ -54,9 +54,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 BudgetPriorities = entity.BudgetPriorities.Any()
                     ? entity.BudgetPriorities.Select(_ => _.ToDto()).ToList()
                     : new List<BudgetPriorityDTO>(),
-                AppliedScenarioIds = entity.BudgetPriorityLibrarySimulationJoins.Any()
-                    ? entity.BudgetPriorityLibrarySimulationJoins.Select(_ => _.SimulationId).ToList()
-                    : new List<Guid>()
             };
 
         public static void CreateBudgetPriority(this BudgetPriorityEntity entity, Simulation simulation)

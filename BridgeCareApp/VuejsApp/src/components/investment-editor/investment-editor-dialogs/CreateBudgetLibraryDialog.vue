@@ -63,7 +63,7 @@ export default class CreateBudgetLibraryDialog extends Vue {
 
   onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newBudgetLibrary, this.dialogData.scenarioId);
+      this.$emit('submit', this.newBudgetLibrary);
     } else {
       this.$emit('submit', null);
     }

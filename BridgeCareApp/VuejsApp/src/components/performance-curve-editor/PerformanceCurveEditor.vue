@@ -155,19 +155,19 @@
         </v-flex>
         <v-flex xs12>
             <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn :disabled='disableCrudButton()'
+                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
                        @click='onUpsertScenarioPerformanceCurves(selectedScenarioId)'
                        class='ara-blue-bg white--text'
                        v-show='hasScenario'>
                     Save
                 </v-btn>
-                <v-btn :disabled='disableCrudButton()'
+                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
                        @click='onUpsertPerformanceCurveLibrary(selectedPerformanceCurveLibrary, uuidNIL)'
                        class='ara-blue-bg white--text'
                        v-show='!hasScenario'>
                     Update Library
                 </v-btn>
-                <v-btn :disabled='disableCrudButton()' @click='onShowCreatePerformanceCurveLibraryDialog(true)'
+                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges' @click='onShowCreatePerformanceCurveLibraryDialog(true)'
                        class='ara-blue-bg white--text'>
                     Create as New Library
                 </v-btn>

@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +15,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AnalysisMethodRepository : IAnalysisMethodRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public AnalysisMethodRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+        public AnalysisMethodRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -24,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
             if (analysisMethod.Weighting != null && !string.IsNullOrEmpty(analysisMethod.Weighting.Name) &&
@@ -109,7 +110,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             _unitOfWork.Context.AnalysisMethod
@@ -166,7 +167,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             if (!_unitOfWork.Context.AnalysisMethod.Any(_ => _.SimulationId == simulationId))
@@ -198,7 +199,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             AttributeEntity attributeEntity = null;

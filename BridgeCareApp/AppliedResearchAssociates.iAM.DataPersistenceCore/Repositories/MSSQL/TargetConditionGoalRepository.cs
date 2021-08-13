@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -15,9 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class TargetConditionGoalRepository : ITargetConditionGoalRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public TargetConditionGoalRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+        public TargetConditionGoalRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateTargetConditionGoalLibrary(string name)
@@ -31,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found");
+                throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation
@@ -118,7 +119,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.TargetConditionGoalLibrary.Any(_ => _.Id == libraryId))
             {
-                throw new RowNotInTableException($"No target condition goal library found having id {libraryId}.");
+                throw new RowNotInTableException("The specified target condition goal library was not found.");
             }
 
             if (targetConditionGoals.Any(_ => string.IsNullOrEmpty(_.Attribute)))

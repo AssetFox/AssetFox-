@@ -9,8 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
     {
         public static CommittedProjectEntity ToEntity(this CommittedProject domain, SimulationEntity simulation)
         {
-            var budget =
-                simulation.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.Single(_ => _.Name == domain.Budget.Name);
+            var budget = simulation.Budgets.Single(_ => _.Name == domain.Budget.Name);
 
             var maintainableAsset = simulation.Network.MaintainableAssets.Single(_ =>
                 _.Id == domain.Section.Id);
@@ -19,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = domain.Id,
                 SimulationId = simulation.Id,
-                BudgetId = budget.Id,
+                ScenarioBudgetId = budget.Id,
                 MaintainableAssetId = maintainableAsset.Id,
                 Name = domain.Name,
                 ShadowForAnyTreatment = domain.ShadowForAnyTreatment,
@@ -36,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             var facility = simulation.Network.Facilities
                 .FirstOrDefault(_ => _.Name == facilitySectionNameSplit[0]);
-            
+
             if (facility != null)
             {
                 var section = facility.Sections.Single(_ =>
@@ -48,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 committedProject.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
                 committedProject.ShadowForSameTreatment = entity.ShadowForSameTreatment;
                 committedProject.Cost = entity.Cost;
-                committedProject.Budget = simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.Budget.Name);
+                committedProject.Budget = simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name);
 
                 if (entity.CommittedProjectConsequences.Any())
                 {

@@ -6,9 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Http;
@@ -26,12 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private readonly CommittedProjectService _service;
         private CommittedProjectController _controller;
 
-        private static readonly Guid InvestmentPlanId = Guid.Parse("f6af0c20-da73-4bec-8318-e904c53b4fec");
-        private static readonly Guid BudgetLibraryId = Guid.Parse("6e99c853-a881-4953-bc9c-38632949f70c");
-        private static readonly Guid BudgetId = Guid.Parse("62cad814-a475-4ee0-8810-09f28bd282a8");
-        private static readonly Guid MaintainableAssetId = Guid.Parse("0bd797b0-a104-4fc3-9b16-479f87e89b4a");
-        private static readonly Guid MaintainableAssetLocationId = Guid.Parse("74ff59a1-7450-4f61-9930-d687feb13ec7");
-        private static readonly Guid CommittedProjectId = Guid.Parse("06d74235-0970-4d7c-82a4-843ff73ad34a");
+        private CommittedProjectEntity _testProject;
 
         private static readonly List<string> ConsequenceAttributeNames = new List<string>
         {
@@ -52,92 +49,68 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
             _service = new CommittedProjectService(_testHelper.UnitOfWork);
+
+            CreateCommittedProjectTestData();
         }
 
-        private InvestmentPlanEntity TestInvestmentPlan { get; } = new InvestmentPlanEntity
+        private void CreateCommittedProjectTestData()
         {
-            Id = InvestmentPlanId,
-            FirstYearOfAnalysisPeriod = 2020,
-            InflationRatePercentage = 0,
-            MinimumProjectCostLimit = 0,
-            NumberOfYearsInAnalysisPeriod = 1
-        };
-
-        private BudgetLibraryEntity TestBudgetLibrary { get; } = new BudgetLibraryEntity
-        {
-            Id = BudgetLibraryId,
-            Name = "Test Name"
-        };
-
-        private BudgetEntity TestBudget { get; } = new BudgetEntity
-        {
-            Id = BudgetId,
-            BudgetLibraryId = BudgetLibraryId,
-            Name = "Test Name"
-        };
-
-        private MaintainableAssetEntity TestAsset { get; } = new MaintainableAssetEntity
-        {
-            Id = MaintainableAssetId, SpatialWeighting = "[DECK_AREA]"
-        };
-
-        private MaintainableAssetLocationEntity TestAssetLocation { get; } = new MaintainableAssetLocationEntity
-        {
-            Id = MaintainableAssetLocationId,
-            LocationIdentifier = "1-2",
-            MaintainableAssetId = MaintainableAssetId,
-            Discriminator = "SectionLocation"
-        };
-
-        private CommittedProjectEntity TestProject { get; } = new CommittedProjectEntity
-        {
-            Id = CommittedProjectId,
-            BudgetId = BudgetId,
-            MaintainableAssetId = MaintainableAssetId,
-            Name = "Rehabilitation",
-            Year = 2021,
-            ShadowForAnyTreatment = 1,
-            ShadowForSameTreatment = 2,
-            Cost = 250000
-        };
-
-        private void AddTestData()
-        {
-            TestInvestmentPlan.SimulationId = _testHelper.TestSimulation.Id;
-            _testHelper.UnitOfWork.Context.AddEntity(TestInvestmentPlan);
-            _testHelper.UnitOfWork.Context.AddEntity(TestBudgetLibrary);
-            _testHelper.UnitOfWork.Context.AddEntity(TestBudget);
-            TestAsset.NetworkId = _testHelper.TestNetwork.Id;
-            _testHelper.UnitOfWork.Context.AddEntity(TestAsset);
-            _testHelper.UnitOfWork.Context.AddEntity(TestAssetLocation);
-        }
-
-        private void SetupForImport()
-        {
-            AddTestData();
-            _testHelper.UnitOfWork.Context.AddEntity(new BudgetLibrarySimulationEntity
+            _testHelper.UnitOfWork.Context.AddEntity(new InvestmentPlanEntity
             {
-                SimulationId = _testHelper.TestSimulation.Id, BudgetLibraryId = BudgetLibraryId
+                Id = Guid.NewGuid(),
+                FirstYearOfAnalysisPeriod = 2020,
+                InflationRatePercentage = 0,
+                MinimumProjectCostLimit = 0,
+                NumberOfYearsInAnalysisPeriod = 1,
+                SimulationId = _testHelper.TestSimulation.Id
             });
-            CreateRequestWithFormData();
-        }
 
-        private void SetupForExport()
-        {
-            AddTestData();
-            TestProject.SimulationId = _testHelper.TestSimulation.Id;
-            _testHelper.UnitOfWork.Context.AddEntity(TestProject);
+
             var attributeIdsPerAttributeName =
                 _testHelper.UnitOfWork.Context.Attribute.Where(_ => ConsequenceAttributeNames.Contains(_.Name))
                     .ToDictionary(_ => _.Name, _ => _.Id);
-            var consequences = ConsequenceAttributeNames.Select(attributeName => new CommittedProjectConsequenceEntity
+
+            _testProject = new CommittedProjectEntity
             {
                 Id = Guid.NewGuid(),
-                CommittedProjectId = CommittedProjectId,
-                AttributeId = attributeIdsPerAttributeName[attributeName],
-                ChangeValue = "1"
-            }).ToList();
-            _testHelper.UnitOfWork.Context.AddAll(consequences);
+                ScenarioBudget =
+                    new ScenarioBudgetEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        SimulationId = _testHelper.TestSimulation.Id,
+                        Name = "Test Name"
+                    },
+                MaintainableAsset =
+                    new MaintainableAssetEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        NetworkId = _testHelper.TestNetwork.Id,
+                        SpatialWeighting = "[DECK_AREA]",
+                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            LocationIdentifier = "1-2",
+                            Discriminator = "SectionLocation"
+                        }
+                    },
+                Name = "Rehabilitation",
+                Year = 2021,
+                ShadowForAnyTreatment = 1,
+                ShadowForSameTreatment = 2,
+                Cost = 250000,
+                SimulationId = _testHelper.TestSimulation.Id,
+                CommittedProjectConsequences = ConsequenceAttributeNames.Select(attributeName =>
+                    new CommittedProjectConsequenceEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = attributeIdsPerAttributeName[attributeName],
+                        ChangeValue = "1"
+                    }).ToList()
+            };
+            _testHelper.UnitOfWork.Context.AddEntity(_testProject);
+
+
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void CreateRequestWithFormData()
@@ -203,45 +176,43 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private void AssertCommittedProjectsData()
         {
             var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    var committedProjects = _testHelper.UnitOfWork.Context.CommittedProject
-                        .Select(project => new CommittedProjectEntity
-                        {
-                            Name = project.Name,
-                            SimulationId = project.SimulationId,
-                            BudgetId = project.BudgetId,
-                            MaintainableAssetId = project.MaintainableAssetId,
-                            Cost = project.Cost,
-                            Year = project.Year,
-                            ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-                            ShadowForSameTreatment = project.ShadowForSameTreatment,
-                            CommittedProjectConsequences = project.CommittedProjectConsequences
-                                .Select(consequence => new CommittedProjectConsequenceEntity
-                                {
-                                    Attribute = new AttributeEntity {Name = consequence.Attribute.Name},
-                                    ChangeValue = consequence.ChangeValue
-                                }).ToList()
-                        }).ToList();
-                    Assert.Single(committedProjects);
-                    Assert.Equal("Rehabilitation", committedProjects[0].Name);
-                    Assert.Equal(250000, committedProjects[0].Cost);
-                    Assert.Equal(2021, committedProjects[0].Year);
-                    Assert.Equal(1, committedProjects[0].ShadowForAnyTreatment);
-                    Assert.Equal(2, committedProjects[0].ShadowForSameTreatment);
-                    Assert.Equal(_testHelper.TestSimulation.Id, committedProjects[0].SimulationId);
-                    Assert.Equal(BudgetId, committedProjects[0].BudgetId);
-                    Assert.Equal(MaintainableAssetId, committedProjects[0].MaintainableAssetId);
-
-                    var consequences = committedProjects[0].CommittedProjectConsequences.ToList();
-                    Assert.Equal(8, consequences.Count);
-                    ConsequenceAttributeNames.ForEach(attributeName =>
+            timer.Elapsed += delegate
+            {
+                var committedProjects = _testHelper.UnitOfWork.Context.CommittedProject
+                    .Select(project => new CommittedProjectEntity
                     {
-                        var consequence = consequences.SingleOrDefault(_ => _.Attribute.Name == attributeName);
-                        Assert.NotNull(consequence);
-                        Assert.Equal("1", consequence.ChangeValue);
-                    });
-                };
+                        Name = project.Name,
+                        SimulationId = project.SimulationId,
+                        ScenarioBudgetId = project.ScenarioBudgetId,
+                        MaintainableAssetId = project.MaintainableAssetId,
+                        Cost = project.Cost,
+                        Year = project.Year,
+                        ShadowForAnyTreatment = project.ShadowForAnyTreatment,
+                        ShadowForSameTreatment = project.ShadowForSameTreatment,
+                        CommittedProjectConsequences = project.CommittedProjectConsequences
+                            .Select(consequence => new CommittedProjectConsequenceEntity
+                            {
+                                Attribute = new AttributeEntity {Name = consequence.Attribute.Name},
+                                ChangeValue = consequence.ChangeValue
+                            }).ToList()
+                    }).ToList();
+                Assert.Single(committedProjects);
+                Assert.Equal("Rehabilitation", committedProjects[0].Name);
+                Assert.Equal(250000, committedProjects[0].Cost);
+                Assert.Equal(2021, committedProjects[0].Year);
+                Assert.Equal(1, committedProjects[0].ShadowForAnyTreatment);
+                Assert.Equal(2, committedProjects[0].ShadowForSameTreatment);
+                Assert.Equal(_testHelper.TestSimulation.Id, committedProjects[0].SimulationId);
+
+                var consequences = committedProjects[0].CommittedProjectConsequences.ToList();
+                Assert.Equal(8, consequences.Count);
+                ConsequenceAttributeNames.ForEach(attributeName =>
+                {
+                    var consequence = consequences.SingleOrDefault(_ => _.Attribute.Name == attributeName);
+                    Assert.NotNull(consequence);
+                    Assert.Equal("1", consequence.ChangeValue);
+                });
+            };
         }
 
         [Fact]
@@ -276,7 +247,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
-                SetupForImport();
+                CreateRequestWithFormData();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
@@ -354,7 +325,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
-                SetupForImport();
+                CreateRequestWithFormData();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityNotAuthorized.Object,
                     _testHelper.UnitOfWork,
@@ -406,7 +377,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
-                SetupForImport();
+                CreateRequestWithFormData();
                 _controller = new CommittedProjectController(_service,
                     _testHelper.MockEsecSecurityAuthorized.Object,
                     _testHelper.UnitOfWork,
@@ -439,7 +410,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     _testHelper.UnitOfWork,
                     _testHelper.MockHubService.Object,
                     _testHelper.MockHttpContextAccessor.Object);
-                SetupForExport();
 
                 // Act
                 var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
@@ -479,7 +449,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     _testHelper.UnitOfWork,
                     _testHelper.MockHubService.Object,
                     _testHelper.MockHttpContextAccessor.Object);
-                SetupForExport();
 
                 // Act
                 await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
@@ -494,7 +463,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Assert.Empty(committedProjects);
 
                     var consequences = _testHelper.UnitOfWork.Context.CommittedProjectConsequence
-                        .Where(_ => _.CommittedProjectId == CommittedProjectId)
+                        .Where(_ => _.CommittedProjectId == _testProject.Id)
                         .ToList();
                     Assert.Empty(consequences);
                 };

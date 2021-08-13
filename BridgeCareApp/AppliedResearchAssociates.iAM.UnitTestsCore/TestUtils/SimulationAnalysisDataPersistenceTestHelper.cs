@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -13,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MoreLinq;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class SimulationAnalysisDataPersistenceTestHelper : TestHelper
     {
@@ -47,8 +45,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
             StandAloneSimulation = network.Simulations.First();
             UnitOfWorkForAnalysis.InvestmentPlanRepo.GetSimulationInvestmentPlan(StandAloneSimulation);
             UnitOfWorkForAnalysis.AnalysisMethodRepo.GetSimulationAnalysisMethod(StandAloneSimulation);
-            UnitOfWorkForAnalysis.PerformanceCurveRepo.SimulationPerformanceCurves(StandAloneSimulation);
-            UnitOfWorkForAnalysis.SelectableTreatmentRepo.GetSimulationTreatments(StandAloneSimulation);
+            UnitOfWorkForAnalysis.PerformanceCurveRepo.GetScenarioPerformanceCurves(StandAloneSimulation);
+            UnitOfWorkForAnalysis.SelectableTreatmentRepo.GetScenarioSelectableTreatments(StandAloneSimulation);
 
             StandAloneSimulation.Network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
         }

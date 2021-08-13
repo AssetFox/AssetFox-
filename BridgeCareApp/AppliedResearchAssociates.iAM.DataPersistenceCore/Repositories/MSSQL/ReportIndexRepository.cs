@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class ReportIndexRepository : IReportIndexRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
+        private readonly UnitOfDataPersistenceWork _unitOfDataPersistenceWork;
 
-        public ReportIndexRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfDataPersistenceWork)
+        public ReportIndexRepository(UnitOfDataPersistenceWork unitOfDataPersistenceWork)
         {
             _unitOfDataPersistenceWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
         }
@@ -20,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Ensure required fields are present
             if (report.Id == Guid.Empty || String.IsNullOrEmpty(report.ReportTypeName))
             {
-                throw new ArgumentException($"Report does not have required values");
+                throw new ArgumentException("Report does not have required values");
             }
 
             // Remove the old report if it exists

@@ -69,7 +69,7 @@ namespace BridgeCareCore.Services
                         worksheet.Cells[row, column++].Value = project.Year;
                         worksheet.Cells[row, column++].Value = project.ShadowForAnyTreatment;
                         worksheet.Cells[row, column++].Value = project.ShadowForSameTreatment;
-                        worksheet.Cells[row, column++].Value = project.Budget.Name;
+                        worksheet.Cells[row, column++].Value = project.ScenarioBudget.Name;
                         worksheet.Cells[row, column++].Value = project.Cost;
                         worksheet.Cells[row, column++].Value = string.Empty; // AREA
                         project.CommittedProjectConsequences.OrderBy(_ => _.Attribute.Name).ForEach(consequence =>
@@ -118,37 +118,14 @@ namespace BridgeCareCore.Services
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException($"No simulation was found for the given scenario.");
             }
 
             return _unitOfWork.Context.Simulation
                 .Include(_ => _.InvestmentPlan)
-                .Include(_ => _.BudgetLibrarySimulationJoin)
-                .ThenInclude(_ => _.BudgetLibrary)
-                .ThenInclude(_ => _.Budgets)
-                .ThenInclude(_ => _.BudgetAmounts)
+                .Include(_ => _.Budgets)
+                .ThenInclude(_ => _.ScenarioBudgetAmounts)
                 .Single(_ => _.Id == simulationId);
-        }
-
-        /**
-         * Validates a SimulationEntity's data for a Committed Project Import
-         */
-        private void ValidateSimulationEntityForCommittedProjectImport(SimulationEntity simulationEntity)
-        {
-            if (simulationEntity.InvestmentPlan == null)
-            {
-                throw new RowNotInTableException("Simulation has no investment plan.");
-            }
-
-            if (simulationEntity.BudgetLibrarySimulationJoin == null)
-            {
-                throw new RowNotInTableException("Simulation has no applied budget library.");
-            }
-
-            if (!simulationEntity.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.Any())
-            {
-                throw new RowNotInTableException("Simulation applied budget library has no budgets.");
-            }
         }
 
         /**
@@ -202,7 +179,16 @@ namespace BridgeCareCore.Services
             ExcelPackage excelPackage, bool applyNoTreatment)
         {
             var simulationEntity = GetSimulationEntityForCommittedProjectImport(simulationId);
-            ValidateSimulationEntityForCommittedProjectImport(simulationEntity);
+
+            if (simulationEntity.InvestmentPlan == null)
+            {
+                throw new RowNotInTableException("Simulation has no investment plan.");
+            }
+
+            if (!simulationEntity.Budgets.Any())
+            {
+                throw new RowNotInTableException("Simulation has no budgets.");
+            }
 
             var worksheet = excelPackage.Workbook.Worksheets[0];
             var end = worksheet.Dimension.End;
@@ -233,21 +219,19 @@ namespace BridgeCareCore.Services
 
                 var budgetName = worksheet.GetCellValue<string>(row, 7);
 
-                if (simulationEntity.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.All(
-                    _ => _.Name != budgetName))
+                if (simulationEntity.Budgets.All(_ => _.Name != budgetName))
                 {
                     throw new RowNotInTableException(
                         $"Budget {budgetName} does not exist in the applied budget library.");
                 }
 
-                var budgetEntity = simulationEntity.BudgetLibrarySimulationJoin.BudgetLibrary.Budgets.Single(
-                    _ => _.Name == budgetName);
+                var budgetEntity = simulationEntity.Budgets.Single(_ => _.Name == budgetName);
 
                 var project = new CommittedProjectEntity
                 {
                     Id = Guid.NewGuid(),
                     SimulationId = simulationEntity.Id,
-                    BudgetId = budgetEntity.Id,
+                    ScenarioBudgetId = budgetEntity.Id,
                     MaintainableAssetId = maintainableAssetIdsPerLocationIdentifier[locationIdentifier],
                     Name = worksheet.GetCellValue<string>(row, 3),
                     Year = projectYear,
@@ -292,7 +276,7 @@ namespace BridgeCareCore.Services
                         {
                             Id = noTreatmentProjectId,
                             SimulationId = project.SimulationId,
-                            BudgetId = project.BudgetId,
+                            ScenarioBudgetId = project.ScenarioBudgetId,
                             MaintainableAssetId = project.MaintainableAssetId,
                             Name = NoTreatment,
                             Year = year,

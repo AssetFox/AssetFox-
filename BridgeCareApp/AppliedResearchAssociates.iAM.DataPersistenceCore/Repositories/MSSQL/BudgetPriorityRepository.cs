@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -19,24 +22,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public BudgetPriorityRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateBudgetPriorityLibrary(string name, Guid simulationId)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException("No simulation found for given scenario.");
-            }
-
-            var budgetPriorityLibraryEntity = new BudgetPriorityLibraryEntity { Id = Guid.NewGuid(), Name = name };
-
-            _unitOfWork.Context.AddEntity(budgetPriorityLibraryEntity);
-
-            _unitOfWork.Context.AddEntity(new BudgetPriorityLibrarySimulationEntity
-            {
-                BudgetPriorityLibraryId = budgetPriorityLibraryEntity.Id,
-                SimulationId = simulationId
-            });
-        }
-
         public void CreateBudgetPriorities(List<BudgetPriority> budgetPriorities, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -44,50 +29,60 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
-            var simulationEntity = _unitOfWork.Context.Simulation
-                .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
+            var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
                 .Single(_ => _.Id == simulationId);
 
-            if (simulationEntity.BudgetPriorityLibrarySimulationJoin == null)
-            {
-                throw new RowNotInTableException($"No budget priority library found for simulation having id {simulationId}");
-            }
-
             var budgetPriorityEntities = budgetPriorities
-                .Select(_ => _.ToEntity(simulationEntity.BudgetPriorityLibrarySimulationJoin.BudgetPriorityLibraryId))
+                .Select(_ => _.ToScenarioEntity(simulationId))
                 .ToList();
 
             _unitOfWork.Context.AddAll(budgetPriorityEntities);
 
-            if (budgetPriorities.Any(_ => !_.Criterion.ExpressionIsBlank))
-            {
-                var priorityIdsPerExpression = budgetPriorities
-                    .Where(_ => !_.Criterion.ExpressionIsBlank)
-                    .GroupBy(_ => _.Criterion.Expression, _ => _)
-                    .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
-
-                _unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(priorityIdsPerExpression,
-                    DataPersistenceConstants.CriterionLibraryJoinEntities.BudgetPriority, simulationEntity.Name);
-            }
-
             if (budgetPriorities.Any(_ => _.BudgetPercentagePairs.Any()))
             {
-                var percentagePairPerBudgetIdPerPriorityId = budgetPriorities
-                    .Where(_ => _.BudgetPercentagePairs.Any())
-                    .ToDictionary(_ => _.Id, _ => _.BudgetPercentagePairs.Select(__ => (__.Budget.Id, __)).ToList());
-
-                _unitOfWork.BudgetPercentagePairRepo.CreateBudgetPercentagePairs(percentagePairPerBudgetIdPerPriorityId);
+                var budgetPercentagePairEntities = budgetPriorities
+                    .SelectMany(_ => _.BudgetPercentagePairs.Select(pair => pair.ToEntity(_.Id, pair.Budget.Id)))
+                    .ToList();
+                _unitOfWork.Context.AddAll(budgetPercentagePairEntities);
             }
+
+            if (budgetPriorities.Any(_ => !_.Criterion.ExpressionIsBlank))
+            {
+                var criterionJoins = new List<CriterionLibraryScenarioBudgetPriorityEntity>();
+
+                var criteria = budgetPriorities.Where(_ => !_.Criterion.ExpressionIsBlank)
+                    .Select(priority =>
+                    {
+                        var criterion = new CriterionLibraryEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            MergedCriteriaExpression = priority.Criterion.Expression,
+                            Name = $"{simulationEntity.Name} Priority {priority.Year}-{priority.PriorityLevel} Criterion",
+                            IsSingleUse = true
+                        };
+                        criterionJoins.Add(new CriterionLibraryScenarioBudgetPriorityEntity
+                        {
+                            CriterionLibraryId = criterion.Id, ScenarioBudgetPriorityId = priority.Id
+                        });
+                        return criterion;
+                    }).ToList();
+
+                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
+            }
+
+            // Update last modified date
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
-        public List<BudgetPriorityLibraryDTO> BudgetPriorityLibrariesWithBudgetPriorities()
+        public List<BudgetPriorityLibraryDTO> GetBudgetPriorityLibraries()
         {
             if (!_unitOfWork.Context.BudgetPriorityLibrary.Any())
             {
                 return new List<BudgetPriorityLibraryDTO>();
             }
 
-            return _unitOfWork.Context.BudgetPriorityLibrary
+            return _unitOfWork.Context.BudgetPriorityLibrary.AsNoTracking()
                 .Include(_ => _.BudgetPriorities)
                 .ThenInclude(_ => _.CriterionLibraryBudgetPriorityJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
@@ -95,28 +90,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto, Guid simulationId)
-        {
-            var budgetPriorityLibraryEntity = dto.ToEntity();
-
-            _unitOfWork.Context.Upsert(budgetPriorityLibraryEntity, dto.Id, _unitOfWork.UserEntity?.Id);
-
-            if (simulationId != Guid.Empty)
-            {
-                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-                {
-                    throw new RowNotInTableException("No simulation was found for the given scenario.");
-                }
-
-                _unitOfWork.Context.DeleteEntity<BudgetPriorityLibrarySimulationEntity>(_ => _.SimulationId == simulationId);
-
-                _unitOfWork.Context.AddEntity(new BudgetPriorityLibrarySimulationEntity
-                {
-                    BudgetPriorityLibraryId = dto.Id,
-                    SimulationId = simulationId
-                }, _unitOfWork.UserEntity?.Id);
-            }
-        }
+        public void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto) =>
+            _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
 
         public void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId)
         {
@@ -126,12 +101,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var budgetPriorityEntities = budgetPriorities
-                .Select(_ => _.ToEntity(libraryId))
+                .Select(_ => _.ToLibraryEntity(libraryId))
                 .ToList();
 
             var entityIds = budgetPriorityEntities.Select(_ => _.Id).ToList();
 
-            var existingEntityIds = _unitOfWork.Context.BudgetPriority
+            var existingEntityIds = _unitOfWork.Context.BudgetPriority.AsNoTracking()
                 .Where(_ => _.BudgetPriorityLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
@@ -145,28 +120,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteAll<CriterionLibraryBudgetPriorityEntity>(_ =>
                 _.BudgetPriority.BudgetPriorityLibraryId == libraryId);
 
-            if (budgetPriorities.Any(_ => _.BudgetPercentagePairs.Any()))
+            if (budgetPriorities.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                                          !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
             {
-                var percentagePairsPerPriorityId = budgetPriorities.Where(_ => _.BudgetPercentagePairs.Any())
-                    .ToDictionary(_ => _.Id, _ => _.BudgetPercentagePairs);
-                _unitOfWork.BudgetPercentagePairRepo.UpsertOrDeleteBudgetPercentagePairs(percentagePairsPerPriorityId, libraryId);
-            }
+                var criterionJoins = new List<CriterionLibraryBudgetPriorityEntity>();
 
-            if (budgetPriorities.Any(_ =>
-                _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
-            {
-                var criterionJoinsToAdd = budgetPriorities
+                var criteria = budgetPriorities
                     .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
-                    .Select(_ => new CriterionLibraryBudgetPriorityEntity
+                               !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
+                    .Select(priority =>
                     {
-                        CriterionLibraryId = _.CriterionLibrary.Id,
-                        BudgetPriorityId = _.Id
-                    })
-                    .ToList();
+                        var criterion = new CriterionLibraryEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            MergedCriteriaExpression = priority.CriterionLibrary.MergedCriteriaExpression,
+                            Name = $"Priority {priority.Year}-{priority.PriorityLevel} Criterion",
+                            IsSingleUse = true
+                        };
+                        criterionJoins.Add(new CriterionLibraryBudgetPriorityEntity
+                        {
+                            CriterionLibraryId = criterion.Id, BudgetPriorityId = priority.Id
+                        });
+                        return criterion;
+                    }).ToList();
 
-                _unitOfWork.Context.AddAll(criterionJoinsToAdd, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
         }
 
@@ -178,6 +157,91 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             _unitOfWork.Context.DeleteEntity<BudgetPriorityLibraryEntity>(_ => _.Id == libraryId);
+        }
+
+        public List<BudgetPriorityDTO> GetScenarioBudgetPriorities(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+
+            return _unitOfWork.Context.ScenarioBudgetPriority.AsNoTracking()
+                .Include(_ => _.BudgetPercentagePairs)
+                .ThenInclude(_ => _.ScenarioBudget)
+                .Include(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Where(_ => _.SimulationId == simulationId)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public void UpsertOrDeleteScenarioBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+
+            var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
+                .Single(_ => _.Id == simulationId);
+
+            var budgetPriorityEntities = budgetPriorities
+                .Select(_ => _.ToScenarioEntity(simulationId))
+                .ToList();
+
+            var entityIds = budgetPriorityEntities.Select(_ => _.Id).ToList();
+
+            var existingEntityIds = _unitOfWork.Context.ScenarioBudgetPriority.AsNoTracking()
+                .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
+                .Select(_ => _.Id).ToList();
+
+            _unitOfWork.Context.DeleteAll<ScenarioBudgetPriorityEntity>(_ =>
+                _.SimulationId == simulationId && !entityIds.Contains(_.Id));
+
+            _unitOfWork.Context.UpdateAll(budgetPriorityEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
+
+            _unitOfWork.Context.AddAll(budgetPriorityEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
+
+            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioBudgetPriorityEntity>(_ =>
+                _.ScenarioBudgetPriority.SimulationId == simulationId);
+
+            if (budgetPriorities.Any(_ => _.BudgetPercentagePairs.Any()))
+            {
+                _unitOfWork.Context.AddAll(budgetPriorities.Where(_ => _.BudgetPercentagePairs.Any())
+                    .SelectMany(_ => _.BudgetPercentagePairs.Select(pair => pair.ToEntity(_.Id))).ToList());
+            }
+
+            if (budgetPriorities.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                                          !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+            {
+                var criterionJoins = new List<CriterionLibraryScenarioBudgetPriorityEntity>();
+
+                var criteria = budgetPriorities
+                    .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
+                               !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
+                    .Select(priority =>
+                    {
+                        var criterion = new CriterionLibraryEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            MergedCriteriaExpression = priority.CriterionLibrary.MergedCriteriaExpression,
+                            Name = $"{simulationEntity.Name} Priority {priority.Year}-{priority.PriorityLevel} Criterion",
+                            IsSingleUse = true
+                        };
+                        criterionJoins.Add(new CriterionLibraryScenarioBudgetPriorityEntity
+                        {
+                            CriterionLibraryId = criterion.Id, ScenarioBudgetPriorityId = priority.Id
+                        });
+                        return criterion;
+                    }).ToList();
+
+                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
+            }
+
+            // Update last modified date
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
     }
 }

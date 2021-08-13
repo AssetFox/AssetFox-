@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using Microsoft.AspNetCore.Mvc;
@@ -130,7 +131,7 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpPost]
+        /*[HttpPost]
         [Route("FixBudgetPercentagePairs")]
         public async Task FixBudgetPercentagePairs()
         {
@@ -145,26 +146,18 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     var budgetPercentagePairs = _unitOfWork.Context.BudgetPercentagePair.AsNoTracking()
-                        .Include(_ => _.Budget)
-                        .ThenInclude(_ => _.BudgetAmounts)
-                        .Include(_ => _.Budget)
-                        .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
                         .Include(_ => _.BudgetPriority)
-                        .ThenInclude(_ => _.BudgetPriorityLibrary)
-                        .ThenInclude(_ => _.BudgetPriorityLibrarySimulationJoins)
+                        .ThenInclude(_ => _.CriterionLibraryBudgetPriorityJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        .Include(_ => _.ScenarioBudget)
                         .ToList();
 
-                    var budgets = new List<ScenarioBudgetEntity>();
-                    var budgetAmounts = new List<ScenarioBudgetAmountEntity>();
+                    var budgetPriorities = new List<ScenarioBudgetPriorityEntity>();
                     var criteria = new List<CriterionLibraryEntity>();
-                    var criterionJoins = new List<CriterionLibraryScenarioBudgetEntity>();
+                    var criterionJoins = new List<CriterionLibraryScenarioBudgetPriorityEntity>();
                     var percentagePairs = new List<BudgetPercentagePairEntity>();
 
-                    var simulationIds = budgetPercentagePairs.SelectMany(_ =>
-                        _.BudgetPriority.BudgetPriorityLibrary.BudgetPriorityLibrarySimulationJoins
-                            .Select(join => join.SimulationId)
-                    ).Distinct().ToList();
+                    var simulationIds = budgetPercentagePairs.Select(_ => _.ScenarioBudget.SimulationId).Distinct().ToList();
                     var budgetsPerSimulationId = _unitOfWork.Context.ScenarioBudget.AsNoTracking()
                         .Where(_ => simulationIds.Contains(_.SimulationId)).ToList()
                         .GroupBy(_ => _.SimulationId, _ => _)
@@ -181,15 +174,14 @@ namespace BridgeCareCore.Controllers
                                 if (!budgetExistsOnSimulation &&
                                     !budgets.Any(b => b.SimulationId == join.SimulationId && b.Name == _.Budget.Name))
                                 {
-                                    var budget = new ScenarioBudgetEntity
+                                    var budget = new ScenarioBudgetPriorityEntity
                                     {
-                                        Id = Guid.NewGuid(),
-                                        Name = _.Budget.Name,
+                                        Id = _.BudgetPriorityId.Value,
                                         SimulationId = join.SimulationId,
                                         CreatedBy = _.Budget.CreatedBy,
                                         LastModifiedBy = _.Budget.LastModifiedBy,
                                     };
-                                    budgets.Add(budget);
+                                    budgetPriorities.Add(budget);
 
                                     if (_.Budget.BudgetAmounts.Any())
                                     {
@@ -280,6 +272,6 @@ namespace BridgeCareCore.Controllers
                 _unitOfWork.Rollback();
                 throw;
             }
-        }
+        }*/
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 
@@ -17,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             CriterionLibraryBudgetJoins = new HashSet<CriterionLibraryBudgetEntity>();
             CriterionLibraryScenarioBudgetJoins = new HashSet<CriterionLibraryScenarioBudgetEntity>();
             CriterionLibraryBudgetPriorityJoins = new HashSet<CriterionLibraryBudgetPriorityEntity>();
+            CriterionLibraryScenarioBudgetPriorityJoins = new HashSet<CriterionLibraryScenarioBudgetPriorityEntity>();
             CriterionLibraryCashFlowRuleJoins = new HashSet<CriterionLibraryCashFlowRuleEntity>();
             CriterionLibraryDeficientConditionGoalJoins = new HashSet<CriterionLibraryDeficientConditionGoalEntity>();
             CriterionLibraryPerformanceCurveJoins = new HashSet<CriterionLibraryPerformanceCurveEntity>();
@@ -45,6 +48,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<CriterionLibraryScenarioBudgetEntity> CriterionLibraryScenarioBudgetJoins { get; set; }
 
         public virtual ICollection<CriterionLibraryBudgetPriorityEntity> CriterionLibraryBudgetPriorityJoins { get; set; }
+
+        public virtual ICollection<CriterionLibraryScenarioBudgetPriorityEntity> CriterionLibraryScenarioBudgetPriorityJoins { get; set; }
 
         public virtual ICollection<CriterionLibraryCashFlowRuleEntity> CriterionLibraryCashFlowRuleJoins { get; set; }
 

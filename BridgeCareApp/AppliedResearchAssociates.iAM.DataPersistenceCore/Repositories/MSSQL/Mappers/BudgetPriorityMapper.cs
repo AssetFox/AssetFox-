@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using MoreLinq;
@@ -10,16 +12,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class BudgetPriorityMapper
     {
-        public static BudgetPriorityEntity ToEntity(this BudgetPriority domain, Guid budgetPriorityLibraryId) =>
-            new BudgetPriorityEntity
+        public static ScenarioBudgetPriorityEntity ToScenarioEntity(this BudgetPriority domain, Guid simulationId) =>
+            new ScenarioBudgetPriorityEntity
             {
                 Id = domain.Id,
-                BudgetPriorityLibraryId = budgetPriorityLibraryId,
+                SimulationId = simulationId,
                 PriorityLevel = domain.PriorityLevel,
                 Year = domain.Year
             };
 
-        public static BudgetPriorityEntity ToEntity(this BudgetPriorityDTO dto, Guid libraryId) =>
+        public static ScenarioBudgetPriorityEntity ToScenarioEntity(this BudgetPriorityDTO dto, Guid simulationId) =>
+            new ScenarioBudgetPriorityEntity
+            {
+                Id = dto.Id,
+                SimulationId = simulationId,
+                PriorityLevel = dto.PriorityLevel,
+                Year = dto.Year
+            };
+
+        public static BudgetPriorityEntity ToLibraryEntity(this BudgetPriorityDTO dto, Guid libraryId) =>
             new BudgetPriorityEntity
             {
                 Id = dto.Id,
@@ -45,6 +56,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new CriterionLibraryDTO()
             };
 
+        public static BudgetPriorityDTO ToDto(this ScenarioBudgetPriorityEntity entity) =>
+            new BudgetPriorityDTO
+            {
+                Id = entity.Id,
+                PriorityLevel = entity.PriorityLevel,
+                Year = entity.Year,
+                BudgetPercentagePairs = entity.BudgetPercentagePairs.Any()
+                    ? entity.BudgetPercentagePairs.Select(_ => _.ToDto()).ToList()
+                    : new List<BudgetPercentagePairDTO>(),
+                CriterionLibrary = entity.CriterionLibraryScenarioBudgetPriorityJoin != null
+                    ? entity.CriterionLibraryScenarioBudgetPriorityJoin.CriterionLibrary.ToDto()
+                    : new CriterionLibraryDTO()
+            };
+
         public static BudgetPriorityLibraryDTO ToDto(this BudgetPriorityLibraryEntity entity) =>
             new BudgetPriorityLibraryDTO
             {
@@ -56,14 +81,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new List<BudgetPriorityDTO>(),
             };
 
-        public static void CreateBudgetPriority(this BudgetPriorityEntity entity, Simulation simulation)
+        public static void CreateBudgetPriority(this ScenarioBudgetPriorityEntity entity, Simulation simulation)
         {
             var priority = simulation.AnalysisMethod.AddBudgetPriority();
             priority.Id = entity.Id;
             priority.PriorityLevel = entity.PriorityLevel;
             priority.Year = entity.Year;
             priority.Criterion.Expression =
-                entity.CriterionLibraryBudgetPriorityJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
+                entity.CriterionLibraryScenarioBudgetPriorityJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
 
             if (entity.BudgetPercentagePairs.Any())
             {

@@ -31,8 +31,7 @@ namespace BridgeCareCore.Controllers
         {
             void UpsertAny(Guid simulationId, BudgetPriorityLibraryDTO dto)
             {
-                UnitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto, simulationId);
-                UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
+                UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(dto.BudgetPriorities, simulationId);
             }
 
             void UpsertPermitted(Guid simulationId, BudgetPriorityLibraryDTO dto)
@@ -56,7 +55,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await Task.Factory.StartNew(() => UnitOfWork.BudgetPriorityRepo
-                    .BudgetPriorityLibrariesWithBudgetPriorities());
+                    .GetBudgetPriorityLibraries());
 
                 return Ok(result);
             }
@@ -68,16 +67,17 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertBudgetPriorityLibrary/{simulationId}")]
+        [Route("UpsertBudgetPriorityLibrary")]
         [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
-        public async Task<IActionResult> UpsertBudgetPriorityLibrary(Guid simulationId, BudgetPriorityLibraryDTO dto)
+        public async Task<IActionResult> UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _budgetPriorityUpsertMethods[UserInfo.Role](simulationId, dto);
+                    UnitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
+                    UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
                     UnitOfWork.Commit();
                 });
 
@@ -111,6 +111,54 @@ namespace BridgeCareCore.Controllers
                 });
 
                 return Ok();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetScenarioBudgetPriorities/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetScenarioBudgetPriorities(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.BudgetPriorityRepo
+                    .GetScenarioBudgetPriorities(simulationId));
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertScenarioBudgetPriorities/{simulationId}")]
+        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        public async Task<IActionResult> UpsertScenarioBudgetPriorities(Guid simulationId, BudgetPriorityLibraryDTO dto)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    _budgetPriorityUpsertMethods[UserInfo.Role](simulationId, dto);
+                    UnitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UnitOfWork.Rollback();
+                return Unauthorized();
             }
             catch (Exception e)
             {

@@ -73,13 +73,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        private void CreateAnalysisMethodBudgetPriorities(SimulationEntity simulationEntity, List<BudgetPriority> budgetPriorities)
-        {
-            _unitOfWork.BudgetPriorityRepo.CreateBudgetPriorityLibrary(
-                $"{simulationEntity.Name} Budget Priority Library", simulationEntity.Id);
-
+        private void CreateAnalysisMethodBudgetPriorities(SimulationEntity simulationEntity, List<BudgetPriority> budgetPriorities) =>
             _unitOfWork.BudgetPriorityRepo.CreateBudgetPriorities(budgetPriorities, simulationEntity.Id);
-        }
 
         private void CreateAnalysisMethodTargetConditionGoals(SimulationEntity simulationEntity, List<TargetConditionGoal> targetConditionGoals)
         {
@@ -120,14 +115,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CriterionLibraryAnalysisMethodJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.BudgetPriorityLibrarySimulationJoin)
-                .ThenInclude(_ => _.BudgetPriorityLibrary)
                 .ThenInclude(_ => _.BudgetPriorities)
-                .ThenInclude(_ => _.CriterionLibraryBudgetPriorityJoin)
+                .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.BudgetPriorityLibrarySimulationJoin)
-                .ThenInclude(_ => _.BudgetPriorityLibrary)
                 .ThenInclude(_ => _.BudgetPriorities)
                 .ThenInclude(_ => _.BudgetPercentagePairs)
                 .Include(_ => _.Simulation)

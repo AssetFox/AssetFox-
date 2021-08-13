@@ -4,6 +4,7 @@ using System.Linq;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -134,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 // Act
                 var result = await _controller
-                    .UpsertBudgetPriorityLibrary(Guid.Empty, _testBudgetPriorityLibrary.ToDto());
+                    .UpsertBudgetPriorityLibrary(_testBudgetPriorityLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result);
@@ -223,7 +224,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 timer.Elapsed += delegate
                 {
                     var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo
-                        .BudgetPriorityLibrariesWithBudgetPriorities()[0];
+                        .GetBudgetPriorityLibraries()[0];
                     Assert.Equal(dto.Description, modifiedDto.Description);
                     Assert.Single(modifiedDto.AppliedScenarioIds);
                     Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
@@ -258,8 +259,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Assert.True(
                     !_testHelper.UnitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == _testBudgetPriorityLibrary.Id));
                 Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriority.Any(_ => _.Id == _testBudgetPriority.Id));
-                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriorityLibrarySimulation.Any(_ =>
-                    _.BudgetPriorityLibraryId == _testBudgetPriorityLibrary.Id));
                 Assert.True(
                     !_testHelper.UnitOfWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
                         _.BudgetPriorityId == _testBudgetPriority.Id));

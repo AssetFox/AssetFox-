@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 
@@ -29,8 +30,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual AnalysisMethodEntity AnalysisMethod { get; set; }
 
         public virtual InvestmentPlanEntity InvestmentPlan { get; set; }
-
-        public virtual BudgetPriorityLibrarySimulationEntity BudgetPriorityLibrarySimulationJoin { get; set; }
 
         public virtual CashFlowRuleLibrarySimulationEntity CashFlowRuleLibrarySimulationJoin { get; set; }
 
@@ -60,5 +59,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<ScenarioSelectableTreatmentEntity> SelectableTreatments { get; set; }
 
         public virtual ICollection<ScenarioBudgetEntity> Budgets { get; set; }
+
+        public virtual ICollection<ScenarioBudgetPriorityEntity> BudgetPriorities { get; set; }
     }
 }

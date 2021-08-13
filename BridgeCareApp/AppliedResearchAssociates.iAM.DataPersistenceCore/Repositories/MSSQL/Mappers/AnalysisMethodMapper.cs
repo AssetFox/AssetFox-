@@ -52,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 }
             }
 
-            entity.Simulation.BudgetPriorityLibrarySimulationJoin?.BudgetPriorityLibrary.BudgetPriorities
+            entity.Simulation.BudgetPriorities
                 .ForEach(_ => _.CreateBudgetPriority(simulation));
 
             entity.Simulation.TargetConditionGoalLibrarySimulationJoin?.TargetConditionGoalLibrary.TargetConditionGoals

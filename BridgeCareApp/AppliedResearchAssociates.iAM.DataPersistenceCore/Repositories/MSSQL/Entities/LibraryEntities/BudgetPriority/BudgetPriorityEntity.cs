@@ -2,22 +2,13 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority
 {
-    public class BudgetPriorityEntity : BaseEntity
+    public class BudgetPriorityEntity : BaseBudgetPriorityEntity
     {
-        public BudgetPriorityEntity()
-        {
-            BudgetPercentagePairs = new HashSet<BudgetPercentagePairEntity>();
-        }
-
-        public Guid Id { get; set; }
+        public BudgetPriorityEntity() => BudgetPercentagePairs = new HashSet<BudgetPercentagePairEntity>();
 
         public Guid BudgetPriorityLibraryId { get; set; }
-
-        public int PriorityLevel { get; set; }
-
-        public int? Year { get; set; }
 
         public virtual BudgetPriorityLibraryEntity BudgetPriorityLibrary { get; set; }
 

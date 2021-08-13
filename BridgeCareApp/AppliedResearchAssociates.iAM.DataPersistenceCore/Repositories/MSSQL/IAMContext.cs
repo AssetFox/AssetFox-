@@ -3,9 +3,11 @@ using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using Microsoft.EntityFrameworkCore;
@@ -61,8 +63,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<BudgetPriorityEntity> BudgetPriority { get; set; }
 
         public virtual DbSet<BudgetPriorityLibraryEntity> BudgetPriorityLibrary { get; set; }
-
-        public virtual DbSet<BudgetPriorityLibrarySimulationEntity> BudgetPriorityLibrarySimulation { get; set; }
 
         public virtual DbSet<CashFlowDistributionRuleEntity> CashFlowDistributionRule { get; set; }
 
@@ -212,6 +212,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<ScenarioBudgetEntity> ScenarioBudget { get; set; }
         public virtual DbSet<ScenarioBudgetAmountEntity> ScenarioBudgetAmount { get; set; }
         public virtual DbSet<CriterionLibraryScenarioBudgetEntity> CriterionLibraryScenarioBudget { get; set; }
+
+        public virtual DbSet<ScenarioBudgetPriorityEntity> ScenarioBudgetPriority { get; set; }
 
         private class MigrationConnection
         {
@@ -430,7 +432,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 entity.HasIndex(e => e.ScenarioBudgetId);
 
-                entity.HasIndex(e => e.BudgetPriorityId);
+                entity.HasIndex(e => e.ScenarioBudgetPriorityId);
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
@@ -441,9 +443,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .HasForeignKey(d => d.ScenarioBudgetId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(d => d.BudgetPriority)
+                entity.HasOne(d => d.ScenarioBudgetPriority)
                     .WithMany(p => p.BudgetPercentagePairs)
-                    .HasForeignKey(d => d.BudgetPriorityId)
+                    .HasForeignKey(d => d.ScenarioBudgetPriorityId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -461,30 +463,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioBudgetPriorityEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.PriorityLevel).IsRequired();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.BudgetPriorities)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<BudgetPriorityLibraryEntity>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            });
-
-            modelBuilder.Entity<BudgetPriorityLibrarySimulationEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.BudgetPriorityLibraryId, e.SimulationId });
-
-                entity.ToTable("BudgetPriorityLibrary_Simulation");
-
-                entity.HasIndex(e => e.BudgetPriorityLibraryId);
-
-                entity.HasIndex(e => e.SimulationId).IsUnique();
-
-                entity.HasOne(d => d.BudgetPriorityLibrary)
-                    .WithMany(p => p.BudgetPriorityLibrarySimulationJoins)
-                    .HasForeignKey(d => d.BudgetPriorityLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.BudgetPriorityLibrarySimulationJoin)
-                    .HasForeignKey<BudgetPriorityLibrarySimulationEntity>(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<CashFlowDistributionRuleEntity>(entity =>

@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using BudgetPriorityUpsertMethod = Action<Guid, BudgetPriorityLibraryDTO>;
+    using BudgetPriorityUpsertMethod = Action<Guid, List<BudgetPriorityDTO>>;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -29,15 +29,15 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, BudgetPriorityUpsertMethod> CreateUpsertMethods()
         {
-            void UpsertAny(Guid simulationId, BudgetPriorityLibraryDTO dto)
+            void UpsertAny(Guid simulationId, List<BudgetPriorityDTO> dtos)
             {
-                UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(dto.BudgetPriorities, simulationId);
+                UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(dtos, simulationId);
             }
 
-            void UpsertPermitted(Guid simulationId, BudgetPriorityLibraryDTO dto)
+            void UpsertPermitted(Guid simulationId, List<BudgetPriorityDTO> dtos)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                UpsertAny(simulationId, dto);
+                UpsertAny(simulationId, dtos);
             }
 
             return new Dictionary<string, BudgetPriorityUpsertMethod>
@@ -142,14 +142,14 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertScenarioBudgetPriorities/{simulationId}")]
         [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
-        public async Task<IActionResult> UpsertScenarioBudgetPriorities(Guid simulationId, BudgetPriorityLibraryDTO dto)
+        public async Task<IActionResult> UpsertScenarioBudgetPriorities(Guid simulationId, List<BudgetPriorityDTO> dtos)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _budgetPriorityUpsertMethods[UserInfo.Role](simulationId, dto);
+                    _budgetPriorityUpsertMethods[UserInfo.Role](simulationId, dtos);
                     UnitOfWork.Commit();
                 });
 

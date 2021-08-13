@@ -6,14 +6,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class BudgetPriorityEntity : BaseBudgetPriorityEntity
     {
-        public BudgetPriorityEntity() => BudgetPercentagePairs = new HashSet<BudgetPercentagePairEntity>();
-
         public Guid BudgetPriorityLibraryId { get; set; }
 
         public virtual BudgetPriorityLibraryEntity BudgetPriorityLibrary { get; set; }
 
         public virtual CriterionLibraryBudgetPriorityEntity CriterionLibraryBudgetPriorityJoin { get; set; }
-
-        public virtual ICollection<BudgetPercentagePairEntity> BudgetPercentagePairs { get; set; }
     }
 }

@@ -48,9 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 PriorityLevel = entity.PriorityLevel,
                 Year = entity.Year,
-                BudgetPercentagePairs = entity.BudgetPercentagePairs.Any()
-                    ? entity.BudgetPercentagePairs.Select(_ => _.ToDto()).ToList()
-                    : new List<BudgetPercentagePairDTO>(),
+                BudgetPercentagePairs = new List<BudgetPercentagePairDTO>(),
                 CriterionLibrary = entity.CriterionLibraryBudgetPriorityJoin != null
                     ? entity.CriterionLibraryBudgetPriorityJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO()

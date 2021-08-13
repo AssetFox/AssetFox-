@@ -105,11 +105,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var deficientConditionGoalLibraryId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(
                 new DeficientConditionGoalLibraryEntity {Id = deficientConditionGoalLibraryId, Name = "Test Name"});
-            _testHelper.UnitOfWork.Context.AddEntity(new DeficientConditionGoalLibrarySimulationEntity
-            {
-                DeficientConditionGoalLibraryId = deficientConditionGoalLibraryId,
-                SimulationId = _testHelper.TestSimulation.Id
-            });
 
             var remainingLifeLimitLibraryId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(
@@ -455,7 +450,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     .Include(_ => _.BudgetLibrarySimulationJoin)
                     .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
                     .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
-                    .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
+
+                    .Include(_ => _.ScenarioDeficientConditionGoals)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.ScenarioDeficientConditionGoals)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+
                     .Include(_ => _.PerformanceCurves)
                     .ThenInclude(_ => _.Attribute)
                     .Include(_ => _.PerformanceCurves)
@@ -517,7 +518,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     .Include(_ => _.BudgetLibrarySimulationJoin)
                     .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
                     .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
-                    .Include(_ => _.DeficientConditionGoalLibrarySimulationJoin)
+
+                    .Include(_ => _.ScenarioDeficientConditionGoals)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.ScenarioDeficientConditionGoals)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+
                     .Include(_ => _.PerformanceCurves)
                     .ThenInclude(_ => _.Attribute)
                     .Include(_ => _.PerformanceCurves)
@@ -586,9 +593,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         originalSimulation.BudgetPriorityLibrarySimulationJoin.BudgetPriorityLibraryId);
                     Assert.Equal(clonedSimulation.CashFlowRuleLibrarySimulationJoin.CashFlowRuleLibraryId,
                         originalSimulation.CashFlowRuleLibrarySimulationJoin.CashFlowRuleLibraryId);
-                    Assert.Equal(
-                        clonedSimulation.DeficientConditionGoalLibrarySimulationJoin.DeficientConditionGoalLibraryId,
-                        originalSimulation.DeficientConditionGoalLibrarySimulationJoin.DeficientConditionGoalLibraryId);
                     Assert.Equal(clonedSimulation.RemainingLifeLimitLibrarySimulationJoin.RemainingLifeLimitLibraryId,
                         originalSimulation.RemainingLifeLimitLibrarySimulationJoin.RemainingLifeLimitLibraryId);
                     var clonedCommittedProjects = clonedSimulation.CommittedProjects.ToList();

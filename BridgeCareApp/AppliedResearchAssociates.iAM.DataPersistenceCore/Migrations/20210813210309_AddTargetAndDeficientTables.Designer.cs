@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 {
     [DbContext(typeof(IAMContext))]
-    [Migration("20210809175817_AddScenarioTargetConditionGoalTable")]
-    partial class AddScenarioTargetConditionGoalTable
+    [Migration("20210813210309_AddTargetAndDeficientTables")]
+    partial class AddTargetAndDeficientTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1410,36 +1410,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("DeficientConditionGoalLibrary");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalLibrarySimulationEntity", b =>
-                {
-                    b.Property<Guid>("DeficientConditionGoalLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("DeficientConditionGoalLibraryId", "SimulationId");
-
-                    b.HasIndex("DeficientConditionGoalLibraryId");
-
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
-
-                    b.ToTable("DeficientConditionGoalLibrary_Simulation");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2191,6 +2161,79 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsUnique();
 
                     b.ToTable("CriterionLibrary_ScenarioTreatmentSupersession");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.CriterionLibraryScenarioDeficientConditionGoalEntity", b =>
+                {
+                    b.Property<Guid>("CriterionLibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ScenarioDeficientConditionGoalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("CriterionLibraryId", "ScenarioDeficientConditionGoalId");
+
+                    b.HasIndex("CriterionLibraryId");
+
+                    b.HasIndex("ScenarioDeficientConditionGoalId")
+                        .IsUnique();
+
+                    b.ToTable("CriterionLibrary_ScenarioDeficientConditionGoal");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.ScenarioDeficientConditionGoalEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("AllowedDeficientPercentage")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("DeficientLimit")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SimulationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeId");
+
+                    b.HasIndex("SimulationId");
+
+                    b.ToTable("ScenarioDeficientConditionGoal");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEntity", b =>
@@ -3770,25 +3813,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("DeficientConditionGoalLibrary");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalLibrarySimulationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalLibraryEntity", "DeficientConditionGoalLibrary")
-                        .WithMany("DeficientConditionGoalLibrarySimulationJoins")
-                        .HasForeignKey("DeficientConditionGoalLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("DeficientConditionGoalLibrarySimulationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalLibrarySimulationEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DeficientConditionGoalLibrary");
-
-                    b.Navigation("Simulation");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.FacilityEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
@@ -4099,6 +4123,44 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("CriterionLibrary");
 
                     b.Navigation("ScenarioTreatmentSupersession");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.CriterionLibraryScenarioDeficientConditionGoalEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                        .WithMany("CriterionLibraryScenarioDeficientConditionGoalJoins")
+                        .HasForeignKey("CriterionLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.ScenarioDeficientConditionGoalEntity", "ScenarioDeficientConditionGoal")
+                        .WithOne("CriterionLibraryScenarioDeficientConditionGoalJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.CriterionLibraryScenarioDeficientConditionGoalEntity", "ScenarioDeficientConditionGoalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CriterionLibrary");
+
+                    b.Navigation("ScenarioDeficientConditionGoal");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.ScenarioDeficientConditionGoalEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                        .WithMany("ScenarioDeficientConditionGoals")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                        .WithMany("ScenarioDeficientConditionGoals")
+                        .HasForeignKey("SimulationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Attribute");
+
+                    b.Navigation("Simulation");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEntity", b =>
@@ -4519,6 +4581,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("RemainingLifeLimits");
 
+                    b.Navigation("ScenarioDeficientConditionGoals");
+
                     b.Navigation("ScenarioPerformanceCurves");
 
                     b.Navigation("ScenarioTreatmentConsequences");
@@ -4608,6 +4672,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("CriterionLibraryRemainingLifeLimitJoins");
 
+                    b.Navigation("CriterionLibraryScenarioDeficientConditionGoalJoins");
+
                     b.Navigation("CriterionLibraryScenarioPerformanceCurveJoins");
 
                     b.Navigation("CriterionLibraryScenarioSelectableTreatmentJoins");
@@ -4640,8 +4706,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalLibraryEntity", b =>
                 {
-                    b.Navigation("DeficientConditionGoalLibrarySimulationJoins");
-
                     b.Navigation("DeficientConditionGoals");
                 });
 
@@ -4715,6 +4779,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("RemainingLifeLimitLibrarySimulationJoins");
 
                     b.Navigation("RemainingLifeLimits");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.ScenarioDeficientConditionGoalEntity", b =>
+                {
+                    b.Navigation("CriterionLibraryScenarioDeficientConditionGoalJoin");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEntity", b =>
@@ -4799,13 +4868,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("CommittedProjects");
 
-                    b.Navigation("DeficientConditionGoalLibrarySimulationJoin");
-
                     b.Navigation("InvestmentPlan");
 
                     b.Navigation("PerformanceCurves");
 
                     b.Navigation("RemainingLifeLimitLibrarySimulationJoin");
+
+                    b.Navigation("ScenarioDeficientConditionGoals");
 
                     b.Navigation("ScenarioTargetConditionalGoals");
 

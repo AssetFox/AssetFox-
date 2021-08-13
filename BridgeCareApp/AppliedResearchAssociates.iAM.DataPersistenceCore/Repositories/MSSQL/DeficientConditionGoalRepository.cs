@@ -90,17 +90,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
-
-                //var deficientIdsPerExpression = deficientConditionGoals
-                //    .Where(_ => !_.Criterion.ExpressionIsBlank)
-                //    .GroupBy(_ => _.Criterion.Expression, _ => _)
-                //    .ToDictionary(_ => _.Key, _ => _.Select(__ => __.Id).ToList());
-
-                //_unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(deficientIdsPerExpression,
-                //    DataPersistenceConstants.CriterionLibraryJoinEntities.DeficientConditionGoal, simulationEntity.Name);
-
-                //// Update last modified date
-                //_unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
             }
             // Update last modified date
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
@@ -210,17 +199,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 _unitOfWork.Context.AddAll(criterionLibraryEntities, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionLibraryJoinEntities, _unitOfWork.UserEntity?.Id);
-
-                //var criterionLibraryJoinsToAdd = deficientConditionGoals
-                //    .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                //                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)).Select(_ =>
-                //        new CriterionLibraryDeficientConditionGoalEntity
-                //        {
-                //            CriterionLibraryId = _.CriterionLibrary.Id,
-                //            DeficientConditionGoalId = _.Id
-                //        }).ToList();
-
-                //_unitOfWork.Context.AddAll(criterionLibraryJoinsToAdd, _unitOfWork.UserEntity?.Id);
             }
         }
 

@@ -55,10 +55,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             entity.Simulation.BudgetPriorityLibrarySimulationJoin?.BudgetPriorityLibrary.BudgetPriorities
                 .ForEach(_ => _.CreateBudgetPriority(simulation));
 
-            entity.Simulation.TargetConditionGoalLibrarySimulationJoin?.TargetConditionGoalLibrary.TargetConditionGoals
+            entity.Simulation.ScenarioTargetConditionalGoals
                 .ForEach(_ => _.CreateTargetConditionGoal(simulation));
 
-            entity.Simulation.DeficientConditionGoalLibrarySimulationJoin?.DeficientConditionGoalLibrary.DeficientConditionGoals
+            entity.Simulation.ScenarioDeficientConditionGoals
                 .ForEach(_ => _.CreateDeficientConditionGoal(simulation));
 
             entity.Simulation.RemainingLifeLimitLibrarySimulationJoin?.RemainingLifeLimitLibrary.RemainingLifeLimits

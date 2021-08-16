@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,35 +15,33 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using DeficientConditionGoalUpsertMethod = Action<Guid, DeficientConditionGoalLibraryDTO>;
+    using ScenarioDeficientConditionGoalUpsertMethod = Action<Guid, List<DeficientConditionGoalDTO>>;
 
     [Route("api/[controller]")]
     [ApiController]
     public class DeficientConditionGoalController : BridgeCareCoreBaseController
     {
-        private readonly IReadOnlyDictionary<string, DeficientConditionGoalUpsertMethod>
-            _deficientConditionGoalUpsertMethods;
+        private readonly IReadOnlyDictionary<string, ScenarioDeficientConditionGoalUpsertMethod>
+            _scenarioDeficientConditionGoalUpsertMethods;
 
         public DeficientConditionGoalController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
-            _deficientConditionGoalUpsertMethods = CreateUpsertMethods();
+            _scenarioDeficientConditionGoalUpsertMethods = CreateUpsertMethods();
 
-        private Dictionary<string, DeficientConditionGoalUpsertMethod> CreateUpsertMethods()
+        private Dictionary<string, ScenarioDeficientConditionGoalUpsertMethod> CreateUpsertMethods()
         {
-            void UpsertAny(Guid simulationId, DeficientConditionGoalLibraryDTO dto)
+            void UpsertAny(Guid simulationId, List<DeficientConditionGoalDTO> dtos)
             {
-                UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibrary(dto, simulationId);
-                UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(
-                    dto.DeficientConditionGoals, dto.Id);
+                UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(dtos, simulationId);
             }
 
-            void UpsertPermitted(Guid simulationId, DeficientConditionGoalLibraryDTO dto)
+            void UpsertPermitted(Guid simulationId, List<DeficientConditionGoalDTO> dtos)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                UpsertAny(simulationId, dto);
+                UpsertAny(simulationId, dtos);
             }
 
-            return new Dictionary<string, DeficientConditionGoalUpsertMethod>
+            return new Dictionary<string, ScenarioDeficientConditionGoalUpsertMethod>
             {
                 [Role.Administrator] = UpsertAny,
                 [Role.DistrictEngineer] = UpsertPermitted,
@@ -59,7 +58,25 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await Task.Factory.StartNew(() => UnitOfWork.DeficientConditionGoalRepo
-                    .DeficientConditionGoalLibrariesWithDeficientConditionGoals());
+                    .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetScenarioDeficientConditionGoals/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetScenarioDeficientConditionGoals(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.DeficientConditionGoalRepo
+                    .GetScenarioDeficientConditionGoals(simulationId));
                 return Ok(result);
             }
             catch (Exception e)
@@ -70,16 +87,17 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertDeficientConditionGoalLibrary/{simulationId}")]
+        [Route("UpsertDeficientConditionGoalLibrary/")]
         [Authorize]
-        public async Task<IActionResult> UpsertDeficientConditionGoalLibrary(Guid simulationId, DeficientConditionGoalLibraryDTO dto)
+        public async Task<IActionResult> UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _deficientConditionGoalUpsertMethods[UserInfo.Role](simulationId, dto);
+                    UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibrary(dto);
+                    UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(dto.DeficientConditionGoals, dto.Id);
                     UnitOfWork.Commit();
                 });
 
@@ -94,6 +112,36 @@ namespace BridgeCareCore.Controllers
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertScenarioDeficientConditionGoals/{simulationId}")]
+        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        public async Task<IActionResult> UpsertScenarioDeficientConditionGoals(Guid simulationId, List<DeficientConditionGoalDTO> dtos)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    _scenarioDeficientConditionGoalUpsertMethods[UserInfo.Role](simulationId, dtos);
+                    UnitOfWork.Commit();
+                });
+
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UnitOfWork.Rollback();
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient condition goal error::{e.Message}");
                 throw;
             }
         }

@@ -281,6 +281,7 @@ import {
     emptyCreateTreatmentLibraryDialogData,
 } from '@/shared/models/modals/create-treatment-library-dialog-data';
 import {
+  emptyConsequence,
     emptyTreatment,
     emptyTreatmentDetails,
     emptyTreatmentLibrary,
@@ -298,6 +299,7 @@ import {
     find,
     findIndex,
     isNil,
+    map,
     prepend,
     propEq,
     reject,
@@ -314,7 +316,7 @@ import {
     InputValidationRules,
     rules,
 } from '@/shared/utils/input-validation-rules';
-import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import {
     getAppliedLibraryId,
     hasAppliedLibrary,
@@ -323,6 +325,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { emptyEquation } from '@/shared/models/iAM/equation';
 
 @Component({
     components: {
@@ -455,7 +458,26 @@ export default class TreatmentEditor extends Vue {
                     value: treatment.id,
                 }),
             );
-            this.selectedScenarioTreatments = this.selectedTreatmentLibrary.treatments;
+
+            this.selectedScenarioTreatments = this.selectedTreatmentLibrary.treatments
+                    .map((treatment: Treatment) => ({
+                        ...treatment,
+                        id: getNewGuid(),
+                        consequences: treatment.consequences.map((con: TreatmentConsequence) => ({
+                            ...con,
+                            id: getNewGuid(),
+                            equation: hasValue(con.equation)
+                            ? {...con.equation, id: getNewGuid()}
+                            : clone(emptyEquation)
+                        })),
+                        costs: treatment.costs.map((cost: TreatmentCost) => ({
+                            ...cost,
+                            id: getNewGuid(),
+                            equation: hasValue(cost.equation)
+                            ? {...cost.equation, id: getNewGuid()}
+                            : clone(emptyEquation)
+                        }))
+                    }));
         }
         if (
             this.selectedTreatment.id !== this.uuidNIL &&
@@ -588,7 +610,7 @@ export default class TreatmentEditor extends Vue {
             this.upsertScenarioSelectableTreatmentsAction({
                 scenarioSelectableTreatments: localScenarioSelectedTreatments,
                 scenarioId: scenarioId,
-            });
+            }).then(() => this.librarySelectItemValue = null);
         }
     }
 

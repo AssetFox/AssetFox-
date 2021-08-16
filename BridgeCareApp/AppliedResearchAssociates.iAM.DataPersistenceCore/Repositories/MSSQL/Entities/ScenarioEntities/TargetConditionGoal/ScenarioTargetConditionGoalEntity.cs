@@ -7,8 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class ScenarioTargetConditionGoalEntity : ConditionGoalEntity
     {
-        //public Guid ScenarioTargetConditionGoalId { get; set; }
-
         public Guid SimulationId { get; set; }
 
         public double Target { get; set; }

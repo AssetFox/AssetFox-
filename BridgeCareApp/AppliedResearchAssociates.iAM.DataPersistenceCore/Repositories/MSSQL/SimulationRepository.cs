@@ -323,14 +323,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 });
             }
 
-            //if (simulationToClone.DeficientConditionGoalLibrarySimulationJoin != null)
-            //{
-            //    simulationToClone.DeficientConditionGoalLibrarySimulationJoin.SimulationId = newSimulationId;
-            //    _unitOfWork.Context
-            //        .ReInitializeAllEntityBaseProperties(
-            //            simulationToClone.DeficientConditionGoalLibrarySimulationJoin, _unitOfWork.UserEntity?.Id);
-            //}
-
             if (simulationToClone.PerformanceCurves.Any())
             {
                 simulationToClone.PerformanceCurves.ForEach(curve =>

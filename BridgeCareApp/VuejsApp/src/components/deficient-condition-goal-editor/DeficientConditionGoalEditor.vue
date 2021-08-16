@@ -555,10 +555,6 @@ export default class DeficientConditionGoalEditor extends Vue {
                 value: library.id,
             }),
         );
-
-        // if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateDeficientConditionGoalLibraries, this.selectedScenarioId)) {
-        //   this.librarySelectItemValue = getAppliedLibraryId(this.stateDeficientConditionGoalLibraries, this.selectedScenarioId);
-        // }
     }
 
     @Watch('librarySelectItemValue')
@@ -698,14 +694,6 @@ export default class DeficientConditionGoalEditor extends Vue {
             ) as DeficientConditionGoal,
             this.deficientConditionGoalGridData,
         );
-        // this.selectedDeficientConditionGoalLibrary = {
-        //   ...this.selectedDeficientConditionGoalLibrary,
-        //   deficientConditionGoals: update(
-        //       findIndex(propEq('id', deficientConditionGoal.id), this.selectedDeficientConditionGoalLibrary.deficientConditionGoals),
-        //       setItemPropertyValue(property, value, deficientConditionGoal) as DeficientConditionGoal,
-        //       this.selectedDeficientConditionGoalLibrary.deficientConditionGoals
-        //   )
-        // };
     }
 
     onShowCriterionLibraryEditorDialog(
@@ -830,11 +818,6 @@ export default class DeficientConditionGoalEditor extends Vue {
             (_: DeficientConditionGoal) =>
                 !contains(_.id, this.selectedDeficientConditionGoalIds),
         );
-        // this.selectedDeficientConditionGoalLibrary = {
-        //   ...this.selectedDeficientConditionGoalLibrary,
-        //   deficientConditionGoals: this.selectedDeficientConditionGoalLibrary.deficientConditionGoals
-        //       .filter((deficientConditionGoal: DeficientConditionGoal) => !contains(deficientConditionGoal.id, this.selectedDeficientConditionGoalIds))
-        // };
     }
 
     onShowConfirmDeleteAlert() {

@@ -36,8 +36,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual CashFlowRuleLibrarySimulationEntity CashFlowRuleLibrarySimulationJoin { get; set; }
 
-        //public virtual DeficientConditionGoalLibrarySimulationEntity DeficientConditionGoalLibrarySimulationJoin { get; set; }
-
         public virtual RemainingLifeLimitLibrarySimulationEntity RemainingLifeLimitLibrarySimulationJoin { get; set; }
 
         public virtual SimulationOutputEntity SimulationOutput { get; set; }

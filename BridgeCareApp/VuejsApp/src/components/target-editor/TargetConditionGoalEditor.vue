@@ -714,12 +714,6 @@ export default class TargetConditionGoalEditor extends Vue {
             },
             this.targetConditionGoalGridData,
         );
-        // if(this.currentUrl.indexOf(ScenarioRoutePaths.TargetConditionGoal) == -1){
-        //   this.selectedTargetConditionGoalLibrary = {
-        //     ...this.selectedTargetConditionGoalLibrary,
-        //     targetConditionGoals: this.targetConditionGoalGridData
-        //   };
-        // }
         this.selectedTargetConditionGoalForCriteriaEdit = clone(
             emptyTargetConditionGoal,
         );

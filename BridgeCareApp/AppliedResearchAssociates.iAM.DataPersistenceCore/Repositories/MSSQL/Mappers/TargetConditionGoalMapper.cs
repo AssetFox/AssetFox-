@@ -111,9 +111,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 TargetConditionGoals = entity.TargetConditionGoals.Any()
                     ? entity.TargetConditionGoals.Select(_ => _.ToDto()).ToList()
                     : new List<TargetConditionGoalDTO>()
-                //AppliedScenarioIds = entity.TargetConditionGoalLibrarySimulationJoins.Any()
-                //    ? entity.TargetConditionGoalLibrarySimulationJoins.Select(_ => _.SimulationId).ToList()
-                //    : new List<Guid>()
             };
     }
 }

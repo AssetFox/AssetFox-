@@ -103,10 +103,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Description = entity.Description,
                 DeficientConditionGoals = entity.DeficientConditionGoals.Any()
                     ? entity.DeficientConditionGoals.Select(_ => _.ToDto()).ToList()
-                    : new List<DeficientConditionGoalDTO>(),
-                //AppliedScenarioIds = entity.DeficientConditionGoalLibrarySimulationJoins.Any()
-                //    ? entity.DeficientConditionGoalLibrarySimulationJoins.Select(_ => _.SimulationId).ToList()
-                //    : new List<Guid>()
+                    : new List<DeficientConditionGoalDTO>()
             };
     }
 }

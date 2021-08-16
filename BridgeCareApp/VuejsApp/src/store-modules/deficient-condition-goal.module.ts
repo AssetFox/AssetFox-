@@ -123,20 +123,6 @@ const actions = {
                 hasValue(response, 'status') &&
                 http2XX.test(response.status.toString())
             ) {
-                // if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.deficientConditionGoalLibraries, payload.scenarioId)) {
-                //     const unAppliedLibrary: DeficientConditionGoalLibrary = unapplyLibrary(getAppliedLibrary(
-                //         state.deficientConditionGoalLibraries, payload.scenarioId), payload.scenarioId);
-                //     commit('addedOrUpdatedDeficientConditionGoalLibraryMutator', unAppliedLibrary);
-                // }
-
-                // const library: DeficientConditionGoalLibrary = {
-                //     ...payload.library,
-                //     appliedScenarioIds: payload.scenarioId !== getBlankGuid() &&
-                //     payload.library.appliedScenarioIds.indexOf(payload.scenarioId) === -1
-                //         ? append(payload.scenarioId, payload.library.appliedScenarioIds)
-                //         : payload.library.appliedScenarioIds
-                // };
-
                 const message: string = any(
                     propEq('id', payload.library.id),
                     state.deficientConditionGoalLibraries,

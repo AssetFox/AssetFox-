@@ -117,8 +117,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<DeficientConditionGoalLibraryEntity> DeficientConditionGoalLibrary { get; set; }
 
-        //public virtual DbSet<DeficientConditionGoalLibrarySimulationEntity> DeficientConditionGoalLibrarySimulation { get; set; }
-
         public virtual DbSet<EquationEntity> Equation { get; set; }
 
         public virtual DbSet<FacilityEntity> Facility { get; set; }
@@ -1091,27 +1089,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
-
-            //modelBuilder.Entity<DeficientConditionGoalLibrarySimulationEntity>(entity =>
-            //{
-            //    entity.HasKey(e => new { e.DeficientConditionGoalLibraryId, e.SimulationId });
-
-            //    entity.ToTable("DeficientConditionGoalLibrary_Simulation");
-
-            //    entity.HasIndex(e => e.DeficientConditionGoalLibraryId);
-
-            //    entity.HasIndex(e => e.SimulationId).IsUnique();
-
-            //    entity.HasOne(d => d.DeficientConditionGoalLibrary)
-            //        .WithMany(p => p.DeficientConditionGoalLibrarySimulationJoins)
-            //        .HasForeignKey(d => d.DeficientConditionGoalLibraryId)
-            //        .OnDelete(DeleteBehavior.Cascade);
-
-            //    entity.HasOne(d => d.Simulation)
-            //        .WithOne(p => p.DeficientConditionGoalLibrarySimulationJoin)
-            //        .HasForeignKey<DeficientConditionGoalLibrarySimulationEntity>(d => d.SimulationId)
-            //        .OnDelete(DeleteBehavior.Cascade);
-            //});
 
             modelBuilder.Entity<EquationEntity>(entity =>
             {

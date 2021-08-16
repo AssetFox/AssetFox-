@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Repositories\MSSQL\Entities\DeficientConditionGoalLibrarySimulationEntity.cs" />
+    <Compile Remove="Repositories\MSSQL\Entities\TargetConditionGoalLibrarySimulationEntity.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Repositories\MSSQL\migrationConnection.json" />
   </ItemGroup>
 

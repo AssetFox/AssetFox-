@@ -519,12 +519,11 @@ export default class BudgetPriorityEditor extends Vue {
             propEq('id', budgetPriorityGridDatum.id), this.budgetPriorities,
         ) as BudgetPriority;
 
-        const fromScenario = this.hasScenario;
-
         this.criterionLibraryEditorDialogData = {
             showDialog: true,
             libraryId: this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id,
-            isCallFromScenario: fromScenario,
+            isCallFromScenario: this.hasScenario,
+            isCriterionForLibrary: !this.hasScenario
         };
     }
 

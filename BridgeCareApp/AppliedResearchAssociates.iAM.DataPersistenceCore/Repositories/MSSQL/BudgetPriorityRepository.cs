@@ -196,6 +196,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
+            _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
+                _.ScenarioBudgetPriority.SimulationId == simulationId && !entityIds.Contains(_.ScenarioBudgetPriorityId));
+
             _unitOfWork.Context.DeleteAll<ScenarioBudgetPriorityEntity>(_ =>
                 _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 

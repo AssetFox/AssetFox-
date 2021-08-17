@@ -16,7 +16,6 @@ export interface DeficientConditionGoalLibrary {
     name: string;
     description: string;
     deficientConditionGoals: DeficientConditionGoal[];
-    appliedScenarioIds: string[];
     owner?: string;
     shared?: boolean;
 }
@@ -35,5 +34,4 @@ export const emptyDeficientConditionGoalLibrary: DeficientConditionGoalLibrary =
     name: '',
     description: '',
     deficientConditionGoals: [],
-    appliedScenarioIds: []
 };

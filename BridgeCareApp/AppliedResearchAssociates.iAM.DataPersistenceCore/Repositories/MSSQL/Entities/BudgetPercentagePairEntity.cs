@@ -1,6 +1,5 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 
@@ -17,6 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public decimal Percentage { get; set; }
 
         public virtual ScenarioBudgetEntity ScenarioBudget { get; set; }
+
 
         public virtual ScenarioBudgetPriorityEntity ScenarioBudgetPriority { get; set; }
     }

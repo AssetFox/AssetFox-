@@ -5,11 +5,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class CriterionLibraryScenarioBudgetPriorityEntity : BaseCriterionLibraryJoinEntity
     {
-        public Guid CriterionLibraryId { get; set; }
-
         public Guid ScenarioBudgetPriorityId { get; set; }
-
-        public virtual CriterionLibraryEntity CriterionLibrary { get; set; }
 
         public virtual ScenarioBudgetPriorityEntity ScenarioBudgetPriority { get; set; }
     }

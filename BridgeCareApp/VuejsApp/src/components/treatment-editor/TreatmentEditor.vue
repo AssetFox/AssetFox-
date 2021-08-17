@@ -462,19 +462,17 @@ export default class TreatmentEditor extends Vue {
             this.selectedScenarioTreatments = this.selectedTreatmentLibrary.treatments
                     .map((treatment: Treatment) => ({
                         ...treatment,
-                        //id: getNewGuid(),
                         consequences: treatment.consequences.map((con: TreatmentConsequence) => ({
                             ...con,
-                            //id: getNewGuid(),
                             equation: hasValue(con.equation)
-                            ? {...con.equation} //,id: getNewGuid()
+                            ? {...con.equation }
                             : clone(emptyEquation)
                         })),
                         costs: treatment.costs.map((cost: TreatmentCost) => ({
                             ...cost,
                             //id: getNewGuid(),
                             equation: hasValue(cost.equation)
-                            ? {...cost.equation} // , id: getNewGuid()
+                            ? {...cost.equation }
                             : clone(emptyEquation)
                         }))
                     }));

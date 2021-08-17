@@ -71,7 +71,7 @@ namespace BridgeCareCore.Controllers
                                         Id = Guid.NewGuid(),
                                         Year = amount.Year,
                                         Value = amount.Value,
-                                        ScenarioBudgetId = _.Id,
+                                        ScenarioBudgetId = budget.Id,
                                         CreatedBy = amount.CreatedBy,
                                         LastModifiedBy = amount.LastModifiedBy
                                     }).ToList());

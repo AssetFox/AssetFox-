@@ -1,4 +1,4 @@
-import {emptyRemainingLifeLimitLibrary, RemainingLifeLimitLibrary} from '@/shared/models/iAM/remaining-life-limit';
+import {emptyRemainingLifeLimit, emptyRemainingLifeLimitLibrary, RemainingLifeLimit, RemainingLifeLimitLibrary} from '@/shared/models/iAM/remaining-life-limit';
 import {any, append, clone, find, findIndex, propEq, reject, update} from 'ramda';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
@@ -9,7 +9,8 @@ import RemainingLifeLimitService from '@/services/remaining-life-limit.service';
 
 const state = {
     remainingLifeLimitLibraries: [] as RemainingLifeLimitLibrary[],
-    selectedRemainingLifeLimitLibrary: clone(emptyRemainingLifeLimitLibrary) as RemainingLifeLimitLibrary
+    selectedRemainingLifeLimitLibrary: clone(emptyRemainingLifeLimitLibrary) as RemainingLifeLimitLibrary,
+    scenarioRemainingLifeLimits: [] as RemainingLifeLimit[]
 };
 
 const mutations = {
@@ -36,7 +37,13 @@ const mutations = {
                 state.remainingLifeLimitLibraries
             );
         }
-    }
+    },
+    scenarioRemainingLifeLimitMutator(
+        state: any,
+        remainingLifeLimits: RemainingLifeLimit[],
+    ) {
+        state.scenarioRemainingLifeLimits = clone(remainingLifeLimits);
+    },
 };
 
 const actions = {
@@ -52,31 +59,65 @@ const actions = {
             });
     },
     async upsertRemainingLifeLimitLibrary({dispatch, commit}: any, payload: any) {
-        await RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(payload.library, payload.scenarioId)
+        await RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(payload.library)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.remainingLifeLimitLibraries, payload.scenarioId)) {
-                        const unAppliedLibrary: RemainingLifeLimitLibrary = unapplyLibrary(getAppliedLibrary(
-                            state.remainingLifeLimitLibraries, payload.scenarioId), payload.scenarioId);
-                        commit('addedOrUpdatedRemainingLifeLimitLibraryMutator', unAppliedLibrary);
-                    }
+                    // if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.remainingLifeLimitLibraries, payload.scenarioId)) {
+                    //     const unAppliedLibrary: RemainingLifeLimitLibrary = unapplyLibrary(getAppliedLibrary(
+                    //         state.remainingLifeLimitLibraries, payload.scenarioId), payload.scenarioId);
+                    //     commit('addedOrUpdatedRemainingLifeLimitLibraryMutator', unAppliedLibrary);
+                    // }
 
-                    const library: RemainingLifeLimitLibrary = {
-                        ...payload.library,
-                        appliedScenarioIds: payload.scenarioId !== getBlankGuid() &&
-                        payload.library.appliedScenarioIds.indexOf(payload.scenarioId) === -1
-                            ? append(payload.scenarioId, payload.library.appliedScenarioIds)
-                            : payload.library.appliedScenarioIds
-                    };
+                    // const library: RemainingLifeLimitLibrary = {
+                    //     ...payload.library,
+                    //     appliedScenarioIds: payload.scenarioId !== getBlankGuid() &&
+                    //     payload.library.appliedScenarioIds.indexOf(payload.scenarioId) === -1
+                    //         ? append(payload.scenarioId, payload.library.appliedScenarioIds)
+                    //         : payload.library.appliedScenarioIds
+                    // };
 
-                    const message: string = any(propEq('id', library.id), state.remainingLifeLimitLibraries)
+                    const message: string = any(propEq('id', payload.library.id), state.remainingLifeLimitLibraries)
                         ? 'Updated remaining life limit library'
                         : 'Added remaining life limit library';
-                    commit('addedOrUpdatedRemainingLifeLimitLibraryMutator', library);
-                    commit('selectedRemainingLifeLimitLibraryMutator', library.id);
+                    commit('addedOrUpdatedRemainingLifeLimitLibraryMutator', payload.library);
+                    commit('selectedRemainingLifeLimitLibraryMutator', payload.library.id);
                     dispatch('setSuccessMessage', {message: message});
                 }
             });
+    },
+    async getScenariotRemainingLifeLimit({ commit }: any, scenarioId: string) {
+        await RemainingLifeLimitService.getScenarioRemainingLifeLimit(
+            scenarioId,
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                commit(
+                    'scenarioRemainingLifeLimitMutator',
+                    response.data as RemainingLifeLimit[],
+                );
+            }
+        });
+    },
+    async upsertScenarioRemainingLifeLimit(
+        { dispatch, commit }: any,
+        payload: any,
+    ) {
+        await RemainingLifeLimitService.upsertScenarioRemainingLifeLimits(
+            payload.scenarioRemainingLifeLimits,
+            payload.scenarioId,
+        ).then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                commit(
+                    'scenarioRemainingLifeLimitMutator',
+                    payload.scenarioRemainingLifeLimits,
+                );
+                dispatch('setSuccessMessage', {
+                    message: 'Modified remaining life minits',
+                });
+            }
+        });
     },
     async deleteRemainingLifeLimitLibrary({dispatch, commit, state}: any, payload: any) {
         await RemainingLifeLimitService.deleteRemainingLifeLimitLibrary(payload.libraryId)

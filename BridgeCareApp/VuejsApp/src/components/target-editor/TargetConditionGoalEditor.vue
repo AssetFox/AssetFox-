@@ -357,15 +357,9 @@ import {
 } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import {
-    getAppliedLibraryId,
-    hasAppliedLibrary,
-} from '@/shared/utils/library-utils';
-import {
     CriterionLibrary,
-    emptyCriterionLibrary,
 } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
-import { hasValue } from '@/shared/utils/has-value-util';
 
 @Component({
     components: {
@@ -377,7 +371,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 })
 export default class TargetConditionGoalEditor extends Vue {
     @State(
-        state => state.targetConditionGoalModule.targetConditionGoalLibraries,
+        state => state.targetConditionGoalModule.targetConditionGoal3Libraries,
     )
     stateTargetConditionGoalLibraries: TargetConditionGoalLibrary[];
     @State(

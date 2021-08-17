@@ -103,11 +103,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var remainingLifeLimitLibraryId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(
                 new RemainingLifeLimitLibraryEntity {Id = remainingLifeLimitLibraryId, Name = "Test Name"});
-            _testHelper.UnitOfWork.Context.AddEntity(new RemainingLifeLimitLibrarySimulationEntity
-            {
-                RemainingLifeLimitLibraryId = remainingLifeLimitLibraryId,
-                SimulationId = _testHelper.TestSimulation.Id
-            });
 
             var targetConditionGoalLibraryId = Guid.NewGuid();
             _testHelper.UnitOfWork.Context.AddEntity(
@@ -459,7 +454,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     .Include(_ => _.PerformanceCurves)
                     .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
                     .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
+
+                    .Include(_ => _.RemainingLifeLimits)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.RemainingLifeLimits)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
 
                     .Include(_ => _.ScenarioTargetConditionalGoals)
                     .ThenInclude(_ => _.Attribute)
@@ -528,7 +528,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     .Include(_ => _.PerformanceCurves)
                     .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
                     .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
+
+                    .Include(_ => _.RemainingLifeLimits)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.RemainingLifeLimits)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
 
                     .Include(_ => _.ScenarioTargetConditionalGoals)
                     .ThenInclude(_ => _.Attribute)
@@ -589,8 +594,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         originalSimulation.BudgetPriorityLibrarySimulationJoin.BudgetPriorityLibraryId);
                     Assert.Equal(clonedSimulation.CashFlowRuleLibrarySimulationJoin.CashFlowRuleLibraryId,
                         originalSimulation.CashFlowRuleLibrarySimulationJoin.CashFlowRuleLibraryId);
-                    Assert.Equal(clonedSimulation.RemainingLifeLimitLibrarySimulationJoin.RemainingLifeLimitLibraryId,
-                        originalSimulation.RemainingLifeLimitLibrarySimulationJoin.RemainingLifeLimitLibraryId);
                     var clonedCommittedProjects = clonedSimulation.CommittedProjects.ToList();
                     var originalCommittedProjects = originalSimulation.CommittedProjects.ToList();
                     Assert.Equal(clonedCommittedProjects.Count, originalCommittedProjects.Count);

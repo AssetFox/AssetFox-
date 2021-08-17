@@ -20,4912 +20,5008 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AggregatedResultEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Discriminator")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("MaintainableAssetId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("MaintainableAssetId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<double?>("NumericValue")
-                        .HasColumnType("float");
+                b.Property<double?>("NumericValue")
+                    .HasColumnType("float");
 
-                    b.Property<string>("TextValue")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("TextValue")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
+                b.Property<int>("Year")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("MaintainableAssetId");
+                b.HasIndex("MaintainableAssetId");
 
-                    b.ToTable("AggregatedResult");
-                });
+                b.ToTable("AggregatedResult");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid?>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<int>("OptimizationStrategy")
-                        .HasColumnType("int");
+                b.Property<int>("OptimizationStrategy")
+                    .HasColumnType("int");
 
-                    b.Property<bool>("ShouldApplyMultipleFeasibleCosts")
-                        .HasColumnType("bit");
+                b.Property<bool>("ShouldApplyMultipleFeasibleCosts")
+                    .HasColumnType("bit");
 
-                    b.Property<bool>("ShouldDeteriorateDuringCashFlow")
-                        .HasColumnType("bit");
+                b.Property<bool>("ShouldDeteriorateDuringCashFlow")
+                    .HasColumnType("bit");
 
-                    b.Property<bool>("ShouldUseExtraFundsAcrossBudgets")
-                        .HasColumnType("bit");
+                b.Property<bool>("ShouldUseExtraFundsAcrossBudgets")
+                    .HasColumnType("bit");
 
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("SpendingStrategy")
-                        .HasColumnType("int");
+                b.Property<int>("SpendingStrategy")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
+                b.HasIndex("SimulationId")
+                    .IsUnique();
 
-                    b.ToTable("AnalysisMethod");
-                });
+                b.ToTable("AnalysisMethod");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnnouncementEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Content")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Announcement");
-                });
+                b.ToTable("Announcement");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Discriminator")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("MaintainableAssetId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("MaintainableAssetId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<double?>("NumericValue")
-                        .HasColumnType("float");
+                b.Property<double?>("NumericValue")
+                    .HasColumnType("float");
 
-                    b.Property<string>("TextValue")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("TextValue")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("TimeStamp")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("MaintainableAssetId");
+                b.HasIndex("MaintainableAssetId");
 
-                    b.ToTable("AttributeDatum");
-                });
+                b.ToTable("AttributeDatum");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumLocationEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeDatumId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeDatumId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<int?>("Direction")
-                        .HasColumnType("int");
+                b.Property<int?>("Direction")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Discriminator")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("End")
-                        .HasColumnType("float");
+                b.Property<double?>("End")
+                    .HasColumnType("float");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("LocationIdentifier")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("LocationIdentifier")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("Start")
-                        .HasColumnType("float");
+                b.Property<double?>("Start")
+                    .HasColumnType("float");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeDatumId")
-                        .IsUnique();
+                b.HasIndex("AttributeDatumId")
+                    .IsUnique();
 
-                    b.ToTable("AttributeDatumLocation");
-                });
+                b.ToTable("AttributeDatumLocation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AggregationRuleType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("AggregationRuleType")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Command")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Command")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ConnectionType")
-                        .HasColumnType("int");
+                b.Property<int>("ConnectionType")
+                    .HasColumnType("int");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("DataType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("DataType")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DefaultValue")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("DefaultValue")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsAscending")
-                        .HasColumnType("bit");
+                b.Property<bool>("IsAscending")
+                    .HasColumnType("bit");
 
-                    b.Property<bool>("IsCalculated")
-                        .HasColumnType("bit");
+                b.Property<bool>("IsCalculated")
+                    .HasColumnType("bit");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<double?>("Maximum")
-                        .HasColumnType("float");
+                b.Property<double?>("Maximum")
+                    .HasColumnType("float");
 
-                    b.Property<double?>("Minimum")
-                        .HasColumnType("float");
+                b.Property<double?>("Minimum")
+                    .HasColumnType("float");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                b.HasIndex("Name")
+                    .IsUnique();
 
-                    b.ToTable("Attribute");
-                });
+                b.ToTable("Attribute");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEquationCriterionLibraryEntity", b =>
-                {
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("EquationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("EquationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid?>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("AttributeId", "EquationId");
+                b.HasKey("AttributeId", "EquationId");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.HasIndex("EquationId")
-                        .IsUnique();
+                b.HasIndex("EquationId")
+                    .IsUnique();
 
-                    b.ToTable("Attribute_Equation_CriterionLibrary");
-                });
+                b.ToTable("Attribute_Equation_CriterionLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AnalysisMethodId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AnalysisMethodId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<double>("Limit")
-                        .HasColumnType("float");
+                b.Property<double>("Limit")
+                    .HasColumnType("float");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AnalysisMethodId")
-                        .IsUnique();
+                b.HasIndex("AnalysisMethodId")
+                    .IsUnique();
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.ToTable("Benefit");
-                });
+                b.ToTable("Benefit");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitQuantifierEntity", b =>
-                {
-                    b.Property<Guid>("NetworkId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("NetworkId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("EquationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("EquationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("NetworkId");
+                b.HasKey("NetworkId");
 
-                    b.HasIndex("EquationId")
-                        .IsUnique();
+                b.HasIndex("EquationId")
+                    .IsUnique();
 
-                    b.HasIndex("NetworkId");
+                b.HasIndex("NetworkId");
 
-                    b.ToTable("BenefitQuantifier");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetAmountEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BudgetId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Value")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BudgetId");
-
-                    b.ToTable("BudgetAmount");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BudgetLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BudgetLibraryId");
-
-                    b.ToTable("Budget");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibraryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BudgetLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibrarySimulationEntity", b =>
-                {
-                    b.Property<Guid>("BudgetLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("BudgetLibraryId", "SimulationId");
-
-                    b.HasIndex("BudgetLibraryId");
-
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
-
-                    b.ToTable("BudgetLibrary_Simulation");
-                });
+                b.ToTable("BenefitQuantifier");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPercentagePairEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BudgetId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid?>("BudgetPriorityId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BudgetPriorityId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<decimal>("Percentage")
+                    .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("Percentage")
-                        .HasColumnType("decimal(18,2)");
+                b.Property<Guid>("ScenarioBudgetId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.Property<Guid?>("ScenarioBudgetPriorityEntityId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("BudgetId");
+                b.Property<Guid?>("ScenarioBudgetPriorityId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("BudgetPriorityId");
+                b.HasKey("Id");
 
-                    b.ToTable("BudgetPercentagePair");
-                });
+                b.HasIndex("ScenarioBudgetId");
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                b.HasIndex("ScenarioBudgetPriorityEntityId");
 
-                    b.Property<Guid>("BudgetPriorityLibraryId")
-                        .HasColumnType("uniqueidentifier");
+                b.HasIndex("ScenarioBudgetPriorityId");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PriorityLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BudgetPriorityLibraryId");
-
-                    b.ToTable("BudgetPriority");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityLibraryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BudgetPriorityLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityLibrarySimulationEntity", b =>
-                {
-                    b.Property<Guid>("BudgetPriorityLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("BudgetPriorityLibraryId", "SimulationId");
-
-                    b.HasIndex("BudgetPriorityLibraryId");
-
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
-
-                    b.ToTable("BudgetPriorityLibrary_Simulation");
-                });
+                b.ToTable("BudgetPercentagePair");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowDistributionRuleEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CashFlowRuleId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CashFlowRuleId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("CostCeiling")
-                        .HasColumnType("decimal(18,2)");
+                b.Property<decimal>("CostCeiling")
+                    .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<int>("DurationInYears")
-                        .HasColumnType("int");
+                b.Property<int>("DurationInYears")
+                    .HasColumnType("int");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("YearlyPercentages")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("YearlyPercentages")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("CashFlowRuleId");
+                b.HasIndex("CashFlowRuleId");
 
-                    b.ToTable("CashFlowDistributionRule");
-                });
+                b.ToTable("CashFlowDistributionRule");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CashFlowRuleLibraryId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CashFlowRuleLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("CashFlowRuleLibraryId");
+                b.HasIndex("CashFlowRuleLibraryId");
 
-                    b.ToTable("CashFlowRule");
-                });
+                b.ToTable("CashFlowRule");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibraryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("CashFlowRuleLibrary");
-                });
+                b.ToTable("CashFlowRuleLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibrarySimulationEntity", b =>
-                {
-                    b.Property<Guid>("CashFlowRuleLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("CashFlowRuleLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CashFlowRuleLibraryId", "SimulationId");
+                b.HasKey("CashFlowRuleLibraryId", "SimulationId");
 
-                    b.HasIndex("CashFlowRuleLibraryId");
+                b.HasIndex("CashFlowRuleLibraryId");
 
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
+                b.HasIndex("SimulationId")
+                    .IsUnique();
 
-                    b.ToTable("CashFlowRuleLibrary_Simulation");
-                });
+                b.ToTable("CashFlowRuleLibrary_Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectConsequenceEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ChangeValue")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ChangeValue")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("CommittedProjectId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CommittedProjectId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("CommittedProjectId");
+                b.HasIndex("CommittedProjectId");
 
-                    b.ToTable("CommittedProjectConsequence");
-                });
+                b.ToTable("CommittedProjectConsequence");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BudgetId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<double>("Cost")
+                    .HasColumnType("float");
 
-                    b.Property<double>("Cost")
-                        .HasColumnType("float");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("MaintainableAssetId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("MaintainableAssetId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<Guid>("ScenarioBudgetId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("SectionEntityId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid?>("SectionEntityId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("ShadowForAnyTreatment")
-                        .HasColumnType("int");
+                b.Property<int>("ShadowForAnyTreatment")
+                    .HasColumnType("int");
 
-                    b.Property<int>("ShadowForSameTreatment")
-                        .HasColumnType("int");
+                b.Property<int>("ShadowForSameTreatment")
+                    .HasColumnType("int");
 
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
+                b.Property<int>("Year")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("BudgetId");
+                b.HasIndex("MaintainableAssetId");
 
-                    b.HasIndex("MaintainableAssetId");
+                b.HasIndex("ScenarioBudgetId");
 
-                    b.HasIndex("SectionEntityId");
+                b.HasIndex("SectionEntityId");
 
-                    b.HasIndex("SimulationId");
+                b.HasIndex("SimulationId");
 
-                    b.ToTable("CommittedProject");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ChangeValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("SelectableTreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttributeId");
-
-                    b.HasIndex("SelectableTreatmentId");
-
-                    b.ToTable("TreatmentConsequence");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEquationEntity", b =>
-                {
-                    b.Property<Guid>("ConditionalTreatmentConsequenceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("EquationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ConditionalTreatmentConsequenceId", "EquationId");
-
-                    b.HasIndex("ConditionalTreatmentConsequenceId")
-                        .IsUnique();
-
-                    b.HasIndex("EquationId")
-                        .IsUnique();
-
-                    b.ToTable("TreatmentConsequence_Equation");
-                });
+                b.ToTable("CommittedProject");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryAnalysisMethodEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AnalysisMethodId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AnalysisMethodId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CriterionLibraryId", "AnalysisMethodId");
+                b.HasKey("CriterionLibraryId", "AnalysisMethodId");
 
-                    b.HasIndex("AnalysisMethodId")
-                        .IsUnique();
+                b.HasIndex("AnalysisMethodId")
+                    .IsUnique();
 
-                    b.HasIndex("CriterionLibraryId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.ToTable("CriterionLibrary_AnalysisMethod");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryBudgetEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BudgetId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CriterionLibraryId", "BudgetId");
-
-                    b.HasIndex("BudgetId")
-                        .IsUnique();
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.ToTable("CriterionLibrary_Budget");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryBudgetPriorityEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BudgetPriorityId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CriterionLibraryId", "BudgetPriorityId");
-
-                    b.HasIndex("BudgetPriorityId")
-                        .IsUnique();
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.ToTable("CriterionLibrary_BudgetPriority");
-                });
+                b.ToTable("CriterionLibrary_AnalysisMethod");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryCashFlowRuleEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CashFlowRuleId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CashFlowRuleId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CriterionLibraryId", "CashFlowRuleId");
+                b.HasKey("CriterionLibraryId", "CashFlowRuleId");
 
-                    b.HasIndex("CashFlowRuleId")
-                        .IsUnique();
+                b.HasIndex("CashFlowRuleId")
+                    .IsUnique();
 
-                    b.HasIndex("CriterionLibraryId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.ToTable("CriterionLibrary_CashFlowRule");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryConditionalTreatmentConsequenceEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ConditionalTreatmentConsequenceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CriterionLibraryId", "ConditionalTreatmentConsequenceId");
-
-                    b.HasIndex("ConditionalTreatmentConsequenceId")
-                        .IsUnique();
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.ToTable("CriterionLibrary_TreatmentConsequence");
-                });
+                b.ToTable("CriterionLibrary_CashFlowRule");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryDeficientConditionGoalEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("DeficientConditionGoalId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("DeficientConditionGoalId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CriterionLibraryId", "DeficientConditionGoalId");
+                b.HasKey("CriterionLibraryId", "DeficientConditionGoalId");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.HasIndex("DeficientConditionGoalId")
-                        .IsUnique();
+                b.HasIndex("DeficientConditionGoalId")
+                    .IsUnique();
 
-                    b.ToTable("CriterionLibrary_DeficientConditionGoal");
-                });
+                b.ToTable("CriterionLibrary_DeficientConditionGoal");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsSingleUse")
-                        .HasColumnType("bit");
+                b.Property<bool>("IsSingleUse")
+                    .HasColumnType("bit");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("MergedCriteriaExpression")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("MergedCriteriaExpression")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("CriterionLibrary");
-                });
+                b.ToTable("CriterionLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryRemainingLifeLimitEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("RemainingLifeLimitId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("RemainingLifeLimitId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CriterionLibraryId", "RemainingLifeLimitId");
+                b.HasKey("CriterionLibraryId", "RemainingLifeLimitId");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.HasIndex("RemainingLifeLimitId")
-                        .IsUnique();
+                b.HasIndex("RemainingLifeLimitId")
+                    .IsUnique();
 
-                    b.ToTable("CriterionLibrary_RemainingLifeLimit");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibrarySelectableTreatmentEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SelectableTreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CriterionLibraryId", "SelectableTreatmentId");
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.HasIndex("SelectableTreatmentId")
-                        .IsUnique();
-
-                    b.ToTable("CriterionLibrary_Treatment");
-                });
+                b.ToTable("CriterionLibrary_RemainingLifeLimit");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTargetConditionGoalEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("TargetConditionGoalId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("TargetConditionGoalId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CriterionLibraryId", "TargetConditionGoalId");
+                b.HasKey("CriterionLibraryId", "TargetConditionGoalId");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.HasIndex("TargetConditionGoalId")
-                        .IsUnique();
+                b.HasIndex("TargetConditionGoalId")
+                    .IsUnique();
 
-                    b.ToTable("CriterionLibrary_TargetConditionGoal");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentCostEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TreatmentCostId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CriterionLibraryId", "TreatmentCostId");
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.HasIndex("TreatmentCostId")
-                        .IsUnique();
-
-                    b.ToTable("CriterionLibrary_TreatmentCost");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentSupersessionEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TreatmentSupersessionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CriterionLibraryId", "TreatmentSupersessionId");
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.HasIndex("TreatmentSupersessionId")
-                        .IsUnique();
-
-                    b.ToTable("CriterionLibrary_TreatmentSupersession");
-                });
+                b.ToTable("CriterionLibrary_TargetConditionGoal");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryUserEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("UserId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("CriterionLibraryId", "UserId");
+                b.HasKey("CriterionLibraryId", "UserId");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                b.HasIndex("UserId")
+                    .IsUnique();
 
-                    b.ToTable("CriterionLibrary_User");
-                });
+                b.ToTable("CriterionLibrary_User");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("AllowedDeficientPercentage")
-                        .HasColumnType("float");
+                b.Property<double>("AllowedDeficientPercentage")
+                    .HasColumnType("float");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("DeficientConditionGoalLibraryId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("DeficientConditionGoalLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("DeficientLimit")
-                        .HasColumnType("float");
+                b.Property<double>("DeficientLimit")
+                    .HasColumnType("float");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("DeficientConditionGoalLibraryId");
+                b.HasIndex("DeficientConditionGoalLibraryId");
 
-                    b.ToTable("DeficientConditionGoal");
-                });
+                b.ToTable("DeficientConditionGoal");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalLibraryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("DeficientConditionGoalLibrary");
-                });
+                b.ToTable("DeficientConditionGoalLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Expression")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Expression")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Equation");
-                });
+                b.ToTable("Equation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.FacilityEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("NetworkId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("NetworkId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("NetworkId");
+                b.HasIndex("NetworkId");
 
-                    b.ToTable("Facility");
-                });
+                b.ToTable("Facility");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.InvestmentPlanEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<int>("FirstYearOfAnalysisPeriod")
-                        .HasColumnType("int");
+                b.Property<int>("FirstYearOfAnalysisPeriod")
+                    .HasColumnType("int");
 
-                    b.Property<double>("InflationRatePercentage")
-                        .HasColumnType("float");
+                b.Property<double>("InflationRatePercentage")
+                    .HasColumnType("float");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<decimal>("MinimumProjectCostLimit")
-                        .HasColumnType("decimal(18,2)");
+                b.Property<decimal>("MinimumProjectCostLimit")
+                    .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("NumberOfYearsInAnalysisPeriod")
-                        .HasColumnType("int");
+                b.Property<int>("NumberOfYearsInAnalysisPeriod")
+                    .HasColumnType("int");
 
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
+                b.HasIndex("SimulationId")
+                    .IsUnique();
 
-                    b.ToTable("InvestmentPlan");
-                });
+                b.ToTable("InvestmentPlan");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CriterionLibraryPerformanceCurveEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetAmountEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("PerformanceCurveId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("BudgetId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CriterionLibraryId", "PerformanceCurveId");
+                b.Property<decimal>("Value")
+                    .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.Property<int>("Year")
+                    .HasColumnType("int");
 
-                    b.HasIndex("PerformanceCurveId")
-                        .IsUnique();
+                b.HasKey("Id");
 
-                    b.ToTable("CriterionLibrary_PerformanceCurve");
-                });
+                b.HasIndex("BudgetId");
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                b.ToTable("BudgetAmount");
+            });
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("BudgetLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("PerformanceCurveLibraryId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Shift")
-                        .HasColumnType("bit");
+                b.HasKey("Id");
 
-                    b.HasKey("Id");
+                b.HasIndex("BudgetLibraryId");
 
-                    b.HasIndex("AttributeId");
+                b.ToTable("Budget");
+            });
 
-                    b.HasIndex("PerformanceCurveLibraryId");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetLibraryEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.ToTable("PerformanceCurve");
-                });
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEquationEntity", b =>
-                {
-                    b.Property<Guid>("PerformanceCurveId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("EquationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.HasKey("Id");
 
-                    b.HasKey("PerformanceCurveId", "EquationId");
+                b.ToTable("BudgetLibrary");
+            });
 
-                    b.HasIndex("EquationId")
-                        .IsUnique();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.CriterionLibraryBudgetEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("PerformanceCurveId")
-                        .IsUnique();
+                b.Property<Guid>("BudgetId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.ToTable("PerformanceCurve_Equation");
-                });
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TreatmentCostEquationEntity", b =>
-                {
-                    b.Property<Guid>("TreatmentCostId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("EquationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.HasKey("CriterionLibraryId", "BudgetId");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.HasIndex("BudgetId")
+                    .IsUnique();
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.HasKey("TreatmentCostId", "EquationId");
+                b.ToTable("CriterionLibrary_Budget");
+            });
 
-                    b.HasIndex("EquationId")
-                        .IsUnique();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("TreatmentCostId")
-                        .IsUnique();
+                b.Property<Guid>("BudgetPriorityLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.ToTable("TreatmentCost_Equation");
-                });
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<int>("PriorityLevel")
+                    .HasColumnType("int");
+
+                b.Property<int?>("Year")
+                    .HasColumnType("int");
+
+                b.HasKey("Id");
+
+                b.HasIndex("BudgetPriorityLibraryId");
+
+                b.ToTable("BudgetPriority");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityLibraryEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Name")
+                    .HasColumnType("nvarchar(max)");
+
+                b.HasKey("Id");
+
+                b.ToTable("BudgetPriorityLibrary");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.CriterionLibraryBudgetPriorityEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("BudgetPriorityId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("CriterionLibraryId", "BudgetPriorityId");
+
+                b.HasIndex("BudgetPriorityId")
+                    .IsUnique();
+
+                b.HasIndex("CriterionLibraryId");
+
+                b.ToTable("CriterionLibrary_BudgetPriority");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.CriterionLibraryPerformanceCurveEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("PerformanceCurveId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("CriterionLibraryId", "PerformanceCurveId");
+
+                b.HasIndex("CriterionLibraryId");
+
+                b.HasIndex("PerformanceCurveId")
+                    .IsUnique();
+
+                b.ToTable("CriterionLibrary_PerformanceCurve");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<Guid>("PerformanceCurveLibraryId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<bool>("Shift")
+                    .HasColumnType("bit");
+
+                b.HasKey("Id");
+
+                b.HasIndex("AttributeId");
+
+                b.HasIndex("PerformanceCurveLibraryId");
+
+                b.ToTable("PerformanceCurve");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEquationEntity", b =>
+            {
+                b.Property<Guid>("PerformanceCurveId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("EquationId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("PerformanceCurveId", "EquationId");
+
+                b.HasIndex("EquationId")
+                    .IsUnique();
+
+                b.HasIndex("PerformanceCurveId")
+                    .IsUnique();
+
+                b.ToTable("PerformanceCurve_Equation");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.HasKey("Id");
+
+                b.ToTable("PerformanceCurveLibrary");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<string>("ChangeValue")
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("SelectableTreatmentId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("AttributeId");
+
+                b.HasIndex("SelectableTreatmentId");
+
+                b.ToTable("TreatmentConsequence");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEquationEntity", b =>
+            {
+                b.Property<Guid>("ConditionalTreatmentConsequenceId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("EquationId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("ConditionalTreatmentConsequenceId", "EquationId");
+
+                b.HasIndex("ConditionalTreatmentConsequenceId")
+                    .IsUnique();
+
+                b.HasIndex("EquationId")
+                    .IsUnique();
+
+                b.ToTable("TreatmentConsequence_Equation");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibraryConditionalTreatmentConsequenceEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("ConditionalTreatmentConsequenceId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("CriterionLibraryId", "ConditionalTreatmentConsequenceId");
+
+                b.HasIndex("ConditionalTreatmentConsequenceId")
+                    .IsUnique();
+
+                b.HasIndex("CriterionLibraryId");
+
+                b.ToTable("CriterionLibrary_TreatmentConsequence");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibrarySelectableTreatmentEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("SelectableTreatmentId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("CriterionLibraryId", "SelectableTreatmentId");
+
+                b.HasIndex("CriterionLibraryId");
+
+                b.HasIndex("SelectableTreatmentId")
+                    .IsUnique();
+
+                b.ToTable("CriterionLibrary_Treatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibraryTreatmentCostEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("TreatmentCostId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("CriterionLibraryId", "TreatmentCostId");
+
+                b.HasIndex("CriterionLibraryId");
+
+                b.HasIndex("TreatmentCostId")
+                    .IsUnique();
+
+                b.ToTable("CriterionLibrary_TreatmentCost");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibraryTreatmentSupersessionEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("TreatmentSupersessionId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("CriterionLibraryId", "TreatmentSupersessionId");
+
+                b.HasIndex("CriterionLibraryId");
+
+                b.HasIndex("TreatmentSupersessionId")
+                    .IsUnique();
+
+                b.ToTable("CriterionLibrary_TreatmentSupersession");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<int>("ShadowForAnyTreatment")
+                    .HasColumnType("int");
+
+                b.Property<int>("ShadowForSameTreatment")
+                    .HasColumnType("int");
+
+                b.Property<Guid>("TreatmentLibraryId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TreatmentLibraryId");
+
+                b.ToTable("SelectableTreatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("TreatmentId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TreatmentId");
+
+                b.ToTable("TreatmentCost");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEquationEntity", b =>
+            {
+                b.Property<Guid>("TreatmentCostId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("EquationId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("TreatmentCostId", "EquationId");
+
+                b.HasIndex("EquationId")
+                    .IsUnique();
+
+                b.HasIndex("TreatmentCostId")
+                    .IsUnique();
+
+                b.ToTable("TreatmentCost_Equation");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentLibraryEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.HasKey("Id");
+
+                b.ToTable("TreatmentLibrary");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSchedulingEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<int>("OffsetToFutureYear")
+                    .HasColumnType("int");
+
+                b.Property<Guid>("TreatmentId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TreatmentId");
+
+                b.ToTable("TreatmentScheduling");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSupersessionEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid?>("CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid?>("CriterionLibraryScenarioTreatmentSupersessionJoinTreatmentSupersessionId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("TreatmentId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TreatmentId");
+
+                b.HasIndex("CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId", "CriterionLibraryScenarioTreatmentSupersessionJoinTreatmentSupersessionId");
+
+                b.ToTable("TreatmentSupersession");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("FacilityName")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("FacilityName")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("NetworkId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("NetworkId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("SectionName")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("SectionName")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SpatialWeighting")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("SpatialWeighting")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("NetworkId");
+                b.HasIndex("NetworkId");
 
-                    b.ToTable("MaintainableAsset");
-                });
+                b.ToTable("MaintainableAsset");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetLocationEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<int?>("Direction")
-                        .HasColumnType("int");
+                b.Property<int?>("Direction")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Discriminator")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("End")
-                        .HasColumnType("float");
+                b.Property<double?>("End")
+                    .HasColumnType("float");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("LocationIdentifier")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("LocationIdentifier")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("MaintainableAssetId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("MaintainableAssetId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<double?>("Start")
-                        .HasColumnType("float");
+                b.Property<double?>("Start")
+                    .HasColumnType("float");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("MaintainableAssetId")
-                        .IsUnique();
+                b.HasIndex("MaintainableAssetId")
+                    .IsUnique();
 
-                    b.ToTable("MaintainableAssetLocation");
-                });
+                b.ToTable("MaintainableAssetLocation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Network");
-                });
+                b.ToTable("Network");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkRollupDetailEntity", b =>
-                {
-                    b.Property<Guid>("NetworkId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("NetworkId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Status")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("NetworkId");
+                b.HasKey("NetworkId");
 
-                    b.HasIndex("NetworkId")
-                        .IsUnique();
+                b.HasIndex("NetworkId")
+                    .IsUnique();
 
-                    b.ToTable("NetworkRollupDetail");
-                });
+                b.ToTable("NetworkRollupDetail");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NumericAttributeValueHistoryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("SectionId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SectionId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Value")
-                        .HasColumnType("float");
+                b.Property<double>("Value")
+                    .HasColumnType("float");
 
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
+                b.Property<int>("Year")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("SectionId");
+                b.HasIndex("SectionId");
 
-                    b.ToTable("NumericAttributeValueHistory");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibraryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PerformanceCurveLibrary");
-                });
+                b.ToTable("NumericAttributeValueHistory");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("RemainingLifeLimitLibraryId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("RemainingLifeLimitLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Value")
-                        .HasColumnType("float");
+                b.Property<double>("Value")
+                    .HasColumnType("float");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("RemainingLifeLimitLibraryId");
+                b.HasIndex("RemainingLifeLimitLibraryId");
 
-                    b.ToTable("RemainingLifeLimit");
-                });
+                b.ToTable("RemainingLifeLimit");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibraryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("RemainingLifeLimitLibrary");
-                });
+                b.ToTable("RemainingLifeLimitLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibrarySimulationEntity", b =>
-                {
-                    b.Property<Guid>("RemainingLifeLimitLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("RemainingLifeLimitLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("RemainingLifeLimitLibraryId", "SimulationId");
+                b.HasKey("RemainingLifeLimitLibraryId", "SimulationId");
 
-                    b.HasIndex("RemainingLifeLimitLibraryId");
+                b.HasIndex("RemainingLifeLimitLibraryId");
 
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
+                b.HasIndex("SimulationId")
+                    .IsUnique();
 
-                    b.ToTable("RemainingLifeLimitLibrary_Simulation");
-                });
+                b.ToTable("RemainingLifeLimitLibrary_Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ReportIndexEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime?>("ExpirationDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("ReportTypeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ReportTypeName")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Result")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Result")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("SimulationID")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid?>("SimulationID")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("SimulationID");
+                b.HasIndex("SimulationID");
 
-                    b.ToTable("ReportIndex");
-                });
+                b.ToTable("ReportIndex");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioConditionalTreatmentConsequenceEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.CriterionLibraryScenarioBudgetEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ScenarioConditionalTreatmentConsequenceId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ScenarioBudgetId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CriterionLibraryId", "ScenarioConditionalTreatmentConsequenceId");
+                b.HasKey("CriterionLibraryId", "ScenarioBudgetId");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.HasIndex("ScenarioConditionalTreatmentConsequenceId")
-                        .IsUnique();
+                b.HasIndex("ScenarioBudgetId")
+                    .IsUnique();
 
-                    b.ToTable("CriterionLibrary_ScenarioTreatmentConsequence");
-                });
+                b.ToTable("CriterionLibrary_ScenarioBudget");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioPerformanceCurveEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetAmountEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ScenarioPerformanceCurveId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("ScenarioBudgetId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("CriterionLibraryId", "ScenarioPerformanceCurveId");
+                b.Property<decimal>("Value")
+                    .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.Property<int>("Year")
+                    .HasColumnType("int");
 
-                    b.HasIndex("ScenarioPerformanceCurveId")
-                        .IsUnique();
+                b.HasKey("Id");
 
-                    b.ToTable("CriterionLibrary_ScenarioPerformanceCurve");
-                });
+                b.HasIndex("ScenarioBudgetId");
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioSelectableTreatmentEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+                b.ToTable("ScenarioBudgetAmount");
+            });
 
-                    b.Property<Guid>("ScenarioSelectableTreatmentId")
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CriterionLibraryId", "ScenarioSelectableTreatmentId");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("ScenarioSelectableTreatmentId")
-                        .IsUnique();
+                b.HasKey("Id");
 
-                    b.ToTable("CriterionLibrary_ScenarioTreatment");
-                });
+                b.HasIndex("SimulationId");
+
+                b.ToTable("ScenarioBudget");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.CriterionLibraryScenarioBudgetPriorityEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("ScenarioBudgetPriorityId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("CriterionLibraryId", "ScenarioBudgetPriorityId");
+
+                b.HasIndex("CriterionLibraryId");
+
+                b.HasIndex("ScenarioBudgetPriorityId")
+                    .IsUnique();
+
+                b.ToTable("CriterionLibrary_ScenarioBudgetPriority");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.ScenarioBudgetPriorityEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<int>("PriorityLevel")
+                    .HasColumnType("int");
+
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<int?>("Year")
+                    .HasColumnType("int");
+
+                b.HasKey("Id");
+
+                b.HasIndex("SimulationId");
+
+                b.ToTable("ScenarioBudgetPriority");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTargetConditionGoalEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ScenarioTargetConditionGoalId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ScenarioTargetConditionGoalId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CriterionLibraryId", "ScenarioTargetConditionGoalId");
+                b.HasKey("CriterionLibraryId", "ScenarioTargetConditionGoalId");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.HasIndex("ScenarioTargetConditionGoalId")
-                        .IsUnique();
+                b.HasIndex("ScenarioTargetConditionGoalId")
+                    .IsUnique();
 
-                    b.ToTable("CriterionLibrary_ScenarioTargetConditionGoal");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTreatmentCostEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ScenarioTreatmentCostId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CriterionLibraryId", "ScenarioTreatmentCostId");
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.HasIndex("ScenarioTreatmentCostId")
-                        .IsUnique();
-
-                    b.ToTable("CriterionLibrary_ScenarioTreatmentCost");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTreatmentSupersessionEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TreatmentSupersessionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("CriterionLibraryId", "TreatmentSupersessionId");
-
-                    b.HasIndex("CriterionLibraryId");
-
-                    b.HasIndex("TreatmentSupersessionId")
-                        .IsUnique();
-
-                    b.ToTable("CriterionLibrary_ScenarioTreatmentSupersession");
-                });
+                b.ToTable("CriterionLibrary_ScenarioTargetConditionGoal");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.CriterionLibraryScenarioDeficientConditionGoalEntity", b =>
-                {
-                    b.Property<Guid>("CriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ScenarioDeficientConditionGoalId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ScenarioDeficientConditionGoalId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("CriterionLibraryId", "ScenarioDeficientConditionGoalId");
+                b.HasKey("CriterionLibraryId", "ScenarioDeficientConditionGoalId");
 
-                    b.HasIndex("CriterionLibraryId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.HasIndex("ScenarioDeficientConditionGoalId")
-                        .IsUnique();
+                b.HasIndex("ScenarioDeficientConditionGoalId")
+                    .IsUnique();
 
-                    b.ToTable("CriterionLibrary_ScenarioDeficientConditionGoal");
-                });
+                b.ToTable("CriterionLibrary_ScenarioDeficientConditionGoal");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.ScenarioDeficientConditionGoalEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("AllowedDeficientPercentage")
-                        .HasColumnType("float");
+                b.Property<double>("AllowedDeficientPercentage")
+                    .HasColumnType("float");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<double>("DeficientLimit")
-                        .HasColumnType("float");
+                b.Property<double>("DeficientLimit")
+                    .HasColumnType("float");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("SimulationId");
+                b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioDeficientConditionGoal");
-                });
+                b.ToTable("ScenarioDeficientConditionGoal");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.CriterionLibraryScenarioPerformanceCurveEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ScenarioPerformanceCurveId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ChangeValue")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.HasKey("CriterionLibraryId", "ScenarioPerformanceCurveId");
 
-                    b.Property<Guid>("ScenarioSelectableTreatmentId")
-                        .HasColumnType("uniqueidentifier");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.HasKey("Id");
+                b.HasIndex("ScenarioPerformanceCurveId")
+                    .IsUnique();
 
-                    b.HasIndex("AttributeId");
+                b.ToTable("CriterionLibrary_ScenarioPerformanceCurve");
+            });
 
-                    b.HasIndex("ScenarioSelectableTreatmentId");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.ScenarioPerformanceCurveEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.ToTable("ScenarioConditionalTreatmentConsequences");
-                });
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEquationEntity", b =>
-                {
-                    b.Property<Guid>("ScenarioConditionalTreatmentConsequenceId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("EquationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<bool>("Shift")
+                    .HasColumnType("bit");
 
-                    b.HasKey("ScenarioConditionalTreatmentConsequenceId", "EquationId");
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("EquationId")
-                        .IsUnique();
+                b.HasKey("Id");
 
-                    b.HasIndex("ScenarioConditionalTreatmentConsequenceId")
-                        .IsUnique();
+                b.HasIndex("AttributeId");
 
-                    b.ToTable("ScenarioTreatmentConsequence_Equation");
-                });
+                b.HasIndex("SimulationId");
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                b.ToTable("ScenarioPerformanceCurve");
+            });
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.ScenarioPerformanceCurveEquationEntity", b =>
+            {
+                b.Property<Guid>("ScenarioPerformanceCurveId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("EquationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<bool>("Shift")
-                        .HasColumnType("bit");
+                b.HasKey("ScenarioPerformanceCurveId", "EquationId");
 
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+                b.HasIndex("EquationId")
+                    .IsUnique();
 
-                    b.HasKey("Id");
+                b.HasIndex("ScenarioPerformanceCurveId")
+                    .IsUnique();
 
-                    b.HasIndex("AttributeId");
-
-                    b.HasIndex("SimulationId");
-
-                    b.ToTable("ScenarioPerformanceCurve");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEquationEntity", b =>
-                {
-                    b.Property<Guid>("ScenarioPerformanceCurveId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("EquationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ScenarioPerformanceCurveId", "EquationId");
-
-                    b.HasIndex("EquationId")
-                        .IsUnique();
-
-                    b.HasIndex("ScenarioPerformanceCurveId")
-                        .IsUnique();
-
-                    b.ToTable("ScenarioPerformanceCurve_Equation");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentBudgetEntity", b =>
-                {
-                    b.Property<Guid>("ScenarioSelectableTreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BudgetId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ScenarioSelectableTreatmentId", "BudgetId");
-
-                    b.HasIndex("BudgetId");
-
-                    b.HasIndex("ScenarioSelectableTreatmentId");
-
-                    b.ToTable("ScenarioTreatment_Budget");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ScenarioTreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("ShadowForAnyTreatment")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ShadowForSameTreatment")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SimulationId");
-
-                    b.ToTable("ScenarioSelectableTreatment");
-                });
+                b.ToTable("ScenarioPerformanceCurve_Equation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTargetConditionGoalEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Target")
-                        .HasColumnType("float");
+                b.Property<double>("Target")
+                    .HasColumnType("float");
 
-                    b.Property<int?>("Year")
-                        .HasColumnType("int");
+                b.Property<int?>("Year")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("SimulationId");
+                b.HasIndex("SimulationId");
 
-                    b.ToTable("ScenarioTargetConditionGoals");
-                });
+                b.ToTable("ScenarioTargetConditionGoals");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentCostEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioConditionalTreatmentConsequenceEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ScenarioConditionalTreatmentConsequenceId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ScenarioTreatmentId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                b.HasKey("CriterionLibraryId", "ScenarioConditionalTreatmentConsequenceId");
 
-                    b.HasIndex("ScenarioTreatmentId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.ToTable("ScenarioTreatmentCost");
-                });
+                b.HasIndex("ScenarioConditionalTreatmentConsequenceId")
+                    .IsUnique();
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentCostEquationEntity", b =>
-                {
-                    b.Property<Guid>("ScenarioTreatmentCostId")
-                        .HasColumnType("uniqueidentifier");
+                b.ToTable("CriterionLibrary_ScenarioTreatmentConsequence");
+            });
 
-                    b.Property<Guid>("EquationId")
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioSelectableTreatmentEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("ScenarioSelectableTreatmentId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ScenarioTreatmentCostId", "EquationId");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasIndex("EquationId")
-                        .IsUnique();
+                b.HasKey("CriterionLibraryId", "ScenarioSelectableTreatmentId");
 
-                    b.HasIndex("ScenarioTreatmentCostId")
-                        .IsUnique();
+                b.HasIndex("CriterionLibraryId");
 
-                    b.ToTable("ScenarioTreatmentCost_Equation");
-                });
+                b.HasIndex("ScenarioSelectableTreatmentId")
+                    .IsUnique();
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentSchedulingEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                b.ToTable("CriterionLibrary_ScenarioTreatment");
+            });
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioTreatmentCostEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("ScenarioTreatmentCostId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<int>("OffsetToFutureYear")
-                        .HasColumnType("int");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("TreatmentId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                b.HasKey("CriterionLibraryId", "ScenarioTreatmentCostId");
 
-                    b.HasIndex("TreatmentId");
+                b.HasIndex("CriterionLibraryId");
 
-                    b.ToTable("ScenarioTreatmentScheduling");
-                });
+                b.HasIndex("ScenarioTreatmentCostId")
+                    .IsUnique();
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentSupersessionEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                b.ToTable("CriterionLibrary_ScenarioTreatmentCost");
+            });
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioTreatmentSupersessionEntity", b =>
+            {
+                b.Property<Guid>("CriterionLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<Guid>("TreatmentSupersessionId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("TreatmentId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasIndex("TreatmentId");
+                b.HasKey("CriterionLibraryId", "TreatmentSupersessionId");
 
-                    b.ToTable("ScenarioTreatmentSupersession");
-                });
+                b.HasIndex("CriterionLibraryId");
+
+                b.HasIndex("TreatmentSupersessionId")
+                    .IsUnique();
+
+                b.ToTable("CriterionLibrary_ScenarioTreatmentSupersession");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioConditionalTreatmentConsequenceEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<string>("ChangeValue")
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("ScenarioSelectableTreatmentId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("AttributeId");
+
+                b.HasIndex("ScenarioSelectableTreatmentId");
+
+                b.ToTable("ScenarioConditionalTreatmentConsequences");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioConditionalTreatmentConsequenceEquationEntity", b =>
+            {
+                b.Property<Guid>("ScenarioConditionalTreatmentConsequenceId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("EquationId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("ScenarioConditionalTreatmentConsequenceId", "EquationId");
+
+                b.HasIndex("EquationId")
+                    .IsUnique();
+
+                b.HasIndex("ScenarioConditionalTreatmentConsequenceId")
+                    .IsUnique();
+
+                b.ToTable("ScenarioTreatmentConsequence_Equation");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<int>("ShadowForAnyTreatment")
+                    .HasColumnType("int");
+
+                b.Property<int>("ShadowForSameTreatment")
+                    .HasColumnType("int");
+
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("SimulationId");
+
+                b.ToTable("ScenarioSelectableTreatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("ScenarioSelectableTreatmentId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("ScenarioSelectableTreatmentId");
+
+                b.ToTable("ScenarioTreatmentCost");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEquationEntity", b =>
+            {
+                b.Property<Guid>("ScenarioTreatmentCostId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("EquationId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("ScenarioTreatmentCostId", "EquationId");
+
+                b.HasIndex("EquationId")
+                    .IsUnique();
+
+                b.HasIndex("ScenarioTreatmentCostId")
+                    .IsUnique();
+
+                b.ToTable("ScenarioTreatmentCost_Equation");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSchedulingEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<int>("OffsetToFutureYear")
+                    .HasColumnType("int");
+
+                b.Property<Guid>("TreatmentId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TreatmentId");
+
+                b.ToTable("ScenarioTreatmentScheduling");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSupersessionEntity", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("TreatmentId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TreatmentId");
+
+                b.ToTable("ScenarioTreatmentSupersession");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioSelectableTreatmentScenarioBudgetEntity", b =>
+            {
+                b.Property<Guid>("ScenarioSelectableTreatmentId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("ScenarioBudgetId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("ScenarioSelectableTreatmentId", "ScenarioBudgetId");
+
+                b.HasIndex("ScenarioBudgetId");
+
+                b.HasIndex("ScenarioSelectableTreatmentId");
+
+                b.ToTable("ScenarioSelectableTreatment_ScenarioBudget");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("FacilityId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("FacilityId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("SpatialWeightingId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid?>("SpatialWeightingId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("FacilityId");
+                b.HasIndex("FacilityId");
 
-                    b.HasIndex("SpatialWeightingId");
+                b.HasIndex("SpatialWeightingId");
 
-                    b.ToTable("Section");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentBudgetEntity", b =>
-                {
-                    b.Property<Guid>("SelectableTreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BudgetId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("SelectableTreatmentId", "BudgetId");
-
-                    b.HasIndex("BudgetId");
-
-                    b.HasIndex("SelectableTreatmentId");
-
-                    b.ToTable("Treatment_Budget");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ShadowForAnyTreatment")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ShadowForSameTreatment")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TreatmentLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TreatmentLibraryId");
-
-                    b.ToTable("SelectableTreatment");
-                });
+                b.ToTable("Section");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationAnalysisDetailEntity", b =>
-                {
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("LastRun")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastRun")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("RunTime")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("RunTime")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Status")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("SimulationId");
+                b.HasKey("SimulationId");
 
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
+                b.HasIndex("SimulationId")
+                    .IsUnique();
 
-                    b.ToTable("SimulationAnalysisDetail");
-                });
+                b.ToTable("SimulationAnalysisDetail");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("NetworkId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("NetworkId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("NumberOfYearsOfTreatmentOutlook")
-                        .HasColumnType("int");
+                b.Property<int>("NumberOfYearsOfTreatmentOutlook")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("NetworkId");
+                b.HasIndex("NetworkId");
 
-                    b.ToTable("Simulation");
-                });
+                b.ToTable("Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationLogEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Message")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                b.Property<int>("Status")
+                    .HasColumnType("int");
 
-                    b.Property<int>("Subject")
-                        .HasColumnType("int");
+                b.Property<int>("Subject")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("SimulationId");
+                b.HasIndex("SimulationId");
 
-                    b.ToTable("SimulationLog");
-                });
+                b.ToTable("SimulationLog");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputEntity", b =>
-                {
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Output")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Output")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("SimulationId");
+                b.HasKey("SimulationId");
 
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
+                b.HasIndex("SimulationId")
+                    .IsUnique();
 
-                    b.ToTable("SimulationOutput");
-                });
+                b.ToTable("SimulationOutput");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationReportDetailEntity", b =>
-                {
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Status")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("SimulationId");
+                b.HasKey("SimulationId");
 
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
+                b.HasIndex("SimulationId")
+                    .IsUnique();
 
-                    b.ToTable("SimulationReportDetail");
-                });
+                b.ToTable("SimulationReportDetail");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationUserEntity", b =>
-                {
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("SimulationId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("UserId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("CanModify")
-                        .HasColumnType("bit");
+                b.Property<bool>("CanModify")
+                    .HasColumnType("bit");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsOwner")
-                        .HasColumnType("bit");
+                b.Property<bool>("IsOwner")
+                    .HasColumnType("bit");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.HasKey("SimulationId", "UserId");
+                b.HasKey("SimulationId", "UserId");
 
-                    b.HasIndex("SimulationId");
+                b.HasIndex("SimulationId");
 
-                    b.HasIndex("UserId");
+                b.HasIndex("UserId");
 
-                    b.ToTable("Simulation_User");
-                });
+                b.ToTable("Simulation_User");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("Target")
-                        .HasColumnType("float");
+                b.Property<double>("Target")
+                    .HasColumnType("float");
 
-                    b.Property<Guid>("TargetConditionGoalLibraryId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("TargetConditionGoalLibraryId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("Year")
-                        .HasColumnType("int");
+                b.Property<int?>("Year")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("TargetConditionGoalLibraryId");
+                b.HasIndex("TargetConditionGoalLibraryId");
 
-                    b.ToTable("TargetConditionGoal");
-                });
+                b.ToTable("TargetConditionGoal");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalLibraryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("TargetConditionGoalLibrary");
-                });
+                b.ToTable("TargetConditionGoalLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TextAttributeValueHistoryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AttributeId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("AttributeId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("SectionId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("SectionId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Value")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
+                b.Property<int>("Year")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("AttributeId");
+                b.HasIndex("AttributeId");
 
-                    b.HasIndex("SectionId");
+                b.HasIndex("SectionId");
 
-                    b.ToTable("TextAttributeValueHistory");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentCostEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("TreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TreatmentId");
-
-                    b.ToTable("TreatmentCost");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentLibraryEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TreatmentLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentSchedulingEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("OffsetToFutureYear")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TreatmentId");
-
-                    b.ToTable("TreatmentScheduling");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentSupersessionEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CriterionLibraryScenarioTreatmentSupersessionJoinTreatmentSupersessionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("TreatmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TreatmentId");
-
-                    b.HasIndex("CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId", "CriterionLibraryScenarioTreatmentSupersessionJoinTreatmentSupersessionId");
-
-                    b.ToTable("TreatmentSupersession");
-                });
+                b.ToTable("TextAttributeValueHistory");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserCriteriaFilterEntity", b =>
-                {
-                    b.Property<Guid>("UserCriteriaId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("UserCriteriaId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Criteria")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Criteria")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("HasCriteria")
-                        .HasColumnType("bit");
+                b.Property<bool>("HasCriteria")
+                    .HasColumnType("bit");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("UserId")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("UserCriteriaId");
+                b.HasKey("UserCriteriaId");
 
-                    b.HasIndex("UserCriteriaId")
-                        .IsUnique();
+                b.HasIndex("UserCriteriaId")
+                    .IsUnique();
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                b.HasIndex("UserId")
+                    .IsUnique();
 
-                    b.ToTable("UserCriteria_Filter");
-                });
+                b.ToTable("UserCriteria_Filter");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("CreatedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("CreatedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<bool>("HasInventoryAccess")
-                        .HasColumnType("bit");
+                b.Property<bool>("HasInventoryAccess")
+                    .HasColumnType("bit");
 
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
+                b.Property<Guid>("LastModifiedBy")
+                    .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
+                b.Property<DateTime>("LastModifiedDate")
+                    .HasColumnType("datetime2");
 
-                    b.Property<string>("Username")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Username")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("User");
-                });
+                b.ToTable("User");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AggregatedResultEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("AggregatedResults")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("AggregatedResults")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
-                        .WithMany("AggregatedResults")
-                        .HasForeignKey("MaintainableAssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
+                    .WithMany("AggregatedResults")
+                    .HasForeignKey("MaintainableAssetId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("MaintainableAsset");
-                });
+                b.Navigation("MaintainableAsset");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("AnalysisMethods")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("AnalysisMethods")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("AnalysisMethod")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithOne("AnalysisMethod")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", "SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("AttributeData")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("AttributeData")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
-                        .WithMany("AssignedData")
-                        .HasForeignKey("MaintainableAssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
+                    .WithMany("AssignedData")
+                    .HasForeignKey("MaintainableAssetId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("MaintainableAsset");
-                });
+                b.Navigation("MaintainableAsset");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumLocationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", "AttributeDatum")
-                        .WithOne("AttributeDatumLocation")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumLocationEntity", "AttributeDatumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", "AttributeDatum")
+                    .WithOne("AttributeDatumLocation")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumLocationEntity", "AttributeDatumId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("AttributeDatum");
-                });
+                b.Navigation("AttributeDatum");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEquationCriterionLibraryEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("AttributeEquationCriterionLibraryJoins")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("AttributeEquationCriterionLibraryJoins")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("AttributeEquationCriterionLibraryJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("AttributeEquationCriterionLibraryJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
-                        .WithOne("AttributeEquationCriterionLibraryJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEquationCriterionLibraryEntity", "EquationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                    .WithOne("AttributeEquationCriterionLibraryJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEquationCriterionLibraryEntity", "EquationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("CriterionLibrary");
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("Equation");
-                });
+                b.Navigation("Equation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", "AnalysisMethod")
-                        .WithOne("Benefit")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitEntity", "AnalysisMethodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", "AnalysisMethod")
+                    .WithOne("Benefit")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitEntity", "AnalysisMethodId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("Benefits")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("Benefits")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("AnalysisMethod");
+                b.Navigation("AnalysisMethod");
 
-                    b.Navigation("Attribute");
-                });
+                b.Navigation("Attribute");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitQuantifierEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
-                        .WithOne("BenefitQuantifier")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitQuantifierEntity", "EquationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                    .WithOne("BenefitQuantifier")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitQuantifierEntity", "EquationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
-                        .WithOne("BenefitQuantifier")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitQuantifierEntity", "NetworkId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
+                    .WithOne("BenefitQuantifier")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BenefitQuantifierEntity", "NetworkId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Equation");
+                b.Navigation("Equation");
 
-                    b.Navigation("Network");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetAmountEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", "Budget")
-                        .WithMany("BudgetAmounts")
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Budget");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibraryEntity", "BudgetLibrary")
-                        .WithMany("Budgets")
-                        .HasForeignKey("BudgetLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BudgetLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibrarySimulationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibraryEntity", "BudgetLibrary")
-                        .WithMany("BudgetLibrarySimulationJoins")
-                        .HasForeignKey("BudgetLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("BudgetLibrarySimulationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibrarySimulationEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BudgetLibrary");
-
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Network");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPercentagePairEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", "Budget")
-                        .WithMany("BudgetPercentagePairs")
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetEntity", "ScenarioBudget")
+                    .WithMany("BudgetPercentagePairs")
+                    .HasForeignKey("ScenarioBudgetId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityEntity", "BudgetPriority")
-                        .WithMany("BudgetPercentagePairs")
-                        .HasForeignKey("BudgetPriorityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.ScenarioBudgetPriorityEntity", null)
+                    .WithMany("BudgetPercentagePairs")
+                    .HasForeignKey("ScenarioBudgetPriorityEntityId");
 
-                    b.Navigation("Budget");
-
-                    b.Navigation("BudgetPriority");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityLibraryEntity", "BudgetPriorityLibrary")
-                        .WithMany("BudgetPriorities")
-                        .HasForeignKey("BudgetPriorityLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BudgetPriorityLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityLibrarySimulationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityLibraryEntity", "BudgetPriorityLibrary")
-                        .WithMany("BudgetPriorityLibrarySimulationJoins")
-                        .HasForeignKey("BudgetPriorityLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("BudgetPriorityLibrarySimulationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityLibrarySimulationEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BudgetPriorityLibrary");
-
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("ScenarioBudget");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowDistributionRuleEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleEntity", "CashFlowRule")
-                        .WithMany("CashFlowDistributionRules")
-                        .HasForeignKey("CashFlowRuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleEntity", "CashFlowRule")
+                    .WithMany("CashFlowDistributionRules")
+                    .HasForeignKey("CashFlowRuleId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CashFlowRule");
-                });
+                b.Navigation("CashFlowRule");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibraryEntity", "CashFlowRuleLibrary")
-                        .WithMany("CashFlowRules")
-                        .HasForeignKey("CashFlowRuleLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibraryEntity", "CashFlowRuleLibrary")
+                    .WithMany("CashFlowRules")
+                    .HasForeignKey("CashFlowRuleLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CashFlowRuleLibrary");
-                });
+                b.Navigation("CashFlowRuleLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibrarySimulationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibraryEntity", "CashFlowRuleLibrary")
-                        .WithMany("CashFlowRuleLibrarySimulationJoins")
-                        .HasForeignKey("CashFlowRuleLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibraryEntity", "CashFlowRuleLibrary")
+                    .WithMany("CashFlowRuleLibrarySimulationJoins")
+                    .HasForeignKey("CashFlowRuleLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("CashFlowRuleLibrarySimulationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibrarySimulationEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithOne("CashFlowRuleLibrarySimulationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibrarySimulationEntity", "SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CashFlowRuleLibrary");
+                b.Navigation("CashFlowRuleLibrary");
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectConsequenceEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany()
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany()
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", "CommittedProject")
-                        .WithMany("CommittedProjectConsequences")
-                        .HasForeignKey("CommittedProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", "CommittedProject")
+                    .WithMany("CommittedProjectConsequences")
+                    .HasForeignKey("CommittedProjectId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("CommittedProject");
-                });
+                b.Navigation("CommittedProject");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", "Budget")
-                        .WithMany("CommittedProjects")
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
+                    .WithMany("CommittedProjects")
+                    .HasForeignKey("MaintainableAssetId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
-                        .WithMany("CommittedProjects")
-                        .HasForeignKey("MaintainableAssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetEntity", "ScenarioBudget")
+                    .WithMany("CommittedProjects")
+                    .HasForeignKey("ScenarioBudgetId")
+                    .OnDelete(DeleteBehavior.ClientCascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", null)
-                        .WithMany("CommittedProjects")
-                        .HasForeignKey("SectionEntityId");
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", null)
+                    .WithMany("CommittedProjects")
+                    .HasForeignKey("SectionEntityId");
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithMany("CommittedProjects")
-                        .HasForeignKey("SimulationId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithMany("CommittedProjects")
+                    .HasForeignKey("SimulationId")
+                    .OnDelete(DeleteBehavior.ClientCascade)
+                    .IsRequired();
 
-                    b.Navigation("Budget");
+                b.Navigation("MaintainableAsset");
 
-                    b.Navigation("MaintainableAsset");
+                b.Navigation("ScenarioBudget");
 
-                    b.Navigation("Simulation");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("TreatmentConsequences")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithMany("TreatmentConsequences")
-                        .HasForeignKey("SelectableTreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Attribute");
-
-                    b.Navigation("SelectableTreatment");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEquationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEntity", "ConditionalTreatmentConsequence")
-                        .WithOne("ConditionalTreatmentConsequenceEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEquationEntity", "ConditionalTreatmentConsequenceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
-                        .WithOne("ConditionalTreatmentConsequenceEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEquationEntity", "EquationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ConditionalTreatmentConsequence");
-
-                    b.Navigation("Equation");
-                });
+                b.Navigation("Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryAnalysisMethodEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", "AnalysisMethod")
-                        .WithOne("CriterionLibraryAnalysisMethodJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryAnalysisMethodEntity", "AnalysisMethodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", "AnalysisMethod")
+                    .WithOne("CriterionLibraryAnalysisMethodJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryAnalysisMethodEntity", "AnalysisMethodId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryAnalysisMethodJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryAnalysisMethodJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("AnalysisMethod");
+                b.Navigation("AnalysisMethod");
 
-                    b.Navigation("CriterionLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryBudgetEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", "Budget")
-                        .WithOne("CriterionLibraryBudgetJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryBudgetEntity", "BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryBudgetJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Budget");
-
-                    b.Navigation("CriterionLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryBudgetPriorityEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityEntity", "BudgetPriority")
-                        .WithOne("CriterionLibraryBudgetPriorityJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryBudgetPriorityEntity", "BudgetPriorityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryBudgetPriorityJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BudgetPriority");
-
-                    b.Navigation("CriterionLibrary");
-                });
+                b.Navigation("CriterionLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryCashFlowRuleEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleEntity", "CashFlowRule")
-                        .WithOne("CriterionLibraryCashFlowRuleJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryCashFlowRuleEntity", "CashFlowRuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleEntity", "CashFlowRule")
+                    .WithOne("CriterionLibraryCashFlowRuleJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryCashFlowRuleEntity", "CashFlowRuleId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryCashFlowRuleJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryCashFlowRuleJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CashFlowRule");
+                b.Navigation("CashFlowRule");
 
-                    b.Navigation("CriterionLibrary");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryConditionalTreatmentConsequenceEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEntity", "ConditionalTreatmentConsequence")
-                        .WithOne("CriterionLibraryConditionalTreatmentConsequenceJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryConditionalTreatmentConsequenceEntity", "ConditionalTreatmentConsequenceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryTreatmentConsequenceJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ConditionalTreatmentConsequence");
-
-                    b.Navigation("CriterionLibrary");
-                });
+                b.Navigation("CriterionLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryDeficientConditionGoalEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryDeficientConditionGoalJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryDeficientConditionGoalJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalEntity", "DeficientConditionGoal")
-                        .WithOne("CriterionLibraryDeficientConditionGoalJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryDeficientConditionGoalEntity", "DeficientConditionGoalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalEntity", "DeficientConditionGoal")
+                    .WithOne("CriterionLibraryDeficientConditionGoalJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryDeficientConditionGoalEntity", "DeficientConditionGoalId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CriterionLibrary");
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("DeficientConditionGoal");
-                });
+                b.Navigation("DeficientConditionGoal");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryRemainingLifeLimitEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryRemainingLifeLimitJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryRemainingLifeLimitJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitEntity", "RemainingLifeLimit")
-                        .WithOne("CriterionLibraryRemainingLifeLimitJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryRemainingLifeLimitEntity", "RemainingLifeLimitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitEntity", "RemainingLifeLimit")
+                    .WithOne("CriterionLibraryRemainingLifeLimitJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryRemainingLifeLimitEntity", "RemainingLifeLimitId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CriterionLibrary");
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("RemainingLifeLimit");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibrarySelectableTreatmentEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibrarySelectableTreatmentJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithOne("CriterionLibrarySelectableTreatmentJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibrarySelectableTreatmentEntity", "SelectableTreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CriterionLibrary");
-
-                    b.Navigation("SelectableTreatment");
-                });
+                b.Navigation("RemainingLifeLimit");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTargetConditionGoalEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryTargetConditionGoalJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryTargetConditionGoalJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalEntity", "TargetConditionGoal")
-                        .WithOne("CriterionLibraryTargetConditionGoalJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTargetConditionGoalEntity", "TargetConditionGoalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalEntity", "TargetConditionGoal")
+                    .WithOne("CriterionLibraryTargetConditionGoalJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTargetConditionGoalEntity", "TargetConditionGoalId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CriterionLibrary");
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("TargetConditionGoal");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentCostEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryTreatmentCostJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentCostEntity", "TreatmentCost")
-                        .WithOne("CriterionLibraryTreatmentCostJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentCostEntity", "TreatmentCostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CriterionLibrary");
-
-                    b.Navigation("TreatmentCost");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentSupersessionEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryTreatmentSupersessionJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentSupersessionEntity", "TreatmentSupersession")
-                        .WithOne("CriterionLibraryTreatmentSupersessionJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryTreatmentSupersessionEntity", "TreatmentSupersessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CriterionLibrary");
-
-                    b.Navigation("TreatmentSupersession");
-                });
+                b.Navigation("TargetConditionGoal");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryUserEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryUserJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryUserJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
-                        .WithOne("CriterionLibraryUserJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryUserEntity", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
+                    .WithOne("CriterionLibraryUserJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryUserEntity", "UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CriterionLibrary");
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("User");
-                });
+                b.Navigation("User");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("DeficientConditionGoals")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("DeficientConditionGoals")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalLibraryEntity", "DeficientConditionGoalLibrary")
-                        .WithMany("DeficientConditionGoals")
-                        .HasForeignKey("DeficientConditionGoalLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalLibraryEntity", "DeficientConditionGoalLibrary")
+                    .WithMany("DeficientConditionGoals")
+                    .HasForeignKey("DeficientConditionGoalLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("DeficientConditionGoalLibrary");
-                });
+                b.Navigation("DeficientConditionGoalLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.FacilityEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
-                        .WithMany("Facilities")
-                        .HasForeignKey("NetworkId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
+                    .WithMany("Facilities")
+                    .HasForeignKey("NetworkId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Network");
-                });
+                b.Navigation("Network");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.InvestmentPlanEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("InvestmentPlan")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.InvestmentPlanEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithOne("InvestmentPlan")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.InvestmentPlanEntity", "SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CriterionLibraryPerformanceCurveEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryPerformanceCurveJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetAmountEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetEntity", "Budget")
+                    .WithMany("BudgetAmounts")
+                    .HasForeignKey("BudgetId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEntity", "PerformanceCurve")
-                        .WithOne("CriterionLibraryPerformanceCurveJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CriterionLibraryPerformanceCurveEntity", "PerformanceCurveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.Navigation("Budget");
+            });
 
-                    b.Navigation("CriterionLibrary");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetLibraryEntity", "BudgetLibrary")
+                    .WithMany("Budgets")
+                    .HasForeignKey("BudgetLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("PerformanceCurve");
-                });
+                b.Navigation("BudgetLibrary");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("PerformanceCurves")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.CriterionLibraryBudgetEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetEntity", "Budget")
+                    .WithOne("CriterionLibraryBudgetJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.CriterionLibraryBudgetEntity", "BudgetId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibraryEntity", "PerformanceCurveLibrary")
-                        .WithMany("PerformanceCurves")
-                        .HasForeignKey("PerformanceCurveLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryBudgetJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Budget");
 
-                    b.Navigation("PerformanceCurveLibrary");
-                });
+                b.Navigation("CriterionLibrary");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEquationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
-                        .WithOne("PerformanceCurveEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEquationEntity", "EquationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityLibraryEntity", "BudgetPriorityLibrary")
+                    .WithMany("BudgetPriorities")
+                    .HasForeignKey("BudgetPriorityLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEntity", "PerformanceCurve")
-                        .WithOne("PerformanceCurveEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEquationEntity", "PerformanceCurveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.Navigation("BudgetPriorityLibrary");
+            });
 
-                    b.Navigation("Equation");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.CriterionLibraryBudgetPriorityEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityEntity", "BudgetPriority")
+                    .WithOne("CriterionLibraryBudgetPriorityJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.CriterionLibraryBudgetPriorityEntity", "BudgetPriorityId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("PerformanceCurve");
-                });
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryBudgetPriorityJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TreatmentCostEquationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
-                        .WithOne("TreatmentCostEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TreatmentCostEquationEntity", "EquationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.Navigation("BudgetPriority");
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentCostEntity", "TreatmentCost")
-                        .WithOne("TreatmentCostEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TreatmentCostEquationEntity", "TreatmentCostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.Navigation("CriterionLibrary");
+            });
 
-                    b.Navigation("Equation");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.CriterionLibraryPerformanceCurveEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryPerformanceCurveJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("TreatmentCost");
-                });
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEntity", "PerformanceCurve")
+                    .WithOne("CriterionLibraryPerformanceCurveJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.CriterionLibraryPerformanceCurveEntity", "PerformanceCurveId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("CriterionLibrary");
+
+                b.Navigation("PerformanceCurve");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("PerformanceCurves")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryEntity", "PerformanceCurveLibrary")
+                    .WithMany("PerformanceCurves")
+                    .HasForeignKey("PerformanceCurveLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Attribute");
+
+                b.Navigation("PerformanceCurveLibrary");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEquationEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                    .WithOne("PerformanceCurveEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEquationEntity", "EquationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEntity", "PerformanceCurve")
+                    .WithOne("PerformanceCurveEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEquationEntity", "PerformanceCurveId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Equation");
+
+                b.Navigation("PerformanceCurve");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("TreatmentConsequences")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", "SelectableTreatment")
+                    .WithMany("TreatmentConsequences")
+                    .HasForeignKey("SelectableTreatmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Attribute");
+
+                b.Navigation("SelectableTreatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEquationEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEntity", "ConditionalTreatmentConsequence")
+                    .WithOne("ConditionalTreatmentConsequenceEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEquationEntity", "ConditionalTreatmentConsequenceId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                    .WithOne("ConditionalTreatmentConsequenceEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEquationEntity", "EquationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("ConditionalTreatmentConsequence");
+
+                b.Navigation("Equation");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibraryConditionalTreatmentConsequenceEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEntity", "ConditionalTreatmentConsequence")
+                    .WithOne("CriterionLibraryConditionalTreatmentConsequenceJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibraryConditionalTreatmentConsequenceEntity", "ConditionalTreatmentConsequenceId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryTreatmentConsequenceJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("ConditionalTreatmentConsequence");
+
+                b.Navigation("CriterionLibrary");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibrarySelectableTreatmentEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibrarySelectableTreatmentJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", "SelectableTreatment")
+                    .WithOne("CriterionLibrarySelectableTreatmentJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibrarySelectableTreatmentEntity", "SelectableTreatmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("CriterionLibrary");
+
+                b.Navigation("SelectableTreatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibraryTreatmentCostEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryTreatmentCostJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEntity", "TreatmentCost")
+                    .WithOne("CriterionLibraryTreatmentCostJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibraryTreatmentCostEntity", "TreatmentCostId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("CriterionLibrary");
+
+                b.Navigation("TreatmentCost");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibraryTreatmentSupersessionEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryTreatmentSupersessionJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSupersessionEntity", "TreatmentSupersession")
+                    .WithOne("CriterionLibraryTreatmentSupersessionJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.CriterionLibraryTreatmentSupersessionEntity", "TreatmentSupersessionId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("CriterionLibrary");
+
+                b.Navigation("TreatmentSupersession");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentLibraryEntity", "TreatmentLibrary")
+                    .WithMany("Treatments")
+                    .HasForeignKey("TreatmentLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("TreatmentLibrary");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", "SelectableTreatment")
+                    .WithMany("TreatmentCosts")
+                    .HasForeignKey("TreatmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("SelectableTreatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEquationEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                    .WithOne("TreatmentCostEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEquationEntity", "EquationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEntity", "TreatmentCost")
+                    .WithOne("TreatmentCostEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEquationEntity", "TreatmentCostId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Equation");
+
+                b.Navigation("TreatmentCost");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSchedulingEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", "SelectableTreatment")
+                    .WithMany("TreatmentSchedulings")
+                    .HasForeignKey("TreatmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("SelectableTreatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSupersessionEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", "SelectableTreatment")
+                    .WithMany("TreatmentSupersessions")
+                    .HasForeignKey("TreatmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioTreatmentSupersessionEntity", "CriterionLibraryScenarioTreatmentSupersessionJoin")
+                    .WithMany()
+                    .HasForeignKey("CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId", "CriterionLibraryScenarioTreatmentSupersessionJoinTreatmentSupersessionId");
+
+                b.Navigation("CriterionLibraryScenarioTreatmentSupersessionJoin");
+
+                b.Navigation("SelectableTreatment");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
-                        .WithMany("MaintainableAssets")
-                        .HasForeignKey("NetworkId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
+                    .WithMany("MaintainableAssets")
+                    .HasForeignKey("NetworkId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Network");
-                });
+                b.Navigation("Network");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetLocationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
-                        .WithOne("MaintainableAssetLocation")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetLocationEntity", "MaintainableAssetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", "MaintainableAsset")
+                    .WithOne("MaintainableAssetLocation")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetLocationEntity", "MaintainableAssetId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("MaintainableAsset");
-                });
+                b.Navigation("MaintainableAsset");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkRollupDetailEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
-                        .WithOne("NetworkRollupDetail")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkRollupDetailEntity", "NetworkId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
+                    .WithOne("NetworkRollupDetail")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkRollupDetailEntity", "NetworkId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Network");
-                });
+                b.Navigation("Network");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NumericAttributeValueHistoryEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("NumericAttributeValueHistories")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("NumericAttributeValueHistories")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", "Section")
-                        .WithMany("NumericAttributeValueHistories")
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", "Section")
+                    .WithMany("NumericAttributeValueHistories")
+                    .HasForeignKey("SectionId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("Section");
-                });
+                b.Navigation("Section");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("RemainingLifeLimits")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("RemainingLifeLimits")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibraryEntity", "RemainingLifeLimitLibrary")
-                        .WithMany("RemainingLifeLimits")
-                        .HasForeignKey("RemainingLifeLimitLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibraryEntity", "RemainingLifeLimitLibrary")
+                    .WithMany("RemainingLifeLimits")
+                    .HasForeignKey("RemainingLifeLimitLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("RemainingLifeLimitLibrary");
-                });
+                b.Navigation("RemainingLifeLimitLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibrarySimulationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibraryEntity", "RemainingLifeLimitLibrary")
-                        .WithMany("RemainingLifeLimitLibrarySimulationJoins")
-                        .HasForeignKey("RemainingLifeLimitLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibraryEntity", "RemainingLifeLimitLibrary")
+                    .WithMany("RemainingLifeLimitLibrarySimulationJoins")
+                    .HasForeignKey("RemainingLifeLimitLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("RemainingLifeLimitLibrarySimulationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibrarySimulationEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithOne("RemainingLifeLimitLibrarySimulationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibrarySimulationEntity", "SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("RemainingLifeLimitLibrary");
+                b.Navigation("RemainingLifeLimitLibrary");
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ReportIndexEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithMany("SimulationReports")
-                        .HasForeignKey("SimulationID")
-                        .OnDelete(DeleteBehavior.SetNull);
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithMany("SimulationReports")
+                    .HasForeignKey("SimulationID")
+                    .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioConditionalTreatmentConsequenceEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryScenarioTreatmentConsequenceJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.CriterionLibraryScenarioBudgetEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryScenarioBudgetJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEntity", "ScenarioConditionalTreatmentConsequence")
-                        .WithOne("CriterionLibraryScenarioConditionalTreatmentConsequenceJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioConditionalTreatmentConsequenceEntity", "ScenarioConditionalTreatmentConsequenceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetEntity", "ScenarioBudget")
+                    .WithOne("CriterionLibraryScenarioBudgetJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.CriterionLibraryScenarioBudgetEntity", "ScenarioBudgetId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CriterionLibrary");
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("ScenarioConditionalTreatmentConsequence");
-                });
+                b.Navigation("ScenarioBudget");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioPerformanceCurveEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryScenarioPerformanceCurveJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetAmountEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetEntity", "ScenarioBudget")
+                    .WithMany("ScenarioBudgetAmounts")
+                    .HasForeignKey("ScenarioBudgetId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEntity", "ScenarioPerformanceCurve")
-                        .WithOne("CriterionLibraryScenarioPerformanceCurveJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioPerformanceCurveEntity", "ScenarioPerformanceCurveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.Navigation("ScenarioBudget");
+            });
 
-                    b.Navigation("CriterionLibrary");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithMany("Budgets")
+                    .HasForeignKey("SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("ScenarioPerformanceCurve");
-                });
+                b.Navigation("Simulation");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioSelectableTreatmentEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryScenarioSelectableTreatmentJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.CriterionLibraryScenarioBudgetPriorityEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryScenarioBudgetPriorityJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
-                        .WithOne("CriterionLibraryScenarioSelectableTreatmentJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.ScenarioBudgetPriorityEntity", "ScenarioBudgetPriority")
+                    .WithOne("CriterionLibraryScenarioBudgetPriorityJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.CriterionLibraryScenarioBudgetPriorityEntity", "ScenarioBudgetPriorityId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CriterionLibrary");
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("ScenarioSelectableTreatment");
-                });
+                b.Navigation("ScenarioBudgetPriority");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.ScenarioBudgetPriorityEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithMany("BudgetPriorities")
+                    .HasForeignKey("SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTargetConditionGoalEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryScenarioTargetConditionGoalJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryScenarioTargetConditionGoalJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTargetConditionGoalEntity", "ScenarioTargetConditionGoal")
-                        .WithOne("CriterionLibraryScenarioTargetConditionGoalJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTargetConditionGoalEntity", "ScenarioTargetConditionGoalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTargetConditionGoalEntity", "ScenarioTargetConditionGoal")
+                    .WithOne("CriterionLibraryScenarioTargetConditionGoalJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTargetConditionGoalEntity", "ScenarioTargetConditionGoalId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CriterionLibrary");
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("ScenarioTargetConditionGoal");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTreatmentCostEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryScenarioTreatmentCostJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentCostEntity", "ScenarioTreatmentCost")
-                        .WithOne("CriterionLibraryScenarioTreatmentCostJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTreatmentCostEntity", "ScenarioTreatmentCostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CriterionLibrary");
-
-                    b.Navigation("ScenarioTreatmentCost");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTreatmentSupersessionEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryScenarioTreatmentSupersessionJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentSupersessionEntity", "ScenarioTreatmentSupersession")
-                        .WithOne("CriterionLibraryScenarioTreatmentSupersessionJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTreatmentSupersessionEntity", "TreatmentSupersessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CriterionLibrary");
-
-                    b.Navigation("ScenarioTreatmentSupersession");
-                });
+                b.Navigation("ScenarioTargetConditionGoal");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.CriterionLibraryScenarioDeficientConditionGoalEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
-                        .WithMany("CriterionLibraryScenarioDeficientConditionGoalJoins")
-                        .HasForeignKey("CriterionLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryScenarioDeficientConditionGoalJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.ScenarioDeficientConditionGoalEntity", "ScenarioDeficientConditionGoal")
-                        .WithOne("CriterionLibraryScenarioDeficientConditionGoalJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.CriterionLibraryScenarioDeficientConditionGoalEntity", "ScenarioDeficientConditionGoalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.ScenarioDeficientConditionGoalEntity", "ScenarioDeficientConditionGoal")
+                    .WithOne("CriterionLibraryScenarioDeficientConditionGoalJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.CriterionLibraryScenarioDeficientConditionGoalEntity", "ScenarioDeficientConditionGoalId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("CriterionLibrary");
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("ScenarioDeficientConditionGoal");
-                });
+                b.Navigation("ScenarioDeficientConditionGoal");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.ScenarioDeficientConditionGoalEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("ScenarioDeficientConditionGoals")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("ScenarioDeficientConditionGoals")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithMany("ScenarioDeficientConditionGoals")
-                        .HasForeignKey("SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithMany("ScenarioDeficientConditionGoals")
+                    .HasForeignKey("SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("ScenarioTreatmentConsequences")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.CriterionLibraryScenarioPerformanceCurveEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryScenarioPerformanceCurveJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
-                        .WithMany("ScenarioTreatmentConsequences")
-                        .HasForeignKey("ScenarioSelectableTreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.ScenarioPerformanceCurveEntity", "ScenarioPerformanceCurve")
+                    .WithOne("CriterionLibraryScenarioPerformanceCurveJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.CriterionLibraryScenarioPerformanceCurveEntity", "ScenarioPerformanceCurveId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("ScenarioSelectableTreatment");
-                });
+                b.Navigation("ScenarioPerformanceCurve");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEquationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
-                        .WithOne("ScenarioConditionalTreatmentConsequenceEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEquationEntity", "EquationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.ScenarioPerformanceCurveEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("ScenarioPerformanceCurves")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEntity", "ScenarioConditionalTreatmentConsequence")
-                        .WithOne("ScenarioConditionalTreatmentConsequenceEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEquationEntity", "ScenarioConditionalTreatmentConsequenceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithMany("PerformanceCurves")
+                    .HasForeignKey("SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Equation");
+                b.Navigation("Attribute");
 
-                    b.Navigation("ScenarioConditionalTreatmentConsequence");
-                });
+                b.Navigation("Simulation");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("ScenarioPerformanceCurves")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.ScenarioPerformanceCurveEquationEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                    .WithOne("ScenarioPerformanceCurveEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.ScenarioPerformanceCurveEquationEntity", "EquationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithMany("PerformanceCurves")
-                        .HasForeignKey("SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.ScenarioPerformanceCurveEntity", "ScenarioPerformanceCurve")
+                    .WithOne("ScenarioPerformanceCurveEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.ScenarioPerformanceCurveEquationEntity", "ScenarioPerformanceCurveId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Equation");
 
-                    b.Navigation("Simulation");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEquationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
-                        .WithOne("ScenarioPerformanceCurveEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEquationEntity", "EquationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEntity", "ScenarioPerformanceCurve")
-                        .WithOne("ScenarioPerformanceCurveEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEquationEntity", "ScenarioPerformanceCurveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Equation");
-
-                    b.Navigation("ScenarioPerformanceCurve");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentBudgetEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", "Budget")
-                        .WithMany("ScenarioSelectableTreatmentBudgetJoins")
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
-                        .WithMany("ScenarioTreatmentBudgetJoins")
-                        .HasForeignKey("ScenarioSelectableTreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Budget");
-
-                    b.Navigation("ScenarioSelectableTreatment");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithMany("SelectableTreatment")
-                        .HasForeignKey("SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("ScenarioPerformanceCurve");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTargetConditionGoalEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany()
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany()
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithMany("ScenarioTargetConditionalGoals")
-                        .HasForeignKey("SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithMany("ScenarioTargetConditionalGoals")
+                    .HasForeignKey("SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentCostEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
-                        .WithMany("ScenarioTreatmentCosts")
-                        .HasForeignKey("ScenarioTreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioConditionalTreatmentConsequenceEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryScenarioTreatmentConsequenceJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("ScenarioSelectableTreatment");
-                });
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioConditionalTreatmentConsequenceEntity", "ScenarioConditionalTreatmentConsequence")
+                    .WithOne("CriterionLibraryScenarioConditionalTreatmentConsequenceJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioConditionalTreatmentConsequenceEntity", "ScenarioConditionalTreatmentConsequenceId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentCostEquationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
-                        .WithOne("ScenarioTreatmentCostEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentCostEquationEntity", "EquationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.Navigation("CriterionLibrary");
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentCostEntity", "ScenarioTreatmentCost")
-                        .WithOne("ScenarioTreatmentCostEquationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentCostEquationEntity", "ScenarioTreatmentCostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.Navigation("ScenarioConditionalTreatmentConsequence");
+            });
 
-                    b.Navigation("Equation");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioSelectableTreatmentEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryScenarioSelectableTreatmentJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("ScenarioTreatmentCost");
-                });
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
+                    .WithOne("CriterionLibraryScenarioSelectableTreatmentJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentSchedulingEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
-                        .WithMany("ScenarioTreatmentSchedulings")
-                        .HasForeignKey("TreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.Navigation("CriterionLibrary");
 
-                    b.Navigation("ScenarioSelectableTreatment");
-                });
+                b.Navigation("ScenarioSelectableTreatment");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentSupersessionEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
-                        .WithMany("ScenarioTreatmentSupersessions")
-                        .HasForeignKey("TreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioTreatmentCostEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryScenarioTreatmentCostJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("ScenarioSelectableTreatment");
-                });
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEntity", "ScenarioTreatmentCost")
+                    .WithOne("CriterionLibraryScenarioTreatmentCostJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioTreatmentCostEntity", "ScenarioTreatmentCostId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("CriterionLibrary");
+
+                b.Navigation("ScenarioTreatmentCost");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioTreatmentSupersessionEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                    .WithMany("CriterionLibraryScenarioTreatmentSupersessionJoins")
+                    .HasForeignKey("CriterionLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSupersessionEntity", "ScenarioTreatmentSupersession")
+                    .WithOne("CriterionLibraryScenarioTreatmentSupersessionJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.CriterionLibraryScenarioTreatmentSupersessionEntity", "TreatmentSupersessionId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("CriterionLibrary");
+
+                b.Navigation("ScenarioTreatmentSupersession");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioConditionalTreatmentConsequenceEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("ScenarioTreatmentConsequences")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
+                    .WithMany("ScenarioTreatmentConsequences")
+                    .HasForeignKey("ScenarioSelectableTreatmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Attribute");
+
+                b.Navigation("ScenarioSelectableTreatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioConditionalTreatmentConsequenceEquationEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                    .WithOne("ScenarioConditionalTreatmentConsequenceEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioConditionalTreatmentConsequenceEquationEntity", "EquationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioConditionalTreatmentConsequenceEntity", "ScenarioConditionalTreatmentConsequence")
+                    .WithOne("ScenarioConditionalTreatmentConsequenceEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioConditionalTreatmentConsequenceEquationEntity", "ScenarioConditionalTreatmentConsequenceId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Equation");
+
+                b.Navigation("ScenarioConditionalTreatmentConsequence");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithMany("SelectableTreatments")
+                    .HasForeignKey("SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Simulation");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
+                    .WithMany("ScenarioTreatmentCosts")
+                    .HasForeignKey("ScenarioSelectableTreatmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("ScenarioSelectableTreatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEquationEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "Equation")
+                    .WithOne("ScenarioTreatmentCostEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEquationEntity", "EquationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEntity", "ScenarioTreatmentCost")
+                    .WithOne("ScenarioTreatmentCostEquationJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEquationEntity", "ScenarioTreatmentCostId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Equation");
+
+                b.Navigation("ScenarioTreatmentCost");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSchedulingEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
+                    .WithMany("ScenarioTreatmentSchedulings")
+                    .HasForeignKey("TreatmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("ScenarioSelectableTreatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSupersessionEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
+                    .WithMany("ScenarioTreatmentSupersessions")
+                    .HasForeignKey("TreatmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("ScenarioSelectableTreatment");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioSelectableTreatmentScenarioBudgetEntity", b =>
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetEntity", "ScenarioBudget")
+                    .WithMany("ScenarioSelectableTreatmentScenarioBudgetJoins")
+                    .HasForeignKey("ScenarioBudgetId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", "ScenarioSelectableTreatment")
+                    .WithMany("ScenarioSelectableTreatmentScenarioBudgetJoins")
+                    .HasForeignKey("ScenarioSelectableTreatmentId")
+                    .OnDelete(DeleteBehavior.ClientCascade)
+                    .IsRequired();
+
+                b.Navigation("ScenarioBudget");
+
+                b.Navigation("ScenarioSelectableTreatment");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.FacilityEntity", "Facility")
-                        .WithMany("Sections")
-                        .HasForeignKey("FacilityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.FacilityEntity", "Facility")
+                    .WithMany("Sections")
+                    .HasForeignKey("FacilityId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "SpatialWeighting")
-                        .WithMany()
-                        .HasForeignKey("SpatialWeightingId");
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", "SpatialWeighting")
+                    .WithMany()
+                    .HasForeignKey("SpatialWeightingId");
 
-                    b.Navigation("Facility");
+                b.Navigation("Facility");
 
-                    b.Navigation("SpatialWeighting");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentBudgetEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", "Budget")
-                        .WithMany("TreatmentBudgetJoins")
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithMany("TreatmentBudgetJoins")
-                        .HasForeignKey("SelectableTreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Budget");
-
-                    b.Navigation("SelectableTreatment");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentLibraryEntity", "TreatmentLibrary")
-                        .WithMany("Treatments")
-                        .HasForeignKey("TreatmentLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TreatmentLibrary");
-                });
+                b.Navigation("SpatialWeighting");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationAnalysisDetailEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("SimulationAnalysisDetail")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationAnalysisDetailEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithOne("SimulationAnalysisDetail")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationAnalysisDetailEntity", "SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
-                        .WithMany("Simulations")
-                        .HasForeignKey("NetworkId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
+                    .WithMany("Simulations")
+                    .HasForeignKey("NetworkId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Network");
-                });
+                b.Navigation("Network");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationLogEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithMany("SimulationLogs")
-                        .HasForeignKey("SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithMany("SimulationLogs")
+                    .HasForeignKey("SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("SimulationOutput")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithOne("SimulationOutput")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutputEntity", "SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationReportDetailEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("SimulationReportDetail")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationReportDetailEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithOne("SimulationReportDetail")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationReportDetailEntity", "SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Simulation");
-                });
+                b.Navigation("Simulation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationUserEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithMany("SimulationUserJoins")
-                        .HasForeignKey("SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                    .WithMany("SimulationUserJoins")
+                    .HasForeignKey("SimulationId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
-                        .WithMany("SimulationUserJoins")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
+                    .WithMany("SimulationUserJoins")
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Simulation");
+                b.Navigation("Simulation");
 
-                    b.Navigation("User");
-                });
+                b.Navigation("User");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany()
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany()
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalLibraryEntity", "TargetConditionGoalLibrary")
-                        .WithMany("TargetConditionGoals")
-                        .HasForeignKey("TargetConditionGoalLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalLibraryEntity", "TargetConditionGoalLibrary")
+                    .WithMany("TargetConditionGoals")
+                    .HasForeignKey("TargetConditionGoalLibraryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("TargetConditionGoalLibrary");
-                });
+                b.Navigation("TargetConditionGoalLibrary");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TextAttributeValueHistoryEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
-                        .WithMany("TextAttributeValueHistories")
-                        .HasForeignKey("AttributeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                    .WithMany("TextAttributeValueHistories")
+                    .HasForeignKey("AttributeId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", "Section")
-                        .WithMany("TextAttributeValueHistories")
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", "Section")
+                    .WithMany("TextAttributeValueHistories")
+                    .HasForeignKey("SectionId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Attribute");
+                b.Navigation("Attribute");
 
-                    b.Navigation("Section");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentCostEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithMany("TreatmentCosts")
-                        .HasForeignKey("TreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SelectableTreatment");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentSchedulingEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithMany("TreatmentSchedulings")
-                        .HasForeignKey("TreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SelectableTreatment");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentSupersessionEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", "SelectableTreatment")
-                        .WithMany("TreatmentSupersessions")
-                        .HasForeignKey("TreatmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CriterionLibraryScenarioTreatmentSupersessionEntity", "CriterionLibraryScenarioTreatmentSupersessionJoin")
-                        .WithMany()
-                        .HasForeignKey("CriterionLibraryScenarioTreatmentSupersessionJoinCriterionLibraryId", "CriterionLibraryScenarioTreatmentSupersessionJoinTreatmentSupersessionId");
-
-                    b.Navigation("CriterionLibraryScenarioTreatmentSupersessionJoin");
-
-                    b.Navigation("SelectableTreatment");
-                });
+                b.Navigation("Section");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserCriteriaFilterEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
-                        .WithOne("UserCriteriaFilterJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserCriteriaFilterEntity", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
+                    .WithOne("UserCriteriaFilterJoin")
+                    .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserCriteriaFilterEntity", "UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("User");
-                });
+                b.Navigation("User");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AnalysisMethodEntity", b =>
-                {
-                    b.Navigation("Benefit");
+            {
+                b.Navigation("Benefit");
 
-                    b.Navigation("CriterionLibraryAnalysisMethodJoin");
-                });
+                b.Navigation("CriterionLibraryAnalysisMethodJoin");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeDatumEntity", b =>
-                {
-                    b.Navigation("AttributeDatumLocation");
-                });
+            {
+                b.Navigation("AttributeDatumLocation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", b =>
-                {
-                    b.Navigation("AggregatedResults");
+            {
+                b.Navigation("AggregatedResults");
 
-                    b.Navigation("AnalysisMethods");
+                b.Navigation("AnalysisMethods");
 
-                    b.Navigation("AttributeData");
+                b.Navigation("AttributeData");
 
-                    b.Navigation("AttributeEquationCriterionLibraryJoins");
+                b.Navigation("AttributeEquationCriterionLibraryJoins");
 
-                    b.Navigation("Benefits");
+                b.Navigation("Benefits");
 
-                    b.Navigation("DeficientConditionGoals");
+                b.Navigation("DeficientConditionGoals");
 
-                    b.Navigation("NumericAttributeValueHistories");
+                b.Navigation("NumericAttributeValueHistories");
 
-                    b.Navigation("PerformanceCurves");
+                b.Navigation("PerformanceCurves");
 
-                    b.Navigation("RemainingLifeLimits");
+                b.Navigation("RemainingLifeLimits");
 
-                    b.Navigation("ScenarioDeficientConditionGoals");
+                b.Navigation("ScenarioDeficientConditionGoals");
 
-                    b.Navigation("ScenarioPerformanceCurves");
+                b.Navigation("ScenarioPerformanceCurves");
 
-                    b.Navigation("ScenarioTreatmentConsequences");
+                b.Navigation("ScenarioTreatmentConsequences");
 
-                    b.Navigation("TextAttributeValueHistories");
+                b.Navigation("TextAttributeValueHistories");
 
-                    b.Navigation("TreatmentConsequences");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetEntity", b =>
-                {
-                    b.Navigation("BudgetAmounts");
-
-                    b.Navigation("BudgetPercentagePairs");
-
-                    b.Navigation("CommittedProjects");
-
-                    b.Navigation("CriterionLibraryBudgetJoin");
-
-                    b.Navigation("ScenarioSelectableTreatmentBudgetJoins");
-
-                    b.Navigation("TreatmentBudgetJoins");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetLibraryEntity", b =>
-                {
-                    b.Navigation("BudgetLibrarySimulationJoins");
-
-                    b.Navigation("Budgets");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityEntity", b =>
-                {
-                    b.Navigation("BudgetPercentagePairs");
-
-                    b.Navigation("CriterionLibraryBudgetPriorityJoin");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.BudgetPriorityLibraryEntity", b =>
-                {
-                    b.Navigation("BudgetPriorities");
-
-                    b.Navigation("BudgetPriorityLibrarySimulationJoins");
-                });
+                b.Navigation("TreatmentConsequences");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleEntity", b =>
-                {
-                    b.Navigation("CashFlowDistributionRules");
+            {
+                b.Navigation("CashFlowDistributionRules");
 
-                    b.Navigation("CriterionLibraryCashFlowRuleJoin");
-                });
+                b.Navigation("CriterionLibraryCashFlowRuleJoin");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CashFlowRuleLibraryEntity", b =>
-                {
-                    b.Navigation("CashFlowRuleLibrarySimulationJoins");
+            {
+                b.Navigation("CashFlowRuleLibrarySimulationJoins");
 
-                    b.Navigation("CashFlowRules");
-                });
+                b.Navigation("CashFlowRules");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CommittedProjectEntity", b =>
-                {
-                    b.Navigation("CommittedProjectConsequences");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ConditionalTreatmentConsequenceEntity", b =>
-                {
-                    b.Navigation("ConditionalTreatmentConsequenceEquationJoin");
-
-                    b.Navigation("CriterionLibraryConditionalTreatmentConsequenceJoin");
-                });
+            {
+                b.Navigation("CommittedProjectConsequences");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", b =>
-                {
-                    b.Navigation("AttributeEquationCriterionLibraryJoins");
+            {
+                b.Navigation("AttributeEquationCriterionLibraryJoins");
 
-                    b.Navigation("CriterionLibraryAnalysisMethodJoins");
+                b.Navigation("CriterionLibraryAnalysisMethodJoins");
 
-                    b.Navigation("CriterionLibraryBudgetJoins");
+                b.Navigation("CriterionLibraryBudgetJoins");
 
-                    b.Navigation("CriterionLibraryBudgetPriorityJoins");
+                b.Navigation("CriterionLibraryBudgetPriorityJoins");
 
-                    b.Navigation("CriterionLibraryCashFlowRuleJoins");
+                b.Navigation("CriterionLibraryCashFlowRuleJoins");
 
-                    b.Navigation("CriterionLibraryDeficientConditionGoalJoins");
+                b.Navigation("CriterionLibraryDeficientConditionGoalJoins");
 
-                    b.Navigation("CriterionLibraryPerformanceCurveJoins");
+                b.Navigation("CriterionLibraryPerformanceCurveJoins");
 
-                    b.Navigation("CriterionLibraryRemainingLifeLimitJoins");
+                b.Navigation("CriterionLibraryRemainingLifeLimitJoins");
 
-                    b.Navigation("CriterionLibraryScenarioDeficientConditionGoalJoins");
+                b.Navigation("CriterionLibraryScenarioBudgetJoins");
 
-                    b.Navigation("CriterionLibraryScenarioPerformanceCurveJoins");
+                b.Navigation("CriterionLibraryScenarioBudgetPriorityJoins");
 
-                    b.Navigation("CriterionLibraryScenarioSelectableTreatmentJoins");
+                b.Navigation("CriterionLibraryScenarioDeficientConditionGoalJoins");
 
-                    b.Navigation("CriterionLibraryScenarioTargetConditionGoalJoins");
+                b.Navigation("CriterionLibraryScenarioPerformanceCurveJoins");
 
-                    b.Navigation("CriterionLibraryScenarioTreatmentConsequenceJoins");
+                b.Navigation("CriterionLibraryScenarioSelectableTreatmentJoins");
 
-                    b.Navigation("CriterionLibraryScenarioTreatmentCostJoins");
+                b.Navigation("CriterionLibraryScenarioTargetConditionGoalJoins");
 
-                    b.Navigation("CriterionLibraryScenarioTreatmentSupersessionJoins");
+                b.Navigation("CriterionLibraryScenarioTreatmentConsequenceJoins");
 
-                    b.Navigation("CriterionLibrarySelectableTreatmentJoins");
+                b.Navigation("CriterionLibraryScenarioTreatmentCostJoins");
 
-                    b.Navigation("CriterionLibraryTargetConditionGoalJoins");
+                b.Navigation("CriterionLibraryScenarioTreatmentSupersessionJoins");
 
-                    b.Navigation("CriterionLibraryTreatmentConsequenceJoins");
+                b.Navigation("CriterionLibrarySelectableTreatmentJoins");
 
-                    b.Navigation("CriterionLibraryTreatmentCostJoins");
+                b.Navigation("CriterionLibraryTargetConditionGoalJoins");
 
-                    b.Navigation("CriterionLibraryTreatmentSupersessionJoins");
+                b.Navigation("CriterionLibraryTreatmentConsequenceJoins");
 
-                    b.Navigation("CriterionLibraryUserJoins");
-                });
+                b.Navigation("CriterionLibraryTreatmentCostJoins");
+
+                b.Navigation("CriterionLibraryTreatmentSupersessionJoins");
+
+                b.Navigation("CriterionLibraryUserJoins");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryDeficientConditionGoalJoin");
-                });
+            {
+                b.Navigation("CriterionLibraryDeficientConditionGoalJoin");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DeficientConditionGoalLibraryEntity", b =>
-                {
-                    b.Navigation("DeficientConditionGoals");
-                });
+            {
+                b.Navigation("DeficientConditionGoals");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", b =>
-                {
-                    b.Navigation("AttributeEquationCriterionLibraryJoin");
+            {
+                b.Navigation("AttributeEquationCriterionLibraryJoin");
 
-                    b.Navigation("BenefitQuantifier");
+                b.Navigation("BenefitQuantifier");
 
-                    b.Navigation("ConditionalTreatmentConsequenceEquationJoin");
+                b.Navigation("ConditionalTreatmentConsequenceEquationJoin");
 
-                    b.Navigation("PerformanceCurveEquationJoin");
+                b.Navigation("PerformanceCurveEquationJoin");
 
-                    b.Navigation("ScenarioConditionalTreatmentConsequenceEquationJoin");
+                b.Navigation("ScenarioConditionalTreatmentConsequenceEquationJoin");
 
-                    b.Navigation("ScenarioPerformanceCurveEquationJoin");
+                b.Navigation("ScenarioPerformanceCurveEquationJoin");
 
-                    b.Navigation("ScenarioTreatmentCostEquationJoin");
+                b.Navigation("ScenarioTreatmentCostEquationJoin");
 
-                    b.Navigation("TreatmentCostEquationJoin");
-                });
+                b.Navigation("TreatmentCostEquationJoin");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.FacilityEntity", b =>
-                {
-                    b.Navigation("Sections");
-                });
+            {
+                b.Navigation("Sections");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurveEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryPerformanceCurveJoin");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetEntity", b =>
+            {
+                b.Navigation("BudgetAmounts");
 
-                    b.Navigation("PerformanceCurveEquationJoin");
-                });
+                b.Navigation("CriterionLibraryBudgetJoin");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget.BudgetLibraryEntity", b =>
+            {
+                b.Navigation("Budgets");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityEntity", b =>
+            {
+                b.Navigation("BudgetPercentagePairs");
+
+                b.Navigation("CriterionLibraryBudgetPriorityJoin");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityLibraryEntity", b =>
+            {
+                b.Navigation("BudgetPriorities");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveEntity", b =>
+            {
+                b.Navigation("CriterionLibraryPerformanceCurveJoin");
+
+                b.Navigation("PerformanceCurveEquationJoin");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve.PerformanceCurveLibraryEntity", b =>
+            {
+                b.Navigation("PerformanceCurves");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.ConditionalTreatmentConsequenceEntity", b =>
+            {
+                b.Navigation("ConditionalTreatmentConsequenceEquationJoin");
+
+                b.Navigation("CriterionLibraryConditionalTreatmentConsequenceJoin");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.SelectableTreatmentEntity", b =>
+            {
+                b.Navigation("CriterionLibrarySelectableTreatmentJoin");
+
+                b.Navigation("TreatmentConsequences");
+
+                b.Navigation("TreatmentCosts");
+
+                b.Navigation("TreatmentSchedulings");
+
+                b.Navigation("TreatmentSupersessions");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentCostEntity", b =>
+            {
+                b.Navigation("CriterionLibraryTreatmentCostJoin");
+
+                b.Navigation("TreatmentCostEquationJoin");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentLibraryEntity", b =>
+            {
+                b.Navigation("Treatments");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentSupersessionEntity", b =>
+            {
+                b.Navigation("CriterionLibraryTreatmentSupersessionJoin");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.MaintainableAssetEntity", b =>
-                {
-                    b.Navigation("AggregatedResults");
+            {
+                b.Navigation("AggregatedResults");
 
-                    b.Navigation("AssignedData");
+                b.Navigation("AssignedData");
 
-                    b.Navigation("CommittedProjects");
+                b.Navigation("CommittedProjects");
 
-                    b.Navigation("MaintainableAssetLocation");
-                });
+                b.Navigation("MaintainableAssetLocation");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", b =>
-                {
-                    b.Navigation("BenefitQuantifier");
+            {
+                b.Navigation("BenefitQuantifier");
 
-                    b.Navigation("Facilities");
+                b.Navigation("Facilities");
 
-                    b.Navigation("MaintainableAssets");
+                b.Navigation("MaintainableAssets");
 
-                    b.Navigation("NetworkRollupDetail");
+                b.Navigation("NetworkRollupDetail");
 
-                    b.Navigation("Simulations");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.PerformanceCurveLibraryEntity", b =>
-                {
-                    b.Navigation("PerformanceCurves");
-                });
+                b.Navigation("Simulations");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryRemainingLifeLimitJoin");
-                });
+            {
+                b.Navigation("CriterionLibraryRemainingLifeLimitJoin");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibraryEntity", b =>
-                {
-                    b.Navigation("RemainingLifeLimitLibrarySimulationJoins");
+            {
+                b.Navigation("RemainingLifeLimitLibrarySimulationJoins");
 
-                    b.Navigation("RemainingLifeLimits");
-                });
+                b.Navigation("RemainingLifeLimits");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget.ScenarioBudgetEntity", b =>
+            {
+                b.Navigation("BudgetPercentagePairs");
+
+                b.Navigation("CommittedProjects");
+
+                b.Navigation("CriterionLibraryScenarioBudgetJoin");
+
+                b.Navigation("ScenarioBudgetAmounts");
+
+                b.Navigation("ScenarioSelectableTreatmentScenarioBudgetJoins");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.ScenarioBudgetPriorityEntity", b =>
+            {
+                b.Navigation("BudgetPercentagePairs");
+
+                b.Navigation("CriterionLibraryScenarioBudgetPriorityJoin");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient.ScenarioDeficientConditionGoalEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryScenarioDeficientConditionGoalJoin");
-                });
+            {
+                b.Navigation("CriterionLibraryScenarioDeficientConditionGoalJoin");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioConditionalTreatmentConsequenceEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryScenarioConditionalTreatmentConsequenceJoin");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve.ScenarioPerformanceCurveEntity", b =>
+            {
+                b.Navigation("CriterionLibraryScenarioPerformanceCurveJoin");
 
-                    b.Navigation("ScenarioConditionalTreatmentConsequenceEquationJoin");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioPerformanceCurveEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryScenarioPerformanceCurveJoin");
-
-                    b.Navigation("ScenarioPerformanceCurveEquationJoin");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioSelectableTreatmentEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryScenarioSelectableTreatmentJoin");
-
-                    b.Navigation("ScenarioTreatmentBudgetJoins");
-
-                    b.Navigation("ScenarioTreatmentConsequences");
-
-                    b.Navigation("ScenarioTreatmentCosts");
-
-                    b.Navigation("ScenarioTreatmentSchedulings");
-
-                    b.Navigation("ScenarioTreatmentSupersessions");
-                });
+                b.Navigation("ScenarioPerformanceCurveEquationJoin");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTargetConditionGoalEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryScenarioTargetConditionGoalJoin");
-                });
+            {
+                b.Navigation("CriterionLibraryScenarioTargetConditionGoalJoin");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentCostEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryScenarioTreatmentCostJoin");
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioConditionalTreatmentConsequenceEntity", b =>
+            {
+                b.Navigation("CriterionLibraryScenarioConditionalTreatmentConsequenceJoin");
 
-                    b.Navigation("ScenarioTreatmentCostEquationJoin");
-                });
+                b.Navigation("ScenarioConditionalTreatmentConsequenceEquationJoin");
+            });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTreatmentSupersessionEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryScenarioTreatmentSupersessionJoin");
-                });
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioSelectableTreatmentEntity", b =>
+            {
+                b.Navigation("CriterionLibraryScenarioSelectableTreatmentJoin");
+
+                b.Navigation("ScenarioSelectableTreatmentScenarioBudgetJoins");
+
+                b.Navigation("ScenarioTreatmentConsequences");
+
+                b.Navigation("ScenarioTreatmentCosts");
+
+                b.Navigation("ScenarioTreatmentSchedulings");
+
+                b.Navigation("ScenarioTreatmentSupersessions");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentCostEntity", b =>
+            {
+                b.Navigation("CriterionLibraryScenarioTreatmentCostJoin");
+
+                b.Navigation("ScenarioTreatmentCostEquationJoin");
+            });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment.ScenarioTreatmentSupersessionEntity", b =>
+            {
+                b.Navigation("CriterionLibraryScenarioTreatmentSupersessionJoin");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SectionEntity", b =>
-                {
-                    b.Navigation("CommittedProjects");
+            {
+                b.Navigation("CommittedProjects");
 
-                    b.Navigation("NumericAttributeValueHistories");
+                b.Navigation("NumericAttributeValueHistories");
 
-                    b.Navigation("TextAttributeValueHistories");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SelectableTreatmentEntity", b =>
-                {
-                    b.Navigation("CriterionLibrarySelectableTreatmentJoin");
-
-                    b.Navigation("TreatmentBudgetJoins");
-
-                    b.Navigation("TreatmentConsequences");
-
-                    b.Navigation("TreatmentCosts");
-
-                    b.Navigation("TreatmentSchedulings");
-
-                    b.Navigation("TreatmentSupersessions");
-                });
+                b.Navigation("TextAttributeValueHistories");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", b =>
-                {
-                    b.Navigation("AnalysisMethod");
+            {
+                b.Navigation("AnalysisMethod");
 
-                    b.Navigation("BudgetLibrarySimulationJoin");
+                b.Navigation("BudgetPriorities");
 
-                    b.Navigation("BudgetPriorityLibrarySimulationJoin");
+                b.Navigation("Budgets");
 
-                    b.Navigation("CashFlowRuleLibrarySimulationJoin");
+                b.Navigation("CashFlowRuleLibrarySimulationJoin");
 
-                    b.Navigation("CommittedProjects");
+                b.Navigation("CommittedProjects");
 
-                    b.Navigation("InvestmentPlan");
+                b.Navigation("InvestmentPlan");
 
-                    b.Navigation("PerformanceCurves");
+                b.Navigation("PerformanceCurves");
 
-                    b.Navigation("RemainingLifeLimitLibrarySimulationJoin");
+                b.Navigation("RemainingLifeLimitLibrarySimulationJoin");
 
-                    b.Navigation("ScenarioDeficientConditionGoals");
+                b.Navigation("ScenarioDeficientConditionGoals");
 
-                    b.Navigation("ScenarioTargetConditionalGoals");
+                b.Navigation("ScenarioTargetConditionalGoals");
 
-                    b.Navigation("SelectableTreatment");
+                b.Navigation("SelectableTreatments");
 
-                    b.Navigation("SimulationAnalysisDetail");
+                b.Navigation("SimulationAnalysisDetail");
 
-                    b.Navigation("SimulationLogs");
+                b.Navigation("SimulationLogs");
 
-                    b.Navigation("SimulationOutput");
+                b.Navigation("SimulationOutput");
 
-                    b.Navigation("SimulationReportDetail");
+                b.Navigation("SimulationReportDetail");
 
-                    b.Navigation("SimulationReports");
+                b.Navigation("SimulationReports");
 
-                    b.Navigation("SimulationUserJoins");
-                });
+                b.Navigation("SimulationUserJoins");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryTargetConditionGoalJoin");
-                });
+            {
+                b.Navigation("CriterionLibraryTargetConditionGoalJoin");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TargetConditionGoalLibraryEntity", b =>
-                {
-                    b.Navigation("TargetConditionGoals");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentCostEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryTreatmentCostJoin");
-
-                    b.Navigation("TreatmentCostEquationJoin");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentLibraryEntity", b =>
-                {
-                    b.Navigation("Treatments");
-                });
-
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentSupersessionEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryTreatmentSupersessionJoin");
-                });
+            {
+                b.Navigation("TargetConditionGoals");
+            });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", b =>
-                {
-                    b.Navigation("CriterionLibraryUserJoin");
+            {
+                b.Navigation("CriterionLibraryUserJoin");
 
-                    b.Navigation("SimulationUserJoins");
+                b.Navigation("SimulationUserJoins");
 
-                    b.Navigation("UserCriteriaFilterJoin");
-                });
+                b.Navigation("UserCriteriaFilterJoin");
+            });
 #pragma warning restore 612, 618
         }
     }

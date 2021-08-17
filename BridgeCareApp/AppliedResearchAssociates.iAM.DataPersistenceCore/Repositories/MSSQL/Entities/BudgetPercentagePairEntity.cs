@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public Guid Id { get; set; }
 
-        public Guid? BudgetId { get; set; }
+        //public Guid? BudgetId { get; set; }
 
         public Guid ScenarioBudgetId { get; set; }
 
@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public decimal Percentage { get; set; }
 
-        public virtual BudgetEntity Budget { get; set; }
+        //public virtual BudgetEntity Budget { get; set; }
 
         public virtual ScenarioBudgetEntity ScenarioBudget { get; set; }
 

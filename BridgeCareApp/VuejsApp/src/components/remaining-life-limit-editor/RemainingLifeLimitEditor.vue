@@ -4,13 +4,13 @@
       <v-layout justify-center>
         <v-flex xs3>
           <v-btn @click="onShowCreateRemainingLifeLimitLibraryDialog(false)"
-                 class="ara-blue-bg white--text" v-show="selectedScenarioId === uuidNIL">
+                 class="ara-blue-bg white--text" v-show="!hasScenario">
             New Library
           </v-btn>
-          <v-select v-if="!hasSelectedRemainingLifeLimitLibrary || selectedScenarioId !== uuidNIL"
+          <v-select v-if="!hasSelectedRemainingLifeLimitLibrary || hasScenario"
                     :items="selectListItems"
                     label="Select a Remaining Life Limit Library" outline v-model="selectItemValue"/>
-          <v-text-field v-if="hasSelectedRemainingLifeLimitLibrary && selectedScenarioId === uuidNIL"
+          <v-text-field v-if="hasSelectedRemainingLifeLimitLibrary && !hasScenario"
                         label="Library Name"
                         v-model="selectedRemainingLifeLimitLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]">
@@ -74,13 +74,13 @@
         <v-btn :disabled="disableCrudButton()"
                @click="onUpsertRemainingLifeLimitLibrary(selectedRemainingLifeLimitLibrary, selectedScenarioId)"
                class="ara-blue-bg white--text"
-               v-show="selectedScenarioId !== uuidNIL">
+               v-show="hasScenario">
           Save
         </v-btn>
         <v-btn :disabled="disableCrudButton()"
                @click="onUpsertRemainingLifeLimitLibrary(selectedRemainingLifeLimitLibrary, uuidNIL)"
                class="ara-blue-bg white--text"
-               v-show="selectedScenarioId === uuidNIL">
+               v-show="!hasScenario">
           Update Library
         </v-btn>
         <v-btn :disabled="disableCrudButton()" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)"
@@ -94,7 +94,7 @@
         </v-btn>
         <v-btn :disabled="!hasSelectedRemainingLifeLimitLibrary" @click="onDiscardChanges"
                class="ara-orange-bg white--text"
-               v-show="selectedScenarioId !== uuidNIL">
+               v-show="hasScenario">
           Discard Changes
         </v-btn>
       </v-layout>
@@ -152,6 +152,7 @@ import {setItemPropertyValue} from '@/shared/utils/setter-utils';
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
 import {getAppliedLibraryId, hasAppliedLibrary} from '@/shared/utils/library-utils';
 import {CriterionLibrary} from '@/shared/models/iAM/criteria';
+import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 
 @Component({
   components: {
@@ -165,6 +166,12 @@ export default class RemainingLifeLimitEditor extends Vue {
   @State(state => state.remainingLifeLimitModule.remainingLifeLimitLibraries) stateRemainingLifeLimitLibraries: RemainingLifeLimitLibrary[];
   @State(state => state.remainingLifeLimitModule.selectedRemainingLifeLimitLibrary) stateSelectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary;
   @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
+  @State(
+        state => state.remainingLifeLimitModule.scenarioRemainingLifeLimits,
+    )
+    stateScenarioRemainingLifeLimits: RemainingLifeLimit[];
+    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
+    hasUnsavedChanges: boolean;
 
   @Action('getRemainingLifeLimitLibraries') getRemainingLifeLimitLibrariesAction: any;
   @Action('upsertRemainingLifeLimitLibrary') upsertRemainingLifeLimitLibraryAction: any;
@@ -172,6 +179,10 @@ export default class RemainingLifeLimitEditor extends Vue {
   @Action('selectRemainingLifeLimitLibrary') selectRemainingLifeLimitLibraryAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+  @Action('getScenariotRemainingLifeLimit')
+  getScenariotRemainingLifeLimitAction: any;
+  @Action('upsertScenarioRemainingLifeLimit')
+  upsertScenarioRemainingLifeLimitAction: any;
 
   remainingLifeLimitLibraries: RemainingLifeLimitLibrary[] = [];
   selectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = clone(emptyRemainingLifeLimitLibrary);
@@ -202,19 +213,22 @@ export default class RemainingLifeLimitEditor extends Vue {
   confirmDeleteAlertData: AlertData = clone(emptyAlertData);
   rules: InputValidationRules = rules;
   uuidNIL: string = getBlankGuid();
+  hasScenario: boolean = false;
+  currentUrl: string = window.location.href;
 
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
-      if (to.path.indexOf('RemainingLifeLimitEditor/Scenario') !== -1) {
+      vm.selectItemValue = null;
+      vm.getRemainingLifeLimitLibrariesAction();
+      if (to.path.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !== -1) {
         vm.selectedScenarioId = to.query.scenarioId;
         if (vm.selectedScenarioId === vm.uuidNIL) {
           vm.setErrorMessageAction({message: 'Found no selected scenario for edit'});
           vm.$router.push('/Scenarios/');
         }
+        vm.hasScenario = true;
+        vm.getScenariotRemainingLifeLimitAction(vm.selectedScenarioId);
       }
-
-      vm.selectItemValue = null;
-      vm.getRemainingLifeLimitLibrariesAction();
     });
   }
 
@@ -230,9 +244,9 @@ export default class RemainingLifeLimitEditor extends Vue {
           value: remainingLifeLimitLibrary.id
         }));
 
-    if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateRemainingLifeLimitLibraries, this.selectedScenarioId)) {
-      this.selectItemValue = getAppliedLibraryId(this.stateRemainingLifeLimitLibraries, this.selectedScenarioId);
-    }
+    // if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateRemainingLifeLimitLibraries, this.selectedScenarioId)) {
+    //   this.selectItemValue = getAppliedLibraryId(this.stateRemainingLifeLimitLibraries, this.selectedScenarioId);
+    // }
   }
 
   @Watch('selectItemValue')

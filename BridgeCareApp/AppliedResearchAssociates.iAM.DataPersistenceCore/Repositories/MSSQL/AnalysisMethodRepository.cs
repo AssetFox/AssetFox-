@@ -101,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             List<RemainingLifeLimit> remainingLifeLimits)
         {
             _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimitLibrary(
-                $"{simulationEntity.Name} Remaining Life Limit Library", simulationEntity.Id);
+                $"{simulationEntity.Name} Remaining Life Limit Library");
 
             _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationEntity.Id);
         }
@@ -148,16 +148,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
 
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.RemainingLifeLimitLibrarySimulationJoin)
-                .ThenInclude(_ => _.RemainingLifeLimitLibrary)
                 .ThenInclude(_ => _.RemainingLifeLimits)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.RemainingLifeLimitLibrarySimulationJoin)
-                .ThenInclude(_ => _.RemainingLifeLimitLibrary)
                 .ThenInclude(_ => _.RemainingLifeLimits)
-                .ThenInclude(_ => _.CriterionLibraryRemainingLifeLimitJoin)
+                .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+
                 .AsNoTracking()
                 .Single(_ => _.Simulation.Id == simulation.Id)
                 .FillSimulationAnalysisMethod(simulation);

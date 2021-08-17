@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public Guid SimulationId { get; set; }
 
 
-        public Guid? BudgetId { get; set; }
+        //public Guid? BudgetId { get; set; }
 
         public Guid ScenarioBudgetId { get; set; }
 
@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual SimulationEntity Simulation { get; set; }
 
-        public virtual BudgetEntity Budget { get; set; }
+        //public virtual BudgetEntity Budget { get; set; }
 
         public virtual ScenarioBudgetEntity ScenarioBudget { get; set; }
 

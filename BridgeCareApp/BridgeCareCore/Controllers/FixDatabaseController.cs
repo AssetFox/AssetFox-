@@ -37,10 +37,10 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     var committedProjects = _unitOfWork.Context.CommittedProject.AsNoTracking()
-                        .Include(_ => _.Budget)
-                        .ThenInclude(_ => _.BudgetAmounts)
-                        .Include(_ => _.Budget)
-                        .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
+                        .Include(_ => _.ScenarioBudget)
+                        .ThenInclude(_ => _.ScenarioBudgetAmounts)
+                        .Include(_ => _.ScenarioBudget)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
                         .ThenInclude(_ => _.CriterionLibrary)
                         .ToList();
 
@@ -51,21 +51,21 @@ namespace BridgeCareCore.Controllers
 
                     committedProjects.ForEach(_ =>
                     {
-                        if (budgets.All(budget => budget.Id != _.BudgetId.Value))
+                        if (budgets.All(budget => budget.Id != _.ScenarioBudgetId))
                         {
                             var budget = new ScenarioBudgetEntity
                             {
-                                Id = _.Budget.Id,
-                                Name = _.Budget.Name,
+                                Id = _.ScenarioBudget.Id,
+                                Name = _.ScenarioBudget.Name,
                                 SimulationId = _.SimulationId,
-                                CreatedBy = _.Budget.CreatedBy,
-                                LastModifiedBy = _.Budget.LastModifiedBy,
+                                CreatedBy = _.ScenarioBudget.CreatedBy,
+                                LastModifiedBy = _.ScenarioBudget.LastModifiedBy,
                             };
                             budgets.Add(budget);
 
-                            if (_.Budget.BudgetAmounts.Any())
+                            if (_.ScenarioBudget.ScenarioBudgetAmounts.Any())
                             {
-                                budgetAmounts.AddRange(_.Budget.BudgetAmounts.Select(amount =>
+                                budgetAmounts.AddRange(_.ScenarioBudget.ScenarioBudgetAmounts.Select(amount =>
                                     new ScenarioBudgetAmountEntity
                                     {
                                         Id = Guid.NewGuid(),
@@ -77,24 +77,25 @@ namespace BridgeCareCore.Controllers
                                     }).ToList());
                             }
 
-                            if (_.Budget.CriterionLibraryBudgetJoin != null)
+                            if (_.ScenarioBudget.CriterionLibraryScenarioBudgetJoin != null)
                             {
                                 var criterion = new CriterionLibraryEntity
                                 {
                                     Id = Guid.NewGuid(),
                                     MergedCriteriaExpression =
-                                        _.Budget.CriterionLibraryBudgetJoin.CriterionLibrary
+                                        _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary
                                             .MergedCriteriaExpression,
                                     Name = $"{_.Name} Criterion",
                                     IsSingleUse = true,
-                                    CreatedBy = _.Budget.CriterionLibraryBudgetJoin.CriterionLibrary.CreatedBy,
-                                    LastModifiedBy = _.Budget.CriterionLibraryBudgetJoin.CriterionLibrary
+                                    CreatedBy = _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary.CreatedBy,
+                                    LastModifiedBy = _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary
                                         .LastModifiedBy
                                 };
                                 criteria.Add(criterion);
                                 criterionJoins.Add(new CriterionLibraryScenarioBudgetEntity
                                 {
-                                    ScenarioBudgetId = _.BudgetId.Value, CriterionLibraryId = criterion.Id
+                                    ScenarioBudgetId = _.ScenarioBudgetId,
+                                    CriterionLibraryId = criterion.Id
                                 });
                             }
                         }
@@ -145,10 +146,10 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     var budgetPercentagePairs = _unitOfWork.Context.BudgetPercentagePair.AsNoTracking()
-                        .Include(_ => _.Budget)
-                        .ThenInclude(_ => _.BudgetAmounts)
-                        .Include(_ => _.Budget)
-                        .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
+                        .Include(_ => _.ScenarioBudget)
+                        .ThenInclude(_ => _.ScenarioBudgetAmounts)
+                        .Include(_ => _.ScenarioBudget)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
                         .ThenInclude(_ => _.CriterionLibrary)
                         .Include(_ => _.BudgetPriority)
                         .ThenInclude(_ => _.BudgetPriorityLibrary)
@@ -177,23 +178,23 @@ namespace BridgeCareCore.Controllers
                             {
                                 var budgetExistsOnSimulation =
                                     budgetsPerSimulationId.ContainsKey(join.SimulationId) &&
-                                    budgetsPerSimulationId[join.SimulationId].Any(budget => budget.Name == _.Budget.Name);
+                                    budgetsPerSimulationId[join.SimulationId].Any(budget => budget.Name == _.ScenarioBudget.Name);
                                 if (!budgetExistsOnSimulation &&
-                                    !budgets.Any(b => b.SimulationId == join.SimulationId && b.Name == _.Budget.Name))
+                                    !budgets.Any(b => b.SimulationId == join.SimulationId && b.Name == _.ScenarioBudget.Name))
                                 {
                                     var budget = new ScenarioBudgetEntity
                                     {
                                         Id = Guid.NewGuid(),
-                                        Name = _.Budget.Name,
+                                        Name = _.ScenarioBudget.Name,
                                         SimulationId = join.SimulationId,
-                                        CreatedBy = _.Budget.CreatedBy,
-                                        LastModifiedBy = _.Budget.LastModifiedBy,
+                                        CreatedBy = _.ScenarioBudget.CreatedBy,
+                                        LastModifiedBy = _.ScenarioBudget.LastModifiedBy,
                                     };
                                     budgets.Add(budget);
 
-                                    if (_.Budget.BudgetAmounts.Any())
+                                    if (_.ScenarioBudget.ScenarioBudgetAmounts.Any())
                                     {
-                                        budgetAmounts.AddRange(_.Budget.BudgetAmounts.Select(amount =>
+                                        budgetAmounts.AddRange(_.ScenarioBudget.ScenarioBudgetAmounts.Select(amount =>
                                             new ScenarioBudgetAmountEntity
                                             {
                                                 Id = Guid.NewGuid(),
@@ -205,31 +206,32 @@ namespace BridgeCareCore.Controllers
                                             }).ToList());
                                     }
 
-                                    if (_.Budget.CriterionLibraryBudgetJoin != null)
+                                    if (_.ScenarioBudget.CriterionLibraryScenarioBudgetJoin != null)
                                     {
                                         var criterion = new CriterionLibraryEntity
                                         {
                                             Id = Guid.NewGuid(),
                                             MergedCriteriaExpression =
-                                                _.Budget.CriterionLibraryBudgetJoin.CriterionLibrary
+                                                _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary
                                                     .MergedCriteriaExpression,
                                             Name = $"{budget.Name} Criterion",
                                             IsSingleUse = true,
-                                            CreatedBy = _.Budget.CriterionLibraryBudgetJoin.CriterionLibrary.CreatedBy,
-                                            LastModifiedBy = _.Budget.CriterionLibraryBudgetJoin.CriterionLibrary
+                                            CreatedBy = _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary.CreatedBy,
+                                            LastModifiedBy = _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary
                                                 .LastModifiedBy
                                         };
                                         criteria.Add(criterion);
                                         criterionJoins.Add(new CriterionLibraryScenarioBudgetEntity
                                         {
-                                            ScenarioBudgetId = budget.Id, CriterionLibraryId = criterion.Id
+                                            ScenarioBudgetId = budget.Id,
+                                            CriterionLibraryId = criterion.Id
                                         });
                                     }
 
                                     percentagePairs.Add(new BudgetPercentagePairEntity
                                     {
                                         Id = Guid.NewGuid(),
-                                        BudgetId = _.BudgetId.Value,
+                                        //BudgetId = _.BudgetId.Value,
                                         ScenarioBudgetId = budget.Id,
                                         BudgetPriorityId = _.BudgetPriorityId,
                                         Percentage = _.Percentage,
@@ -241,15 +243,15 @@ namespace BridgeCareCore.Controllers
                                 {
                                     var budget = budgetsPerSimulationId.ContainsKey(join.SimulationId) &&
                                                  budgetsPerSimulationId[join.SimulationId]
-                                                     .Any(budget => budget.Name == _.Budget.Name)
+                                                     .Any(budget => budget.Name == _.ScenarioBudget.Name)
                                         ? budgetsPerSimulationId[join.SimulationId]
-                                            .First(budget => budget.Name == _.Budget.Name)
-                                        : budgets.First(budget => budget.Name == _.Budget.Name);
+                                            .First(budget => budget.Name == _.ScenarioBudget.Name)
+                                        : budgets.First(budget => budget.Name == _.ScenarioBudget.Name);
 
                                     percentagePairs.Add(new BudgetPercentagePairEntity
                                     {
                                         Id = Guid.NewGuid(),
-                                        BudgetId = _.BudgetId.Value,
+                                        //BudgetId = _.BudgetId.Value,
                                         ScenarioBudgetId = budget.Id,
                                         BudgetPriorityId = _.BudgetPriorityId,
                                         Percentage = _.Percentage,

@@ -465,14 +465,13 @@ export default class TreatmentEditor extends Vue {
                         consequences: treatment.consequences.map((con: TreatmentConsequence) => ({
                             ...con,
                             equation: hasValue(con.equation)
-                            ? {...con.equation }
+                            ? {...con.equation}
                             : clone(emptyEquation)
                         })),
                         costs: treatment.costs.map((cost: TreatmentCost) => ({
                             ...cost,
-                            //id: getNewGuid(),
                             equation: hasValue(cost.equation)
-                            ? {...cost.equation }
+                            ? {...cost.equation}
                             : clone(emptyEquation)
                         }))
                     }));
@@ -605,7 +604,6 @@ export default class TreatmentEditor extends Vue {
         scenarioId: string,
     ) {
         if (!isNil(localScenarioSelectedTreatments)) {
-
             if(this.hasSelectedLibrary){ // If a library is being applied, assign new ids
                 localScenarioSelectedTreatments = this.selectedScenarioTreatments
                     .map((treatment: Treatment) => ({

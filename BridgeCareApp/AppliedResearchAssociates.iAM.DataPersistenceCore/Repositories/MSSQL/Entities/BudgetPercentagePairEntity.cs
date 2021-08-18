@@ -9,15 +9,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public Guid Id { get; set; }
 
-        //public Guid? BudgetId { get; set; }
-
         public Guid ScenarioBudgetId { get; set; }
 
         public Guid BudgetPriorityId { get; set; }
 
         public decimal Percentage { get; set; }
-
-        //public virtual BudgetEntity Budget { get; set; }
 
         public virtual ScenarioBudgetEntity ScenarioBudget { get; set; }
 

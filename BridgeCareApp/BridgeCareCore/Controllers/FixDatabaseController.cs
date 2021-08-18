@@ -71,7 +71,7 @@ namespace BridgeCareCore.Controllers
                                         Id = Guid.NewGuid(),
                                         Year = amount.Year,
                                         Value = amount.Value,
-                                        ScenarioBudgetId = _.Id,
+                                        ScenarioBudgetId = budget.Id,
                                         CreatedBy = amount.CreatedBy,
                                         LastModifiedBy = amount.LastModifiedBy
                                     }).ToList());
@@ -94,7 +94,8 @@ namespace BridgeCareCore.Controllers
                                 criteria.Add(criterion);
                                 criterionJoins.Add(new CriterionLibraryScenarioBudgetEntity
                                 {
-                                    ScenarioBudgetId = _.ScenarioBudgetId, CriterionLibraryId = criterion.Id
+                                    ScenarioBudgetId = _.ScenarioBudgetId,
+                                    CriterionLibraryId = criterion.Id
                                 });
                             }
                         }
@@ -222,7 +223,8 @@ namespace BridgeCareCore.Controllers
                                         criteria.Add(criterion);
                                         criterionJoins.Add(new CriterionLibraryScenarioBudgetEntity
                                         {
-                                            ScenarioBudgetId = budget.Id, CriterionLibraryId = criterion.Id
+                                            ScenarioBudgetId = budget.Id,
+                                            CriterionLibraryId = criterion.Id
                                         });
                                     }
 

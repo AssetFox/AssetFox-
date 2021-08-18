@@ -243,10 +243,6 @@ export default class RemainingLifeLimitEditor extends Vue {
           text: remainingLifeLimitLibrary.name,
           value: remainingLifeLimitLibrary.id
         }));
-
-    // if (this.selectedScenarioId !== this.uuidNIL && hasAppliedLibrary(this.stateRemainingLifeLimitLibraries, this.selectedScenarioId)) {
-    //   this.selectItemValue = getAppliedLibraryId(this.stateRemainingLifeLimitLibraries, this.selectedScenarioId);
-    // }
   }
 
   @Watch('selectItemValue')
@@ -261,11 +257,6 @@ export default class RemainingLifeLimitEditor extends Vue {
 
   @Watch('selectedRemainingLifeLimitLibrary')
   onSelectedRemainingLifeLimitLibraryChanged() {
-    // this.setHasUnsavedChangesAction({
-    //   value: hasUnsavedChangesCore(
-    //       'remaining-life-limit', this.selectedRemainingLifeLimitLibrary, this.stateSelectedRemainingLifeLimitLibrary
-    //   )
-    // });
     this.hasSelectedRemainingLifeLimitLibrary = this.selectedRemainingLifeLimitLibrary.id !== this.uuidNIL;
     this.gridData = clone(this.selectedRemainingLifeLimitLibrary.remainingLifeLimits);
   }
@@ -474,18 +465,6 @@ export default class RemainingLifeLimitEditor extends Vue {
         }
 
         return !(dataIsValid && this.hasUnsavedChanges);
-
-    // if (this.hasSelectedRemainingLifeLimitLibrary) {
-    //   const allDataIsValid = this.selectedRemainingLifeLimitLibrary.remainingLifeLimits
-    //       .every((rml: RemainingLifeLimit) => {
-    //         return this.rules['generalRules'].valueIsNotEmpty(rml.attribute) === true &&
-    //             this.rules['generalRules'].valueIsNotEmpty(rml.value) === true;
-    //       });
-
-    //   return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedRemainingLifeLimitLibrary.name) === true && allDataIsValid);
-    // }
-
-    // return true;
   }
 }
 </script>

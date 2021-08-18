@@ -480,8 +480,11 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
                 nextBudget = 0;
             }
             ExcelHelper.MergeCells(worksheet, 38, 1, 39, 1);
-            ExcelHelper.MergeCells(worksheet, 38, 2, 38, simulation.InvestmentPlan.Budgets.Count + 1);
-            ExcelHelper.ApplyBorder(worksheet.Cells[38, 1, startingRowInvestment - 1, simulation.InvestmentPlan.Budgets.Count + 1]);
+            if(simulation.InvestmentPlan.Budgets.Count > 0)
+            {
+                ExcelHelper.MergeCells(worksheet, 38, 2, 38, simulation.InvestmentPlan.Budgets.Count + 1);
+                ExcelHelper.ApplyBorder(worksheet.Cells[38, 1, startingRowInvestment - 1, simulation.InvestmentPlan.Budgets.Count + 1]);
+            }
             FillBudgetCriteria(worksheet, startingRowInvestment, simulation);
         }
 

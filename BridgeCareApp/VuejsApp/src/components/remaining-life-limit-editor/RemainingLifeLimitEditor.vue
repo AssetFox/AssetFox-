@@ -261,14 +261,39 @@ export default class RemainingLifeLimitEditor extends Vue {
 
   @Watch('selectedRemainingLifeLimitLibrary')
   onSelectedRemainingLifeLimitLibraryChanged() {
-    this.setHasUnsavedChangesAction({
-      value: hasUnsavedChangesCore(
-          'remaining-life-limit', this.selectedRemainingLifeLimitLibrary, this.stateSelectedRemainingLifeLimitLibrary
-      )
-    });
+    // this.setHasUnsavedChangesAction({
+    //   value: hasUnsavedChangesCore(
+    //       'remaining-life-limit', this.selectedRemainingLifeLimitLibrary, this.stateSelectedRemainingLifeLimitLibrary
+    //   )
+    // });
     this.hasSelectedRemainingLifeLimitLibrary = this.selectedRemainingLifeLimitLibrary.id !== this.uuidNIL;
     this.gridData = clone(this.selectedRemainingLifeLimitLibrary.remainingLifeLimits);
   }
+
+  @Watch('stateScenarioRemainingLifeLimits')
+    onStateScenarioRemainingLifeLimitsChanged() {
+        if (
+            this.currentUrl.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !==
+            -1
+        ) {
+            this.gridData = clone(
+                this.stateScenarioRemainingLifeLimits,
+            );
+        }
+    }
+    @Watch('gridData')
+    onGridDataChanged() {
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore(
+            'remaining-life-limit',
+            this.gridData,
+            this.currentUrl.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !==
+                -1
+                ? this.stateScenarioRemainingLifeLimits
+                : this.stateSelectedRemainingLifeLimitLibrary.remainingLifeLimits,
+        );
+
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
 
   @Watch('stateNumericAttributes')
   onStateNumericAttributesChanged() {

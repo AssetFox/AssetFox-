@@ -149,16 +149,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.AnalysisMethod)
                 .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
                 .Include(_ => _.InvestmentPlan)
+
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.Budgets)
+
+                .Include(_ => _.BudgetPriorities)
                 .ThenInclude(_ => _.BudgetPercentagePairs)
-                /*.ThenInclude(_ => _.ScenarioBudgetPriority)
+                .Include(_ => _.BudgetPriorities)
+                .ThenInclude(_ => _.BudgetPercentagePairs)
+                .ThenInclude(_ => _.ScenarioBudget)
+                .Include(_ => _.BudgetPriorities)
                 .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
-                .ThenInclude(_ => _.CriterionLibrary)*/
+                .ThenInclude(_ => _.CriterionLibrary)
+
                 .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
 
                 .Include(_ => _.ScenarioDeficientConditionGoals)
@@ -284,10 +290,47 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             .ReInitializeAllEntityBaseProperties(budget.CriterionLibraryScenarioBudgetJoin,
                                 _unitOfWork.UserEntity?.Id);
                     }
+                });
+            }
 
-                    if (budget.BudgetPercentagePairs.Any())
+            if (simulationToClone.BudgetPriorities.Any())
+            {
+                simulationToClone.BudgetPriorities.ToList().ForEach(priority =>
+                {
+                    var newPriorityId = Guid.NewGuid();
+                    priority.Id = newPriorityId;
+                    priority.SimulationId = simulationId;
+                    _unitOfWork.Context.ReInitializeAllEntityBaseProperties(priority, _unitOfWork.UserEntity?.Id);
+
+                    if (priority.BudgetPercentagePairs.Any())
                     {
+                        priority.BudgetPercentagePairs.ToList().ForEach(pair =>
+                        {
+                            var newPairId = Guid.NewGuid();
+                            pair.Id = newPairId;
+                            pair.ScenarioBudgetPriorityId = newPriorityId;
+                            if (simulationToClone.Budgets.Any(_ => _.Name == pair.ScenarioBudget.Name))
+                            {
+                                pair.ScenarioBudgetId = simulationToClone.Budgets
+                                    .Single(_ => _.Name == pair.ScenarioBudget.Name).Id;
+                            }
+                            _unitOfWork.Context.ReInitializeAllEntityBaseProperties(pair, _unitOfWork.UserEntity?.Id);
+                        });
+                    }
 
+                    if (priority.CriterionLibraryScenarioBudgetPriorityJoin != null)
+                    {
+                        var criterionLibraryId = Guid.NewGuid();
+                        priority.CriterionLibraryScenarioBudgetPriorityJoin.CriterionLibrary.Id = criterionLibraryId;
+                        priority.CriterionLibraryScenarioBudgetPriorityJoin.CriterionLibraryId = criterionLibraryId;
+                        priority.CriterionLibraryScenarioBudgetPriorityJoin.ScenarioBudgetPriorityId = newPriorityId;
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                priority.CriterionLibraryScenarioBudgetPriorityJoin.CriterionLibrary,
+                                _unitOfWork.UserEntity?.Id);
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(priority.CriterionLibraryScenarioBudgetPriorityJoin,
+                                _unitOfWork.UserEntity?.Id);
                     }
                 });
             }

@@ -371,7 +371,7 @@ import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 })
 export default class TargetConditionGoalEditor extends Vue {
     @State(
-        state => state.targetConditionGoalModule.targetConditionGoal3Libraries,
+        state => state.targetConditionGoalModule.targetConditionGoalLibraries,
     )
     stateTargetConditionGoalLibraries: TargetConditionGoalLibrary[];
     @State(
@@ -719,7 +719,9 @@ export default class TargetConditionGoalEditor extends Vue {
         );
 
         if (!isNil(library)) {
-            this.createTargetConditionGoalLibraryAction({ library: library });
+            var localObject = clone(library);
+            localObject.targetConditionGoals = clone(this.targetConditionGoalGridData);
+            this.createTargetConditionGoalLibraryAction({ library: localObject });
         }
     }
 

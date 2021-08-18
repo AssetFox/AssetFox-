@@ -62,19 +62,6 @@ const actions = {
         await RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(payload.library)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    // if (payload.scenarioId !== getBlankGuid() && hasAppliedLibrary(state.remainingLifeLimitLibraries, payload.scenarioId)) {
-                    //     const unAppliedLibrary: RemainingLifeLimitLibrary = unapplyLibrary(getAppliedLibrary(
-                    //         state.remainingLifeLimitLibraries, payload.scenarioId), payload.scenarioId);
-                    //     commit('addedOrUpdatedRemainingLifeLimitLibraryMutator', unAppliedLibrary);
-                    // }
-
-                    // const library: RemainingLifeLimitLibrary = {
-                    //     ...payload.library,
-                    //     appliedScenarioIds: payload.scenarioId !== getBlankGuid() &&
-                    //     payload.library.appliedScenarioIds.indexOf(payload.scenarioId) === -1
-                    //         ? append(payload.scenarioId, payload.library.appliedScenarioIds)
-                    //         : payload.library.appliedScenarioIds
-                    // };
 
                     const message: string = any(propEq('id', payload.library.id), state.remainingLifeLimitLibraries)
                         ? 'Updated remaining life limit library'

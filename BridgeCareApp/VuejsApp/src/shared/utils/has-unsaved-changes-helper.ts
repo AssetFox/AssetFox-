@@ -56,10 +56,7 @@ export const hasUnsavedChangesCore = (
                 !isEqual(localObject, stateObject)
             );
         case 'budget-priority':
-            return (
-                !isEqual(localObject, emptyBudgetPriorityLibrary) &&
-                !isEqual(localObject, stateObject)
-            );
+            return !isEqual(localObject, stateObject);
         case 'criterion-library':
             return (
                 !isEqual(localObject, emptyCriterionLibrary) &&

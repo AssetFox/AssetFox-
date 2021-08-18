@@ -131,7 +131,7 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpPost]
+        /*[HttpPost]
         [Route("FixBudgetPercentagePairs")]
         public async Task FixBudgetPercentagePairs()
         {
@@ -282,6 +282,6 @@ namespace BridgeCareCore.Controllers
                 _unitOfWork.Rollback();
                 throw;
             }
-        }
+        }*/
     }
 }

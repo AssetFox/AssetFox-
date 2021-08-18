@@ -3426,7 +3426,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.ScenarioBudgetPriorityEntity", null)
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.ScenarioBudgetPriorityEntity", "ScenarioBudgetPriority")
                         .WithMany("BudgetPercentagePairs")
                         .HasForeignKey("ScenarioBudgetPriorityId")
                         .OnDelete(DeleteBehavior.ClientCascade)
@@ -4793,8 +4793,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityEntity", b =>
                 {
-                    b.Navigation("BudgetPercentagePairs");
-
                     b.Navigation("CriterionLibraryBudgetPriorityJoin");
                 });
 

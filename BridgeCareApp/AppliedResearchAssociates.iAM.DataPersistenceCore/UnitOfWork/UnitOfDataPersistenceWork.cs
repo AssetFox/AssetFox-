@@ -36,7 +36,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IAttributeValueHistoryRepository _attributeValueHistoryRepo;
         private IBenefitRepository _benefitRepo;
         private IBudgetAmountRepository _budgetAmountRepo;
-        private IBudgetPercentagePairRepository _budgetPercentagePairRepo;
         private IBudgetPriorityRepository _budgetPriorityRepo;
         private IBudgetRepository _budgetRepo;
         private ICashFlowDistributionRuleRepository _cashFlowDistributionRuleRepo;
@@ -85,8 +84,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public IBenefitRepository BenefitRepo => _benefitRepo ??= new BenefitRepository(this);
 
         public IBudgetAmountRepository BudgetAmountRepo => _budgetAmountRepo ??= new BudgetAmountRepository(this);
-
-        public IBudgetPercentagePairRepository BudgetPercentagePairRepo => _budgetPercentagePairRepo ??= new BudgetPercentagePairRepository(this);
 
         public IBudgetPriorityRepository BudgetPriorityRepo => _budgetPriorityRepo ??= new BudgetPriorityRepository(this);
 

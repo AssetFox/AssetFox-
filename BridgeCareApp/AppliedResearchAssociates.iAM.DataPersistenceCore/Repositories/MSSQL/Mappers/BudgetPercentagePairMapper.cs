@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new BudgetPercentagePairEntity
             {
                 Id = domain.Id,
-                BudgetPriorityId = budgetPriorityId,
+                ScenarioBudgetPriorityId = budgetPriorityId,
                 ScenarioBudgetId = budgetId,
                 Percentage = domain.Percentage
             };
@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new BudgetPercentagePairEntity
             {
                 Id = dto.Id,
-                BudgetPriorityId = budgetPriorityId,
+                ScenarioBudgetPriorityId = budgetPriorityId,
                 ScenarioBudgetId = dto.BudgetId,
                 Percentage = dto.Percentage
             };

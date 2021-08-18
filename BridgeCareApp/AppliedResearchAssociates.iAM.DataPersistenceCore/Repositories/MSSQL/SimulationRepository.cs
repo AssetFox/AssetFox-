@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -10,6 +13,7 @@ using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using MoreLinq.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -145,12 +149,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.AnalysisMethod)
                 .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
                 .Include(_ => _.InvestmentPlan)
+
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.ScenarioBudgetAmounts)
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.BudgetPriorityLibrarySimulationJoin)
+
+                .Include(_ => _.BudgetPriorities)
+                .ThenInclude(_ => _.BudgetPercentagePairs)
+                .Include(_ => _.BudgetPriorities)
+                .ThenInclude(_ => _.BudgetPercentagePairs)
+                .ThenInclude(_ => _.ScenarioBudget)
+                .Include(_ => _.BudgetPriorities)
+                .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+
                 .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
 
                 .Include(_ => _.ScenarioDeficientConditionGoals)
@@ -254,7 +268,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.Budgets.Any())
             {
-                simulationToClone.Budgets.ForEach(budget =>
+                simulationToClone.Budgets.ToList().ForEach(budget =>
                 {
                     var newBudgetId = Guid.NewGuid();
                     budget.Id = newBudgetId;
@@ -279,12 +293,46 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 });
             }
 
-            if (simulationToClone.BudgetPriorityLibrarySimulationJoin != null)
+            if (simulationToClone.BudgetPriorities.Any())
             {
-                simulationToClone.BudgetPriorityLibrarySimulationJoin.SimulationId = newSimulationId;
-                _unitOfWork.Context
-                    .ReInitializeAllEntityBaseProperties(simulationToClone.BudgetPriorityLibrarySimulationJoin,
-                        _unitOfWork.UserEntity?.Id);
+                simulationToClone.BudgetPriorities.ToList().ForEach(priority =>
+                {
+                    var newPriorityId = Guid.NewGuid();
+                    priority.Id = newPriorityId;
+                    priority.SimulationId = simulationId;
+                    _unitOfWork.Context.ReInitializeAllEntityBaseProperties(priority, _unitOfWork.UserEntity?.Id);
+
+                    if (priority.BudgetPercentagePairs.Any())
+                    {
+                        priority.BudgetPercentagePairs.ToList().ForEach(pair =>
+                        {
+                            var newPairId = Guid.NewGuid();
+                            pair.Id = newPairId;
+                            pair.ScenarioBudgetPriorityId = newPriorityId;
+                            if (simulationToClone.Budgets.Any(_ => _.Name == pair.ScenarioBudget.Name))
+                            {
+                                pair.ScenarioBudgetId = simulationToClone.Budgets
+                                    .Single(_ => _.Name == pair.ScenarioBudget.Name).Id;
+                            }
+                            _unitOfWork.Context.ReInitializeAllEntityBaseProperties(pair, _unitOfWork.UserEntity?.Id);
+                        });
+                    }
+
+                    if (priority.CriterionLibraryScenarioBudgetPriorityJoin != null)
+                    {
+                        var criterionLibraryId = Guid.NewGuid();
+                        priority.CriterionLibraryScenarioBudgetPriorityJoin.CriterionLibrary.Id = criterionLibraryId;
+                        priority.CriterionLibraryScenarioBudgetPriorityJoin.CriterionLibraryId = criterionLibraryId;
+                        priority.CriterionLibraryScenarioBudgetPriorityJoin.ScenarioBudgetPriorityId = newPriorityId;
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                priority.CriterionLibraryScenarioBudgetPriorityJoin.CriterionLibrary,
+                                _unitOfWork.UserEntity?.Id);
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(priority.CriterionLibraryScenarioBudgetPriorityJoin,
+                                _unitOfWork.UserEntity?.Id);
+                    }
+                });
             }
 
             if (simulationToClone.CashFlowRuleLibrarySimulationJoin != null)
@@ -297,7 +345,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.ScenarioDeficientConditionGoals.Any())
             {
-                simulationToClone.ScenarioDeficientConditionGoals.ForEach(deficient =>
+                simulationToClone.ScenarioDeficientConditionGoals.ToList().ForEach(deficient =>
                 {
                     var newDeficientId = Guid.NewGuid();
                     deficient.Id = newDeficientId;
@@ -325,7 +373,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.PerformanceCurves.Any())
             {
-                simulationToClone.PerformanceCurves.ForEach(curve =>
+                MoreEnumerable.ForEach(simulationToClone.PerformanceCurves, curve =>
                 {
                     var newCurveId = Guid.NewGuid();
                     curve.Id = newCurveId;
@@ -377,7 +425,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.ScenarioTargetConditionalGoals.Any())
             {
-                simulationToClone.ScenarioTargetConditionalGoals.ForEach(target =>
+                simulationToClone.ScenarioTargetConditionalGoals.ToList().ForEach(target =>
                 {
                     var newTargetId = Guid.NewGuid();
                     target.Id = newTargetId;
@@ -405,7 +453,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.SelectableTreatments.Any())
             {
-                simulationToClone.SelectableTreatments.ForEach(treatment =>
+                MoreEnumerable.ForEach(simulationToClone.SelectableTreatments, treatment =>
                 {
                     var newTreatmentId = Guid.NewGuid();
                     treatment.Id = newTreatmentId;
@@ -432,7 +480,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (treatment.ScenarioTreatmentConsequences.Any())
                     {
-                        treatment.ScenarioTreatmentConsequences.ForEach(consequence =>
+                        MoreEnumerable.ForEach(treatment.ScenarioTreatmentConsequences, consequence =>
                         {
                             var newConsequenceId = Guid.NewGuid();
                             consequence.Id = newConsequenceId;
@@ -476,7 +524,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     }
                     if (treatment.ScenarioTreatmentCosts.Any())
                     {
-                        treatment.ScenarioTreatmentCosts.ForEach(cost =>
+                        MoreEnumerable.ForEach(treatment.ScenarioTreatmentCosts, cost =>
                         {
                             var newCostId = Guid.NewGuid();
                             cost.Id = newCostId;
@@ -524,7 +572,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     }
                     if (treatment.ScenarioTreatmentSchedulings.Any())
                     {
-                        treatment.ScenarioTreatmentSchedulings.ForEach(scheduling =>
+                        MoreEnumerable.ForEach(treatment.ScenarioTreatmentSchedulings, scheduling =>
                         {
                             var newScheduleId = Guid.NewGuid();
                             scheduling.Id = newScheduleId;
@@ -538,7 +586,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     }
                     if (treatment.ScenarioTreatmentSupersessions.Any())
                     {
-                        treatment.ScenarioTreatmentSupersessions.ForEach(supersession =>
+                        MoreEnumerable.ForEach(treatment.ScenarioTreatmentSupersessions, supersession =>
                         {
                             var newSupersessionId = Guid.NewGuid();
                             supersession.Id = newSupersessionId;
@@ -555,7 +603,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.CommittedProjects.Any())
             {
-                simulationToClone.CommittedProjects.ForEach(committedProject =>
+                MoreEnumerable.ForEach(simulationToClone.CommittedProjects, committedProject =>
                 {
                     committedProject.Id = Guid.NewGuid();
                     committedProject.SimulationId = newSimulationId;
@@ -564,7 +612,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (committedProject.CommittedProjectConsequences.Any())
                     {
-                        committedProject.CommittedProjectConsequences.ForEach(committedProjectConsequence =>
+                        MoreEnumerable.ForEach(committedProject.CommittedProjectConsequences, committedProjectConsequence =>
                         {
                             committedProjectConsequence.Id = Guid.NewGuid();
                             committedProjectConsequence.CommittedProjectId = committedProject.Id;

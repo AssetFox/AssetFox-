@@ -31,13 +31,13 @@
 import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
 import { Action } from 'vuex-class';
-import FileSelector from '@/shared/components/FileSelector.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportInvestmentBudgetsDialogResult } from '@/shared/models/modals/import-export-investment-budgets-dialog-result';
 import {clone} from 'ramda';
+import InvestmentBudgetsFileSelector from '@/shared/components/FileSelector.vue';
 
 @Component({
-    components: { InvestmentBudgetsFileSelector: FileSelector },
+    components: { InvestmentBudgetsFileSelector }
 })
 export default class ImportExportInvestmentBudgetsDialog extends Vue {
     @Prop() showDialog: boolean;
@@ -61,7 +61,7 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
 
     /**
      * FileSelector submit event handler
-     */
+     */     
     onFileSelectorChange(file: File) {
         this.investmentBudgetsFile = hasValue(file) ? clone(file) : null;
     }

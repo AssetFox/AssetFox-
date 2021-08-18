@@ -106,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     }
                 }
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testBudgetPriority);
+            _testHelper.UnitOfWork.Context.AddEntity(_testScenarioBudgetPriority);
 
 
             _testBudgetPercentagePair = new BudgetPercentagePairEntity

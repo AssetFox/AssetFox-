@@ -30,7 +30,7 @@
                                 v-model='selectedBudgetPriorityLibrary.shared' />
                 </v-flex>
             </v-layout>
-            <v-flex v-show='hasSelectedLibrary' xs3>
+            <v-flex v-show='hasSelectedLibrary || hasScenario' xs3>
                 <v-btn @click='showCreateBudgetPriorityDialog = true' class='ara-blue-bg white--text'>Add</v-btn>
                 <v-btn :disabled='selectedBudgetPriorityIds.length === 0' @click='onRemoveBudgetPriorities'
                        class='ara-orange-bg white--text'>
@@ -38,7 +38,7 @@
                 </v-btn>
             </v-flex>
         </v-flex>
-        <v-flex v-show='hasSelectedLibrary' xs12>
+        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
             <div class='priorities-data-table'>
                 <v-data-table :headers='budgetPriorityGridHeaders' :items='budgetPriorityGridRows'
                               class='elevation-1 v-table__overflow' item-key='id' select-all
@@ -126,10 +126,10 @@
             </v-layout>
         </v-flex>
         <v-flex xs12>
-            <v-layout justify-end row v-show='hasSelectedLibrary'>
+            <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn @click='onUpsertScenarioBudgetPriorities()'
                        class='ara-blue-bg white--text'
-                       v-show='hasScenarioL' :disabled='disableCrudButtons() || !hasUnsavedChanges'>
+                       v-show='hasScenario' :disabled='disableCrudButtons() || !hasUnsavedChanges'>
                     Save
                 </v-btn>
                 <v-btn @click='onUpsertBudgetPriorityLibrary(selectedBudgetPriorityLibrary, uuidNIL)'
@@ -267,8 +267,8 @@ export default class BudgetPriorityEditor extends Vue {
                 }
 
                 vm.hasScenario = true;
-                vm.getScenarioBudgetPrioritiesAction(vm.selectedScenarioId);
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId });
+                vm.getScenarioBudgetPrioritiesAction(vm.selectedScenarioId);
             }
         });
     }
@@ -297,14 +297,10 @@ export default class BudgetPriorityEditor extends Vue {
 
     @Watch('selectedBudgetPriorityLibrary')
     onSelectedPriorityLibraryChanged() {
-        this.setHasUnsavedChangesAction({
-            value: hasUnsavedChangesCore('priority', this.selectedBudgetPriorityLibrary, this.stateSelectedBudgetPriorityLibrary),
-        });
-
         this.hasSelectedLibrary = this.selectedBudgetPriorityLibrary.id !== this.uuidNIL;
 
         if (this.hasSelectedLibrary) {
-            this.budgetPriorities = clone(this.selectedBudgetLibrary.budgetPriorities);
+            this.budgetPriorities = clone(this.selectedBudgetPriorityLibrary.budgetPriorities);
         }
     }
 
@@ -379,50 +375,54 @@ export default class BudgetPriorityEditor extends Vue {
     }
 
     setGridCriteriaColumnWidth() {
-        let criteriaColumnWidth = '';
+        let criteriaColumnWidth = '75%';
 
-        switch (this.stateScenarioSimpleBudgetDetails.length) {
-            case 0:
-                criteriaColumnWidth = '75%';
-                break;
-            case 1:
-                criteriaColumnWidth = '65%';
-                break;
-            case 2:
-                criteriaColumnWidth = '55%';
-                break;
-            case 3:
-                criteriaColumnWidth = '45%';
-                break;
-            case 4:
-                criteriaColumnWidth = '35%';
-                break;
-            case 5:
-                criteriaColumnWidth = '25%';
-                break;
+        if (this.hasScenario) {
+            switch (this.stateScenarioSimpleBudgetDetails.length) {
+                case 0:
+                    criteriaColumnWidth = '75%';
+                    break;
+                case 1:
+                    criteriaColumnWidth = '65%';
+                    break;
+                case 2:
+                    criteriaColumnWidth = '55%';
+                    break;
+                case 3:
+                    criteriaColumnWidth = '45%';
+                    break;
+                case 4:
+                    criteriaColumnWidth = '35%';
+                    break;
+                case 5:
+                    criteriaColumnWidth = '25%';
+                    break;
+            }
         }
 
         this.budgetPriorityGridHeaders[2].width = criteriaColumnWidth;
     }
 
     setGridHeaders() {
-        const budgetNames: string[] = getPropertyValues('name', this.stateScenarioSimpleBudgetDetails) as string[];
-        if (hasValue(budgetNames)) {
-            const budgetHeaders: DataTableHeader[] = budgetNames.map((budgetName: string) => ({
-                text: `${budgetName} %`,
-                value: budgetName,
-                align: 'left',
-                sortable: true,
-                class: '',
-                width: '',
-            }));
+        if (this.hasScenario) {
+            const budgetNames: string[] = getPropertyValues('name', this.stateScenarioSimpleBudgetDetails) as string[];
+            if (hasValue(budgetNames)) {
+                const budgetHeaders: DataTableHeader[] = budgetNames.map((budgetName: string) => ({
+                    text: `${budgetName} %`,
+                    value: budgetName,
+                    align: 'left',
+                    sortable: true,
+                    class: '',
+                    width: '',
+                }));
 
-            this.budgetPriorityGridHeaders = [
-                this.budgetPriorityGridHeaders[0],
-                this.budgetPriorityGridHeaders[1],
-                this.budgetPriorityGridHeaders[2],
-                ...budgetHeaders,
-            ];
+                this.budgetPriorityGridHeaders = [
+                    this.budgetPriorityGridHeaders[0],
+                    this.budgetPriorityGridHeaders[1],
+                    this.budgetPriorityGridHeaders[2],
+                    ...budgetHeaders,
+                ];
+            }
         }
     }
 
@@ -435,7 +435,7 @@ export default class BudgetPriorityEditor extends Vue {
                 criteria: budgetPriority.criterionLibrary.mergedCriteriaExpression != null ? budgetPriority.criterionLibrary.mergedCriteriaExpression : '',
             };
 
-            if (hasValue(budgetPriority.budgetPercentagePairs)) {
+            if (this.hasScenario && hasValue(budgetPriority.budgetPercentagePairs)) {
                 budgetPriority.budgetPercentagePairs.forEach((budgetPercentagePair: BudgetPercentagePair) => {
                     row[budgetPercentagePair.budgetName] = budgetPercentagePair.percentage.toString();
                 });

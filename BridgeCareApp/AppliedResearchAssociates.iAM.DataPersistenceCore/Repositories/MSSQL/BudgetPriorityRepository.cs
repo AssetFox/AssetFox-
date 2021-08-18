@@ -36,14 +36,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToScenarioEntity(simulationId))
                 .ToList();
 
-            _unitOfWork.Context.AddAll(budgetPriorityEntities);
+            _unitOfWork.Context.AddAll(budgetPriorityEntities, _unitOfWork.UserEntity?.Id);
 
             if (budgetPriorities.Any(_ => _.BudgetPercentagePairs.Any()))
             {
                 var budgetPercentagePairEntities = budgetPriorities
                     .SelectMany(_ => _.BudgetPercentagePairs.Select(pair => pair.ToEntity(_.Id, pair.Budget.Id)))
                     .ToList();
-                _unitOfWork.Context.AddAll(budgetPercentagePairEntities);
+                _unitOfWork.Context.AddAll(budgetPercentagePairEntities, _unitOfWork.UserEntity?.Id);
             }
 
             if (budgetPriorities.Any(_ => !_.Criterion.ExpressionIsBlank))
@@ -113,9 +113,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteAll<BudgetPriorityEntity>(_ =>
                 _.BudgetPriorityLibraryId == libraryId && !entityIds.Contains(_.Id));
 
-            _unitOfWork.Context.UpdateAll(budgetPriorityEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
+            _unitOfWork.Context.UpdateAll(budgetPriorityEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
 
-            _unitOfWork.Context.AddAll(budgetPriorityEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
+            _unitOfWork.Context.AddAll(budgetPriorityEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryBudgetPriorityEntity>(_ =>
                 _.BudgetPriority.BudgetPriorityLibraryId == libraryId);
@@ -196,15 +196,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
-            _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
-                _.ScenarioBudgetPriority.SimulationId == simulationId && !entityIds.Contains(_.ScenarioBudgetPriorityId));
+            _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ => _.ScenarioBudgetPriority.SimulationId == simulationId);
 
             _unitOfWork.Context.DeleteAll<ScenarioBudgetPriorityEntity>(_ =>
                 _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
-            _unitOfWork.Context.UpdateAll(budgetPriorityEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList());
+            _unitOfWork.Context.UpdateAll(budgetPriorityEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
 
-            _unitOfWork.Context.AddAll(budgetPriorityEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
+            _unitOfWork.Context.AddAll(budgetPriorityEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioBudgetPriorityEntity>(_ =>
                 _.ScenarioBudgetPriority.SimulationId == simulationId);
@@ -212,7 +211,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (budgetPriorities.Any(_ => _.BudgetPercentagePairs.Any()))
             {
                 _unitOfWork.Context.AddAll(budgetPriorities.Where(_ => _.BudgetPercentagePairs.Any())
-                    .SelectMany(_ => _.BudgetPercentagePairs.Select(pair => pair.ToEntity(_.Id))).ToList());
+                    .SelectMany(_ => _.BudgetPercentagePairs.Select(pair => pair.ToEntity(_.Id))).ToList(), _unitOfWork.UserEntity?.Id);
             }
 
             if (budgetPriorities.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&

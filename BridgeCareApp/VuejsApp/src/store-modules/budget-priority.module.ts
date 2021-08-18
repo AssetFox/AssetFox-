@@ -153,7 +153,7 @@ const actions = {
         payload: any,
     ) {
         await BudgetPriorityService.upsertScenarioBudgetPriorities(
-            payload.budgetPriorities,
+            payload.scenarioBudgetPriorities,
             payload.scenarioId,
         ).then((response: AxiosResponse) => {
             if (
@@ -162,7 +162,7 @@ const actions = {
             ) {
                 commit(
                     'scenarioBudgetPrioritiesMutator',
-                    payload.budgetPriorities,
+                    payload.scenarioBudgetPriorities,
                 );
                 dispatch('setSuccessMessage', {
                     message: 'Modified scenario budget priorities',

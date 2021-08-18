@@ -11,7 +11,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual BudgetPriorityLibraryEntity BudgetPriorityLibrary { get; set; }
 
         public virtual CriterionLibraryBudgetPriorityEntity CriterionLibraryBudgetPriorityJoin { get; set; }
-
-        public virtual ICollection<BudgetPercentagePairEntity> BudgetPercentagePairs { get; set; }
     }
 }

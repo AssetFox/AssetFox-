@@ -64,7 +64,7 @@ export default class CreatePriorityLibraryDialog extends Vue {
 
   onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newBudgetPriorityLibrary, this.dialogData.scenarioId);
+      this.$emit('submit', this.newBudgetPriorityLibrary);
     } else {
       this.$emit('submit', null);
     }

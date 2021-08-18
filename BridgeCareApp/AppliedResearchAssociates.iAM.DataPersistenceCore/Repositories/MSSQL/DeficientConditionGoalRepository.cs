@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     attributeEntities.Single(__ => __.Name == _.Attribute.Name).Id))
                 .ToList();
 
-            _unitOfWork.Context.AddAll(deficientConditionGoalEntities);
+            _unitOfWork.Context.AddAll(deficientConditionGoalEntities, _unitOfWork.UserEntity?.Id);
 
             if (deficientConditionGoals.Any(_ => !_.Criterion.ExpressionIsBlank))
             {
@@ -267,10 +267,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
             _unitOfWork.Context.UpdateAll(scenarioDeficientConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
-                .ToList());
+                .ToList(), _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.AddAll(scenarioDeficientConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
-                .ToList());
+                .ToList(), _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioDeficientConditionGoalEntity>(_ =>
                 _.ScenarioDeficientConditionGoal.SimulationId == simulationId);

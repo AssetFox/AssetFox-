@@ -462,19 +462,16 @@ export default class TreatmentEditor extends Vue {
             this.selectedScenarioTreatments = this.selectedTreatmentLibrary.treatments
                     .map((treatment: Treatment) => ({
                         ...treatment,
-                        id: getNewGuid(),
                         consequences: treatment.consequences.map((con: TreatmentConsequence) => ({
                             ...con,
-                            id: getNewGuid(),
                             equation: hasValue(con.equation)
-                            ? {...con.equation, id: getNewGuid()}
+                            ? {...con.equation}
                             : clone(emptyEquation)
                         })),
                         costs: treatment.costs.map((cost: TreatmentCost) => ({
                             ...cost,
-                            id: getNewGuid(),
                             equation: hasValue(cost.equation)
-                            ? {...cost.equation, id: getNewGuid()}
+                            ? {...cost.equation}
                             : clone(emptyEquation)
                         }))
                     }));
@@ -607,6 +604,27 @@ export default class TreatmentEditor extends Vue {
         scenarioId: string,
     ) {
         if (!isNil(localScenarioSelectedTreatments)) {
+            if(this.hasSelectedLibrary){ // If a library is being applied, assign new ids
+                localScenarioSelectedTreatments = this.selectedScenarioTreatments
+                    .map((treatment: Treatment) => ({
+                        ...treatment,
+                        id: getNewGuid(),
+                        consequences: treatment.consequences.map((con: TreatmentConsequence) => ({
+                            ...con,
+                            id: getNewGuid(),
+                            equation: hasValue(con.equation)
+                            ? {...con.equation, id: getNewGuid()}
+                            : clone(emptyEquation)
+                        })),
+                        costs: treatment.costs.map((cost: TreatmentCost) => ({
+                            ...cost,
+                            id: getNewGuid(),
+                            equation: hasValue(cost.equation)
+                            ? {...cost.equation, id: getNewGuid()}
+                            : clone(emptyEquation)
+                        }))
+                    }));
+            }
             this.upsertScenarioSelectableTreatmentsAction({
                 scenarioSelectableTreatments: localScenarioSelectedTreatments,
                 scenarioId: scenarioId,

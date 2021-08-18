@@ -494,8 +494,8 @@ export default class PerformanceCurveEditor extends Vue {
             this.performanceCurveGridData);
     }
 
-    onUpsertScenarioPerformanceCurves(scenarioId: string) {
-        this.upsertScenarioPerformanceCurvesAction({scenarioPerformanceCurves: this.performanceCurveGridData, scenarioId: scenarioId})
+    onUpsertScenarioPerformanceCurves() {
+        this.upsertScenarioPerformanceCurvesAction({scenarioPerformanceCurves: this.performanceCurveGridData, scenarioId: this.selectedScenarioId})
         .then(() => this.librarySelectItemValue = null);
     }
 

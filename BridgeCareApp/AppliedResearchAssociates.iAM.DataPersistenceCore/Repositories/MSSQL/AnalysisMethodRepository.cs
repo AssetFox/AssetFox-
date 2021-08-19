@@ -78,26 +78,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void CreateAnalysisMethodTargetConditionGoals(SimulationEntity simulationEntity, List<TargetConditionGoal> targetConditionGoals)
         {
-            _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoalLibrary(
-                $"{simulationEntity.Name} Target Condition Goal Library");
-
             _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoals(targetConditionGoals, simulationEntity.Id);
         }
 
         private void CreateAnalysisMethodDeficientConditionGoals(SimulationEntity simulationEntity, List<DeficientConditionGoal> deficientConditionGoals)
         {
-            _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoalLibrary(
-                $"{simulationEntity.Name} Deficient Condition Goal Library");
-
             _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoals(deficientConditionGoals, simulationEntity.Id);
         }
 
         private void CreateAnalysisMethodRemainingLifeLimits(SimulationEntity simulationEntity,
             List<RemainingLifeLimit> remainingLifeLimits)
         {
-            _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimitLibrary(
-                $"{simulationEntity.Name} Remaining Life Limit Library");
-
             _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationEntity.Id);
         }
 

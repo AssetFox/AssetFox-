@@ -442,10 +442,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 _unitOfWork.UserEntity?.Id);
                     }
                 });
-                //simulationToClone.RemainingLifeLimitLibrarySimulationJoin.SimulationId = newSimulationId;
-                //_unitOfWork.Context
-                //    .ReInitializeAllEntityBaseProperties(simulationToClone.RemainingLifeLimitLibrarySimulationJoin,
-                //        _unitOfWork.UserEntity?.Id);
             }
 
             if (simulationToClone.ScenarioTargetConditionalGoals.Any())

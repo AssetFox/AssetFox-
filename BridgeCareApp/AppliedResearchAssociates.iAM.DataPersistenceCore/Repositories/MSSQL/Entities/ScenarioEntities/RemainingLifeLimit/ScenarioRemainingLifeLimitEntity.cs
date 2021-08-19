@@ -5,16 +5,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit
 {
-    public class ScenarioRemainingLifeLimitEntity : BaseEntity
+    public class ScenarioRemainingLifeLimitEntity : BaseRemainingLifeLimitEntity
     {
-        public Guid Id { get; set; }
         public Guid SimulationId { get; set; }
 
-        public Guid AttributeId { get; set; }
-
         public double Value { get; set; }
-
-        public virtual AttributeEntity Attribute { get; set; }
 
         public virtual SimulationEntity Simulation { get; set; }
 

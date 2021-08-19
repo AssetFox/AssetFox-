@@ -5,13 +5,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit
 {
-    public class CriterionLibraryScenarioRemainingLifeLimitEntity : BaseEntity
+    public class CriterionLibraryScenarioRemainingLifeLimitEntity : BaseCriterionLibraryJoinEntity
     {
         public Guid ScenarioRemainingLifeLimitId { get; set; }
-
-        public Guid CriterionLibraryId { get; set; }
-
-        public virtual CriterionLibraryEntity CriterionLibrary { get; set; }
 
         public virtual ScenarioRemainingLifeLimitEntity ScenarioRemainingLifeLimit { get; set; }
     }

@@ -1,11 +1,11 @@
 <template>
     <v-layout column>
-        <v-layout column>
-            <form class="ara-light-gray-bg" id="fileForm" v-show="dragAndDropCapable">
+        <v-layout column>           
+            <div id="app" class="ara-light-gray-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
                 <v-layout align-center fill-height justify-center>
-                    <div>Drag & Drop File Here</div>
-                </v-layout>
-            </form>
+                    <div style="height:50px;" class="align-center">Drag & Drop File Here</div>
+                </v-layout>                
+            </div>
             <v-flex xs12>
                 <v-layout justify-start>                  
                     <v-btn @click="chooseFiles()" class="ara-blue-bg white--text">
@@ -57,14 +57,14 @@ export default class FileSelector extends Vue {
 
     dragAndDropCapable: boolean = false;
     dragEvents: string[] = ['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'];
-    fileForm: HTMLFormElement = {} as HTMLFormElement;
+    //fileForm: HTMLFormElement = {} as HTMLFormElement;
     fileSelect: HTMLInputElement = {} as HTMLInputElement;
     tableHeaders: DataTableHeader[] = [
         {text: 'Selected File', value: 'name', align: 'left', sortable: false, class: '', width: '150px'},
         {text: '', value: '', align: 'center', sortable: false, class: '', width: '25px'}
     ];
     files: File[] = [];
-    file: File | null = null;
+    file: File | null = null;   
 
     chooseFiles(){
         if(document != null)
@@ -92,23 +92,23 @@ export default class FileSelector extends Vue {
 
     mounted() {
         // calculate if user's browser is drag-and-drop capable
-        this.dragAndDropCapable = this.isBrowserDragAndDropCapable();
+        //this.dragAndDropCapable = this.isBrowserDragAndDropCapable();
 
-        if (this.dragAndDropCapable) {
+        //if (this.dragAndDropCapable) {
             // couple fileForm object #fileForm form element
-            this.fileForm = document.getElementById('fileForm') as HTMLFormElement;
+            //this.fileForm = document.getElementById('fileForm') as HTMLFormElement;
             // add event listeners to #fileForm form element for all drag/drop events
-            this.dragEvents.forEach((dragEvent: string) => {
-                this.fileForm.addEventListener(dragEvent, (e: any) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // add onSelect callback function if event is 'drop'
-                    if (dragEvent === 'drop') {
-                        this.onSelect(e.dataTransfer.files);
-                    }
-                });
-            });
-        }
+            //this.dragEvents.forEach((dragEvent: string) => {
+            //    this.fileForm.addEventListener(dragEvent, (e: any) => {
+             //       e.preventDefault();
+             //       e.stopPropagation();
+             //       // add onSelect callback function if event is 'drop'
+             //       if (dragEvent === 'drop') {
+             //           this.onSelect(e.dataTransfer.files);
+             //       }
+             //   });
+            //});
+        //}
 
         // couple fileSelect object with #file-select input element
         this.fileSelect = document.getElementById('file-select') as HTMLInputElement;        

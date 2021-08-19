@@ -75,14 +75,18 @@ export default class FileSelector extends Vue {
 
     @Watch('file')
     onFileChanged() {        
-        this.files = hasValue(this.file) ? [this.file as File] : [];                        
-        this.$emit('submit', this.file);        
+        this.files = hasValue(this.file) ? [this.file as File] : [];                                   
+        this.$emit('submit', this.file);
+        document.getElementById("file-select").value = '';
     }
 
     @Watch('closed')
     onClose() {
         if (this.closed) {
             this.files = [];
+            this.file = null;
+            this.fileSelect.value = '';
+            document.getElementById("file-select").value = '';
         }
     }
 

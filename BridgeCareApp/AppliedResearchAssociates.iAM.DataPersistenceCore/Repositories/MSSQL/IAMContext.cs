@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -97,6 +98,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<CriterionLibraryRemainingLifeLimitEntity> CriterionLibraryRemainingLifeLimit { get; set; }
 
+        public virtual DbSet<CriterionLibraryScenarioRemainingLifeLimitEntity> CriterionLibraryScenarioRemainingLifeLimit { get; set; }
+
         public virtual DbSet<CriterionLibraryTargetConditionGoalEntity> CriterionLibraryTargetConditionGoal { get; set; }
 
         public virtual DbSet<CriterionLibraryScenarioTargetConditionGoalEntity> CriterionLibraryScenarioTargetConditionGoal { get; set; }
@@ -137,9 +140,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<RemainingLifeLimitEntity> RemainingLifeLimit { get; set; }
 
-        public virtual DbSet<RemainingLifeLimitLibraryEntity> RemainingLifeLimitLibrary { get; set; }
+        public virtual DbSet<ScenarioRemainingLifeLimitEntity> ScenarioRemainingLifeLimit { get; set; }
 
-        public virtual DbSet<RemainingLifeLimitLibrarySimulationEntity> RemainingLifeLimitLibrarySimulation { get; set; }
+        public virtual DbSet<RemainingLifeLimitLibraryEntity> RemainingLifeLimitLibrary { get; set; }
 
         public virtual DbSet<SectionEntity> Section { get; set; }
 
@@ -841,6 +844,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .HasForeignKey<CriterionLibraryRemainingLifeLimitEntity>(d => d.RemainingLifeLimitId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<CriterionLibraryScenarioRemainingLifeLimitEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioRemainingLifeLimitId });
+
+                entity.ToTable("CriterionLibrary_ScenarioRemainingLifeLimit");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioRemainingLifeLimitId).IsUnique();
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioRemainingLifeLimitJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ScenarioRemainingLifeLimit)
+                    .WithOne(p => p.CriterionLibraryScenarioRemainingLifeLimitJoin)
+                    .HasForeignKey<CriterionLibraryScenarioRemainingLifeLimitEntity>(d => d.ScenarioRemainingLifeLimitId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<CriterionLibraryTargetConditionGoalEntity>(entity =>
             {
@@ -1295,33 +1318,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .HasForeignKey(d => d.AttributeId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<ScenarioRemainingLifeLimitEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.HasIndex(e => e.AttributeId);
+
+                entity.Property(e => e.Value).IsRequired();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.RemainingLifeLimits)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Attribute)
+                    .WithMany(p => p.ScenarioRemainingLifeLimits)
+                    .HasForeignKey(d => d.AttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<RemainingLifeLimitLibraryEntity>(entity =>
             {
                 entity.Property(e => e.Name).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            });
-
-            modelBuilder.Entity<RemainingLifeLimitLibrarySimulationEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.RemainingLifeLimitLibraryId, e.SimulationId });
-
-                entity.ToTable("RemainingLifeLimitLibrary_Simulation");
-
-                entity.HasIndex(e => e.RemainingLifeLimitLibraryId);
-
-                entity.HasIndex(e => e.SimulationId).IsUnique();
-
-                entity.HasOne(d => d.RemainingLifeLimitLibrary)
-                    .WithMany(p => p.RemainingLifeLimitLibrarySimulationJoins)
-                    .HasForeignKey(d => d.RemainingLifeLimitLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.RemainingLifeLimitLibrarySimulationJoin)
-                    .HasForeignKey<RemainingLifeLimitLibrarySimulationEntity>(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<SectionEntity>(entity =>

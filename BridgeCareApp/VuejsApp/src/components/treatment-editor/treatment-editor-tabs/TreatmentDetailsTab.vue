@@ -94,7 +94,8 @@ export default class TreatmentDetailsTab extends Vue {
     this.treatmentCriterionLibraryEditorDialogData = {
       showDialog: true,
       libraryId: this.selectedTreatmentDetails.criterionLibrary.id,
-      isCallFromScenario: this.selectedTreatmentDetails.isCallFromScenario
+      isCallFromScenario: this.selectedTreatmentDetails.isCallFromScenario,
+      isCriterionForLibrary: this.selectedTreatmentDetails.isCriterionForLibrary
     };
   }
 

@@ -408,9 +408,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("BudgetPriorityId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
@@ -429,7 +426,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid>("ScenarioBudgetId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ScenarioBudgetPriorityId")
+                    b.Property<Guid>("ScenarioBudgetPriorityId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -2022,36 +2019,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("RemainingLifeLimitLibrary");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibrarySimulationEntity", b =>
-                {
-                    b.Property<Guid>("RemainingLifeLimitLibraryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SimulationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("RemainingLifeLimitLibraryId", "SimulationId");
-
-                    b.HasIndex("RemainingLifeLimitLibraryId");
-
-                    b.HasIndex("SimulationId")
-                        .IsUnique();
-
-                    b.ToTable("RemainingLifeLimitLibrary_Simulation");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ReportIndexEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2452,6 +2419,72 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsUnique();
 
                     b.ToTable("ScenarioPerformanceCurve_Equation");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit.CriterionLibraryScenarioRemainingLifeLimitEntity", b =>
+                {
+                    b.Property<Guid>("CriterionLibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ScenarioRemainingLifeLimitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("CriterionLibraryId", "ScenarioRemainingLifeLimitId");
+
+                    b.HasIndex("CriterionLibraryId");
+
+                    b.HasIndex("ScenarioRemainingLifeLimitId")
+                        .IsUnique();
+
+                    b.ToTable("CriterionLibrary_ScenarioRemainingLifeLimit");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit.ScenarioRemainingLifeLimitEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SimulationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Value")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeId");
+
+                    b.HasIndex("SimulationId");
+
+                    b.ToTable("ScenarioRemainingLifeLimit");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTargetConditionGoalEntity", b =>
@@ -3424,7 +3457,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.ScenarioBudgetPriorityEntity", null)
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority.ScenarioBudgetPriorityEntity", "ScenarioBudgetPriority")
                         .WithMany("BudgetPercentagePairs")
                         .HasForeignKey("ScenarioBudgetPriorityId")
                         .OnDelete(DeleteBehavior.ClientCascade)
@@ -4063,25 +4096,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("RemainingLifeLimitLibrary");
                 });
 
-            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibrarySimulationEntity", b =>
-                {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibraryEntity", "RemainingLifeLimitLibrary")
-                        .WithMany("RemainingLifeLimitLibrarySimulationJoins")
-                        .HasForeignKey("RemainingLifeLimitLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
-                        .WithOne("RemainingLifeLimitLibrarySimulationJoin")
-                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibrarySimulationEntity", "SimulationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RemainingLifeLimitLibrary");
-
-                    b.Navigation("Simulation");
-                });
-
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ReportIndexEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
@@ -4275,6 +4289,44 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("Equation");
 
                     b.Navigation("ScenarioPerformanceCurve");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit.CriterionLibraryScenarioRemainingLifeLimitEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.CriterionLibraryEntity", "CriterionLibrary")
+                        .WithMany("CriterionLibraryScenarioRemainingLifeLimitJoins")
+                        .HasForeignKey("CriterionLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit.ScenarioRemainingLifeLimitEntity", "ScenarioRemainingLifeLimit")
+                        .WithOne("CriterionLibraryScenarioRemainingLifeLimitJoin")
+                        .HasForeignKey("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit.CriterionLibraryScenarioRemainingLifeLimitEntity", "ScenarioRemainingLifeLimitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CriterionLibrary");
+
+                    b.Navigation("ScenarioRemainingLifeLimit");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit.ScenarioRemainingLifeLimitEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", "Attribute")
+                        .WithMany("ScenarioRemainingLifeLimits")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationEntity", "Simulation")
+                        .WithMany("RemainingLifeLimits")
+                        .HasForeignKey("SimulationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Attribute");
+
+                    b.Navigation("Simulation");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTargetConditionGoalEntity", b =>
@@ -4668,6 +4720,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("ScenarioPerformanceCurves");
 
+                    b.Navigation("ScenarioRemainingLifeLimits");
+
                     b.Navigation("ScenarioTreatmentConsequences");
 
                     b.Navigation("TextAttributeValueHistories");
@@ -4719,6 +4773,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("CriterionLibraryScenarioDeficientConditionGoalJoins");
 
                     b.Navigation("CriterionLibraryScenarioPerformanceCurveJoins");
+
+                    b.Navigation("CriterionLibraryScenarioRemainingLifeLimitJoins");
 
                     b.Navigation("CriterionLibraryScenarioSelectableTreatmentJoins");
 
@@ -4791,8 +4847,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority.BudgetPriorityEntity", b =>
                 {
-                    b.Navigation("BudgetPercentagePairs");
-
                     b.Navigation("CriterionLibraryBudgetPriorityJoin");
                 });
 
@@ -4881,8 +4935,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.RemainingLifeLimitLibraryEntity", b =>
                 {
-                    b.Navigation("RemainingLifeLimitLibrarySimulationJoins");
-
                     b.Navigation("RemainingLifeLimits");
                 });
 
@@ -4916,6 +4968,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("CriterionLibraryScenarioPerformanceCurveJoin");
 
                     b.Navigation("ScenarioPerformanceCurveEquationJoin");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit.ScenarioRemainingLifeLimitEntity", b =>
+                {
+                    b.Navigation("CriterionLibraryScenarioRemainingLifeLimitJoin");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.ScenarioTargetConditionGoalEntity", b =>
@@ -4982,7 +5039,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("PerformanceCurves");
 
-                    b.Navigation("RemainingLifeLimitLibrarySimulationJoin");
+                    b.Navigation("RemainingLifeLimits");
 
                     b.Navigation("ScenarioDeficientConditionGoals");
 

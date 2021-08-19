@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 
@@ -18,8 +19,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AttributeId = attributeId,
                 Value = domain.Value
             };
+        public static ScenarioRemainingLifeLimitEntity ToScenarioEntity(this RemainingLifeLimit domain,
+            Guid simulationId, Guid attributeId) =>
+            new ScenarioRemainingLifeLimitEntity
+            {
+                Id = domain.Id,
+                SimulationId = simulationId,
+                AttributeId = attributeId,
+                Value = domain.Value
+            };
 
-        public static RemainingLifeLimitEntity ToEntity(this RemainingLifeLimitDTO dto, Guid libraryId,
+        public static RemainingLifeLimitEntity ToLibraryEntity(this RemainingLifeLimitDTO dto, Guid libraryId,
             Guid attributeId) =>
             new RemainingLifeLimitEntity
             {
@@ -28,17 +38,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AttributeId = attributeId,
                 Value = dto.Value
             };
+        public static ScenarioRemainingLifeLimitEntity ToScenarioEntity(this RemainingLifeLimitDTO dto, Guid simulationId,
+            Guid attributeId) =>
+            new ScenarioRemainingLifeLimitEntity
+            {
+                Id = dto.Id,
+                SimulationId = simulationId,
+                AttributeId = attributeId,
+                Value = dto.Value
+            };
 
         public static RemainingLifeLimitLibraryEntity ToEntity(this RemainingLifeLimitLibraryDTO dto) =>
             new RemainingLifeLimitLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
 
-        public static void CreateRemainingLifeLimit(this RemainingLifeLimitEntity entity, Simulation simulation)
+        public static void CreateRemainingLifeLimit(this ScenarioRemainingLifeLimitEntity entity, Simulation simulation)
         {
             var limit = simulation.AnalysisMethod.AddRemainingLifeLimit();
             limit.Id = entity.Id;
             limit.Value = entity.Value;
             limit.Criterion.Expression =
-                entity.CriterionLibraryRemainingLifeLimitJoin?.CriterionLibrary.MergedCriteriaExpression ??
+                entity.CriterionLibraryScenarioRemainingLifeLimitJoin?.CriterionLibrary.MergedCriteriaExpression ??
                 string.Empty;
 
             if (entity.Attribute != null)
@@ -60,6 +79,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ? entity.CriterionLibraryRemainingLifeLimitJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO()
             };
+        public static RemainingLifeLimitDTO ToDto(this ScenarioRemainingLifeLimitEntity entity) =>
+            new RemainingLifeLimitDTO
+            {
+                Id = entity.Id,
+                Value = entity.Value,
+                Attribute = entity.Attribute != null
+                    ? entity.Attribute.Name
+                    : "",
+                CriterionLibrary = entity.CriterionLibraryScenarioRemainingLifeLimitJoin != null
+                    ? entity.CriterionLibraryScenarioRemainingLifeLimitJoin.CriterionLibrary.ToDto()
+                    : new CriterionLibraryDTO()
+            };
 
         public static RemainingLifeLimitLibraryDTO ToDto(this RemainingLifeLimitLibraryEntity entity) =>
             new RemainingLifeLimitLibraryDTO
@@ -69,10 +100,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Description = entity.Description,
                 RemainingLifeLimits = entity.RemainingLifeLimits.Any()
                     ? entity.RemainingLifeLimits.Select(_ => _.ToDto()).ToList()
-                    : new List<RemainingLifeLimitDTO>(),
-                AppliedScenarioIds = entity.RemainingLifeLimitLibrarySimulationJoins.Any()
-                    ? entity.RemainingLifeLimitLibrarySimulationJoins.Select(_ => _.SimulationId).ToList()
-                    : new List<Guid>()
+                    : new List<RemainingLifeLimitDTO>()
             };
     }
 }

@@ -113,11 +113,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            if (_unitOfWork.Context.ScenarioPerformanceCurve.Any(_ => _.SimulationId == simulation.Id))
-            {
-                return;
-            }
-
             _unitOfWork.Context.ScenarioPerformanceCurve.AsNoTracking()
                 .Include(_ => _.Attribute)
                 .Include(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)

@@ -1,7 +1,7 @@
 <template>
     <v-layout column>
         <v-layout column>
-            <form class="ara-light-gray-bg" id="file-form" v-show="dragAndDropCapable">
+            <form class="ara-light-gray-bg" id="fileForm" v-show="dragAndDropCapable">
                 <v-layout align-center fill-height justify-center>
                     <div>Drag & Drop File Here</div>
                 </v-layout>
@@ -84,9 +84,9 @@ export default class FileSelector extends Vue {
         this.dragAndDropCapable = this.isBrowserDragAndDropCapable();
 
         if (this.dragAndDropCapable) {
-            // couple fileForm object #file-form form element
-            this.fileForm = document.getElementById('file-form') as HTMLFormElement;
-            // add event listeners to #file-form form element for all drag/drop events
+            // couple fileForm object #fileForm form element
+            this.fileForm = document.getElementById('fileForm') as HTMLFormElement;
+            // add event listeners to #fileForm form element for all drag/drop events
             this.dragEvents.forEach((dragEvent: string) => {
                 this.fileForm.addEventListener(dragEvent, (e: any) => {
                     e.preventDefault();

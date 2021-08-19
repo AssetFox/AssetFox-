@@ -7,16 +7,16 @@
                 </v-layout>
             </form>
             <v-flex xs12>
-                <v-layout justify-start>
-                    <v-btn @click="fileSelect.click()" class="ara-blue-bg white--text">
+                <v-layout justify-start>                  
+                    <v-btn @click="chooseFiles()" class="ara-blue-bg white--text">
                         Select File
                     </v-btn>
                 </v-layout>
             </v-flex>
-            <div v-show="false">
-                <input @change="onSelect($event.target.files)" id="file-select" type="file"/>
+            <div v-show="true">
+                <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden/>
             </div>
-        </v-layout>
+        </v-layout>        
         <div class="files-table">
             <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow"
                           hide-actions>
@@ -66,16 +66,27 @@ export default class FileSelector extends Vue {
     files: File[] = [];
     file: File | null = null;
 
+    chooseFiles(){
+        if(document != null)
+        {
+            document.getElementById("file-select").click();
+        }
+    }
+
     @Watch('file')
-    onFileChanged() {
-        this.files = hasValue(this.file) ? [this.file as File] : [];
+    onFileChanged() {        
+        this.files = hasValue(this.file) ? [this.file as File] : [];                                   
         this.$emit('submit', this.file);
+        document.getElementById("file-select").value = '';
     }
 
     @Watch('closed')
     onClose() {
         if (this.closed) {
             this.files = [];
+            this.file = null;
+            this.fileSelect.value = '';
+            document.getElementById("file-select").value = '';
         }
     }
 
@@ -100,7 +111,7 @@ export default class FileSelector extends Vue {
         }
 
         // couple fileSelect object with #file-select input element
-        this.fileSelect = document.getElementById('file-select') as HTMLInputElement;
+        this.fileSelect = document.getElementById('file-select') as HTMLInputElement;        
     }
 
     /**
@@ -125,7 +136,7 @@ export default class FileSelector extends Vue {
                 this.setErrorMessageAction({message: 'Only .xlsx file types are allowed'});
             }
 
-            this.file = clone(fileList[0]);
+            this.file = clone(fileList[0]);          
         }
 
         this.fileSelect.value = '';

@@ -4,18 +4,14 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class CashFlowRuleEntity : BaseEntity
+    public class CashFlowRuleEntity : BaseCashFlowRuleEntity
     {
         public CashFlowRuleEntity()
         {
             CashFlowDistributionRules = new HashSet<CashFlowDistributionRuleEntity>();
         }
 
-        public Guid Id { get; set; }
-
         public Guid CashFlowRuleLibraryId { get; set; }
-
-        public string Name { get; set; }
 
         public virtual CashFlowRuleLibraryEntity CashFlowRuleLibrary { get; set; }
 

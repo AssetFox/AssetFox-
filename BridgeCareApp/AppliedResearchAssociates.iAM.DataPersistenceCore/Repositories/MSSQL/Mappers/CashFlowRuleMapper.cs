@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 
@@ -9,15 +10,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class CashFlowRuleMapper
     {
-        public static CashFlowRuleEntity ToEntity(this CashFlowRule domain, Guid cashFlowRuleLibraryId) =>
-            new CashFlowRuleEntity
+        public static ScenarioCashFlowRuleEntity ToScenarioEntity(this CashFlowRule domain, Guid simulationId) =>
+            new ScenarioCashFlowRuleEntity
             {
                 Id = domain.Id,
                 Name = domain.Name,
-                CashFlowRuleLibraryId = cashFlowRuleLibraryId
+                SimulationId = simulationId
             };
 
-        public static CashFlowRuleEntity ToEntity(this CashFlowRuleDTO dto, Guid libraryId) =>
+        public static ScenarioCashFlowRuleEntity ToScenarioEntity(this CashFlowRuleDTO dto, Guid simulationId) =>
+            new ScenarioCashFlowRuleEntity { Id = dto.Id, Name = dto.Name, SimulationId = simulationId };
+
+        public static CashFlowRuleDTO ToDto(this ScenarioCashFlowRuleEntity entity) =>
+            new CashFlowRuleDTO
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                CashFlowDistributionRules = entity.ScenarioCashFlowDistributionRules.Any()
+                    ? entity.ScenarioCashFlowDistributionRules.OrderBy(_ => _.DurationInYears)
+                        .Select(_ => _.ToDto()).ToList()
+                    : new List<CashFlowDistributionRuleDTO>(),
+                CriterionLibrary = entity.CriterionLibraryScenarioCashFlowRuleJoin != null
+                    ? entity.CriterionLibraryScenarioCashFlowRuleJoin.CriterionLibrary.ToDto()
+                    : new CriterionLibraryDTO()
+            };
+
+        public static CashFlowRuleEntity ToLibraryEntity(this CashFlowRuleDTO dto, Guid libraryId) =>
             new CashFlowRuleEntity { Id = dto.Id, Name = dto.Name, CashFlowRuleLibraryId = libraryId };
 
         public static CashFlowRuleDTO ToDto(this CashFlowRuleEntity entity) =>
@@ -46,9 +64,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 CashFlowRules = entity.CashFlowRules.Any()
                     ? entity.CashFlowRules.Select(_ => _.ToDto()).ToList()
                     : new List<CashFlowRuleDTO>(),
-                AppliedScenarioIds = entity.CashFlowRuleLibrarySimulationJoins.Any()
-                    ? entity.CashFlowRuleLibrarySimulationJoins.Select(_ => _.SimulationId).ToList()
-                    : new List<Guid>()
+                AppliedScenarioIds = new List<Guid>()
             };
     }
 }

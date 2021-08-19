@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -223,6 +224,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<ScenarioBudgetPriorityEntity> ScenarioBudgetPriority { get; set; }
 
         public virtual DbSet<CriterionLibraryScenarioBudgetPriorityEntity> CriterionLibraryScenarioBudgetPriority { get; set; }
+
+        public virtual DbSet<ScenarioCashFlowRuleEntity> ScenarioCashFlowRule { get; set; }
+
+        public virtual DbSet<ScenarioCashFlowDistributionRuleEntity> ScenarioCashFlowDistributionRule { get; set; }
+
+        public virtual DbSet<CriterionLibraryScenarioCashFlowRuleEntity> CriterionLibraryScenarioCashFlowRule { get; set; }
 
         private class MigrationConnection
         {
@@ -509,6 +516,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioCashFlowDistributionRuleEntity>(entity =>
+            {
+                entity.HasIndex(e => e.ScenarioCashFlowRuleId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.DurationInYears).IsRequired();
+
+                entity.Property(e => e.CostCeiling).IsRequired();
+
+                entity.Property(e => e.YearlyPercentages).IsRequired();
+
+                entity.HasOne(d => d.ScenarioCashFlowRule)
+                    .WithMany(p => p.ScenarioCashFlowDistributionRules)
+                    .HasForeignKey(d => d.ScenarioCashFlowRuleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<CashFlowRuleEntity>(entity =>
             {
                 entity.HasIndex(e => e.CashFlowRuleLibraryId);
@@ -520,6 +545,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.CashFlowRuleLibrary)
                     .WithMany(p => p.CashFlowRules)
                     .HasForeignKey(d => d.CashFlowRuleLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ScenarioCashFlowRuleEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.CashFlowRules)
+                    .HasForeignKey(d => d.SimulationId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -734,6 +773,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.CriterionLibrary)
                     .WithMany(p => p.CriterionLibraryCashFlowRuleJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CriterionLibraryScenarioCashFlowRuleEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioCashFlowRuleId });
+
+                entity.ToTable("CriterionLibrary_ScenarioCashFlowRule");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioCashFlowRuleId).IsUnique();
+
+                entity.HasOne(d => d.ScenarioCashFlowRule)
+                    .WithOne(p => p.CriterionLibraryScenarioCashFlowRuleJoin)
+                    .HasForeignKey<CriterionLibraryScenarioCashFlowRuleEntity>(d => d.ScenarioCashFlowRuleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioCashFlowRuleJoins)
                     .HasForeignKey(d => d.CriterionLibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

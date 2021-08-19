@@ -230,7 +230,8 @@ export default class EditAnalysisMethod extends Vue {
     this.criterionLibraryEditorDialogData = {
       showDialog: true,
       libraryId: this.analysisMethod.criterionLibrary.id,
-      isCallFromScenario: true
+      isCallFromScenario: true,
+      isCriterionForLibrary: false
     };
   }
 

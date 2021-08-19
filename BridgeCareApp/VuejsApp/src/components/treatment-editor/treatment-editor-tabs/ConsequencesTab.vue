@@ -99,6 +99,7 @@ export default class ConsequencesTab extends Vue {
   @Prop() selectedTreatmentConsequences: TreatmentConsequence[];
   @Prop() rules: InputValidationRules;
   @Prop() callFromScenario: boolean;
+  @Prop() isCriterionForLibrary: boolean;
 
   @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
 
@@ -173,7 +174,8 @@ export default class ConsequencesTab extends Vue {
     this.consequenceCriterionLibraryEditorDialogData = {
       showDialog: true,
       libraryId: consequence.criterionLibrary.id,
-      isCallFromScenario: this.callFromScenario
+      isCallFromScenario: this.callFromScenario,
+      isCriterionForLibrary: this.isCriterionForLibrary,
     };
   }
 

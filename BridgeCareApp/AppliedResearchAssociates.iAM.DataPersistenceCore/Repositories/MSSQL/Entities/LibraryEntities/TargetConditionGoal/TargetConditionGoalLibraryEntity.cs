@@ -8,11 +8,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public TargetConditionGoalLibraryEntity()
         {
             TargetConditionGoals = new HashSet<TargetConditionGoalEntity>();
-            //TargetConditionGoalLibrarySimulationJoins = new HashSet<TargetConditionGoalLibrarySimulationEntity>();
         }
 
         public virtual ICollection<TargetConditionGoalEntity> TargetConditionGoals { get; set; }
-
-        //public virtual ICollection<TargetConditionGoalLibrarySimulationEntity> TargetConditionGoalLibrarySimulationJoins { get; set; }
     }
 }

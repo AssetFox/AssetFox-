@@ -21,13 +21,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public TargetConditionGoalRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateTargetConditionGoalLibrary(string name)
-        {
-            var targetConditionGoalLibraryEntity = new TargetConditionGoalLibraryEntity { Id = Guid.NewGuid(), Name = name };
-
-            _unitOfWork.Context.AddEntity(targetConditionGoalLibraryEntity);
-        }
-
         public void CreateTargetConditionGoals(List<TargetConditionGoal> targetConditionGoals, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -58,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     attributeEntities.Single(__ => __.Name == _.Attribute.Name).Id))
                 .ToList();
 
-            _unitOfWork.Context.AddAll(targetConditionGoalEntities);
+            _unitOfWork.Context.AddAll(targetConditionGoalEntities, _unitOfWork.UserEntity?.Id);
 
             if (targetConditionGoals.Any(_ => !_.Criterion.ExpressionIsBlank))
             {
@@ -259,10 +252,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
             _unitOfWork.Context.UpdateAll(scenarioTargetConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
-                .ToList());
+                .ToList(), _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.AddAll(scenarioTargetConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
-                .ToList());
+                .ToList(), _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTargetConditionGoalEntity>(_ =>
                 _.ScenarioTargetConditionGoal.SimulationId == simulationId);

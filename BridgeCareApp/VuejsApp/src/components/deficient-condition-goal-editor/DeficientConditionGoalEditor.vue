@@ -783,8 +783,10 @@ export default class DeficientConditionGoalEditor extends Vue {
         );
 
         if (!isNil(library)) {
+            var localObject = clone(library);
+            localObject.deficientConditionGoals = clone(this.deficientConditionGoalGridData);
             this.upsertDeficientConditionGoalLibraryAction({
-                library: library,
+                library: localObject,
             });
         }
     }

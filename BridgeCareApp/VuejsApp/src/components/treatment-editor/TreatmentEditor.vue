@@ -132,6 +132,8 @@
                                                     :callFromScenario="
                                                         callComingFromScenario
                                                     "
+                                                    :isCriterionForLibrary="
+                                                    criterionForLibraryForCostTab"
                                                     @onAddCost="
                                                         addSelectedTreatmentCost
                                                     "
@@ -382,6 +384,7 @@ export default class TreatmentEditor extends Vue {
     uuidNIL: string = getBlankGuid();
     keepActiveTab: boolean = false;
     callComingFromScenario: boolean = false;
+    criterionForLibraryForCostTab: boolean = false;
     hasScenario: boolean = false;
 
     currentUrl: string = window.location.href;
@@ -408,6 +411,9 @@ export default class TreatmentEditor extends Vue {
                 vm.getScenarioSimpleBudgetDetailsAction({
                     scenarioId: vm.selectedScenarioId,
                 });
+            }
+            else{
+                vm.criterionForLibraryForCostTab = true;
             }
         });
     }
@@ -558,9 +564,15 @@ export default class TreatmentEditor extends Vue {
     onSelectedTreatmentChanged() {
         this.hasSelectedTreatment = this.selectedTreatment.id !== this.uuidNIL;
 
-        var fromScenario = false;
-        if (this.selectedScenarioId != this.uuidNIL) {
+        let fromScenario = false;
+        let criterionForLibrary = false;
+        if (
+            this.currentUrl.indexOf(ScenarioRoutePaths.TreatmentEditor) !==
+            -1
+        ) {
             fromScenario = true;
+        } else {
+            criterionForLibrary = true;
         }
         this.selectedTreatmentDetails = {
             description: this.selectedTreatment.description,
@@ -569,6 +581,7 @@ export default class TreatmentEditor extends Vue {
             shadowForAnyTreatment: this.selectedTreatment.shadowForAnyTreatment,
             criterionLibrary: this.selectedTreatment.criterionLibrary,
             isCallFromScenario: fromScenario,
+            isCriterionForLibrary: criterionForLibrary,
         };
     }
 
@@ -596,7 +609,9 @@ export default class TreatmentEditor extends Vue {
         );
 
         if (!isNil(library)) {
-            this.upsertTreatmentLibraryAction({ library: library });
+            var localObject = clone(library);
+            localObject.treatments = clone(this.selectedScenarioTreatments);
+            this.upsertTreatmentLibraryAction({ library: localObject });
         }
     }
     onSaveScenarioTreatment(

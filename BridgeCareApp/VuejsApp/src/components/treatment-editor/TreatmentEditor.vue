@@ -133,7 +133,7 @@
                                                         callComingFromScenario
                                                     "
                                                     :isCriterionForLibrary="
-                                                    criterionForLibraryForCostTab"
+                                                    criterionForLibraryTreatmentSubTabs"
                                                     @onAddCost="
                                                         addSelectedTreatmentCost
                                                     "
@@ -160,6 +160,8 @@
                                                     :callFromScenario="
                                                         callComingFromScenario
                                                     "
+                                                    :isCriterionForLibrary="
+                                                    criterionForLibraryTreatmentSubTabs"
                                                     @onAddConsequence="
                                                         addSelectedTreatmentConsequence
                                                     "
@@ -384,7 +386,7 @@ export default class TreatmentEditor extends Vue {
     uuidNIL: string = getBlankGuid();
     keepActiveTab: boolean = false;
     callComingFromScenario: boolean = false;
-    criterionForLibraryForCostTab: boolean = false;
+    criterionForLibraryTreatmentSubTabs: boolean = false;
     hasScenario: boolean = false;
 
     currentUrl: string = window.location.href;
@@ -413,7 +415,7 @@ export default class TreatmentEditor extends Vue {
                 });
             }
             else{
-                vm.criterionForLibraryForCostTab = true;
+                vm.criterionForLibraryTreatmentSubTabs = true;
             }
         });
     }

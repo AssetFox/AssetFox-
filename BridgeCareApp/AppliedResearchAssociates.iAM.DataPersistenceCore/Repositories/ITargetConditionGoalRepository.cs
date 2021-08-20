@@ -7,8 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ITargetConditionGoalRepository
     {
-        void CreateTargetConditionGoalLibrary(string name);
-
         void CreateTargetConditionGoals(List<TargetConditionGoal> targetConditionGoals, Guid simulationId);
 
         List<TargetConditionGoalLibraryDTO> GetTargetConditionGoalLibrariesWithTargetConditionGoals();

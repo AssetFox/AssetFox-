@@ -351,15 +351,9 @@ import {
 } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import {
-    getAppliedLibraryId,
-    hasAppliedLibrary,
-} from '@/shared/utils/library-utils';
-import {
     CriterionLibrary,
-    emptyCriterionLibrary,
 } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
-import { hasValue } from '@/shared/utils/has-value-util';
 
 @Component({
     components: {
@@ -644,7 +638,9 @@ export default class TargetConditionGoalEditor extends Vue {
         const library: TargetConditionGoalLibrary = {
             ...clone(this.selectedTargetConditionGoalLibrary), targetConditionGoals: clone(this.targetConditionGoalGridData)
         };
-        this.upsertTargetConditionGoalLibraryAction({ library: library });
+        var localObject = clone(library);
+            localObject.targetConditionGoals = clone(this.targetConditionGoalGridData);
+            this.upsertTargetConditionGoalLibraryAction({ library: localObject });
     }
 
     onUpsertScenarioTargetConditionGoals() {

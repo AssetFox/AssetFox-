@@ -126,6 +126,8 @@
                                                     :selectedTreatmentCosts='selectedTreatment.costs'
                                                     :callFromScenario='hasScenario'
                                                     :callFromLibrary='!hasScenario'
+                                                    :isCriterionForLibrary="
+                                                    criterionForLibraryForCostTab"
                                                     @onAddCost='addSelectedTreatmentCost'
                                                     @onModifyCost='modifySelectedTreatmentCost'
                                                     @onRemoveCost='removeSelectedTreatmentCost'
@@ -370,6 +372,9 @@ export default class TreatmentEditor extends Vue {
                     scenarioId: vm.selectedScenarioId,
                 });
             }
+            else{
+                vm.criterionForLibraryForCostTab = true;
+            }
         });
     }
 
@@ -490,7 +495,9 @@ export default class TreatmentEditor extends Vue {
         this.createTreatmentLibraryDialogData = clone(emptyCreateTreatmentLibraryDialogData,);
 
         if (!isNil(library)) {
-            this.upsertTreatmentLibraryAction({ library: library });
+            var localObject = clone(library);
+            localObject.treatments = clone(this.selectedScenarioTreatments);
+            this.upsertTreatmentLibraryAction({ library: localObject });
         }
     }
 

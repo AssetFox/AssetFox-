@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             entity.Simulation.ScenarioDeficientConditionGoals
                 .ForEach(_ => _.CreateDeficientConditionGoal(simulation));
 
-            entity.Simulation.RemainingLifeLimitLibrarySimulationJoin?.RemainingLifeLimitLibrary.RemainingLifeLimits
+            entity.Simulation.RemainingLifeLimits
                 .ForEach(_ => _.CreateRemainingLifeLimit(simulation));
         }
 

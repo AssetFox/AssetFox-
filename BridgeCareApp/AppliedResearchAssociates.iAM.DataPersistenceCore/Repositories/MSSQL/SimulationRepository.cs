@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -13,7 +10,6 @@ using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
-using MoreLinq.Extensions;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -181,7 +177,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.PerformanceCurves)
                 .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
                 .ThenInclude(_ => _.Equation)
-                .Include(_ => _.RemainingLifeLimitLibrarySimulationJoin)
+
+                .Include(_ => _.RemainingLifeLimits)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.RemainingLifeLimits)
+                .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
 
                 .Include(_ => _.ScenarioTargetConditionalGoals)
                 .ThenInclude(_ => _.Attribute)
@@ -415,12 +416,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             }
 
-            if (simulationToClone.RemainingLifeLimitLibrarySimulationJoin != null)
+            if (simulationToClone.RemainingLifeLimits.Any())
             {
-                simulationToClone.RemainingLifeLimitLibrarySimulationJoin.SimulationId = newSimulationId;
-                _unitOfWork.Context
-                    .ReInitializeAllEntityBaseProperties(simulationToClone.RemainingLifeLimitLibrarySimulationJoin,
-                        _unitOfWork.UserEntity?.Id);
+                simulationToClone.RemainingLifeLimits.ForEach(remainingLife =>
+                {
+                    var newRemainingLifeId = Guid.NewGuid();
+                    remainingLife.Id = newRemainingLifeId;
+                    remainingLife.SimulationId = simulationId;
+                    remainingLife.Attribute = null;
+                    _unitOfWork.Context
+                        .ReInitializeAllEntityBaseProperties(remainingLife, _unitOfWork.UserEntity?.Id);
+
+                    if (remainingLife.CriterionLibraryScenarioRemainingLifeLimitJoin != null)
+                    {
+                        var criterionLibraryId = Guid.NewGuid();
+                        remainingLife.CriterionLibraryScenarioRemainingLifeLimitJoin.CriterionLibrary.Id = criterionLibraryId;
+                        remainingLife.CriterionLibraryScenarioRemainingLifeLimitJoin.CriterionLibraryId = criterionLibraryId;
+                        remainingLife.CriterionLibraryScenarioRemainingLifeLimitJoin.ScenarioRemainingLifeLimitId = newRemainingLifeId;
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                remainingLife.CriterionLibraryScenarioRemainingLifeLimitJoin.CriterionLibrary,
+                                _unitOfWork.UserEntity?.Id);
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(remainingLife.CriterionLibraryScenarioRemainingLifeLimitJoin,
+                                _unitOfWork.UserEntity?.Id);
+                    }
+                });
             }
 
             if (simulationToClone.ScenarioTargetConditionalGoals.Any())

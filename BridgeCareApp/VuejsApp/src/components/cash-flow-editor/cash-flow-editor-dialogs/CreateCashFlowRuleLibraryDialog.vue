@@ -76,7 +76,7 @@ export default class CreateCashFlowRuleLibraryDialog extends Vue {
 
   onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newCashFlowRuleLibrary, this.dialogData.scenarioId);
+      this.$emit('submit', this.newCashFlowRuleLibrary);
     } else {
       this.$emit('submit', null);
     }

@@ -6,8 +6,13 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -83,12 +88,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
 
 
-            var cashFlowRuleLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(
-                new CashFlowRuleLibraryEntity {Id = cashFlowRuleLibraryId, Name = "Test Name"});
-            _testHelper.UnitOfWork.Context.AddEntity(new CashFlowRuleLibrarySimulationEntity
+            var newRuleId = Guid.NewGuid();
+            _testHelper.UnitOfWork.Context.AddEntity(new ScenarioCashFlowRuleEntity
             {
-                CashFlowRuleLibraryId = cashFlowRuleLibraryId, SimulationId = _testHelper.TestSimulation.Id
+                Id = newRuleId,
+                SimulationId = _testHelper.TestSimulation.Id,
+                Name = "Test Cash Flow Rule"
+            });
+            var newCashFlowRuleCriterionId = Guid.NewGuid();
+            _testHelper.UnitOfWork.Context.AddEntity(new CriterionLibraryEntity
+            {
+                Id = newCashFlowRuleCriterionId,
+                MergedCriteriaExpression = "Criterion Test Expression",
+                IsSingleUse = true,
+                Name = "Test Criterion"
+            });
+            _testHelper.UnitOfWork.Context.AddEntity(new CriterionLibraryScenarioCashFlowRuleEntity
+            {
+                ScenarioCashFlowRuleId = newRuleId, CriterionLibraryId = newCashFlowRuleCriterionId
+            });
+            _testHelper.UnitOfWork.Context.AddEntity(new ScenarioCashFlowDistributionRuleEntity
+            {
+                Id = Guid.NewGuid(), ScenarioCashFlowRuleId = newRuleId, CostCeiling = 500000, YearlyPercentages = "100", DurationInYears = 1
             });
 
             var deficientConditionGoalLibraryId = Guid.NewGuid();
@@ -432,7 +453,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
                     .Include(_ => _.InvestmentPlan)
                     .Include(_ => _.BudgetPriorities)
-                    .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
+                    .Include(_ => _.CashFlowRules)
+                    .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
+                    .Include(_ => _.CashFlowRules)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
 
                     .Include(_ => _.ScenarioDeficientConditionGoals)
                     .ThenInclude(_ => _.Attribute)
@@ -506,7 +531,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     .Include(_ => _.AnalysisMethod)
                     .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
                     .Include(_ => _.InvestmentPlan)
-                    .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
 
                     .Include(_ => _.ScenarioDeficientConditionGoals)
                     .ThenInclude(_ => _.Attribute)
@@ -584,8 +608,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Assert.NotEqual(clonedSimulation.InvestmentPlan.Id, originalSimulation.InvestmentPlan.Id);
                     Assert.Equal(clonedSimulation.InvestmentPlan.FirstYearOfAnalysisPeriod,
                         originalSimulation.InvestmentPlan.FirstYearOfAnalysisPeriod);
-                    Assert.Equal(clonedSimulation.CashFlowRuleLibrarySimulationJoin.CashFlowRuleLibraryId,
-                        originalSimulation.CashFlowRuleLibrarySimulationJoin.CashFlowRuleLibraryId);
                     var clonedCommittedProjects = clonedSimulation.CommittedProjects.ToList();
                     var originalCommittedProjects = originalSimulation.CommittedProjects.ToList();
                     Assert.Equal(clonedCommittedProjects.Count, originalCommittedProjects.Count);

@@ -61,8 +61,8 @@ const mutations = {
 };
 
 const actions = {
-    selectCashFlowRuleLibrary({ commit }: any, payload: any) {
-        commit('selectedCashFlowRuleLibraryMutator', payload.libraryId);
+    selectCashFlowRuleLibrary({ commit }: any, libraryId: string) {
+        commit('selectedCashFlowRuleLibraryMutator', libraryId);
     },
     async getCashFlowRuleLibraries({ commit }: any) {
         await CashFlowService.getCashFlowRuleLibraries().then(

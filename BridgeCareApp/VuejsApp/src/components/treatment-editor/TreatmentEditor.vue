@@ -126,8 +126,6 @@
                                                     :selectedTreatmentCosts='selectedTreatment.costs'
                                                     :callFromScenario='hasScenario'
                                                     :callFromLibrary='!hasScenario'
-                                                    :isCriterionForLibrary="
-                                                    criterionForLibraryForCostTab"
                                                     @onAddCost='addSelectedTreatmentCost'
                                                     @onModifyCost='modifySelectedTreatmentCost'
                                                     @onRemoveCost='removeSelectedTreatmentCost'
@@ -361,9 +359,8 @@ export default class TreatmentEditor extends Vue {
                         message: 'Found no selected scenario for edit',
                     });
                     vm.$router.push('/Scenarios/');
-                } else {
-                    vm.callComingFromScenario = true;
                 }
+
                 vm.hasScenario = true;
                 vm.getScenarioSelectableTreatmentsAction(vm.selectedScenarioId);
 
@@ -371,9 +368,6 @@ export default class TreatmentEditor extends Vue {
                 vm.getScenarioSimpleBudgetDetailsAction({
                     scenarioId: vm.selectedScenarioId,
                 });
-            }
-            else{
-                vm.criterionForLibraryForCostTab = true;
             }
         });
     }

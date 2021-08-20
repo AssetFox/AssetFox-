@@ -3,7 +3,7 @@
         <v-layout column>           
             <div id="app" class="ara-light-gray-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
                 <v-layout align-center fill-height justify-center>
-                    <div style="height:50px;" class="align-center">Drag & Drop File Here</div>
+                    <div class="drag-drop-area">Drag & Drop File Here</div>
                 </v-layout>                
             </div>
             <v-flex xs12>
@@ -54,10 +54,7 @@ export default class FileSelector extends Vue {
 
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
-
-    dragAndDropCapable: boolean = false;
-    dragEvents: string[] = ['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'];
-    //fileForm: HTMLFormElement = {} as HTMLFormElement;
+    
     fileSelect: HTMLInputElement = {} as HTMLInputElement;
     tableHeaders: DataTableHeader[] = [
         {text: 'Selected File', value: 'name', align: 'left', sortable: false, class: '', width: '150px'},
@@ -91,39 +88,9 @@ export default class FileSelector extends Vue {
     }
 
     mounted() {
-        // calculate if user's browser is drag-and-drop capable
-        //this.dragAndDropCapable = this.isBrowserDragAndDropCapable();
-
-        //if (this.dragAndDropCapable) {
-            // couple fileForm object #fileForm form element
-            //this.fileForm = document.getElementById('fileForm') as HTMLFormElement;
-            // add event listeners to #fileForm form element for all drag/drop events
-            //this.dragEvents.forEach((dragEvent: string) => {
-            //    this.fileForm.addEventListener(dragEvent, (e: any) => {
-             //       e.preventDefault();
-             //       e.stopPropagation();
-             //       // add onSelect callback function if event is 'drop'
-             //       if (dragEvent === 'drop') {
-             //           this.onSelect(e.dataTransfer.files);
-             //       }
-             //   });
-            //});
-        //}
-
         // couple fileSelect object with #file-select input element
         this.fileSelect = document.getElementById('file-select') as HTMLInputElement;        
-    }
-
-    /**
-     * Determines whether or not the user's current browser allows drag & drop functionality
-     */
-    isBrowserDragAndDropCapable() {
-        const div = document.createElement('div');
-
-        return ('draggable' in div || ('ondragstart' in div && 'ondrop' in div)) &&
-            'FormData' in window &&
-            'FileReader' in window;
-    }
+    }    
 
     /**
      * File input change event handler
@@ -152,13 +119,14 @@ export default class FileSelector extends Vue {
 </script>
 
 <style>
-form {
-    height: 100px;
-    border-radius: 4px;
-}
-
 .files-table {
     height: 125px;
     overflow-y: auto;
+}
+
+.drag-drop-area{
+    height: 100px;
+    border-radius: 4px;
+    padding-top: 40px;
 }
 </style>

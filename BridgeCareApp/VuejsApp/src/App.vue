@@ -491,6 +491,7 @@ export default class AppComponent extends Vue {
 html {
     overflow: auto;
     overflow-x: hidden;
+    overflow-y: scroll !important;
 }
 
 .v-list__group__header__prepend-icon .v-icon {

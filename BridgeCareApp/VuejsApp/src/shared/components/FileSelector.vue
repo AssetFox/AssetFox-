@@ -46,7 +46,7 @@ import {hasValue} from '@/shared/utils/has-value-util';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {clone, prop} from 'ramda';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
-import { formatBytes } from '@/shared/utils/math-utils.ts';
+import { formatBytes } from '@/shared/utils/math-utils';
 
 @Component
 export default class FileSelector extends Vue {
@@ -69,7 +69,7 @@ export default class FileSelector extends Vue {
     chooseFiles(){
         if(document != null)
         {
-            document.getElementById("file-select").click();
+            document.getElementById("file-select")!.click();
         }
     }
 
@@ -77,7 +77,7 @@ export default class FileSelector extends Vue {
     onFileChanged() {        
         this.files = hasValue(this.file) ? [this.file as File] : [];                                   
         this.$emit('submit', this.file);
-        document.getElementById("file-select").value = '';
+        (<HTMLInputElement>document.getElementById("file-select")!).value = '';
     }
 
     @Watch('closed')
@@ -86,7 +86,7 @@ export default class FileSelector extends Vue {
             this.files = [];
             this.file = null;
             this.fileSelect.value = '';
-            document.getElementById("file-select").value = '';
+            (<HTMLInputElement>document.getElementById("file-select")!).value = '';
         }
     }
 

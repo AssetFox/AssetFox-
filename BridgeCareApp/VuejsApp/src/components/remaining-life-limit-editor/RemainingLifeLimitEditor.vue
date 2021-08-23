@@ -14,7 +14,7 @@
                     </v-btn>
                     <v-select
                         v-if="
-                            !hasSelectedRemainingLifeLimitLibrary || hasScenario
+                            !hasSelectedLibrary || hasScenario
                         "
                         :items="selectListItems"
                         label="Select a Remaining Life Limit Library"
@@ -23,7 +23,7 @@
                     />
                     <v-text-field
                         v-if="
-                            hasSelectedRemainingLifeLimitLibrary && !hasScenario
+                            hasSelectedLibrary && !hasScenario
                         "
                         label="Library Name"
                         v-model="selectedRemainingLifeLimitLibrary.name"
@@ -43,7 +43,7 @@
             </v-layout>
             <v-flex
                 xs3
-                v-show="hasSelectedRemainingLifeLimitLibrary || hasScenario"
+                v-show="hasSelectedLibrary || hasScenario"
             >
                 <v-btn
                     @click="onShowCreateRemainingLifeLimitDialog"
@@ -54,12 +54,12 @@
         </v-flex>
         <v-flex
             xs12
-            v-show="hasSelectedRemainingLifeLimitLibrary || hasScenario"
+            v-show="hasSelectedLibrary || hasScenario"
         >
             <div class="remaining-life-limit-data-table">
                 <v-data-table
                     :headers="gridHeaders"
-                    :items="gridData"
+                    :items="remainingLifeLimits"
                     class="elevation-1 fixed-header v-table__overflow"
                 >
                     <template slot="items" slot-scope="props">
@@ -163,11 +163,26 @@
                 </v-data-table>
             </div>
         </v-flex>
-        <v-flex xs12 v-show="hasSelectedRemainingLifeLimitLibrary || hasScenario">
+        <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
+            <v-layout justify-center>
+                <v-flex xs6>
+                    <v-textarea
+                        label="Description"
+                        no-resize
+                        outline
+                        rows="4"
+                        v-model="selectedRemainingLifeLimitLibrary.description"
+                        @input='selectedRemainingLifeLimitLibrary = {...selectedRemainingLifeLimitLibrary, description: $event}'
+                    >
+                    </v-textarea>
+                </v-flex>
+            </v-layout>
+        </v-flex>
+        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
             <v-layout justify-end row>
                 <v-btn
                     :disabled="disableCrudButton() || !hasUnsavedChanges"
-                    @click="onSaveScenarioRemainingLifeLimit(selectedScenarioId)"
+                    @click="onUpsertScenarioRemainingLifeLimits"
                     class="ara-blue-bg white--text"
                     v-show="hasScenario"
                 >
@@ -175,7 +190,7 @@
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButton() || !hasUnsavedChanges"
-                    @click="onUpsertRemainingLifeLimitLibrary(selectedRemainingLifeLimitLibrary)"
+                    @click="onUpsertRemainingLifeLimitLibrary"
                     class="ara-blue-bg white--text"
                     v-show="!hasScenario"
                 >
@@ -192,14 +207,14 @@
                     v-show="!hasScenario"
                     class="ara-orange-bg white--text"
                     @click="onShowConfirmDeleteAlert"
-                    :disabled="!hasSelectedRemainingLifeLimitLibrary"
+                    :disabled="!hasSelectedLibrary"
                 >
                     Delete Library
                 </v-btn>
                 <v-btn :disabled='!hasUnsavedChanges'
                     @click="onDiscardChanges"
                     class="ara-orange-bg white--text"
-                    v-show="hasSelectedRemainingLifeLimitLibrary || hasScenario"
+                    v-show="hasSelectedLibrary || hasScenario"
                 >
                     Discard Changes
                 </v-btn>
@@ -213,7 +228,7 @@
 
         <CreateRemainingLifeLimitLibraryDialog
             :dialogData="createRemainingLifeLimitLibraryDialogData"
-            @submit="onUpsertRemainingLifeLimitLibrary"
+            @submit="onSubmitCreateRemainingLifeLimitLibraryDialogResult"
         />
 
         <CreateRemainingLifeLimitDialog
@@ -239,7 +254,7 @@ import {
     RemainingLifeLimit,
     RemainingLifeLimitLibrary,
 } from '@/shared/models/iAM/remaining-life-limit';
-import { append, clone, findIndex, isNil, propEq, update } from 'ramda';
+import { prepend, clone, findIndex, isNil, propEq, update } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
@@ -304,10 +319,10 @@ export default class RemainingLifeLimitEditor extends Vue {
     selectRemainingLifeLimitLibraryAction: any;
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('getScenariotRemainingLifeLimit')
-    getScenariotRemainingLifeLimitAction: any;
-    @Action('upsertScenarioRemainingLifeLimit')
-    upsertScenarioRemainingLifeLimitAction: any;
+    @Action('getScenarioRemainingLifeLimits')
+    getScenarioRemainingLifeLimitsAction: any;
+    @Action('upsertScenarioRemainingLifeLimits')
+    upsertScenarioRemainingLifeLimitsAction: any;
 
     remainingLifeLimitLibraries: RemainingLifeLimitLibrary[] = [];
     selectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = clone(
@@ -316,7 +331,7 @@ export default class RemainingLifeLimitEditor extends Vue {
     selectedScenarioId: string = getBlankGuid();
     selectItemValue: string | null = '';
     selectListItems: SelectItem[] = [];
-    hasSelectedRemainingLifeLimitLibrary: boolean = false;
+    hasSelectedLibrary: boolean = false;
     gridHeaders: DataTableHeader[] = [
         {
             text: 'Remaining Life Attribute',
@@ -343,7 +358,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             width: '75%',
         },
     ];
-    gridData: RemainingLifeLimit[] = [];
+    remainingLifeLimits: RemainingLifeLimit[] = [];
     numericAttributeSelectItems: SelectItem[] = [];
     createRemainingLifeLimitDialogData: CreateRemainingLifeLimitDialogData = clone(
         emptyCreateRemainingLifeLimitDialogData,
@@ -376,7 +391,7 @@ export default class RemainingLifeLimitEditor extends Vue {
                     vm.$router.push('/Scenarios/');
                 }
                 vm.hasScenario = true;
-                vm.getScenariotRemainingLifeLimitAction(vm.selectedScenarioId);
+                vm.getScenarioRemainingLifeLimitsAction(vm.selectedScenarioId);
             }
         });
     }
@@ -411,33 +426,33 @@ export default class RemainingLifeLimitEditor extends Vue {
 
     @Watch('selectedRemainingLifeLimitLibrary')
     onSelectedRemainingLifeLimitLibraryChanged() {
-        this.hasSelectedRemainingLifeLimitLibrary =
+        this.hasSelectedLibrary =
             this.selectedRemainingLifeLimitLibrary.id !== this.uuidNIL;
-        this.gridData = clone(
-            this.selectedRemainingLifeLimitLibrary.remainingLifeLimits,
-        );
+
+        if (this.hasScenario) {
+            this.remainingLifeLimits = this.selectedRemainingLifeLimitLibrary.remainingLifeLimits.map((remainingLifeLimit: RemainingLifeLimit) => ({
+                ...remainingLifeLimit, id: getNewGuid()
+            }));
+        } else {
+            this.remainingLifeLimits = clone(
+                this.selectedRemainingLifeLimitLibrary.remainingLifeLimits,
+            );
+        }
     }
 
     @Watch('stateScenarioRemainingLifeLimits')
     onStateScenarioRemainingLifeLimitsChanged() {
-        if (
-            this.currentUrl.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !==
-            -1
-        ) {
-            this.gridData = clone(this.stateScenarioRemainingLifeLimits);
+        if (this.hasScenario) {
+            this.remainingLifeLimits = clone(this.stateScenarioRemainingLifeLimits);
         }
     }
-    @Watch('gridData')
+    @Watch('remainingLifeLimits')
     onGridDataChanged() {
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore(
-            'remaining-life-limit',
-            this.gridData,
-            this.currentUrl.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !==
-                -1
-                ? this.stateScenarioRemainingLifeLimits
-                : this.stateSelectedRemainingLifeLimitLibrary
-                      .remainingLifeLimits,
-        );
+        const hasUnsavedChanges: boolean = this.hasScenario
+            ? hasUnsavedChangesCore('', this.remainingLifeLimits, this.stateScenarioRemainingLifeLimits)
+            : hasUnsavedChangesCore('',
+                { ...clone(this.selectedRemainingLifeLimitLibrary), remainingLifeLimits: clone(this.remainingLifeLimits) },
+                this.stateSelectedRemainingLifeLimitLibrary);
 
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
@@ -462,19 +477,21 @@ export default class RemainingLifeLimitEditor extends Vue {
         }
     }
 
-    onShowCreateRemainingLifeLimitLibraryDialog(
-        createExistingLibraryAsNew: boolean,
-    ) {
+    onShowCreateRemainingLifeLimitLibraryDialog(createAsNewLibrary: boolean) {
         this.createRemainingLifeLimitLibraryDialogData = {
-            ...this.createRemainingLifeLimitDialogData,
             showDialog: true,
-            remainingLifeLimits: createExistingLibraryAsNew
+            remainingLifeLimits: createAsNewLibrary
                 ? this.selectedRemainingLifeLimitLibrary.remainingLifeLimits
                 : [],
-            scenarioId: createExistingLibraryAsNew
-                ? this.selectedScenarioId
-                : this.uuidNIL,
         };
+    }
+
+    onSubmitCreateRemainingLifeLimitLibraryDialogResult(library: RemainingLifeLimitLibrary) {
+        this.createRemainingLifeLimitLibraryDialogData = clone(emptyCreateRemainingLifeLimitLibraryDialogData);
+
+        if (!isNil(library)) {
+            this.upsertRemainingLifeLimitLibraryAction({library: library});
+        }
     }
 
     onShowCreateRemainingLifeLimitDialog() {
@@ -485,123 +502,74 @@ export default class RemainingLifeLimitEditor extends Vue {
     }
 
     onAddRemainingLifeLimit(newRemainingLifeLimit: RemainingLifeLimit) {
-        this.createRemainingLifeLimitDialogData = clone(
-            emptyCreateRemainingLifeLimitDialogData,
-        );
+        this.createRemainingLifeLimitDialogData = clone(emptyCreateRemainingLifeLimitDialogData);
 
         if (!isNil(newRemainingLifeLimit)) {
-            this.gridData = append(newRemainingLifeLimit, this.gridData);
+            this.remainingLifeLimits = prepend(newRemainingLifeLimit, this.remainingLifeLimits);
         }
     }
 
-    onEditRemainingLifeLimitProperty(
-        remainingLifeLimit: RemainingLifeLimit,
-        property: string,
-        value: any,
-    ) {
-        this.gridData = update(
-            findIndex(propEq('id', remainingLifeLimit.id), this.gridData),
+    onEditRemainingLifeLimitProperty(remainingLifeLimit: RemainingLifeLimit, property: string, value: any) {
+        this.remainingLifeLimits = update(
+            findIndex(propEq('id', remainingLifeLimit.id), this.remainingLifeLimits),
             setItemPropertyValue(property, value, remainingLifeLimit),
-            this.gridData,
+            this.remainingLifeLimits,
         );
     }
 
     onShowCriterionLibraryEditorDialog(remainingLifeLimit: RemainingLifeLimit) {
         this.selectedRemainingLifeLimit = remainingLifeLimit;
 
-        let fromScenario = false;
-        let criterionForLibrary = false;
-        if (
-            this.currentUrl.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !==
-            -1
-        ) {
-            fromScenario = true;
-        } else {
-            criterionForLibrary = true;
-        }
         this.criterionLibraryEditorDialogData = {
             showDialog: true,
             libraryId: remainingLifeLimit.criterionLibrary.id,
-            isCallFromScenario: fromScenario,
-            isCriterionForLibrary: criterionForLibrary,
+            isCallFromScenario: this.hasScenario,
+            isCriterionForLibrary: !this.hasScenario,
         };
     }
 
     onEditRemainingLifeLimitCriterionLibrary(
         criterionLibrary: CriterionLibrary,
     ) {
-        this.criterionLibraryEditorDialogData = clone(
-            emptyCriterionLibraryEditorDialogData,
-        );
+        this.criterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
-        if (
-            !isNil(criterionLibrary) &&
-            this.selectedRemainingLifeLimit.id !== this.uuidNIL
-        ) {
-            this.selectedRemainingLifeLimitLibrary = {
-                ...this.selectedRemainingLifeLimitLibrary,
-                remainingLifeLimits: update(
-                    findIndex(
-                        propEq('id', this.selectedRemainingLifeLimit.id),
-                        this.selectedRemainingLifeLimitLibrary
-                            .remainingLifeLimits,
-                    ),
-                    {
-                        ...this.selectedRemainingLifeLimit,
-                        criterionLibrary: criterionLibrary,
-                    },
-                    this.selectedRemainingLifeLimitLibrary.remainingLifeLimits,
+        if (!isNil(criterionLibrary) && this.selectedRemainingLifeLimit.id !== this.uuidNIL) {
+            this.remainingLifeLimits = update(
+                findIndex(
+                    propEq('id', this.selectedRemainingLifeLimit.id),
+                    this.remainingLifeLimits,
                 ),
-            };
+                {
+                    ...this.selectedRemainingLifeLimit,
+                    criterionLibrary: criterionLibrary,
+                },
+                this.remainingLifeLimits,
+            );
         }
 
         this.selectedRemainingLifeLimit = clone(emptyRemainingLifeLimit);
     }
 
-    onUpsertRemainingLifeLimitLibrary(
-        remainingLifeLimitLibrary: RemainingLifeLimitLibrary,
-    ) {
-        this.createRemainingLifeLimitLibraryDialogData = clone(
-            emptyCreateRemainingLifeLimitLibraryDialogData,
-        );
-
-        if (!isNil(remainingLifeLimitLibrary)) {
-            var localObject = clone(remainingLifeLimitLibrary);
-            localObject.remainingLifeLimits = clone(this.gridData);
-            this.upsertRemainingLifeLimitLibraryAction({
-                library: localObject,
-            });
-        }
+    onUpsertRemainingLifeLimitLibrary() {
+        const library: RemainingLifeLimitLibrary = {
+            ...clone(this.selectedRemainingLifeLimitLibrary),
+            remainingLifeLimits: clone(this.remainingLifeLimits)
+        };
+        this.upsertRemainingLifeLimitLibraryAction({ library: library, });
     }
-    onSaveScenarioRemainingLifeLimit(scenarioId: string) {
-        if (!isNil(this.gridData)) {
-            var localCopy: RemainingLifeLimit[];
-            if (this.hasSelectedRemainingLifeLimitLibrary) {
-                localCopy = this.gridData.map(
-                    (lifeLimit: RemainingLifeLimit) => ({
-                        ...lifeLimit,
-                        id: getNewGuid(),
-                    }),
-                );
-            } else {
-                localCopy = clone(this.gridData);
-            }
-            this.upsertScenarioRemainingLifeLimitAction({
-                scenarioRemainingLifeLimits: localCopy,
-                scenarioId: scenarioId,
-            }).then(() => (this.selectItemValue = null));
-        }
+
+    onUpsertScenarioRemainingLifeLimits() {
+        this.upsertScenarioRemainingLifeLimitsAction({
+            scenarioRemainingLifeLimits: this.remainingLifeLimits,
+            scenarioId: this.selectedScenarioId,
+        }).then(() => (this.selectItemValue = null));
     }
 
     onDiscardChanges() {
         this.selectItemValue = null;
         setTimeout(() => {
-            if (
-                this.currentUrl.indexOf(
-                    ScenarioRoutePaths.RemainingLifeLimit,
-                ) !== -1
-            ) {
-                this.gridData = clone(this.stateScenarioRemainingLifeLimits);
+            if (this.hasScenario) {
+                this.remainingLifeLimits = clone(this.stateScenarioRemainingLifeLimits);
             }
         });
     }
@@ -627,7 +595,7 @@ export default class RemainingLifeLimitEditor extends Vue {
     }
 
     disableCrudButton() {
-        const dataIsValid: boolean = this.gridData.every(
+        const dataIsValid: boolean = this.remainingLifeLimits.every(
             (remainingLife: RemainingLifeLimit) => {
                 return (
                     this.rules['generalRules'].valueIsNotEmpty(
@@ -640,7 +608,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             },
         );
 
-        if (this.hasSelectedRemainingLifeLimitLibrary) {
+        if (this.hasSelectedLibrary) {
             return !(
                 this.rules['generalRules'].valueIsNotEmpty(
                     this.selectedRemainingLifeLimitLibrary.name,

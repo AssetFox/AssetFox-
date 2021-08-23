@@ -267,9 +267,8 @@
                         no-resize
                         outline
                         rows="4"
-                        v-model="
-                            selectedDeficientConditionGoalLibrary.description
-                        "
+                        v-model="selectedDeficientConditionGoalLibrary.description"
+                        @input='selectedDeficientConditionGoalLibrary = {...selectedDeficientConditionGoalLibrary, description: $event}'
                     >
                     </v-textarea>
                 </v-flex>

@@ -120,7 +120,8 @@
             <v-layout justify-center>
                 <v-flex xs6>
                     <v-textarea label='Description' no-resize outline rows='4'
-                                v-model='selectedBudgetPriorityLibrary.description'>
+                                v-model='selectedBudgetPriorityLibrary.description'
+                                @input='selectedBudgetPriorityLibrary = {...selectedBudgetPriorityLibrary, description: $event}'>
                     </v-textarea>
                 </v-flex>
             </v-layout>

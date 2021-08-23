@@ -161,7 +161,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
 
-                .Include(_ => _.CashFlowRuleLibrarySimulationJoin)
+                .Include(_ => _.CashFlowRules)
+                .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
+                .Include(_ => _.CashFlowRules)
+                .ThenInclude(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
 
                 .Include(_ => _.ScenarioDeficientConditionGoals)
                 .ThenInclude(_ => _.Attribute)
@@ -336,12 +340,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 });
             }
 
-            if (simulationToClone.CashFlowRuleLibrarySimulationJoin != null)
+            if (simulationToClone.CashFlowRules.Any())
             {
-                simulationToClone.CashFlowRuleLibrarySimulationJoin.SimulationId = newSimulationId;
-                _unitOfWork.Context
-                    .ReInitializeAllEntityBaseProperties(simulationToClone.CashFlowRuleLibrarySimulationJoin,
-                        _unitOfWork.UserEntity?.Id);
+                simulationToClone.CashFlowRules.ForEach(cashFlowRule =>
+                {
+                    var newRuleId = Guid.NewGuid();
+                    cashFlowRule.Id = newRuleId;
+                    cashFlowRule.SimulationId = simulationId;
+                    _unitOfWork.Context
+                        .ReInitializeAllEntityBaseProperties(cashFlowRule, _unitOfWork.UserEntity?.Id);
+
+                    if (cashFlowRule.ScenarioCashFlowDistributionRules.Any())
+                    {
+                        cashFlowRule.ScenarioCashFlowDistributionRules.ForEach(distributionRule =>
+                        {
+                            var newDistributionRuleId = Guid.NewGuid();
+                            distributionRule.Id = newDistributionRuleId;
+                            distributionRule.ScenarioCashFlowRuleId = newRuleId;
+                            _unitOfWork.Context
+                                .ReInitializeAllEntityBaseProperties(distributionRule, _unitOfWork.UserEntity?.Id);
+                        });
+                    }
+
+                    if (cashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin != null)
+                    {
+                        var criterionLibraryId = Guid.NewGuid();
+                        cashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin.CriterionLibrary.Id = criterionLibraryId;
+                        cashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin.CriterionLibraryId = criterionLibraryId;
+                        cashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin.ScenarioCashFlowRuleId = newRuleId;
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(
+                                cashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin.CriterionLibrary,
+                                _unitOfWork.UserEntity?.Id);
+                        _unitOfWork.Context
+                            .ReInitializeAllEntityBaseProperties(cashFlowRule.CriterionLibraryScenarioCashFlowRuleJoin,
+                                _unitOfWork.UserEntity?.Id);
+                    }
+                });
             }
 
             if (simulationToClone.ScenarioDeficientConditionGoals.Any())

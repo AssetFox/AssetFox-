@@ -1,5 +1,7 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 
@@ -7,17 +9,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class CashFlowDistributionRuleMapper
     {
-        public static CashFlowDistributionRuleEntity ToEntity(this CashFlowDistributionRule domain, Guid cashFlowRuleId, int durationInYears) =>
-            new CashFlowDistributionRuleEntity
+        public static ScenarioCashFlowDistributionRuleEntity ToScenarioEntity(this CashFlowDistributionRule domain, Guid cashFlowRuleId, int durationInYears) =>
+            new ScenarioCashFlowDistributionRuleEntity
             {
                 Id = domain.Id,
-                CashFlowRuleId = cashFlowRuleId,
+                ScenarioCashFlowRuleId = cashFlowRuleId,
                 DurationInYears = durationInYears,
                 YearlyPercentages = string.Join('/', domain.YearlyPercentages),
                 CostCeiling = domain.CostCeiling ?? 0
             };
 
-        public static CashFlowDistributionRuleEntity ToEntity(this CashFlowDistributionRuleDTO dto, Guid cashFlowRuleId) =>
+        public static ScenarioCashFlowDistributionRuleEntity ToScenarioEntity(this CashFlowDistributionRuleDTO dto, Guid cashFlowRuleId) =>
+            new ScenarioCashFlowDistributionRuleEntity
+            {
+                Id = dto.Id,
+                ScenarioCashFlowRuleId = cashFlowRuleId,
+                CostCeiling = dto.CostCeiling,
+                DurationInYears = dto.DurationInYears,
+                YearlyPercentages = dto.YearlyPercentages
+            };
+
+        public static CashFlowDistributionRuleDTO ToDto(this ScenarioCashFlowDistributionRuleEntity entity) =>
+            new CashFlowDistributionRuleDTO
+            {
+                Id = entity.Id,
+                CostCeiling = entity.CostCeiling,
+                DurationInYears = entity.DurationInYears,
+                YearlyPercentages = entity.YearlyPercentages
+            };
+
+        public static CashFlowDistributionRuleEntity ToLibraryEntity(this CashFlowDistributionRuleDTO dto, Guid cashFlowRuleId) =>
             new CashFlowDistributionRuleEntity
             {
                 Id = dto.Id,

@@ -35,9 +35,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            _controller = new BudgetPriorityController(_testHelper.MockEsecSecurityAuthorized.Object,
-                _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
         private void CreateAuthorizedController() =>

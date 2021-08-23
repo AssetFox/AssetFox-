@@ -23,8 +23,6 @@ export const hasUnsavedChangesCore = (
     const stateObject = sortNonObjectLists(clone(object2));
 
     switch (objectType) {
-        case 'performance-curves':
-            return !isEqual(localObject, stateObject);
         case 'cash-flow':
             return (
                 !isEqual(localObject, emptyCashFlowRuleLibrary) &&
@@ -35,35 +33,13 @@ export const hasUnsavedChangesCore = (
                 !isEqual(localObject, emptyRemainingLifeLimitLibrary) &&
                 !isEqual(localObject, stateObject)
             );
-        case 'deficient-condition-goal':
-            return (
-                !isEqual(localObject, emptyDeficientConditionGoalLibrary) &&
-                !isEqual(localObject, stateObject)
-            );
-        case 'target-condition-goal':
-            return (
-                !isEqual(localObject, emptyTargetConditionGoalLibrary) &&
-                !isEqual(localObject, stateObject)
-            );
-        case 'budget-library':
-            return (
-                !isEqual(localObject, emptyBudgetLibrary) &&
-                !isEqual(localObject, stateObject)
-            );
-        case 'investmentModule-plan':
-            return (
-                !isEqual(localObject, emptyInvestmentPlan) &&
-                !isEqual(localObject, stateObject)
-            );
-        case 'budget-priority':
-            return !isEqual(localObject, stateObject);
         case 'criterion-library':
             return (
                 !isEqual(localObject, emptyCriterionLibrary) &&
                 !isEqual(localObject, stateObject)
             );
         default:
-            return false;
+            return !isEqual(localObject, stateObject);
     }
 };
 

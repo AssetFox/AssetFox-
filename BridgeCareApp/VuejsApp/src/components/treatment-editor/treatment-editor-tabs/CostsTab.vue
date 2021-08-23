@@ -129,7 +129,7 @@ import Alert from '@/shared/modals/Alert.vue';
 export default class CostsTab extends Vue {
     @Prop() selectedTreatmentCosts: TreatmentCost[];
     @Prop() callFromScenario: boolean;
-    @Prop() isCriterionForLibrary: boolean;
+    @Prop() callFromLibrary: boolean;
 
     costsGridHeaders: DataTableHeader[] = [
         {
@@ -216,7 +216,7 @@ export default class CostsTab extends Vue {
             showDialog: true,
             libraryId: cost.criterionLibrary.id,
             isCallFromScenario: this.callFromScenario,
-            isCriterionForLibrary: this.isCriterionForLibrary,
+            isCriterionForLibrary: this.callFromLibrary
         };
     }
 

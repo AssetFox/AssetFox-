@@ -73,17 +73,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     _.CriterionLibraryScenarioBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
             });
 
-            entity.Simulation.CashFlowRuleLibrarySimulationJoin?.CashFlowRuleLibrary.CashFlowRules.ForEach(_ =>
+            entity.Simulation.CashFlowRules.ForEach(_ =>
             {
                 var cashFlowRule = simulation.InvestmentPlan.AddCashFlowRule();
                 cashFlowRule.Id = _.Id;
                 cashFlowRule.Name = _.Name;
                 cashFlowRule.Criterion.Expression =
-                    _.CriterionLibraryCashFlowRuleJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
+                    _.CriterionLibraryScenarioCashFlowRuleJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
 
-                if (_.CashFlowDistributionRules.Any())
+                if (_.ScenarioCashFlowDistributionRules.Any())
                 {
-                    var sortedDistributionRules = _.CashFlowDistributionRules.OrderBy(__ => __.DurationInYears);
+                    var sortedDistributionRules = _.ScenarioCashFlowDistributionRules.OrderBy(__ => __.DurationInYears);
                     sortedDistributionRules.ForEach(__ =>
                     {
                         var distributionRule = cashFlowRule.DistributionRules.GetAdd(new CashFlowDistributionRule());

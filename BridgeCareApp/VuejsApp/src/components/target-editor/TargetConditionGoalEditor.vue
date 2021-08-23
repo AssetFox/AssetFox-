@@ -232,6 +232,7 @@
                         outline
                         rows="4"
                         v-model="selectedTargetConditionGoalLibrary.description"
+                        @input='selectedTargetConditionGoalLibrary = {...selectedTargetConditionGoalLibrary, description: $event}'
                     >
                     </v-textarea>
                 </v-flex>

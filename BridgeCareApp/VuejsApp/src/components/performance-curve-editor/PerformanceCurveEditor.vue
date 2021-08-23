@@ -284,6 +284,7 @@
                         outline
                         rows="4"
                         v-model="selectedPerformanceCurveLibrary.description"
+                        @input='selectedPerformanceCurveLibrary = {...selectedPerformanceCurveLibrary, description: $event}'
                     />
                 </v-flex>
             </v-layout>

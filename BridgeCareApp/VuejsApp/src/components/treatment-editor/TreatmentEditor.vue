@@ -175,7 +175,8 @@
                         no-resize
                         outline
                         rows='4'
-                        v-model='selectedTreatmentLibrary.description'
+                        :value='selectedTreatmentLibrary.description'
+                        @input='selectedTreatmentLibrary = {...selectedTreatmentLibrary, description: $event}'
                     />
                 </v-flex>
             </v-layout>
@@ -190,7 +191,7 @@
                     Save
                 </v-btn>
                 <v-btn
-                    @click='onUpsertTreatmentLibrary()'
+                    @click='onUpsertTreatmentLibrary'
                     class='ara-blue-bg white--text'
                     v-show='!hasScenario'
                     :disabled='disableCrudButton() || !hasUnsavedChanges'

@@ -426,6 +426,7 @@
                         outline
                         rows="4"
                         v-model="selectedCashFlowRuleLibrary.description"
+                        @input='selectedCashFlowRuleLibrary = {...selectedCashFlowRuleLibrary, description: $event}'
                     >
                     </v-textarea>
                 </v-flex>

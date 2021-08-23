@@ -489,9 +489,7 @@ export default class TreatmentEditor extends Vue {
         this.createTreatmentLibraryDialogData = clone(emptyCreateTreatmentLibraryDialogData,);
 
         if (!isNil(library)) {
-            var localObject = clone(library);
-            localObject.treatments = clone(this.selectedScenarioTreatments);
-            this.upsertTreatmentLibraryAction({ library: localObject });
+            this.upsertTreatmentLibraryAction({ library: library });
         }
     }
 

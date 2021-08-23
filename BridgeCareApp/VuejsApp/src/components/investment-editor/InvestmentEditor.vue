@@ -109,8 +109,7 @@
                 <v-flex xs8>
                     <v-card>
                         <v-data-table :headers='budgetYearsGridHeaders' :items='budgetYearsGridData'
-                                      class='elevation-1 v-table__overflow' item-key='year'
-                                      v-model='selectedGridRows'>
+                                      class='elevation-1 v-table__overflow' item-key='year'>
                             <template slot='items' slot-scope='props'>
                                 <td v-for='header in budgetYearsGridHeaders'>
                                     <div v-if="header.value !== 'year'">
@@ -232,7 +231,7 @@ import { getLastPropertyValue, getPropertyValues } from '@/shared/utils/getter-u
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import { isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
+import { hasUnsavedChangesCore, isEqual, sortNonObjectLists } from '@/shared/utils/has-unsaved-changes-helper';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { sorter } from '@/shared/utils/sorter-utils';
@@ -287,7 +286,6 @@ export default class InvestmentEditor extends Vue {
         { text: 'Year', value: 'year', sortable: true, align: 'left', class: '', width: '' },
     ];
     budgetYearsGridData: BudgetYearsGridData[] = [];
-    selectedGridRows: BudgetYearsGridData[] = [];
     selectedBudgetYears: number[] = [];
     createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
     editBudgetsDialogData: EditBudgetsDialogData = clone(emptyEditBudgetsDialogData);
@@ -358,7 +356,19 @@ export default class InvestmentEditor extends Vue {
     @Watch('selectedBudgetLibrary')
     onSelectedBudgetLibraryChanged() {
         this.hasSelectedLibrary = this.selectedBudgetLibrary.id !== this.uuidNIL;
-        if (this.hasSelectedLibrary) {
+
+        if (this.hasScenario) {
+            this.budgets = this.selectedBudgetLibrary.budgets.map((budget: Budget) => ({
+                ...budget,
+                id: getNewGuid(),
+                budgetAmounts: hasValue(budget.budgetAmounts)
+                    ? budget.budgetAmounts.map((budgetAmount: BudgetAmount) => ({
+                        ...budgetAmount,
+                        id: getNewGuid(),
+                    }))
+                    : [] as BudgetAmount[],
+            }));
+        } else {
             this.budgets = clone(this.selectedBudgetLibrary.budgets);
         }
     }
@@ -371,27 +381,23 @@ export default class InvestmentEditor extends Vue {
     @Watch('stateScenarioBudgets')
     onStateScenarioBudgetsChanged() {
         if (this.hasScenario) {
-            this.selectedGridRows = [];
             this.budgets = clone(this.stateScenarioBudgets);
         }
     }
 
     @Watch('budgets')
     onScenarioBudgetsChanged() {
-        this.setGridHeaders(this.budgets);
-        this.setGridData(this.budgets);
-        this.syncInvestmentPlanWithBudgets(this.stateScenarioBudgets);
+        this.setGridHeaders();
+        this.setGridData();
+        if (this.hasScenario) {
+            this.syncInvestmentPlanWithBudgets();
+        }
         this.setHasUnsavedChangesFlag();
     }
 
     @Watch('investmentPlan')
     onInvestmentPlanChanged() {
         this.setHasUnsavedChangesFlag();
-    }
-
-    @Watch('selectedGridRows')
-    onSelectedGridRowsChanged() {
-        this.selectedBudgetYears = getPropertyValues('year', this.selectedGridRows) as number[];
     }
 
     cloneStateInvestmentPlan() {
@@ -404,40 +410,37 @@ export default class InvestmentEditor extends Vue {
 
     setHasUnsavedChangesFlag() {
         if (this.hasScenario) {
-            const localBudgets: Budget[] = sortNonObjectLists(clone(this.budgets));
-            const stateBudgets: Budget[] = sortNonObjectLists(clone(this.stateScenarioBudgets));
+            const budgetsHaveUnsavedChanges: boolean = hasUnsavedChangesCore('', this.budgets, this.stateScenarioBudgets);
 
-            const investmentPlan: InvestmentPlan = clone(this.investmentPlan);
-            const localInvestmentPlan: InvestmentPlan = sortNonObjectLists({
-                ...investmentPlan,
-                minimumProjectCostLimit: hasValue(investmentPlan.minimumProjectCostLimit)
-                    ? parseFloat(investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+
+            const clonedInvestmentPlan: InvestmentPlan = clone(this.investmentPlan);
+            const investmentPlan: InvestmentPlan = {
+                ...clonedInvestmentPlan,
+                minimumProjectCostLimit: hasValue(clonedInvestmentPlan.minimumProjectCostLimit)
+                    ? parseFloat(clonedInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
-            });
-
+            };
             const clonedStateInvestmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
-            const stateInvestmentPlan: InvestmentPlan = sortNonObjectLists({
+            const stateInvestmentPlan: InvestmentPlan = {
                 ...clonedStateInvestmentPlan,
                 minimumProjectCostLimit: hasValue(clonedStateInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedStateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
-            });
+            };
+            const investmentPlanHasUnsavedChanges: boolean = hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan);
 
-            this.setHasUnsavedChangesAction({ value: !isEqual(localBudgets, stateBudgets) || !isEqual(localInvestmentPlan, stateInvestmentPlan) });
+
+            this.setHasUnsavedChangesAction({ value: budgetsHaveUnsavedChanges || investmentPlanHasUnsavedChanges });
         } else if (this.hasSelectedLibrary) {
-            const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
-            const localLibrary: BudgetLibrary = sortNonObjectLists({
-                ...budgetLibrary,
-                budgets: clone(this.budgets),
-            });
-            const stateLibrary: BudgetLibrary = sortNonObjectLists(clone(this.stateSelectedBudgetLibrary));
-
-            this.setHasUnsavedChangesAction({ value: !isEqual(localLibrary, stateLibrary) });
+            const hasUnsavedChanges: boolean = hasUnsavedChangesCore('',
+                { ...clone(this.selectedBudgetLibrary), budgets: clone(this.budgets) },
+                this.stateSelectedBudgetLibrary);
+            this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
         }
     }
 
-    setGridHeaders(budgets: Budget[]) {
-        const budgetNames: string[] = sorter(getPropertyValues('name', budgets)) as string[];
+    setGridHeaders() {
+        const budgetNames: string[] = sorter(getPropertyValues('name', this.budgets)) as string[];
         const budgetHeaders: DataTableHeader[] = budgetNames
             .map((name: string) => ({
                 text: name,
@@ -450,10 +453,10 @@ export default class InvestmentEditor extends Vue {
         this.budgetYearsGridHeaders = [this.budgetYearsGridHeaders[0], ...budgetHeaders];
     }
 
-    setGridData(budgets: Budget[]) {
+    setGridData() {
         this.budgetYearsGridData = [];
 
-        const budgetAmounts: BudgetAmount[] = budgets
+        const budgetAmounts: BudgetAmount[] = this.budgets
             .flatMap((budget: Budget) => budget.budgetAmounts);
         const groupBudgetAmountsByYear = groupBy((budgetAmount: BudgetAmount) => budgetAmount.year.toString());
         const groupedBudgetAmounts = groupBudgetAmountsByYear(budgetAmounts);
@@ -463,7 +466,7 @@ export default class InvestmentEditor extends Vue {
 
             const budgetAmounts: BudgetAmount[] = groupedBudgetAmounts[year];
 
-            const budgetNames: string[] = sorter(getPropertyValues('name', budgets)) as string[];
+            const budgetNames: string[] = sorter(getPropertyValues('name', this.budgets)) as string[];
             for (let i = 0; i < budgetNames.length; i++) {
                 const budgetAmount: BudgetAmount = budgetAmounts
                     .find((ba: BudgetAmount) => ba.budgetName === budgetNames[i]) as BudgetAmount;
@@ -475,8 +478,8 @@ export default class InvestmentEditor extends Vue {
         });
     }
 
-    syncInvestmentPlanWithBudgets(budgets: Budget[]) {
-        const allBudgetAmounts: BudgetAmount[] = budgets
+    syncInvestmentPlanWithBudgets() {
+        const allBudgetAmounts: BudgetAmount[] = this.budgets
             .flatMap((budget: Budget) => budget.budgetAmounts);
         const allBudgetYears: number[] = sorter(getPropertyValues('year', allBudgetAmounts)) as number[];
 
@@ -530,7 +533,6 @@ export default class InvestmentEditor extends Vue {
 
         this.budgets = clone(budgets);
     }
-
 
     onRemoveLatestBudgetYear() {
         const latestYear: number = this.getLatestYear();
@@ -665,8 +667,6 @@ export default class InvestmentEditor extends Vue {
     }
 
     onUpsertInvestment() {
-        this.selectedGridRows = [];
-
         const investmentPlan: InvestmentPlan = clone(this.investmentPlan);
 
         this.upsertInvestmentAction({
@@ -681,12 +681,10 @@ export default class InvestmentEditor extends Vue {
             },
             scenarioId: this.selectedScenarioId,
         })
-        .then(() => this.librarySelectItemValue = null);
+            .then(() => this.librarySelectItemValue = null);
     }
 
     onUpsertBudgetLibrary() {
-        this.selectedGridRows = [];
-
         const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
 
         this.upsertBudgetLibraryAction({ ...budgetLibrary, budgets: clone(this.budgets) });
@@ -731,7 +729,8 @@ export default class InvestmentEditor extends Vue {
     disableCrudButton() {
         const allBudgetDataIsValid: boolean = this.budgets.every((budget: Budget) => {
             return budget.budgetAmounts
-                .every((budgetAmount: BudgetAmount) => this.rules['generalRules'].valueIsNotEmpty(budgetAmount.year) &&
+                .every((budgetAmount: BudgetAmount) =>
+                    this.rules['generalRules'].valueIsNotEmpty(budgetAmount.year) === true &&
                     this.rules['generalRules'].valueIsNotEmpty(budgetAmount.value) === true);
         });
 
@@ -747,7 +746,7 @@ export default class InvestmentEditor extends Vue {
             return !(allBudgetDataIsValid && allInvestmentPlanDataIsValid);
         }
 
-        return true;
+        return !allBudgetDataIsValid;
     }
 }
 </script>

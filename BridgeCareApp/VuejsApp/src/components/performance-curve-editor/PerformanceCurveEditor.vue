@@ -289,32 +289,17 @@
             </v-layout>
         </v-flex>
         <v-flex xs12>
-            <v-layout
-                justify-end
-                row
-                v-show="hasSelectedLibrary || hasScenario"
-            >
-                <v-btn
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
-                    @click="
-                        onUpsertScenarioPerformanceCurves(selectedScenarioId)
-                    "
-                    class="ara-blue-bg white--text"
-                    v-show="hasScenario"
-                >
+            <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
+                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                       @click='onUpsertScenarioPerformanceCurves'
+                       class='ara-blue-bg white--text'
+                       v-show='hasScenario'>
                     Save
                 </v-btn>
-                <v-btn
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
-                    @click="
-                        onUpsertPerformanceCurveLibrary(
-                            selectedPerformanceCurveLibrary,
-                            uuidNIL,
-                        )
-                    "
-                    class="ara-blue-bg white--text"
-                    v-show="!hasScenario"
-                >
+                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                       @click='onUpsertPerformanceCurveLibrary'
+                       class='ara-blue-bg white--text'
+                       v-show='!hasScenario'>
                     Update Library
                 </v-btn>
                 <v-btn
@@ -590,25 +575,14 @@ export default class PerformanceCurveEditor extends Vue {
         this.hasSelectedLibrary =
             this.selectedPerformanceCurveLibrary.id !== this.uuidNIL;
 
-        if (
-            this.currentUrl.indexOf(ScenarioRoutePaths.PerformanceCurve) &&
-            this.hasSelectedLibrary
-        ) {
-            this.performanceCurveGridData = this.selectedPerformanceCurveLibrary.performanceCurves.map(
-                (performanceCurve: PerformanceCurve) => ({
+        if (this.hasScenario) {
+            this.performanceCurveGridData = this.selectedPerformanceCurveLibrary.performanceCurves
+                .map((performanceCurve: PerformanceCurve) => ({
                     ...performanceCurve,
                     id: getNewGuid(),
-                    equation: hasValue(performanceCurve.equation)
-                        ? { ...performanceCurve.equation, id: getNewGuid() }
-                        : clone(emptyEquation),
-                }),
-            );
-        } else if (
-            !this.currentUrl.indexOf(ScenarioRoutePaths.PerformanceCurve)
-        ) {
-            this.performanceCurveGridData = clone(
-                this.selectedPerformanceCurveLibrary.performanceCurves,
-            );
+                }));
+        } else {
+            this.performanceCurveGridData = clone(this.selectedPerformanceCurveLibrary.performanceCurves);
         }
     }
 
@@ -620,7 +594,7 @@ export default class PerformanceCurveEditor extends Vue {
     @Watch('stateScenarioPerformanceCurves')
     onStateScenarioPerformanceCurvesChanged() {
         if (
-            this.currentUrl.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1
+            this.hasScenario
         ) {
             this.performanceCurveGridData = clone(
                 this.stateScenarioPerformanceCurves,
@@ -630,14 +604,11 @@ export default class PerformanceCurveEditor extends Vue {
 
     @Watch('performanceCurveGridData')
     onPerformanceCurveGridDataChanged() {
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore(
-            'performance-curves',
-            this.performanceCurveGridData,
-            this.currentUrl.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1
-                ? this.stateScenarioPerformanceCurves
-                : this.stateSelectedPerformanceCurveLibrary.performanceCurves,
-        );
-
+        const hasUnsavedChanges: boolean = this.hasScenario
+            ? hasUnsavedChangesCore('', this.performanceCurveGridData, this.stateScenarioPerformanceCurves)
+            : hasUnsavedChangesCore('',
+                {...clone(this.selectedPerformanceCurveLibrary), performanceCurves: clone(this.performanceCurveGridData)},
+                this.stateSelectedPerformanceCurveLibrary);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -751,22 +722,11 @@ export default class PerformanceCurveEditor extends Vue {
         if (!isNil(this.selectedPerformanceCurve)) {
             this.hasSelectedPerformanceCurve = true;
 
-            let fromScenario = false;
-            let criterionForLibrary = false;
-            if (
-                this.currentUrl.indexOf(ScenarioRoutePaths.PerformanceCurve) !==
-                -1
-            ) {
-                fromScenario = true;
-            } else {
-                criterionForLibrary = true;
-            }
-
             this.criterionLibraryEditorDialogData = {
                 showDialog: true,
                 libraryId: this.selectedPerformanceCurve.criterionLibrary.id,
-                isCallFromScenario: fromScenario,
-                isCriterionForLibrary: criterionForLibrary,
+                isCallFromScenario: this.hasScenario,
+                isCriterionForLibrary: !this.hasScenario
             };
         }
     }
@@ -821,13 +781,8 @@ export default class PerformanceCurveEditor extends Vue {
     onDiscardChanges() {
         this.librarySelectItemValue = null;
         setTimeout(() => {
-            if (
-                this.currentUrl.indexOf(ScenarioRoutePaths.PerformanceCurve) !==
-                -1
-            ) {
-                this.performanceCurveGridData = clone(
-                    this.stateScenarioPerformanceCurves,
-                );
+            if (this.hasScenario) {
+                this.performanceCurveGridData = clone(this.stateScenarioPerformanceCurves);
             }
         });
     }

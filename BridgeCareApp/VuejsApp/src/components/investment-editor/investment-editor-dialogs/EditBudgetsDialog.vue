@@ -155,7 +155,7 @@ export default class EditBudgetsDialog extends Vue {
             showDialog: true,
             libraryId: budget.criterionLibrary.id,
             isCallFromScenario: this.dialogData.scenarioId !== this.uuidNIL,
-            isCriterionForLibrary: this.dialogData.scenarioId == this.uuidNIL
+            isCriterionForLibrary: this.dialogData.scenarioId === this.uuidNIL
         };
     }
 

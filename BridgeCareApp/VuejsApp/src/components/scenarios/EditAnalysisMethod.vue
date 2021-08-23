@@ -231,7 +231,7 @@ export default class EditAnalysisMethod extends Vue {
       showDialog: true,
       libraryId: this.analysisMethod.criterionLibrary.id,
       isCallFromScenario: true,
-      isCriterionForLibrary: false
+        isCriterionForLibrary: false
     };
   }
 

@@ -68,12 +68,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
-        private void CreateInvestmentPlanCashFlowRules(SimulationEntity simulationEntity, List<CashFlowRule> cashFlowRules)
-        {
-            _unitOfWork.CashFlowRuleRepo.CreateCashFlowRuleLibrary($"{simulationEntity.Name} Simulation Cash Flow Rule Library", simulationEntity.Id);
-
+        private void CreateInvestmentPlanCashFlowRules(SimulationEntity simulationEntity, List<CashFlowRule> cashFlowRules) =>
             _unitOfWork.CashFlowRuleRepo.CreateCashFlowRules(cashFlowRules, simulationEntity.Id);
-        }
 
         public void GetSimulationInvestmentPlan(Simulation simulation)
         {
@@ -91,16 +87,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.CashFlowRuleLibrarySimulationJoin)
-                .ThenInclude(_ => _.CashFlowRuleLibrary)
                 .ThenInclude(_ => _.CashFlowRules)
-                .ThenInclude(_ => _.CriterionLibraryCashFlowRuleJoin)
+                .ThenInclude(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.CashFlowRuleLibrarySimulationJoin)
-                .ThenInclude(_ => _.CashFlowRuleLibrary)
                 .ThenInclude(_ => _.CashFlowRules)
-                .ThenInclude(_ => _.CashFlowDistributionRules)
+                .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
                 .AsNoTracking()
                 .Single(_ => _.Simulation.Id == simulation.Id)
                 .FillSimulationInvestmentPlan(simulation);

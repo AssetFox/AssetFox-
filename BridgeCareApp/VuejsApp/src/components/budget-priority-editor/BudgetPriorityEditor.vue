@@ -127,12 +127,12 @@
         </v-flex>
         <v-flex xs12>
             <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn @click='onUpsertScenarioBudgetPriorities()'
+                <v-btn @click='onUpsertScenarioBudgetPriorities'
                        class='ara-blue-bg white--text'
                        v-show='hasScenario' :disabled='disableCrudButtons() || !hasUnsavedChanges'>
                     Save
                 </v-btn>
-                <v-btn @click='onUpsertBudgetPriorityLibrary(selectedBudgetPriorityLibrary, uuidNIL)'
+                <v-btn @click='onUpsertBudgetPriorityLibrary'
                        class='ara-blue-bg white--text'
                        v-show='!hasScenario' :disabled='disableCrudButtons() || !hasUnsavedChanges'>
                     Update Library
@@ -299,7 +299,12 @@ export default class BudgetPriorityEditor extends Vue {
     onSelectedPriorityLibraryChanged() {
         this.hasSelectedLibrary = this.selectedBudgetPriorityLibrary.id !== this.uuidNIL;
 
-        if (this.hasSelectedLibrary) {
+        if (this.hasScenario) {
+            this.budgetPriorities = this.selectedBudgetPriorityLibrary.budgetPriorities.map((priority: BudgetPriority) => ({
+                ...priority,
+                id: getNewGuid(),
+            }));
+        } else {
             this.budgetPriorities = clone(this.selectedBudgetPriorityLibrary.budgetPriorities);
         }
     }
@@ -321,11 +326,11 @@ export default class BudgetPriorityEditor extends Vue {
             return;
         }
 
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore(
-            'budget-priority',
-            this.budgetPriorities,
-            this.hasScenario ? this.stateScenarioBudgetPriorities : this.stateSelectedBudgetPriorityLibrary.budgetPriorities,
-        );
+        const hasUnsavedChanges: boolean = this.hasScenario
+            ? hasUnsavedChangesCore('', this.budgetPriorities, this.stateScenarioBudgetPriorities)
+            : hasUnsavedChangesCore('',
+                {...clone(this.selectedBudgetPriorityLibrary), budgetPriorities: clone(this.budgetPriorities)},
+                this.stateSelectedBudgetPriorityLibrary);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
 
         this.setGridCriteriaColumnWidth();
@@ -560,7 +565,7 @@ export default class BudgetPriorityEditor extends Vue {
         this.librarySelectItemValue = null;
         setTimeout(() => {
             if (this.hasScenario) {
-                this.budgetPriorities = clone(this.stateBudgetPriorities);
+                this.budgetPriorities = clone(this.stateScenarioBudgetPriorities);
             }
         });
     }

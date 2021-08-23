@@ -303,7 +303,7 @@
                     Update Library
                 </v-btn>
                 <v-btn
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :disabled="disableCrudButton()"
                     @click="onShowCreatePerformanceCurveLibraryDialog(true)"
                     class="ara-blue-bg white--text"
                 >
@@ -321,7 +321,7 @@
                     :disabled="!hasUnsavedChanges"
                     @click="onDiscardChanges"
                     class="ara-orange-bg white--text"
-                    v-show="hasScenario"
+                    v-show="hasSelectedLibrary || hasScenario"
                 >
                     Discard Changes
                 </v-btn>
@@ -826,12 +826,10 @@ export default class PerformanceCurveEditor extends Vue {
                 this.rules['generalRules'].valueIsNotEmpty(
                     this.selectedPerformanceCurveLibrary.name,
                 ) === true &&
-                dataIsValid &&
-                this.hasUnsavedChanges
-            );
+                dataIsValid);
         }
 
-        return !(dataIsValid && this.hasUnsavedChanges);
+        return !dataIsValid;
     }
 }
 </script>

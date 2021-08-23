@@ -76,17 +76,11 @@ export default class CreateTreatmentLibraryDialog extends Vue {
                     id: getNewGuid(),
                     costs: treatment.costs.map((cost: TreatmentCost) => {
                         cost.id = getNewGuid();
-                        if (cost.equation.id !== getBlankGuid()) {
-                            cost.equation.id = getNewGuid();
-                        }
                         return cost;
                     }),
                     consequences: treatment.consequences.map(
                         (consequence: TreatmentConsequence) => {
                             consequence.id = getNewGuid();
-                            if (consequence.equation.id !== getBlankGuid()) {
-                                consequence.equation.id = getNewGuid();
-                            }
                             return consequence;
                         },
                     ),

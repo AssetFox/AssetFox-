@@ -163,29 +163,21 @@
                 </v-data-table>
             </div>
         </v-flex>
-        <v-flex xs12>
+        <v-flex xs12 v-show="hasSelectedRemainingLifeLimitLibrary || hasScenario">
             <v-layout justify-end row>
                 <v-btn
-                    :disabled="disableCrudButton()"
-                    @click="
-                        onSaveScenarioRemainingLifeLimit(selectedScenarioId)
-                    "
+                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    @click="onSaveScenarioRemainingLifeLimit(selectedScenarioId)"
                     class="ara-blue-bg white--text"
                     v-show="hasScenario"
                 >
                     Save
                 </v-btn>
                 <v-btn
-                    :disabled="disableCrudButton()"
-                    @click="
-                        onUpsertRemainingLifeLimitLibrary(
-                            selectedRemainingLifeLimitLibrary,
-                        )
-                    "
+                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    @click="onUpsertRemainingLifeLimitLibrary(selectedRemainingLifeLimitLibrary)"
                     class="ara-blue-bg white--text"
-                    v-show="
-                        hasSelectedRemainingLifeLimitLibrary || !hasScenario
-                    "
+                    v-show="!hasScenario"
                 >
                     Update Library
                 </v-btn>
@@ -204,7 +196,7 @@
                 >
                     Delete Library
                 </v-btn>
-                <v-btn
+                <v-btn :disabled='!hasUnsavedChanges'
                     @click="onDiscardChanges"
                     class="ara-orange-bg white--text"
                     v-show="hasSelectedRemainingLifeLimitLibrary || hasScenario"
@@ -653,12 +645,10 @@ export default class RemainingLifeLimitEditor extends Vue {
                 this.rules['generalRules'].valueIsNotEmpty(
                     this.selectedRemainingLifeLimitLibrary.name,
                 ) === true &&
-                dataIsValid &&
-                this.hasUnsavedChanges
-            );
+                dataIsValid);
         }
 
-        return !(dataIsValid && this.hasUnsavedChanges);
+        return !dataIsValid;
     }
 }
 </script>

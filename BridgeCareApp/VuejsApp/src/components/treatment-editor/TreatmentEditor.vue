@@ -200,7 +200,7 @@
                 <v-btn
                     @click='onShowCreateTreatmentLibraryDialog(true)'
                     class='ara-blue-bg white--text'
-                    :disabled='disableCrudButton() || !hasUnsavedChanges'
+                    :disabled='disableCrudButton()'
                 >
                     Create as New Library
                 </v-btn>
@@ -215,7 +215,7 @@
                 <v-btn :disabled='!hasUnsavedChanges'
                     @click='onDiscardChanges'
                     class='ara-orange-bg white--text'
-                    v-show='hasScenario'
+                    v-show='hasSelectedLibrary || hasScenario'
                 >
                     Discard Changes
                 </v-btn>

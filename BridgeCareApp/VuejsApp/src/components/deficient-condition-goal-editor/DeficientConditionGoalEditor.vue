@@ -296,7 +296,7 @@
                 <v-btn
                     @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     class="ara-blue-bg white--text"
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :disabled="disableCrudButton()"
                 >
                     Create as New Library
                 </v-btn>
@@ -311,7 +311,7 @@
                 <v-btn
                     @click="onDiscardChanges"
                     class="ara-orange-bg white--text"
-                    v-show="hasScenario"
+                    v-show="hasSelectedLibrary || hasScenario"
                     :disabled="!hasUnsavedChanges"
                 >
                     Discard Changes

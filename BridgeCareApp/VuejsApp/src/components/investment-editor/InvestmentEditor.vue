@@ -106,7 +106,7 @@
                 </v-flex>
             </v-layout>
             <v-layout justify-center>
-                <v-flex xs8>
+                <v-flex xs10>
                     <v-card>
                         <v-data-table :headers='budgetYearsGridHeaders' :items='budgetYearsGridData'
                                       class='elevation-1 v-table__overflow' item-key='year'>

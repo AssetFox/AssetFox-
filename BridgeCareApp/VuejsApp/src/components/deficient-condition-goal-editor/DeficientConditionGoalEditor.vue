@@ -267,9 +267,8 @@
                         no-resize
                         outline
                         rows="4"
-                        v-model="
-                            selectedDeficientConditionGoalLibrary.description
-                        "
+                        v-model="selectedDeficientConditionGoalLibrary.description"
+                        @input='selectedDeficientConditionGoalLibrary = {...selectedDeficientConditionGoalLibrary, description: $event}'
                     >
                     </v-textarea>
                 </v-flex>
@@ -296,7 +295,7 @@
                 <v-btn
                     @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     class="ara-blue-bg white--text"
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :disabled="disableCrudButton()"
                 >
                     Create as New Library
                 </v-btn>
@@ -311,7 +310,7 @@
                 <v-btn
                     @click="onDiscardChanges"
                     class="ara-orange-bg white--text"
-                    v-show="hasScenario"
+                    v-show="hasSelectedLibrary || hasScenario"
                     :disabled="!hasUnsavedChanges"
                 >
                     Discard Changes

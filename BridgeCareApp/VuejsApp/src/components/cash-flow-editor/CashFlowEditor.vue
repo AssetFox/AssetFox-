@@ -426,6 +426,7 @@
                         outline
                         rows="4"
                         v-model="selectedCashFlowRuleLibrary.description"
+                        @input='selectedCashFlowRuleLibrary = {...selectedCashFlowRuleLibrary, description: $event}'
                     >
                     </v-textarea>
                 </v-flex>
@@ -454,7 +455,7 @@
                     Update Library
                 </v-btn>
                 <v-btn
-                    :disabled="disableSubmitAction() || !hasUnsavedChanges"
+                    :disabled="disableSubmitAction()"
                     @click="onShowCreateCashFlowRuleLibraryDialog(true)"
                     class="ara-blue-bg white--text"
                 >
@@ -471,7 +472,7 @@
                 <v-btn
                     @click="onDiscardChanges"
                     class="ara-orange-bg white--text"
-                    v-show="hasScenario"
+                    v-show="hasSelectedLibrary || hasScenario"
                     :disabled="!hasUnsavedChanges"
                 >
                     Discard Changes

@@ -120,7 +120,8 @@
             <v-layout justify-center>
                 <v-flex xs6>
                     <v-textarea label='Description' no-resize outline rows='4'
-                                v-model='selectedBudgetPriorityLibrary.description'>
+                                v-model='selectedBudgetPriorityLibrary.description'
+                                @input='selectedBudgetPriorityLibrary = {...selectedBudgetPriorityLibrary, description: $event}'>
                     </v-textarea>
                 </v-flex>
             </v-layout>
@@ -138,7 +139,7 @@
                     Update Library
                 </v-btn>
                 <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ara-blue-bg white--text'
-                       :disabled='disableCrudButtons() || !hasUnsavedChanges'>
+                       :disabled='disableCrudButtons()'>
                     Create as New Library
                 </v-btn>
                 <v-btn @click='onShowConfirmDeleteAlert' class='ara-orange-bg white--text'
@@ -146,7 +147,7 @@
                     Delete Library
                 </v-btn>
                 <v-btn @click='onDiscardChanges' class='ara-orange-bg white--text'
-                       v-show='hasScenario' :disabled='!hasUnsavedChanges'>
+                       v-show='hasSelectedLibrary || hasScenario' :disabled='!hasUnsavedChanges'>
                     Discard Changes
                 </v-btn>
             </v-layout>

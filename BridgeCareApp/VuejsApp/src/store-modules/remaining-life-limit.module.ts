@@ -139,7 +139,7 @@ const actions = {
             }
         });
     },
-    async getScenariotRemainingLifeLimit({ commit }: any, scenarioId: string) {
+    async getScenarioRemainingLifeLimits({ commit }: any, scenarioId: string) {
         await RemainingLifeLimitService.getScenarioRemainingLifeLimit(
             scenarioId,
         ).then((response: AxiosResponse) => {
@@ -151,7 +151,7 @@ const actions = {
             }
         });
     },
-    async upsertScenarioRemainingLifeLimit(
+    async upsertScenarioRemainingLifeLimits(
         { dispatch, commit }: any,
         payload: any,
     ) {

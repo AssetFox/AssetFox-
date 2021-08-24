@@ -471,7 +471,7 @@ export default class InvestmentEditor extends Vue {
                 const budgetAmount: BudgetAmount = budgetAmounts
                     .find((ba: BudgetAmount) => ba.budgetName === budgetNames[i]) as BudgetAmount;
 
-                gridDataRow[budgetNames[i]] = hasValue(budgetAmount) ? budgetAmount.value : null;
+                gridDataRow[budgetNames[i]] = hasValue(budgetAmount) ? budgetAmount.value : 0;
             }
 
             this.budgetYearsGridData.push(gridDataRow);

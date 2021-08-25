@@ -106,7 +106,7 @@
                 </v-flex>
             </v-layout>
             <v-layout justify-center>
-                <v-flex xs8>
+                <v-flex xs10>
                     <v-card>
                         <v-data-table :headers='budgetYearsGridHeaders' :items='budgetYearsGridData'
                                       class='elevation-1 v-table__overflow' item-key='year'>
@@ -472,7 +472,7 @@ export default class InvestmentEditor extends Vue {
                 const budgetAmount: BudgetAmount = budgetAmounts
                     .find((ba: BudgetAmount) => ba.budgetName === budgetNames[i]) as BudgetAmount;
 
-                gridDataRow[budgetNames[i]] = hasValue(budgetAmount) ? budgetAmount.value : null;
+                gridDataRow[budgetNames[i]] = hasValue(budgetAmount) ? budgetAmount.value : 0;
             }
 
             this.budgetYearsGridData.push(gridDataRow);

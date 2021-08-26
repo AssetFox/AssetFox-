@@ -1,22 +1,22 @@
 <template>
     <v-layout column>
-        <v-layout column>
-            <form class="ara-light-gray-bg" id="file-form" v-show="dragAndDropCapable">
+        <v-layout column>           
+            <div id="app" class="ara-light-gray-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
                 <v-layout align-center fill-height justify-center>
-                    <div>Drag & Drop File Here</div>
-                </v-layout>
-            </form>
+                    <div class="drag-drop-area">Drag & Drop File Here</div>
+                </v-layout>                
+            </div>
             <v-flex xs12>
-                <v-layout justify-start>
-                    <v-btn @click="fileSelect.click()" class="ara-blue-bg white--text">
+                <v-layout justify-start>                  
+                    <v-btn @click="chooseFiles()" class="ara-blue-bg white--text">
                         Select File
                     </v-btn>
                 </v-layout>
             </v-flex>
-            <div v-show="false">
-                <input @change="onSelect($event.target.files)" id="file-select" type="file"/>
+            <div v-show="true">
+                <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden/>
             </div>
-        </v-layout>
+        </v-layout>        
         <div class="files-table">
             <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow"
                           hide-actions>
@@ -46,7 +46,7 @@ import {hasValue} from '@/shared/utils/has-value-util';
 import {getPropertyValues} from '@/shared/utils/getter-utils';
 import {clone, prop} from 'ramda';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
-import { formatBytes } from '@/shared/utils/math-utils.ts';
+import { formatBytes } from '@/shared/utils/math-utils';
 
 @Component
 export default class FileSelector extends Vue {
@@ -54,65 +54,43 @@ export default class FileSelector extends Vue {
 
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
-
-    dragAndDropCapable: boolean = false;
-    dragEvents: string[] = ['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'];
-    fileForm: HTMLFormElement = {} as HTMLFormElement;
+    
     fileSelect: HTMLInputElement = {} as HTMLInputElement;
     tableHeaders: DataTableHeader[] = [
         {text: 'Selected File', value: 'name', align: 'left', sortable: false, class: '', width: '150px'},
         {text: '', value: '', align: 'center', sortable: false, class: '', width: '25px'}
     ];
     files: File[] = [];
-    file: File | null = null;
+    file: File | null = null;   
+
+    chooseFiles(){
+        if(document != null)
+        {
+            document.getElementById("file-select")!.click();
+        }
+    }
 
     @Watch('file')
-    onFileChanged() {
-        this.files = hasValue(this.file) ? [this.file as File] : [];
+    onFileChanged() {        
+        this.files = hasValue(this.file) ? [this.file as File] : [];                                   
         this.$emit('submit', this.file);
+        (<HTMLInputElement>document.getElementById("file-select")!).value = '';
     }
 
     @Watch('closed')
     onClose() {
         if (this.closed) {
             this.files = [];
+            this.file = null;
+            this.fileSelect.value = '';
+            (<HTMLInputElement>document.getElementById("file-select")!).value = '';
         }
     }
 
     mounted() {
-        // calculate if user's browser is drag-and-drop capable
-        this.dragAndDropCapable = this.isBrowserDragAndDropCapable();
-
-        if (this.dragAndDropCapable) {
-            // couple fileForm object #file-form form element
-            this.fileForm = document.getElementById('file-form') as HTMLFormElement;
-            // add event listeners to #file-form form element for all drag/drop events
-            this.dragEvents.forEach((dragEvent: string) => {
-                this.fileForm.addEventListener(dragEvent, (e: any) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // add onSelect callback function if event is 'drop'
-                    if (dragEvent === 'drop') {
-                        this.onSelect(e.dataTransfer.files);
-                    }
-                });
-            });
-        }
-
         // couple fileSelect object with #file-select input element
-        this.fileSelect = document.getElementById('file-select') as HTMLInputElement;
-    }
-
-    /**
-     * Determines whether or not the user's current browser allows drag & drop functionality
-     */
-    isBrowserDragAndDropCapable() {
-        const div = document.createElement('div');
-
-        return ('draggable' in div || ('ondragstart' in div && 'ondrop' in div)) &&
-            'FormData' in window &&
-            'FileReader' in window;
-    }
+        this.fileSelect = document.getElementById('file-select') as HTMLInputElement;        
+    }    
 
     /**
      * File input change event handler
@@ -125,7 +103,7 @@ export default class FileSelector extends Vue {
                 this.setErrorMessageAction({message: 'Only .xlsx file types are allowed'});
             }
 
-            this.file = clone(fileList[0]);
+            this.file = clone(fileList[0]);          
         }
 
         this.fileSelect.value = '';
@@ -141,13 +119,14 @@ export default class FileSelector extends Vue {
 </script>
 
 <style>
-form {
-    height: 100px;
-    border-radius: 4px;
-}
-
 .files-table {
     height: 125px;
     overflow-y: auto;
+}
+
+.drag-drop-area{
+    height: 100px;
+    border-radius: 4px;
+    padding-top: 40px;
 }
 </style>

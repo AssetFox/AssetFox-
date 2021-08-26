@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == dto.SimulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {dto.SimulationId}.");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             _unitOfWork.Context.Upsert(dto.ToEntity(), _ => _.SimulationId == dto.SimulationId,

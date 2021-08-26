@@ -1,6 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -27,23 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual InvestmentPlanEntity InvestmentPlan { get; set; }
 
-        public virtual BudgetLibrarySimulationEntity BudgetLibrarySimulationJoin { get; set; }
-
-        public virtual BudgetPriorityLibrarySimulationEntity BudgetPriorityLibrarySimulationJoin { get; set; }
-
-        public virtual CashFlowRuleLibrarySimulationEntity CashFlowRuleLibrarySimulationJoin { get; set; }
-
-        public virtual DeficientConditionGoalLibrarySimulationEntity DeficientConditionGoalLibrarySimulationJoin { get; set; }
-
-        public virtual PerformanceCurveLibrarySimulationEntity PerformanceCurveLibrarySimulationJoin { get; set; }
-
-        public virtual RemainingLifeLimitLibrarySimulationEntity RemainingLifeLimitLibrarySimulationJoin { get; set; }
-
         public virtual SimulationOutputEntity SimulationOutput { get; set; }
-
-        public virtual TargetConditionGoalLibrarySimulationEntity TargetConditionGoalLibrarySimulationJoin { get; set; }
-
-        public virtual TreatmentLibrarySimulationEntity TreatmentLibrarySimulationJoin { get; set; }
 
         public virtual SimulationAnalysisDetailEntity SimulationAnalysisDetail { get; set; }
 
@@ -56,5 +51,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
 
         public virtual ICollection<SimulationUserEntity> SimulationUserJoins { get; set; }
+
+        public virtual ICollection<ScenarioPerformanceCurveEntity> PerformanceCurves { get; set; }
+
+
+        public virtual ICollection<ScenarioSelectableTreatmentEntity> SelectableTreatments { get; set; }
+
+        public virtual ICollection<ScenarioTargetConditionGoalEntity> ScenarioTargetConditionalGoals { get; set; }
+
+        public virtual ICollection<ScenarioBudgetEntity> Budgets { get; set; }
+
+        public virtual ICollection<ScenarioDeficientConditionGoalEntity> ScenarioDeficientConditionGoals { get; set; }
+
+        public virtual ICollection<ScenarioBudgetPriorityEntity> BudgetPriorities { get; set; }
+
+        public virtual ICollection<ScenarioRemainingLifeLimitEntity> RemainingLifeLimits { get; set; }
+
+        public virtual ICollection<ScenarioCashFlowRuleEntity> CashFlowRules { get; set; }
     }
 }

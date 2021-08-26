@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
@@ -85,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 // Act
                 var result = await _controller
-                    .UpsertRemainingLifeLimitLibrary(Guid.Empty, TestRemainingLifeLimitLibrary.ToDto());
+                    .UpsertRemainingLifeLimitLibrary(TestRemainingLifeLimitLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result);
@@ -164,8 +165,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     _testHelper.TestCriterionLibrary.ToDto();
 
                 // Act
-                await _controller.UpsertRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
-                        dto);
+                await _controller.UpsertRemainingLifeLimitLibrary(dto);
 
                 // Assert
                 var timer = new Timer {Interval = 5000};
@@ -205,8 +205,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
-                await _controller.UpsertRemainingLifeLimitLibrary(_testHelper.TestSimulation.Id,
-                    remainingLifeLimitLibraryDTO);
+                await _controller.UpsertRemainingLifeLimitLibrary(remainingLifeLimitLibraryDTO);
 
                 // Act
                 var result = await _controller.DeleteRemainingLifeLimitLibrary(RemainingLifeLimitLibraryId);
@@ -216,8 +215,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
                 Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == RemainingLifeLimitLibraryId));
                 Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimit.Any(_ => _.Id == RemainingLifeLimitId));
-                Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimitLibrarySimulation.Any(_ =>
-                    _.RemainingLifeLimitLibraryId == RemainingLifeLimitLibraryId));
                 Assert.True(
                     !_testHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any(_ =>
                         _.RemainingLifeLimitId == RemainingLifeLimitId));

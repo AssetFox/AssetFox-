@@ -68,7 +68,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column, currentCell.Row + 3, currentCell.Column + 1]);
 
             worksheet.Cells[currentCell.Row + 2, currentCell.Column + 3].Value = "Simulation Last Run:";
-            worksheet.Cells[currentCell.Row + 2, currentCell.Column + 4].Value = "10/25/2019";
+            worksheet.Cells[currentCell.Row + 2, currentCell.Column + 4].Value = lastRun.ToShortDateString();
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column + 3, currentCell.Row + 2, currentCell.Column + 4]);
 
             currentCell.Row += 5; // moving on to the "NHS" block
@@ -352,7 +352,7 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
                 worksheet.Row(startingRow).Height = 33;
                 startingRow++;
             }
-            ExcelHelper.ApplyBorder(worksheet.Cells[rowNo + 2, colNo, startingRow - 1, worksheet.Dimension.End.Column]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[rowNo + 2, colNo, startingRow, worksheet.Dimension.End.Column]);
 
             currentCell.Row = startingRow;
             return currentCell;
@@ -480,8 +480,11 @@ namespace BridgeCareCore.Services.SummaryReport.Parameters
                 nextBudget = 0;
             }
             ExcelHelper.MergeCells(worksheet, 38, 1, 39, 1);
-            ExcelHelper.MergeCells(worksheet, 38, 2, 38, simulation.InvestmentPlan.Budgets.Count + 1);
-            ExcelHelper.ApplyBorder(worksheet.Cells[38, 1, startingRowInvestment - 1, simulation.InvestmentPlan.Budgets.Count + 1]);
+            if(simulation.InvestmentPlan.Budgets.Count > 0)
+            {
+                ExcelHelper.MergeCells(worksheet, 38, 2, 38, simulation.InvestmentPlan.Budgets.Count + 1);
+                ExcelHelper.ApplyBorder(worksheet.Cells[38, 1, startingRowInvestment - 1, simulation.InvestmentPlan.Budgets.Count + 1]);
+            }
             FillBudgetCriteria(worksheet, startingRowInvestment, simulation);
         }
 

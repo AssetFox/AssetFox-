@@ -96,7 +96,7 @@ namespace BridgeCareCore.Controllers
             void DeletePermitted(Guid simulationId)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                UnitOfWork.CommittedProjectRepo.DeleteCommittedProjects(simulationId);
+                DeleteAny(simulationId);
             }
 
             return new Dictionary<string, CommittedProjectDeleteMethod>

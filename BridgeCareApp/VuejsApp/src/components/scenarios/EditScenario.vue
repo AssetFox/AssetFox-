@@ -4,9 +4,11 @@
             <v-layout fixed justify-space-between>
                 <div>
                     <v-tabs>
-                        <v-tab :key='navigationTab.tabName'
-                               :to='navigationTab.navigation'
-                               v-for='navigationTab in visibleNavigationTabs()'>
+                        <v-tab
+                            :key="navigationTab.tabName"
+                            :to="navigationTab.navigation"
+                            v-for="navigationTab in visibleNavigationTabs()"
+                        >
                             {{ navigationTab.tabName }}
                             <v-icon right>{{ navigationTab.tabIcon }}</v-icon>
                         </v-tab>
@@ -14,41 +16,67 @@
                 </div>
                 <div>
                     <v-layout>
-                        <div v-if='$screen.xxl && !$screen.freeRealEstate'>
+                        <div v-if="$screen.xxl && !$screen.freeRealEstate">
                             <v-menu>
-                                <template slot='activator'>
+                                <template slot="activator">
                                     <v-btn icon>
                                         <v-icon>fas fa-bars</v-icon>
                                     </v-btn>
                                 </template>
                                 <v-list>
-                                    <v-list-tile @click='onShowRunSimulationAlert'>
+                                    <v-list-tile
+                                        @click="onShowRunSimulationAlert"
+                                    >
                                         <v-list-tile-action>
                                             <v-icon>fas fa-play</v-icon>
                                         </v-list-tile-action>
-                                        <v-list-tile-title>Run Scenario</v-list-tile-title>
+                                        <v-list-tile-title
+                                            >Run Scenario</v-list-tile-title
+                                        >
                                     </v-list-tile>
-                                    <v-list-tile @click='showImportExportCommittedProjectsDialog = true'>
+                                    <v-list-tile
+                                        @click="
+                                            showImportExportCommittedProjectsDialog = true
+                                        "
+                                    >
                                         <v-list-tile-action>
-                                            <v-icon>fas fa-cloud-upload-alt</v-icon>
+                                            <v-icon
+                                                >fas fa-cloud-upload-alt</v-icon
+                                            >
                                         </v-list-tile-action>
-                                        <v-list-tile-title>Committed Projects</v-list-tile-title>
+                                        <v-list-tile-title
+                                            >Committed
+                                            Projects</v-list-tile-title
+                                        >
                                     </v-list-tile>
                                 </v-list>
                             </v-menu>
                         </div>
-                        <div class='edit-scenario-btns-div' v-if='$screen.freeRealEstate'>
+                        <div
+                            class="edit-scenario-btns-div"
+                            v-if="$screen.freeRealEstate"
+                        >
                             <div>
-                                <v-btn @click='onShowRunSimulationAlert'
-                                       class='ara-blue-bg white--text'>Run Scenario
-                                    <v-icon class='white--text' right>fas fa-play</v-icon>
+                                <v-btn
+                                    @click="onShowRunSimulationAlert"
+                                    class="ara-blue-bg white--text"
+                                    >Run Scenario
+                                    <v-icon class="white--text" right
+                                        >fas fa-play</v-icon
+                                    >
                                 </v-btn>
                             </div>
                             <div>
-                                <v-btn @click='showImportExportCommittedProjectsDialog = true'
-                                       class='ara-blue-bg white--text'>
+                                <v-btn
+                                    @click="
+                                        showImportExportCommittedProjectsDialog = true
+                                    "
+                                    class="ara-blue-bg white--text"
+                                >
                                     Committed Projects
-                                    <v-icon class='white--text' right>fas fa-cloud-upload-alt</v-icon>
+                                    <v-icon class="white--text" right
+                                        >fas fa-cloud-upload-alt</v-icon
+                                    >
                                 </v-btn>
                             </div>
                         </div>
@@ -63,24 +91,28 @@
             </v-container>
         </v-flex>
 
-        <Alert :dialogData='alertData' @submit='onSubmitAlertResult' />
+        <Alert :dialogData="alertData" @submit="onSubmitAlertResult" />
 
-        <Alert :dialogData='alertDataForDeletingCommittedProjects' @submit='onDeleteCommittedProjectsSubmit' />
+        <Alert
+            :dialogData="alertDataForDeletingCommittedProjects"
+            @submit="onDeleteCommittedProjectsSubmit"
+        />
 
-        <CommittedProjectsFileUploaderDialog :showDialog='showImportExportCommittedProjectsDialog'
-                                             @submit='onSubmitImportExportCommittedProjectsDialogResult'
-                                             @delete='onDeleteCommittedProjects' />
+        <CommittedProjectsFileUploaderDialog
+            :showDialog="showImportExportCommittedProjectsDialog"
+            @submit="onSubmitImportExportCommittedProjectsDialogResult"
+            @delete="onDeleteCommittedProjects"
+        />
     </v-layout>
 </template>
 
-<script lang='ts'>
+<script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
-import ImportExportCommittedProjectsDialog
-    from '@/components/scenarios/scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
+import ImportExportCommittedProjectsDialog from '@/components/scenarios/scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
 import { any, clone, isNil, propEq } from 'ramda';
 import { AxiosResponse } from 'axios';
 import CommittedProjectsService from '@/services/committed-projects.service';
@@ -97,7 +129,10 @@ import { FileInfo } from '@/shared/models/iAM/file-info';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 
 @Component({
-    components: { CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog, Alert },
+    components: {
+        CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
+        Alert,
+    },
 })
 export default class EditScenario extends Vue {
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
@@ -265,27 +300,41 @@ export default class EditScenario extends Vue {
         this.selectScenarioAction({ scenarioId: getBlankGuid() });
     }
 
-    onSubmitImportExportCommittedProjectsDialogResult(result: ImportExportCommittedProjectsDialogResult) {
+    onSubmitImportExportCommittedProjectsDialogResult(
+        result: ImportExportCommittedProjectsDialogResult,
+    ) {
         this.showImportExportCommittedProjectsDialog = false;
 
         if (hasValue(result)) {
             if (result.isExport) {
-                CommittedProjectsService.exportCommittedProjects(this.selectedScenarioId)
-                    .then((response: AxiosResponse) => {
-                        if (hasValue(response, 'data')) {
-                            const fileInfo: FileInfo = response.data as FileInfo;
-                            FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
-                        }
-                    });
+                CommittedProjectsService.exportCommittedProjects(
+                    this.selectedScenarioId,
+                ).then((response: AxiosResponse) => {
+                    if (hasValue(response, 'data')) {
+                        const fileInfo: FileInfo = response.data as FileInfo;
+                        FileDownload(
+                            convertBase64ToArrayBuffer(fileInfo.fileData),
+                            fileInfo.fileName,
+                            fileInfo.mimeType,
+                        );
+                    }
+                });
             } else if (hasValue(result.file)) {
-                CommittedProjectsService.importCommittedProjects(result.file, result.applyNoTreatment, this.selectedScenarioId)
-                    .then((response: AxiosResponse) => {
-                        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                            this.setSuccessMessageAction({
-                                message: 'Successfully uploaded committed projects.',
-                            });
-                        }
-                    });
+                CommittedProjectsService.importCommittedProjects(
+                    result.file,
+                    result.applyNoTreatment,
+                    this.selectedScenarioId,
+                ).then((response: AxiosResponse) => {
+                    if (
+                        hasValue(response, 'status') &&
+                        http2XX.test(response.status.toString())
+                    ) {
+                        this.setSuccessMessageAction({
+                            message:
+                                'Successfully uploaded committed projects.',
+                        });
+                    }
+                });
             }
         }
     }
@@ -294,7 +343,8 @@ export default class EditScenario extends Vue {
         this.alertDataForDeletingCommittedProjects = {
             showDialog: true,
             heading: 'Are you sure?',
-            message: 'You are about to delete all of this scenario\'s committed projects.',
+            message:
+                "You are about to delete all of this scenario's committed projects.",
             choice: true,
         };
     }
@@ -303,12 +353,18 @@ export default class EditScenario extends Vue {
         this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
 
         if (doDelete) {
-            CommittedProjectsService.deleteCommittedProjects(this.selectedScenarioId)
-                .then((response: AxiosResponse) => {
-                    if (hasValue(response) && http2XX.test(response.status.toString())) {
-                        this.setSuccessMessageAction({ message: 'Committed projects have been deleted.' });
-                    }
-                });
+            CommittedProjectsService.deleteCommittedProjects(
+                this.selectedScenarioId,
+            ).then((response: AxiosResponse) => {
+                if (
+                    hasValue(response) &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    this.setSuccessMessageAction({
+                        message: 'Committed projects have been deleted.',
+                    });
+                }
+            });
         }
     }
 
@@ -341,7 +397,10 @@ export default class EditScenario extends Vue {
         this.alertData = clone(emptyAlertData);
 
         if (runScenarioSimulation) {
-            this.runSimulationAction({ networkId: this.networkId, scenarioId: this.selectedScenarioId });
+            this.runSimulationAction({
+                networkId: this.networkId,
+                scenarioId: this.selectedScenarioId,
+            });
         }
     }
 }

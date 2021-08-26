@@ -14,6 +14,7 @@
                             :dialogIsFromScenario="
                                 dialogData.isCallFromScenario
                             "
+                            :dialogIsFromLibrary="dialogData.isCriterionForLibrary"
                             @submit="onSubmitSelectedCriterionLibrary"
                         />
                     </div>
@@ -22,7 +23,7 @@
             <v-card-actions>
                 <v-layout justify-space-between row>
                     <v-btn
-                        :disabled="!dialogData.isCallFromScenario || !stateSelectedCriterionIsValid
+                        :disabled="(!dialogData.isCallFromScenario && !dialogData.isCriterionForLibrary) || !stateSelectedCriterionIsValid
                         "
                         class="ara-blue-bg white--text"
                         @click="onBeforeSubmit(true)"
@@ -107,14 +108,14 @@ export default class CriterionLibraryEditorDialog extends Vue {
         if (this.dialogData.showDialog) {
             if (!hasValue(this.stateCriterionLibraries)) {
                 this.getCriterionLibrariesAction().then(() => {
-                    if (this.dialogData.isCallFromScenario) {
+                    if (this.dialogData.isCallFromScenario || this.dialogData.isCriterionForLibrary) {
                         this.selectScenarioRelatedCriterionAction({
                             libraryId: this.dialogData.libraryId,
                         });
                     }
                 });
             } else {
-                if (this.dialogData.isCallFromScenario) {
+                if (this.dialogData.isCallFromScenario || this.dialogData.isCriterionForLibrary) {
                     this.selectScenarioRelatedCriterionAction({
                         libraryId: this.dialogData.libraryId,
                     });

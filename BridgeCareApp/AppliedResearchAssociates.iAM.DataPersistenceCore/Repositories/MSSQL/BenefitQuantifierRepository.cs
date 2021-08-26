@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
-                throw new RowNotInTableException($"No network found having id {networkId}.");
+                throw new RowNotInTableException("The specified network was not found.");
             }
 
             if (!_unitOfWork.Context.BenefitQuantifier.Any(_ => _.NetworkId == networkId))
@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == dto.NetworkId))
             {
-                throw new RowNotInTableException($"No network found having id {dto.NetworkId}.");
+                throw new RowNotInTableException("The specified network was not found.");
             }
 
                 var attributes = _unitOfWork.Context.Attribute.ToList();

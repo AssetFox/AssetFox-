@@ -341,16 +341,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName;
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
-                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment;
-                    if (section.TreatmentCause == TreatmentCause.CashFlowProject)
-                    {
-                        ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(0, 255, 0));
-                        ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.FromArgb(255, 0, 0));
-
-                        // Color the previous year project also
-                        ExcelHelper.ApplyColor(worksheet.Cells[row, column - 16], Color.FromArgb(0, 255, 0));
-                        ExcelHelper.SetTextColor(worksheet.Cells[row, column - 16], Color.FromArgb(255, 0, 0));
-                    }
+                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Project
+                    var columnForAppliedTreatment = column;
 
                     var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
                     worksheet.Cells[row, ++column].Value = cost; // cost
@@ -360,6 +352,16 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                     if (row % 2 == 0)
                     {
                         ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+                    }
+
+                    if (section.TreatmentCause == TreatmentCause.CashFlowProject)
+                    {
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(255, 0, 0));
+
+                        // Color the previous year project also
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(255, 0, 0));
                     }
 
                     column = column + 1;
@@ -428,6 +430,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             // It returns the column number where MinC value is written
             column = _valueForMinC[minCActionCallDecider](worksheet, row, column, selectedSection.ValuePerNumericAttribute);
             ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
+            var minCondColumn = column;
 
             if (selectedSection.ValuePerNumericAttribute["P3"] > 0 && selectedSection.ValuePerNumericAttribute["MINCOND"] < 5)
             {
@@ -440,6 +443,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             if (row % 2 == 0)
             {
                 ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+            }
+
+            // Setting color of MinCond over here, to avoid Color.LightGray overriding it 
+            if (selectedSection.ValuePerNumericAttribute["MINCOND"] <= 3.5)
+            {
+                ExcelHelper.ApplyColor(worksheet.Cells[row, minCondColumn], Color.FromArgb(112, 48, 160));
+                ExcelHelper.SetTextColor(worksheet.Cells[row, minCondColumn], Color.White);
             }
 
             return column;
@@ -761,11 +771,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
         {
             numericAttribute["MINCOND"] = numericAttribute["CULV_SEEDED"];
             worksheet.Cells[row, ++column].Value = numericAttribute["MINCOND"];
-            if (numericAttribute["MINCOND"] <= 3.5)
-            {
-                ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(112, 48, 160));
-                ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.White);
-            }
             return column;
         }
 
@@ -774,22 +779,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var minValue = Math.Min(numericAttribute["DECK_SEEDED"], Math.Min(numericAttribute["SUP_SEEDED"], numericAttribute["SUB_SEEDED"]));
             worksheet.Cells[row, ++column].Value = minValue;
             numericAttribute["MINCOND"] = minValue;
-            if (numericAttribute["MINCOND"] <= 3.5)
-            {
-                ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(112, 48, 160));
-                ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.White);
-            }
             return column;
         }
 
         private int EnterMinDeckSuperSubCulv(ExcelWorksheet worksheet, int row, int column, Dictionary<string, double> numericAttribute)
         {
             worksheet.Cells[row, ++column].Value = numericAttribute["MINCOND"];
-            if (numericAttribute["MINCOND"] <= 3.5)
-            {
-                ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.FromArgb(112, 48, 160));
-                ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.White);
-            }
             return column;
         }
 

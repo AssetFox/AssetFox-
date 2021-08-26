@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +15,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AnalysisMethodRepository : IAnalysisMethodRepository
     {
-        private readonly UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public AnalysisMethodRepository(UnitOfWork.UnitOfDataPersistenceWork unitOfWork) =>
+        public AnalysisMethodRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -24,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new RowNotInTableException("No simulation found for given scenario.");
             }
 
             if (analysisMethod.Weighting != null && !string.IsNullOrEmpty(analysisMethod.Weighting.Name) &&
@@ -72,36 +73,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        private void CreateAnalysisMethodBudgetPriorities(SimulationEntity simulationEntity, List<BudgetPriority> budgetPriorities)
-        {
-            _unitOfWork.BudgetPriorityRepo.CreateBudgetPriorityLibrary(
-                $"{simulationEntity.Name} Budget Priority Library", simulationEntity.Id);
-
+        private void CreateAnalysisMethodBudgetPriorities(SimulationEntity simulationEntity, List<BudgetPriority> budgetPriorities) =>
             _unitOfWork.BudgetPriorityRepo.CreateBudgetPriorities(budgetPriorities, simulationEntity.Id);
-        }
 
         private void CreateAnalysisMethodTargetConditionGoals(SimulationEntity simulationEntity, List<TargetConditionGoal> targetConditionGoals)
         {
-            _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoalLibrary(
-                $"{simulationEntity.Name} Target Condition Goal Library", simulationEntity.Id);
-
             _unitOfWork.TargetConditionGoalRepo.CreateTargetConditionGoals(targetConditionGoals, simulationEntity.Id);
         }
 
         private void CreateAnalysisMethodDeficientConditionGoals(SimulationEntity simulationEntity, List<DeficientConditionGoal> deficientConditionGoals)
         {
-            _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoalLibrary(
-                $"{simulationEntity.Name} Deficient Condition Goal Library", simulationEntity.Id);
-
             _unitOfWork.DeficientConditionGoalRepo.CreateDeficientConditionGoals(deficientConditionGoals, simulationEntity.Id);
         }
 
         private void CreateAnalysisMethodRemainingLifeLimits(SimulationEntity simulationEntity,
             List<RemainingLifeLimit> remainingLifeLimits)
         {
-            _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimitLibrary(
-                $"{simulationEntity.Name} Remaining Life Limit Library", simulationEntity.Id);
-
             _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationEntity.Id);
         }
 
@@ -109,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulation.Id}");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             _unitOfWork.Context.AnalysisMethod
@@ -119,49 +106,37 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CriterionLibraryAnalysisMethodJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.BudgetPriorityLibrarySimulationJoin)
-                .ThenInclude(_ => _.BudgetPriorityLibrary)
                 .ThenInclude(_ => _.BudgetPriorities)
-                .ThenInclude(_ => _.CriterionLibraryBudgetPriorityJoin)
+                .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.BudgetPriorityLibrarySimulationJoin)
-                .ThenInclude(_ => _.BudgetPriorityLibrary)
                 .ThenInclude(_ => _.BudgetPriorities)
                 .ThenInclude(_ => _.BudgetPercentagePairs)
+
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.TargetConditionGoalLibrarySimulationJoin)
-                .ThenInclude(_ => _.TargetConditionGoalLibrary)
-                .ThenInclude(_ => _.TargetConditionGoals)
+                .ThenInclude(_ => _.ScenarioTargetConditionalGoals)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.TargetConditionGoalLibrarySimulationJoin)
-                .ThenInclude(_ => _.TargetConditionGoalLibrary)
-                .ThenInclude(_ => _.TargetConditionGoals)
-                .ThenInclude(_ => _.CriterionLibraryTargetConditionGoalJoin)
+                .ThenInclude(_ => _.ScenarioTargetConditionalGoals)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.DeficientConditionGoalLibrarySimulationJoin)
-                .ThenInclude(_ => _.DeficientConditionGoalLibrary)
-                .ThenInclude(_ => _.DeficientConditionGoals)
+                .ThenInclude(_ => _.ScenarioDeficientConditionGoals)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.DeficientConditionGoalLibrarySimulationJoin)
-                .ThenInclude(_ => _.DeficientConditionGoalLibrary)
-                .ThenInclude(_ => _.DeficientConditionGoals)
-                .ThenInclude(_ => _.CriterionLibraryDeficientConditionGoalJoin)
+                .ThenInclude(_ => _.ScenarioDeficientConditionGoals)
+                .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.RemainingLifeLimitLibrarySimulationJoin)
-                .ThenInclude(_ => _.RemainingLifeLimitLibrary)
                 .ThenInclude(_ => _.RemainingLifeLimits)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.Simulation)
-                .ThenInclude(_ => _.RemainingLifeLimitLibrarySimulationJoin)
-                .ThenInclude(_ => _.RemainingLifeLimitLibrary)
                 .ThenInclude(_ => _.RemainingLifeLimits)
-                .ThenInclude(_ => _.CriterionLibraryRemainingLifeLimitJoin)
+                .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+
                 .AsNoTracking()
                 .Single(_ => _.Simulation.Id == simulation.Id)
                 .FillSimulationAnalysisMethod(simulation);
@@ -171,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             if (!_unitOfWork.Context.AnalysisMethod.Any(_ => _.SimulationId == simulationId))
@@ -203,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}.");
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
             AttributeEntity attributeEntity = null;

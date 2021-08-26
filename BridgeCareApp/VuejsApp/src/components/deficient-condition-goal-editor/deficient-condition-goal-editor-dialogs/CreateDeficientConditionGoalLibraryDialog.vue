@@ -66,7 +66,7 @@ export default class CreateDeficientConditionGoalLibraryDialog extends Vue {
 
   onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newDeficientConditionGoalLibrary, this.dialogData.scenarioId);
+      this.$emit('submit', this.newDeficientConditionGoalLibrary);
     } else {
       this.$emit('submit', null);
     }

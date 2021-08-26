@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class TestDataForPennDOTAssetDataRepo
     {

@@ -64,7 +64,7 @@ export default class CreateTargetConditionGoalLibraryDialog extends Vue {
 
   onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newTargetConditionGoalLibrary, this.dialogData.scenarioId);
+      this.$emit('submit', this.newTargetConditionGoalLibrary);
     } else {
       this.$emit('submit', null);
     }

@@ -1,8 +1,10 @@
-import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
-import {getBlankGuid} from '@/shared/utils/uuid-utils';
-import {clone} from 'ramda';
-import {emptyEquation, Equation} from '@/shared/models/iAM/equation';
-import {SimpleBudgetDetail} from '@/shared/models/iAM/investment';
+import {
+    CriterionLibrary,
+    emptyCriterionLibrary,
+} from '@/shared/models/iAM/criteria';
+import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import { clone } from 'ramda';
+import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 
 export interface TreatmentCost {
     id: string;
@@ -28,6 +30,7 @@ export interface Treatment {
     costs: TreatmentCost[];
     consequences: TreatmentConsequence[];
     budgetIds: string[];
+    addTreatment: boolean;
 }
 
 export interface TreatmentLibrary {
@@ -35,7 +38,6 @@ export interface TreatmentLibrary {
     name: string;
     description: string;
     treatments: Treatment[];
-    appliedScenarioIds: string[];
     owner?: string;
     shared?: boolean;
 }
@@ -45,7 +47,6 @@ export interface TreatmentDetails {
     shadowForAnyTreatment: number;
     shadowForSameTreatment: number;
     criterionLibrary: CriterionLibrary;
-    isCallFromScenario: boolean;
 }
 
 export interface BudgetGridRow {
@@ -55,7 +56,7 @@ export interface BudgetGridRow {
 export const emptyCost: TreatmentCost = {
     id: getBlankGuid(),
     equation: clone(emptyEquation),
-    criterionLibrary: clone(emptyCriterionLibrary)
+    criterionLibrary: clone(emptyCriterionLibrary),
 };
 
 export const emptyConsequence: TreatmentConsequence = {
@@ -63,7 +64,7 @@ export const emptyConsequence: TreatmentConsequence = {
     attribute: '',
     changeValue: '',
     equation: clone(emptyEquation),
-    criterionLibrary: clone(emptyCriterionLibrary)
+    criterionLibrary: clone(emptyCriterionLibrary),
 };
 
 export const emptyTreatment: Treatment = {
@@ -75,7 +76,8 @@ export const emptyTreatment: Treatment = {
     criterionLibrary: clone(emptyCriterionLibrary),
     costs: [],
     consequences: [],
-    budgetIds: []
+    budgetIds: [],
+    addTreatment: false,
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {
@@ -83,7 +85,6 @@ export const emptyTreatmentLibrary: TreatmentLibrary = {
     name: '',
     description: '',
     treatments: [],
-    appliedScenarioIds: []
 };
 
 export const emptyTreatmentDetails: TreatmentDetails = {
@@ -91,5 +92,4 @@ export const emptyTreatmentDetails: TreatmentDetails = {
     shadowForAnyTreatment: 0,
     shadowForSameTreatment: 0,
     criterionLibrary: clone(emptyCriterionLibrary),
-    isCallFromScenario: false
 };

@@ -12,8 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new BudgetPercentagePairEntity
             {
                 Id = domain.Id,
-                BudgetPriorityId = budgetPriorityId,
-                BudgetId = budgetId,
+                ScenarioBudgetPriorityId = budgetPriorityId,
+                ScenarioBudgetId = budgetId,
                 Percentage = domain.Percentage
             };
 
@@ -21,8 +21,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new BudgetPercentagePairEntity
             {
                 Id = dto.Id,
-                BudgetPriorityId = budgetPriorityId,
-                BudgetId = dto.BudgetId,
+                ScenarioBudgetPriorityId = budgetPriorityId,
+                ScenarioBudgetId = dto.BudgetId,
                 Percentage = dto.Percentage
             };
 
@@ -31,16 +31,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = entity.Id,
                 Percentage = entity.Percentage,
-                BudgetId = entity.BudgetId,
-                BudgetName = entity.Budget != null
-                    ? entity.Budget.Name
+                BudgetId = entity.ScenarioBudgetId,
+                BudgetName = entity.ScenarioBudget != null
+                    ? entity.ScenarioBudget.Name
                     : ""
             };
 
         public static void FillBudgetPercentagePair(this BudgetPercentagePairEntity entity, InvestmentPlan investmentPlan,
             BudgetPriority budgetPriority)
         {
-            var budget = investmentPlan.Budgets.Single(_ => _.Id == entity.BudgetId);
+            var budget = investmentPlan.Budgets.Single(_ => _.Id == entity.ScenarioBudgetId);
             var budgetPercentagePair = budgetPriority.GetBudgetPercentagePair(budget);
             budgetPercentagePair.Id = entity.Id;
             budgetPercentagePair.Percentage = entity.Percentage;

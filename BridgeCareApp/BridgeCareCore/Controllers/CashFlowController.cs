@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using CashFlowUpsertMethod = Action<Guid, CashFlowRuleLibraryDTO>;
+    using CashFlowUpsertMethod = Action<Guid, List<CashFlowRuleDTO>>;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -29,16 +29,15 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, CashFlowUpsertMethod> CreateUpsertMethods()
         {
-            void UpsertAny(Guid simulationId, CashFlowRuleLibraryDTO dto)
+            void UpsertAny(Guid simulationId, List<CashFlowRuleDTO> dtos)
             {
-                UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto, simulationId);
-                UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
+                UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(dtos, simulationId);
             }
 
-            void UpsertPermitted(Guid simulationId, CashFlowRuleLibraryDTO dto)
+            void UpsertPermitted(Guid simulationId, List<CashFlowRuleDTO> dtos)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                UpsertAny(simulationId, dto);
+                UpsertAny(simulationId, dtos);
             }
 
             return new Dictionary<string, CashFlowUpsertMethod>
@@ -51,12 +50,31 @@ namespace BridgeCareCore.Controllers
         [HttpGet]
         [Route("GetCashFlowRuleLibraries")]
         [Authorize]
-        public async Task<IActionResult> CashFlowRuleLibraries()
+        public async Task<IActionResult> GetCashFlowRuleLibraries()
         {
             try
             {
                 var result = await Task.Factory.StartNew(() => UnitOfWork.CashFlowRuleRepo
-                    .CashFlowRuleLibrariesWithCashFlowRules());
+                    .GetCashFlowRuleLibraries());
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Cash Flow error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetScenarioCashFlowRules/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetScenarioCashFlowRules(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.CashFlowRuleRepo
+                    .GetScenarioCashFlowRules(simulationId));
 
                 return Ok(result);
             }
@@ -68,16 +86,46 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertCashFlowRuleLibrary/{simulationId}")]
+        [Route("UpsertCashFlowRuleLibrary")]
         [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
-        public async Task<IActionResult> UpsertCashFlowRuleLibrary(Guid simulationId, CashFlowRuleLibraryDTO dto)
+        public async Task<IActionResult> UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto)
         {
             try
             {
                  await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _cashFlowUpsertMethods[UserInfo.Role](simulationId, dto);
+                    UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);
+                    UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
+                    UnitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UnitOfWork.Rollback();
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Cash Flow error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertScenarioCashFlowRules/{simulationId}")]
+        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        public async Task<IActionResult> UpsertScenarioCashFlowRules(Guid simulationId, List<CashFlowRuleDTO> dtos)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    _cashFlowUpsertMethods[UserInfo.Role](simulationId, dtos);
                     UnitOfWork.Commit();
                 });
 

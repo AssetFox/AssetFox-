@@ -2,6 +2,16 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -14,8 +24,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             AttributeData = new HashSet<AttributeDatumEntity>();
             AnalysisMethods = new HashSet<AnalysisMethodEntity>();
             PerformanceCurves = new HashSet<PerformanceCurveEntity>();
+            ScenarioPerformanceCurves = new HashSet<ScenarioPerformanceCurveEntity>();
             RemainingLifeLimits = new HashSet<RemainingLifeLimitEntity>();
+            ScenarioRemainingLifeLimits = new HashSet<ScenarioRemainingLifeLimitEntity>();
             TreatmentConsequences = new HashSet<ConditionalTreatmentConsequenceEntity>();
+            ScenarioTreatmentConsequences = new HashSet<ScenarioConditionalTreatmentConsequenceEntity>();
             NumericAttributeValueHistories = new HashSet<NumericAttributeValueHistoryEntity>();
             TextAttributeValueHistories = new HashSet<TextAttributeValueHistoryEntity>();
             AttributeEquationCriterionLibraryJoins = new HashSet<AttributeEquationCriterionLibraryEntity>();
@@ -58,11 +71,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<PerformanceCurveEntity> PerformanceCurves { get; set; }
 
+        public virtual ICollection<ScenarioPerformanceCurveEntity> ScenarioPerformanceCurves { get; set; }
+
         public virtual ICollection<RemainingLifeLimitEntity> RemainingLifeLimits { get; set; }
+
+        public virtual ICollection<ScenarioRemainingLifeLimitEntity> ScenarioRemainingLifeLimits { get; set; }
 
         public virtual ICollection<ConditionalTreatmentConsequenceEntity> TreatmentConsequences { get; set; }
 
+        public virtual ICollection<ScenarioConditionalTreatmentConsequenceEntity> ScenarioTreatmentConsequences { get; set; }
+
         public virtual ICollection<DeficientConditionGoalEntity> DeficientConditionGoals { get; set; }
+
+        public virtual ICollection<ScenarioDeficientConditionGoalEntity> ScenarioDeficientConditionGoals { get; set; }
 
         public virtual ICollection<NumericAttributeValueHistoryEntity> NumericAttributeValueHistories { get; set; }
 

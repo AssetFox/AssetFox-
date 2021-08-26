@@ -2,8 +2,26 @@ using System;
 using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -48,8 +66,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<BudgetLibraryEntity> BudgetLibrary { get; set; }
 
-        public virtual DbSet<BudgetLibrarySimulationEntity> BudgetLibrarySimulation { get; set; }
-
         public virtual DbSet<BudgetAmountEntity> BudgetAmount { get; set; }
 
         public virtual DbSet<BudgetPercentagePairEntity> BudgetPercentagePair { get; set; }
@@ -58,15 +74,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<BudgetPriorityLibraryEntity> BudgetPriorityLibrary { get; set; }
 
-        public virtual DbSet<BudgetPriorityLibrarySimulationEntity> BudgetPriorityLibrarySimulation { get; set; }
-
         public virtual DbSet<CashFlowDistributionRuleEntity> CashFlowDistributionRule { get; set; }
 
         public virtual DbSet<CashFlowRuleEntity> CashFlowRule { get; set; }
 
         public virtual DbSet<CashFlowRuleLibraryEntity> CashFlowRuleLibrary { get; set; }
-
-        public virtual DbSet<CashFlowRuleLibrarySimulationEntity> CashFlowRuleLibrarySimulation { get; set; }
 
         public virtual DbSet<CommittedProjectEntity> CommittedProject { get; set; }
 
@@ -84,11 +96,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<CriterionLibraryDeficientConditionGoalEntity> CriterionLibraryDeficientConditionGoal { get; set; }
 
+        public virtual DbSet<CriterionLibraryScenarioDeficientConditionGoalEntity> CriterionLibraryScenarioDeficientConditionGoal { get; set; }
+
         public virtual DbSet<CriterionLibraryPerformanceCurveEntity> CriterionLibraryPerformanceCurve { get; set; }
 
         public virtual DbSet<CriterionLibraryRemainingLifeLimitEntity> CriterionLibraryRemainingLifeLimit { get; set; }
 
+        public virtual DbSet<CriterionLibraryScenarioRemainingLifeLimitEntity> CriterionLibraryScenarioRemainingLifeLimit { get; set; }
+
         public virtual DbSet<CriterionLibraryTargetConditionGoalEntity> CriterionLibraryTargetConditionGoal { get; set; }
+
+        public virtual DbSet<CriterionLibraryScenarioTargetConditionGoalEntity> CriterionLibraryScenarioTargetConditionGoal { get; set; }
 
         public virtual DbSet<CriterionLibrarySelectableTreatmentEntity> CriterionLibrarySelectableTreatment { get; set; }
 
@@ -98,11 +116,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<CriterionLibraryTreatmentSupersessionEntity> CriterionLibraryTreatmentSupersession { get; set; }
 
+        public virtual DbSet<CriterionLibraryScenarioTreatmentSupersessionEntity> CriterionLibraryScenarioTreatmentSupersession { get; set; }
+
         public virtual DbSet<DeficientConditionGoalEntity> DeficientConditionGoal { get; set; }
 
-        public virtual DbSet<DeficientConditionGoalLibraryEntity> DeficientConditionGoalLibrary { get; set; }
+        public virtual DbSet<ScenarioDeficientConditionGoalEntity> ScenarioDeficientConditionGoal { get; set; }
 
-        public virtual DbSet<DeficientConditionGoalLibrarySimulationEntity> DeficientConditionGoalLibrarySimulation { get; set; }
+        public virtual DbSet<DeficientConditionGoalLibraryEntity> DeficientConditionGoalLibrary { get; set; }
 
         public virtual DbSet<EquationEntity> Equation { get; set; }
 
@@ -122,13 +142,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<PerformanceCurveLibraryEntity> PerformanceCurveLibrary { get; set; }
 
-        public virtual DbSet<PerformanceCurveLibrarySimulationEntity> PerformanceCurveLibrarySimulation { get; set; }
-
         public virtual DbSet<RemainingLifeLimitEntity> RemainingLifeLimit { get; set; }
 
-        public virtual DbSet<RemainingLifeLimitLibraryEntity> RemainingLifeLimitLibrary { get; set; }
+        public virtual DbSet<ScenarioRemainingLifeLimitEntity> ScenarioRemainingLifeLimit { get; set; }
 
-        public virtual DbSet<RemainingLifeLimitLibrarySimulationEntity> RemainingLifeLimitLibrarySimulation { get; set; }
+        public virtual DbSet<RemainingLifeLimitLibraryEntity> RemainingLifeLimitLibrary { get; set; }
 
         public virtual DbSet<SectionEntity> Section { get; set; }
 
@@ -140,13 +158,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<TargetConditionGoalEntity> TargetConditionGoal { get; set; }
 
-        public virtual DbSet<TargetConditionGoalLibraryEntity> TargetConditionGoalLibrary { get; set; }
+        public virtual DbSet<ScenarioTargetConditionGoalEntity> ScenarioTargetConditionGoals { get; set; }
 
-        public virtual DbSet<TargetConditionGoalLibrarySimulationEntity> TargetConditionGoalLibrarySimulation { get; set; }
+        public virtual DbSet<TargetConditionGoalLibraryEntity> TargetConditionGoalLibrary { get; set; }
 
         public virtual DbSet<SelectableTreatmentEntity> SelectableTreatment { get; set; }
 
-        public virtual DbSet<SelectableTreatmentBudgetEntity> TreatmentBudget { get; set; }
+        public virtual DbSet<ScenarioSelectableTreatmentScenarioBudgetEntity> ScenarioSelectableTreatmentScenarioBudget { get; set; }
 
         public virtual DbSet<ConditionalTreatmentConsequenceEntity> TreatmentConsequence { get; set; }
 
@@ -158,11 +176,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<TreatmentLibraryEntity> TreatmentLibrary { get; set; }
 
-        public virtual DbSet<TreatmentLibrarySimulationEntity> TreatmentLibrarySimulation { get; set; }
-
         public virtual DbSet<TreatmentSchedulingEntity> TreatmentScheduling { get; set; }
 
+        public virtual DbSet<ScenarioTreatmentSchedulingEntity> ScenarioTreatmentScheduling { get; set; }
+
         public virtual DbSet<TreatmentSupersessionEntity> TreatmentSupersession { get; set; }
+
+        public virtual DbSet<ScenarioTreatmentSupersessionEntity> ScenarioTreatmentSupersession { get; set; }
 
         public virtual DbSet<NumericAttributeValueHistoryEntity> NumericAttributeValueHistory { get; set; }
 
@@ -187,6 +207,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<ReportIndexEntity> ReportIndex { get; set; }
 
         public virtual DbSet<AnnouncementEntity> Announcement { get; set; }
+
+        public virtual DbSet<ScenarioPerformanceCurveEntity> ScenarioPerformanceCurve { get; set; }
+
+        public virtual DbSet<ScenarioPerformanceCurveEquationEntity> ScenarioPerformanceCurveEquation { get; set; }
+
+        public virtual DbSet<CriterionLibraryScenarioPerformanceCurveEntity> CriterionLibraryScenarioPerformanceCurve { get; set; }
+
+        public virtual DbSet<ScenarioSelectableTreatmentEntity> ScenarioSelectableTreatment { get; set; }
+        public virtual DbSet<ScenarioTreatmentCostEntity> ScenarioTreatmentCost { get; set; }
+        public virtual DbSet<ScenarioTreatmentCostEquationEntity> ScenarioTreatmentCostEquation { get; set; }
+        public virtual DbSet<ScenarioConditionalTreatmentConsequenceEquationEntity> ScenarioConditionalTreatmentConsequenceEquations { get; set; }
+        public virtual DbSet<ScenarioConditionalTreatmentConsequenceEntity> ScenarioConditionalTreatmentConsequences { get; set; }
+        public virtual DbSet<CriterionLibraryScenarioTreatmentCostEntity> CriterionLibraryScenarioTreatmentCosts { get; set; }
+        public virtual DbSet<CriterionLibraryScenarioSelectableTreatmentEntity> CriterionLibraryScenarioSelectableTreatments { get; set; }
+        public virtual DbSet<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity> CriterionLibraryScenarioConditionalTreatmentConsequence { get; set; }
+
+        public virtual DbSet<ScenarioBudgetEntity> ScenarioBudget { get; set; }
+        public virtual DbSet<ScenarioBudgetAmountEntity> ScenarioBudgetAmount { get; set; }
+        public virtual DbSet<CriterionLibraryScenarioBudgetEntity> CriterionLibraryScenarioBudget { get; set; }
+
+        public virtual DbSet<ScenarioBudgetPriorityEntity> ScenarioBudgetPriority { get; set; }
+
+        public virtual DbSet<CriterionLibraryScenarioBudgetPriorityEntity> CriterionLibraryScenarioBudgetPriority { get; set; }
+
+        public virtual DbSet<ScenarioCashFlowRuleEntity> ScenarioCashFlowRule { get; set; }
+
+        public virtual DbSet<ScenarioCashFlowDistributionRuleEntity> ScenarioCashFlowDistributionRule { get; set; }
+
+        public virtual DbSet<CriterionLibraryScenarioCashFlowRuleEntity> CriterionLibraryScenarioCashFlowRule { get; set; }
 
         private class MigrationConnection
         {
@@ -348,32 +397,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioBudgetEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.Budgets)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<BudgetLibraryEntity>(entity =>
             {
                 entity.Property(e => e.Name).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            });
-
-            modelBuilder.Entity<BudgetLibrarySimulationEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.BudgetLibraryId, e.SimulationId });
-
-                entity.ToTable("BudgetLibrary_Simulation");
-
-                entity.HasIndex(e => e.BudgetLibraryId);
-
-                entity.HasIndex(e => e.SimulationId).IsUnique();
-
-                entity.HasOne(d => d.BudgetLibrary)
-                    .WithMany(p => p.BudgetLibrarySimulationJoins)
-                    .HasForeignKey(d => d.BudgetLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.BudgetLibrarySimulationJoin)
-                    .HasForeignKey<BudgetLibrarySimulationEntity>(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<BudgetAmountEntity>(entity =>
@@ -392,25 +434,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioBudgetAmountEntity>(entity =>
+            {
+                entity.HasIndex(e => e.ScenarioBudgetId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Year).IsRequired();
+
+                entity.Property(e => e.Value).IsRequired();
+
+                entity.HasOne(d => d.ScenarioBudget)
+                    .WithMany(p => p.ScenarioBudgetAmounts)
+                    .HasForeignKey(d => d.ScenarioBudgetId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<BudgetPercentagePairEntity>(entity =>
             {
-                entity.HasIndex(e => e.BudgetId);
+                entity.HasIndex(e => e.ScenarioBudgetId);
 
-                entity.HasIndex(e => e.BudgetPriorityId);
+                entity.HasIndex(e => e.ScenarioBudgetPriorityId);
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Percentage).IsRequired();
 
-                entity.HasOne(d => d.Budget)
+                entity.HasOne(d => d.ScenarioBudget)
                     .WithMany(p => p.BudgetPercentagePairs)
-                    .HasForeignKey(d => d.BudgetId)
+                    .HasForeignKey(d => d.ScenarioBudgetId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(d => d.BudgetPriority)
+                entity.HasOne(d => d.ScenarioBudgetPriority)
                     .WithMany(p => p.BudgetPercentagePairs)
-                    .HasForeignKey(d => d.BudgetPriorityId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .HasForeignKey(d => d.ScenarioBudgetPriorityId)
+                    .OnDelete(DeleteBehavior.ClientCascade);
             });
 
             modelBuilder.Entity<BudgetPriorityEntity>(entity =>
@@ -427,30 +485,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioBudgetPriorityEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.PriorityLevel).IsRequired();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.BudgetPriorities)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<BudgetPriorityLibraryEntity>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            });
-
-            modelBuilder.Entity<BudgetPriorityLibrarySimulationEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.BudgetPriorityLibraryId, e.SimulationId });
-
-                entity.ToTable("BudgetPriorityLibrary_Simulation");
-
-                entity.HasIndex(e => e.BudgetPriorityLibraryId);
-
-                entity.HasIndex(e => e.SimulationId).IsUnique();
-
-                entity.HasOne(d => d.BudgetPriorityLibrary)
-                    .WithMany(p => p.BudgetPriorityLibrarySimulationJoins)
-                    .HasForeignKey(d => d.BudgetPriorityLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.BudgetPriorityLibrarySimulationJoin)
-                    .HasForeignKey<BudgetPriorityLibrarySimulationEntity>(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<CashFlowDistributionRuleEntity>(entity =>
@@ -471,6 +522,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioCashFlowDistributionRuleEntity>(entity =>
+            {
+                entity.HasIndex(e => e.ScenarioCashFlowRuleId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.DurationInYears).IsRequired();
+
+                entity.Property(e => e.CostCeiling).IsRequired();
+
+                entity.Property(e => e.YearlyPercentages).IsRequired();
+
+                entity.HasOne(d => d.ScenarioCashFlowRule)
+                    .WithMany(p => p.ScenarioCashFlowDistributionRules)
+                    .HasForeignKey(d => d.ScenarioCashFlowRuleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<CashFlowRuleEntity>(entity =>
             {
                 entity.HasIndex(e => e.CashFlowRuleLibraryId);
@@ -485,6 +554,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioCashFlowRuleEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.CashFlowRules)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<CashFlowRuleLibraryEntity>(entity =>
             {
                 entity.Property(e => e.Name).IsRequired();
@@ -492,32 +575,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
-            modelBuilder.Entity<CashFlowRuleLibrarySimulationEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.CashFlowRuleLibraryId, e.SimulationId });
-
-                entity.ToTable("CashFlowRuleLibrary_Simulation");
-
-                entity.HasIndex(e => e.CashFlowRuleLibraryId);
-
-                entity.HasIndex(e => e.SimulationId).IsUnique();
-
-                entity.HasOne(d => d.CashFlowRuleLibrary)
-                    .WithMany(p => p.CashFlowRuleLibrarySimulationJoins)
-                    .HasForeignKey(d => d.CashFlowRuleLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.CashFlowRuleLibrarySimulationJoin)
-                    .HasForeignKey<CashFlowRuleLibrarySimulationEntity>(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
             modelBuilder.Entity<CommittedProjectEntity>(entity =>
             {
                 entity.HasIndex(e => e.SimulationId);
 
-                entity.HasIndex(e => e.BudgetId);
+                entity.HasIndex(e => e.ScenarioBudgetId);
 
                 entity.HasIndex(e => e.MaintainableAssetId);
 
@@ -538,15 +600,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .HasForeignKey(d => d.MaintainableAssetId)
                     .OnDelete(DeleteBehavior.Cascade);
 
+                entity.HasOne(d => d.ScenarioBudget)
+                    .WithMany(p => p.CommittedProjects)
+                    .HasForeignKey(d => d.ScenarioBudgetId)
+                    .OnDelete(DeleteBehavior.ClientCascade);
+
                 entity.HasOne(d => d.Simulation)
                     .WithMany(p => p.CommittedProjects)
                     .HasForeignKey(d => d.SimulationId)
                     .OnDelete(DeleteBehavior.ClientCascade);
-
-                entity.HasOne(d => d.Budget)
-                    .WithMany(p => p.CommittedProjects)
-                    .HasForeignKey(d => d.BudgetId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<CommittedProjectConsequenceEntity>(entity =>
@@ -616,6 +678,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<CriterionLibraryScenarioBudgetEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioBudgetId });
+
+                entity.ToTable("CriterionLibrary_ScenarioBudget");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioBudgetId).IsUnique();
+
+                entity.HasOne(d => d.ScenarioBudget)
+                    .WithOne(p => p.CriterionLibraryScenarioBudgetJoin)
+                    .HasForeignKey<CriterionLibraryScenarioBudgetEntity>(d => d.ScenarioBudgetId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioBudgetJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<CriterionLibraryBudgetPriorityEntity>(entity =>
             {
                 entity.HasKey(e => new { e.CriterionLibraryId, e.BudgetPriorityId });
@@ -633,6 +716,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.CriterionLibrary)
                     .WithMany(p => p.CriterionLibraryBudgetPriorityJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CriterionLibraryScenarioBudgetPriorityEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioBudgetPriorityId });
+
+                entity.ToTable("CriterionLibrary_ScenarioBudgetPriority");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioBudgetPriorityId).IsUnique();
+
+                entity.HasOne(d => d.ScenarioBudgetPriority)
+                    .WithOne(p => p.CriterionLibraryScenarioBudgetPriorityJoin)
+                    .HasForeignKey<CriterionLibraryScenarioBudgetPriorityEntity>(d => d.ScenarioBudgetPriorityId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioBudgetPriorityJoins)
                     .HasForeignKey(d => d.CriterionLibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
@@ -658,6 +762,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<CriterionLibraryScenarioCashFlowRuleEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioCashFlowRuleId });
+
+                entity.ToTable("CriterionLibrary_ScenarioCashFlowRule");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioCashFlowRuleId).IsUnique();
+
+                entity.HasOne(d => d.ScenarioCashFlowRule)
+                    .WithOne(p => p.CriterionLibraryScenarioCashFlowRuleJoin)
+                    .HasForeignKey<CriterionLibraryScenarioCashFlowRuleEntity>(d => d.ScenarioCashFlowRuleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioCashFlowRuleJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<CriterionLibraryDeficientConditionGoalEntity>(entity =>
             {
                 entity.HasKey(e => new { e.CriterionLibraryId, e.DeficientConditionGoalId });
@@ -675,6 +800,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.CriterionLibrary)
                     .WithMany(p => p.CriterionLibraryDeficientConditionGoalJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<CriterionLibraryScenarioDeficientConditionGoalEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioDeficientConditionGoalId });
+
+                entity.ToTable("CriterionLibrary_ScenarioDeficientConditionGoal");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioDeficientConditionGoalId).IsUnique();
+
+                entity.HasOne(d => d.ScenarioDeficientConditionGoal)
+                    .WithOne(p => p.CriterionLibraryScenarioDeficientConditionGoalJoin)
+                    .HasForeignKey<CriterionLibraryScenarioDeficientConditionGoalEntity>(d => d.ScenarioDeficientConditionGoalId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioDeficientConditionGoalJoins)
                     .HasForeignKey(d => d.CriterionLibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
@@ -700,6 +845,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<CriterionLibraryScenarioPerformanceCurveEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioPerformanceCurveId });
+
+                entity.ToTable("CriterionLibrary_ScenarioPerformanceCurve");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioPerformanceCurveId).IsUnique();
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioPerformanceCurveJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ScenarioPerformanceCurve)
+                    .WithOne(p => p.CriterionLibraryScenarioPerformanceCurveJoin)
+                    .HasForeignKey<CriterionLibraryScenarioPerformanceCurveEntity>(d => d.ScenarioPerformanceCurveId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<CriterionLibraryRemainingLifeLimitEntity>(entity =>
             {
                 entity.HasKey(e => new { e.CriterionLibraryId, e.RemainingLifeLimitId });
@@ -720,6 +886,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .HasForeignKey<CriterionLibraryRemainingLifeLimitEntity>(d => d.RemainingLifeLimitId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<CriterionLibraryScenarioRemainingLifeLimitEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioRemainingLifeLimitId });
+
+                entity.ToTable("CriterionLibrary_ScenarioRemainingLifeLimit");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioRemainingLifeLimitId).IsUnique();
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioRemainingLifeLimitJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ScenarioRemainingLifeLimit)
+                    .WithOne(p => p.CriterionLibraryScenarioRemainingLifeLimitJoin)
+                    .HasForeignKey<CriterionLibraryScenarioRemainingLifeLimitEntity>(d => d.ScenarioRemainingLifeLimitId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<CriterionLibraryTargetConditionGoalEntity>(entity =>
             {
@@ -738,6 +924,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.CriterionLibrary)
                     .WithMany(p => p.CriterionLibraryTargetConditionGoalJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CriterionLibraryScenarioTargetConditionGoalEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioTargetConditionGoalId });
+
+                entity.ToTable("CriterionLibrary_ScenarioTargetConditionGoal");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioTargetConditionGoalId).IsUnique();
+
+                entity.HasOne(d => d.ScenarioTargetConditionGoal)
+                    .WithOne(p => p.CriterionLibraryScenarioTargetConditionGoalJoin)
+                    .HasForeignKey<CriterionLibraryScenarioTargetConditionGoalEntity>(d => d.ScenarioTargetConditionGoalId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioTargetConditionGoalJoins)
                     .HasForeignKey(d => d.CriterionLibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
@@ -763,6 +970,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<CriterionLibraryScenarioSelectableTreatmentEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, TreatmentId = e.ScenarioSelectableTreatmentId });
+
+                entity.ToTable("CriterionLibrary_ScenarioTreatment");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioSelectableTreatmentId).IsUnique();
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioSelectableTreatmentJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ScenarioSelectableTreatment)
+                    .WithOne(p => p.CriterionLibraryScenarioSelectableTreatmentJoin)
+                    .HasForeignKey<CriterionLibraryScenarioSelectableTreatmentEntity>(d => d.ScenarioSelectableTreatmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<CriterionLibraryConditionalTreatmentConsequenceEntity>(entity =>
             {
                 entity.HasKey(e => new { e.CriterionLibraryId, TreatmentConsequenceId = e.ConditionalTreatmentConsequenceId });
@@ -781,6 +1009,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.ConditionalTreatmentConsequence)
                     .WithOne(p => p.CriterionLibraryConditionalTreatmentConsequenceJoin)
                     .HasForeignKey<CriterionLibraryConditionalTreatmentConsequenceEntity>(d => d.ConditionalTreatmentConsequenceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, TreatmentConsequenceId = e.ScenarioConditionalTreatmentConsequenceId });
+
+                entity.ToTable("CriterionLibrary_ScenarioTreatmentConsequence");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioConditionalTreatmentConsequenceId).IsUnique();
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioTreatmentConsequenceJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ScenarioConditionalTreatmentConsequence)
+                    .WithOne(p => p.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                    .HasForeignKey<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(d => d.ScenarioConditionalTreatmentConsequenceId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -805,6 +1054,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<CriterionLibraryScenarioTreatmentCostEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.ScenarioTreatmentCostId });
+
+                entity.ToTable("CriterionLibrary_ScenarioTreatmentCost");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.ScenarioTreatmentCostId).IsUnique();
+
+                entity.HasOne(d => d.CriterionLibrary)
+                .WithMany(p => p.CriterionLibraryScenarioTreatmentCostJoins)
+                .HasForeignKey(d => d.CriterionLibraryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ScenarioTreatmentCost)
+                .WithOne(p => p.CriterionLibraryScenarioTreatmentCostJoin)
+                .HasForeignKey<CriterionLibraryScenarioTreatmentCostEntity>(d => d.ScenarioTreatmentCostId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<CriterionLibraryTreatmentSupersessionEntity>(entity =>
             {
                 entity.HasKey(e => new { e.CriterionLibraryId, e.TreatmentSupersessionId });
@@ -823,6 +1093,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.TreatmentSupersession)
                     .WithOne(p => p.CriterionLibraryTreatmentSupersessionJoin)
                     .HasForeignKey<CriterionLibraryTreatmentSupersessionEntity>(d => d.TreatmentSupersessionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CriterionLibraryScenarioTreatmentSupersessionEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CriterionLibraryId, e.TreatmentSupersessionId });
+
+                entity.ToTable("CriterionLibrary_ScenarioTreatmentSupersession");
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasIndex(e => e.TreatmentSupersessionId).IsUnique();
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioTreatmentSupersessionJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ScenarioTreatmentSupersession)
+                    .WithOne(p => p.CriterionLibraryScenarioTreatmentSupersessionJoin)
+                    .HasForeignKey<CriterionLibraryScenarioTreatmentSupersessionEntity>(d => d.TreatmentSupersessionId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -851,6 +1142,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioDeficientConditionGoalEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.HasIndex(e => e.AttributeId);
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.AllowedDeficientPercentage).IsRequired();
+
+                entity.Property(e => e.DeficientLimit).IsRequired();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.ScenarioDeficientConditionGoals)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Attribute)
+                    .WithMany(p => p.ScenarioDeficientConditionGoals)
+                    .HasForeignKey(d => d.AttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<DeficientConditionGoalLibraryEntity>(entity =>
             {
                 entity.Property(e => e.Name).IsRequired();
@@ -858,52 +1173,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
-            modelBuilder.Entity<DeficientConditionGoalLibrarySimulationEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.DeficientConditionGoalLibraryId, e.SimulationId });
-
-                entity.ToTable("DeficientConditionGoalLibrary_Simulation");
-
-                entity.HasIndex(e => e.DeficientConditionGoalLibraryId);
-
-                entity.HasIndex(e => e.SimulationId).IsUnique();
-
-                entity.HasOne(d => d.DeficientConditionGoalLibrary)
-                    .WithMany(p => p.DeficientConditionGoalLibrarySimulationJoins)
-                    .HasForeignKey(d => d.DeficientConditionGoalLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.DeficientConditionGoalLibrarySimulationJoin)
-                    .HasForeignKey<DeficientConditionGoalLibrarySimulationEntity>(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
             modelBuilder.Entity<EquationEntity>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Expression).IsRequired();
-
-                /*entity.HasOne(d => d.AttributeEquationCriterionLibraryJoin)
-                    .WithOne(p => p.Equation)
-                    .HasForeignKey<AttributeEquationCriterionLibraryEntity>(d => d.EquationId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.ConditionalTreatmentConsequenceEquationJoin)
-                    .WithOne(p => p.Equation)
-                    .HasForeignKey<ConditionalTreatmentConsequenceEquationEntity>(d => d.EquationId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.PerformanceCurveEquationJoin)
-                    .WithOne(p => p.Equation)
-                    .HasForeignKey<PerformanceCurveEquationEntity>(d => d.EquationId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.TreatmentCostEquationJoin)
-                    .WithOne(p => p.Equation)
-                    .HasForeignKey<TreatmentCostEquationEntity>(d => d.EquationId)
-                    .OnDelete(DeleteBehavior.Cascade);*/
             });
 
             modelBuilder.Entity<FacilityEntity>(entity =>
@@ -996,6 +1270,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioPerformanceCurveEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.HasIndex(e => e.AttributeId);
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.PerformanceCurves)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Attribute)
+                    .WithMany(p => p.ScenarioPerformanceCurves)
+                    .HasForeignKey(d => d.AttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<PerformanceCurveEquationEntity>(entity =>
             {
                 entity.HasKey(e => new { e.PerformanceCurveId, e.EquationId });
@@ -1017,32 +1312,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioPerformanceCurveEquationEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.ScenarioPerformanceCurveId, e.EquationId });
+
+                entity.ToTable("ScenarioPerformanceCurve_Equation");
+
+                entity.HasIndex(e => e.ScenarioPerformanceCurveId).IsUnique();
+
+                entity.HasIndex(e => e.EquationId).IsUnique();
+
+                entity.HasOne(d => d.ScenarioPerformanceCurve)
+                    .WithOne(p => p.ScenarioPerformanceCurveEquationJoin)
+                    .HasForeignKey<ScenarioPerformanceCurveEquationEntity>(d => d.ScenarioPerformanceCurveId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Equation)
+                    .WithOne(p => p.ScenarioPerformanceCurveEquationJoin)
+                    .HasForeignKey<ScenarioPerformanceCurveEquationEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<PerformanceCurveLibraryEntity>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Name).IsRequired();
-            });
-
-            modelBuilder.Entity<PerformanceCurveLibrarySimulationEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.PerformanceCurveLibraryId, e.SimulationId });
-
-                entity.ToTable("PerformanceCurveLibrary_Simulation");
-
-                entity.HasIndex(e => e.PerformanceCurveLibraryId);
-
-                entity.HasIndex(e => e.SimulationId).IsUnique();
-
-                entity.HasOne(d => d.PerformanceCurveLibrary)
-                    .WithMany(p => p.PerformanceCurveLibrarySimulationJoins)
-                    .HasForeignKey(d => d.PerformanceCurveLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.PerformanceCurveLibrarySimulationJoin)
-                    .HasForeignKey<PerformanceCurveLibrarySimulationEntity>(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<RemainingLifeLimitEntity>(entity =>
@@ -1065,33 +1360,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .HasForeignKey(d => d.AttributeId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<ScenarioRemainingLifeLimitEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.HasIndex(e => e.AttributeId);
+
+                entity.Property(e => e.Value).IsRequired();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.RemainingLifeLimits)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Attribute)
+                    .WithMany(p => p.ScenarioRemainingLifeLimits)
+                    .HasForeignKey(d => d.AttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<RemainingLifeLimitLibraryEntity>(entity =>
             {
                 entity.Property(e => e.Name).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            });
-
-            modelBuilder.Entity<RemainingLifeLimitLibrarySimulationEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.RemainingLifeLimitLibraryId, e.SimulationId });
-
-                entity.ToTable("RemainingLifeLimitLibrary_Simulation");
-
-                entity.HasIndex(e => e.RemainingLifeLimitLibraryId);
-
-                entity.HasIndex(e => e.SimulationId).IsUnique();
-
-                entity.HasOne(d => d.RemainingLifeLimitLibrary)
-                    .WithMany(p => p.RemainingLifeLimitLibrarySimulationJoins)
-                    .HasForeignKey(d => d.RemainingLifeLimitLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.RemainingLifeLimitLibrarySimulationJoin)
-                    .HasForeignKey<RemainingLifeLimitLibrarySimulationEntity>(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<SectionEntity>(entity =>
@@ -1124,6 +1418,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithMany(p => p.Treatments)
                     .HasForeignKey(d => d.TreatmentLibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ScenarioSelectableTreatmentEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.ShadowForAnyTreatment).IsRequired();
+                entity.Property(e => e.ShadowForSameTreatment).IsRequired();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.Simulation)
+                .WithMany(p => p.SelectableTreatments)
+                .HasForeignKey(d => d.SimulationId)
+                .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<SimulationEntity>(entity =>
@@ -1181,6 +1489,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioTargetConditionGoalEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+                entity.HasIndex(e => e.AttributeId);
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.Target).IsRequired();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.ScenarioTargetConditionalGoals)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<TargetConditionGoalLibraryEntity>(entity =>
             {
                 entity.Property(e => e.Name).IsRequired();
@@ -1188,46 +1513,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
-            modelBuilder.Entity<TargetConditionGoalLibrarySimulationEntity>(entity =>
+            modelBuilder.Entity<ScenarioSelectableTreatmentScenarioBudgetEntity>(entity =>
             {
-                entity.HasKey(e => new { e.TargetConditionGoalLibraryId, e.SimulationId });
+                entity.HasKey(e => new { TreatmentId = e.ScenarioSelectableTreatmentId, e.ScenarioBudgetId });
 
-                entity.ToTable("TargetConditionGoalLibrary_Simulation");
+                entity.ToTable("ScenarioSelectableTreatment_ScenarioBudget");
 
-                entity.HasIndex(e => e.TargetConditionGoalLibraryId);
+                entity.HasIndex(e => e.ScenarioSelectableTreatmentId);
 
-                entity.HasIndex(e => e.SimulationId).IsUnique();
+                entity.HasIndex(e => e.ScenarioBudgetId);
 
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.TargetConditionGoalLibrarySimulationJoin)
-                    .HasForeignKey<TargetConditionGoalLibrarySimulationEntity>(d => d.SimulationId)
+                entity.HasOne(d => d.ScenarioBudget)
+                    .WithMany(p => p.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                    .HasForeignKey(d => d.ScenarioBudgetId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(d => d.TargetConditionGoalLibrary)
-                    .WithMany(p => p.TargetConditionGoalLibrarySimulationJoins)
-                    .HasForeignKey(d => d.TargetConditionGoalLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<SelectableTreatmentBudgetEntity>(entity =>
-            {
-                entity.HasKey(e => new { TreatmentId = e.SelectableTreatmentId, e.BudgetId });
-
-                entity.ToTable("Treatment_Budget");
-
-                entity.HasIndex(e => e.SelectableTreatmentId);
-
-                entity.HasIndex(e => e.BudgetId);
-
-                entity.HasOne(d => d.Budget)
-                    .WithMany(p => p.TreatmentBudgetJoins)
-                    .HasForeignKey(d => d.BudgetId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.SelectableTreatment)
-                    .WithMany(p => p.TreatmentBudgetJoins)
-                    .HasForeignKey(d => d.SelectableTreatmentId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(d => d.ScenarioSelectableTreatment)
+                    .WithMany(p => p.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                    .HasForeignKey(d => d.ScenarioSelectableTreatmentId)
+                    .OnDelete(DeleteBehavior.ClientCascade);
             });
 
             modelBuilder.Entity<ConditionalTreatmentConsequenceEntity>(entity =>
@@ -1245,6 +1549,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.Attribute)
                     .WithMany(p => p.TreatmentConsequences)
+                    .HasForeignKey(d => d.AttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ScenarioConditionalTreatmentConsequenceEntity>(entity =>
+            {
+                entity.HasIndex(e => e.ScenarioSelectableTreatmentId);
+
+                entity.HasIndex(e => e.AttributeId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.ScenarioSelectableTreatment)
+                    .WithMany(p => p.ScenarioTreatmentConsequences)
+                    .HasForeignKey(d => d.ScenarioSelectableTreatmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Attribute)
+                    .WithMany(p => p.ScenarioTreatmentConsequences)
                     .HasForeignKey(d => d.AttributeId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
@@ -1270,6 +1593,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioConditionalTreatmentConsequenceEquationEntity>(entity =>
+            {
+                entity.HasKey(e => new { TreatmentConsequenceId = e.ScenarioConditionalTreatmentConsequenceId, e.EquationId });
+
+                entity.ToTable("ScenarioTreatmentConsequence_Equation");
+
+                entity.HasIndex(e => e.ScenarioConditionalTreatmentConsequenceId).IsUnique();
+
+                entity.HasIndex(e => e.EquationId).IsUnique();
+
+                entity.HasOne(d => d.ScenarioConditionalTreatmentConsequence)
+                    .WithOne(p => p.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                    .HasForeignKey<ScenarioConditionalTreatmentConsequenceEquationEntity>(d => d.ScenarioConditionalTreatmentConsequenceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Equation)
+                    .WithOne(p => p.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                    .HasForeignKey<ScenarioConditionalTreatmentConsequenceEquationEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<TreatmentCostEntity>(entity =>
             {
                 entity.HasIndex(e => e.TreatmentId);
@@ -1279,6 +1623,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.SelectableTreatment)
                     .WithMany(p => p.TreatmentCosts)
                     .HasForeignKey(d => d.TreatmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ScenarioTreatmentCostEntity>(entity =>
+            {
+                entity.HasIndex(e => e.ScenarioSelectableTreatmentId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.ScenarioSelectableTreatment)
+                    .WithMany(p => p.ScenarioTreatmentCosts)
+                    .HasForeignKey(d => d.ScenarioSelectableTreatmentId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -1303,32 +1659,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioTreatmentCostEquationEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.ScenarioTreatmentCostId, e.EquationId });
+
+                entity.ToTable("ScenarioTreatmentCost_Equation");
+
+                entity.HasIndex(e => e.ScenarioTreatmentCostId).IsUnique();
+
+                entity.HasIndex(e => e.EquationId).IsUnique();
+
+                entity.HasOne(d => d.ScenarioTreatmentCost)
+                    .WithOne(p => p.ScenarioTreatmentCostEquationJoin)
+                    .HasForeignKey<ScenarioTreatmentCostEquationEntity>(d => d.ScenarioTreatmentCostId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Equation)
+                    .WithOne(p => p.ScenarioTreatmentCostEquationJoin)
+                    .HasForeignKey<ScenarioTreatmentCostEquationEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<TreatmentLibraryEntity>(entity =>
             {
                 entity.Property(e => e.Name).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            });
-
-            modelBuilder.Entity<TreatmentLibrarySimulationEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.TreatmentLibraryId, e.SimulationId });
-
-                entity.ToTable("TreatmentLibrary_Simulation");
-
-                entity.HasIndex(e => e.TreatmentLibraryId);
-
-                entity.HasIndex(e => e.SimulationId).IsUnique();
-
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.TreatmentLibrarySimulationJoin)
-                    .HasForeignKey<TreatmentLibrarySimulationEntity>(d => d.SimulationId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.TreatmentLibrary)
-                    .WithMany(p => p.TreatmentLibrarySimulationJoins)
-                    .HasForeignKey(d => d.TreatmentLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<TreatmentSchedulingEntity>(entity =>
@@ -1345,6 +1701,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioTreatmentSchedulingEntity>(entity =>
+            {
+                entity.HasIndex(e => e.TreatmentId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.OffsetToFutureYear).IsRequired();
+
+                entity.HasOne(d => d.ScenarioSelectableTreatment)
+                    .WithMany(p => p.ScenarioTreatmentSchedulings)
+                    .HasForeignKey(d => d.TreatmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<TreatmentSupersessionEntity>(entity =>
             {
                 entity.HasIndex(e => e.TreatmentId);
@@ -1353,6 +1723,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.SelectableTreatment)
                     .WithMany(p => p.TreatmentSupersessions)
+                    .HasForeignKey(d => d.TreatmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ScenarioTreatmentSupersessionEntity>(entity =>
+            {
+                entity.HasIndex(e => e.TreatmentId);
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.ScenarioSelectableTreatment)
+                    .WithMany(p => p.ScenarioTreatmentSupersessions)
                     .HasForeignKey(d => d.TreatmentId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
@@ -1534,6 +1916,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Title).IsRequired();
 
                 entity.Property(e => e.Content).IsRequired();
+            });
+
+            modelBuilder.Entity<SimulationLogEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.HasOne(d => d.Simulation)
+                .WithMany(p => p.SimulationLogs)
+                .HasForeignKey(d => d.SimulationId)
+                .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

@@ -8,9 +8,8 @@ using Moq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Reporting;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
-
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
 {

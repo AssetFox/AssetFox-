@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.UnitTestsCore.TestData;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
@@ -87,7 +88,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 // Act
                 var result = await _controller
-                    .UpsertDeficientConditionGoalLibrary(Guid.Empty, TestDeficientConditionGoalLibrary.ToDto());
+                    .UpsertDeficientConditionGoalLibrary(TestDeficientConditionGoalLibrary.ToDto());
 
                 // Assert
                 Assert.IsType<OkResult>(result);
@@ -166,15 +167,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     _testHelper.TestCriterionLibrary.ToDto();
 
                 // Act
-                await _controller.UpsertDeficientConditionGoalLibrary(_testHelper.TestSimulation.Id,
-                    dto);
+                await _controller.UpsertDeficientConditionGoalLibrary(dto);
 
                 // Assert
                 var timer = new Timer {Interval = 5000};
                 timer.Elapsed += delegate
                 {
                     var modifiedDto = _testHelper.UnitOfWork.DeficientConditionGoalRepo
-                        .DeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
+                        .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
                     Assert.Equal(dto.Description, modifiedDto.Description);
                     Assert.Single(modifiedDto.AppliedScenarioIds);
                     Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
@@ -208,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary =
                     _testHelper.TestCriterionLibrary.ToDto();
 
-                await _controller.UpsertDeficientConditionGoalLibrary(_testHelper.TestSimulation.Id,
+                await _controller.UpsertDeficientConditionGoalLibrary(
                     deficientConditionGoalLibraryDTO);
 
                 // Act
@@ -219,8 +219,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
                 Assert.True(!_testHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == DeficientConditionGoalLibraryId));
                 Assert.True(!_testHelper.UnitOfWork.Context.DeficientConditionGoal.Any(_ => _.Id == DeficientConditionGoalId));
-                Assert.True(!_testHelper.UnitOfWork.Context.DeficientConditionGoalLibrarySimulation.Any(_ =>
-                    _.DeficientConditionGoalLibraryId == DeficientConditionGoalLibraryId));
                 Assert.True(
                     !_testHelper.UnitOfWork.Context.CriterionLibraryDeficientConditionGoal.Any(_ =>
                         _.DeficientConditionGoalId == DeficientConditionGoalId));

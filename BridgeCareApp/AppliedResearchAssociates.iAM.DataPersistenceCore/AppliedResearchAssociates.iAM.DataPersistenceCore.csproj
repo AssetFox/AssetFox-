@@ -13,7 +13,9 @@
 
   <ItemGroup>
     <Content Include="Repositories\MSSQL\migrationConnection.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
 
@@ -46,7 +48,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
     <Folder Include="Repositories\MSSQLLegacy\Mappings\" />
   </ItemGroup>
 

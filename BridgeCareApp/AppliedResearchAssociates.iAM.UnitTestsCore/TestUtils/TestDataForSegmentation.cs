@@ -1,6 +1,6 @@
 ﻿//using AppliedResearchAssociates.iAM.Segmentation;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestData
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public static class TestDataForSegmentation
     {

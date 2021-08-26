@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
@@ -38,7 +36,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IAttributeValueHistoryRepository _attributeValueHistoryRepo;
         private IBenefitRepository _benefitRepo;
         private IBudgetAmountRepository _budgetAmountRepo;
-        private IBudgetPercentagePairRepository _budgetPercentagePairRepo;
         private IBudgetPriorityRepository _budgetPriorityRepo;
         private IBudgetRepository _budgetRepo;
         private ICashFlowDistributionRuleRepository _cashFlowDistributionRuleRepo;
@@ -47,7 +44,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ICommittedProjectRepository _committedProjectRepo;
         private ICriterionLibraryRepository _criterionLibraryRepo;
         private IDeficientConditionGoalRepository _deficientConditionGoalRepo;
-        private IEquationRepository _equationRepo;
         private IFacilityRepository _facilityRepo;
         private IInvestmentPlanRepository _investmentPlanRepo;
         private IMaintainableAssetRepository _maintainableAssetRepo;
@@ -89,8 +85,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IBudgetAmountRepository BudgetAmountRepo => _budgetAmountRepo ??= new BudgetAmountRepository(this);
 
-        public IBudgetPercentagePairRepository BudgetPercentagePairRepo => _budgetPercentagePairRepo ??= new BudgetPercentagePairRepository(this);
-
         public IBudgetPriorityRepository BudgetPriorityRepo => _budgetPriorityRepo ??= new BudgetPriorityRepository(this);
 
         public IBudgetRepository BudgetRepo => _budgetRepo ??= new BudgetRepository(this);
@@ -106,8 +100,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ICriterionLibraryRepository CriterionLibraryRepo => _criterionLibraryRepo ??= new CriterionLibraryRepository(this);
 
         public IDeficientConditionGoalRepository DeficientConditionGoalRepo => _deficientConditionGoalRepo ??= new DeficientConditionGoalRepository(this);
-
-        public IEquationRepository EquationRepo => _equationRepo ??= new EquationRepository(this);
 
         public IFacilityRepository FacilityRepo => _facilityRepo ??= new FacilityRepository(this);
 

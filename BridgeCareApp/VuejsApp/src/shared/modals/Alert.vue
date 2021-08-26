@@ -7,7 +7,9 @@
                 </v-layout>
             </v-card-title>
             <v-card-text>
+                <div class="text--primary">
                 {{dialogData.message}}
+                </div>
             </v-card-text>
             <v-card-actions>
                 <v-layout justify-space-between row v-if="dialogData.choice">

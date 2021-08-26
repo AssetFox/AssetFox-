@@ -84,7 +84,7 @@ namespace BridgeCareCore.Controllers.BaseController
         {
             if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new RowNotInTableException($"No simulation found for given scenario.");
             }
 
             if (UnitOfWork.UserEntity == null || !UnitOfWork.Context.Simulation.Any(_ =>
@@ -98,7 +98,7 @@ namespace BridgeCareCore.Controllers.BaseController
         {
             if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new RowNotInTableException($"No simulation found for given scenario.");
             }
 
             if (!UnitOfWork.Context.Simulation.Any(_ =>

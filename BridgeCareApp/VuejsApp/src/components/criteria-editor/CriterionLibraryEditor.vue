@@ -50,8 +50,8 @@
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario" />
-        <v-flex v-show="hasSelectedCriterionLibrary || callFromScenario">
+        <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion" />
+        <v-flex v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion">
             <v-layout justify-center>
                 <v-flex xs10>
                     <CriteriaEditor
@@ -63,7 +63,7 @@
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario" />
+        <v-divider v-show="hasSelectedCriterionLibrary || callFromScenario || callFromLibraryToEditCriterion" />
         <v-flex v-show="hasSelectedCriterionLibrary">
             <v-layout justify-center>
                 <v-flex xs6>
@@ -155,6 +155,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 export default class CriterionLibraryEditor extends Vue {
     @Prop() dialogLibraryId: string;
     @Prop() dialogIsFromScenario: boolean;
+    @Prop() dialogIsFromLibrary: boolean;
 
     @State(state => state.criterionModule.criterionLibraries)
     stateCriterionLibraries: CriterionLibrary[];
@@ -184,7 +185,7 @@ export default class CriterionLibraryEditor extends Vue {
         ...emptyCriteriaEditorData,
         isLibraryContext: true,
     };
-    isLibraryContext: boolean = false;
+    isLibraryContext: boolean = true;
     createCriterionLibraryDialogData: CreateCriterionLibraryDialogData = clone(
         emptyCreateCriterionLibraryDialogData,
     );
@@ -192,6 +193,7 @@ export default class CriterionLibraryEditor extends Vue {
     canUpdateOrCreate: boolean = false;
     uuidNIL: string = getBlankGuid();
     callFromScenario: boolean = false;
+    callFromLibraryToEditCriterion: boolean = false;
     criteriaForScenario: string | null = null;
     selectedScenarioRelatedCriteria: CriterionLibrary = clone(
         emptyCriterionLibrary,
@@ -232,7 +234,7 @@ export default class CriterionLibraryEditor extends Vue {
     @Watch('dialogLibraryId')
     onDialogLibraryIdChanged() {
         if (
-            !this.dialogIsFromScenario ||
+            (!this.dialogIsFromScenario && !this.dialogIsFromLibrary) ||
             this.dialogLibraryId == this.uuidNIL
         ) {
             this.librarySelectItemValue = this.dialogLibraryId;
@@ -258,6 +260,7 @@ export default class CriterionLibraryEditor extends Vue {
     onScenarioRelatedCriteria() {
         this.criteriaForScenario = this.dialogLibraryId;
         this.callFromScenario = this.dialogIsFromScenario;
+        this.callFromLibraryToEditCriterion = this.dialogIsFromLibrary;
         this.selectedScenarioRelatedCriteria = clone(
             this.scenarioRelatedCriteria,
         );
@@ -277,7 +280,7 @@ export default class CriterionLibraryEditor extends Vue {
             this.selectedCriterionLibrary.id !== this.uuidNIL;
 
         if (
-            this.callFromScenario &&
+            (this.callFromScenario || this.dialogIsFromLibrary) &&
             this.hasSelectedCriterionLibrary == false
         ) {
             this.criteriaEditorData = {
@@ -317,7 +320,7 @@ export default class CriterionLibraryEditor extends Vue {
             }));
 
             if (
-                !this.isLibraryContext &&
+                (!this.isLibraryContext || !this.dialogIsFromLibrary) &&
                 hasValue(this.librarySelectItemValue)
             ) {
                 this.selectCriterionLibraryAction({
@@ -342,7 +345,7 @@ export default class CriterionLibraryEditor extends Vue {
         this.canUpdateOrCreate = result.validated;
 
         if (result.validated) {
-            if (!this.dialogIsFromScenario) {
+            if (!this.dialogIsFromScenario && !this.dialogIsFromLibrary) {
                 this.selectedCriterionLibrary = {
                     ...this.selectedCriterionLibrary,
                     mergedCriteriaExpression: result.criteria!,

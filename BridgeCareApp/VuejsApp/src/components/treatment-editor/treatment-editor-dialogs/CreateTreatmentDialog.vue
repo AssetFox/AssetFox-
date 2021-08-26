@@ -34,16 +34,17 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 export default class CreateTreatmentDialog extends Vue {
   @Prop() showDialog: boolean;
 
-  newTreatment: Treatment = {...emptyTreatment, id: getNewGuid()};
+  newTreatment: Treatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
 
   onSubmit(submit: boolean) {
     if (submit) {
+      this.newTreatment.addTreatment = true;
       this.$emit('submit', this.newTreatment);
     } else {
       this.$emit('submit', null);
     }
 
-    this.newTreatment = {...emptyTreatment, id: getNewGuid()};
+    this.newTreatment = {...emptyTreatment, id: getNewGuid(), addTreatment: false};
   }
 }
 </script>

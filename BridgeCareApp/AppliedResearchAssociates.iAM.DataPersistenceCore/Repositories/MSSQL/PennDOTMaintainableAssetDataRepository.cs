@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class PennDOTMaintainableAssetDataRepository : IAssetData
     {
-        UnitOfWork.UnitOfDataPersistenceWork _unitOfWork;
+        UnitOfDataPersistenceWork _unitOfWork;
 
-        public PennDOTMaintainableAssetDataRepository(UnitOfWork.UnitOfDataPersistenceWork uow)
+        public PennDOTMaintainableAssetDataRepository(UnitOfDataPersistenceWork uow)
         {
             _unitOfWork = uow;
             var network = _unitOfWork.NetworkRepo.GetPennDotNetwork();
@@ -21,12 +22,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             foreach (var asset in assets)
             {
-                brkeyDatum.Add(new KeySegmentDatum()
+                brkeyDatum.Add(new KeySegmentDatum
                 {
                     SegmentId = asset.Id,
                     KeyValue = new SegmentAttributeDatum("BRKEY", asset.FacilityName)
                 });
-                bmsidDatum.Add(new KeySegmentDatum()
+                bmsidDatum.Add(new KeySegmentDatum
                 {
                     SegmentId = asset.Id,
                     KeyValue = new SegmentAttributeDatum("BMSID", asset.SectionName)

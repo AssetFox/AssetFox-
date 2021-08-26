@@ -1,7 +1,10 @@
-import {emptyEquation, Equation} from '@/shared/models/iAM/equation';
-import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
-import {clone} from 'ramda';
-import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
+import {
+    CriterionLibrary,
+    emptyCriterionLibrary,
+} from '@/shared/models/iAM/criteria';
+import { clone } from 'ramda';
+import { getBlankGuid } from '@/shared/utils/uuid-utils';
 
 export interface PerformanceCurve {
     id: string;
@@ -22,21 +25,13 @@ export interface PerformanceCurveLibrary {
     shared?: boolean;
 }
 
-export interface PerformanceCurveGridItem {
-    id: string;
-    name: string;
-    attribute: string;
-    equation: string;
-    criterion: string;
-}
-
 export const emptyPerformanceCurve: PerformanceCurve = {
     id: getBlankGuid(),
     attribute: '',
     name: '',
     shift: false,
     equation: clone(emptyEquation),
-    criterionLibrary: clone(emptyCriterionLibrary)
+    criterionLibrary: clone(emptyCriterionLibrary),
 };
 
 export const emptyPerformanceCurveLibrary: PerformanceCurveLibrary = {
@@ -44,5 +39,5 @@ export const emptyPerformanceCurveLibrary: PerformanceCurveLibrary = {
     name: '',
     description: '',
     performanceCurves: [],
-    appliedScenarioIds: []
+    appliedScenarioIds: [],
 };

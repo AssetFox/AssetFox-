@@ -4,7 +4,10 @@ using System.IO;
 using System.Linq;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
@@ -97,9 +100,49 @@ namespace BridgeCareCore.Services
             };
         }
 
-        public FileInfoDTO ExportInvestmentBudgetsFile(Guid budgetLibraryId)
+        public FileInfoDTO ExportScenarioInvestmentBudgetsFile(Guid simulationId)
         {
-            var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetBudgetAmountsByBudgetLibraryId(budgetLibraryId);
+            var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(simulationId);
+
+            if (budgetAmounts.Any())
+            {
+                var simulationName = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
+                    .Select(_ => new SimulationEntity {Name = _.Name}).AsNoTracking().Single().Name;
+
+                var fileName = $"{simulationName.Trim().Replace(" ", "_")}_investment_budgets.xlsx";
+
+                using var excelPackage = new ExcelPackage(new FileInfo(fileName));
+
+                var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+
+                var budgetNames = budgetAmounts.Select(_ => _.ScenarioBudget.Name).Distinct().OrderBy(budgetName => budgetName)
+                    .ToList();
+
+                AddHeaderCells(worksheet, budgetNames);
+
+                var budgetAmountsPerYear = budgetAmounts
+                    .OrderBy(budgetAmount => budgetAmount.Year)
+                    .GroupBy(budgetAmount => budgetAmount.Year, entities => entities)
+                    .ToDictionary(group => group.Key, entities => entities
+                        .OrderBy(budgetAmount => budgetAmount.ScenarioBudget.Name)
+                        .Select(budgetAmount => budgetAmount.Value).ToList());
+
+                AddDataCells(worksheet, budgetAmountsPerYear);
+
+                return new FileInfoDTO
+                {
+                    FileName = fileName,
+                    FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                };
+            }
+
+            return CreateInvestmentBudgetsSampleFile();
+        }
+
+        public FileInfoDTO ExportLibraryInvestmentBudgetsFile(Guid budgetLibraryId)
+        {
+            var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetLibraryBudgetAmounts(budgetLibraryId);
 
             if (budgetAmounts.Any())
             {
@@ -139,7 +182,7 @@ namespace BridgeCareCore.Services
         }
 
 
-        public BudgetLibraryDTO ImportInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage)
+        public List<BudgetDTO> ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage)
         {
             var worksheet = excelPackage.Workbook.Worksheets[0];
             var worksheetEnd = worksheet.Dimension.End;
@@ -147,7 +190,70 @@ namespace BridgeCareCore.Services
             var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheetEnd.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
 
-            var existingBudgetEntities = _unitOfWork.BudgetRepo.GetBudgetsWithBudgetAmounts(budgetLibraryId);
+            var existingBudgetEntities = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId)
+                .Select(_ => _.ToScenarioEntity(simulationId)).ToList();
+
+            var existingBudgetNames = existingBudgetEntities.Select(existingBudget => existingBudget.Name).ToList();
+            var newBudgetEntities = worksheetBudgetNames.Where(budgetName => !existingBudgetNames.Contains(budgetName))
+                .Select(budgetName => new ScenarioBudgetEntity
+                {
+                    Id = Guid.NewGuid(), SimulationId = simulationId, Name = budgetName
+                }).ToList();
+
+            var budgetAmountsPerBudgetYearTuple = new Dictionary<(string, int), ScenarioBudgetAmountEntity>();
+            existingBudgetEntities.ForEach(budget =>
+            {
+                budget.ScenarioBudgetAmounts.ForEach(budgetAmount =>
+                    budgetAmountsPerBudgetYearTuple.Add((budget.Name, budgetAmount.Year), budgetAmount));
+            });
+
+            var newBudgetAmountEntities = new List<ScenarioBudgetAmountEntity>();
+            for (var row = 2; row <= worksheetEnd.Row; row++)
+            {
+                for (var col = 2; col <= worksheetEnd.Column; col++)
+                {
+                    var budgetName = worksheet.GetValue<string>(1, col);
+                    var year = worksheet.GetValue<int>(row, 1);
+                    var budgetYearTuple = (budgetName, year);
+                    if (!budgetAmountsPerBudgetYearTuple.ContainsKey(budgetYearTuple))
+                    {
+                        var budgetId = existingBudgetEntities.Any(_ => _.Name == budgetYearTuple.budgetName)
+                            ? existingBudgetEntities
+                                .Single(_ => _.Name == budgetYearTuple.budgetName).Id
+                            : newBudgetEntities
+                                .Single(_ => _.Name == budgetYearTuple.budgetName).Id;
+
+                        newBudgetAmountEntities.Add(new ScenarioBudgetAmountEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            ScenarioBudgetId = budgetId,
+                            Year = budgetYearTuple.year,
+                            Value = worksheet.GetValue<decimal>(row, col)
+                        });
+                    }
+                    else
+                    {
+                        budgetAmountsPerBudgetYearTuple[budgetYearTuple].Value = worksheet.GetValue<decimal>(row, col);
+                    }
+                }
+            }
+
+            _unitOfWork.Context.AddAll(newBudgetEntities);
+            _unitOfWork.Context.AddAll(newBudgetAmountEntities);
+            _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList());
+
+            return _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+        }
+
+        public BudgetLibraryDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage)
+        {
+            var worksheet = excelPackage.Workbook.Worksheets[0];
+            var worksheetEnd = worksheet.Dimension.End;
+
+            var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheetEnd.Column]
+                .Select(cell => cell.GetValue<string>()).ToList();
+
+            var existingBudgetEntities = _unitOfWork.BudgetRepo.GetLibraryBudgets(budgetLibraryId);
 
             var existingBudgetNames = existingBudgetEntities.Select(existingBudget => existingBudget.Name).ToList();
             var newBudgetEntities = worksheetBudgetNames.Where(budgetName => !existingBudgetNames.Contains(budgetName))
@@ -198,7 +304,7 @@ namespace BridgeCareCore.Services
             _unitOfWork.Context.AddAll(newBudgetAmountEntities);
             _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList());
 
-            return _unitOfWork.BudgetRepo.GetBudgetLibraryWithBudgetsAndBudgetAmounts(budgetLibraryId);
+            return _unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryId);
         }
     }
 }

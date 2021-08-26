@@ -30,7 +30,7 @@ export interface Treatment {
     costs: TreatmentCost[];
     consequences: TreatmentConsequence[];
     budgetIds: string[];
-    isNew: boolean;
+    addTreatment: boolean;
 }
 
 export interface TreatmentLibrary {
@@ -77,7 +77,7 @@ export const emptyTreatment: Treatment = {
     costs: [],
     consequences: [],
     budgetIds: [],
-    isNew: false,
+    addTreatment: false,
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {

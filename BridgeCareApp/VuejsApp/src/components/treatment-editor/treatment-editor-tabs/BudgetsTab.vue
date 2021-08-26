@@ -51,7 +51,7 @@ export default class BudgetsTab extends Vue {
     @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
 
     @Prop() selectedTreatmentBudgets: string[];
-    @Prop() isNewTreatment: boolean;
+    @Prop() addTreatment: boolean;    
 
     budgetHeaders: DataTableHeader[] = [
         { text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300px' },
@@ -65,9 +65,8 @@ export default class BudgetsTab extends Vue {
     }
 
     @Watch('selectedTreatmentBudgets')
-    onBudgetsTabDataChanged() {
-        // if it is a new treatment or (Treatment is having set of budgets)
-        if ((this.isNewTreatment && this.selectedTreatmentBudgets.length == 0) || this.selectedTreatmentBudgets.length == 0) {
+    onBudgetsTabDataChanged() {        
+        if (this.addTreatment) {        
             this.selectedBudgets = this.budgets;
         } else {
             this.selectedBudgets = this.budgets

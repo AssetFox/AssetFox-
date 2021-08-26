@@ -154,7 +154,7 @@
                                         <v-card>
                                             <v-card-text class='card-tab-content'>
                                                 <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
-                                                            :isNewTreatment='selectedTreatment.isNew'
+                                                            :addTreatment='selectedTreatment.addTreatment'
                                                             @onModifyBudgets='modifySelectedTreatmentBudgets' />
                                             </v-card-text>
                                         </v-card>
@@ -245,8 +245,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
-import CreateTreatmentLibraryDialog
-    from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentLibraryDialog.vue';
+import CreateTreatmentLibraryDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentLibraryDialog.vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
     CreateTreatmentLibraryDialogData,
@@ -312,6 +311,7 @@ export default class TreatmentEditor extends Vue {
     stateScenarioSelectableTreatments: Treatment[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
+    @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
 
     @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
     @Action('selectTreatmentLibrary') selectTreatmentLibraryAction: any;
@@ -347,6 +347,7 @@ export default class TreatmentEditor extends Vue {
     uuidNIL: string = getBlankGuid();
     keepActiveTab: boolean = false;
     hasScenario: boolean = false;
+    budgets: SimpleBudgetDetail[] = [];
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -375,6 +376,11 @@ export default class TreatmentEditor extends Vue {
 
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
+    }
+
+    @Watch('stateScenarioSimpleBudgetDetails')
+    onStateScenarioInvestmentLibraryChanged() {
+        this.budgets = clone(this.stateScenarioSimpleBudgetDetails);
     }
 
     @Watch('stateTreatmentLibraries')
@@ -418,8 +424,9 @@ export default class TreatmentEditor extends Vue {
                         ...cost,
                         id: getNewGuid(),
                     })),
-                    isNew: true
-                }));
+                    budgetIds: getPropertyValues('id', this.budgets) as string[],                    
+                    addTreatment: false
+                }));               
         } else {
             this.treatments = clone(this.selectedTreatmentLibrary.treatments);
         }
@@ -445,7 +452,7 @@ export default class TreatmentEditor extends Vue {
                 {...clone(this.selectedTreatmentLibrary), treatments: clone(this.treatments)},
                 this.stateSelectedTreatmentLibrary
             );
-        this.setHasUnsavedChangesAction({value: hasUnsavedChanges})
+        this.setHasUnsavedChangesAction({value: hasUnsavedChanges});
 
         if (this.selectedTreatment.id !== this.uuidNIL &&
             any(propEq('id', this.selectedTreatment.id), this.treatments)) {

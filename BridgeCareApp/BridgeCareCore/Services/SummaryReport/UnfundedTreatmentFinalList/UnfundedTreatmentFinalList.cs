@@ -52,6 +52,8 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
         {
             // facilityId, year, section, treatment
             var treatmentsPerSection = new SortedDictionary<int, Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>>();
+            var validFacilityIds = new List<int>();
+            var firstYear = true;
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
                 var untreatedSections =
@@ -60,11 +62,19 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
                         sect.ValuePerNumericAttribute["RISK_SCORE"] > 15000 &&
                         sect.TreatmentOptions.Count > 0
                         ).ToList();
+                if (firstYear)
+                {
+                    validFacilityIds.AddRange(untreatedSections.Select(_ => int.Parse(_.FacilityName)));
+                    firstYear = false;
+                }
+                else
+                {
+                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => int.Parse(_.FacilityName))).ToList();
+                }
 
                 foreach (var section in untreatedSections)
                 {
                     var facilityId = int.Parse(section.FacilityName);
-
                     if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section
                     {
                         var treatmentOptions = section.TreatmentOptions.
@@ -76,14 +86,12 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
                         {
                             var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
                             treatmentsPerSection.Add(facilityId, newTuple);
+                            if (!validFacilityIds.Contains(facilityId) && !firstYear)
+                            {
+                                treatmentsPerSection.Remove(facilityId);
+                            }
                         }
                     }
-                }
-                var facilities = untreatedSections.Select(_ => int.Parse(_.FacilityName));
-                var treatedSectionsInMap = treatmentsPerSection.Keys.Except(facilities);
-                foreach (var item in treatedSectionsInMap)
-                {
-                    treatmentsPerSection.Remove(item);
                 }
             }
 

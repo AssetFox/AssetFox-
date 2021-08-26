@@ -79,6 +79,12 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
                         }
                     }
                 }
+                var facilities = untreatedSections.Select(_ => int.Parse(_.FacilityName));
+                var treatedSectionsInMap = treatmentsPerSection.Keys.Except(facilities);
+                foreach (var item in treatedSectionsInMap)
+                {
+                    treatmentsPerSection.Remove(item);
+                }
             }
 
             currentCell.Row += 1; // Data starts here

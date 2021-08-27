@@ -1,0 +1,15 @@
+{
+  "DefaultData": {
+    "Analysis": {
+      "Weighting": "RISK_SCORE",
+      "OptimizationStrategy": "Benefit-to-Cost Ratio",
+      "BenefitAttribute": "CONDITIONINDEX",
+      "BenefitLimit": 0
+    },
+    "Investment": {
+      "MinimumProjectCostLimit": 1000,
+      "InflationRatePercentage": 3
+    }
+  }
+  // TODO this json will be read in controller api, which will get invoked by vuejs service store.
+}

@@ -27,14 +27,14 @@
     import Component from 'vue-class-component';
     import {State} from 'vuex-class';
     import { hasValue } from '@/shared/utils/has-value-util';
+    import { SecurityTypes } from '@/shared/utils/security-types';
 
     @Component
     export default class Logout extends Vue {
         @State(state => state.authenticationModule.securityType) securityType: string;
-        @State(state => state.authenticationModule.pennDotSecurityType) pennDotSecurityType: string;
 
         mounted() {
-            if (this.securityType === this.pennDotSecurityType) {
+            if (this.securityType === SecurityTypes.esec) {
                 /*
                  * The /iAM/ pages of the penndot deployments fail to set the cookie until they have been refreshed.
                  */

@@ -2,186 +2,252 @@ import AuthenticationService from '../services/authentication.service';
 import { AxiosResponse } from 'axios';
 import { UserInfo, UserTokens } from '@/shared/models/iAM/authentication';
 import { http2XX } from '@/shared/utils/http-utils';
-import { checkLDAP, parseLDAP, regexCheckLDAP } from '@/shared/utils/parse-ldap';
+import {
+    checkLDAP,
+    parseLDAP,
+    regexCheckLDAP,
+} from '@/shared/utils/parse-ldap';
 import { hasValue } from '@/shared/utils/has-value-util';
 import moment from 'moment';
+import { isNil } from 'ramda';
+import { SecurityTypes } from '@/shared/utils/security-types';
 
 const state = {
-  authenticated: false,
-  hasRole: false,
-  checkedForRole: false,
-  isAdmin: false,
-  isCWOPA: false,
-  username: '',
-  refreshing: false,
-  securityType: 'ESEC',
-  pennDotSecurityType: 'ESEC',
-  azureSecurityType: 'B2C',
+    authenticated: false,
+    hasRole: false,
+    checkedForRole: false,
+    isAdmin: false,
+    isCWOPA: false,
+    username: '',
+    refreshing: false,
+    securityType: SecurityTypes.esec,
+    pennDotSecurityType: 'ESEC',
+    azureSecurityType: 'B2C',
 };
 
 const mutations = {
-  authenticatedMutator(state: any, status: boolean) {
-    state.authenticated = status;
-  },
-  hasRoleMutator(state: any, status: boolean) {
-    state.hasRole = status;
-  },
-  checkedForRoleMutator(state: any, status: boolean) {
-    state.checkedForRole = status;
-  },
-  isAdminMutator(state: any, status: boolean) {
-    state.isAdmin = status;
-  },
-  isCWOPAMutator(state: any, status: boolean) {
-    state.isCWOPA = status;
-  },
-  usernameMutator(state: any, username: string) {
-    state.username = username;
-  },
-  refreshingMutator(state: any, refreshing: boolean) {
-    state.refreshing = refreshing;
-  },
+    authenticatedMutator(state: any, status: boolean) {
+        state.authenticated = status;
+    },
+    hasRoleMutator(state: any, status: boolean) {
+        state.hasRole = status;
+    },
+    checkedForRoleMutator(state: any, status: boolean) {
+        state.checkedForRole = status;
+    },
+    isAdminMutator(state: any, status: boolean) {
+        state.isAdmin = status;
+    },
+    isCWOPAMutator(state: any, status: boolean) {
+        state.isCWOPA = status;
+    },
+    usernameMutator(state: any, username: string) {
+        state.username = username;
+    },
+    refreshingMutator(state: any, refreshing: boolean) {
+        state.refreshing = refreshing;
+    },
 };
 
 const actions = {
-  async getUserTokens({ commit }: any, code: string) {
-    await AuthenticationService.getUserTokens(code)
-      .then((response: AxiosResponse) => {
-        const expirationInMilliseconds = moment().add(30, 'minutes');
-        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-          const userTokens: UserTokens = response.data as UserTokens;
-          localStorage.setItem('UserTokens', JSON.stringify(userTokens));
-          localStorage.setItem('TokenExpiration', expirationInMilliseconds.valueOf().toString());
-          commit('authenticatedMutator', true);
+    async getUserTokens({ commit }: any, code: string) {
+        await AuthenticationService.getUserTokens(code).then(
+            (response: AxiosResponse) => {
+                const expirationInMilliseconds = moment().add(30, 'minutes');
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    const userTokens: UserTokens = response.data as UserTokens;
+                    localStorage.setItem(
+                        'UserTokens',
+                        JSON.stringify(userTokens),
+                    );
+                    localStorage.setItem(
+                        'TokenExpiration',
+                        expirationInMilliseconds.valueOf().toString(),
+                    );
+                    commit('authenticatedMutator', true);
+                }
+            },
+        );
+    },
+
+    async checkBrowserTokens({ dispatch }: any) {
+        if (!hasValue(localStorage.getItem('UserTokens'))) {
+            throw new Error('Cannot determine user authentication status');
         }
-      });
-  },
 
-  async checkBrowserTokens({ commit, dispatch, state }: any, code: string) {
-    const storedTokenExpiration: number = parseInt(localStorage.getItem('TokenExpiration') as string);
-    if (isNaN(storedTokenExpiration)) {
-      return;
-    }
+        const storedTokenExpiration: number = parseInt(
+            localStorage.getItem('TokenExpiration') as string,
+        );
+        if (isNaN(storedTokenExpiration)) {
+            throw new Error('Cannot determine user authentication status');
+        }
 
-    const currentDateTime = moment();
-    const tokenExpirationDateTime = moment(storedTokenExpiration);
-    const differenceInMinutes = tokenExpirationDateTime.diff(currentDateTime, 'minutes');
+        const currentDateTime = moment();
+        const tokenExpirationDateTime = moment(storedTokenExpiration);
+        const differenceInMinutes = tokenExpirationDateTime.diff(
+            currentDateTime,
+            'minutes',
+        );
 
-    if (differenceInMinutes > 2) {
-      return;
-    } else if (differenceInMinutes <= 2) {
-      dispatch('refreshTokens');
-    } else if (state.authenticated) {
-      dispatch('logOut');
-    }
-  },
+        if (differenceInMinutes > 2) {
+            return;
+        }
 
-  async refreshTokens({ commit, dispatch }: any) {
-    if (!localStorage.getItem('UserTokens')) {
-      dispatch('logOut');
-    } else {
-      commit('refreshingMutator', true);
-      const userTokens: UserTokens = JSON.parse(localStorage.getItem('UserTokens') as string) as UserTokens;
-      await AuthenticationService.refreshTokens(userTokens.refresh_token)
-        .then((response: AxiosResponse) => {
-          const expirationInMilliseconds = moment().add(30, 'minutes');
-          if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-            const userTokens: UserTokens = response.data as UserTokens;
-            localStorage.setItem('UserTokens', JSON.stringify(userTokens));
-            localStorage.setItem('TokenExpiration', expirationInMilliseconds.valueOf().toString());
-          }
-        });
-      commit('refreshingMutator', false);
-    }
-  },
+        dispatch('refreshTokens');
+    },
 
-  async getUserInfo({ commit, dispatch, state }: any) {
-    if (!localStorage.getItem('UserTokens')) {
-      dispatch('logOut');
-    } else {
-      const userTokens: UserTokens = JSON.parse(localStorage.getItem('UserTokens') as string) as UserTokens;
-      await AuthenticationService.getUserInfo(userTokens.access_token)
-        .then((response: AxiosResponse) => {
-          if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-            const userInfo: UserInfo = response.data as UserInfo;
-            localStorage.setItem('UserInfo', JSON.stringify(userInfo));
-            const username: string = parseLDAP(userInfo.sub)[0];
-            commit('hasRoleMutator', regexCheckLDAP(userInfo.roles, /PD-BAMS-(Administrator|CWOPA|PlanningPartner|DBEngineer)/));
+    async refreshTokens({ commit }: any) {
+        if (!hasValue(localStorage.getItem('UserTokens'))) {
+            throw new Error('Cannot determine user authentication status');
+        } else {
+            commit('refreshingMutator', true);
+            const userTokens: UserTokens = JSON.parse(
+                localStorage.getItem('UserTokens') as string,
+            ) as UserTokens;
+            await AuthenticationService.refreshTokens(
+                userTokens.refresh_token,
+            ).then((response: AxiosResponse) => {
+                const expirationInMilliseconds = moment().add(30, 'minutes');
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    const userTokens: UserTokens = response.data as UserTokens;
+                    localStorage.setItem(
+                        'UserTokens',
+                        JSON.stringify(userTokens),
+                    );
+                    localStorage.setItem(
+                        'TokenExpiration',
+                        expirationInMilliseconds.valueOf().toString(),
+                    );
+                }
+            });
+            commit('refreshingMutator', false);
+        }
+    },
 
-            if (state.hasRole) {
-              commit('isAdminMutator', checkLDAP(userInfo.roles, 'PD-BAMS-Administrator'));
-              commit('isCWOPAMutator', checkLDAP(userInfo.roles, 'PD-BAMS-CWOPA'));
-            }
+    async getUserInfo({ commit, state }: any) {
+        if (!hasValue(localStorage.getItem('UserTokens'))) {
+            throw new Error('Cannot determine user authentication status');
+        } else {
+            const userTokens: UserTokens = JSON.parse(
+                localStorage.getItem('UserTokens') as string,
+            ) as UserTokens;
+            await AuthenticationService.getUserInfo(
+                userTokens.access_token,
+            ).then((response: AxiosResponse) => {
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    const userInfo: UserInfo = response.data as UserInfo;
+                    localStorage.setItem('UserInfo', JSON.stringify(userInfo));
+                    commit('usernameMutator', parseLDAP(userInfo.sub)[0]);
 
+                    const hasRole: boolean = regexCheckLDAP(
+                        userInfo.roles,
+                        /PD-BAMS-(Administrator|CWOPA|PlanningPartner|DBEngineer)/,
+                    );
+
+                    commit('checkedForRoleMutator', hasRole);
+                    commit('hasRoleMutator', hasRole);
+
+                    if (hasRole) {
+                        commit(
+                            'isAdminMutator',
+                            checkLDAP(userInfo.roles, 'PD-BAMS-Administrator'),
+                        );
+                        commit(
+                            'isCWOPAMutator',
+                            checkLDAP(userInfo.roles, 'PD-BAMS-CWOPA'),
+                        );
+                    }
+
+                    if (!state.authenticated) {
+                        commit('authenticatedMutator', true);
+                    }
+                } else {
+                    if (state.authenticated) {
+                        commit('authenticatedMutator', false);
+                    }
+                    throw new Error(
+                        'Cannot determine user authentication status',
+                    );
+                }
+            });
+        }
+    },
+
+    async logOut({ commit }: any) {
+        commit('usernameMutator', '');
+        commit('authenticatedMutator', false);
+        localStorage.removeItem('UserInfo');
+        localStorage.removeItem('TokenExpiration');
+        if (hasValue(localStorage.getItem('UserTokens'))) {
+            await AuthenticationService.revokeIdToken();
+
+            const userTokens: UserTokens = JSON.parse(
+                localStorage.getItem('UserTokens') as string,
+            ) as UserTokens;
+
+            localStorage.removeItem('UserTokens');
+
+            await AuthenticationService.revokeToken(
+                userTokens.access_token,
+                'Access',
+            );
+            await AuthenticationService.revokeToken(
+                userTokens.refresh_token,
+                'Refresh',
+            );
+        }
+    },
+    async setAzureUserInfo({ commit, dispatch }: any, payload: any) {
+        if (payload.status) {
+            commit('hasRoleMutator', true);
             commit('checkedForRoleMutator', true);
-            commit('usernameMutator', username);
+            commit('isAdminMutator', true);
+            commit('usernameMutator', payload.username);
+        } else {
+            commit('hasRoleMutator', false);
+            commit('checkedForRoleMutator', false);
+            commit('isAdminMutator', false);
+            commit('usernameMutator', '');
+            dispatch('azureB2CLogout');
+        }
 
-            if (!state.authenticated) {
-              commit('authenticatedMutator', true);
+        if (state.authenticated !== payload.status) {
+            commit('authenticatedMutator', payload.status);
+        }
+    },
+    async checkAzureB2CBrowserTokens({ commit, dispatch }: any) {
+        const storedTokenExpiration: number = Number(
+            localStorage.getItem('TokenExpiration') as string,
+        );
+        if (isNaN(storedTokenExpiration)) {
+            return;
+        }
+
+        if (storedTokenExpiration > Date.now()) {
+            if (state.authenticated) {
+                return;
             }
-          } else {
+            commit('authenticatedMutator', true);
+        } else if (state.authenticated) {
             dispatch('logOut');
-          }
-        });
-    }
-  },
-
-  async logOut({ commit }: any) {
-    if (!hasValue(localStorage.getItem('UserTokens'))) {
-      commit('usernameMutator', '');
-      commit('authenticatedMutator', false);
-    } else {
-      localStorage.removeItem('UserInfo');
-      await AuthenticationService.revokeIdToken();
-      const userTokens: UserTokens = JSON.parse(localStorage.getItem('UserTokens') as string) as UserTokens;
-      localStorage.removeItem('UserTokens');
-      localStorage.removeItem('TokenExpiration');
-      await AuthenticationService.revokeToken(userTokens.access_token, 'Access');
-      await AuthenticationService.revokeToken(userTokens.refresh_token, 'Refresh');
-      commit('usernameMutator', '');
-      commit('authenticatedMutator', false);
-    }
-  },
-  async setAzureUserInfo({ commit, dispatch }: any, payload: any) {
-    if (payload.status) {
-      commit('hasRoleMutator', true);
-      commit('checkedForRoleMutator', true);
-      commit('isAdminMutator', true);
-      commit('usernameMutator', payload.username);
-    } else {
-      commit('hasRoleMutator', false);
-      commit('checkedForRoleMutator', false);
-      commit('isAdminMutator', false);
-      commit('usernameMutator', '');
-      dispatch('azureB2CLogout');
-    }
-
-    if (state.authenticated !== payload.status) {
-      commit('authenticatedMutator', payload.status);
-    }
-  },
-  async checkAzureB2CBrowserTokens({ commit, dispatch }: any) {
-    const storedTokenExpiration: number = Number(localStorage.getItem('TokenExpiration') as string);
-    if (isNaN(storedTokenExpiration)) {
-      return;
-    }
-
-    if (storedTokenExpiration > Date.now()) {
-      if (state.authenticated) {
-        return;
-      }
-      commit('authenticatedMutator', true);
-    } else if (state.authenticated) {
-      dispatch('logOut');
-    }
-  },
+        }
+    },
 };
 
 const getters = {};
 
 export default {
-  state,
-  getters,
-  actions,
-  mutations,
+    state,
+    getters,
+    actions,
+    mutations,
 };

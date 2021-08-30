@@ -42,5 +42,6 @@ export const API = {
     ExpressionValidation: '/api/ExpressionValidation',
     UserCriteria: '/api/UserCriteria',
     CommittedProject: '/api/CommittedProject',
-    Announcement: '/api/Announcement'
+    Announcement: '/api/Announcement',
+    CalculatedAttribute: '/api/CalculatedAttribute',
 };

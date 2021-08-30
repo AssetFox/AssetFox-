@@ -55,6 +55,9 @@
                         <v-list-tile @click="onNavigate('/CriterionLibraryEditor/Library/')">
                             <v-list-tile-title>Criterion</v-list-tile-title>
                         </v-list-tile>
+                        <v-list-tile @click="onNavigate('/CalculatedAttributeEditor/Library/')">
+                            <v-list-tile-title>Calculated Attribute</v-list-tile-title>
+                        </v-list-tile>
                     </v-list-group>
                     <v-list-tile @click="onNavigate('/UserCriteria/')" v-if='isAdmin'>
                         <v-list-tile-action>

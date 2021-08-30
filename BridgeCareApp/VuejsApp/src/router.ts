@@ -27,6 +27,7 @@ const CriterionLibraryEditor = () => import(/*webpackChunkName: "criterionLibrar
 const AnalysisMethodEditor = () => import (/*webpackChunkName: editAnalysis*/ '@/components/scenarios/EditAnalysisMethod.vue');
 const RemainingLifeLimitEditor = () => import (/*webpackChunkName: remainingLifeLimitEditor*/ '@/components/remaining-life-limit-editor/RemainingLifeLimitEditor.vue');
 const CashFlowEditor = () => import (/*webpackChunkName: cashFlowEditor*/ '@/components/cash-flow-editor/CashFlowEditor.vue');
+const CalculatedAttributeEditor = () => import (/*webpackChunkName: "CalculatedAttributeEditor" */ '@/components/calculated-attribute-editor/CalculatedAttributeEditor.vue');
 
 Vue.use(VueRouter);
 
@@ -187,6 +188,12 @@ const router = new VueRouter({
             path: '/UserCriteria/',
             name: 'UserCriteria',
             component: UserCriteriaEditor
+        },
+        {
+            path: '/CalculatedAttributeEditor/Library/',
+            name: 'CalculatedAttributeEditor',
+            component: CalculatedAttributeEditor,
+            props: true
         },
         {
             path: '*',

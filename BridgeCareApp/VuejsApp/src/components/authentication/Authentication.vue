@@ -33,8 +33,6 @@
         @Action('setErrorMessage') setErrorMessageAction: any;
         @Action('getUserTokens') getUserTokensAction: any;
         @Action('getUserInfo') getUserInfoAction: any;
-        @Action('getNetworks') getNetworksAction: any;
-        @Action('getAttributes') getAttributesAction: any;
         @Action('getAzureAccountDetails') getAzureAccountDetailsAction: any;
         @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
 

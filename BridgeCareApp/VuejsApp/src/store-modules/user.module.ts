@@ -8,8 +8,7 @@ import {
     emptyUserCriteriaFilter,
     UserCriteriaFilter,
 } from '@/shared/models/iAM/user-criteria-filter';
-import authModule from '@/store-modules/authentication.module';
-import { isEqual } from '@/shared/utils/has-unsaved-changes-helper';
+import store from '@/store/root-store';
 
 const state = {
     users: [] as User[],
@@ -133,7 +132,8 @@ const actions = {
     },
     //////////////////////////////
     async getUserCriteriaFilter({ commit, dispatch }: any) {
-        if (!state.checkedForCriteria) {
+        // @ts-ignore
+        if (!store.state.userModule.checkedForCriteria) {
             const message =
                 'You do not have access to any bridge data. \
           Please contact an administrator to gain access to the data you need.';
@@ -148,7 +148,8 @@ const actions = {
                         );
                         if (
                             !userCriteriaFilter.hasAccess &&
-                            !authModule.state.isAdmin
+                            // @ts-ignore
+                            !store.state.authenticationModule.isAdmin
                         ) {
                             dispatch('setInfoMessage', { message });
                         }

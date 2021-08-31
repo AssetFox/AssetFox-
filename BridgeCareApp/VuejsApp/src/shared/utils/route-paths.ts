@@ -10,7 +10,7 @@ export const ScenarioRoutePaths: any = {
     CashFlow: 'CashFlowEditor/Scenario',
 };
 
-export const UnsecuredRouteNames: string[] = [
+export const UnsecuredRoutePathNames: string[] = [
     'Authentication',
     'AuthenticationStart',
     'AuthenticationFailure',

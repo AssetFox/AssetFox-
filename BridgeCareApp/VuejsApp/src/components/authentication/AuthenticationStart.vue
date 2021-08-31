@@ -29,10 +29,11 @@
     import {Component} from 'vue-property-decorator';
     import {State, Action} from 'vuex-class';
     import oidcConfig from '@/oidc-config';
-    import { emptyUserCriteriaFilter, UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
-    import { isEqual } from '@/shared/utils/has-unsaved-changes-helper';
+    import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
     import { SecurityTypes } from '@/shared/utils/security-types';
     import { hasValue } from '@/shared/utils/has-value-util';
+    import { isAuthenticatedUser,
+    } from '@/shared/utils/authentication-utils';
 
     @Component
     export default class AuthenticationStart extends Vue {
@@ -43,12 +44,6 @@
         @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
         @Action('azureB2CLogin') azureB2CLoginAction: any;
-        @Action('getUserInfo') getUserInfoAction: any;
-        @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
-        @Action('setErrorMessage') setErrorMessageAction: any;
-        @Action('azureB2CLogout') azureB2CLogoutAction: any;
-        @Action('logOut') logOutAction: any;
-        @Action('checkBrowserTokens') checkBrowserTokensAction: any;
 
         esecSecurityType: string = SecurityTypes.esec;
         b2cSecurityType: string = SecurityTypes.b2c;
@@ -59,11 +54,12 @@
                     ? hasValue(localStorage.getItem('UserTokens'))
                     : hasValue(localStorage.getItem('LoggedInUser'));
             if (!this.authenticated && hasAuthInfo) {
-                if (this.securityType === SecurityTypes.esec) {
-                    this.onCheckEsecToken();
-                } else {
-                    this.onCheckAzureToken();
-                }
+                isAuthenticatedUser()
+                    .then((isAuthenticated: boolean | void) => {
+                        if (isAuthenticated) {
+                            this.$router.push('/Home/')
+                        }
+                    });
             } else if (this.authenticated && hasAuthInfo) {
                 this.$router.push('/Home/');
             } else {
@@ -73,31 +69,6 @@
                     this.azureB2CLoginAction();
                 }
             }
-        }
-
-        onCheckEsecToken() {
-            this.checkBrowserTokensAction()
-                .then(() =>
-                    this.getUserInfoAction().then(() =>
-                        this.getUserCriteriaFilterAction().then(() => {
-                            if (this.authenticated) {
-                                this.$router.push('/Home/');
-                            } else {
-                                throw new Error(
-                                    'Failed to authenticate',
-                                );
-                            }
-                        }),
-                    ),
-                )
-                .catch((error: any) => {
-                    this.setErrorMessageAction({ message: error });
-                    this.onLogout();
-                });
-        }
-
-        onCheckAzureToken() {
-
         }
 
         onRedirect() {
@@ -112,30 +83,6 @@
             }
 
             window.location.href = href;
-        }
-
-        /**
-         * Dispatches an action that will revoke all user tokens, prevents token refresh attempts,
-         * and redirects users to the landing page
-         */
-        onLogout() {
-            this.logOutAction().then(() => {
-                if (window.location.host.toLowerCase().indexOf('penndot.gov') === -1) {
-                    /*
-                     * In order to log out properly, the browser must visit the /iAM page of a penndot deployment, as iam-deploy.com cannot
-                     * modify browser cookies for penndot.gov. So, the current host is sent as part of the query to the penndot site
-                     * to allow the landing page to redirect the browser to the original host.
-                     */
-                    window.location.href = 'http://bamssyst.penndot.gov/iAM?host=' + encodeURI(window.location.host);
-                } else {
-                    this.$router.push('/iAM/');
-                }
-            });
-        }
-
-        onAzureLogout() {
-            this.azureB2CLogoutAction()
-                .then(() => this.onLogout());
         }
     }
 </script>

@@ -275,24 +275,25 @@ import { clone } from 'ramda';
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { Hub } from '@/connectionHub';
-import { UnsecuredRouteNames } from '@/shared/utils/route-paths';
-import {
-    emptyUserCriteriaFilter,
-    UserCriteriaFilter,
-} from '@/shared/models/iAM/user-criteria-filter';
-import { isEqual } from '@/shared/utils/has-unsaved-changes-helper';
+import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { SecurityTypes } from '@/shared/utils/security-types';
+import {
+    clearRefreshIntervalID,
+    setRefreshIntervalID,
+} from '@/shared/utils/refresh-interval-id';
+import {
+    isAuthenticatedUser,
+    onHandleLogout,
+} from '@/shared/utils/authentication-utils';
+import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 
 @Component({
     components: { Alert, Spinner },
 })
 export default class AppComponent extends Vue {
-    @State(state => state) state: any;
     @State(state => state.authenticationModule.authenticated)
     authenticated: boolean;
     @State(state => state.authenticationModule.hasRole) hasRole: boolean;
-    @State(state => state.authenticationModule.checkedForRole)
-    checkedForRole: boolean;
     @State(state => state.authenticationModule.username) username: string;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.authenticationModule.refreshing) refreshing: boolean;
@@ -301,19 +302,13 @@ export default class AppComponent extends Vue {
     @State(state => state.toastrModule.warningMessage) warningMessage: string;
     @State(state => state.toastrModule.errorMessage) errorMessage: string;
     @State(state => state.toastrModule.infoMessage) infoMessage: string;
-    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
-    hasUnsavedChanges: boolean;
     @State(state => state.scenarioModule.selectedScenario)
     stateSelectedScenario: Scenario;
     @State(state => state.announcementModule.packageVersion)
     packageVersion: string;
     @State(state => state.authenticationModule.securityType)
     securityType: string;
-    @State(state => state.userModule.currentUserCriteriaFilter)
-    currentUserCriteriaFilter: UserCriteriaFilter;
 
-    @Action('refreshTokens') refreshTokensAction: any;
-    @Action('checkBrowserTokens') checkBrowserTokensAction: any;
     @Action('logOut') logOutAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
     @Action('getNetworks') getNetworksAction: any;
@@ -325,12 +320,9 @@ export default class AppComponent extends Vue {
     @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
     @Action('getAllUsers') getAllUsersAction: any;
     @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
-    @Action('getUserInfo') getUserInfoAction: any;
 
     @Action('azureB2CLogin') azureB2CLoginAction: any;
     @Action('azureB2CLogout') azureB2CLogoutAction: any;
-    @Action('getAzureAccountDetails') getAzureAccountDetailsAction: any;
-    @Action('getAzureB2CAccessToken') getAzureB2CAccessTokenAction: any;
 
     drawer: boolean = false;
     alertDialogData: AlertData = clone(emptyAlertData);
@@ -346,7 +338,6 @@ export default class AppComponent extends Vue {
         'AggregateNetworkData',
         'RefreshToken',
     ];
-    refreshIntervalID: any | null = null;
     esecSecurityType: string = SecurityTypes.esec;
     b2cSecurityType: string = SecurityTypes.b2c;
 
@@ -447,7 +438,7 @@ export default class AppComponent extends Vue {
     onAuthenticationChange() {
         if (this.authenticated) {
             this.onAuthenticate();
-        }/* else if (
+        } /* else if (
             !this.authenticated &&
             this.securityType === SecurityTypes.esec
         ) {
@@ -510,7 +501,19 @@ export default class AppComponent extends Vue {
                 );
             }
             this.setIsBusyAction({ isBusy: false });
-            //this.setErrorMessageAction({message: getErrorMessage(error)});
+            this.setErrorMessageAction({ message: getErrorMessage(error) });
+            if (
+                hasValue(error, 'response') &&
+                error.response!.status.toString() === '401'
+            ) {
+                isAuthenticatedUser().then(
+                    (isAuthenticated: boolean | void) => {
+                        if (!isAuthenticated) {
+                            setTimeout(() => onHandleLogout(), 3000);
+                        }
+                    },
+                );
+            }
         };
         // set axios response handler to use success & error handlers
         axiosInstance.interceptors.response.use(
@@ -528,94 +531,15 @@ export default class AppComponent extends Vue {
             (error: any) => errorHandler(error),
         );
 
-        this.$router.beforeEach((to: any, from: any, next: any) => {
-            if (UnsecuredRouteNames.indexOf(to.name) === -1) {
-                const hasAuthInfo: boolean =
-                    this.securityType === SecurityTypes.esec
-                        ? hasValue(localStorage.getItem('UserTokens'))
-                        : hasValue(localStorage.getItem('LoggedInUser'));
-                if (!this.authenticated && !hasAuthInfo) {
-                    next('/AuthenticationStart/');
-                } else if (!this.authenticated && hasAuthInfo) {
-                    this.checkBrowserTokensAction()
-                        .then(() =>
-                            this.getUserInfoAction().then(() =>
-                                this.getUserCriteriaFilterAction().then(() => {
-                                    if (this.authenticated) {
-                                        this.onHandlingUnsavedChanges(to, next);
-                                    } else {
-                                        throw new Error(
-                                            'Failed to authenticate',
-                                        );
-                                    }
-                                }),
-                            ),
-                        )
-                        .catch((error: any) => {
-                            next(false);
-                            this.setErrorMessageAction({ message: error.errorMessage });
-                            if (this.securityType === SecurityTypes.esec) {
-                                this.onLogout();
-                            } else {
-                                this.onAzureLogout();
-                            }
-                        });
-                } else {
-                    this.onHandlingUnsavedChanges(to, next);
-                }
-            } else {
-                next();
-            }
-        });
-
-        if (this.securityType === SecurityTypes.esec) {
+        if (
+            this.securityType === SecurityTypes.esec &&
+            UnsecuredRoutePathNames.indexOf(this.$router.currentRoute.name as string) ===
+                -1
+        ) {
             // Upon opening the page, and every 30 seconds, check if authentication data
             // has been changed by another tab or window
-            if (hasValue(this.refreshIntervalID)) {
-                window.clearInterval(this.refreshIntervalID);
-            }
-            this.refreshIntervalID = window.setInterval(
-                this.checkBrowserTokensAction,
-                30000,
-            );
-        } /* else {
-
-        }*/
-
-        /*if (this.authenticated) {
-            if (this.securityType === this.pennDotSecurityType) {
-                this.getUserInfoAction();
-            }
-
-            if (this.securityType === this.azureSecurityType) {
-                this.getAzureAccountDetailsAction();
-            }
-
-            this.onAuthenticate();
-        }*/
-    }
-
-    onHandlingUnsavedChanges(to: any, next: any) {
-        /*this.route = to;
-        const showAlert: boolean = !this.pushRouteUpdate && this.hasUnsavedChanges;*/
-        if (this.hasUnsavedChanges) {
-            this.$dialog
-                .confirm(
-                    'You have unsaved changes. Are you sure you wish to continue?',
-                    { reverse: true },
-                )
-                .then(() => next())
-                .catch(() => next(false));
-            /*next(false);
-            this.alertDialogData = {
-                showDialog: true,
-                heading: 'Unsaved Changes',
-                message: 'You have unsaved changes. Are you sure you wish to continue?',
-                choice: true,
-            };*/
-        } else {
-            //this.pushRouteUpdate = false;
-            next();
+            clearRefreshIntervalID();
+            setRefreshIntervalID();
         }
     }
 
@@ -675,7 +599,7 @@ export default class AppComponent extends Vue {
      */
     onLogout() {
         this.logOutAction().then(() => {
-            window.clearInterval(this.refreshIntervalID);
+            clearRefreshIntervalID();
             if (
                 window.location.host.toLowerCase().indexOf('penndot.gov') === -1
             ) {

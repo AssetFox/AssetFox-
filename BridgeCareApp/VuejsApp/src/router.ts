@@ -7,8 +7,13 @@ import Logout from '@/components/Logout.vue';
 import Home from '@/components/Home.vue';
 import AuthenticationStart from '@/components/authentication/AuthenticationStart.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
-import authModule from '@/store-modules/authentication.module';
-import userModule from '@/store-modules/user.module';
+import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
+import { SecurityTypes } from '@/shared/utils/security-types';
+import store from '@/store/root-store';
+import {
+    isAuthenticatedUser,
+    onHandleLogout,
+} from '@/shared/utils/authentication-utils';
 
 // Lazily-loaded pages
 const Scenario = () =>
@@ -78,11 +83,68 @@ const CashFlowEditor = () =>
         /*webpackChunkName: cashFlowEditor*/ '@/components/cash-flow-editor/CashFlowEditor.vue'
     );
 
+const onHandlingUnsavedChanges = (to: any, next: any): void => {
+    // @ts-ignore
+    if (store.state.unsavedChangesFlagModule.hasUnsavedChanges) {
+        // @ts-ignore
+        Vue.dialog
+            .confirm(
+                'You have unsaved changes. Are you sure you wish to continue?',
+                { reverse: true },
+            )
+            .then(() => next())
+            .catch(() => next(false));
+    } else {
+        next();
+    }
+};
+
+const beforeEachFunc = (to: any, from: any, next: any) => {
+    if (UnsecuredRoutePathNames.indexOf(to.name) === -1) {
+        const hasAuthInfo: boolean =
+            // @ts-ignore
+            store.state.authenticationModule.securityType === SecurityTypes.esec
+                ? hasValue(localStorage.getItem('UserTokens'))
+                : hasValue(localStorage.getItem('LoggedInUser'));
+        // @ts-ignore
+        if (!store.state.authenticationModule.authenticated && !hasAuthInfo) {
+            next('/AuthenticationStart/');
+        } else if (
+            // @ts-ignore
+            !store.state.authenticationModule.authenticated &&
+            hasAuthInfo
+        ) {
+            /*const isAuthenticatedUser: Promise<boolean | void> =
+                // @ts-ignore
+                store.state.authenticationModule.securityType ===
+                SecurityTypes.esec
+                  // @ts-ignore
+                    ? isAuthenticatedEsecUser(onHandlingUnsavedChanges(to, next))
+                    : isAuthenticatedAzureUser();*/
+
+            isAuthenticatedUser().then((isAuthenticated: boolean | void) => {
+                if (isAuthenticated) {
+                    onHandlingUnsavedChanges(to, next);
+                } else {
+                    onHandleLogout();
+                }
+            });
+        } else {
+            onHandlingUnsavedChanges(to, next);
+        }
+    } else {
+        next();
+    }
+};
+
 const beforeEnterFunc = (to: any, from: any, next: any) => {
     if (
-        !authModule.state.hasRole ||
-        (!userModule.state.currentUserCriteriaFilter.hasAccess &&
-            !authModule.state.isAdmin)
+        // @ts-ignore
+        !store.state.authenticationModule.hasRole ||
+        // @ts-ignore
+        (!store.state.userModule.currentUserCriteriaFilter.hasAccess &&
+            // @ts-ignore
+            !store.state.authenticationModule.isAdmin)
     ) {
         next('/NoRole/');
     } else {
@@ -276,5 +338,7 @@ const router = new VueRouter({
         },
     ],
 });
+
+router.beforeEach(beforeEachFunc);
 
 export default router;

@@ -10,6 +10,5 @@
       "MinimumProjectCostLimit": 1000,
       "InflationRatePercentage": 3
     }
-  }
-  // TODO this json will be read in controller api, which will get invoked by vuejs service store.
+  } 
 }

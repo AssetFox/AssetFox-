@@ -2,7 +2,7 @@ import {AxiosResponse} from 'axios';
 import {clone} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
 import AnalysisDefaultDataService from '@/services/analysisDefaultData.service';
-import {AnalysisDefaultData, emptyAnalysisDefaultData} from '@/shared/models/iAM/DefaultData';
+import {AnalysisDefaultData, emptyAnalysisDefaultData} from '@/shared/models/iAM/defaultData';
 
 const state = {
     analysisDefaultData: clone(emptyAnalysisDefaultData) as AnalysisDefaultData

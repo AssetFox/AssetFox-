@@ -46,6 +46,7 @@ namespace BridgeCareCore
             services.AddSimulationData();
             services.AddSummaryReportDataTABs();
             services.AddSummaryReportGraphTABs();
+            services.AddDefaultData();
 
             services.AddSingleton<ILog, LogNLog>();
             services.AddScoped<LegacySimulationSynchronizerService>();

@@ -2,7 +2,7 @@ import {AxiosResponse} from 'axios';
 import {clone} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
 import InvestmentDefaultDataService from '@/services/investmentDefaultData.service';
-import {InvestmentDefaultData, emptyInvestmentDefaultData} from '@/shared/models/iAM/DefaultData';
+import {InvestmentDefaultData, emptyInvestmentDefaultData} from '@/shared/models/iAM/defaultData';
 
 const state = {
     investmentDefaultData: clone(emptyInvestmentDefaultData) as InvestmentDefaultData

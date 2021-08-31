@@ -2,10 +2,12 @@ import CalculatedAttributeService from '@/services/calculated-attribute.service'
 import {
     CalculatedAttribute,
     CalculatedAttributeLibrary,
+    emptyCalculatedAttribute,
     emptyCalculatedAttributeLibrary,
 } from '@/shared/models/iAM/calculated-attribute';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
+import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { AxiosResponse } from 'axios';
 import { any, append, clone, find, findIndex, propEq, reject, update } from 'ramda';
 
@@ -63,6 +65,42 @@ const mutations = {
 };
 
 const actions = {
+    selectCalculatedAttributeLibrary({ commit }: any, libraryId: string) {
+        commit('selectedCalculatedAttributeLibraryMutator', libraryId);
+    },
+    async getCalculatedAttributeLibraries({ commit }: any) {
+        var dummy = [{id: getBlankGuid(), name: '',
+        description: '',
+        calculatedAttributes: [{
+            id:  getBlankGuid(),
+    attribute: 'AADTTOTAL',
+    name: 'AADTTOTAL',
+    shift: true,
+        }]}];
+        return dummy;
+        // await CalculatedAttributeService.getCalculatedAttributeLibraries().then(
+        //     (response: AxiosResponse<any[]>) => {
+        //         if (hasValue(response, 'data')) {
+        //             commit(
+        //                 'calculatedAttributeLibrariesMutator',
+        //                 response.data as CalculatedAttributeLibrary[],
+        //             );
+        //         }
+        //     },
+        // );
+    },
+    async getScenarioCalculatedAttribute({ commit }: any, scenarioId: string) {
+        await CalculatedAttributeService.getScenarioCalculatedAttribute(
+            scenarioId,
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                commit(
+                    'scenarioCalculatedAttributeMutator',
+                    response.data as CalculatedAttribute[],
+                );
+            }
+        });
+    },
     async upsertCalculatedAttributeLibrary(
         { dispatch, commit }: any,
         library: CalculatedAttributeLibrary,

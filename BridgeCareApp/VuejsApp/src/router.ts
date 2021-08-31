@@ -65,6 +65,11 @@ const router = new VueRouter({
                     props: true
                 },
                 {
+                    path: '/CalculatedAttributeEditor/Scenario/',
+                    component: CalculatedAttributeEditor,
+                    props: true
+                },
+                {
                     path: '/TreatmentEditor/Scenario/',
                     component: TreatmentEditor,
                     props: true

@@ -36,7 +36,7 @@
                             </v-btn>
                         </template>
                     </v-text-field>
-                    <v-checkbox class="sharing" label="Default Calculations" />
+                    <v-checkbox v-show="!hasScenario" class="sharing" label="Default Calculations" />
                 </v-flex>
             </v-layout>
         </v-flex>
@@ -50,7 +50,6 @@
                                 :items="attributeSelectItems"
                                 label="Attribute"
                                 outline
-                                v-if="!hasSelectedLibrary || hasScenario"
                                 v-model="attributeSelectItemValue"
                             >
                             </v-select>
@@ -58,7 +57,6 @@
                                 :items="attributeTimingSelectItems"
                                 label="Timing"
                                 outline
-                                v-if="!hasSelectedLibrary || hasScenario"
                                 v-model="attributeTimingSelectItemValue"
                             >
                             </v-select>
@@ -244,10 +242,20 @@ import {
     CreateCalculatedAttributeLibraryDialogData,
     emptyCreateCalculatedAttributeLibraryDialogData,
 } from '@/shared/models/modals/create-calculated-attribute-library-dialog-data';
-import { emptyEquationEditorDialogData, EquationEditorDialogData } from '@/shared/models/modals/equation-editor-dialog-data';
+import {
+    emptyEquationEditorDialogData,
+    EquationEditorDialogData,
+} from '@/shared/models/modals/equation-editor-dialog-data';
 import { Equation } from '@/shared/models/iAM/equation';
-import { CriterionLibraryEditorDialogData, emptyCriterionLibraryEditorDialogData } from '@/shared/models/modals/criterion-library-editor-dialog-data';
+import {
+    CriterionLibraryEditorDialogData,
+    emptyCriterionLibraryEditorDialogData,
+} from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
+import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
+import { SelectItem } from '@/shared/models/vue/select-item';
+import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 
 @Component({
     components: {
@@ -282,15 +290,30 @@ export default class CalculatedAttributeEditor extends Vue {
     upsertCalculatedAttributeLibraryAction: any;
     @Action('deleteCalculatedAttributeLibrary')
     deleteCalculatedAttributeLibraryAction: any;
+    @Action('getCalculatedAttributeLibraries')
+    getCalculatedAttributeLibrariesAction: any;
+    @Action('getScenarioCalculatedAttribute')
+    getScenarioCalculatedAttributeAction: any;
+    @Action('selectCalculatedAttributeLibrary')
+    selectCalculatedAttributeLibraryAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
-    hasSelectedLibrary: boolean = true;
+    hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
     rules: InputValidationRules = clone(rules);
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     showCreateCalculatedAttributeDialog = false;
     hasSelectedCalculatedAttribute: boolean = false;
-    selectedCalculatedAttribute: CalculatedAttribute = clone(emptyCalculatedAttribute);
+    selectedCalculatedAttribute: CalculatedAttribute = clone(
+        emptyCalculatedAttribute,
+    );
+    selectedScenarioId: string = getBlankGuid();
+    librarySelectItems: SelectItem[] = [];
+    librarySelectItemValue: string | null = '';
+    attributeSelectItems: SelectItem[] = [];
+    attributeSelectItemValue: string | null = '';
+    attributeTimingSelectItems: SelectItem[] = [];
+    attributeTimingSelectItemValue: string | null = '';
 
     gridSearchTerm = '';
     selectedCalculatedAttributeLibrary: CalculatedAttributeLibrary = clone(
@@ -334,12 +357,33 @@ export default class CalculatedAttributeEditor extends Vue {
         },
     ];
 
+    beforeRouteEnter(to: any, from: any, next: any) {
+        next((vm: any) => {
+            vm.librarySelectItemValue = null;
+            vm.getCalculatedAttributeLibrariesAction();
+
+            if (to.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1) {
+                vm.selectedScenarioId = to.query.scenarioId;
+
+                if (vm.selectedScenarioId === vm.uuidNIL) {
+                    vm.setErrorMessageAction({
+                        message: 'Unable to identify selected scenario.',
+                    });
+                    vm.$router.push('/Scenarios/');
+                }
+
+                vm.hasScenario = true;
+                vm.getScenarioCalculatedAttributeAction(vm.selectedScenarioId);
+            }
+        });
+    }
     mounted() {
         this.setAttributeSelectItems();
     }
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }
+
     @Watch('stateNumericAttributes')
     onStateNumericAttributesChanged() {
         this.setAttributeSelectItems();
@@ -351,6 +395,74 @@ export default class CalculatedAttributeEditor extends Vue {
                     text: attribute.name,
                     value: attribute.name,
                 }),
+            );
+        }
+    }
+    @Watch('stateCalculatedAttributeLibraries')
+    onStateCalculatedAttributeLibrariesChanged() {
+        this.librarySelectItems = this.stateCalculatedAttributeLibraries.map(
+            (library: CalculatedAttributeLibrary) => ({
+                text: library.name,
+                value: library.id,
+            }),
+        );
+    }
+    @Watch('librarySelectItemValue')
+    onLibrarySelectItemValueChanged() {
+        this.selectCalculatedAttributeLibraryAction(
+            this.librarySelectItemValue,
+        );
+    }
+
+    @Watch('stateSelectedCalculatedAttributeLibrary')
+    onStateSelectedCalculatedAttributeLibraryChanged() {
+        this.selectedCalculatedAttributeLibrary = clone(
+            this.stateSelectedCalculatedAttributeLibrary,
+        );
+    }
+    @Watch('stateScenarioCalculatedAttribute')
+    onStateScenarioCalculatedAttributeChanged() {
+        if (this.hasScenario) {
+            this.calculatedAttributeGridData = clone(
+                this.stateScenarioCalculatedAttribute,
+            );
+        }
+    }
+    @Watch('calculatedAttributeGridData')
+    onCalculatedAttributeGridDataChanged() {
+        const hasUnsavedChanges: boolean = this.hasScenario
+            ? hasUnsavedChangesCore(
+                  '',
+                  this.calculatedAttributeGridData,
+                  this.stateScenarioCalculatedAttribute,
+              )
+            : hasUnsavedChangesCore(
+                  '',
+                  {
+                      ...clone(this.selectedCalculatedAttributeLibrary),
+                      calculatedAttributes: clone(
+                          this.calculatedAttributeGridData,
+                      ),
+                  },
+                  this.stateSelectedCalculatedAttributeLibrary,
+              );
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+    @Watch('selectedCalculatedAttributeLibrary')
+    onSelectedCalculatedAttributeLibraryChanged() {
+        this.hasSelectedLibrary =
+            this.selectedCalculatedAttributeLibrary.id !== this.uuidNIL;
+
+        if (this.hasScenario) {
+            this.calculatedAttributeGridData = this.selectedCalculatedAttributeLibrary.calculatedAttributes.map(
+                (calculatedAttribute: CalculatedAttribute) => ({
+                    ...calculatedAttribute,
+                    id: getNewGuid(),
+                }),
+            );
+        } else {
+            this.calculatedAttributeGridData = clone(
+                this.selectedCalculatedAttributeLibrary.calculatedAttributes,
             );
         }
     }
@@ -376,7 +488,9 @@ export default class CalculatedAttributeEditor extends Vue {
         );
 
         if (!isNil(calculatedAttributeLibrary)) {
-            this.upsertCalculatedAttributeLibraryAction(calculatedAttributeLibrary);
+            this.upsertCalculatedAttributeLibraryAction(
+                calculatedAttributeLibrary,
+            );
         }
     }
     onSubmitCreateCalculatedAttributeDialogResult(
@@ -464,7 +578,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 showDialog: true,
                 libraryId: this.selectedCalculatedAttribute.criterionLibrary.id,
                 isCallFromScenario: this.hasScenario,
-                isCriterionForLibrary: !this.hasScenario
+                isCriterionForLibrary: !this.hasScenario,
             };
         }
     }
@@ -497,17 +611,11 @@ export default class CalculatedAttributeEditor extends Vue {
         this.librarySelectItemValue = null;
         setTimeout(() => {
             if (this.hasScenario) {
-                this.calculatedAttributeGridData = clone(this.stateScenarioCalculatedAttribute);
+                this.calculatedAttributeGridData = clone(
+                    this.stateScenarioCalculatedAttribute,
+                );
             }
         });
     }
 }
 </script>
-
-function emptyCreateCalculatedAttributeLibraryDialogData(emptyCreateCalculatedAttributeLibraryDialogData: any): any {
-  throw new Error('Function not implemented.');
-}
-
-function emptyCreateCalculatedAttributeLibraryDialogData(emptyCreateCalculatedAttributeLibraryDialogData: any): any {
-  throw new Error('Function not implemented.');
-}

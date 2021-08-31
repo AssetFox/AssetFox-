@@ -8,4 +8,5 @@ export const ScenarioRoutePaths: any = {
     DeficientConditionGoal: 'DeficientConditionGoalEditor/Scenario',
     RemainingLifeLimit: 'RemainingLifeLimitEditor/Scenario',
     CashFlow: 'CashFlowEditor/Scenario',
+    CalculatedAttribute: 'CalculatedAttributeEditor/Scenario',
 };

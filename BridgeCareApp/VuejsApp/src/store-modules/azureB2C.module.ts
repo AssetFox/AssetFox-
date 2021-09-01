@@ -6,6 +6,8 @@ import {
 } from '@/azure-b2c-config';
 import * as msal from 'msal';
 import { hasValue } from '@/shared/utils/has-value-util';
+import store from '@/store/root-store';
+import router from '@/router';
 
 const state = {
     authenticatedFromAzure: false,
@@ -29,7 +31,14 @@ const actions = {
                     hasValue(authResponse.account.name)
                 ) {
                     dispatch('getAzureB2CAccessToken', authResponse).then(() =>
-                        dispatch('getAzureAccountDetails'),
+                        dispatch('getAzureAccountDetails').then(() => {
+                            if (
+                                // @ts-ignore
+                                store.state.authenticationModule.authenticated
+                            ) {
+                                router.push('/Home/');
+                            }
+                        }),
                     );
                 }
             })
@@ -53,6 +62,7 @@ const actions = {
     },
     async azureB2CLogout() {
         await state.app.logout();
+        localStorage.removeItem('access_token');
         localStorage.removeItem('LoggedInUser');
     },
     async getAzureB2CAccessToken(

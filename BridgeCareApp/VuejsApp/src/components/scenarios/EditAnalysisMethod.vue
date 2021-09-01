@@ -112,6 +112,7 @@ import {
 import {SelectItem} from '@/shared/models/vue/select-item';
 import {CriterionLibrary} from '@/shared/models/iAM/criteria';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
+import { AnalysisDefaultData, emptyAnalysisDefaultData } from '@/shared/models/iAM/defaultData';
 
 @Component({
   components: {CriterionLibraryEditorDialog}
@@ -119,11 +120,13 @@ import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules
 export default class EditAnalysisMethod extends Vue {
   @State(state => state.analysisMethodModule.analysisMethod) stateAnalysisMethod: AnalysisMethod;
   @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
+  @State(state => state.analysisDefaultDataModule.analysisDefaultData) stateAnalysisDefaultData: AnalysisDefaultData;
 
   @Action('getAnalysisMethod') getAnalysisMethodAction: any;
   @Action('upsertAnalysisMethod') upsertAnalysisMethodAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+  @Action('getAnalysisDefaultData') getAnalysisDefaultDataAction: any;
 
   selectedScenarioId: string = getBlankGuid();
   analysisMethod: AnalysisMethod = clone(emptyAnalysisMethod);
@@ -150,6 +153,7 @@ export default class EditAnalysisMethod extends Vue {
   criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
   rules: InputValidationRules = rules;
   valid: boolean = true;
+  analysisDefaultData: AnalysisDefaultData = clone(emptyAnalysisDefaultData);
 
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
@@ -164,6 +168,8 @@ export default class EditAnalysisMethod extends Vue {
 
       // get the selected scenario's analysisMethod data
       vm.getAnalysisMethodAction({scenarioId: vm.selectedScenarioId});
+
+      vm.getAnalysisDefaultDataAction();
     });
   }
 
@@ -175,16 +181,7 @@ export default class EditAnalysisMethod extends Vue {
 
   beforeDestroy() {
     this.setHasUnsavedChangesAction({value: false});
-  }
-
-  @Watch('stateAnalysisMethod')
-  onStateAnalysisChanged() {
-    this.analysisMethod = {
-      ...this.stateAnalysisMethod,
-      benefit: {...this.stateAnalysisMethod.benefit,
-        id: this.stateAnalysisMethod.benefit.id === getBlankGuid() ? getNewGuid() : this.stateAnalysisMethod.benefit.id}
-    };
-  }
+  }  
 
   @Watch('analysisMethod')
   onAnalysisChanged() {
@@ -201,6 +198,24 @@ export default class EditAnalysisMethod extends Vue {
       this.setBenefitAndWeightingAttributes();
       this.setBenefitAttributeIfEmpty();
     }
+  }
+
+  @Watch('stateAnalysisMethod')
+  onStateAnalysisChanged() {
+    this.analysisMethod = {
+      ...this.stateAnalysisMethod,
+      benefit: {...this.stateAnalysisMethod.benefit,
+        id: this.stateAnalysisMethod.benefit.id === getBlankGuid() ? getNewGuid() : this.stateAnalysisMethod.benefit.id}
+    };
+  }
+
+  @Watch('stateAnalysisDefaultData')
+  onStateAnalysisDefaultDataChanged() {
+    this.analysisDefaultData = this.stateAnalysisDefaultData;
+    this.analysisMethod.attribute = this.analysisDefaultData.weighting;
+    this.analysisMethod.optimizationStrategy = this.analysisDefaultData.optimizationStrategy;
+    this.analysisMethod.benefit.limit = this.analysisDefaultData.benefitLimit;
+    this.analysisMethod.benefit.attribute = this.analysisDefaultData.benefitAttribute;
   }
 
   setBenefitAttributeIfEmpty() {

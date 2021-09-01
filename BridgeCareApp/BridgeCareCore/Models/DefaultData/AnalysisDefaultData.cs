@@ -1,10 +1,12 @@
-﻿namespace BridgeCareCore.Models.DefaultData
+﻿using AppliedResearchAssociates.iAM.DataAccess;
+
+namespace BridgeCareCore.Models.DefaultData
 {
     public class AnalysisDefaultData
     {
         public string weighting { get; set; }
 
-        public string optimizationStrategy { get; set; }
+        public OptimizationStrategy optimizationStrategy { get; set; }
 
         public string benefitAttribute { get; set; }
 

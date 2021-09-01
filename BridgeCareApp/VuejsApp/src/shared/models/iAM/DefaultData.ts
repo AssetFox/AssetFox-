@@ -1,6 +1,8 @@
+import {OptimizationStrategy} from '@/shared/models/iAM/analysis-method';
+
 export interface AnalysisDefaultData {
     weighting: string;
-    optimizationStrategy: string;
+    optimizationStrategy: OptimizationStrategy;
     benefitAttribute: string;
     benefitLimit: number;
 }
@@ -12,7 +14,7 @@ export interface InvestmentDefaultData {
 
 export const emptyAnalysisDefaultData: AnalysisDefaultData = {
     weighting: '',
-    optimizationStrategy: '',
+    optimizationStrategy: OptimizationStrategy.BenefitToCostRatio,
     benefitAttribute: '',
     benefitLimit: 0
 };

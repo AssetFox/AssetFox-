@@ -1344,16 +1344,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithMany(p => p.Equations)
                     .HasForeignKey(d => d.ScenarioCalculatedAttributeId)
                     .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.CriterionLibraryCalculatedAttributeJoin)
-                    .WithOne(p => p.ScenarioCalculatedAttributePair)
-                    .HasForeignKey<ScenarioCriterionLibraryCalculatedAttributePairEntity>(d => d.ScenarioCalculatedAttributePairId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.EquationCalculatedAttributeJoin)
-                    .WithOne(p => p.ScenarioCalculatedAttributePair)
-                    .HasForeignKey<ScenarioEquationCalculatedAttributePairEntity>(d => d.ScenarioCalculatedAttributePairId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<ScenarioCriterionLibraryCalculatedAttributePairEntity>(entity =>
@@ -1437,16 +1427,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.CalculatedAttribute)
                     .WithMany(p => p.Equations)
                     .HasForeignKey(d => d.CalculatedAttributeId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.CriterionLibraryCalculatedAttributeJoin)
-                    .WithOne(p => p.CalculatedAttributePair)
-                    .HasForeignKey<CriterionLibraryCalculatedAttributePairEntity>(d => d.CalculatedAttributePairId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.EquationCalculatedAttributeJoin)
-                    .WithOne(p => p.CalculatedAttributePair)
-                    .HasForeignKey<EquationCalculatedAttributePairEntity>(d => d.CalculatedAttributePairId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 

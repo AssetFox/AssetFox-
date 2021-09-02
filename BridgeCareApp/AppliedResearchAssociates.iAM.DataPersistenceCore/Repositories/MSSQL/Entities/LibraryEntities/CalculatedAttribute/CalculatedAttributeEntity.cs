@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid CalculatedAttributeLibraryId { get; set; }
 
-        public virtual CalculatedAttributeLibraryEntity CaclulatedAttributeLibrary { get; set; }
+        public virtual CalculatedAttributeLibraryEntity CalculatedAttributeLibrary { get; set; }
 
         public ICollection<CalculatedAttributeEquationCriteriaPairEntity> Equations { get; set; }
     }

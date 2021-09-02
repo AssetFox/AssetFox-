@@ -24,14 +24,16 @@
                                       @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
                                       v-model='investmentPlan.minimumProjectCostLimit'
                                       v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
-                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]" />
+                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
+                                      :disabled="!this.isAdmin" />
                     </v-flex>
                     <v-flex xs2>
                         <v-text-field label='Inflation Rate Percentage' outline
                                       v-model='investmentPlan.inflationRatePercentage'
                                       @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
                                       :mask="'###'"
-                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]" />
+                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]"
+                                      :disabled="!this.isAdmin" />
                     </v-flex>
                     <v-spacer></v-spacer>
                 </v-layout>
@@ -298,6 +300,7 @@ export default class InvestmentEditor extends Vue {
     showImportExportInvestmentBudgetsDialog: boolean = false;
     hasScenario: boolean = false;
     budgets: Budget[] = [];
+    isAdmin: boolean = false;
 
     get addYearLabel() {
         return 'Add Year (' + this.getNextYear() + ')';
@@ -315,6 +318,7 @@ export default class InvestmentEditor extends Vue {
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
+            vm.isAdmin = to.query.isAdmin;
             vm.getBudgetLibrariesAction();
 
             if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {

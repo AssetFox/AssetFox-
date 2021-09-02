@@ -27,7 +27,7 @@ import azureB2CModule from '@/store-modules/azureB2C.module';
 
 Vue.use(Vuex);
 
-export default new Vuex.Store({
+const store = new Vuex.Store({
     modules: {
         busyModule,
         authenticationModule,
@@ -51,6 +51,8 @@ export default new Vuex.Store({
         unsavedChangesFlagModule,
         criterionModule,
         analysisMethodModule,
-        azureB2CModule
-    }
+        azureB2CModule,
+    },
 });
+
+export default store;

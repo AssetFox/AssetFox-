@@ -7,12 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ICalculatedAttributesRepository
     {
-        void CreateScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid simulationId);
-
-        void GetScenarioCalculatedAttributes(Simulation simulation);
-
-        ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId);
-
+        // Libraries
         ICollection<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibraries();
 
         void UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO library);
@@ -21,6 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void DeleteCalculatedAttributeLibrary(Guid libraryId);
 
-        void UpsertOrDeleteScenarioCalculatdAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid libraryId);
+        // Scenarios
+        ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId);      
+
+        void UpsertOrDeleteScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid libraryId);
     }
 }

@@ -2,8 +2,8 @@
 {
     public class InvestmentDefaultData
     {
-        public string MinimumProjectCostLimit { get; set; }
+        public decimal MinimumProjectCostLimit { get; set; }
 
-        public int InflationRatePercentage { get; set; }
+        public double InflationRatePercentage { get; set; }
     }
 }

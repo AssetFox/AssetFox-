@@ -20,10 +20,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         // Scenarios
         ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId);      
 
-        void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId);
+        void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid simulationId);
 
-        void DeleteCalculatedAttributeFromScenario(Guid scenarioId, Guid calculatedAttributeId);
+        void DeleteCalculatedAttributeFromScenario(Guid simulationId, Guid calculatedAttributeId);
 
-        void ClearCalculatedAttributes(Guid scenarioId);
+        void ClearCalculatedAttributes(Guid simulationId);
     }
 }

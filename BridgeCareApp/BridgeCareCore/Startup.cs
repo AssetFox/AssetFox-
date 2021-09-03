@@ -55,9 +55,9 @@ namespace BridgeCareCore
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-             services.AddDbContext<IAMContext>(options => options.UseSqlServer(
-            Configuration.GetConnectionString("BridgeCareConnex"),
-            sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
+            services.AddDbContext<IAMContext>(options => options.UseSqlServer(
+                Configuration.GetConnectionString("BridgeCareConnex"),
+                sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
                 );
 
             // Setup reporting

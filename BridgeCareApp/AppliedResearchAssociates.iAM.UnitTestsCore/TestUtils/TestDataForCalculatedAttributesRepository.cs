@@ -12,6 +12,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class TestDataForCalculatedAttributesRepository
     {
+        public static IQueryable<SimulationEntity> GetSimulations()
+        {
+            var simulationList = new List<SimulationEntity>();
+            simulationList.Add(new SimulationEntity()
+            {
+                Id = new Guid("440ab4bb-da87-4aee-868b-4272910fae9b"),
+                Name = "First"
+            });
+            simulationList.Add(new SimulationEntity()
+            {
+                Id = new Guid("bf8984b8-4fbf-4b54-9035-b20b349a6808"),
+                Name = "Second"
+            });
+
+            return simulationList.AsQueryable();
+        }
+
         public static IQueryable<AttributeEntity> GetAttributeRepo()
         {
             var attributeList = new List<AttributeEntity>();
@@ -70,6 +87,33 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
 
             result.Add(library);
+
+            return result.AsQueryable();
+        }
+
+        public static IQueryable<ScenarioCalculatedAttributeEntity> GetSimulationCalculatedAttributesRepo()
+        {
+            var result = new List<ScenarioCalculatedAttributeEntity>();
+            var scenarios = GetSimulations();
+            var attributes = GetAttributeRepo();
+
+            var selectedScenario = scenarios.First(_ => _.Name == "First");
+            foreach (var attribute in attributes)
+            {
+                var newCalculation = CreateNewCalculatedAttribute(attribute, selectedScenario, $"[{attribute.Name}] + 1");
+                AddEquation(newCalculation, "[{attribute.Name}] + 2", "[Status] = 'Good'");
+                result.Add(newCalculation);
+            }
+
+            selectedScenario = scenarios.First(_ => _.Name == "Second");
+            var loopCount = 1;
+            foreach (var attribute in attributes)
+            {
+                var newCalculation = CreateNewCalculatedAttribute(attribute, selectedScenario, $"[{attribute.Name}] - 5");
+                if (loopCount > 1) AddEquation(newCalculation, "[{attribute.Name}] - 10", "[Status] = 'Bad'");
+                result.Add(newCalculation);
+                loopCount++;
+            }
 
             return result.AsQueryable();
         }
@@ -151,6 +195,89 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 CriterionLibraryCalculatedAttributePairJoins = new List<CriterionLibraryCalculatedAttributePairEntity>()
             };
             criteriaObject.CriterionLibraryCalculatedAttributePairJoins.Add(criteriaCalculationJoin);
+
+            calculatedAttribute.Equations.Add(addedPair);
+        }
+
+        private static ScenarioCalculatedAttributeEntity CreateNewCalculatedAttribute(AttributeEntity attribute, SimulationEntity scenario, string firstEquation, int calculationTiming = 1)
+        {
+            var result = new ScenarioCalculatedAttributeEntity
+            {
+                Id = new Guid(),
+                CalculationTiming = calculationTiming,
+                AttributeId = attribute.Id,
+                Attribute = attribute,
+                SimulationId = scenario.Id,
+                Simulation = scenario
+            };
+
+            var firstPair = new ScenarioCalculatedAttributeEquationCriteriaPairEntity
+            {
+                Id = new Guid(),
+                ScenarioCalculatedAttributeId = result.Id,
+                ScenarioCalculatedAttribute = result
+            };
+
+            var equationCalculationJoin = new ScenarioEquationCalculatedAttributePairEntity
+            {
+                ScenarioCalculatedAttributePairId = firstPair.Id,
+                ScenarioCalculatedAttributePair = firstPair
+            };
+            firstPair.EquationCalculatedAttributeJoin = equationCalculationJoin;
+
+            var equationObject = new EquationEntity
+            {
+                Id = new Guid(),
+                Expression = firstEquation,
+                ScenarioCalculatedAttributePairJoin = equationCalculationJoin
+            };
+            equationCalculationJoin.EquationId = equationObject.Id;
+            equationCalculationJoin.Equation = equationObject;
+
+            result.Equations.Add(firstPair);
+
+            return result;
+        }
+
+        private static void AddEquation(ScenarioCalculatedAttributeEntity calculatedAttribute, string equation, string criteria)
+        {
+            var addedPair = new ScenarioCalculatedAttributeEquationCriteriaPairEntity
+            {
+                Id = new Guid(),
+                ScenarioCalculatedAttributeId = calculatedAttribute.Id,
+                ScenarioCalculatedAttribute = calculatedAttribute
+            };
+
+            var equationCalculationJoin = new ScenarioEquationCalculatedAttributePairEntity
+            {
+                ScenarioCalculatedAttributePairId = addedPair.Id,
+                ScenarioCalculatedAttributePair = addedPair
+            };
+            addedPair.EquationCalculatedAttributeJoin = equationCalculationJoin;
+            var equationObject = new EquationEntity
+            {
+                Id = new Guid(),
+                Expression = equation,
+                ScenarioCalculatedAttributePairJoin = equationCalculationJoin
+            };
+            equationCalculationJoin.EquationId = equationObject.Id;
+            equationCalculationJoin.Equation = equationObject;
+
+            var criteriaCalculationJoin = new ScenarioCriterionLibraryCalculatedAttributePairEntity
+            {
+                ScenarioCalculatedAttributePairId = addedPair.Id,
+                ScenarioCalculatedAttributePair = addedPair
+            };
+            addedPair.CriterionLibraryCalculatedAttributeJoin = criteriaCalculationJoin;
+            var criteriaObject = new CriterionLibraryEntity
+            {
+                Id = new Guid(),
+                Name = $"Criteria for {criteria}",
+                MergedCriteriaExpression = criteria,
+                IsSingleUse = false,
+                CriterionLibraryCalculatedAttributePairJoins = new List<CriterionLibraryCalculatedAttributePairEntity>()
+            };
+            criteriaObject.CriterionLibraryScenarioCalculatedAttributePairJoins.Add(criteriaCalculationJoin);
 
             calculatedAttribute.Equations.Add(addedPair);
         }

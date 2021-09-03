@@ -11,14 +11,14 @@
                         @change="onSetAnalysisMethodProperty('attribute', $event)" label="Weighting"
                         outline
                         clearable
-                        :value="analysisMethod.attribute" :disabled="!this.isAdmin">
+                        :value="analysisMethod.attribute" :disabled="!isAdmin">
               </v-select>
             </v-flex>
             <v-flex xs2>
               <v-select :items="optimizationStrategy"
                         @change="onSetAnalysisMethodProperty('optimizationStrategy', $event)"
                         label="Optimization Strategy" outline
-                        :value="analysisMethod.optimizationStrategy" :disabled="!this.isAdmin">
+                        :value="analysisMethod.optimizationStrategy" :disabled="!isAdmin">
               </v-select>
             </v-flex>
             <v-flex xs2>
@@ -34,7 +34,7 @@
               <v-select :items="benefitAttributes" @change="onSetBenefitProperty('attribute', $event)"
                         label="Benefit Attribute"
                         outline
-                        :value="analysisMethod.benefit.attribute" :disabled="!this.isAdmin">
+                        :value="analysisMethod.benefit.attribute" :disabled="!isAdmin">
               </v-select>
             </v-flex>
             <v-flex xs2>
@@ -44,7 +44,7 @@
                             min=0
                             :value.number="analysisMethod.benefit.limit"
                             :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotNegative(analysisMethod.benefit.limit)]"
-                            :disabled="!this.isAdmin">
+                            :disabled="!isAdmin">
               </v-text-field>
             </v-flex>
             <v-spacer/>
@@ -120,7 +120,8 @@ import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules
 export default class EditAnalysisMethod extends Vue {
   @State(state => state.analysisMethodModule.analysisMethod) stateAnalysisMethod: AnalysisMethod;
   @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
-  
+  @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+
   @Action('getAnalysisMethod') getAnalysisMethodAction: any;
   @Action('upsertAnalysisMethod') upsertAnalysisMethodAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
@@ -151,14 +152,12 @@ export default class EditAnalysisMethod extends Vue {
   criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
   rules: InputValidationRules = rules;
   valid: boolean = true;
-  isAdmin: boolean = false;
-
+  
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
       vm.selectedScenarioId = to.query.scenarioId;
       vm.simulationName = to.query.simulationName;
-      vm.isAdmin = to.query.isAdmin;
-
+      
       if (vm.selectedScenarioId === getBlankGuid()) {
         // set 'no selected scenario' error message, then redirect user to Scenarios UI
         vm.setErrorMessageAction({message: 'Found no selected scenario for edit'});

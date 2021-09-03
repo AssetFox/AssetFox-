@@ -245,8 +245,7 @@ export default class EditScenario extends Vue {
                                 query: {
                                     scenarioName: vm.simulationName,
                                     scenarioId: vm.selectedScenarioId,
-                                    networkId: vm.networkId,
-                                    isAdmin: vm.isAdmin
+                                    networkId: vm.networkId
                                 },
                             },
                         };

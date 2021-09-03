@@ -12,8 +12,14 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal
+    ;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -22,6 +28,7 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
@@ -29,9 +36,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     public class SimulationTests
     {
         private readonly TestHelper _testHelper;
-        private readonly SimulationController _controller;
+        private static SimulationAnalysisService _simulationAnalysisService;
+        private SimulationController _controller;
 
-        private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
+        private UserEntity _testUserEntity;
+        private SimulationEntity _testSimulationToClone;
 
         public SimulationTests()
         {
@@ -40,154 +49,402 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            var simulationAnalysis =
+            _simulationAnalysisService =
                 new SimulationAnalysisService(_testHelper.UnitOfWork, _testHelper.MockHubService.Object);
-            _controller = new SimulationController(simulationAnalysis, _testHelper.MockEsecSecurityAuthorized.Object,
+            /*_controller = new SimulationController(_simulationAnalysisSerivce,
+                _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);*/
         }
 
-        private void SetupForClone()
+        private void CreateAuthorizedController() =>
+            _controller = new SimulationController(_simulationAnalysisService,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+
+        private void CreateUnauthorizedController() =>
+            _controller = new SimulationController(_simulationAnalysisService,
+                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+
+        private void CreateTestData()
         {
-            _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
-            _testHelper.UnitOfWork.Context.AddEntity(new SimulationUserEntity
-            {
-                SimulationId = _testHelper.TestSimulation.Id,
-                UserId = UserId,
-                CanModify = true,
-                IsOwner = true,
-                CreatedBy = UserId,
-                LastModifiedBy = UserId
-            });
-
-            var analysisMethodId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new AnalysisMethodEntity
-            {
-                Id = analysisMethodId, SimulationId = _testHelper.TestSimulation.Id,
-            });
-            _testHelper.UnitOfWork.Context.AddEntity(new BenefitEntity
-            {
-                Id = Guid.NewGuid(),
-                AnalysisMethodId = analysisMethodId,
-                AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id
-            });
-            _testHelper.UnitOfWork.Context.AddEntity(new CriterionLibraryAnalysisMethodEntity
-            {
-                CriterionLibraryId = _testHelper.TestCriterionLibrary.Id, AnalysisMethodId = analysisMethodId
-            });
-
-            _testHelper.UnitOfWork.Context.AddEntity(new InvestmentPlanEntity
-            {
-                Id = Guid.NewGuid(), SimulationId = _testHelper.TestSimulation.Id
-            });
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            _testUserEntity = new UserEntity {Id = Guid.NewGuid(), Username = "Clone Tester"};
+            _testHelper.UnitOfWork.Context.AddEntity(_testUserEntity);
+            _testHelper.UnitOfWork.SetUser(_testUserEntity.Username);
 
             var budgetId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(
-                new ScenarioBudgetEntity {Id = budgetId, SimulationId = _testHelper.TestSimulation.Id, Name = "Test Budget Name"});
-
-
-
-            var newRuleId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new ScenarioCashFlowRuleEntity
+            _testSimulationToClone = new SimulationEntity
             {
-                Id = newRuleId,
-                SimulationId = _testHelper.TestSimulation.Id,
-                Name = "Test Cash Flow Rule"
-            });
-            var newCashFlowRuleCriterionId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new CriterionLibraryEntity
-            {
-                Id = newCashFlowRuleCriterionId,
-                MergedCriteriaExpression = "Criterion Test Expression",
-                IsSingleUse = true,
-                Name = "Test Criterion"
-            });
-            _testHelper.UnitOfWork.Context.AddEntity(new CriterionLibraryScenarioCashFlowRuleEntity
-            {
-                ScenarioCashFlowRuleId = newRuleId, CriterionLibraryId = newCashFlowRuleCriterionId
-            });
-            _testHelper.UnitOfWork.Context.AddEntity(new ScenarioCashFlowDistributionRuleEntity
-            {
-                Id = Guid.NewGuid(), ScenarioCashFlowRuleId = newRuleId, CostCeiling = 500000, YearlyPercentages = "100", DurationInYears = 1
-            });
-
-            var deficientConditionGoalLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(
-                new DeficientConditionGoalLibraryEntity {Id = deficientConditionGoalLibraryId, Name = "Test Name"});
-
-            var remainingLifeLimitLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(
-                new RemainingLifeLimitLibraryEntity {Id = remainingLifeLimitLibraryId, Name = "Test Name"});
-
-            var targetConditionGoalLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(
-                new TargetConditionGoalLibraryEntity {Id = targetConditionGoalLibraryId, Name = "Test Name"});
-
-            var treatmentLibraryId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(
-                new TreatmentLibraryEntity {Id = treatmentLibraryId, Name = "Test Name"});
-
-            var maintainableAssetId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new MaintainableAssetEntity
-            {
-                Id = maintainableAssetId,
+                Id = Guid.NewGuid(), Name = "Simulation", NumberOfYearsOfTreatmentOutlook = 1,
                 NetworkId = _testHelper.TestNetwork.Id,
-                FacilityName = "1",
-                SectionName = "0123456789"
-            });
-
-            _testHelper.UnitOfWork.Context.AddEntity(
-                new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation,
-                    "10123456789") {MaintainableAssetId = maintainableAssetId});
-
-            var committedProjectId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new CommittedProjectEntity
-            {
-                Id = committedProjectId,
-                SimulationId = _testHelper.TestSimulation.Id,
-                ScenarioBudgetId = budgetId,
-                MaintainableAssetId = maintainableAssetId,
-                Name = "Test Name"
-            });
-
-            _testHelper.UnitOfWork.Context.AddEntity(new CommittedProjectConsequenceEntity
-            {
-                Id = Guid.NewGuid(),
-                AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id,
-                CommittedProjectId = committedProjectId,
-                ChangeValue = "+1"
-            });
-
-            var newCurveId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new ScenarioPerformanceCurveEntity
-            {
-                Id = newCurveId,
-                SimulationId = _testHelper.TestSimulation.Id,
-                AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id,
-                Name = "Test Curve"
-            });
-            var newCurveCriterionId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new CriterionLibraryEntity
-            {
-                Id = newCurveCriterionId,
-                MergedCriteriaExpression = "Criterion Test Expression",
-                IsSingleUse = true,
-                Name = "Test Criterion"
-            });
-            _testHelper.UnitOfWork.Context.AddEntity(new CriterionLibraryScenarioPerformanceCurveEntity
-            {
-                ScenarioPerformanceCurveId = newCurveId, CriterionLibraryId = newCurveCriterionId
-            });
-            var newCurveEquationId = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(new EquationEntity
-            {
-                Id = newCurveEquationId, Expression = "Equation Test Expression",
-            });
-            _testHelper.UnitOfWork.Context.AddEntity(new ScenarioPerformanceCurveEquationEntity
-            {
-                ScenarioPerformanceCurveId = newCurveId, EquationId = newCurveEquationId,
-            });
+                SimulationUserJoins = new List<SimulationUserEntity>
+                {
+                    new SimulationUserEntity
+                    {
+                        UserId = _testHelper.UnitOfWork.UserEntity.Id,
+                        CanModify = true,
+                        IsOwner = true,
+                        CreatedBy = _testHelper.UnitOfWork.UserEntity.Id,
+                        LastModifiedBy = _testHelper.UnitOfWork.UserEntity.Id
+                    }
+                },
+                AnalysisMethod =
+                    new AnalysisMethodEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = attribute.Id,
+                        Benefit =
+                            new BenefitEntity {Id = Guid.NewGuid(), AttributeId = attribute.Id, Limit = 1},
+                        CriterionLibraryAnalysisMethodJoin = new CriterionLibraryAnalysisMethodEntity
+                        {
+                            CriterionLibrary = new CriterionLibraryEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                Name = "Analysis Method Criterion",
+                                MergedCriteriaExpression = "Analysis Method Criterion Expression",
+                                IsSingleUse = true
+                            }
+                        }
+                    },
+                Budgets =
+                    new List<ScenarioBudgetEntity>
+                    {
+                        new ScenarioBudgetEntity
+                        {
+                            Id = budgetId,
+                            Name = "Cloned Budget",
+                            ScenarioBudgetAmounts =
+                                new List<ScenarioBudgetAmountEntity>
+                                {
+                                    new ScenarioBudgetAmountEntity
+                                    {
+                                        Id = Guid.NewGuid(), Value = 500000, Year = DateTime.Now.Year
+                                    }
+                                },
+                            CriterionLibraryScenarioBudgetJoin = new CriterionLibraryScenarioBudgetEntity
+                            {
+                                CriterionLibrary = new CriterionLibraryEntity
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Budget Criterion",
+                                    MergedCriteriaExpression = "Budget Criterion Expression",
+                                    IsSingleUse = true
+                                }
+                            }
+                        }
+                    },
+                BudgetPriorities = new List<ScenarioBudgetPriorityEntity>
+                {
+                    new ScenarioBudgetPriorityEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        PriorityLevel = 1,
+                        BudgetPercentagePairs =
+                            new List<BudgetPercentagePairEntity>
+                            {
+                                new BudgetPercentagePairEntity {ScenarioBudgetId = budgetId}
+                            },
+                        CriterionLibraryScenarioBudgetPriorityJoin =
+                            new CriterionLibraryScenarioBudgetPriorityEntity
+                            {
+                                CriterionLibrary = new CriterionLibraryEntity
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Budget Priority Criterion",
+                                    MergedCriteriaExpression =
+                                        "Budget Priority Criterion Expression",
+                                    IsSingleUse = true
+                                }
+                            }
+                    }
+                },
+                CashFlowRules = new List<ScenarioCashFlowRuleEntity>
+                {
+                    new ScenarioCashFlowRuleEntity
+                    {
+                        Id = Guid.NewGuid(), Name = "Cash Flow Rule",
+                        ScenarioCashFlowDistributionRules =
+                            new List<ScenarioCashFlowDistributionRuleEntity>
+                            {
+                                new ScenarioCashFlowDistributionRuleEntity
+                                {
+                                    Id = Guid.NewGuid(),
+                                    CostCeiling = 500000,
+                                    YearlyPercentages = "100",
+                                    DurationInYears = 1
+                                }
+                            },
+                        CriterionLibraryScenarioCashFlowRuleJoin =
+                            new CriterionLibraryScenarioCashFlowRuleEntity
+                            {
+                                CriterionLibrary = new CriterionLibraryEntity
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Cash Flow Rule Criterion",
+                                    MergedCriteriaExpression = "Cash Flow Rule Criterion Expression",
+                                    IsSingleUse = true
+                                }
+                            }
+                    }
+                },
+                InvestmentPlan =
+                    new InvestmentPlanEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        InflationRatePercentage = 3,
+                        MinimumProjectCostLimit = 500000,
+                        FirstYearOfAnalysisPeriod = DateTime.Now.Year,
+                        NumberOfYearsInAnalysisPeriod = 1
+                    },
+                CommittedProjects =
+                    new List<CommittedProjectEntity>
+                    {
+                        new CommittedProjectEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            Cost = 500000,
+                            Name = "Committed Project",
+                            Year = DateTime.Now.Year,
+                            ShadowForAnyTreatment = 1,
+                            ShadowForSameTreatment = 1,
+                            ScenarioBudgetId = budgetId,
+                            MaintainableAsset = new MaintainableAssetEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                NetworkId = _testHelper.TestNetwork.Id,
+                                FacilityName = "Facility",
+                                SectionName = "Section",
+                                SpatialWeighting = "SpatialWeighting",
+                                MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Discriminator = "SectionLocation",
+                                    LocationIdentifier = "FacilitySection",
+                                }
+                            },
+                            CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>
+                            {
+                                new CommittedProjectConsequenceEntity
+                                {
+                                    Id = Guid.NewGuid(), AttributeId = attribute.Id, ChangeValue = "+1"
+                                }
+                            }
+                        }
+                    },
+                PerformanceCurves =
+                    new List<ScenarioPerformanceCurveEntity>
+                    {
+                        new ScenarioPerformanceCurveEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            AttributeId = attribute.Id,
+                            Name = "Performance Curve",
+                            ScenarioPerformanceCurveEquationJoin =
+                                new ScenarioPerformanceCurveEquationEntity
+                                {
+                                    Equation = new EquationEntity
+                                    {
+                                        Id = Guid.NewGuid(),
+                                        Expression = "Performance Curve Equation Expression"
+                                    }
+                                },
+                            CriterionLibraryScenarioPerformanceCurveJoin =
+                                new CriterionLibraryScenarioPerformanceCurveEntity
+                                {
+                                    CriterionLibrary = new CriterionLibraryEntity
+                                    {
+                                        Id = Guid.NewGuid(),
+                                        Name = "Performance Curve Criterion",
+                                        MergedCriteriaExpression =
+                                            "Performance Curve Criterion Expression",
+                                        IsSingleUse = true
+                                    }
+                                }
+                        }
+                    },
+                RemainingLifeLimits =
+                    new List<ScenarioRemainingLifeLimitEntity>
+                    {
+                        new ScenarioRemainingLifeLimitEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            AttributeId = attribute.Id,
+                            Value = 500000,
+                            CriterionLibraryScenarioRemainingLifeLimitJoin =
+                                new CriterionLibraryScenarioRemainingLifeLimitEntity
+                                {
+                                    CriterionLibrary = new CriterionLibraryEntity
+                                    {
+                                        Id = Guid.NewGuid(),
+                                        Name = "Remaining Life Limit Criterion",
+                                        MergedCriteriaExpression =
+                                            "Remaining Life Limit Criterion Expression",
+                                        IsSingleUse = true
+                                    }
+                                }
+                        }
+                    },
+                ScenarioDeficientConditionGoals =
+                    new List<ScenarioDeficientConditionGoalEntity>
+                    {
+                        new ScenarioDeficientConditionGoalEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            AttributeId = attribute.Id,
+                            Name = "Deficient Condition Goal",
+                            DeficientLimit = 1,
+                            AllowedDeficientPercentage = 1,
+                            CriterionLibraryScenarioDeficientConditionGoalJoin =
+                                new CriterionLibraryScenarioDeficientConditionGoalEntity
+                                {
+                                    CriterionLibrary = new CriterionLibraryEntity
+                                    {
+                                        Id = Guid.NewGuid(),
+                                        Name = "Deficient Condition Goal Criterion",
+                                        MergedCriteriaExpression =
+                                            "Deficient Condition Goal Criterion Expression",
+                                        IsSingleUse = true
+                                    }
+                                }
+                        }
+                    },
+                ScenarioTargetConditionalGoals = new List<ScenarioTargetConditionGoalEntity>
+                {
+                    new ScenarioTargetConditionGoalEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = attribute.Id,
+                        Name = "Target Condition Goal",
+                        Target = 1,
+                        CriterionLibraryScenarioTargetConditionGoalJoin =
+                            new CriterionLibraryScenarioTargetConditionGoalEntity
+                            {
+                                CriterionLibrary = new CriterionLibraryEntity
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Target Condition Goal Criterion",
+                                    MergedCriteriaExpression =
+                                        "Target Condition Goal Criterion Expression",
+                                    IsSingleUse = true
+                                }
+                            }
+                    }
+                },
+                SelectableTreatments = new List<ScenarioSelectableTreatmentEntity>
+                {
+                    new ScenarioSelectableTreatmentEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Treatment",
+                        ShadowForAnyTreatment = 1,
+                        ShadowForSameTreatment = 1,
+                        CriterionLibraryScenarioSelectableTreatmentJoin =
+                            new CriterionLibraryScenarioSelectableTreatmentEntity
+                            {
+                                CriterionLibrary = new CriterionLibraryEntity
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Treatment Criterion",
+                                    MergedCriteriaExpression =
+                                        "Treatment Criterion Expression",
+                                    IsSingleUse = true
+                                }
+                            },
+                        ScenarioSelectableTreatmentScenarioBudgetJoins =
+                            new List<ScenarioSelectableTreatmentScenarioBudgetEntity>
+                            {
+                                new ScenarioSelectableTreatmentScenarioBudgetEntity {ScenarioBudgetId = budgetId}
+                            },
+                        ScenarioTreatmentConsequences = new List<ScenarioConditionalTreatmentConsequenceEntity>
+                        {
+                            new ScenarioConditionalTreatmentConsequenceEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                AttributeId = attribute.Id,
+                                ChangeValue = "+1",
+                                ScenarioConditionalTreatmentConsequenceEquationJoin =
+                                    new ScenarioConditionalTreatmentConsequenceEquationEntity
+                                    {
+                                        Equation = new EquationEntity
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            Expression = "Treatment Consequence Equation Expression"
+                                        }
+                                    },
+                                CriterionLibraryScenarioConditionalTreatmentConsequenceJoin =
+                                    new CriterionLibraryScenarioConditionalTreatmentConsequenceEntity
+                                    {
+                                        CriterionLibrary = new CriterionLibraryEntity
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            Name = "Treatment Consequence Criterion",
+                                            MergedCriteriaExpression =
+                                                "Treatment Consequence Expression",
+                                            IsSingleUse = true
+                                        }
+                                    }
+                            }
+                        },
+                        ScenarioTreatmentCosts = new List<ScenarioTreatmentCostEntity>
+                        {
+                            new ScenarioTreatmentCostEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                ScenarioTreatmentCostEquationJoin =
+                                    new ScenarioTreatmentCostEquationEntity
+                                    {
+                                        Equation = new EquationEntity
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            Expression = "Treatment Cost Equation Expression"
+                                        }
+                                    },
+                                CriterionLibraryScenarioTreatmentCostJoin =
+                                    new CriterionLibraryScenarioTreatmentCostEntity
+                                    {
+                                        CriterionLibrary = new CriterionLibraryEntity
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            Name = "Treatment Cost Criterion",
+                                            MergedCriteriaExpression =
+                                                "Treatment Cost Expression",
+                                            IsSingleUse = true
+                                        }
+                                    }
+                            }
+                        },
+                        ScenarioTreatmentSchedulings =
+                            new List<ScenarioTreatmentSchedulingEntity>
+                            {
+                                new ScenarioTreatmentSchedulingEntity {Id = Guid.NewGuid(), OffsetToFutureYear = 1}
+                            },
+                        ScenarioTreatmentSupersessions = new List<ScenarioTreatmentSupersessionEntity>
+                        {
+                            new ScenarioTreatmentSupersessionEntity
+                            {
+                                Id = Guid.NewGuid(),
+                                CriterionLibraryScenarioTreatmentSupersessionJoin =
+                                    new CriterionLibraryScenarioTreatmentSupersessionEntity
+                                    {
+                                        CriterionLibrary = new CriterionLibraryEntity
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            Name = "Treatment Supersession Criterion",
+                                            MergedCriteriaExpression =
+                                                "Treatment Supersession Expression",
+                                            IsSingleUse = true
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                }
+            };
+            _testHelper.UnitOfWork.Context.AddEntity(_testSimulationToClone);
         }
 
         [Fact]
@@ -195,6 +452,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             try
             {
+                // Arrange
+                CreateAuthorizedController();
+
                 // Act
                 var result = await _controller.GetSimulations(_testHelper.TestNetwork.Id);
 
@@ -213,6 +473,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             try
             {
+                // Arrange
+                CreateAuthorizedController();
+
                 // Act
                 var dto = _testHelper.TestSimulation.ToDto(null);
                 dto.Id = Guid.NewGuid();
@@ -233,6 +496,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             try
             {
+                // Arrange
+                CreateAuthorizedController();
+
                 // Act
                 var result = await _controller.UpdateSimulation(_testHelper.TestSimulation.ToDto(null));
 
@@ -251,6 +517,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             try
             {
+                // Arrange
+                CreateAuthorizedController();
+
                 // Act
                 var result = await _controller.DeleteSimulation(Guid.Empty);
 
@@ -269,6 +538,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             try
             {
+                // Arrange
+                CreateAuthorizedController();
+
                 // Act
                 var result = await _controller.GetSimulations(_testHelper.TestNetwork.Id);
 
@@ -294,6 +566,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                CreateAuthorizedController();
                 _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
 
                 var newSimulationDTO = _testHelper.TestSimulation.ToDto(null);
@@ -344,6 +617,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                CreateAuthorizedController();
                 _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
 
                 var getResult = await _controller.GetSimulations(_testHelper.TestNetwork.Id);
@@ -392,6 +666,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
+                CreateAuthorizedController();
                 _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
 
                 var getResult = await _controller.GetSimulations(_testHelper.TestNetwork.Id);
@@ -433,10 +708,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
-                SetupForClone();
+                CreateAuthorizedController();
+                CreateTestData();
 
                 // Act
-                var result = await _controller.CloneSimulation(_testHelper.TestSimulation.Id);
+                var result = await _controller.CloneSimulation(_testSimulationToClone.Id);
 
                 // Assert
                 var okObjResult = result as OkObjectResult;
@@ -446,157 +722,167 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 var timer = new Timer {Interval = 5000};
                 timer.Elapsed += delegate
                 {
-                    var originalSimulation = _testHelper.UnitOfWork.Context.Simulation
-                    .Include(_ => _.AnalysisMethod)
-                    .ThenInclude(_ => _.Benefit)
-                    .Include(_ => _.AnalysisMethod)
-                    .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
-                    .Include(_ => _.InvestmentPlan)
-                    .Include(_ => _.BudgetPriorities)
-                    .Include(_ => _.CashFlowRules)
-                    .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
-                    .Include(_ => _.CashFlowRules)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
+                    var originalSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking()
+                        // analysis method
+                        .Include(_ => _.AnalysisMethod)
+                        .ThenInclude(_ => _.Benefit)
+                        .Include(_ => _.AnalysisMethod)
+                        .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // budgets
+                        .Include(_ => _.Budgets)
+                        .ThenInclude(_ => _.ScenarioBudgetAmounts)
+                        .Include(_ => _.Budgets)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // budget priorities
+                        .Include(_ => _.BudgetPriorities)
+                        .ThenInclude(_ => _.BudgetPercentagePairs)
+                        .ThenInclude(_ => _.ScenarioBudget)
+                        .Include(_ => _.BudgetPriorities)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // cash flow rules
+                        .Include(_ => _.CashFlowRules)
+                        .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
+                        .Include(_ => _.CashFlowRules)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // investment plan
+                        .Include(_ => _.InvestmentPlan)
+                        // committed projects
+                        .Include(_ => _.CommittedProjects)
+                        .ThenInclude(_ => _.CommittedProjectConsequences)
+                        .Include(_ => _.CommittedProjects)
+                        .ThenInclude(_ => _.ScenarioBudget)
+                        // performance curves
+                        .Include(_ => _.PerformanceCurves)
+                        .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
+                        .ThenInclude(_ => _.Equation)
+                        .Include(_ => _.PerformanceCurves)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // remaining life limits
+                        .Include(_ => _.RemainingLifeLimits)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // selectable treatments
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                        .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                        .ThenInclude(_ => _.Equation)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                        .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                        .ThenInclude(_ => _.Equation)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                        .ThenInclude(_ => _.ScenarioBudget)
+                        // deficient condition goals
+                        .Include(_ => _.ScenarioDeficientConditionGoals)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // target condition goals
+                        .Include(_ => _.ScenarioTargetConditionalGoals)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        .Include(_ => _.SimulationUserJoins)
+                        .Single(_ => _.Id == _testSimulationToClone.Id);
 
-                    .Include(_ => _.ScenarioDeficientConditionGoals)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.ScenarioDeficientConditionGoals)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-
-                    .Include(_ => _.PerformanceCurves)
-                    .ThenInclude(_ => _.Attribute)
-
-                    .Include(_ => _.PerformanceCurves)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.PerformanceCurves)
-                    .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-
-                    .Include(_ => _.RemainingLifeLimits)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.RemainingLifeLimits)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-
-                    .Include(_ => _.ScenarioTargetConditionalGoals)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.ScenarioTargetConditionalGoals)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
-                    .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
-                    .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
-
-                    .Include(_ => _.Budgets)
-                    .ThenInclude(_ => _.ScenarioBudgetAmounts)
-                    .Include(_ => _.Budgets)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-
-                    .Include(_ => _.CommittedProjects)
-                    .ThenInclude(_ => _.CommittedProjectConsequences)
-                    .Include(_ => _.SimulationUserJoins)
-                    .Single(_ => _.Id == _testHelper.TestSimulation.Id);
-
-                var clonedSimulation = _testHelper.UnitOfWork.Context.Simulation
-                    .Include(_ => _.AnalysisMethod)
-                    .ThenInclude(_ => _.Benefit)
-                    .Include(_ => _.AnalysisMethod)
-                    .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
-                    .Include(_ => _.InvestmentPlan)
-
-                    .Include(_ => _.ScenarioDeficientConditionGoals)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.ScenarioDeficientConditionGoals)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-
-                    .Include(_ => _.PerformanceCurves)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.PerformanceCurves)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.PerformanceCurves)
-                    .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-
-                    .Include(_ => _.RemainingLifeLimits)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.RemainingLifeLimits)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-
-                    .Include(_ => _.ScenarioTargetConditionalGoals)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.ScenarioTargetConditionalGoals)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-
-                    .Include(_ => _.SelectableTreatments)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
-                    .ThenInclude(_ => _.Attribute)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
-                    .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
-                    .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
-                    .ThenInclude(_ => _.Equation)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
-                    .Include(_ => _.SelectableTreatments)
-                    .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
-
-                    .Include(_ => _.Budgets)
-                    .ThenInclude(_ => _.ScenarioBudgetAmounts)
-                    .Include(_ => _.Budgets)
-                    .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
-                    .ThenInclude(_ => _.CriterionLibrary)
-
-                    .Include(_ => _.CommittedProjects)
-                    .ThenInclude(_ => _.CommittedProjectConsequences)
-                    .Include(_ => _.SimulationUserJoins)
-                    .Single(_ => _.Id == dto.Id);
+                    var clonedSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking()
+                        // analysis method
+                        .Include(_ => _.AnalysisMethod)
+                        .ThenInclude(_ => _.Benefit)
+                        .Include(_ => _.AnalysisMethod)
+                        .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // budgets
+                        .Include(_ => _.Budgets)
+                        .ThenInclude(_ => _.ScenarioBudgetAmounts)
+                        .Include(_ => _.Budgets)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // budget priorities
+                        .Include(_ => _.BudgetPriorities)
+                        .ThenInclude(_ => _.BudgetPercentagePairs)
+                        .ThenInclude(_ => _.ScenarioBudget)
+                        .Include(_ => _.BudgetPriorities)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // cash flow rules
+                        .Include(_ => _.CashFlowRules)
+                        .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
+                        .Include(_ => _.CashFlowRules)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // investment plan
+                        .Include(_ => _.InvestmentPlan)
+                        // committed projects
+                        .Include(_ => _.CommittedProjects)
+                        .ThenInclude(_ => _.CommittedProjectConsequences)
+                        .Include(_ => _.CommittedProjects)
+                        .ThenInclude(_ => _.ScenarioBudget)
+                        // performance curves
+                        .Include(_ => _.PerformanceCurves)
+                        .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
+                        .ThenInclude(_ => _.Equation)
+                        .Include(_ => _.PerformanceCurves)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // remaining life limits
+                        .Include(_ => _.RemainingLifeLimits)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // selectable treatments
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                        .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                        .ThenInclude(_ => _.Equation)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                        .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                        .ThenInclude(_ => _.Equation)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        .Include(_ => _.SelectableTreatments)
+                        .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                        .ThenInclude(_ => _.ScenarioBudget)
+                        // deficient condition goals
+                        .Include(_ => _.ScenarioDeficientConditionGoals)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        // target condition goals
+                        .Include(_ => _.ScenarioTargetConditionalGoals)
+                        .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
+                        .ThenInclude(_ => _.CriterionLibrary)
+                        .Include(_ => _.SimulationUserJoins)
+                        .Single(_ => _.Id == dto.Id);
 
                     Assert.NotEqual(clonedSimulation.Id, originalSimulation.Id);
                     Assert.Equal(clonedSimulation.Name, originalSimulation.Name);
@@ -638,7 +924,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
                     var clonedCriteria =
                         clonedSimulation.PerformanceCurves.Where(_ =>
-                            _.CriterionLibraryScenarioPerformanceCurveJoin != null)
+                                _.CriterionLibraryScenarioPerformanceCurveJoin != null)
                             .Select(_ => _.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary).ToList();
                     var originalCriteria =
                         originalSimulation.PerformanceCurves.Where(_ =>
@@ -668,7 +954,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Assert.Equal(equationIdsDiff.Count, clonedCriteria.Count);
                     Assert.True(clonedEquations.All(_ => equationIdsDiff.Contains(_.Id)));
 
-                    Assert.Equal(clonedSimulation.SelectableTreatments.Count, originalSimulation.SelectableTreatments.Count);
+                    Assert.Equal(clonedSimulation.SelectableTreatments.Count,
+                        originalSimulation.SelectableTreatments.Count);
                     var clonedTreatmentIds = clonedSimulation.SelectableTreatments.Select(_ => _.Id).ToList();
                     var originalTreatmentIds = originalSimulation.SelectableTreatments.Select(_ => _.Id).ToList();
                     var TreatmentIdsDiff = clonedTreatmentIds.Except(originalTreatmentIds).ToList();
@@ -678,7 +965,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
                     clonedCriteria =
                         clonedSimulation.SelectableTreatments.Where(_ =>
-                            _.CriterionLibraryScenarioSelectableTreatmentJoin != null)
+                                _.CriterionLibraryScenarioSelectableTreatmentJoin != null)
                             .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary).ToList();
                     originalCriteria =
                         originalSimulation.SelectableTreatments.Where(_ =>

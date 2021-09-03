@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
@@ -12,13 +11,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO library);
 
-        void UpsertOrDeleteCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid libraryId);
+        void UpsertCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid libraryId);
+
+        void DeleteCalculatedAttributeFromLibrary(Guid libraryId, Guid calculatedAttributeId);
 
         void DeleteCalculatedAttributeLibrary(Guid libraryId);
 
         // Scenarios
         ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId);      
 
-        void UpsertOrDeleteScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid libraryId);
+        void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId);
+
+        void DeleteCalculatedAttributeFromScenario(Guid scenarioId, Guid calculatedAttributeId);
+
+        void ClearCalculatedAttributes(Guid scenarioId);
     }
 }

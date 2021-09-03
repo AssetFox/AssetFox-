@@ -75,17 +75,24 @@ export default class CreateCalculatedAttributeLibraryDialog extends Vue {
     onDialogDataChanged() {
         this.newCalculatedAttributeLibrary = {
             ...this.newCalculatedAttributeLibrary,
-            calculatedAttributes: this.dialogData.calculatedAttributes.map(
-                (calculatedAttribute: CalculatedAttribute) => {
-                    calculatedAttribute.id = getNewGuid();
-                    if (calculatedAttribute.equation.id !== getBlankGuid()) {
-                        calculatedAttribute.equation.id = getNewGuid();
-                    }
-                    return calculatedAttribute;
-                },
-            ),
+            calculatedAttribute: this.dialogData.calculatedAttribute,
+            // .map(
+            //     (calculatedAttribute: CalculatedAttribute) => {
+            //         calculatedAttribute.id = getNewGuid();
+            //         if (calculatedAttribute.equation.id !== getBlankGuid()) {
+            //             calculatedAttribute.equation.id = getNewGuid();
+            //         }
+            //         return calculatedAttribute;
+            //     },
+            // ),
             owner: getUserName(),
         };
+        this.newCalculatedAttributeLibrary.calculatedAttribute.id = getNewGuid();
+        this.newCalculatedAttributeLibrary.calculatedAttribute.criterionAndEquationSet.map(_ => {
+            if(_.equation.id !== getBlankGuid()){
+                _.equation.id = getNewGuid();
+            }
+        });
     }
     onSubmit(submit: boolean) {
         if (submit) {

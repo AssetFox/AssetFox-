@@ -6,28 +6,47 @@ import {
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { clone } from 'ramda';
 
+export enum Timing {
+    PreSimulation = 0,
+    PostSimulation,
+    OnDemand,
+  }
+
 export interface CalculatedAttribute {
     id: string;
     attribute: string;
     name: string;
     shift: boolean;
-    criterionLibrary: CriterionLibrary;
-    equation: Equation;
+    timing: Timing;
+    criterionAndEquationSet: CriterionAndEquationSet[];
 }
 
 export interface CalculatedAttributeLibrary {
     id: string;
     name: string;
     description: string;
-    calculatedAttributes: CalculatedAttribute[];
+    calculatedAttribute: CalculatedAttribute;
     owner?: string;
     shared?: boolean;
+    defaultCalculation: boolean;
 }
+export interface CriterionAndEquationSet {
+    id: string;
+    criterionLibrary: CriterionLibrary;
+    equation: Equation;
+}
+
 export const emptyCalculatedAttribute: CalculatedAttribute = {
     id: getBlankGuid(),
     attribute: '',
     name: '',
     shift: false,
+    criterionAndEquationSet: [],
+    timing: Timing.OnDemand
+};
+
+export const emptyCriterionAndEquationSet: CriterionAndEquationSet = {
+    id: getBlankGuid(),
     equation: clone(emptyEquation),
     criterionLibrary: clone(emptyCriterionLibrary),
 };
@@ -36,5 +55,6 @@ export const emptyCalculatedAttributeLibrary: CalculatedAttributeLibrary = {
     id: getBlankGuid(),
     name: '',
     description: '',
-    calculatedAttributes: [],
+    calculatedAttribute: clone(emptyCalculatedAttribute),
+    defaultCalculation: false,
 };

@@ -1,9 +1,11 @@
-import { CalculatedAttribute, CalculatedAttributeLibrary } from "@/shared/models/iAM/calculated-attribute";
-import { API, coreAxiosInstance } from "@/shared/utils/axios-instance";
-import { AxiosPromise } from "axios";
+import {
+    CalculatedAttribute,
+    CalculatedAttributeLibrary,
+} from '@/shared/models/iAM/calculated-attribute';
+import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
+import { AxiosPromise } from 'axios';
 
 export default class CalculatedAttributeService {
-    
     static getCalculatedAttributeLibraries(): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.CalculatedAttribute}/GetCalculatedAttributeLibraries`,

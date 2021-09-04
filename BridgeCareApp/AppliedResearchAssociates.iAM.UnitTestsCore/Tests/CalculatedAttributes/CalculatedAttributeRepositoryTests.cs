@@ -189,7 +189,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             var attributeList = TestDataForCalculatedAttributesRepository.GetAttributeRepo().ToList();
             attributeList.Add(new AttributeEntity()
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Name = newAttributeName
             });
             var attributes = attributeList.AsQueryable();
@@ -351,7 +351,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             var attributeList = TestDataForCalculatedAttributesRepository.GetAttributeRepo().ToList();
             attributeList.Add(new AttributeEntity()
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Name = newAttributeName
             });
             var attributes = attributeList.AsQueryable();
@@ -475,14 +475,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
         {
             var newCalculation = new CalculatedAttributeDTO
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Attribute = attribute.Name,
                 CalculationTiming = 1
             };
 
             var newPair = new CalculatedAttributeEquationCriteriaPairDTO()
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Equation = new EquationDTO()
                 {
                     Expression = $"[{attribute.Name}] + 15"
@@ -492,7 +492,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
 
             newPair = new CalculatedAttributeEquationCriteriaPairDTO()
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Equation = new EquationDTO()
                 {
                     Expression = $"[{attribute.Name}] + 25"

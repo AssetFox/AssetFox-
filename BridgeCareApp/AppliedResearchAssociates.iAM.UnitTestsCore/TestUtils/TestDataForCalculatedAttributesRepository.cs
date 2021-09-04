@@ -123,7 +123,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             var result = new CalculatedAttributeEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 CalculationTiming = calculationTiming,
                 AttributeId = attribute.Id,
                 Attribute = attribute
@@ -131,7 +131,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             var firstPair = new CalculatedAttributeEquationCriteriaPairEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 CalculatedAttributeId = result.Id,
                 CalculatedAttribute = result
             };
@@ -145,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             var equationObject = new EquationEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Expression = firstEquation,
                 CalculatedAttributePairJoin = equationCalculationJoin
             };
@@ -161,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             var addedPair = new CalculatedAttributeEquationCriteriaPairEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 CalculatedAttributeId = calculatedAttribute.Id,
                 CalculatedAttribute = calculatedAttribute
             };
@@ -174,7 +174,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             addedPair.EquationCalculatedAttributeJoin = equationCalculationJoin;
             var equationObject = new EquationEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Expression = equation,
                 CalculatedAttributePairJoin = equationCalculationJoin
             };
@@ -189,13 +189,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             addedPair.CriterionLibraryCalculatedAttributeJoin = criteriaCalculationJoin;
             var criteriaObject = new CriterionLibraryEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Name = $"Criteria for {criteria}",
                 MergedCriteriaExpression = criteria,
                 IsSingleUse = false,
                 CriterionLibraryCalculatedAttributePairJoins = new List<CriterionLibraryCalculatedAttributePairEntity>()
             };
             criteriaObject.CriterionLibraryCalculatedAttributePairJoins.Add(criteriaCalculationJoin);
+            criteriaCalculationJoin.CriterionLibraryId = criteriaObject.Id;
+            criteriaCalculationJoin.CriterionLibrary = criteriaObject;
 
             calculatedAttribute.Equations.Add(addedPair);
         }
@@ -204,7 +206,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             var result = new ScenarioCalculatedAttributeEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 CalculationTiming = calculationTiming,
                 AttributeId = attribute.Id,
                 Attribute = attribute,
@@ -214,7 +216,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             var firstPair = new ScenarioCalculatedAttributeEquationCriteriaPairEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 ScenarioCalculatedAttributeId = result.Id,
                 ScenarioCalculatedAttribute = result
             };
@@ -228,7 +230,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             var equationObject = new EquationEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Expression = firstEquation,
                 ScenarioCalculatedAttributePairJoin = equationCalculationJoin
             };
@@ -244,7 +246,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             var addedPair = new ScenarioCalculatedAttributeEquationCriteriaPairEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 ScenarioCalculatedAttributeId = calculatedAttribute.Id,
                 ScenarioCalculatedAttribute = calculatedAttribute
             };
@@ -257,7 +259,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             addedPair.EquationCalculatedAttributeJoin = equationCalculationJoin;
             var equationObject = new EquationEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Expression = equation,
                 ScenarioCalculatedAttributePairJoin = equationCalculationJoin
             };
@@ -272,13 +274,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             addedPair.CriterionLibraryCalculatedAttributeJoin = criteriaCalculationJoin;
             var criteriaObject = new CriterionLibraryEntity
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Name = $"Criteria for {criteria}",
                 MergedCriteriaExpression = criteria,
                 IsSingleUse = false,
                 CriterionLibraryCalculatedAttributePairJoins = new List<CriterionLibraryCalculatedAttributePairEntity>()
             };
             criteriaObject.CriterionLibraryScenarioCalculatedAttributePairJoins.Add(criteriaCalculationJoin);
+            criteriaCalculationJoin.CriterionLibraryId = criteriaObject.Id;
+            criteriaCalculationJoin.CriterionLibrary = criteriaObject;
 
             calculatedAttribute.Equations.Add(addedPair);
         }

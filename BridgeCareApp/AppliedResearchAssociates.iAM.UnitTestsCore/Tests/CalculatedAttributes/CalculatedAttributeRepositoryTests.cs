@@ -65,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             _emptyMockedContext.Setup(_ => _.CalculatedAttributeLibrary).Returns(_mockLibrary.Object);
             _emptyMockedContext.Setup(_ => _.Set<CalculatedAttributeLibraryEntity>()).Returns(_mockLibrary.Object);
 
-            scenarioRepo = TestDataForCalculatedAttributesRepository.GetSimulationCalculatedAttributesRepo();
+            scenarioRepo = new List<ScenarioCalculatedAttributeEntity>().AsQueryable();
             _mockScenarioCalculations = new Mock<DbSet<ScenarioCalculatedAttributeEntity>>();
             _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.Provider).Returns(scenarioRepo.Provider);
             _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.Expression).Returns(scenarioRepo.Expression);

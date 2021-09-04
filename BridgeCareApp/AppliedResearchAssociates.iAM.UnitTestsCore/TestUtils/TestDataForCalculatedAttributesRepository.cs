@@ -60,6 +60,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             library.Id = new Guid("86bf65df-5ac9-44cc-b26d-9a1182c258d4");
             library.Name = "First";
             library.CalculatedAttributes = new List<CalculatedAttributeEntity>();
+            library.IsDefault = true;
 
             int loopCount = 1;
             foreach (var attribute in attributes)
@@ -118,7 +119,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return result.AsQueryable();
         }
 
-        private static CalculatedAttributeEntity CreateNewCalculatedAttribute(AttributeEntity attribute, string firstEquation, int calculationTiming = 1)
+        public static CalculatedAttributeEntity CreateNewCalculatedAttribute(AttributeEntity attribute, string firstEquation, int calculationTiming = 1)
         {
             var result = new CalculatedAttributeEntity
             {
@@ -156,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return result;
         }
 
-        private static void AddEquation(CalculatedAttributeEntity calculatedAttribute, string equation, string criteria)
+        public static void AddEquation(CalculatedAttributeEntity calculatedAttribute, string equation, string criteria)
         {
             var addedPair = new CalculatedAttributeEquationCriteriaPairEntity
             {
@@ -199,7 +200,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             calculatedAttribute.Equations.Add(addedPair);
         }
 
-        private static ScenarioCalculatedAttributeEntity CreateNewCalculatedAttribute(AttributeEntity attribute, SimulationEntity scenario, string firstEquation, int calculationTiming = 1)
+        public static ScenarioCalculatedAttributeEntity CreateNewCalculatedAttribute(AttributeEntity attribute, SimulationEntity scenario, string firstEquation, int calculationTiming = 1)
         {
             var result = new ScenarioCalculatedAttributeEntity
             {
@@ -239,7 +240,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return result;
         }
 
-        private static void AddEquation(ScenarioCalculatedAttributeEntity calculatedAttribute, string equation, string criteria)
+        public static void AddEquation(ScenarioCalculatedAttributeEntity calculatedAttribute, string equation, string criteria)
         {
             var addedPair = new ScenarioCalculatedAttributeEquationCriteriaPairEntity
             {

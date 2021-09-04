@@ -113,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IPerformanceCurveRepository PerformanceCurveRepo => _performanceCurveRepo ??= new PerformanceCurveRepository(this);
 
-        public ICalculatedAttributesRepository CalculatedAttributeRepo => _calculatedAttributesRepo ??= new CalculatedAttributeRepository();
+        public ICalculatedAttributesRepository CalculatedAttributeRepo => _calculatedAttributesRepo ??= new CalculatedAttributeRepository(this);
 
         public IRemainingLifeLimitRepository RemainingLifeLimitRepo => _remainingLifeLimitRepo ??= new RemainingLifeLimitRepository(this);
 

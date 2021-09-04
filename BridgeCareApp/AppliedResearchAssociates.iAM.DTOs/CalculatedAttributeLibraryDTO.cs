@@ -5,6 +5,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class CalculatedAttributeLibraryDTO : BaseLibraryDTO
     {
+        public bool IsDefault { get; set; } = false;
+
         public ICollection<CalculatedAttributeDTO> CalculatedAttributes { get; set; } = new List<CalculatedAttributeDTO>();
     }
 }

@@ -50,7 +50,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.GetEnumerator()).Returns(scenarioRepo.GetEnumerator());
             _mockedContext.Setup(_ => _.ScenarioCalculatedAttribute).Returns(_mockScenarioCalculations.Object);
             _mockedContext.Setup(_ => _.Set<ScenarioCalculatedAttributeEntity>()).Returns(_mockScenarioCalculations.Object);
-            
+
+            var attributeRepo = TestDataForCalculatedAttributesRepository.GetAttributeRepo();
+            var attributeLibrary = new Mock<DbSet<AttributeEntity>>();
+            attributeLibrary.As<IQueryable<AttributeEntity>>().Setup(_ => _.Provider).Returns(attributeRepo.Provider);
+            attributeLibrary.As<IQueryable<AttributeEntity>>().Setup(_ => _.Expression).Returns(attributeRepo.Expression);
+            attributeLibrary.As<IQueryable<AttributeEntity>>().Setup(_ => _.ElementType).Returns(attributeRepo.ElementType);
+            attributeLibrary.As<IQueryable<AttributeEntity>>().Setup(_ => _.GetEnumerator()).Returns(attributeRepo.GetEnumerator());
+            _mockedContext.Setup(_ => _.Attribute).Returns(attributeLibrary.Object);
+            _mockedContext.Setup(_ => _.Set<AttributeEntity>()).Returns(attributeLibrary.Object);
+
             var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, _mockedContext.Object);
             _testRepo = mockedRepo;
 

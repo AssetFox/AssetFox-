@@ -5,6 +5,8 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CalculatedAttribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -26,11 +28,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistanceWork.Context.Upsert(library.ToLibraryEntity(_unitOfDataPersistanceWork.Context.Attribute),
                 library.Id, _unitOfDataPersistanceWork.UserEntity?.Id);
 
-        public void UpsertCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid libraryId) => throw new NotImplementedException();
+        public void UpsertCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid libraryId)
+        {
+            var attributeList = _unitOfDataPersistanceWork.Context.Attribute;
+            foreach (var calculatedAttribute in calculatedAttributes)
+            {
+                var attributeObject = attributeList.FirstOrDefault(_ => _.Name == calculatedAttribute.Attribute);
+                if (attributeObject != null)
+                {
+                    _unitOfDataPersistanceWork.Context.Upsert(calculatedAttribute.ToLibraryEntity(attributeObject),
+                        libraryId, _unitOfDataPersistanceWork.UserEntity?.Id);
+                }
+            }
+        }
 
-        public void DeleteCalculatedAttributeFromLibrary(Guid libraryId, Guid calculatedAttributeId) => throw new NotImplementedException();
+        public void DeleteCalculatedAttributeFromLibrary(Guid libraryId, Guid calculatedAttributeId) =>
+            _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeEntity>(_ => _.CalculatedAttributeLibraryId == libraryId && _.Id == calculatedAttributeId);
 
-        public void DeleteCalculatedAttributeLibrary(Guid libraryId) => throw new NotImplementedException();
+        public void DeleteCalculatedAttributeLibrary(Guid libraryId) =>
+            _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeLibraryEntity>(_ => _.Id == libraryId);
 
         public ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId) =>
             _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute
@@ -38,11 +54,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
 
-        public void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId) => throw new NotImplementedException();
+        public void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId)
+        {
+            var attributeList = _unitOfDataPersistanceWork.Context.Attribute;
 
-        public void DeleteCalculatedAttributeFromScenario(Guid scenarioId, Guid calculatedAttributeId) => throw new NotImplementedException();
+            // This will throw an error if no simulation is found.  That is the desired action here - let the API worry about the existence of the simulation
+            var networkId = _unitOfDataPersistanceWork.NetworkRepo.GetPennDotNetwork().Id;
+            var scenario = _unitOfDataPersistanceWork.SimulationRepo.GetSimulation(scenarioId).ToEntity(networkId);
 
-        public void ClearCalculatedAttributes(Guid scenarioId) => throw new NotImplementedException();
+            foreach (var calculatedAttribute in calculatedAttributes)
+            {
+                var attributeObject = attributeList.FirstOrDefault(_ => _.Name == calculatedAttribute.Attribute);
+                if (attributeObject != null)
+                {
+                    _unitOfDataPersistanceWork.Context.Upsert(calculatedAttribute.ToScenarioEntity(scenario, attributeObject),
+                        scenarioId, _unitOfDataPersistanceWork.UserEntity?.Id);
+                }
+            }
+        }
+
+        public void DeleteCalculatedAttributeFromScenario(Guid scenarioId, Guid calculatedAttributeId) =>
+            _unitOfDataPersistanceWork.Context.DeleteAll<ScenarioCalculatedAttributeEntity>(_ => _.SimulationId == scenarioId && _.Id == calculatedAttributeId);
+
+        public void ClearCalculatedAttributes(Guid scenarioId) =>
+            _unitOfDataPersistanceWork.Context.DeleteAll<ScenarioCalculatedAttributeEntity>(_ => _.SimulationId == scenarioId);
         
         
         

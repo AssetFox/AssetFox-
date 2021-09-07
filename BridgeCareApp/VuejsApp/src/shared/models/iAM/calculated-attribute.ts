@@ -16,7 +16,6 @@ export interface CalculatedAttribute {
     id: string;
     attribute: string;
     name: string;
-    shift: boolean;
     timing: Timing;
     criterionAndEquationSet: CriterionAndEquationSet[];
 }
@@ -40,7 +39,6 @@ export const emptyCalculatedAttribute: CalculatedAttribute = {
     id: getBlankGuid(),
     attribute: '',
     name: '',
-    shift: false,
     criterionAndEquationSet: [],
     timing: Timing.OnDemand
 };

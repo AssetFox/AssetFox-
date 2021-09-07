@@ -8,12 +8,12 @@ import { AxiosPromise } from 'axios';
 export default class CalculatedAttributeService {
     static getCalculatedAttributeLibraries(): AxiosPromise {
         return coreAxiosInstance.get(
-            `${API.CalculatedAttribute}/GetCalculatedAttributeLibraries`,
+            `${API.CalculatedAttribute}/CalculatedAttrbiuteLibraries`,
         );
     }
     static getScenarioCalculatedAttribute(scenarioId: string): AxiosPromise {
         return coreAxiosInstance.get(
-            `${API.CalculatedAttribute}/GetScenarioCalculatedAttribute/${scenarioId}`,
+            `${API.CalculatedAttribute}/ScenarioAttributes/${scenarioId}`,
         );
     }
 
@@ -21,7 +21,7 @@ export default class CalculatedAttributeService {
         data: CalculatedAttributeLibrary,
     ): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.CalculatedAttribute}/UpsertCalculatedAttributeLibrary`,
+            `${API.CalculatedAttribute}/UpsertLibrary`,
             data,
         );
     }
@@ -31,13 +31,13 @@ export default class CalculatedAttributeService {
         scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.CalculatedAttribute}/UpsertScenarioCalculatedAttribute/${scenarioId}`,
+            `${API.CalculatedAttribute}/UpsertScenarioAttribute/${scenarioId}`,
             data,
         );
     }
     static deleteCalculatedAttributeLibrary(libraryId: string): AxiosPromise {
         return coreAxiosInstance.delete(
-            `${API.CalculatedAttribute}/DeleteCalculatedAttributeLibrary/${libraryId}`,
+            `${API.CalculatedAttribute}/DeleteLibrary/${libraryId}`,
         );
     }
 }

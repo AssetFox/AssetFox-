@@ -13,17 +13,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid libraryId);
 
-        void DeleteCalculatedAttributeFromLibrary(Guid libraryId, Guid calculatedAttributeId);
-
         void DeleteCalculatedAttributeLibrary(Guid libraryId);
 
         // Scenarios
         ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId);      
 
         void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid simulationId);
-
-        void DeleteCalculatedAttributeFromScenario(Guid simulationId, Guid calculatedAttributeId);
-
-        void ClearCalculatedAttributes(Guid simulationId);
     }
 }

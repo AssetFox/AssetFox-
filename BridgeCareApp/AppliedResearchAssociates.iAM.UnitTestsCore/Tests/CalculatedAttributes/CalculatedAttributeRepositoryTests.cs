@@ -244,27 +244,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
         }
 
         [Fact]
-        public void RemovesCaclulatedAttributesInLibrary()
-        {
-            // Arrange
-            var repo = new CalculatedAttributeRepository(_testRepo);
-
-            var attributes = TestDataForCalculatedAttributesRepository.GetAttributeRepo();
-
-            var changingLibraryEntity = _testRepo.Context.CalculatedAttributeLibrary.First(_ => _.Name == "Second");
-
-            var removedCalculation = changingLibraryEntity.ToDto().CalculatedAttributes.First(_ => _.Attribute == "Description");
-
-            // Act
-            repo.DeleteCalculatedAttributeFromLibrary(changingLibraryEntity.Id, removedCalculation.Id);
-
-            // Assert
-            _mockLibrary.Verify(_ => _.Update(It.IsAny<CalculatedAttributeLibraryEntity>()), Times.Once());
-            _mockedContext.Verify(_ => _.CalculatedAttribute.Remove(It.IsAny<CalculatedAttributeEntity>()), Times.Once());
-            _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
-        }
-
-        [Fact]
         public void UpsertHandlesNoLibraryFound()
         {
             // Arrange
@@ -278,22 +257,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => repo.UpsertCalculatedAttributes(new List<CalculatedAttributeDTO>() { revisedCalculation }, _badId));
-        }
-
-        [Fact]
-        public void DeleteCalculatedAttributeHandlesNoLibraryFound()
-        {
-            // Arrange
-            var repo = new CalculatedAttributeRepository(_testRepo);
-
-            var attributes = TestDataForCalculatedAttributesRepository.GetAttributeRepo();
-
-            var changingLibraryEntity = _testRepo.Context.CalculatedAttributeLibrary.First(_ => _.Name == "Second");
-
-            var removedCalculation = changingLibraryEntity.ToDto().CalculatedAttributes.First(_ => _.Attribute == "Description");
-
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => repo.DeleteCalculatedAttributeFromLibrary(_badId, removedCalculation.Id));
         }
 
         [Fact]
@@ -409,70 +372,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => repo.UpsertScenarioCalculatedAttributes(new List<CalculatedAttributeDTO>() { attributeToModify }, _badId));
-        }
-
-        [Fact]
-        public void SuccessfullyDeleteScenarioCalculatedAttribute()
-        {
-            // Arrange
-            var repo = new CalculatedAttributeRepository(_testRepo);
-            var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
-            var attributeToDelete = _testRepo.Context.ScenarioCalculatedAttribute.First(_ => _.Attribute.Name == "Condition" && _.SimulationId == simulationId).ToDto();
-
-            // Act
-            repo.DeleteCalculatedAttributeFromScenario(simulationId, attributeToDelete.Id);
-
-            // Assert
-            _mockScenarioCalculations.Verify(_ => _.Remove(It.IsAny<ScenarioCalculatedAttributeEntity>()), Times.Once());
-            _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
-        }
-
-        [Fact]
-        public void DeleteScenarioCalculatedAttributeHandlesAttributeNotFound()
-        {
-            // Arrange
-            var repo = new CalculatedAttributeRepository(_testRepo);
-            var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
-
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => repo.DeleteCalculatedAttributeFromScenario(simulationId, _badId));
-        }
-
-        [Fact]
-        public void DeleteScenarioCalculatedAttributeHandlesScenarioNotFound()
-        {
-            // Arrange
-            var repo = new CalculatedAttributeRepository(_testRepo);
-            var attributeToDelete = _testRepo.Context.ScenarioCalculatedAttribute.First(_ => _.Attribute.Name == "Condition").ToDto();
-
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => repo.DeleteCalculatedAttributeFromScenario(_badId, attributeToDelete.Id));
-        }
-
-        [Fact]
-        public void SuccessfullyClearsCalculatedAttributesFromScenario()
-        {
-            // Arrange
-            var repo = new CalculatedAttributeRepository(_testRepo);
-            var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
-            var attributesToClear = _testRepo.Context.ScenarioCalculatedAttribute.Where(_ => _.SimulationId == simulationId).Count();
-
-            // Act
-            repo.ClearCalculatedAttributes(simulationId);
-
-            // Assert
-            // NOTE:  .RemoveRange(ICollection<ScenarioCalculatedAttributeEntity>) might be called instead (once)
-            _mockScenarioCalculations.Verify(_ => _.Remove(It.IsAny<ScenarioCalculatedAttributeEntity>()), Times.Exactly(attributesToClear));
-        }
-
-        [Fact]
-        public void ClearHandlesScenarioNotFound()
-        {
-            // Arrange
-            var repo = new CalculatedAttributeRepository(_testRepo);
-
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => repo.ClearCalculatedAttributes(_badId));
         }
 
         // Helpers

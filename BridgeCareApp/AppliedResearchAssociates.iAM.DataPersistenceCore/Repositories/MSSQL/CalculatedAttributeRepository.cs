@@ -42,9 +42,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void DeleteCalculatedAttributeFromLibrary(Guid libraryId, Guid calculatedAttributeId) =>
-            _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeEntity>(_ => _.CalculatedAttributeLibraryId == libraryId && _.Id == calculatedAttributeId);
-
         public void DeleteCalculatedAttributeLibrary(Guid libraryId) =>
             _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeLibraryEntity>(_ => _.Id == libraryId);
 
@@ -73,14 +70,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void DeleteCalculatedAttributeFromScenario(Guid scenarioId, Guid calculatedAttributeId) =>
-            _unitOfDataPersistanceWork.Context.DeleteAll<ScenarioCalculatedAttributeEntity>(_ => _.SimulationId == scenarioId && _.Id == calculatedAttributeId);
-
-        public void ClearCalculatedAttributes(Guid scenarioId) =>
+        private void ClearCalculatedAttributes(Guid scenarioId) =>
             _unitOfDataPersistanceWork.Context.DeleteAll<ScenarioCalculatedAttributeEntity>(_ => _.SimulationId == scenarioId);
-        
-        
-        
-        
+
+        private void DeleteCalculatedAttributeFromLibrary(Guid libraryId, Guid calculatedAttributeId) =>
+            _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeEntity>(_ => _.CalculatedAttributeLibraryId == libraryId && _.Id == calculatedAttributeId);
+
+
     }
 }

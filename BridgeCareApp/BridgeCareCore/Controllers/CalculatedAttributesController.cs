@@ -30,31 +30,11 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("CalculatedAttributeList")]
-        //[Authorize]
-        public async Task<IActionResult> GetAttributeList()
-        {
-            var calculatedAttributes = await UnitOfWork.AttributeRepo.CalculatedAttributes();
-            return Ok(calculatedAttributes);
-        }
-
-        [HttpGet]
         [Route("CalculatedAttrbiuteLibraries")]
         [Authorize]
         public async Task<IActionResult> GetCalculatedAttributeLibraries()
         {
-            return Ok(LibraryIdList());
-        }
-
-        [HttpGet]
-        [Route("AttributeLibrary")]
-        [Authorize]
-        public async Task<IActionResult> GetCalculatedAttributeLibrary(Guid libraryId)
-        {
-            if (!LibraryIdList().ContainsKey(libraryId)) return BadRequest($"Unable to find {libraryId} in the database");
-            var result = calculatedAttributesRepo.GetCalculatedAttributeLibraries().FirstOrDefault(_ => _.Id == libraryId);
-            if (result == null) return StatusCode(500);
-            return Ok(result);
+            return Ok(calculatedAttributesRepo.GetCalculatedAttributeLibraries().ToList());
         }
 
         [HttpGet]
@@ -103,16 +83,6 @@ namespace BridgeCareCore.Controllers
         {
             if (!LibraryIdList().ContainsKey(libraryId)) return BadRequest($"Unable to find {libraryId} in the database");
             calculatedAttributesRepo.DeleteCalculatedAttributeLibrary(libraryId);
-            return Ok();
-        }
-
-        [HttpDelete]
-        [Route("DeleteScenarioAttribute")]
-        //[Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public async Task<IActionResult> DeleteAttributeFromScenario(Guid simulationId, Guid attributeId)
-        {
-            if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when deleting a simulation attribute");
-            calculatedAttributesRepo.DeleteCalculatedAttributeFromScenario(simulationId, attributeId);
             return Ok();
         }
 

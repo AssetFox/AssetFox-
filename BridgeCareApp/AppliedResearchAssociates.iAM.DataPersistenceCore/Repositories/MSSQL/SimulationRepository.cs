@@ -209,6 +209,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.SelectableTreatments)
                 .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
                 .ThenInclude(_ => _.ScenarioBudget)
+                .Include(_ => _.SelectableTreatments)
+                .ThenInclude(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
                 // deficient condition goals
                 .Include(_ => _.ScenarioDeficientConditionGoals)
                 .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
@@ -225,6 +228,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.AnalysisMethod != null)
             {
                 simulationToClone.AnalysisMethod.Id = Guid.NewGuid();
+                simulationToClone.AnalysisMethod.SimulationId = simulationToClone.Id;
+                simulationToClone.AnalysisMethod.Simulation = null;
                 _unitOfWork.Context.ReInitializeAllEntityBaseProperties(simulationToClone.AnalysisMethod, _unitOfWork.UserEntity?.Id);
 
                 if (simulationToClone.AnalysisMethod.Benefit != null)
@@ -251,6 +256,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 simulationToClone.Budgets.ToList().ForEach(budget =>
                 {
                     budget.Id = Guid.NewGuid();
+                    budget.SimulationId = simulationToClone.Id;
+                    budget.Simulation = null;
                     _unitOfWork.Context.ReInitializeAllEntityBaseProperties(budget, _unitOfWork.UserEntity?.Id);
 
                     if (budget.ScenarioBudgetAmounts.Any())
@@ -281,6 +288,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 simulationToClone.BudgetPriorities.ForEach(budgetPriority =>
                 {
                     budgetPriority.Id = Guid.NewGuid();
+                    budgetPriority.SimulationId = simulationToClone.Id;
+                    budgetPriority.Simulation = null;
                     _unitOfWork.Context.ReInitializeAllEntityBaseProperties(budgetPriority, _unitOfWork.UserEntity?.Id);
 
                     if (budgetPriority.BudgetPercentagePairs.Any())
@@ -313,6 +322,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 simulationToClone.CashFlowRules.ForEach(cashFlowRule =>
                 {
                     cashFlowRule.Id = Guid.NewGuid();
+                    cashFlowRule.SimulationId = simulationToClone.Id;
+                    cashFlowRule.Simulation = null;
                     _unitOfWork.Context.ReInitializeAllEntityBaseProperties(cashFlowRule, _unitOfWork.UserEntity?.Id);
 
                     if (cashFlowRule.ScenarioCashFlowDistributionRules.Any())
@@ -342,6 +353,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.InvestmentPlan != null)
             {
                 simulationToClone.InvestmentPlan.Id = Guid.NewGuid();
+                simulationToClone.InvestmentPlan.SimulationId = simulationToClone.Id;
+                simulationToClone.InvestmentPlan.Simulation = null;
                 _unitOfWork.Context.ReInitializeAllEntityBaseProperties(simulationToClone.InvestmentPlan, _unitOfWork.UserEntity?.Id);
             }
 
@@ -350,6 +363,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 simulationToClone.CommittedProjects.ForEach(committedProject =>
                 {
                     committedProject.Id = Guid.NewGuid();
+                    committedProject.SimulationId = simulationToClone.Id;
+                    committedProject.Simulation = null;
                     committedProject.ScenarioBudgetId = simulationToClone.Budgets.Single(_ => _.Name == committedProject.ScenarioBudget.Name).Id;
                     committedProject.ScenarioBudget = null;
                     _unitOfWork.Context.ReInitializeAllEntityBaseProperties(committedProject, _unitOfWork.UserEntity?.Id);
@@ -371,6 +386,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 simulationToClone.PerformanceCurves.ForEach(performanceCurve =>
                 {
                     performanceCurve.Id = Guid.NewGuid();
+                    performanceCurve.SimulationId = simulationToClone.Id;
+                    performanceCurve.Simulation = null;
                     _unitOfWork.Context.ReInitializeAllEntityBaseProperties(performanceCurve, _unitOfWork.UserEntity?.Id);
 
                     if (performanceCurve.ScenarioPerformanceCurveEquationJoin != null)
@@ -401,6 +418,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 simulationToClone.RemainingLifeLimits.ForEach(remainingLifeLimit =>
                 {
                     remainingLifeLimit.Id = Guid.NewGuid();
+                    remainingLifeLimit.SimulationId = simulationToClone.Id;
+                    remainingLifeLimit.Simulation = null;
                     _unitOfWork.Context.ReInitializeAllEntityBaseProperties(remainingLifeLimit, _unitOfWork.UserEntity?.Id);
 
                     if (remainingLifeLimit.CriterionLibraryScenarioRemainingLifeLimitJoin != null)
@@ -421,6 +440,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 simulationToClone.ScenarioDeficientConditionGoals.ForEach(goal =>
                 {
                     goal.Id = Guid.NewGuid();
+                    goal.SimulationId = simulationToClone.Id;
+                    goal.Simulation = null;
                     _unitOfWork.Context.ReInitializeAllEntityBaseProperties(goal, _unitOfWork.UserEntity?.Id);
 
                     if (goal.CriterionLibraryScenarioDeficientConditionGoalJoin != null)
@@ -441,6 +462,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 simulationToClone.ScenarioTargetConditionalGoals.ForEach(goal =>
                 {
                     goal.Id = Guid.NewGuid();
+                    goal.SimulationId = simulationToClone.Id;
+                    goal.Simulation = null;
                     _unitOfWork.Context.ReInitializeAllEntityBaseProperties(goal, _unitOfWork.UserEntity?.Id);
 
                     if (goal.CriterionLibraryScenarioTargetConditionGoalJoin != null)
@@ -461,6 +484,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 simulationToClone.SelectableTreatments.ForEach(treatment =>
                 {
                     treatment.Id = Guid.NewGuid();
+                    treatment.SimulationId = simulationToClone.Id;
+                    treatment.Simulation = null;
                     _unitOfWork.Context.ReInitializeAllEntityBaseProperties(treatment, _unitOfWork.UserEntity?.Id);
 
                     if (treatment.CriterionLibraryScenarioSelectableTreatmentJoin != null)
@@ -598,7 +623,135 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 };
             }
 
-            _unitOfWork.Context.AddEntity(simulationToClone);
+            /*_unitOfWork.Context.AddEntity(simulationToClone);*/
+            // add simulation
+            _unitOfWork.Context.AddAll(new List<SimulationEntity>{simulationToClone});
+            // add analysis method
+            _unitOfWork.Context.AddEntity(simulationToClone.AnalysisMethod);
+            // add budgets
+            _unitOfWork.Context.AddAll(simulationToClone.Budgets.ToList());
+            // add budget amounts
+            _unitOfWork.Context.AddAll(simulationToClone.Budgets
+                .SelectMany(_ => _.ScenarioBudgetAmounts.Select(amount => amount)).ToList());
+            // add budget criteria
+            var budgetCriteriaJoins =
+                simulationToClone.Budgets.Select(_ => _.CriterionLibraryScenarioBudgetJoin).ToList();
+            _unitOfWork.Context.AddAll(budgetCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(budgetCriteriaJoins);
+            // add budget priorities
+            _unitOfWork.Context.AddAll(simulationToClone.BudgetPriorities.ToList());
+            // add percentage pairs
+            _unitOfWork.Context.AddAll(simulationToClone.BudgetPriorities
+                .SelectMany(_ => _.BudgetPercentagePairs.Select(pair => pair)).ToList());
+            // add budget priority criteria
+            var budgetPriorityCriteriaJoins =
+                simulationToClone.BudgetPriorities.Select(_ => _.CriterionLibraryScenarioBudgetPriorityJoin).ToList();
+            _unitOfWork.Context.AddAll(budgetPriorityCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(budgetPriorityCriteriaJoins);
+            // add cash flow rules
+            _unitOfWork.Context.AddAll(simulationToClone.CashFlowRules.ToList());
+            // add distribution rules
+            _unitOfWork.Context.AddAll(simulationToClone.CashFlowRules.SelectMany(_ =>
+                _.ScenarioCashFlowDistributionRules.Select(distributionRule => distributionRule)).ToList());
+            // add cash flow rule criteria
+            var cashFlowRuleCriteriaJoins =
+                simulationToClone.CashFlowRules.Select(_ => _.CriterionLibraryScenarioCashFlowRuleJoin).ToList();
+            _unitOfWork.Context.AddAll(cashFlowRuleCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(cashFlowRuleCriteriaJoins);
+            // add investment plan
+            _unitOfWork.Context.AddEntity(simulationToClone.InvestmentPlan);
+            // add committed projects
+            _unitOfWork.Context.AddAll(simulationToClone.CommittedProjects.ToList());
+            // add committed project consequences
+            _unitOfWork.Context.AddAll(simulationToClone.CommittedProjects
+                .SelectMany(_ => _.CommittedProjectConsequences.Select(consequence => consequence)).ToList());
+            // add performance curves
+            _unitOfWork.Context.AddAll(simulationToClone.PerformanceCurves.ToList());
+            // add performance curve equations
+            var performanceCurveEquationJoins =
+                simulationToClone.PerformanceCurves.Select(_ => _.ScenarioPerformanceCurveEquationJoin).ToList();
+            _unitOfWork.Context.AddAll(performanceCurveEquationJoins.Select(_ => _.Equation).ToList());
+            _unitOfWork.Context.AddAll(performanceCurveEquationJoins);
+            // add performance curve criteria
+            var performanceCurveCriteriaJoins =
+                simulationToClone.PerformanceCurves.Select(_ => _.CriterionLibraryScenarioPerformanceCurveJoin).ToList();
+            _unitOfWork.Context.AddAll(performanceCurveCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(performanceCurveCriteriaJoins);
+            // add remaining life limits
+            _unitOfWork.Context.AddAll(simulationToClone.RemainingLifeLimits.ToList());
+            // add remaining life limit criteria
+            var remainingLifeLimitCriteriaJoins =
+                simulationToClone.RemainingLifeLimits.Select(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin).ToList();
+            _unitOfWork.Context.AddAll(remainingLifeLimitCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(remainingLifeLimitCriteriaJoins);
+            // add deficient condition goals
+            _unitOfWork.Context.AddAll(simulationToClone.ScenarioDeficientConditionGoals.ToList());
+            // add deficient condition goal criteria
+            var deficientConditionGoalCriteriaJoins =
+                simulationToClone.ScenarioDeficientConditionGoals.Select(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin).ToList();
+            _unitOfWork.Context.AddAll(deficientConditionGoalCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(deficientConditionGoalCriteriaJoins);
+            // add target condition goals
+            _unitOfWork.Context.AddAll(simulationToClone.ScenarioTargetConditionalGoals.ToList());
+            // add target condition goal criteria
+            var targetConditionGoalCriteriaJoins =
+                simulationToClone.ScenarioTargetConditionalGoals.Select(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin).ToList();
+            _unitOfWork.Context.AddAll(targetConditionGoalCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(targetConditionGoalCriteriaJoins);
+            // add selectable treatments
+            _unitOfWork.Context.AddAll(simulationToClone.SelectableTreatments.ToList());
+            // add selectable treatment criteria
+            var treatmentCriteriaJoins =
+                simulationToClone.SelectableTreatments.Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin).ToList();
+            _unitOfWork.Context.AddAll(treatmentCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(treatmentCriteriaJoins);
+            // add treatment consequences
+            var treatmentConsequences = simulationToClone.SelectableTreatments
+                .SelectMany(_ => _.ScenarioTreatmentConsequences.Select(consequence => consequence)).ToList();
+            _unitOfWork.Context.AddAll(treatmentConsequences);
+            // add treatment consequence equations
+            var treatmentConsequenceEquationJoins =
+                treatmentConsequences.Select(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin).ToList();
+            _unitOfWork.Context.AddAll(treatmentConsequenceEquationJoins.Select(_ => _.Equation).ToList());
+            _unitOfWork.Context.AddAll(treatmentConsequenceEquationJoins);
+            // add treatment consequence criteria
+            var treatmentConsequenceCriteriaJoins =
+                treatmentConsequences.Select(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin).ToList();
+            _unitOfWork.Context.AddAll(treatmentConsequenceCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(treatmentConsequenceCriteriaJoins);
+            // add treatment costs
+            var treatmentCosts = simulationToClone.SelectableTreatments
+                .SelectMany(_ => _.ScenarioTreatmentCosts.Select(consequence => consequence)).ToList();
+            _unitOfWork.Context.AddAll(treatmentCosts);
+            // add treatment cost equations
+            var treatmentCostEquationJoins =
+                treatmentCosts.Select(_ => _.ScenarioTreatmentCostEquationJoin).ToList();
+            _unitOfWork.Context.AddAll(treatmentCostEquationJoins.Select(_ => _.Equation).ToList());
+            _unitOfWork.Context.AddAll(treatmentCostEquationJoins);
+            // add treatment cost criteria
+            var treatmentCostCriteriaJoins =
+                treatmentCosts.Select(_ => _.CriterionLibraryScenarioTreatmentCostJoin).ToList();
+            _unitOfWork.Context.AddAll(treatmentCostCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(treatmentCostCriteriaJoins);
+            // add treatment schedulings
+            _unitOfWork.Context.AddAll(simulationToClone.SelectableTreatments
+                .SelectMany(_ => _.ScenarioTreatmentSchedulings.Select(scheduling => scheduling)).ToList());
+            // add treatment supersessions
+            var treatmentSupersessions = simulationToClone.SelectableTreatments
+                .SelectMany(_ => _.ScenarioTreatmentSupersessions.Select(scheduling => scheduling)).ToList();
+            _unitOfWork.Context.AddAll(treatmentSupersessions);
+            // add treatment supersession criteria
+            var treatmentSupersessionCriteriaJoins =
+                treatmentSupersessions.Select(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin).ToList();
+            _unitOfWork.Context.AddAll(treatmentSupersessionCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+            _unitOfWork.Context.AddAll(treatmentSupersessionCriteriaJoins);
+            // add simulation user
+            _unitOfWork.Context.AddAll(simulationToClone.SimulationUserJoins.ToList());
+
+            if (simulationToClone.SimulationUserJoins.Any())
+            {
+                simulationToClone.SimulationUserJoins.ToList()[0].User = _unitOfWork.UserEntity;
+            }
 
             return simulationToClone.ToDto(_unitOfWork.UserEntity);
         }

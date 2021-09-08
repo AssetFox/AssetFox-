@@ -69,72 +69,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return result;
         }
 
-        public static CalculatedAttributeLibraryEntity ToLibraryEntity(this CalculatedAttributeLibraryDTO dto, IQueryable<AttributeEntity> attributeList)
-        {
-            var result = new CalculatedAttributeLibraryEntity()
+        public static CalculatedAttributeLibraryEntity ToLibraryEntity(this CalculatedAttributeLibraryDTO dto) =>
+            new CalculatedAttributeLibraryEntity()
             {
                 Id = dto.Id,
                 Name = dto.Name,
                 Description = dto.Description,
                 IsDefault = dto.IsDefault
             };
-            foreach (var calculatedAttribute in dto.CalculatedAttributes)
-            {
-                var attribute = attributeList.Any(_ => _.Name == calculatedAttribute.Attribute)
-                    ? attributeList.First(_ => _.Name == calculatedAttribute.Attribute)
-                    : throw new ArgumentException($"Error in conversion to entity library.  Unable to find attribute {calculatedAttribute.Attribute} in provided attribute library");
-                var calculatedAttributeEntity = calculatedAttribute.ToLibraryEntity(attribute);
-                calculatedAttributeEntity.CalculatedAttributeLibrary = result;
-                calculatedAttributeEntity.CalculatedAttributeLibraryId = result.Id;
-                result.CalculatedAttributes.Add(calculatedAttributeEntity);
-            }
-            return result;
-        }
 
-        public static CalculatedAttributeEntity ToLibraryEntity(this CalculatedAttributeDTO dto, AttributeEntity attribute)
-        {
-            var result = new CalculatedAttributeEntity()
+        public static CalculatedAttributeEntity ToLibraryEntity(this CalculatedAttributeDTO dto, Guid attributeId) =>
+            new CalculatedAttributeEntity()
             {
-                Id = dto.Id,
-                AttributeId = attribute.Id,
-                Attribute = attribute,
-                CalculationTiming = dto.CalculationTiming
-            };
-            foreach (var pair in dto.Equations)
-            {
-                var pairEntity = pair.ToLibraryEntity();
-                pairEntity.CalculatedAttribute = result;
-                pairEntity.CalculatedAttributeId = result.Id;
-                result.Equations.Add(pairEntity);
-            }
-            return result;
-        }
-
-        public static CalculatedAttributeEquationCriteriaPairEntity ToLibraryEntity(this CalculatedAttributeEquationCriteriaPairDTO dto)
-        {
-            var result = new CalculatedAttributeEquationCriteriaPairEntity() { Id = dto.Id };
-            var criteria = dto.CriteriaLibrary?.ToEntity();
-            if (criteria != null)
-            {
-                result.CriterionLibraryCalculatedAttributeJoin = new CriterionLibraryCalculatedAttributePairEntity()
-                {
-                    CriterionLibrary = criteria,
-                    CriterionLibraryId = criteria.Id,
-                    CalculatedAttributePair = result,
-                    CalculatedAttributePairId = result.Id
-                };
-            }
-            var equation = dto.Equation.ToEntity();
-            result.EquationCalculatedAttributeJoin = new EquationCalculatedAttributePairEntity()
-            {
-                Equation = equation,
-                EquationId = equation.Id,
-                CalculatedAttributePair = result,
-                CalculatedAttributePairId = result.Id
+                Id = dto.Id, AttributeId = attributeId, CalculationTiming = dto.CalculationTiming
             };
 
-            return result;
-        }
+        public static CalculatedAttributeEquationCriteriaPairEntity ToLibraryEntity(
+            this CalculatedAttributeEquationCriteriaPairDTO dto, Guid calculatedAttributeId) =>
+            new CalculatedAttributeEquationCriteriaPairEntity
+            {
+                Id = dto.Id, CalculatedAttributeId = calculatedAttributeId
+            };
+
+        public static EquationCalculatedAttributePairEntity ToLibraryEntity(this EquationDTO equation,
+            Guid calculatedAttributePairId) =>
+            new EquationCalculatedAttributePairEntity
+            {
+                EquationId = equation.Id, CalculatedAttributePairId = calculatedAttributePairId
+            };
+
+        public static CriterionLibraryCalculatedAttributePairEntity ToLibraryEntity(this CriterionLibraryDTO criterion,
+            Guid calculatedAttributePairId) =>
+            new CriterionLibraryCalculatedAttributePairEntity
+            {
+                CriterionLibraryId = criterion.Id, CalculatedAttributePairId = calculatedAttributePairId
+            };
 
         public static ScenarioCalculatedAttributeEntity ToScenarioEntity(this CalculatedAttributeDTO dto, SimulationEntity simulation, AttributeEntity attribute)
         {

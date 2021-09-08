@@ -99,8 +99,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void DeleteCalculatedAttributeLibrary(Guid libraryId) =>
+        public void DeleteCalculatedAttributeLibrary(Guid libraryId)
+        {
+            var library = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary.SingleOrDefault(_ => _.Id == libraryId);
+            if (library == null) return;
+
+            foreach (var attribute in library.CalculatedAttributes)
+            {
+                DeletePairs(attribute);
+            }
+
             _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeLibraryEntity>(_ => _.Id == libraryId);
+        }
+            
 
         public ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId) =>
             _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute
@@ -110,20 +121,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId)
         {
-            var attributeList = _unitOfDataPersistanceWork.Context.Attribute;
-
+            ValidateCalculatedAttributes(calculatedAttributes.AsQueryable());
             // This will throw an error if no simulation is found.  That is the desired action here - let the API worry about the existence of the simulation
             var networkId = _unitOfDataPersistanceWork.NetworkRepo.GetPennDotNetwork().Id;
             var scenario = _unitOfDataPersistanceWork.SimulationRepo.GetSimulation(scenarioId).ToEntity(networkId);
 
+
             foreach (var calculatedAttribute in calculatedAttributes)
             {
-                var attributeObject = attributeList.FirstOrDefault(_ => _.Name == calculatedAttribute.Attribute);
-                if (attributeObject != null)
-                {
-                    _unitOfDataPersistanceWork.Context.Upsert(calculatedAttribute.ToScenarioEntity(scenario, attributeObject),
+                    _unitOfDataPersistanceWork.Context.Upsert(calculatedAttribute.ToScenarioEntity(scenario,
+                        _unitOfDataPersistanceWork.Context.Attribute.First(_ => _.Name == calculatedAttribute.Attribute)),
                         scenarioId, _unitOfDataPersistanceWork.UserEntity?.Id);
-                }
             }
         }
 

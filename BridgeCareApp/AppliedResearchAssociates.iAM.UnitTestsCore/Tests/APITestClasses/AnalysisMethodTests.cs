@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Interfaces.DefaultData;
+using BridgeCareCore.Models.DefaultData;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
@@ -18,6 +22,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private static readonly Guid AnalysisMethodId = Guid.Parse("e93670b5-af82-4b58-9487-6eceed99b91e");
         private static readonly Guid BenefitId = Guid.Parse("be2497dd-3acd-4cdd-88a8-adeb9893f1df");
+        private readonly Mock<IAnalysisDefaultDataService> _mockAnalysisDefaultDataService = new Mock<IAnalysisDefaultDataService>();
 
         public AnalysisMethodTests()
         {
@@ -26,9 +31,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
+            _mockAnalysisDefaultDataService.Setup(m => m.GetAnalysisDefaultData()).ReturnsAsync(new AnalysisDefaultData());
             _controller = new AnalysisMethodController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
-        }
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockAnalysisDefaultDataService.Object);
+        }        
 
         public AnalysisMethodEntity TestAnalysis { get; } = new AnalysisMethodEntity
         {

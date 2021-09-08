@@ -311,6 +311,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (budgetPriority.BudgetPercentagePairs.Any())
                     {
+                        budgetPriority.BudgetPercentagePairs = budgetPriority.BudgetPercentagePairs.Where(_ =>
+                            simulationToClone.Budgets.Any(budget => budget.Name == _.ScenarioBudget.Name)).ToList();
                         budgetPriority.BudgetPercentagePairs.ForEach(percentagePair =>
                         {
                             if (simulationToClone.Budgets.Any(_ => _.Name == percentagePair.ScenarioBudget.Name))
@@ -389,6 +391,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.CommittedProjects.Any())
             {
+                simulationToClone.CommittedProjects = simulationToClone.CommittedProjects.Where(_ =>
+                    simulationToClone.Budgets.Any(budget => budget.Name == _.ScenarioBudget.Name)).ToList();
                 simulationToClone.CommittedProjects.ForEach(committedProject =>
                 {
                     if (simulationToClone.Budgets.Any(_ => _.Name == committedProject.ScenarioBudget.Name))
@@ -690,6 +694,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                     if (treatment.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
                     {
+                        treatment.ScenarioSelectableTreatmentScenarioBudgetJoins = treatment.ScenarioSelectableTreatmentScenarioBudgetJoins.Where(_ =>
+                            simulationToClone.Budgets.Any(budget => budget.Name == _.ScenarioBudget.Name)).ToList();
                         treatment.ScenarioSelectableTreatmentScenarioBudgetJoins.ForEach(join =>
                         {
                             if (simulationToClone.Budgets.Any(_ => _.Name == join.ScenarioBudget.Name))
@@ -1040,41 +1046,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public async void DeleteSimulation(Guid simulationId)
+        public void DeleteSimulation(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 return;
             }
 
-            await Task.Factory.StartNew(() => _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
-                    _.ScenarioBudgetPriority.SimulationId == simulationId))
-                .ContinueWith(pairDeleteTask =>
-                {
-                    if (pairDeleteTask.IsCompleted)
-                    {
-                        Task.Factory.StartNew(() =>
-                                _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
-                                    _.ScenarioSelectableTreatment.SimulationId == simulationId))
-                            .ContinueWith(treatmentBudgetJoinDeleteTask =>
-                            {
-                                if (treatmentBudgetJoinDeleteTask.IsCompleted)
-                                {
-                                    Task.Factory.StartNew(() =>
-                                            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
-                                                _.SimulationId == simulationId))
-                                        .ContinueWith(projectDeleteTask =>
-                                        {
-                                            if (projectDeleteTask.IsCompleted)
-                                            {
-                                                _unitOfWork.Context.DeleteEntity<SimulationEntity>(
-                                                    _ => _.Id == simulationId);
-                                            }
-                                        });
-                                }
-                            });
-                    }
-                });
+            _unitOfWork.Context.DeleteAll<BudgetPercentagePairEntity>(_ =>
+                _.ScenarioBudgetPriority.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
+
+            _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                _.ScenarioSelectableTreatment.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
+
+            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
+                _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
+
+            _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
         }
 
         // the method is used only by other repositories.

@@ -31,8 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO library)
         {
             // Update the library
-            _unitOfDataPersistanceWork.Context.Upsert(library.ToLibraryEntity(_unitOfDataPersistanceWork.Context.Attribute),
-                library.Id, _unitOfDataPersistanceWork.UserEntity?.Id);
+            _unitOfDataPersistanceWork.Context.Upsert(library.ToLibraryEntity(), library.Id, _unitOfDataPersistanceWork.UserEntity?.Id);
 
             // Delete the entities attached to the library that are no longer there
             var entityIds = library.CalculatedAttributes.Select(_ => _.Id).ToList();
@@ -114,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             foreach (var attribute in library.CalculatedAttributes)
             {
-                DeletePairs(attribute);
+                DeleteLibraryPairs(libraryId);
             }
 
             _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeLibraryEntity>(_ => _.Id == libraryId);
@@ -130,18 +129,55 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId)
         {
             ValidateCalculatedAttributes(calculatedAttributes.AsQueryable());
-            // This will throw an error if no simulation is found.  That is the desired action here - let the API worry about the existence of the simulation
-            var networkId = _unitOfDataPersistanceWork.NetworkRepo.GetPennDotNetwork().Id;
-            var scenario = _unitOfDataPersistanceWork.SimulationRepo.GetSimulation(scenarioId).ToEntity(networkId);
+            // This will throw an error if no simulation is found.  That is the desired action here.
+            // Let the API worry about the existence of the simulation
+            _unitOfDataPersistanceWork.SimulationRepo.GetSimulation(scenarioId);
 
+            var entities = calculatedAttributes
+                .Select(calc => calc.ToScenarioEntity(scenarioId,
+                    _unitOfDataPersistanceWork.Context.Attribute.First(attr => attr.Name == calc.Attribute).Id
+                    ));
 
-            foreach (var calculatedAttribute in calculatedAttributes)
+            var entityIds = entities.Select(_ => _.Id).ToList();
+
+            var existingEntityIds = _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute.AsNoTracking()
+                .Where(_ => _.SimulationId == scenarioId && entityIds.Contains(_.Id))
+                .Select(_ => _.Id).ToList();
+
+            _unitOfDataPersistanceWork.Context.DeleteAll<ScenarioCalculatedAttributeEntity>(_ =>
+                _.SimulationId == scenarioId && !entityIds.Contains(_.Id));
+
+            _unitOfDataPersistanceWork.Context.UpdateAll(entities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(), _unitOfDataPersistanceWork.UserEntity?.Id);
+
+            _unitOfDataPersistanceWork.Context.AddAll(entities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), _unitOfDataPersistanceWork.UserEntity?.Id);
+
+            DeleteScenarioPairs(scenarioId);
+
+            var calculatedAttributeEquationCriteriaPairs = new List<ScenarioCalculatedAttributeEquationCriteriaPairEntity>();
+            var equations = new List<EquationEntity>();
+            var equationPairJoins = new List<ScenarioEquationCalculatedAttributePairEntity>();
+            var criteria = new List<CriterionLibraryEntity>();
+            var criteriaPairJoins = new List<ScenarioCriterionLibraryCalculatedAttributePairEntity>();
+
+            calculatedAttributes.ForEach(calcAttr =>
             {
-                    _unitOfDataPersistanceWork.Context.Upsert(calculatedAttribute.ToScenarioEntity(scenario,
-                        _unitOfDataPersistanceWork.Context.Attribute.First(_ => _.Name == calculatedAttribute.Attribute)),
-                        scenarioId, _unitOfDataPersistanceWork.UserEntity?.Id);
-                }
-            }*/
+                calculatedAttributeEquationCriteriaPairs.AddRange(calcAttr.Equations.Select(p => p.ToScenarioEntity(calcAttr.Id)));
+                equations.AddRange(calcAttr.Equations.Select(p => p.Equation.ToEntity()));
+                equationPairJoins.AddRange(calcAttr.Equations.Select(p => p.Equation.ToScenarioEntity(p.Id)));
+                criteria.AddRange(calcAttr.Equations.Select(p =>
+                {
+                    var entity = p.CriteriaLibrary.ToEntity();
+                    entity.IsSingleUse = true;
+                    return entity;
+                }));
+                criteriaPairJoins.AddRange(calcAttr.Equations.Select(p => p.CriteriaLibrary.ToScenarioEntity(p.Id)));
+            });
+
+            AddAllWithUser(calculatedAttributeEquationCriteriaPairs);
+            AddAllWithUser(equations);
+            AddAllWithUser(equationPairJoins);
+            AddAllWithUser(criteria);
+            AddAllWithUser(criteriaPairJoins);
         }
 
         private string JoinAttributesIntoCommaSeparatedString(IQueryable<CalculatedAttributeDTO> calculatedAttributes) =>

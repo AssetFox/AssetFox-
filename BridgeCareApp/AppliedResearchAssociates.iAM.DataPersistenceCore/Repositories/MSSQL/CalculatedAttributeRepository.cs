@@ -25,6 +25,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public ICollection<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibraries() =>
             _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary
+                .Include(_ => _.CalculatedAttributes)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.CalculatedAttributes)
+                .ThenInclude(_ => _.Equations)
+                .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.CalculatedAttributes)
+                .ThenInclude(_ => _.Equations)
+                .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+                .ThenInclude(_ => _.Equation)
                 .Select(_ => _.ToDto())
                 .ToList();
 
@@ -123,6 +133,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId) =>
             _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute
                 .Where(_ => _.SimulationId == simulationId)
+                .Include(_ => _.Attribute)
+                .Include(_ => _.Equations)
+                .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Equations)
+                .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+                .ThenInclude(_ => _.Equation)
                 .Select(_ => _.ToDto())
                 .ToList();
 

@@ -1358,7 +1358,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.ScenarioCalculatedAttributePair)
                     .WithOne(p => p.CriterionLibraryCalculatedAttributeJoin)
-                    .HasForeignKey<ScenarioCalculatedAttributeEquationCriteriaPairEntity>(d => d.ScenarioCalculatedAttributeId)
+                    .HasForeignKey<ScenarioCriterionLibraryCalculatedAttributePairEntity>(d => d.ScenarioCalculatedAttributePairId)
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.CriterionLibrary)
@@ -1384,7 +1384,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.Equation)
                     .WithOne(p => p.ScenarioCalculatedAttributePairJoin)
-                    .HasForeignKey<ScenarioEquationCalculatedAttributePairEntity>(d => d.ScenarioCalculatedAttributePairId)
+                    .HasForeignKey<ScenarioEquationCalculatedAttributePairEntity>(d => d.EquationId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -1432,7 +1432,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<CriterionLibraryCalculatedAttributePairEntity>(entity =>
             {
-                entity.HasKey(e => new { e.CalculatedAttributePair, e.CriterionLibraryId });
+                entity.HasKey(e => new { e.CalculatedAttributePairId, e.CriterionLibraryId });
 
                 entity.ToTable("CalculatedAttributePair_Criteria");
 
@@ -1468,7 +1468,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.Equation)
                     .WithOne(p => p.CalculatedAttributePairJoin)
-                    .HasForeignKey<EquationCalculatedAttributePairEntity>(d => d.CalculatedAttributePairId)
+                    .HasForeignKey<EquationCalculatedAttributePairEntity>(d => d.EquationId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 

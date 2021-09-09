@@ -128,10 +128,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid scenarioId)
         {
-            ValidateCalculatedAttributes(calculatedAttributes.AsQueryable());
             // This will throw an error if no simulation is found.  That is the desired action here.
             // Let the API worry about the existence of the simulation
             _unitOfDataPersistanceWork.SimulationRepo.GetSimulation(scenarioId);
+
+            ValidateCalculatedAttributes(calculatedAttributes.AsQueryable());
 
             var entities = calculatedAttributes
                 .Select(calc => calc.ToScenarioEntity(scenarioId,

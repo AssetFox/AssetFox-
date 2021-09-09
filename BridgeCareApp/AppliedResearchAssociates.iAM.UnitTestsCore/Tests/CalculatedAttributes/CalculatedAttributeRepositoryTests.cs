@@ -14,6 +14,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using System.Data;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
 {
@@ -65,6 +66,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             attributeLibrary.As<IQueryable<AttributeEntity>>().Setup(_ => _.GetEnumerator()).Returns(attributeRepo.GetEnumerator());
             _mockedContext.Setup(_ => _.Attribute).Returns(attributeLibrary.Object);
             _mockedContext.Setup(_ => _.Set<AttributeEntity>()).Returns(attributeLibrary.Object);
+
+            var simulationRepo = TestDataForCalculatedAttributesRepository.GetSimulations();
+            var simulationLibrary = new Mock<DbSet<SimulationEntity>>();
+            simulationLibrary.As<IQueryable<SimulationEntity>>().Setup(_ => _.Provider).Returns(simulationRepo.Provider);
+            simulationLibrary.As<IQueryable<SimulationEntity>>().Setup(_ => _.Expression).Returns(simulationRepo.Expression);
+            simulationLibrary.As<IQueryable<SimulationEntity>>().Setup(_ => _.ElementType).Returns(simulationRepo.ElementType);
+            simulationLibrary.As<IQueryable<SimulationEntity>>().Setup(_ => _.GetEnumerator()).Returns(simulationRepo.GetEnumerator());
+            _mockedContext.Setup(_ => _.Simulation).Returns(simulationLibrary.Object);
+            _mockedContext.Setup(_ => _.Set<SimulationEntity>()).Returns(simulationLibrary.Object);
 
             var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, _mockedContext.Object);
             _testRepo = mockedRepo;
@@ -256,7 +266,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             revisedCalculation.CalculationTiming = 2;
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => repo.UpsertCalculatedAttributes(new List<CalculatedAttributeDTO>() { revisedCalculation }, _badId));
+            Assert.Throws<RowNotInTableException>(() => repo.UpsertCalculatedAttributes(new List<CalculatedAttributeDTO>() { revisedCalculation }, _badId));
         }
 
         [Fact]
@@ -284,8 +294,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             repo.DeleteCalculatedAttributeLibrary(_badId);
 
             // Assert
-            _mockLibrary.Verify(_ => _.Remove(It.IsAny<CalculatedAttributeLibraryEntity>()), Times.Once());
-            _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
+            _mockLibrary.Verify(_ => _.Remove(It.IsAny<CalculatedAttributeLibraryEntity>()), Times.Never());
+            _mockedContext.Verify(_ => _.SaveChanges(), Times.Never());
         }
 
         [Fact]
@@ -371,7 +381,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             attributeToModify.CalculationTiming = 2;
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => repo.UpsertScenarioCalculatedAttributes(new List<CalculatedAttributeDTO>() { attributeToModify }, _badId));
+            Assert.Throws<RowNotInTableException>(() => repo.UpsertScenarioCalculatedAttributes(new List<CalculatedAttributeDTO>() { attributeToModify }, _badId));
         }
 
         // Helpers

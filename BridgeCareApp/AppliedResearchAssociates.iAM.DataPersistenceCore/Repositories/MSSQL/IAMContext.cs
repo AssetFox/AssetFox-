@@ -1416,11 +1416,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Category)
+                .HasDefaultValue(TreatmentCategory.Preservation)
                 .HasConversion(
                     v => v.ToString(),
                     v => (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
 
                 entity.Property(e => e.AssetType)
+                .HasDefaultValue(AssetType.Bridge)
                 .HasConversion(
                     v => v.ToString(),
                     v => (AssetType)Enum.Parse(typeof(AssetType), v));
@@ -1440,11 +1442,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Category)
+                .HasDefaultValue(TreatmentCategory.Preservation)
                 .HasConversion(
                     v => v.ToString(),
                     v => (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
 
                 entity.Property(e => e.AssetType)
+                .HasDefaultValue(AssetType.Bridge)
                 .HasConversion(
                     v => v.ToString(),
                     v => (AssetType)Enum.Parse(typeof(AssetType), v));

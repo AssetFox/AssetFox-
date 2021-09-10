@@ -19,9 +19,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid TreatmentLibraryId { get; set; }
 
-        public TreatmentCategory Category { get; set; }
+        public TreatmentCategory Category { get; set; } = TreatmentCategory.Preservation;
 
-        public AssetType AssetType { get; set; }
+        public AssetType AssetType { get; set; } = AssetType.Bridge;
 
         public virtual TreatmentLibraryEntity TreatmentLibrary { get; set; }
 

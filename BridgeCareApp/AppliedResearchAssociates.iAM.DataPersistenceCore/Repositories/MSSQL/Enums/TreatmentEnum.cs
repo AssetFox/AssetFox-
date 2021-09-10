@@ -6,6 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class TreatmentEnum
     {
+        // Order is important
         public enum TreatmentCategory
         {
             Preservation,

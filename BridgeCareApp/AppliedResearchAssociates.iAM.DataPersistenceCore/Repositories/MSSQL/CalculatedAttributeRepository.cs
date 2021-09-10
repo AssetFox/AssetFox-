@@ -40,6 +40,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO library)
         {
+            // Does the library have a provided ID?
+            AssignIdWhenNull(library);
+
             // Update the library
             _unitOfDataPersistanceWork.Context.Upsert(library.ToLibraryEntity(), library.Id, _unitOfDataPersistanceWork.UserEntity?.Id);
 
@@ -66,9 +69,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             ValidateCalculatedAttributes(calculatedAttributes.AsQueryable());
 
+            // Assign IDs as needed
+            
+
             var entities = calculatedAttributes
-                .Select(_ => _.ToLibraryEntity(_unitOfDataPersistanceWork.Context.Attribute
-                    .First(attr => attr.Name == _.Attribute).Id))
+                .Select(calc =>
+                {
+                    AssignIdWhenNull(calc);
+                    return calc.ToLibraryEntity(_unitOfDataPersistanceWork.Context.Attribute.First(attr => attr.Name == calc.Attribute).Id);
+                })
                 .ToList();
 
             var entityIds = entities.Select(_ => _.Id).ToList();
@@ -95,18 +104,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             calculatedAttributes.ForEach(calcAttr =>
             {
                 calculatedAttributeEquationCriteriaPairs.AddRange(
-                    calcAttr.Equations.Select(pair => pair.ToLibraryEntity(calcAttr.Id)));
-                equations.AddRange(calcAttr.Equations.Select(pair => pair.Equation.ToEntity()));
+                    calcAttr.Equations.Select(pair =>
+                    {
+                        AssignIdWhenNull(pair);
+                        return pair.ToLibraryEntity(calcAttr.Id);
+                    }));
+                equations.AddRange(calcAttr.Equations.Select(pair =>
+                {
+                    AssignIdWhenNull(pair.Equation);
+                    return pair.Equation.ToEntity();
+                }));
                 equationPairJoins.AddRange(
                     calcAttr.Equations.Select(pair => pair.Equation.ToLibraryEntity(pair.Id)));
-                criteria.AddRange(calcAttr.Equations.Select(pair =>
+                criteria.AddRange(calcAttr.Equations.Where(_ => _.CriteriaLibrary != null).Select(pair =>
                 {
+                    AssignIdWhenNull(pair.CriteriaLibrary);
                     var entity = pair.CriteriaLibrary.ToEntity();
                     entity.IsSingleUse = true;
                     return entity;
                 }));
-                criteriaPairJoins.AddRange(calcAttr.Equations.Select(pair =>
-                    pair.CriteriaLibrary.ToLibraryEntity(pair.Id)));
+                criteriaPairJoins.AddRange(calcAttr.Equations
+                    .Where(pair => pair.CriteriaLibrary != null)
+                    .Select(pair => pair.CriteriaLibrary.ToLibraryEntity(pair.Id)));
             });
 
             AddAllWithUser(calculatedAttributeEquationCriteriaPairs);
@@ -152,9 +171,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             ValidateCalculatedAttributes(calculatedAttributes.AsQueryable());
 
             var entities = calculatedAttributes
-                .Select(calc => calc.ToScenarioEntity(scenarioId,
-                    _unitOfDataPersistanceWork.Context.Attribute.First(attr => attr.Name == calc.Attribute).Id
-                    ));
+                .Select(calc =>
+                {
+                    AssignIdWhenNull(calc);
+                    return calc.ToScenarioEntity(scenarioId, _unitOfDataPersistanceWork.Context.Attribute.First(attr => attr.Name == calc.Attribute).Id);
+                });
 
             var entityIds = entities.Select(_ => _.Id).ToList();
 
@@ -179,16 +200,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             calculatedAttributes.ForEach(calcAttr =>
             {
-                calculatedAttributeEquationCriteriaPairs.AddRange(calcAttr.Equations.Select(p => p.ToScenarioEntity(calcAttr.Id)));
-                equations.AddRange(calcAttr.Equations.Select(p => p.Equation.ToEntity()));
-                equationPairJoins.AddRange(calcAttr.Equations.Select(p => p.Equation.ToScenarioEntity(p.Id)));
-                criteria.AddRange(calcAttr.Equations.Select(p =>
+                calculatedAttributeEquationCriteriaPairs.AddRange(calcAttr.Equations.Select(p =>
                 {
+                    AssignIdWhenNull(p);
+                    return p.ToScenarioEntity(calcAttr.Id);
+                }));
+                equations.AddRange(calcAttr.Equations.Select(p =>
+                {
+                    AssignIdWhenNull(p.Equation);
+                    return p.Equation.ToEntity();
+                }));
+                equationPairJoins.AddRange(calcAttr.Equations.Select(p => p.Equation.ToScenarioEntity(p.Id)));
+                criteria.AddRange(calcAttr.Equations.Where(_ => _.CriteriaLibrary != null).Select(p =>
+                {
+                    AssignIdWhenNull(p.CriteriaLibrary);
                     var entity = p.CriteriaLibrary.ToEntity();
                     entity.IsSingleUse = true;
                     return entity;
                 }));
-                criteriaPairJoins.AddRange(calcAttr.Equations.Select(p => p.CriteriaLibrary.ToScenarioEntity(p.Id)));
+                criteriaPairJoins.AddRange(calcAttr.Equations
+                    .Where(p => p.CriteriaLibrary != null)
+                    .Select(p => p.CriteriaLibrary.ToScenarioEntity(p.Id)));
             });
 
             AddAllWithUser(calculatedAttributeEquationCriteriaPairs);
@@ -281,5 +313,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private string JoinAttributesIntoCommaSeparatedString(IQueryable<CalculatedAttributeDTO> calculatedAttributes) =>
             string.Join(", ", calculatedAttributes.Select(_ => _.Attribute).ToList());
+
+        private void AssignIdWhenNull(AppliedResearchAssociates.iAM.DTOs.Abstract.BaseDTO dto)
+        {
+            if (dto.Id == Guid.Empty) dto.Id = Guid.NewGuid();
+        }
     }
 }

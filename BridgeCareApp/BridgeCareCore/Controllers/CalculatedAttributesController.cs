@@ -38,7 +38,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("ScenarioAttributes")]
+        [Route("ScenarioAttributes/{simulationId}")]
         [Authorize]
         public async Task<IActionResult> GetAttributesForScenario(Guid simulationId)
         {

@@ -39,7 +39,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("ScenarioAttributes")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetAttributesForScenario(Guid simulationId)
         {
             if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when getting simulation attributes");
@@ -48,41 +48,69 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertLibrary")]
-        //[Authorize(Policy = SecurityConstants.Policy.Admin]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO dto)
         {
-            calculatedAttributesRepo.UpsertCalculatedAttributeLibrary(dto);
+            try
+            {
+                calculatedAttributesRepo.UpsertCalculatedAttributeLibrary(dto);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
             return Ok();
         }
 
         [HttpPost]
-        [Route("UpsertScenarioAttribute")]
-        //[Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Route("UpsertScenarioAttribute/{simulationId}")]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> UpsertScenarioAttribute(Guid simulationId, CalculatedAttributeDTO dto)
         {
             if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when upserting a simulation attribute");
             var dtoList = new List<CalculatedAttributeDTO>() { dto };
-            calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dtoList, simulationId);
+            try
+            {
+                calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dtoList, simulationId);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
             return Ok();
         }
 
         [HttpPost]
-        [Route("UpsertScenarioAttributes")]
-        //[Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Route("UpsertScenarioAttributes/{simulationId}")]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> UpsertScenarioAttribute(Guid simulationId, List<CalculatedAttributeDTO> dto)
         {
             if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when upserting simulation attributes");
-            calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);
+            try
+            {
+                calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
             return Ok();
         }
 
         [HttpDelete]
         [Route("DeleteLibrary")]
-        //[Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> DeleteLibrary(Guid libraryId)
         {
             if (!LibraryIdList().ContainsKey(libraryId)) return BadRequest($"Unable to find {libraryId} in the database");
-            calculatedAttributesRepo.DeleteCalculatedAttributeLibrary(libraryId);
+            try
+            {
+                calculatedAttributesRepo.DeleteCalculatedAttributeLibrary(libraryId);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            } 
             return Ok();
         }
 
@@ -91,6 +119,6 @@ namespace BridgeCareCore.Controllers
             calculatedAttributesRepo.GetCalculatedAttributeLibraries().Select(_ => new { _.Name, _.Id }).ToDictionary(_ => _.Id, _ => _.Name);
 
         private bool SimulationExists(Guid simulationId) =>
-            UnitOfWork.NetworkRepo.GetAllNetworks().Any(_ => _.Id == simulationId);
+            (UnitOfWork.SimulationRepo.GetSimulationName(simulationId) == null) ? false : true;
     }
 }

@@ -198,8 +198,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             AddAllWithUser(criteriaPairJoins);
         }
 
-        private string JoinAttributesIntoCommaSeparatedString(IQueryable<CalculatedAttributeDTO> calculatedAttributes) =>
-            string.Join(", ", calculatedAttributes.Select(_ => _.Attribute).ToList());
+
 
         private void ValidateCalculatedAttributes(IQueryable<CalculatedAttributeDTO> calculatedAttributes)
         {
@@ -233,28 +232,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     $"The following calculated attributes have empty equation expressions: {JoinAttributesIntoCommaSeparatedString(noEquationExpressionAttributes)}");
             }
 
-            var nullCriteriaAttributes = calculatedAttributes
-                .Where(_ => _.Equations.Any(equation => equation.CriteriaLibrary == null));
-            var noCriteriaExpressionAttributes = calculatedAttributes
-                .Where(_ => _.Equations.Any(equation => string.IsNullOrEmpty(equation.CriteriaLibrary.MergedCriteriaExpression)));
-
-            if (nullCriteriaAttributes.Any() && noCriteriaExpressionAttributes.Any())
+            var attributesWithErrors = new List<string>();
+            foreach (var calcAttr in calculatedAttributes)
             {
-                var mergedAttributes = nullCriteriaAttributes.Union(noCriteriaExpressionAttributes);
-                throw new ArgumentException(
-                    $"The following calculated attributes have multiple default equations: {JoinAttributesIntoCommaSeparatedString(mergedAttributes)}");
+                var nullCriteria = calcAttr.Equations.Where(equation => equation.CriteriaLibrary == null);
+                var noCriteriaExpressionAttributes = calcAttr.Equations
+                    .Where(_ => _.CriteriaLibrary != null)
+                    .Where(_ => string.IsNullOrEmpty(_.CriteriaLibrary.MergedCriteriaExpression));
+                if (nullCriteria.Count() + noCriteriaExpressionAttributes.Count() != 1) attributesWithErrors.Add(calcAttr.Attribute);
             }
 
-            if (nullCriteriaAttributes.Any())
+            if (attributesWithErrors.Count > 0)
             {
                 throw new ArgumentException(
-                    $"The following calculated attributes have 1 or more invalid criterion: {JoinAttributesIntoCommaSeparatedString(nullCriteriaAttributes)}");
-            }
-
-            if (noCriteriaExpressionAttributes.Any())
-            {
-                throw new ArgumentException(
-                    $"The following calculated attributes 1 or more empty criterion expressions: {JoinAttributesIntoCommaSeparatedString(noCriteriaExpressionAttributes)}");
+                    $"The following calculated attributes do not have the proper number of default equations: {string.Join(", ", attributesWithErrors)}");
             }
         }
 
@@ -287,5 +278,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void AddAllWithUser<T>(List<T> entity) where T : class =>
             _unitOfDataPersistanceWork.Context.AddAll(entity, _unitOfDataPersistanceWork.UserEntity?.Id);
+
+        private string JoinAttributesIntoCommaSeparatedString(IQueryable<CalculatedAttributeDTO> calculatedAttributes) =>
+            string.Join(", ", calculatedAttributes.Select(_ => _.Attribute).ToList());
     }
 }

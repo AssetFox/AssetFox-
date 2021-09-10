@@ -63,32 +63,6 @@
                         >
                             Add Treatment
                         </v-btn>
-<!--                        <v-select
-                            :items='treatmentSelectItems'
-                            label='Select a Treatment'
-                            @change='keepActiveTab = false'
-                            outline
-                            v-model='treatmentSelectItemValue'
-                            v-if='!hasSelectedTreatment'
-                        >
-                        </v-select>
-                        <v-text-field
-                            v-if='hasSelectedTreatment'
-                            label='Treatment Name'
-                            v-model='selectedTreatment.name'
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        >
-                            <template slot='append'>
-                                <v-btn
-                                    @click='treatmentSelectItemValue = null'
-                                    class='ara-orange'
-                                    icon
-                                >
-                                    <v-icon>fas fa-caret-left</v-icon>
-                                </v-btn>
-                            </template>
-                        </v-text-field>-->
-
                         <v-list class='treatments-list'>
                             <template v-for='treatmentSelectItem in treatmentSelectItems'>
                                 <v-list-tile :key='treatmentSelectItem.value' ripple :class="{'selected-treatment-item': isSelectedTreatmentItem(treatmentSelectItem.value)}"

@@ -63,7 +63,7 @@
                         >
                             Add Treatment
                         </v-btn>
-                        <v-select
+<!--                        <v-select
                             :items='treatmentSelectItems'
                             label='Select a Treatment'
                             @change='keepActiveTab = false'
@@ -87,7 +87,24 @@
                                     <v-icon>fas fa-caret-left</v-icon>
                                 </v-btn>
                             </template>
-                        </v-text-field>
+                        </v-text-field>-->
+
+                        <v-list class='treatments-list'>
+                            <template v-for='treatmentSelectItem in treatmentSelectItems'>
+                                <v-list-tile :key='treatmentSelectItem.value' ripple :class="{'selected-treatment-item': isSelectedTreatmentItem(treatmentSelectItem.value)}"
+                                             avatar @click='onSetTreatmentSelectItemValue(treatmentSelectItem.value)'>
+                                    <v-list-tile-content>
+                                        <span>{{treatmentSelectItem.text}}</span>
+                                    </v-list-tile-content>
+                                    <v-list-tile-action>
+                                        <v-btn @click="onDeleteTreatment(treatmentSelectItem.value)" class="ara-orange" icon>
+                                            <v-icon>fas fa-trash</v-icon>
+                                        </v-btn>
+                                    </v-list-tile-action>
+                                </v-list-tile>
+                            </template>
+                        </v-list>
+
                     </v-flex>
                     <v-flex xs9>
                         <div v-show='selectedTreatment.id !== uuidNIL'>
@@ -289,7 +306,7 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
-import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import { hasUnsavedChangesCore, isEqual } from '@/shared/utils/has-unsaved-changes-helper';
 
 @Component({
     components: {
@@ -484,6 +501,24 @@ export default class TreatmentEditor extends Vue {
             shadowForAnyTreatment: this.selectedTreatment.shadowForAnyTreatment,
             criterionLibrary: this.selectedTreatment.criterionLibrary
         };
+    }
+
+    isSelectedTreatmentItem(treatmentId: string | number) {
+        return isEqual(this.treatmentSelectItemValue, treatmentId.toString());
+    }
+
+    onSetTreatmentSelectItemValue(treatmentId: string | number) {
+        if (!isEqual(this.treatmentSelectItemValue, treatmentId.toString())) {
+            this.treatmentSelectItemValue = treatmentId.toString();
+        } else {
+            this.treatmentSelectItemValue = null;
+        }
+    }
+
+    onDeleteTreatment(treatmentId: string | number) {
+        if (any(propEq('id', treatmentId.toString()), this.treatments)) {
+            this.treatments = reject(propEq('id', treatmentId.toString()), this.treatments);
+        }
     }
 
     onShowCreateTreatmentLibraryDialog(createAsNewLibrary: boolean) {
@@ -695,5 +730,14 @@ export default class TreatmentEditor extends Vue {
 .sharing {
     padding-top: 0;
     margin: 0;
+}
+
+.treatments-list {
+    height: 308px;
+    overflow-y: auto;
+}
+
+.selected-treatment-item {
+    background: lightblue;
 }
 </style>

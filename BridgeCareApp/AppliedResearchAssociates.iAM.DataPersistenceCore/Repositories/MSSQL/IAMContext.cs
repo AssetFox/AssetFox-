@@ -24,6 +24,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
+using static AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums.TreatmentEnum;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -1595,6 +1596,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
+                entity.Property(e => e.Category)
+                .HasDefaultValue(TreatmentCategory.Preservation)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
+
+                entity.Property(e => e.AssetType)
+                .HasDefaultValue(AssetType.Bridge)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (AssetType)Enum.Parse(typeof(AssetType), v));
+
                 entity.HasOne(d => d.TreatmentLibrary)
                     .WithMany(p => p.Treatments)
                     .HasForeignKey(d => d.TreatmentLibraryId)
@@ -1608,6 +1621,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.ShadowForAnyTreatment).IsRequired();
                 entity.Property(e => e.ShadowForSameTreatment).IsRequired();
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Category)
+                .HasDefaultValue(TreatmentCategory.Preservation)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
+
+                entity.Property(e => e.AssetType)
+                .HasDefaultValue(AssetType.Bridge)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (AssetType)Enum.Parse(typeof(AssetType), v));
 
                 entity.HasOne(d => d.Simulation)
                 .WithMany(p => p.SelectableTreatments)

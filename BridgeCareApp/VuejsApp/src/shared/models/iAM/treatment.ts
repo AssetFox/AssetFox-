@@ -6,6 +6,20 @@ import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { clone } from 'ramda';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 
+// order is important
+export enum TreatmentCategory {
+    preservation,
+    capacityAdding,
+    rehabilitation,
+    replacement,
+    maintenance,
+    other,
+}
+export enum AssetType {
+    bridge,
+    culvert,
+}
+
 export interface TreatmentCost {
     id: string;
     equation: Equation;
@@ -31,6 +45,8 @@ export interface Treatment {
     consequences: TreatmentConsequence[];
     budgetIds: string[];
     addTreatment: boolean;
+    category: TreatmentCategory;
+    assetType: AssetType;
 }
 
 export interface TreatmentLibrary {
@@ -47,6 +63,8 @@ export interface TreatmentDetails {
     shadowForAnyTreatment: number;
     shadowForSameTreatment: number;
     criterionLibrary: CriterionLibrary;
+    category: TreatmentCategory;
+    assetType: AssetType;
 }
 
 export interface BudgetGridRow {
@@ -78,6 +96,8 @@ export const emptyTreatment: Treatment = {
     consequences: [],
     budgetIds: [],
     addTreatment: false,
+    category: TreatmentCategory.preservation,
+    assetType: AssetType.bridge,
 };
 
 export const emptyTreatmentLibrary: TreatmentLibrary = {
@@ -92,4 +112,32 @@ export const emptyTreatmentDetails: TreatmentDetails = {
     shadowForAnyTreatment: 0,
     shadowForSameTreatment: 0,
     criterionLibrary: clone(emptyCriterionLibrary),
+    category: TreatmentCategory.preservation,
+    assetType: AssetType.bridge,
 };
+export const assetTypeMap: Map<string, AssetType> = new Map([
+    ['Bridge', 0],
+    ['Culvert', 1],
+]);
+export const assetTypeReverseMap: Map<AssetType, string> = new Map([
+    [0, 'Bridge'],
+    [1, 'Culvert'],
+]);
+
+// the maps are to convert data to be used in the UI to the data needed by Vue and backend
+export const treatmentCategoryMap: Map<string, TreatmentCategory> = new Map([
+    ['Preservation', 0],
+    ['Capacity adding', 1],
+    ['Rehabilitation', 2],
+    ['Replacement', 3],
+    ['Maintenance', 4],
+    ['Other', 5],
+]);
+export const treatmentCategoryReverseMap: Map<TreatmentCategory, string> = new Map([
+    [0, 'Preservation'],
+    [1, 'Capacity adding'],
+    [2, 'Rehabilitation'],
+    [3, 'Replacement'],
+    [4, 'Maintenance'],
+    [5, 'Other'],
+]);

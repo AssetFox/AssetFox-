@@ -98,7 +98,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpDelete]
-        [Route("DeleteLibrary")]
+        [Route("DeleteLibrary/{libraryId}")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> DeleteLibrary(Guid libraryId)
         {

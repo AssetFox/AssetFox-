@@ -78,10 +78,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsDefault = dto.IsDefault
             };
 
-        public static CalculatedAttributeEntity ToLibraryEntity(this CalculatedAttributeDTO dto, Guid attributeId) =>
+        public static CalculatedAttributeEntity ToLibraryEntity(this CalculatedAttributeDTO dto, Guid libraryId, Guid attributeId) =>
             new CalculatedAttributeEntity()
             {
-                Id = dto.Id, AttributeId = attributeId, CalculationTiming = dto.CalculationTiming
+                Id = dto.Id, AttributeId = attributeId, CalculationTiming = dto.CalculationTiming, CalculatedAttributeLibraryId = libraryId
             };
 
         public static CalculatedAttributeEquationCriteriaPairEntity ToLibraryEntity(

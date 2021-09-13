@@ -43,6 +43,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Does the library have a provided ID?
             AssignIdWhenNull(library);
 
+            var existingLibrary = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary
+                .Include(_ => _.CalculatedAttributes)
+                .ThenInclude(_ => _.Equations)
+                .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                .FirstOrDefault(_ => _.Id == library.Id);
+
+            if (existingLibrary != null)
+            {
+                var criteriaIds = existingLibrary
+                    .CalculatedAttributes.SelectMany(_ => _.Equations)
+                    .Where(_ => _.CriterionLibraryCalculatedAttributeJoin != null)
+                    .Select(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                    .Select(_ => _.CriterionLibraryId);
+
+                // Delete the criteria
+                _unitOfDataPersistanceWork.Context.DeleteAll<CriterionLibraryEntity>(_ => criteriaIds.Contains(_.Id));
+            }
+
             // Update the library
             _unitOfDataPersistanceWork.Context.Upsert(library.ToLibraryEntity(), library.Id, _unitOfDataPersistanceWork.UserEntity?.Id);
 
@@ -55,6 +73,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.CalculatedAttributePairJoin.CalculatedAttributePair.CalculatedAttribute.CalculatedAttributeLibraryId == library.Id);
             _unitOfDataPersistanceWork.Context.DeleteAll<CriterionLibraryCalculatedAttributePairEntity>(_ =>
                 _.CalculatedAttributePair.CalculatedAttribute.CalculatedAttributeLibraryId == library.Id);
+            
 
             // Insert the new entities into the library
             UpsertCalculatedAttributes(library.CalculatedAttributes, library.Id);
@@ -76,7 +95,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(calc =>
                 {
                     AssignIdWhenNull(calc);
-                    return calc.ToLibraryEntity(_unitOfDataPersistanceWork.Context.Attribute.First(attr => attr.Name == calc.Attribute).Id);
+                    return calc.ToLibraryEntity(libraryId, _unitOfDataPersistanceWork.Context.Attribute.First(attr => attr.Name == calc.Attribute).Id);
                 })
                 .ToList();
 
@@ -86,14 +105,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.CalculatedAttributeLibraryId == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
+            DeleteLibraryPairs(calculatedAttributes.Select(_ => _.Id));
+
             _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeEntity>(_ =>
                 _.CalculatedAttributeLibraryId == libraryId && !entityIds.Contains(_.Id));
 
             _unitOfDataPersistanceWork.Context.UpdateAll(entities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(), _unitOfDataPersistanceWork.UserEntity?.Id);
 
             _unitOfDataPersistanceWork.Context.AddAll(entities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), _unitOfDataPersistanceWork.UserEntity?.Id);
-
-            DeleteLibraryPairs(libraryId);
 
             var calculatedAttributeEquationCriteriaPairs = new List<CalculatedAttributeEquationCriteriaPairEntity>();
             var equations = new List<EquationEntity>();
@@ -140,10 +159,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var library = _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary.SingleOrDefault(_ => _.Id == libraryId);
             if (library == null) return;
 
-            foreach (var attribute in library.CalculatedAttributes)
-            {
-                DeleteLibraryPairs(libraryId);
-            }
+            DeleteLibraryPairs(library.CalculatedAttributes.Select(_ => _.Id));
 
             _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeLibraryEntity>(_ => _.Id == libraryId);
         }
@@ -183,14 +199,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == scenarioId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
 
+            DeleteScenarioPairs(scenarioId);
+
             _unitOfDataPersistanceWork.Context.DeleteAll<ScenarioCalculatedAttributeEntity>(_ =>
                 _.SimulationId == scenarioId && !entityIds.Contains(_.Id));
 
             _unitOfDataPersistanceWork.Context.UpdateAll(entities.Where(_ => existingEntityIds.Contains(_.Id)).ToList(), _unitOfDataPersistanceWork.UserEntity?.Id);
 
             _unitOfDataPersistanceWork.Context.AddAll(entities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList(), _unitOfDataPersistanceWork.UserEntity?.Id);
-
-            DeleteScenarioPairs(scenarioId);
 
             var calculatedAttributeEquationCriteriaPairs = new List<ScenarioCalculatedAttributeEquationCriteriaPairEntity>();
             var equations = new List<EquationEntity>();
@@ -281,18 +297,30 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        private void DeleteLibraryPairs(Guid libraryId)
+        private void DeleteLibraryPairs(IEnumerable<Guid> attributeIds)
         {
-            _unitOfDataPersistanceWork.Context.DeleteAll<EquationEntity>(_ =>
-                _.CalculatedAttributePairJoin.CalculatedAttributePair.CalculatedAttribute
-                    .CalculatedAttributeLibraryId == libraryId);
+            _unitOfDataPersistanceWork.Context.DeleteAll<EquationEntity>(_ => attributeIds.Contains(
+                _.CalculatedAttributePairJoin.CalculatedAttributePair.CalculatedAttribute.Id));
 
-            _unitOfDataPersistanceWork.Context.DeleteAll<CriterionLibraryCalculatedAttributePairEntity>(_ =>
-                _.CalculatedAttributePair.CalculatedAttribute
-                    .CalculatedAttributeLibraryId == libraryId);
+            var pairsToDelete = _unitOfDataPersistanceWork.Context.CalculatedAttribute
+                .Include(_ => _.Equations)
+                .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                .Where(_ => attributeIds.Contains(_.Id))
+                .SelectMany(_ => _.Equations);
 
-            _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeEquationCriteriaPairEntity>(_ =>
-                _.CalculatedAttribute.CalculatedAttributeLibraryId == libraryId);
+            var criteriaIds = pairsToDelete
+                .Where(_ => _.CriterionLibraryCalculatedAttributeJoin != null)
+                .Select(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                .Select(_ => _.CriterionLibraryId);
+
+            _unitOfDataPersistanceWork.Context.DeleteAll<CriterionLibraryEntity>(_ => criteriaIds.Contains(_.Id));
+
+            _unitOfDataPersistanceWork.Context.DeleteAll<CriterionLibraryCalculatedAttributePairEntity>(_ => attributeIds.Contains(
+                _.CalculatedAttributePair.CalculatedAttribute.Id));
+
+            _unitOfDataPersistanceWork.Context.DeleteAll<CalculatedAttributeEquationCriteriaPairEntity>(_ => pairsToDelete.Select(pair => pair.Id).Contains(
+                _.Id));
+
         }
 
         private void DeleteScenarioPairs(Guid simulationId)
@@ -300,6 +328,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfDataPersistanceWork.Context.DeleteAll<EquationEntity>(_ =>
                 _.ScenarioCalculatedAttributePairJoin.ScenarioCalculatedAttributePair.ScenarioCalculatedAttribute
                     .SimulationId == simulationId);
+
+            var criteriaIds = _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute
+                .Include(_ => _.Equations)
+                .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                .Where(_ => _.SimulationId == simulationId)
+                .SelectMany(_ => _.Equations)
+                .Where(_ => _.CriterionLibraryCalculatedAttributeJoin != null)
+                .Select(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                .Select(_ => _.CriterionLibraryId);
+
+            _unitOfDataPersistanceWork.Context.DeleteAll<CriterionLibraryEntity>(_ => criteriaIds.Contains(_.Id));
 
             _unitOfDataPersistanceWork.Context.DeleteAll<ScenarioCriterionLibraryCalculatedAttributePairEntity>(_ =>
                 _.ScenarioCalculatedAttributePair.ScenarioCalculatedAttribute.SimulationId == simulationId);

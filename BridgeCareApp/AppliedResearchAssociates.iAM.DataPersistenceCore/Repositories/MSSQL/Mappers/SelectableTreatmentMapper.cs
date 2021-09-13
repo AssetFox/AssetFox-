@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -19,7 +20,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = dto.Name,
                 ShadowForAnyTreatment = dto.ShadowForAnyTreatment,
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
-                Description = dto.Description
+                Description = dto.Description,
+                Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
+                AssetType = (Enums.TreatmentEnum.AssetType)dto.AssetType
             };
 
         public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this TreatmentDTO dto, Guid simulationId) =>
@@ -30,7 +33,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = dto.Name,
                 ShadowForAnyTreatment = dto.ShadowForAnyTreatment,
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
-                Description = dto.Description
+                Description = dto.Description,
+                Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
+                AssetType = (Enums.TreatmentEnum.AssetType)dto.AssetType
             };
 
         public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this Treatment domain, Guid simulationId) =>
@@ -109,7 +114,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new List<TreatmentConsequenceDTO>(),
                 CriterionLibrary = entity.CriterionLibrarySelectableTreatmentJoin != null
                     ? entity.CriterionLibrarySelectableTreatmentJoin.CriterionLibrary.ToDto()
-                    : new CriterionLibraryDTO()
+                    : new CriterionLibraryDTO(),
+                Category = (TreatmentDTOEnum.TreatmentCategory)entity.Category,
+                AssetType = (TreatmentDTOEnum.AssetType)entity.AssetType
             };
 
         public static TreatmentLibraryDTO ToDto(this TreatmentLibraryEntity entity) =>
@@ -142,7 +149,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         ? entity.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary.ToDto()
                         : new CriterionLibraryDTO(),
                 ShadowForAnyTreatment = entity.ShadowForAnyTreatment,
-                ShadowForSameTreatment = entity.ShadowForSameTreatment
+                ShadowForSameTreatment = entity.ShadowForSameTreatment,
+                Category = (TreatmentDTOEnum.TreatmentCategory)entity.Category,
+                AssetType = (TreatmentDTOEnum.AssetType)entity.AssetType
             };
     }
 }

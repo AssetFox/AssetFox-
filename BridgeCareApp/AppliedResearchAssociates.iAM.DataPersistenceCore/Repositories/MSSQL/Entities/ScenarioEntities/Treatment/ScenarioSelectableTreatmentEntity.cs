@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
+using static AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums.TreatmentEnum;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment
 {
@@ -17,6 +18,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public string Description { get; set; }
 
         public Guid SimulationId { get; set; }
+
+        public TreatmentCategory Category { get; set; }
+
+        public AssetType AssetType { get; set; }
 
         public virtual SimulationEntity Simulation { get; set; }
 

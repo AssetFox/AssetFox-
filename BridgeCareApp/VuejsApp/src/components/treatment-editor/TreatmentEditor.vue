@@ -473,7 +473,9 @@ export default class TreatmentEditor extends Vue {
             description: this.selectedTreatment.description,
             shadowForSameTreatment: this.selectedTreatment.shadowForSameTreatment,
             shadowForAnyTreatment: this.selectedTreatment.shadowForAnyTreatment,
-            criterionLibrary: this.selectedTreatment.criterionLibrary
+            criterionLibrary: this.selectedTreatment.criterionLibrary,
+            category: this.selectedTreatment.category,
+            assetType: this.selectedTreatment.assetType,
         };
     }
 
@@ -540,6 +542,8 @@ export default class TreatmentEditor extends Vue {
                 shadowForAnyTreatment: treatmentDetails.shadowForAnyTreatment,
                 shadowForSameTreatment: treatmentDetails.shadowForSameTreatment,
                 criterionLibrary: treatmentDetails.criterionLibrary,
+                category: treatmentDetails.category,
+                assetType: treatmentDetails.assetType,
             });
         }
     }

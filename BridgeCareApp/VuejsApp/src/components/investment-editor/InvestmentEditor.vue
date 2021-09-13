@@ -24,14 +24,16 @@
                                       @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
                                       v-model='investmentPlan.minimumProjectCostLimit'
                                       v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
-                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]" />
+                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
+                                      :disabled="!isAdmin" />
                     </v-flex>
                     <v-flex xs2>
                         <v-text-field label='Inflation Rate Percentage' outline
                                       v-model='investmentPlan.inflationRatePercentage'
                                       @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
                                       :mask="'###'"
-                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]" />
+                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]"
+                                      :disabled="!isAdmin" />
                     </v-flex>
                     <v-spacer></v-spacer>
                 </v-layout>
@@ -265,6 +267,7 @@ export default class InvestmentEditor extends Vue {
     @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
     @State(state => state.investmentModule.scenarioBudgets) stateScenarioBudgets: Budget[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
 
     @Action('getInvestment') getInvestmentAction: any;
     @Action('getBudgetLibraries') getBudgetLibrariesAction: any;
@@ -298,7 +301,7 @@ export default class InvestmentEditor extends Vue {
     showImportExportInvestmentBudgetsDialog: boolean = false;
     hasScenario: boolean = false;
     budgets: Budget[] = [];
-
+    
     get addYearLabel() {
         return 'Add Year (' + this.getNextYear() + ')';
     }
@@ -314,7 +317,7 @@ export default class InvestmentEditor extends Vue {
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
-            vm.librarySelectItemValue = null;
+            vm.librarySelectItemValue = null;            
             vm.getBudgetLibrariesAction();
 
             if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {

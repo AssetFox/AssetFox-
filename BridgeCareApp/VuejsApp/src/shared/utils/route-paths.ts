@@ -9,3 +9,11 @@ export const ScenarioRoutePaths: any = {
     RemainingLifeLimit: 'RemainingLifeLimitEditor/Scenario',
     CashFlow: 'CashFlowEditor/Scenario',
 };
+
+export const UnsecuredRoutePathNames: string[] = [
+    'Authentication',
+    'AuthenticationStart',
+    'AuthenticationFailure',
+    'NoRole',
+    'iAM',
+];

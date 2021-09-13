@@ -1,8 +1,9 @@
-import {AxiosError, AxiosResponse} from 'axios';
-import {hasValue} from '@/shared/utils/has-value-util';
-import {prop} from 'ramda';
-import {UserTokens} from '@/shared/models/iAM/authentication';
+import { AxiosError, AxiosResponse } from 'axios';
+import { hasValue } from '@/shared/utils/has-value-util';
+import { prop } from 'ramda';
+import { UserTokens } from '@/shared/models/iAM/authentication';
 import authenticationModule from '@/store-modules/authentication.module';
+import { SecurityTypes } from '@/shared/utils/security-types';
 
 export const http2XX = /(2(0|2)[0-8])/;
 
@@ -20,17 +21,23 @@ export const setContentTypeCharset = (headers: any) => {
     if (headers) {
         if (headers['common']) {
             if (headers['common']['Content-Type']) {
-                headers['common']['Content-Type'] = `${headers['common']['Content-Type']}; charset=utf-8`;
+                headers['common'][
+                    'Content-Type'
+                ] = `${headers['common']['Content-Type']}; charset=utf-8`;
             } else {
                 headers['common']['Content-Type'] = 'charset=utf-8';
             }
         } else if (headers['Content-Type']) {
             if (!headers['Content-Type'].match(/charset=utf-8/gi)) {
-                headers['Content-Type'] = `${headers['Content-Type']}; charset=utf-8`;
+                headers[
+                    'Content-Type'
+                ] = `${headers['Content-Type']}; charset=utf-8`;
             }
         } else if (headers['content-type']) {
             if (!headers['content-type'].match(/charset=utf-8/gi)) {
-                headers['content-type'] = `${headers['content-type']}; charset=utf-8`;
+                headers[
+                    'content-type'
+                ] = `${headers['content-type']}; charset=utf-8`;
             }
         } else {
             headers['Content-Type'] = 'charset=utf-8';
@@ -41,15 +48,26 @@ export const setContentTypeCharset = (headers: any) => {
 };
 
 export const setAuthHeader = (headers: any) => {
-    if (headers && authenticationModule.state.securityType === authenticationModule.state.pennDotSecurityType &&
-      localStorage.getItem('UserTokens')) {
-        const userTokens: UserTokens = JSON.parse(localStorage.getItem('UserTokens') as string) as UserTokens;
+    if (
+        headers &&
+        authenticationModule.state.securityType === SecurityTypes.esec &&
+        localStorage.getItem('UserTokens')
+    ) {
+        const userTokens: UserTokens = JSON.parse(
+            localStorage.getItem('UserTokens') as string,
+        ) as UserTokens;
         headers['Authorization'] = `Bearer ${userTokens.id_token}`;
     }
 
-    if (headers && authenticationModule.state.securityType === authenticationModule.state.azureSecurityType &&
-      localStorage.getItem('access_token')) {
-        const accessToken: string =  localStorage.getItem('access_token') as string;
+    if (
+        headers &&
+        authenticationModule.state.securityType ===
+            authenticationModule.state.azureSecurityType &&
+        localStorage.getItem('access_token')
+    ) {
+        const accessToken: string = localStorage.getItem(
+            'access_token',
+        ) as string;
         headers['Authorization'] = `Bearer ${accessToken}`;
     }
 
@@ -59,7 +77,10 @@ export const setAuthHeader = (headers: any) => {
 export const getErrorMessage = (error: AxiosError) => {
     if (hasValue(error)) {
         if (hasValue(prop('response', error))) {
-            const response: AxiosResponse = prop('response', error) as AxiosResponse;
+            const response: AxiosResponse = prop(
+                'response',
+                error,
+            ) as AxiosResponse;
 
             if (hasValue(prop('statusText', response))) {
                 return prop('statusText', response) as string;

@@ -7,14 +7,14 @@
                         <v-card-title>
                             <h3>Beginning Authentication</h3>
                         </v-card-title>
-                        <v-card-text v-if="securityType === pennDotSecurityType">
+                        <v-card-text v-if="securityType === esecSecurityType">
                             You should be redirected to the PennDOT login page shortly. If you are not redirected within
                             5 seconds, press the button below.
                         </v-card-text>
-                        <v-btn v-if="securityType === pennDotSecurityType" @click="onRedirect" class="v-btn theme--light ara-blue-bg white--text">
+                        <v-btn v-if="securityType === esecSecurityType" @click="onRedirect" class="v-btn theme--light ara-blue-bg white--text">
                             Go to login page
                         </v-btn>
-                        <v-card-text v-if="securityType === azureSecurityType">
+                        <v-card-text v-if="securityType === b2cSecurityType">
                             Please click 'Login' if the login pop-up does not show within ~5 seconds.
                         </v-card-text>
                     </v-card>
@@ -26,9 +26,14 @@
 
 <script lang="ts">
     import Vue from 'vue';
-    import {Component, Watch} from 'vue-property-decorator';
+    import {Component} from 'vue-property-decorator';
     import {State, Action} from 'vuex-class';
     import oidcConfig from '@/oidc-config';
+    import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+    import { SecurityTypes } from '@/shared/utils/security-types';
+    import { hasValue } from '@/shared/utils/has-value-util';
+    import { isAuthenticatedUser,
+    } from '@/shared/utils/authentication-utils';
 
     @Component
     export default class AuthenticationStart extends Vue {
@@ -36,59 +41,48 @@
         @State(state => state.authenticationModule.hasRole) hasRole: boolean;
         @State(state => state.authenticationModule.checkedForRole) checkedForRole: boolean;
         @State(state => state.authenticationModule.securityType) securityType: string;
-        @State(state => state.authenticationModule.pennDotSecurityType) pennDotSecurityType: string;
-        @State(state => state.authenticationModule.azureSecurityType) azureSecurityType: string;
+        @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
         @Action('azureB2CLogin') azureB2CLoginAction: any;
 
-        @Watch('checkedForRole')
-        onCheckedRole() {
-            if (this.checkedForRole && this.securityType === this.pennDotSecurityType) {
-                if (this.hasRole) {
-                    this.$router.push('/Home/');
-                } else {
-                    this.$router.push('/NoRole/');
-                }
-            }
-        }
-
-        @Watch('authenticated')
-        onAuthenticatedChanged() {
-            if (this.authenticated) {
-                this.$router.push('/Home/');
-            }
-        }
+        esecSecurityType: string = SecurityTypes.esec;
+        b2cSecurityType: string = SecurityTypes.b2c;
 
         mounted() {
-            if (this.securityType === this.pennDotSecurityType) {
-                this.onRedirect();
-            } else if (this.securityType === this.azureSecurityType) {
-                this.onAzureLogin();
+            const hasAuthInfo: boolean =
+                this.securityType === SecurityTypes.esec
+                    ? hasValue(localStorage.getItem('UserTokens'))
+                    : hasValue(localStorage.getItem('LoggedInUser'));
+            if (!this.authenticated && hasAuthInfo) {
+                isAuthenticatedUser()
+                    .then((isAuthenticated: boolean | void) => {
+                        if (isAuthenticated) {
+                            this.$router.push('/Home/')
+                        }
+                    });
+            } else if (this.authenticated && hasAuthInfo) {
+                this.$router.push('/Home/');
+            } else {
+                if (this.securityType === SecurityTypes.esec) {
+                    this.onRedirect();
+                } else if (this.securityType === SecurityTypes.b2c) {
+                    this.azureB2CLoginAction();
+                }
             }
         }
 
         onRedirect() {
-            if (!this.authenticated) {
-                let href: string = `${oidcConfig.authorizationEndpoint}?response_type=code&scope=openid&scope=BAMS`;
-                href += `&client_id=${oidcConfig.clientId}`;
-                href += `&redirect_uri=${oidcConfig.redirectUri}`;
+            let href: string = `${oidcConfig.authorizationEndpoint}?response_type=code&scope=openid&scope=BAMS`;
+            href += `&client_id=${oidcConfig.clientId}`;
+            href += `&redirect_uri=${oidcConfig.redirectUri}`;
 
-                // The 'state' query parameter that is sent to ESEC will be sent back to
-                // the /Authentication page of the iam-deploy app.
-                if (process.env.VUE_APP_IS_PRODUCTION !== 'true') {
-                    href += '&state=localhost8080';
-                }
-
-                window.location.href = href;
+            // The 'state' query parameter that is sent to ESEC will be sent back to
+            // the /Authentication page of the iam-deploy app.
+            if (process.env.VUE_APP_IS_PRODUCTION !== 'true') {
+                href += '&state=localhost8080';
             }
-        }
 
-        onAzureLogin() {
-            if (!this.authenticated) {
-                this.azureB2CLoginAction();
-            } else if (this.authenticated) {
-                this.$router.push('/Home/');
-            }
+            window.location.href = href;
         }
     }
 </script>

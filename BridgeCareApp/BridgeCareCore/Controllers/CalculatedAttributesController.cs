@@ -57,7 +57,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Calculated Attribute error::{e.Message}");
+                throw;
             }
             return Ok();
         }
@@ -75,7 +76,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Calculated Attribute error::{e.Message}");
+                throw;
             }
             return Ok();
         }
@@ -92,7 +94,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Calculated Attribute error::{e.Message}");
+                throw;
             }
             return Ok();
         }
@@ -109,7 +112,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Calculated Attribute error::{e.Message}");
+                throw;
             } 
             return Ok();
         }

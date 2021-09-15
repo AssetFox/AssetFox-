@@ -79,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.Domains
                 var numberOfSourcesWithBlankCriterion = ValueSources.Count(source => source.Criterion.ExpressionIsBlank);
                 if (numberOfSourcesWithBlankCriterion == 0)
                 {
-                    results.Add(ValidationStatus.Warning, "There are no value sources with a blank criterion.", this, nameof(ValueSources));
+                    results.Add(ValidationStatus.Error, "There are no value sources with a blank criterion.", this, nameof(ValueSources));
                 }
             }
 

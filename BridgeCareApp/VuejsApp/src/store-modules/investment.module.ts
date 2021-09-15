@@ -87,7 +87,8 @@ const actions = {
         await InvestmentService.getInvestment(scenarioId).then(
             (response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    const investmentData: Investment = response.data as Investment;
+                    const investmentData: Investment =
+                        response.data as Investment;
                     commit(
                         'scenarioBudgetsMutator',
                         investmentData.scenarioBudgets,
@@ -177,7 +178,7 @@ const actions = {
                     const budgetLibraries: BudgetLibrary[] = reject(
                         propEq('id', libraryId),
                         state.budgetLibraries,
-                    );
+                    ) as BudgetLibrary[];
                     commit('budgetLibrariesMutator', budgetLibraries);
 
                     dispatch('setSuccessMessage', {

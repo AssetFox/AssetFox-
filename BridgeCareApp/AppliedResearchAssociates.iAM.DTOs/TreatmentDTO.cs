@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using static AppliedResearchAssociates.iAM.DTOs.Enums.TreatmentDTOEnum;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
@@ -13,6 +14,10 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public int ShadowForAnyTreatment { get; set; }
 
         public int ShadowForSameTreatment { get; set; }
+
+        public TreatmentCategory Category { get; set; }
+
+        public AssetType AssetType { get; set; }
 
         public CriterionLibraryDTO CriterionLibrary { get; set; }
 

@@ -5,10 +5,12 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow;
@@ -22,6 +24,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
+using static AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums.TreatmentEnum;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -236,6 +239,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<ScenarioCashFlowDistributionRuleEntity> ScenarioCashFlowDistributionRule { get; set; }
 
         public virtual DbSet<CriterionLibraryScenarioCashFlowRuleEntity> CriterionLibraryScenarioCashFlowRule { get; set; }
+
+        public virtual DbSet<CalculatedAttributeLibraryEntity> CalculatedAttributeLibrary { get; set; }
+
+        public virtual DbSet<CalculatedAttributeEntity> CalculatedAttribute { get; set; }
+
+        public virtual DbSet<CalculatedAttributeEquationCriteriaPairEntity> CalculatedAttributeEquationCriteriaPair { get; set; }
+
+        public virtual DbSet<CriterionLibraryCalculatedAttributePairEntity> CriterionLibraryCalculatedAttributePair { get; set; }
+
+        public virtual DbSet<EquationCalculatedAttributePairEntity> EquationCalculatedAttributePair { get; set; }
+
+        public virtual DbSet<ScenarioCalculatedAttributeEntity> ScenarioCalculatedAttribute { get; set; }
+
+        public virtual DbSet<ScenarioCalculatedAttributeEquationCriteriaPairEntity> ScenarioCalculatedAttributeEquationCriteriaPair { get; set; }
+
+        public virtual DbSet<ScenarioCriterionLibraryCalculatedAttributePairEntity> ScenarioCriterionLibraryCalculatedAttributePair { get; set; }
+
+        public virtual DbSet<ScenarioEquationCalculatedAttributePairEntity> ScenarioEquationCalculatedAttributePair { get; set; }
 
         private class MigrationConnection
         {
@@ -1291,6 +1312,167 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ScenarioCalculatedAttributeEntity>(entity =>
+            {
+                entity.HasIndex(e => e.SimulationId);
+
+                entity.HasIndex(e => e.AttributeId);
+
+                entity.Property(e => e.CalculationTiming).IsRequired();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.Simulation)
+                    .WithMany(p => p.CalculatedAttributes)
+                    .HasForeignKey(d => d.SimulationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Attribute)
+                    .WithMany(p => p.ScenarioCalculatedAttributes)
+                    .HasForeignKey(d => d.AttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ScenarioCalculatedAttributeEquationCriteriaPairEntity>(entity =>
+            {
+                entity.ToTable("ScenarioCalculatedAttributePair");
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasIndex(e => e.ScenarioCalculatedAttributeId);
+
+                entity.HasOne(d => d.ScenarioCalculatedAttribute)
+                    .WithMany(p => p.Equations)
+                    .HasForeignKey(d => d.ScenarioCalculatedAttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ScenarioCriterionLibraryCalculatedAttributePairEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.ScenarioCalculatedAttributePairId, e.CriterionLibraryId });
+
+                entity.ToTable("ScenarioCalculatedAttributePair_Criteria");
+
+                entity.HasIndex(e => e.ScenarioCalculatedAttributePairId).IsUnique();
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasOne(d => d.ScenarioCalculatedAttributePair)
+                    .WithOne(p => p.CriterionLibraryCalculatedAttributeJoin)
+                    .HasForeignKey<ScenarioCriterionLibraryCalculatedAttributePairEntity>(d => d.ScenarioCalculatedAttributePairId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryScenarioCalculatedAttributePairJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ScenarioEquationCalculatedAttributePairEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.ScenarioCalculatedAttributePairId, e.EquationId });
+
+                entity.ToTable("ScenarioCalculatedAttributePair_Equation");
+
+                entity.HasIndex(e => e.ScenarioCalculatedAttributePairId).IsUnique();
+
+                entity.HasIndex(e => e.EquationId).IsUnique();
+
+                entity.HasOne(d => d.ScenarioCalculatedAttributePair)
+                    .WithOne(p => p.EquationCalculatedAttributeJoin)
+                    .HasForeignKey<ScenarioEquationCalculatedAttributePairEntity>(d => d.ScenarioCalculatedAttributePairId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Equation)
+                    .WithOne(p => p.ScenarioCalculatedAttributePairJoin)
+                    .HasForeignKey<ScenarioEquationCalculatedAttributePairEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CalculatedAttributeLibraryEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Name).IsRequired();
+            });
+
+            modelBuilder.Entity<CalculatedAttributeEntity>(entity =>
+            {
+                entity.HasIndex(e => e.CalculatedAttributeLibraryId);
+
+                entity.HasIndex(e => e.AttributeId);
+
+                entity.Property(e => e.CalculationTiming).IsRequired();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(d => d.CalculatedAttributeLibrary)
+                    .WithMany(p => p.CalculatedAttributes)
+                    .HasForeignKey(d => d.CalculatedAttributeLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Attribute)
+                    .WithMany(p => p.CalculatedAttributes)
+                    .HasForeignKey(d => d.AttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CalculatedAttributeEquationCriteriaPairEntity>(entity =>
+            {
+                entity.ToTable("CalculatedAttributePair");
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasIndex(e => e.CalculatedAttributeId);
+
+                entity.HasOne(d => d.CalculatedAttribute)
+                    .WithMany(p => p.Equations)
+                    .HasForeignKey(d => d.CalculatedAttributeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CriterionLibraryCalculatedAttributePairEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CalculatedAttributePairId, e.CriterionLibraryId });
+
+                entity.ToTable("CalculatedAttributePair_Criteria");
+
+                entity.HasIndex(e => e.CalculatedAttributePairId).IsUnique();
+
+                entity.HasIndex(e => e.CriterionLibraryId);
+
+                entity.HasOne(d => d.CalculatedAttributePair)
+                    .WithOne(p => p.CriterionLibraryCalculatedAttributeJoin)
+                    .HasForeignKey<CriterionLibraryCalculatedAttributePairEntity>(d => d.CalculatedAttributePairId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.CriterionLibrary)
+                    .WithMany(p => p.CriterionLibraryCalculatedAttributePairJoins)
+                    .HasForeignKey(d => d.CriterionLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<EquationCalculatedAttributePairEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.CalculatedAttributePairId, e.EquationId });
+
+                entity.ToTable("CalculatedAttributePair_Equation");
+
+                entity.HasIndex(e => e.CalculatedAttributePairId).IsUnique();
+
+                entity.HasIndex(e => e.EquationId).IsUnique();
+
+                entity.HasOne(d => d.CalculatedAttributePair)
+                    .WithOne(p => p.EquationCalculatedAttributeJoin)
+                    .HasForeignKey<EquationCalculatedAttributePairEntity>(d => d.CalculatedAttributePairId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Equation)
+                    .WithOne(p => p.CalculatedAttributePairJoin)
+                    .HasForeignKey<EquationCalculatedAttributePairEntity>(d => d.EquationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<PerformanceCurveEquationEntity>(entity =>
             {
                 entity.HasKey(e => new { e.PerformanceCurveId, e.EquationId });
@@ -1414,6 +1596,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
+                entity.Property(e => e.Category)
+                .HasDefaultValue(TreatmentCategory.Preservation)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
+
+                entity.Property(e => e.AssetType)
+                .HasDefaultValue(AssetType.Bridge)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (AssetType)Enum.Parse(typeof(AssetType), v));
+
                 entity.HasOne(d => d.TreatmentLibrary)
                     .WithMany(p => p.Treatments)
                     .HasForeignKey(d => d.TreatmentLibraryId)
@@ -1427,6 +1621,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.ShadowForAnyTreatment).IsRequired();
                 entity.Property(e => e.ShadowForSameTreatment).IsRequired();
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Category)
+                .HasDefaultValue(TreatmentCategory.Preservation)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
+
+                entity.Property(e => e.AssetType)
+                .HasDefaultValue(AssetType.Bridge)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (AssetType)Enum.Parse(typeof(AssetType), v));
 
                 entity.HasOne(d => d.Simulation)
                 .WithMany(p => p.SelectableTreatments)

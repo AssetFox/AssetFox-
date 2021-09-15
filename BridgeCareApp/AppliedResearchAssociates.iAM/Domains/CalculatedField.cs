@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.Validation;
 
@@ -14,6 +13,8 @@ namespace AppliedResearchAssociates.iAM.Domains
         public string ShortDescription => Name;
 
         public bool IsDecreasingWithDeterioration { get; set; }
+
+        public CalculatedFieldTiming Timing { get; set; }
 
         public ValidatorBag Subvalidators => new ValidatorBag { ValueSources };
 

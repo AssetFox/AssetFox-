@@ -16,6 +16,10 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public string Description { get; set; }
 
+        public TreatmentCategory Category { get; set; }
+
+        public AssetType Asset { get; set; }
+
         public IReadOnlyCollection<Criterion> FeasibilityCriteria => _FeasibilityCriteria;
 
         public ICollection<TreatmentScheduling> Schedulings { get; } = new SetWithoutNulls<TreatmentScheduling>();
@@ -182,5 +186,20 @@ namespace AppliedResearchAssociates.iAM.Domains
         private readonly Simulation Simulation;
 
         private ILookup<Attribute, ConditionalTreatmentConsequence> ConsequencesPerAttribute;
+
+        public enum TreatmentCategory
+        {
+            Preservation,
+            CapacityAdding,
+            Rehabilitation,
+            Replacement,
+            Maintenance,
+            Other
+        }
+        public enum AssetType
+        {
+            Bridge,
+            Culvert
+        }
     }
 }

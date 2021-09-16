@@ -175,7 +175,7 @@ namespace BridgeCareCore.Services.SummaryReport
             // Bridge work summary TAB
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
-                simulationYears, workSummaryModel, yearlyBudgetAmount);
+                simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);

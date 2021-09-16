@@ -60,6 +60,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             selectableTreatment.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
             selectableTreatment.ShadowForSameTreatment = entity.ShadowForSameTreatment;
             selectableTreatment.Description = entity.Description;
+            selectableTreatment.Category = (SelectableTreatment.TreatmentCategory)entity.Category;
+            selectableTreatment.Asset = (SelectableTreatment.AssetType)entity.AssetType;
 
             if (entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
             {

@@ -10,6 +10,7 @@ using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
+using static AppliedResearchAssociates.iAM.Domains.SelectableTreatment;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 {
@@ -178,7 +179,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 ExcelHelper.ApplyBorder(totalColumnHeaderRange);
                 ExcelHelper.ApplyStyle(totalColumnHeaderRange);
 
-                var workTypes = EnumExtensions.GetValues<WorkTypeName>();
+                var workTypes = EnumExtensions.GetValues<TreatmentCategory>();
                 currentCell.Row++;
                 var firstContentRow = currentCell.Row;
                 var rowTrackerForColoring = firstContentRow;

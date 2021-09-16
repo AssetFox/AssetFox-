@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using static AppliedResearchAssociates.iAM.Domains.SelectableTreatment;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
@@ -144,37 +143,39 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             ExcelHelper.ApplyBorder(cells);
         }
 
-        internal void SetNonCulvertSectionExcelString(ExcelWorksheet worksheet, SortedSet<string> treatments, ref int row, ref int column)
+        internal void SetNonCulvertSectionExcelString(ExcelWorksheet worksheet,
+            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
         {
-            foreach (var item in treatments)
+            foreach (var item in simulationTreatments)
             {
-                if (!item.Contains("culvert", StringComparison.OrdinalIgnoreCase) && item != Properties.Resources.CulvertNoTreatment)
+                if (item.AssetType == AssetType.Bridge || item.Name == Properties.Resources.NonCulvertNoTreatment)
                 {
-                    if (item == Properties.Resources.NonCulvertNoTreatment)
+                    if (item.Name == Properties.Resources.NonCulvertNoTreatment)
                     {
                         worksheet.Cells[row++, column].Value = Properties.Resources.NoTreatmentForWorkSummary;
                     }
                     else
                     {
-                        worksheet.Cells[row++, column].Value = item;
+                        worksheet.Cells[row++, column].Value = item.Name;
                     }
                 }
             }
         }
 
-        internal void SetCulvertSectionExcelString(ExcelWorksheet worksheet, SortedSet<string> treatments, ref int row, ref int column)
+        internal void SetCulvertSectionExcelString(ExcelWorksheet worksheet,
+            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
         {
-            foreach (var item in treatments)
+            foreach (var item in simulationTreatments)
             {
-                if (item.Contains("culvert", StringComparison.OrdinalIgnoreCase) || item == Properties.Resources.CulvertNoTreatment)
+                if (item.AssetType == AssetType.Culvert || item.Name == Properties.Resources.CulvertNoTreatment)
                 {
-                    if (item == Properties.Resources.CulvertNoTreatment)
+                    if (item.Name == Properties.Resources.CulvertNoTreatment)
                     {
                         worksheet.Cells[row++, column].Value = Properties.Resources.NoTreatmentForWorkSummary;
                     }
                     else
                     {
-                        worksheet.Cells[row++, column].Value = item;
+                        worksheet.Cells[row++, column].Value = item.Name;
                     }
                 }
             }

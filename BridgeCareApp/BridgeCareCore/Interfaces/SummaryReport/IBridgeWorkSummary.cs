@@ -9,6 +9,7 @@ namespace BridgeCareCore.Interfaces.SummaryReport
     public interface IBridgeWorkSummary
     {
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
-            List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount);
+            List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount,
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments);
     }
 }

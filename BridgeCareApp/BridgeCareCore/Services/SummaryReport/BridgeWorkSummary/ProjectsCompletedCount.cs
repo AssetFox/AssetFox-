@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
+using static AppliedResearchAssociates.iAM.Domains.SelectableTreatment;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
@@ -20,37 +21,40 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         public void FillProjectCompletedCountSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, int>> completedProjectCount, Dictionary<int, Dictionary<string, int>> completedCommittedCount,
-            List<int> simulationYears, SortedSet<string> treatments)
+            List<int> simulationYears,
+            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var projectRowNumberModel = new ProjectRowNumberModel();
             FillMPMSCompletedProjectsCount(worksheet, currentCell, completedCommittedCount, simulationYears, projectRowNumberModel);
-            FillCulvertCompletedProjectsCount(worksheet, currentCell, completedProjectCount, simulationYears, treatments, projectRowNumberModel);
-            FillBridgeCompletedProjectsCount(worksheet, currentCell, completedProjectCount, simulationYears, treatments, projectRowNumberModel);
-            FillTotalCompletedProjectCount(worksheet, currentCell, simulationYears, projectRowNumberModel, treatments);
+            FillCulvertCompletedProjectsCount(worksheet, currentCell, completedProjectCount, simulationYears, projectRowNumberModel, simulationTreatments);
+            FillBridgeCompletedProjectsCount(worksheet, currentCell, completedProjectCount, simulationYears, projectRowNumberModel, simulationTreatments);
+            FillTotalCompletedProjectCount(worksheet, currentCell, simulationYears, projectRowNumberModel, simulationTreatments);
         }
 
         private void FillTotalCompletedProjectCount(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
-            SortedSet<string> treatments)
+            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Bridges and Culverts Comlpeted", "Work Types");
-            AddCountOfAllCompletedProjects(worksheet, currentCell, simulationYears, projectRowNumberModel, treatments);
+            AddCountOfAllCompletedProjects(worksheet, currentCell, simulationYears, projectRowNumberModel, simulationTreatments);
         }
 
         #region Private methods
 
-        private void AddCountOfAllCompletedProjects(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
-            SortedSet<string> treatments)
+        private void AddCountOfAllCompletedProjects(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+            ProjectRowNumberModel projectRowNumberModel,
+            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
             worksheet.Cells[row++, column].Value = Properties.Resources.NoTreatmentForWorkSummary;
-            treatments.Remove(Properties.Resources.NonCulvertNoTreatment);
-            treatments.Remove(Properties.Resources.CulvertNoTreatment);
 
-            foreach (var item in treatments)
+            simulationTreatments.Remove((Properties.Resources.CulvertNoTreatment, AssetType.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Remove((Properties.Resources.NonCulvertNoTreatment, AssetType.Bridge, TreatmentCategory.Other));
+
+            foreach (var item in simulationTreatments)
             {
-                worksheet.Cells[row++, column].Value = item;
+                worksheet.Cells[row++, column].Value = item.Name;
             }
             foreach (var item in MPMSTreatments)
             {
@@ -71,10 +75,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 noTreatmentCount += Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[Properties.Resources.NonCulvertNoTreatment + "_" + year], column].Value);
                 worksheet.Cells[row++, column].Value = noTreatmentCount;
                 totalCount += noTreatmentCount;
-                foreach (var treatment in treatments)
+                foreach (var treatment in simulationTreatments)
                 {
                     var count = 0;
-                    count = Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[treatment + "_" + year], column].Value);
+                    count = Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[treatment.Name + "_" + year], column].Value);
                     worksheet.Cells[row++, column].Value = count;
                     totalCount += count;
                 }
@@ -97,8 +101,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             ExcelHelper.ApplyColor(worksheet.Cells[row + 2, startColumn, row + 2, column], Color.DimGray);
 
             // Adding back the two types of No treatments.
-            treatments.Add(Properties.Resources.NonCulvertNoTreatment);
-            treatments.Add(Properties.Resources.CulvertNoTreatment);
+            simulationTreatments.Add((Properties.Resources.CulvertNoTreatment, AssetType.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Add((Properties.Resources.NonCulvertNoTreatment, AssetType.Bridge, TreatmentCategory.Other));
         }
 
         private void FillMPMSCompletedProjectsCount(ExcelWorksheet worksheet, CurrentCell currentCell, Dictionary<int, Dictionary<string, int>> completedCommittedCount,
@@ -166,19 +170,21 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private void FillBridgeCompletedProjectsCount(ExcelWorksheet worksheet, CurrentCell currentCell, Dictionary<int, Dictionary<string, int>> completedProjectCount,
-            List<int> simulationYears, SortedSet<string> treatments, ProjectRowNumberModel projectRowNumberModel)
+            List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
+            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Bridges Completed", "Bridge Work Type");
-            AddCountOfBridgeCompleted(worksheet, currentCell, completedProjectCount, treatments, projectRowNumberModel);
+            AddCountOfBridgeCompleted(worksheet, currentCell, completedProjectCount, projectRowNumberModel, simulationTreatments);
         }
 
         private void AddCountOfBridgeCompleted(ExcelWorksheet worksheet, CurrentCell currentCell, Dictionary<int, Dictionary<string, int>> completedProjectCount,
-            SortedSet<string> treatments, ProjectRowNumberModel projectRowNumberModel)
+            ProjectRowNumberModel projectRowNumberModel,
+            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
-            _bridgeWorkSummaryCommon.SetNonCulvertSectionExcelString(worksheet, treatments, ref row, ref column);
+            _bridgeWorkSummaryCommon.SetNonCulvertSectionExcelString(worksheet, simulationTreatments, ref row, ref column);
             worksheet.Cells[row++, column].Value = Properties.Resources.Total;
             column++;
             var fromColumn = column + 1;
@@ -189,13 +195,24 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column = ++column;
                 double nonCulvertTotalCount = 0;
 
-                foreach (var treatment in treatments)
+                //foreach (var treatment in treatments)
+                //{
+                //    if (!treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && treatment != Properties.Resources.CulvertNoTreatment)
+                //    {
+                //        yearlyValues.Value.TryGetValue(treatment, out var nonCulvertCount);
+                //        worksheet.Cells[row, column].Value = nonCulvertCount;
+                //        projectRowNumberModel.TreatmentsCount.Add(treatment + "_" + yearlyValues.Key, row);
+                //        row++;
+                //        nonCulvertTotalCount += nonCulvertCount;
+                //    }
+                //}
+                foreach (var treatment in simulationTreatments)
                 {
-                    if (!treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && treatment != Properties.Resources.CulvertNoTreatment)
+                    if (treatment.AssetType == AssetType.Bridge || treatment.Name == Properties.Resources.NonCulvertNoTreatment)
                     {
-                        yearlyValues.Value.TryGetValue(treatment, out var nonCulvertCount);
+                        yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCount);
                         worksheet.Cells[row, column].Value = nonCulvertCount;
-                        projectRowNumberModel.TreatmentsCount.Add(treatment + "_" + yearlyValues.Key, row);
+                        projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
                         row++;
                         nonCulvertTotalCount += nonCulvertCount;
                     }
@@ -208,19 +225,21 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private void FillCulvertCompletedProjectsCount(ExcelWorksheet worksheet, CurrentCell currentCell, Dictionary<int, Dictionary<string, int>> completedProjectCount,
-            List<int> simulationYears, SortedSet<string> treatments, ProjectRowNumberModel projectRowNumberModel)
+            List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
+            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Culverts Completed", "Culvert Work Type");
-            AddCountOfCulvertCompleted(worksheet, currentCell, completedProjectCount, treatments, projectRowNumberModel);
+            AddCountOfCulvertCompleted(worksheet, currentCell, completedProjectCount, projectRowNumberModel, simulationTreatments);
         }
 
         private void AddCountOfCulvertCompleted(ExcelWorksheet worksheet, CurrentCell currentCell, Dictionary<int, Dictionary<string, int>> completedProjectCount,
-            SortedSet<string> treatments, ProjectRowNumberModel projectRowNumberModel)
+            ProjectRowNumberModel projectRowNumberModel,
+            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
-            _bridgeWorkSummaryCommon.SetCulvertSectionExcelString(worksheet, treatments, ref row, ref column);
+            _bridgeWorkSummaryCommon.SetCulvertSectionExcelString(worksheet, simulationTreatments, ref row, ref column);
             worksheet.Cells[row++, column].Value = Properties.Resources.Total;
             column++;
             var fromColumn = column + 1;
@@ -231,13 +250,13 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column = ++column;
                 double culvertTotalCount = 0;
 
-                foreach (var treatment in treatments)
+                foreach (var treatment in simulationTreatments)
                 {
-                    if (treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) || treatment == Properties.Resources.CulvertNoTreatment)
+                    if (treatment.AssetType == AssetType.Culvert || treatment.Name == Properties.Resources.CulvertNoTreatment)
                     {
-                        yearlyValues.Value.TryGetValue(treatment, out var culvertCount);
+                        yearlyValues.Value.TryGetValue(treatment.Name, out var culvertCount);
                         worksheet.Cells[row, column].Value = culvertCount;
-                        projectRowNumberModel.TreatmentsCount.Add(treatment + "_" + yearlyValues.Key, row);
+                        projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
                         row++;
                         culvertTotalCount += culvertCount;
                     }

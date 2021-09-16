@@ -220,6 +220,7 @@ export default class BudgetPriorityEditor extends Vue {
     @State(state => state.budgetPriorityModule.selectedBudgetPriorityLibrary) stateSelectedBudgetPriorityLibrary: BudgetPriorityLibrary;
     @State(state => state.budgetPriorityModule.scenarioBudgetPriorities) stateScenarioBudgetPriorities: BudgetPriority[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
 
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;

@@ -417,64 +417,77 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             // Arrange
             var attributeRepo = new AttributeRepository(_testRepo);
             var testExplorer = attributeRepo.GetExplorer();
-            var mockNetwork = new Mock<Network>();
-            mockNetwork.Setup(_ => _.Explorer).Returns(testExplorer);
-            var mockSimulation = new Mock<Simulation>();
-            mockSimulation.Setup(_ => _.Network).Returns(mockNetwork.Object);
+            var simulation = testExplorer.AddNetwork().AddSimulation();
+            SetupSimulation("First", simulation, _isCalcualtedTestRepo);
 
-            //var repo = new CalculatedAttributeRepository(_isCalcualtedTestRepo);
+            var repo = new CalculatedAttributeRepository(_isCalcualtedTestRepo);
 
             // Act
-            // repo.PopulateScenarioCalculatedFields(mockSimulation.Object);
+            repo.PopulateScenarioCalculatedFields(simulation);
 
             // Assert
-            Assert.Equal(1, testExplorer.NumberAttributes.Count);
+            Assert.Equal(1, testExplorer.CalculatedFields.Count);
+            Assert.Equal(2, testExplorer.CalculatedFields.First().ValueSources.Count);
         }
 
         [Fact]
         public void CalculatedFieldPopulationHandlesCalculationsWithoutAttributes()
         {
             // Arrange
-            var attributeToRemove = _mockAttributes.Object.First(_ => _.Name == "CONDITION");
-            _mockAttributes.Object.Remove(attributeToRemove);
+            var testAttributeRepo = TestDataForCalculatedAttributesRepository.GetAttributeRepo().ToList();
+            var attributeToRemove = testAttributeRepo.First(_ => _.Name == "CONDITION");
+            testAttributeRepo.Remove(attributeToRemove);
+            var limitedAttributes = new Mock<DbSet<AttributeEntity>>();
+            limitedAttributes.As<IQueryable<AttributeEntity>>().Setup(_ => _.Provider).Returns(testAttributeRepo.AsQueryable().Provider);
+            limitedAttributes.As<IQueryable<AttributeEntity>>().Setup(_ => _.Expression).Returns(testAttributeRepo.AsQueryable().Expression);
+            limitedAttributes.As<IQueryable<AttributeEntity>>().Setup(_ => _.ElementType).Returns(testAttributeRepo.AsQueryable().ElementType);
+            limitedAttributes.As<IQueryable<AttributeEntity>>().Setup(_ => _.GetEnumerator()).Returns(testAttributeRepo.AsQueryable().GetEnumerator());
+            _mockedContext.Setup(_ => _.Attribute).Returns(limitedAttributes.Object);
+            _mockedContext.Setup(_ => _.Set<AttributeEntity>()).Returns(limitedAttributes.Object);
 
             var attributeRepo = new AttributeRepository(_testRepo);
             var testExplorer = attributeRepo.GetExplorer();
-            var mockNetwork = new Mock<Network>();
-            mockNetwork.Setup(_ => _.Explorer).Returns(testExplorer);
-            var mockSimulation = new Mock<Simulation>();
-            mockSimulation.Setup(_ => _.Network).Returns(mockNetwork.Object);
+            var simulation = testExplorer.AddNetwork().AddSimulation();
+            SetupSimulation("First", simulation, _isCalcualtedTestRepo);
 
-            //var repo = new CalculatedAttributeRepository(_isCalcualtedTestRepo);
+            var repo = new CalculatedAttributeRepository(_isCalcualtedTestRepo);
 
             // Act
-            // repo.PopulateScenarioCalculatedFields(mockSimulation.Object);
+            repo.PopulateScenarioCalculatedFields(simulation);
 
             // Assert
-            Assert.Equal(1, testExplorer.NumberAttributes.Count);
+            Assert.Equal(0, testExplorer.CalculatedFields.Count);
         }
 
         [Fact]
-        public void CalculatedFieldPopulationHandlesAttributesWithoutCalculations()
+        public void CalculatedFieldPopulationHandlesAttributesWithoutCalculation()
         {
             // Arrange
-            var calculationsToRemove = _mockScenarioCalculations.Object.Where(_ => _.Attribute.Name == "CONDITION");
-            _mockScenarioCalculations.Object.RemoveRange(calculationsToRemove);
+            var scenarioRepo = TestDataForCalculatedAttributesRepository.GetSimulationCalculatedAttributesRepo().ToList();
+            var calculationsToRemove = scenarioRepo.Where(_ => _.Attribute.Name == "CONDITION").ToList();
+            calculationsToRemove.ForEach(calc => scenarioRepo.Remove(calc));
+
+            var limitedCalculations = new Mock<DbSet<ScenarioCalculatedAttributeEntity>>();
+            limitedCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.Provider).Returns(scenarioRepo.AsQueryable().Provider);
+            limitedCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.Expression).Returns(scenarioRepo.AsQueryable().Expression);
+            limitedCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.ElementType).Returns(scenarioRepo.AsQueryable().ElementType);
+            limitedCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.GetEnumerator()).Returns(scenarioRepo.AsQueryable().GetEnumerator());
+            _mockedContext.Setup(_ => _.ScenarioCalculatedAttribute).Returns(limitedCalculations.Object);
+            _mockedContext.Setup(_ => _.Set<ScenarioCalculatedAttributeEntity>()).Returns(limitedCalculations.Object);
 
             var attributeRepo = new AttributeRepository(_testRepo);
             var testExplorer = attributeRepo.GetExplorer();
-            var mockNetwork = new Mock<Network>();
-            mockNetwork.Setup(_ => _.Explorer).Returns(testExplorer);
-            var mockSimulation = new Mock<Simulation>();
-            mockSimulation.Setup(_ => _.Network).Returns(mockNetwork.Object);
+            var simulation = testExplorer.AddNetwork().AddSimulation();
+            SetupSimulation("First", simulation, _testRepo);
 
-            //var repo = new CalculatedAttributeRepository(_testRepo);
+            var repo = new CalculatedAttributeRepository(_testRepo);
 
             // Act
-            // repo.PopulateScenarioCalculatedFields(mockSimulation.Object);
+            repo.PopulateScenarioCalculatedFields(simulation);
 
             // Assert
-            Assert.Equal(1, testExplorer.NumberAttributes.Count);
+            Assert.Equal(1, testExplorer.CalculatedFields.Count);
+            Assert.Equal(CalculatedFieldTiming.NotSpecified, testExplorer.CalculatedFields.First().Timing);
         }
 
         // Helpers
@@ -524,6 +537,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             newCalculation.Equations.Add(newPair);
 
             return newCalculation;
+        }
+
+        private void SetupSimulation(string name, Simulation simulation, UnitOfDataPersistenceWork uow)
+        {
+            var populatedSimulation = uow.Context.Simulation.First(_ => _.Name == name);
+            simulation.Id = populatedSimulation.Id;
+            simulation.Name = populatedSimulation.Name;
         }
     }
 }

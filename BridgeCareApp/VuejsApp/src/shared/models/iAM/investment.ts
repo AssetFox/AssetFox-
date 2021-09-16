@@ -94,6 +94,6 @@ export const emptyInvestmentPlan: InvestmentPlan = {
     id: getBlankGuid(),
     firstYearOfAnalysisPeriod: moment().year(),
     inflationRatePercentage: 0,
-    minimumProjectCostLimit: 500000,
+    minimumProjectCostLimit: 0,
     numberOfYearsInAnalysisPeriod: 1,
 };

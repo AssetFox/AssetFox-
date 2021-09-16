@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -33,15 +34,15 @@ namespace BridgeCareCore.Controllers
         private static IInvestmentBudgetsService _investmentBudgetsService;
         private readonly IReadOnlyDictionary<string, InvestmentUpsertMethod> _investmentUpsertMethods;
         private readonly IReadOnlyDictionary<string, InvestmentImportMethod> _investmentImportMethods;
+        public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
 
-        public InvestmentController(IInvestmentBudgetsService investmentBudgetsService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public InvestmentController(IInvestmentBudgetsService investmentBudgetsService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IInvestmentDefaultDataService investmentDefaultDataService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _investmentBudgetsService = investmentBudgetsService ??
                                         throw new ArgumentNullException(nameof(investmentBudgetsService));
             _investmentUpsertMethods = CreateUpsertMethods();
             _investmentImportMethods = CreateImportMethods();
+            _investmentDefaultDataService = investmentDefaultDataService ?? throw new ArgumentNullException(nameof(investmentDefaultDataService));
         }
 
         private Dictionary<string, InvestmentUpsertMethod> CreateUpsertMethods()
@@ -107,7 +108,7 @@ namespace BridgeCareCore.Controllers
 
                     var scenarioInvestmentPlan = UnitOfWork.InvestmentPlanRepo
                         .GetInvestmentPlan(simulationId);
-
+                    SetDefaultDataForNewScenario(scenarioInvestmentPlan);
                     return new InvestmentDTO
                     {
                         ScenarioBudgets = budgets, InvestmentPlan = scenarioInvestmentPlan
@@ -121,6 +122,16 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 throw;
+            }
+        }
+
+        private void SetDefaultDataForNewScenario(InvestmentPlanDTO scenarioInvestmentPlan)
+        {
+            if (scenarioInvestmentPlan.Id == Guid.Empty)
+            {
+                var investmentDefaultData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
+                scenarioInvestmentPlan.MinimumProjectCostLimit = investmentDefaultData.MinimumProjectCostLimit;
+                scenarioInvestmentPlan.InflationRatePercentage = investmentDefaultData.InflationRatePercentage;
             }
         }
 

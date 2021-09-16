@@ -20,10 +20,10 @@
                 <v-layout justify-space-between row>
                     <v-spacer></v-spacer>
                     <v-flex xs2>
-                        <v-text-field label='Minimum Project Cost Limit' outline id='min-proj-cost-limit-txt'
+                        <v-text-field label='Minimum Project Cost Limit' outline id='min-proj-cost-limit-txt'                                      
                                       @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
                                       v-model='investmentPlan.minimumProjectCostLimit'
-                                      v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
+                                      v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: true}"                                      
                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
                                       :disabled="!isAdmin" />
                     </v-flex>
@@ -680,7 +680,7 @@ export default class InvestmentEditor extends Vue {
                     ...investmentPlan,
                     minimumProjectCostLimit: hasValue(investmentPlan.minimumProjectCostLimit)
                         ? parseFloat(investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
-                        : 500000,
+                        : 1000,
                 },
             },
             scenarioId: this.selectedScenarioId,

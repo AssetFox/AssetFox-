@@ -156,6 +156,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         var calculatedField = explorer.AddCalculatedField(entity.Name);
                         calculatedField.IsDecreasingWithDeterioration = entity.IsAscending;
+                        calculatedField.Timing = CalculatedFieldTiming.NotSpecified;
 
                         // TODO:  Remove this once the simulation object is built
                         if (entity.AttributeEquationCriterionLibraryJoins.Any())

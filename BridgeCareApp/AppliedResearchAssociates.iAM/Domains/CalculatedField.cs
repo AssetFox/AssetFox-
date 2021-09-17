@@ -8,31 +8,49 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class CalculatedField : Attribute, INumericAttribute, IValidator
     {
-        internal CalculatedField(string name, Explorer explorer) : base(name) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
+        public bool IsDecreasingWithDeterioration { get; set; }
 
         public string ShortDescription => Name;
 
-        public bool IsDecreasingWithDeterioration { get; set; }
-
-        public CalculatedFieldTiming Timing { get; set; }
-
         public ValidatorBag Subvalidators => new ValidatorBag { ValueSources };
+
+        /// <summary>
+        ///     When to "fix" the value of this field during an analysis year. Ignored when <see
+        ///     cref="Simulation.ShouldPreapplyPassiveTreatment"/> is enabled.
+        /// </summary>
+        public CalculatedFieldTiming Timing
+        {
+            get => Enum.IsDefined(typeof(CalculatedFieldTiming), _Timing) ? _Timing : CalculatedFieldTiming.OnDemand;
+            set => _Timing = value;
+        }
 
         public IReadOnlyCollection<CalculatedFieldValueSource> ValueSources => _ValueSources;
 
         public CalculatedFieldValueSource AddValueSource() => _ValueSources.GetAdd(new CalculatedFieldValueSource(Explorer));
 
-        private double Compute(Equation equation, SectionContext sectionContext)
+        public ValidationResultBag GetDirectValidationResults()
         {
-            double r = equation.Compute(sectionContext);
-            if (double.IsNaN(r) || double.IsInfinity(r))
+            var results = new ValidationResultBag();
+
+            if (ValueSources.Count is 0)
             {
-                var errorMessage = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, equation, Name, r);
-                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, sectionContext.SimulationRunner.Simulation.Id);
-                sectionContext.SimulationRunner.Send(messageBuilder);
+                results.Add(ValidationStatus.Error, "There are no value sources.", this, nameof(ValueSources));
             }
-            return r;
+            else
+            {
+                var numberOfSourcesWithBlankCriterion = ValueSources.Count(source => source.Criterion.ExpressionIsBlank);
+                if (numberOfSourcesWithBlankCriterion == 0)
+                {
+                    results.Add(ValidationStatus.Error, "There are no value sources with a blank criterion.", this, nameof(ValueSources));
+                }
+            }
+
+            return results;
         }
+
+        public void Remove(CalculatedFieldValueSource source) => _ValueSources.Remove(source);
+
+        internal CalculatedField(string name, Explorer explorer) : base(name) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
         internal double Calculate(SectionContext scope)
         {
@@ -67,30 +85,22 @@ namespace AppliedResearchAssociates.iAM.Domains
             return IsDecreasingWithDeterioration ? potentialValues.Min() : potentialValues.Max();
         }
 
-        public ValidationResultBag GetDirectValidationResults()
-        {
-            var results = new ValidationResultBag();
-
-            if (ValueSources.Count == 0)
-            {
-                results.Add(ValidationStatus.Error, "There are no value sources.", this, nameof(ValueSources));
-            }
-            else
-            {
-                var numberOfSourcesWithBlankCriterion = ValueSources.Count(source => source.Criterion.ExpressionIsBlank);
-                if (numberOfSourcesWithBlankCriterion == 0)
-                {
-                    results.Add(ValidationStatus.Error, "There are no value sources with a blank criterion.", this, nameof(ValueSources));
-                }
-            }
-
-            return results;
-        }
-
-        public void Remove(CalculatedFieldValueSource source) => _ValueSources.Remove(source);
-
         private readonly List<CalculatedFieldValueSource> _ValueSources = new List<CalculatedFieldValueSource>();
 
         private readonly Explorer Explorer;
+
+        private CalculatedFieldTiming _Timing = CalculatedFieldTiming.OnDemand;
+
+        private double Compute(Equation equation, SectionContext sectionContext)
+        {
+            var equationValue = equation.Compute(sectionContext);
+            if (double.IsNaN(equationValue) || double.IsInfinity(equationValue))
+            {
+                var errorMessage = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, equation, Name, equationValue);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, sectionContext.SimulationRunner.Simulation.Id);
+                sectionContext.SimulationRunner.Send(messageBuilder);
+            }
+            return equationValue;
+        }
     }
 }

@@ -192,6 +192,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     context.ApplyTreatmentMetadataIfPending(year);
                 }
 
+                if (!Simulation.ShouldPreapplyPassiveTreatment)
+                {
+                    foreach (var context in SectionContexts)
+                    {
+                        context.UnfixCalculatedFieldValues();
+                    }
+                }
+
                 Snapshot(year);
             }
 
@@ -332,7 +340,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     if (Simulation.ShouldPreapplyPassiveTreatment)
                     {
-                        context.FixCalculatedFieldValues();
+                        context.FixAllCalculatedFieldValues();
+                    }
+                    else
+                    {
+                        context.FixCalculatedFieldValuesWithPreDeteriorationTiming();
                     }
 
                     context.ApplyPerformanceCurves();
@@ -341,6 +353,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     {
                         context.PreapplyPassiveTreatment();
                         context.UnfixCalculatedFieldValues();
+                    }
+                    else
+                    {
+                        context.FixCalculatedFieldValuesWithPostDeteriorationTiming();
                     }
 
                     if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))

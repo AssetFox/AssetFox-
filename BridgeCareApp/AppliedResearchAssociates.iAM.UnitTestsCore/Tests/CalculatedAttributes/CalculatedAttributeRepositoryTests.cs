@@ -487,7 +487,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
 
             // Assert
             Assert.Equal(1, testExplorer.CalculatedFields.Count);
-            Assert.Equal(CalculatedFieldTiming.NotSpecified, testExplorer.CalculatedFields.First().Timing);
+            Assert.Equal(CalculatedFieldTiming.OnDemand, testExplorer.CalculatedFields.First().Timing);
         }
 
         // Helpers

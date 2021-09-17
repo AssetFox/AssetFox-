@@ -124,7 +124,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
                 if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
                 {
-                    AccumulationContext.FixCalculatedFieldValues();
+                    AccumulationContext.FixAllCalculatedFieldValues();
+                }
+                else
+                {
+                    AccumulationContext.FixCalculatedFieldValuesWithPreDeteriorationTiming();
                 }
 
                 AccumulationContext.ApplyPerformanceCurves();
@@ -133,6 +137,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 {
                     AccumulationContext.PreapplyPassiveTreatment();
                     AccumulationContext.UnfixCalculatedFieldValues();
+                }
+                else
+                {
+                    AccumulationContext.FixCalculatedFieldValuesWithPostDeteriorationTiming();
                 }
 
                 if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
@@ -145,6 +153,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
 
                 AccumulationContext.ApplyTreatmentMetadataIfPending(year);
+
+                if (!SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
+                {
+                    AccumulationContext.UnfixCalculatedFieldValues();
+                }
 
                 AccumulateBenefit();
                 updateRemainingLife?.Invoke();

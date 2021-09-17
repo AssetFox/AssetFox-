@@ -156,7 +156,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         var calculatedField = explorer.AddCalculatedField(entity.Name);
                         calculatedField.IsDecreasingWithDeterioration = entity.IsAscending;
-                        calculatedField.Timing = CalculatedFieldTiming.NotSpecified;
+                        calculatedField.Timing = CalculatedFieldTiming.OnDemand;
                     }
                     else
                     {

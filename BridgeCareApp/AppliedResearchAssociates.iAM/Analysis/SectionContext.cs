@@ -79,13 +79,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void CopyDetailFrom(SectionContext other) => Detail = new SectionDetail(other.Detail);
 
-        public void FixCalculatedFieldValues()
-        {
-            foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
-            {
-                NumberCache_Override[calculatedField.Name] = GetNumber(calculatedField.Name);
-            }
-        }
+        public void FixAllCalculatedFieldValues() => FixCalculatedFieldValues(SimulationRunner.Simulation.Network.Explorer.CalculatedFields);
+
+        public void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(SimulationRunner.Simulation.Network.Explorer.CalculatedFields.Where(cf => cf.Timing is CalculatedFieldTiming.PreDeterioration));
+
+        public void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(SimulationRunner.Simulation.Network.Explorer.CalculatedFields.Where(cf => cf.Timing is CalculatedFieldTiming.PostDeterioration));
 
         public double GetBenefit()
         {
@@ -345,6 +343,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
             foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.TextAttributes)
             {
                 detail.ValuePerTextAttribute.Add(attribute.Name, GetText(attribute.Name));
+            }
+        }
+
+        private void FixCalculatedFieldValues(IEnumerable<CalculatedField> calculatedFields)
+        {
+            foreach (var calculatedField in calculatedFields)
+            {
+                NumberCache_Override[calculatedField.Name] = GetNumber(calculatedField.Name);
             }
         }
 

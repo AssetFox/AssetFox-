@@ -33,9 +33,11 @@ namespace AppliedResearchAssociates.iAM.Domains
         public string ShortDescription => Name;
 
         /// <summary>
-        ///     Whether to always pre-apply the passive treatment just after deterioration.
+        ///     Whether to always pre-apply the passive treatment just after deterioration. This
+        ///     feature exists in order to provide v1-compatible analysis behavior. If this feature
+        ///     is enabled, the v2 feature based on <see cref="CalculatedField.Timing"/> is disabled.
         /// </summary>
-        public bool ShouldPreapplyPassiveTreatment { get; set; } = true;
+        public bool ShouldPreapplyPassiveTreatment { get; set; }
 
         public ValidatorBag Subvalidators => new ValidatorBag { AnalysisMethod, CommittedProjects, InvestmentPlan, PerformanceCurves, Treatments };
 

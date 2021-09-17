@@ -10,3 +10,11 @@ export const ScenarioRoutePaths: any = {
     CashFlow: 'CashFlowEditor/Scenario',
     CalculatedAttribute: 'CalculatedAttributeEditor/Scenario',
 };
+
+export const UnsecuredRoutePathNames: string[] = [
+    'Authentication',
+    'AuthenticationStart',
+    'AuthenticationFailure',
+    'NoRole',
+    'iAM',
+];

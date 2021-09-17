@@ -15,5 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         Explorer GetExplorer();
 
         Task<List<AttributeDTO>> Attributes();
+
+        Task<List<AttributeDTO>> CalculatedAttributes();
     }
 }

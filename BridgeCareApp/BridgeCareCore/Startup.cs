@@ -46,6 +46,7 @@ namespace BridgeCareCore
             services.AddSimulationData();
             services.AddSummaryReportDataTABs();
             services.AddSummaryReportGraphTABs();
+            services.AddDefaultData();
 
             services.AddSingleton<ILog, LogNLog>();
             services.AddScoped<LegacySimulationSynchronizerService>();
@@ -55,9 +56,9 @@ namespace BridgeCareCore
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-             services.AddDbContext<IAMContext>(options => options.UseSqlServer(
-            Configuration.GetConnectionString("BridgeCareConnex"),
-            sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
+            services.AddDbContext<IAMContext>(options => options.UseSqlServer(
+                Configuration.GetConnectionString("BridgeCareConnex"),
+                sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
                 );
 
             // Setup reporting

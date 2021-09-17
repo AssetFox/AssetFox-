@@ -1,0 +1,14 @@
+{
+  "DefaultData": {
+    "Analysis": {
+      "Weighting": "RISK_SCORE",
+      "OptimizationStrategy": "BenefitToCostRatio",
+      "BenefitAttribute": "CONDITIONINDEX",
+      "BenefitLimit": 0
+    },
+    "Investment": {
+      "MinimumProjectCostLimit": 1000,
+      "InflationRatePercentage": 3
+    }
+  } 
+}

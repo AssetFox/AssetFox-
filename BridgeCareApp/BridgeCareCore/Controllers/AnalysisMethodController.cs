@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -23,18 +24,24 @@ namespace BridgeCareCore.Controllers
     {
         private readonly IReadOnlyDictionary<string, AnalysisMethodGetMethod> _analysisMethodGetMethods;
         private readonly IReadOnlyDictionary<string, AnalysisMethodUpsertMethod> _analysisMethodUpsertMethods;
+        public readonly IAnalysisDefaultDataService _analysisDefaultDataService;
 
         public AnalysisMethodController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, IAnalysisDefaultDataService analysisDefaultDataService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _analysisMethodGetMethods = CreateGetMethods();
             _analysisMethodUpsertMethods = CreateUpsertMethods();
+            _analysisDefaultDataService = analysisDefaultDataService ?? throw new ArgumentNullException(nameof(analysisDefaultDataService));
         }
 
         private Dictionary<string, AnalysisMethodGetMethod> CreateGetMethods()
         {
-            AnalysisMethodDTO GetAny(Guid simulationId) =>
-                UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationId);
+            AnalysisMethodDTO GetAny(Guid simulationId)
+            {
+                var analysisMethodDTO = UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationId);
+                SetDefaultDataForNewScenario(analysisMethodDTO);
+                return analysisMethodDTO;
+            }
 
             AnalysisMethodDTO GetPermitted(Guid simulationId)
             {
@@ -49,6 +56,18 @@ namespace BridgeCareCore.Controllers
                 [Role.Cwopa] = GetPermitted,
                 [Role.PlanningPartner] = GetPermitted
             };
+        }
+
+        private void SetDefaultDataForNewScenario(AnalysisMethodDTO analysisMethodDTO)
+        {            
+            if (analysisMethodDTO.Attribute == null && analysisMethodDTO.Benefit.Id == Guid.Empty && analysisMethodDTO.CriterionLibrary.Id == Guid.Empty)
+            {
+                var analysisDefaultData = _analysisDefaultDataService.GetAnalysisDefaultData().Result;
+                analysisMethodDTO.Attribute = analysisDefaultData.weighting;
+                analysisMethodDTO.OptimizationStrategy = analysisDefaultData.optimizationStrategy;
+                analysisMethodDTO.Benefit.Attribute = analysisDefaultData.benefitAttribute;
+                analysisMethodDTO.Benefit.Limit = analysisDefaultData.benefitLimit;
+            }
         }
 
         private Dictionary<string, AnalysisMethodUpsertMethod> CreateUpsertMethods()

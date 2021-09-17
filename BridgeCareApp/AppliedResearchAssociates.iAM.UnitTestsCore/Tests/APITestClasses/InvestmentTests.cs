@@ -13,13 +13,13 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
-using BridgeCareCore.Interfaces.SummaryReport;
+using BridgeCareCore.Interfaces.DefaultData;
+using BridgeCareCore.Models.DefaultData;
 using BridgeCareCore.Services;
-using BridgeCareCore.Services.SummaryReport;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
-using MoreLinq;
+using Moq;
 using OfficeOpenXml;
 using Xunit;
 
@@ -35,6 +35,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetEntity _testBudget;
         private InvestmentPlanEntity _testInvestmentPlan;
         private ScenarioBudgetEntity _testScenarioBudget;
+        private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
 
         public InvestmentTests()
         {
@@ -46,16 +47,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _service = new InvestmentBudgetsService(_testHelper.UnitOfWork);
         }
 
-        private void CreateAuthorizedController() =>
+        private void CreateAuthorizedController()
+        {
+            _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             _controller = new InvestmentController(_service, _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
-
-        private void CreateUnauthorizedController() =>
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
+        }
+        private void CreateUnauthorizedController()
+        {
+            _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             _controller = new InvestmentController(_service, _testHelper.MockEsecSecurityNotAuthorized.Object,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
-
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
+        }
         private void CreateLibraryTestData()
         {
             _testBudgetLibrary = new BudgetLibraryEntity {Id = Guid.NewGuid(), Name = "Test Name"};

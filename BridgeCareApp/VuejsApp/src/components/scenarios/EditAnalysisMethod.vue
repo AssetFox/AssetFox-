@@ -11,14 +11,14 @@
                         @change="onSetAnalysisMethodProperty('attribute', $event)" label="Weighting"
                         outline
                         clearable
-                        :value="analysisMethod.attribute">
+                        :value="analysisMethod.attribute" :disabled="!isAdmin">
               </v-select>
             </v-flex>
             <v-flex xs2>
               <v-select :items="optimizationStrategy"
                         @change="onSetAnalysisMethodProperty('optimizationStrategy', $event)"
                         label="Optimization Strategy" outline
-                        :value="analysisMethod.optimizationStrategy">
+                        :value="analysisMethod.optimizationStrategy" :disabled="!isAdmin">
               </v-select>
             </v-flex>
             <v-flex xs2>
@@ -34,7 +34,7 @@
               <v-select :items="benefitAttributes" @change="onSetBenefitProperty('attribute', $event)"
                         label="Benefit Attribute"
                         outline
-                        :value="analysisMethod.benefit.attribute">
+                        :value="analysisMethod.benefit.attribute" :disabled="!isAdmin">
               </v-select>
             </v-flex>
             <v-flex xs2>
@@ -43,7 +43,8 @@
                             type="number"
                             min=0
                             :value.number="analysisMethod.benefit.limit"
-                            :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotNegative(analysisMethod.benefit.limit)]">
+                            :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotNegative(analysisMethod.benefit.limit)]"
+                            :disabled="!isAdmin">
               </v-text-field>
             </v-flex>
             <v-spacer/>
@@ -119,12 +120,13 @@ import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules
 export default class EditAnalysisMethod extends Vue {
   @State(state => state.analysisMethodModule.analysisMethod) stateAnalysisMethod: AnalysisMethod;
   @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
+  @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
 
   @Action('getAnalysisMethod') getAnalysisMethodAction: any;
   @Action('upsertAnalysisMethod') upsertAnalysisMethodAction: any;
   @Action('setErrorMessage') setErrorMessageAction: any;
   @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-
+  
   selectedScenarioId: string = getBlankGuid();
   analysisMethod: AnalysisMethod = clone(emptyAnalysisMethod);
   optimizationStrategy: SelectItem[] = [
@@ -150,12 +152,12 @@ export default class EditAnalysisMethod extends Vue {
   criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
   rules: InputValidationRules = rules;
   valid: boolean = true;
-
+  
   beforeRouteEnter(to: any, from: any, next: any) {
     next((vm: any) => {
       vm.selectedScenarioId = to.query.scenarioId;
       vm.simulationName = to.query.simulationName;
-
+      
       if (vm.selectedScenarioId === getBlankGuid()) {
         // set 'no selected scenario' error message, then redirect user to Scenarios UI
         vm.setErrorMessageAction({message: 'Found no selected scenario for edit'});
@@ -175,7 +177,7 @@ export default class EditAnalysisMethod extends Vue {
 
   beforeDestroy() {
     this.setHasUnsavedChangesAction({value: false});
-  }
+  }  
 
   @Watch('stateAnalysisMethod')
   onStateAnalysisChanged() {
@@ -195,14 +197,14 @@ export default class EditAnalysisMethod extends Vue {
     this.setBenefitAttributeIfEmpty();
   }
 
-  @Watch('stateNumericAttributes')
+@Watch('stateNumericAttributes')
   onStateNumericAttributesChanged() {
     if (hasValue(this.stateNumericAttributes)) {
       this.setBenefitAndWeightingAttributes();
       this.setBenefitAttributeIfEmpty();
     }
   }
-
+ 
   setBenefitAttributeIfEmpty() {
     if (!hasValue(this.analysisMethod.benefit.attribute) && hasValue(this.benefitAttributes)) {
       this.analysisMethod.benefit.attribute = this.benefitAttributes[0].value.toString();

@@ -16,14 +16,19 @@ import VueScreen from 'vue-screen';
 import VueWorker from 'vue-worker';
 import '@progress/kendo-ui';
 import '@progress/kendo-theme-default/dist/all.css';
-import {KendoChartInstaller} from '@progress/kendo-charts-vue-wrapper';
+import { KendoChartInstaller } from '@progress/kendo-charts-vue-wrapper';
 import VueCurrencyInput from 'vue-currency-input';
 import connectionHub from './connectionHub';
 // @ts-ignore
 import VueSanitize from 'vue-sanitize';
+// @ts-ignore
+import VuejsDialog from 'vuejs-dialog';
+// @ts-ignore
+import VuejsDialogMixin from 'vuejs-dialog/dist/vuejs-dialog-mixin.min.js';
+import 'vuejs-dialog/dist/vuejs-dialog.min.css';
 
 Vue.use(Vuetify, {
-    iconfont: 'fa'
+    iconfont: 'fa',
 });
 
 Vue.use(VueWorker);
@@ -40,20 +45,27 @@ Vue.use(VueScreen, {
     xl: 1200,
     xxl: 1400,
     freeRealEstate: 1700,
-    breakpointsOrder: ['sm', 'md', 'lg', 'xl', 'xxl', 'freeRealEstate']
+    breakpointsOrder: ['sm', 'md', 'lg', 'xl', 'xxl', 'freeRealEstate'],
 });
 
 var defaultOptions = {
-    allowedTags: VueSanitize.defaults.allowedTags.concat(['html', 'head', 'body', 'link']),
-    allowedAttributes: false
+    allowedTags: VueSanitize.defaults.allowedTags.concat([
+        'html',
+        'head',
+        'body',
+        'link',
+    ]),
+    allowedAttributes: false,
 };
 
 Vue.use(VueSanitize, defaultOptions);
 
 Vue.config.productionTip = false;
 
+Vue.use(VuejsDialog);
+
 new Vue({
     store,
     router,
-    render: h => h(App)
+    render: h => h(App),
 }).$mount('#app');

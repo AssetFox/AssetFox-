@@ -122,13 +122,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     throw new InvalidOperationException(MessageStrings.TreatmentOutlookIsConsumingAProgressEvent);
                 }
 
+                AccumulationContext.FixCalculatedFieldValuesWithPreDeteriorationTiming();
+
                 if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
                 {
-                    AccumulationContext.FixAllCalculatedFieldValues();
-                }
-                else
-                {
-                    AccumulationContext.FixCalculatedFieldValuesWithPreDeteriorationTiming();
+                    AccumulationContext.FixCalculatedFieldValuesWithoutPreDeteriorationTiming();
                 }
 
                 AccumulationContext.ApplyPerformanceCurves();
@@ -136,12 +134,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 if (SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
                 {
                     AccumulationContext.PreapplyPassiveTreatment();
-                    AccumulationContext.UnfixCalculatedFieldValues();
+                    AccumulationContext.UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming();
                 }
-                else
-                {
-                    AccumulationContext.FixCalculatedFieldValuesWithPostDeteriorationTiming();
-                }
+
+                AccumulationContext.FixCalculatedFieldValuesWithPostDeteriorationTiming();
 
                 if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                 {
@@ -153,11 +149,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
 
                 AccumulationContext.ApplyTreatmentMetadataIfPending(year);
-
-                if (!SimulationRunner.Simulation.ShouldPreapplyPassiveTreatment)
-                {
-                    AccumulationContext.UnfixCalculatedFieldValues();
-                }
+                AccumulationContext.UnfixCalculatedFieldValues();
 
                 AccumulateBenefit();
                 updateRemainingLife?.Invoke();

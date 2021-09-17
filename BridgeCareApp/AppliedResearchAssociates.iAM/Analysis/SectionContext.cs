@@ -79,11 +79,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void CopyDetailFrom(SectionContext other) => Detail = new SectionDetail(other.Detail);
 
-        public void FixAllCalculatedFieldValues() => FixCalculatedFieldValues(SimulationRunner.Simulation.Network.Explorer.CalculatedFields);
+        public void FixCalculatedFieldValuesWithoutPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration));
 
-        public void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(SimulationRunner.Simulation.Network.Explorer.CalculatedFields.Where(cf => cf.Timing is CalculatedFieldTiming.PreDeterioration));
+        public void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PostDeterioration));
 
-        public void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(SimulationRunner.Simulation.Network.Explorer.CalculatedFields.Where(cf => cf.Timing is CalculatedFieldTiming.PostDeterioration));
+        public void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PreDeterioration));
 
         public double GetBenefit()
         {
@@ -232,6 +232,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void UnfixCalculatedFieldValues() => NumberCache_Override.Clear();
 
+        public void UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming()
+        {
+            foreach (var calculatedField in AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration))
+            {
+                _ = NumberCache_Override.Remove(calculatedField.Name);
+            }
+        }
+
         public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
 
         public bool YearIsWithinShadowForSameTreatment(int year, Treatment treatment) => FirstUnshadowedYearForSameTreatment.TryGetValue(treatment.Name, out var firstUnshadowedYear) && year < firstUnshadowedYear;
@@ -249,6 +257,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private Treatment AppliedTreatmentWithPendingMetadata;
 
         private int? FirstUnshadowedYearForAnyTreatment;
+
+        private IEnumerable<CalculatedField> AllCalculatedFields => SimulationRunner.Simulation.Network.Explorer.CalculatedFields;
 
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {

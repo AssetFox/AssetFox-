@@ -187,18 +187,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
                 ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
 
-                foreach (var context in SectionContexts)
+                InParallel(SectionContexts, context =>
                 {
                     context.ApplyTreatmentMetadataIfPending(year);
-                }
-
-                if (!Simulation.ShouldPreapplyPassiveTreatment)
-                {
-                    foreach (var context in SectionContexts)
-                    {
-                        context.UnfixCalculatedFieldValues();
-                    }
-                }
+                    context.UnfixCalculatedFieldValues();
+                });
 
                 Snapshot(year);
             }
@@ -338,13 +331,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
                 else
                 {
+                    context.FixCalculatedFieldValuesWithPreDeteriorationTiming();
+
                     if (Simulation.ShouldPreapplyPassiveTreatment)
                     {
-                        context.FixAllCalculatedFieldValues();
-                    }
-                    else
-                    {
-                        context.FixCalculatedFieldValuesWithPreDeteriorationTiming();
+                        context.FixCalculatedFieldValuesWithoutPreDeteriorationTiming();
                     }
 
                     context.ApplyPerformanceCurves();
@@ -352,12 +343,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     if (Simulation.ShouldPreapplyPassiveTreatment)
                     {
                         context.PreapplyPassiveTreatment();
-                        context.UnfixCalculatedFieldValues();
+                        context.UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming();
                     }
-                    else
-                    {
-                        context.FixCalculatedFieldValuesWithPostDeteriorationTiming();
-                    }
+
+                    context.FixCalculatedFieldValuesWithPostDeteriorationTiming();
 
                     if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                     {

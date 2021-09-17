@@ -15,8 +15,7 @@ namespace AppliedResearchAssociates.iAM.Domains
         public ValidatorBag Subvalidators => new ValidatorBag { ValueSources };
 
         /// <summary>
-        ///     When to "fix" the value of this field during an analysis year. Ignored when <see
-        ///     cref="Simulation.ShouldPreapplyPassiveTreatment"/> is enabled.
+        ///     When to "fix" the value of this field during an analysis year.
         /// </summary>
         public CalculatedFieldTiming Timing
         {

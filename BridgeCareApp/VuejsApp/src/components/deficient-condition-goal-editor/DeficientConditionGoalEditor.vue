@@ -424,6 +424,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     stateScenarioDeficientConditionGoals: DeficientConditionGoal[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
 
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('getDeficientConditionGoalLibraries')

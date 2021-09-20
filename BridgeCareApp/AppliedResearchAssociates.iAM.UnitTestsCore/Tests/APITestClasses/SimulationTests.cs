@@ -722,7 +722,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 var timer = new Timer {Interval = 5000};
                 timer.Elapsed += delegate
                 {
-                    var originalSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking()
+                    var originalSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
                         // analysis method
                         .Include(_ => _.AnalysisMethod)
                         .ThenInclude(_ => _.Benefit)
@@ -803,7 +803,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         .Include(_ => _.SimulationUserJoins)
                         .Single(_ => _.Id == _testSimulationToClone.Id);
 
-                    var clonedSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking()
+                    var clonedSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
                         // analysis method
                         .Include(_ => _.AnalysisMethod)
                         .ThenInclude(_ => _.Benefit)

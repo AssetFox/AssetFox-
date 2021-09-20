@@ -136,14 +136,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return (selectedSimulation == null) ? null : selectedSimulation.Name;
         }
 
-        public SimulationDTO CloneSimulation(Guid simulationId)
+        public SimulationCloningResultDTO CloneSimulation(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            var simulationToClone = _unitOfWork.Context.Simulation.AsNoTracking()
+            var budgetsPreventingCloning = new List<string>();
+            var numberOfCommittedProjectsAffected = 0;
+
+            var simulationToClone = _unitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
                 // analysis method
                 .Include(_ => _.AnalysisMethod)
                 .ThenInclude(_ => _.Benefit)
@@ -391,6 +394,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (simulationToClone.CommittedProjects.Any())
             {
+                var committedProjectsAffected = simulationToClone.CommittedProjects.Where(_ =>
+                    simulationToClone.Budgets.Any(budget => budget.Name != _.ScenarioBudget.Name)).ToList();
+                if (committedProjectsAffected.Any())
+                {
+                    numberOfCommittedProjectsAffected = committedProjectsAffected.Count();
+                    budgetsPreventingCloning = committedProjectsAffected
+                        .Select(_ => _.ScenarioBudget.Name).Distinct().ToList();
+                }
+
                 simulationToClone.CommittedProjects = simulationToClone.CommittedProjects.Where(_ =>
                     simulationToClone.Budgets.Any(budget => budget.Name == _.ScenarioBudget.Name)).ToList();
                 simulationToClone.CommittedProjects.ForEach(committedProject =>
@@ -731,17 +743,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             /*_unitOfWork.Context.AddEntity(simulationToClone);*/
             // add simulation
             _unitOfWork.Context.AddAll(new List<SimulationEntity> {simulationToClone});
+            _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
             // add analysis method
             _unitOfWork.Context.AddEntity(simulationToClone.AnalysisMethod);
+            _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
             // add budgets
             if (simulationToClone.Budgets.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.Budgets.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 // add budget amounts
                 if (simulationToClone.Budgets.Any(_ => _.ScenarioBudgetAmounts.Any()))
                 {
                     _unitOfWork.Context.AddAll(simulationToClone.Budgets.Where(_ => _.ScenarioBudgetAmounts.Any())
                         .SelectMany(_ => _.ScenarioBudgetAmounts.Select(amount => amount)).ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
 
                 // add budget criteria
@@ -752,7 +768,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .Select(_ => _.CriterionLibraryScenarioBudgetJoin)
                         .ToList();
                     _unitOfWork.Context.AddAll(budgetCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     _unitOfWork.Context.AddAll(budgetCriteriaJoins);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
             }
 
@@ -760,6 +778,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.BudgetPriorities.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.BudgetPriorities.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 // add percentage pairs
                 if (simulationToClone.BudgetPriorities.Any(_ => _.BudgetPercentagePairs.Any()))
                 {
@@ -767,6 +786,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .Where(_ => _.BudgetPercentagePairs.Any())
                         .SelectMany(_ => _.BudgetPercentagePairs.Select(pair => pair))
                         .ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
 
                 // add budget priority criteria
@@ -778,7 +798,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .Select(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
                         .ToList();
                     _unitOfWork.Context.AddAll(budgetPriorityCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     _unitOfWork.Context.AddAll(budgetPriorityCriteriaJoins);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
             }
 
@@ -786,6 +808,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.CashFlowRules.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.CashFlowRules.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 // add distribution rules
                 if (simulationToClone.CashFlowRules.Any(_ => _.ScenarioCashFlowDistributionRules.Any()))
                 {
@@ -794,13 +817,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .SelectMany(_ => _.ScenarioCashFlowDistributionRules
                             .Select(distributionRule => distributionRule))
                         .ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
 
                 // add cash flow rule criteria
-                var cashFlowRuleCriteriaJoins =
-                    simulationToClone.CashFlowRules.Select(_ => _.CriterionLibraryScenarioCashFlowRuleJoin).ToList();
-                _unitOfWork.Context.AddAll(cashFlowRuleCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
-                _unitOfWork.Context.AddAll(cashFlowRuleCriteriaJoins);
+                if (simulationToClone.CashFlowRules.Any(_ =>
+                    _.CriterionLibraryScenarioCashFlowRuleJoin?.CriterionLibrary != null))
+                {
+                    var cashFlowRuleCriteriaJoins = simulationToClone.CashFlowRules
+                        .Where(_ => _.CriterionLibraryScenarioCashFlowRuleJoin?.CriterionLibrary != null)
+                        .Select(_ => _.CriterionLibraryScenarioCashFlowRuleJoin).ToList();
+                    _unitOfWork.Context.AddAll(cashFlowRuleCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                    _unitOfWork.Context.AddAll(cashFlowRuleCriteriaJoins);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                }
             }
 
             // add investment plan
@@ -809,6 +840,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.CommittedProjects.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.CommittedProjects.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 // add committed project consequences
                 if (simulationToClone.CommittedProjects.Any(_ => _.CommittedProjectConsequences.Any()))
                 {
@@ -817,6 +849,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .SelectMany(_ => _.CommittedProjectConsequences
                             .Select(consequence => consequence))
                         .ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
             }
 
@@ -824,23 +857,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.PerformanceCurves.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.PerformanceCurves.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 // add performance curve equations
-                var performanceCurveEquationJoins =
-                    simulationToClone.PerformanceCurves.Select(_ => _.ScenarioPerformanceCurveEquationJoin).ToList();
-                _unitOfWork.Context.AddAll(performanceCurveEquationJoins.Select(_ => _.Equation).ToList());
-                _unitOfWork.Context.AddAll(performanceCurveEquationJoins);
+                if (simulationToClone.PerformanceCurves.Any(_ =>
+                    _.ScenarioPerformanceCurveEquationJoin?.Equation != null))
+                {
+                    var performanceCurveEquationJoins = simulationToClone.PerformanceCurves
+                        .Where(_ => _.ScenarioPerformanceCurveEquationJoin?.Equation != null)
+                        .Select(_ => _.ScenarioPerformanceCurveEquationJoin).ToList();
+                    _unitOfWork.Context.AddAll(performanceCurveEquationJoins.Select(_ => _.Equation).ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                    _unitOfWork.Context.AddAll(performanceCurveEquationJoins);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                }
                 // add performance curve criteria
-                var performanceCurveCriteriaJoins =
-                    simulationToClone.PerformanceCurves.Select(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
-                        .ToList();
-                _unitOfWork.Context.AddAll(performanceCurveCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
-                _unitOfWork.Context.AddAll(performanceCurveCriteriaJoins);
+                if (simulationToClone.PerformanceCurves.Any(_ => _.CriterionLibraryScenarioPerformanceCurveJoin?.CriterionLibrary != null))
+                {
+                    var performanceCurveCriteriaJoins = simulationToClone.PerformanceCurves
+                        .Where(_ => _.CriterionLibraryScenarioPerformanceCurveJoin?.CriterionLibrary != null)
+                        .Select(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
+                            .ToList();
+                    _unitOfWork.Context.AddAll(performanceCurveCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                    _unitOfWork.Context.AddAll(performanceCurveCriteriaJoins);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                }
             }
 
             // add remaining life limits
             if (simulationToClone.RemainingLifeLimits.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.RemainingLifeLimits.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 // add remaining life limit criteria
                 if (simulationToClone.RemainingLifeLimits.Any(_ =>
                     _.CriterionLibraryScenarioRemainingLifeLimitJoin?.CriterionLibrary != null))
@@ -851,7 +899,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .ToList();
                     _unitOfWork.Context.AddAll(remainingLifeLimitCriteriaJoins.Select(_ => _.CriterionLibrary)
                         .ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     _unitOfWork.Context.AddAll(remainingLifeLimitCriteriaJoins);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
             }
 
@@ -859,6 +909,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.ScenarioDeficientConditionGoals.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.ScenarioDeficientConditionGoals.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 // add deficient condition goal criteria
                 if (simulationToClone.ScenarioDeficientConditionGoals.Any(_ =>
                     _.CriterionLibraryScenarioDeficientConditionGoalJoin?.CriterionLibrary != null))
@@ -869,7 +920,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .ToList();
                     _unitOfWork.Context.AddAll(deficientConditionGoalCriteriaJoins.Select(_ => _.CriterionLibrary)
                         .ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     _unitOfWork.Context.AddAll(deficientConditionGoalCriteriaJoins);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
             }
 
@@ -877,6 +930,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.ScenarioTargetConditionalGoals.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.ScenarioTargetConditionalGoals.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 // add target condition goal criteria
                 if (simulationToClone.ScenarioTargetConditionalGoals.Any(_ =>
                     _.CriterionLibraryScenarioTargetConditionGoalJoin?.CriterionLibrary != null))
@@ -887,7 +941,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .ToList();
                     _unitOfWork.Context.AddAll(
                         targetConditionGoalCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     _unitOfWork.Context.AddAll(targetConditionGoalCriteriaJoins);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
             }
 
@@ -895,6 +951,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.SelectableTreatments.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.SelectableTreatments.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 // add selectable treatment criteria
                 if (simulationToClone.SelectableTreatments.Any(_ =>
                     _.CriterionLibraryScenarioSelectableTreatmentJoin?.CriterionLibrary != null))
@@ -904,7 +961,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
                         .ToList();
                     _unitOfWork.Context.AddAll(treatmentCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     _unitOfWork.Context.AddAll(treatmentCriteriaJoins);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
 
                 // add treatment consequences
@@ -916,6 +975,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             .Select(consequence => consequence))
                         .ToList();
                     _unitOfWork.Context.AddAll(treatmentConsequences);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     // add treatment consequence equations
                     if (treatmentConsequences.Any(_ =>
                         _.ScenarioConditionalTreatmentConsequenceEquationJoin?.Equation != null))
@@ -925,7 +985,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             .Select(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
                             .ToList();
                         _unitOfWork.Context.AddAll(treatmentConsequenceEquationJoins.Select(_ => _.Equation).ToList());
+                        _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                         _unitOfWork.Context.AddAll(treatmentConsequenceEquationJoins);
+                        _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     }
 
                     // add treatment consequence criteria
@@ -939,7 +1001,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             .ToList();
                         _unitOfWork.Context.AddAll(treatmentConsequenceCriteriaJoins.Select(_ => _.CriterionLibrary)
                             .ToList());
+                        _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                         _unitOfWork.Context.AddAll(treatmentConsequenceCriteriaJoins);
+                        _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     }
                 }
 
@@ -952,6 +1016,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             .Select(consequence => consequence))
                         .ToList();
                     _unitOfWork.Context.AddAll(treatmentCosts);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     // add treatment cost equations
                     if (treatmentCosts.Any(_ => _.ScenarioTreatmentCostEquationJoin?.Equation != null))
                     {
@@ -960,7 +1025,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             .Select(_ => _.ScenarioTreatmentCostEquationJoin)
                             .ToList();
                         _unitOfWork.Context.AddAll(treatmentCostEquationJoins.Select(_ => _.Equation).ToList());
+                        _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                         _unitOfWork.Context.AddAll(treatmentCostEquationJoins);
+                        _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     }
 
                     // add treatment cost criteria
@@ -971,7 +1038,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             .Select(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
                             .ToList();
                         _unitOfWork.Context.AddAll(treatmentCostCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+                        _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                         _unitOfWork.Context.AddAll(treatmentCostCriteriaJoins);
+                        _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     }
                 }
 
@@ -983,6 +1052,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .SelectMany(_ => _.ScenarioTreatmentSchedulings
                             .Select(scheduling => scheduling))
                         .ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 }
 
                 // add treatment supersessions
@@ -994,6 +1064,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             .Select(scheduling => scheduling))
                         .ToList();
                     _unitOfWork.Context.AddAll(treatmentSupersessions);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     // add treatment supersession criteria
                     if (treatmentSupersessions.Any(_ =>
                         _.CriterionLibraryScenarioTreatmentSupersessionJoin?.CriterionLibrary != null))
@@ -1004,7 +1075,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             .ToList();
                         _unitOfWork.Context.AddAll(treatmentSupersessionCriteriaJoins.Select(_ => _.CriterionLibrary)
                             .ToList());
+                        _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                         _unitOfWork.Context.AddAll(treatmentSupersessionCriteriaJoins);
+                        _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     }
                 }
             }
@@ -1013,6 +1086,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.SimulationUserJoins.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.SimulationUserJoins.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                 simulationToClone.SimulationUserJoins.ToList()
                     .ForEach(join => join.User = _unitOfWork.UserEntity ?? new UserEntity
                     {
@@ -1020,7 +1094,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     });
             }
 
-            return simulationToClone.ToDto(_unitOfWork.UserEntity);
+            return new SimulationCloningResultDTO
+            {
+                Simulation = simulationToClone.ToDto(_unitOfWork.UserEntity),
+                WarningMessage = budgetsPreventingCloning.Any() && numberOfCommittedProjectsAffected > 0
+                    ? $"The following committed project budgets were not found which has prevented {numberOfCommittedProjectsAffected} committed project(s) from being cloned: {string.Join(", ", budgetsPreventingCloning)}"
+                    : null
+            };
         }
 
         public void UpdateSimulation(SimulationDTO dto)

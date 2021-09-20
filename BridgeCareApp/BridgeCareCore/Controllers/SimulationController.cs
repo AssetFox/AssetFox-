@@ -155,7 +155,11 @@ namespace BridgeCareCore.Controllers
                     return cloneResult;
                 });
 
-                return Ok(result);
+                if (result.WarningMessage != null)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                }
+                return Ok(result.Simulation);
             }
             catch (Exception e)
             {

@@ -6,6 +6,11 @@ import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { AxiosPromise } from 'axios';
 
 export default class CalculatedAttributeService {
+    static getCalculatedAttributes(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.CalculatedAttributes}/CalculatedAttributes`,
+        );
+    }
     static getCalculatedAttributeLibraries(): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.CalculatedAttributes}/CalculatedAttrbiuteLibraries`,

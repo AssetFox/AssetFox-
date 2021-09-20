@@ -1,4 +1,5 @@
 import CalculatedAttributeService from '@/services/calculated-attribute.service';
+import { Attribute } from '@/shared/models/iAM/attribute';
 import {
     CalculatedAttribute,
     CalculatedAttributeLibrary,
@@ -27,6 +28,7 @@ const state = {
         emptyCalculatedAttributeLibrary,
     ) as CalculatedAttributeLibrary,
     scenarioCalculatedAttributes: [] as CalculatedAttribute[],
+    calculatedAttributes: [] as Attribute[],
 };
 
 const mutations = {
@@ -72,9 +74,24 @@ const mutations = {
     ) {
         state.scenarioCalculatedAttribute = clone(calculatedAttributes);
     },
+    calculatedAttributesMutator(state: any, calculatedAtt: Attribute[]) {
+        state.calculatedAttributes = clone(calculatedAtt);
+    },
 };
 
 const actions = {
+    async getCalculatedAttributes({ commit }: any) {
+        await CalculatedAttributeService.getCalculatedAttributes().then(
+            (response: AxiosResponse<any[]>) => {
+                if (hasValue(response, 'data')) {
+                    commit(
+                        'calculatedAttributesMutator',
+                        response.data as Attribute[],
+                    );
+                }
+            },
+        );
+    },
     selectCalculatedAttributeLibrary({ commit }: any, libraryId: string) {
         commit('selectedCalculatedAttributeLibraryMutator', libraryId);
     },

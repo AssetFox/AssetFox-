@@ -344,12 +344,16 @@ import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
-import { Equation } from '@/shared/models/iAM/equation';
+import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import {
     CriterionLibraryEditorDialogData,
     emptyCriterionLibraryEditorDialogData,
 } from '@/shared/models/modals/criterion-library-editor-dialog-data';
-import { CriterionLibrary, emptyCriteria, emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
+import {
+    CriterionLibrary,
+    emptyCriteria,
+    emptyCriterionLibrary,
+} from '@/shared/models/iAM/criteria';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -378,8 +382,10 @@ export default class CalculatedAttributeEditor extends Vue {
 
     @State(state => state.calculatedAttributeModule.scenarioCalculatedAttribute)
     stateScenarioCalculatedAttribute: CalculatedAttribute[];
-    @State(state => state.attributeModule.numericAttributes)
-    stateNumericAttributes: Attribute[];
+    // @State(state => state.attributeModule.numericAttributes)
+    // stateNumericAttributes: Attribute[];
+    @State(state => state.calculatedAttributeModule.calculatedAttributes)
+    stateCalculatedAttributes: Attribute[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
@@ -397,6 +403,7 @@ export default class CalculatedAttributeEditor extends Vue {
     @Action('selectCalculatedAttributeLibrary')
     selectCalculatedAttributeLibraryAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+    @Action('getCalculatedAttributes') getCalculatedAttributesAction: any;
 
     hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
@@ -466,6 +473,7 @@ export default class CalculatedAttributeEditor extends Vue {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.attributeSelectItemValue = null;
+            vm.getCalculatedAttributesAction();
             vm.getCalculatedAttributeLibrariesAction();
 
             vm.setAttributeSelectItems();
@@ -496,13 +504,13 @@ export default class CalculatedAttributeEditor extends Vue {
         this.setHasUnsavedChangesAction({ value: false });
     }
 
-    @Watch('stateNumericAttributes')
-    onStateNumericAttributesChanged() {
+    @Watch('stateCalculatedAttributes')
+    onStateCalculatedAttributesChanged() {
         this.setAttributeSelectItems();
     }
     setAttributeSelectItems() {
-        if (hasValue(this.stateNumericAttributes)) {
-            this.attributeSelectItems = this.stateNumericAttributes.map(
+        if (hasValue(this.stateCalculatedAttributes)) {
+            this.attributeSelectItems = this.stateCalculatedAttributes.map(
                 (attribute: Attribute) => ({
                     text: attribute.name,
                     value: attribute.name,
@@ -517,7 +525,7 @@ export default class CalculatedAttributeEditor extends Vue {
                     timing: Timing.OnDemand,
                     equations: [] as CriterionAndEquationSet[],
                 };
-                if(this.calculatedAttributeGridData == undefined){
+                if (this.calculatedAttributeGridData == undefined) {
                     this.calculatedAttributeGridData = [] as CalculatedAttribute[];
                 }
                 this.calculatedAttributeGridData.push(tempItem);
@@ -562,17 +570,15 @@ export default class CalculatedAttributeEditor extends Vue {
             );
             if (item != undefined) {
                 item.equations.forEach(_ => {
-                    if(isNil(_.criteriaLibrary)){
+                    if (isNil(_.criteriaLibrary)) {
                         _.criteriaLibrary = clone(emptyCriterionLibrary);
-                    } 
+                    }
+                    if(isNil(_.equation)){
+                        _.equation = clone(emptyEquation);
+                    }
                 });
                 this.activeCalculatedAttributeId = item.id;
                 this.selectedGridItem = item;
-                // this.selectedGridItem.equations.forEach(ob => {
-                //     if(ob.criterionLibrary == null || ob.criterionLibrary == undefined){
-                //         ob.criterionLibrary = clone(emptyCriterionLibrary);
-                //     }
-                // });
             } else {
                 var newAttributeObject: CalculatedAttribute = {
                     id: getNewGuid(),
@@ -662,13 +668,6 @@ export default class CalculatedAttributeEditor extends Vue {
             this.calculatedAttributeGridData = clone(
                 this.selectedCalculatedAttributeLibrary.calculatedAttributes,
             );
-            //this.calculatedAttributeGridData.id = getNewGuid();
-            // this.calculatedAttributeGridData.criterionAndEquationSet.map(
-            //     (set: CriterionAndEquationSet) => ({
-            //         ...set,
-            //         id: getNewGuid(),
-            //     }),
-            // );
             if (
                 this.calculatedAttributeGridData != undefined &&
                 this.calculatedAttributeGridData.length > 0
@@ -767,7 +766,7 @@ export default class CalculatedAttributeEditor extends Vue {
     }
 
     disableCrudButton() {
-        if(this.calculatedAttributeGridData == undefined){
+        if (this.calculatedAttributeGridData == undefined) {
             return false;
         }
         const dataIsValid = this.calculatedAttributeGridData.every(_ =>

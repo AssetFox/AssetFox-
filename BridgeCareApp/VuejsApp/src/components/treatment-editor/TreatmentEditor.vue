@@ -303,7 +303,8 @@ export default class TreatmentEditor extends Vue {
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
     @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
-
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    
     @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
     @Action('selectTreatmentLibrary') selectTreatmentLibraryAction: any;
     @Action('upsertTreatmentLibrary') upsertTreatmentLibraryAction: any;

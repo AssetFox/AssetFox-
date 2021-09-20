@@ -560,6 +560,7 @@ export default class AppComponent extends Vue {
             Hub.BroadcastEventType.BroadcastErrorEvent,
             this.onSetErrorMessage,
         );
+        this.$statusHub.$on(Hub.BroadcastEventType.BroadcastWarningEvent, this.onSetWarningMessage);
     }
 
     beforeDestroy() {
@@ -571,6 +572,10 @@ export default class AppComponent extends Vue {
 
     onSetErrorMessage(data: any) {
         this.setErrorMessageAction({ message: data.error });
+    }
+
+    onSetWarningMessage(data: any) {
+        this.setWarningMessageAction({ message: data.warning });
     }
 
     onAlertResult(submit: boolean) {

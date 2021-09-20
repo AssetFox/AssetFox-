@@ -308,6 +308,7 @@ export default class RemainingLifeLimitEditor extends Vue {
     stateScenarioRemainingLifeLimits: RemainingLifeLimit[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
 
     @Action('getRemainingLifeLimitLibraries')
     getRemainingLifeLimitLibrariesAction: any;

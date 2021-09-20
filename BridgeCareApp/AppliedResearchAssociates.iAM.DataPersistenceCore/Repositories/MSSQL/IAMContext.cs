@@ -1600,13 +1600,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HasDefaultValue(TreatmentCategory.Preservation)
                 .HasConversion(
                     v => v.ToString(),
-                    v => (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
+                    v => string.IsNullOrWhiteSpace(v) || string.IsNullOrEmpty(v)
+                        ? TreatmentCategory.Preservation
+                        : (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
 
                 entity.Property(e => e.AssetType)
                 .HasDefaultValue(AssetType.Bridge)
                 .HasConversion(
                     v => v.ToString(),
-                    v => (AssetType)Enum.Parse(typeof(AssetType), v));
+                    v => string.IsNullOrWhiteSpace(v) || string.IsNullOrEmpty(v)
+                        ? AssetType.Bridge
+                        : (AssetType)Enum.Parse(typeof(AssetType), v));
 
                 entity.HasOne(d => d.TreatmentLibrary)
                     .WithMany(p => p.Treatments)
@@ -1626,13 +1630,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HasDefaultValue(TreatmentCategory.Preservation)
                 .HasConversion(
                     v => v.ToString(),
-                    v => (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
+                    v => string.IsNullOrWhiteSpace(v) || string.IsNullOrEmpty(v)
+                        ? TreatmentCategory.Preservation
+                        : (TreatmentCategory)Enum.Parse(typeof(TreatmentCategory), v));
 
                 entity.Property(e => e.AssetType)
                 .HasDefaultValue(AssetType.Bridge)
                 .HasConversion(
                     v => v.ToString(),
-                    v => (AssetType)Enum.Parse(typeof(AssetType), v));
+                    v => string.IsNullOrWhiteSpace(v) || string.IsNullOrEmpty(v)
+                        ? AssetType.Bridge
+                        : (AssetType)Enum.Parse(typeof(AssetType), v));
 
                 entity.HasOne(d => d.Simulation)
                 .WithMany(p => p.SelectableTreatments)

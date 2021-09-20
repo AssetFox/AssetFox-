@@ -16,6 +16,7 @@ namespace BridgeCareCore.Hubs
     public static class HubConstant
     {
         public const string BroadcastError = "BroadcastError";
+        public const string BroadcastWarning = "BroadcastWarning";
         public const string BroadcastAssignDataStatus = "BroadcastAssignDataStatus";
         public const string BroadcastSummaryReportGenerationStatus = "BroadcastSummaryReportGenerationStatus";
         public const string BroadcastScenarioStatusUpdate = "BroadcastScenarioStatusUpdate";

@@ -563,7 +563,8 @@ export default class CashFlowEditor extends Vue {
     stateScenarioCashFlowRules: CashFlowRule[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    
     @Action('getCashFlowRuleLibraries') getCashFlowRuleLibrariesAction: any;
     @Action('selectCashFlowRuleLibrary') selectCashFlowRuleLibraryAction: any;
     @Action('upsertCashFlowRuleLibrary') upsertCashFlowRuleLibraryAction: any;

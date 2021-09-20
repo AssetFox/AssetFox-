@@ -382,7 +382,8 @@ export default class TargetConditionGoalEditor extends Vue {
     stateScenarioTargetConditionGoals: TargetConditionGoal[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('getTargetConditionGoalLibraries') getTargetConditionGoalLibrariesAction: any;
     @Action('selectTargetConditionGoalLibrary') selectTargetConditionGoalLibraryAction: any;

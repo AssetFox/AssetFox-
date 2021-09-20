@@ -39,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var result = new CalculatedAttributeEquationCriteriaPairDTO()
             {
                 Id = entity.Id,
-                Equation = entity.EquationCalculatedAttributeJoin.Equation.ToDto()
+                Equation = entity.EquationCalculatedAttributeJoin?.Equation.ToDto()
             };
             if (entity.CriterionLibraryCalculatedAttributeJoin != null)
                 result.CriteriaLibrary = entity.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary.ToDto();
@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var result = new CalculatedAttributeEquationCriteriaPairDTO()
             {
                 Id = entity.Id,
-                Equation = entity.EquationCalculatedAttributeJoin.Equation.ToDto()
+                Equation = entity.EquationCalculatedAttributeJoin?.Equation.ToDto()
             };
             if (entity.CriterionLibraryCalculatedAttributeJoin != null)
                 result.CriteriaLibrary = entity.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary.ToDto();

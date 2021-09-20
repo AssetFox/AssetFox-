@@ -50,7 +50,7 @@ export default {
             },
         );
 
-        connection.on(Hub.BroadcastType.BroadcastDataMigration, (status) => {
+        connection.on(Hub.BroadcastType.BroadcastDataMigration, status => {
             statusHub.$emit(
                 Hub.BroadcastEventType.BroadcastDataMigrationEvent,
                 { status },
@@ -78,9 +78,15 @@ export default {
             },
         );
 
-        connection.on(Hub.BroadcastType.BroadcastError, (error) => {
+        connection.on(Hub.BroadcastType.BroadcastError, error => {
             statusHub.$emit(Hub.BroadcastEventType.BroadcastErrorEvent, {
                 error,
+            });
+        });
+
+        connection.on(Hub.BroadcastType.BroadcastWarning, warning => {
+            statusHub.$emit(Hub.BroadcastEventType.BroadcastWarningEvent, {
+                warning,
             });
         });
 
@@ -95,12 +101,15 @@ export default {
 
             startedPromise = connection
                 .start()
-                .then((_) => connection.invoke('AssociateMessage', username))
+                .then(_ => connection.invoke('AssociateMessage', username))
                 .catch((err: any) => {
                     console.error('Failed to connect with hub', err);
                     return new Promise((resolve: any, reject: any) =>
                         setTimeout(
-                            () => start().then(resolve).catch(reject),
+                            () =>
+                                start()
+                                    .then(resolve)
+                                    .catch(reject),
                             5000,
                         ),
                     );
@@ -117,6 +126,7 @@ export default {
 export const Hub = {
     BroadcastType: {
         BroadcastError: 'BroadcastError',
+        BroadcastWarning: 'BroadcastWarning',
         BroadcastAssignDataStatus: 'BroadcastAssignDataStatus',
         BroadcastSummaryReportGenerationStatus:
             'BroadcastSummaryReportGenerationStatus',
@@ -127,6 +137,7 @@ export const Hub = {
     },
     BroadcastEventType: {
         BroadcastErrorEvent: 'BroadcastErrorEvent',
+        BroadcastWarningEvent: 'BroadcastWarningEvent',
         BroadcastAssignDataStatusEvent: 'BroadcastAssignDataStatusEvent',
         BroadcastSummaryReportGenerationStatusEvent:
             'BroadcastSummaryReportGenerationStatusEvent',

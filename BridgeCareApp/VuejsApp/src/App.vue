@@ -116,6 +116,17 @@
                         >
                             <v-list-tile-title>Criterion</v-list-tile-title>
                         </v-list-tile>
+                        <v-list-tile
+                            @click="
+                                onNavigate(
+                                    '/CalculatedAttributeEditor/Library/',
+                                )
+                            "
+                        >
+                            <v-list-tile-title
+                                >Calculated Attribute</v-list-tile-title
+                            >
+                        </v-list-tile>
                     </v-list-group>
                     <v-list-tile
                         @click="onNavigate('/UserCriteria/')"
@@ -533,8 +544,9 @@ export default class AppComponent extends Vue {
 
         if (
             this.securityType === SecurityTypes.esec &&
-            UnsecuredRoutePathNames.indexOf(this.$router.currentRoute.name as string) ===
-                -1
+            UnsecuredRoutePathNames.indexOf(
+                this.$router.currentRoute.name as string,
+            ) === -1
         ) {
             // Upon opening the page, and every 30 seconds, check if authentication data
             // has been changed by another tab or window

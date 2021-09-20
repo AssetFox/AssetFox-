@@ -59,7 +59,7 @@ export default class CreateCalculatedAttributeDialog extends Vue {
   @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 
   attributeSelectItems: SelectItem[] = [];
-  newCalculatedAttribute: CalculatedAttribute = {...emptyCalculatedAttribute, id: getNewGuid()};
+  newCalculatedAttribute: CalculatedAttribute[] = [];
   rules: InputValidationRules = clone(rules);
 
   mounted() {
@@ -89,7 +89,7 @@ export default class CreateCalculatedAttributeDialog extends Vue {
       this.$emit('submit', null);
     }
 
-    this.newCalculatedAttribute = {...emptyCalculatedAttribute, id: getNewGuid()};
+    this.newCalculatedAttribute = [] as CalculatedAttribute[];
   }
 }
 </script>

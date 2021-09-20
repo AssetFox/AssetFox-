@@ -56,7 +56,7 @@ export default new Vuex.Store({
         analysisMethodModule,
         azureB2CModule,
         analysisDefaultDataModule,
-        investmentDefaultDataModule
+        investmentDefaultDataModule,
         calculatedAttributeModule,
     }
 });

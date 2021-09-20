@@ -17,42 +17,40 @@ export interface CalculatedAttribute {
     attribute: string;
     name: string;
     timing: Timing;
-    criterionAndEquationSet: CriterionAndEquationSet[];
+    equations: CriterionAndEquationSet[];
 }
 
 export interface CalculatedAttributeLibrary {
     id: string;
     name: string;
     description: string;
-    calculatedAttribute: CalculatedAttribute;
-    owner?: string;
-    shared?: boolean;
-    defaultCalculation: boolean;
+    calculatedAttributes: CalculatedAttribute[];
+    isDefault: boolean;
 }
 export interface CriterionAndEquationSet {
     id: string;
-    criterionLibrary: CriterionLibrary;
+    criteriaLibrary: CriterionLibrary;
     equation: Equation;
 }
 
 export const emptyCalculatedAttribute: CalculatedAttribute = {
     id: getBlankGuid(),
-    attribute: '',
-    name: '',
-    criterionAndEquationSet: [],
+    attribute: 'AADTTOTAL',
+    name: 'AADTTOTAL',
+    equations: [],
     timing: Timing.OnDemand
 };
 
 export const emptyCriterionAndEquationSet: CriterionAndEquationSet = {
     id: getBlankGuid(),
     equation: clone(emptyEquation),
-    criterionLibrary: clone(emptyCriterionLibrary),
+    criteriaLibrary: clone(emptyCriterionLibrary),
 };
 
 export const emptyCalculatedAttributeLibrary: CalculatedAttributeLibrary = {
     id: getBlankGuid(),
     name: '',
     description: '',
-    calculatedAttribute: clone(emptyCalculatedAttribute),
-    defaultCalculation: false,
+    calculatedAttributes: [] as CalculatedAttribute[],
+    isDefault: false,
 };

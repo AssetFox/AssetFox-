@@ -26,9 +26,7 @@ const state = {
     selectedCalculatedAttributeLibrary: clone(
         emptyCalculatedAttributeLibrary,
     ) as CalculatedAttributeLibrary,
-    scenarioCalculatedAttribute: clone(
-        emptyCalculatedAttribute,
-    ) as CalculatedAttribute,
+    scenarioCalculatedAttributes: [] as CalculatedAttribute[],
 };
 
 const mutations = {
@@ -70,9 +68,9 @@ const mutations = {
     },
     scenarioCalculatedAttributeMutator(
         state: any,
-        calculatedAttribute: CalculatedAttribute,
+        calculatedAttributes: CalculatedAttribute[],
     ) {
-        state.scenarioCalculatedAttribute = clone(calculatedAttribute);
+        state.scenarioCalculatedAttribute = clone(calculatedAttributes);
     },
 };
 
@@ -81,54 +79,54 @@ const actions = {
         commit('selectedCalculatedAttributeLibraryMutator', libraryId);
     },
     async getCalculatedAttributeLibraries({ commit }: any) {
-        var dummy = [
-            {
-                id: getNewGuid(),
-                name: 'Cal1',
-                description: 'Cal1 description',
-                defaultCalculation: true,
-                calculatedAttribute: {
-                    id: getNewGuid(),
-                    attribute: 'AADTTOTAL',
-                    name: 'AADTTOTAL',
-                    shift: true,
-                    timing: Timing.OnDemand,
-                    criterionAndEquationSet: [
-                        {
-                            id: getNewGuid(),
-                            equation: {
-                                id: getNewGuid(),
-                                expression: '(Ceiling([SUP_SEEDED])-0.01)+1',
-                            },
-                            criterionLibrary: {
-                                id: getNewGuid(),
-                                name: 'cal dummy criteria',
-                                mergedCriteriaExpression: '[AGE] > "10"',
-                                description: 'criteria for cal',
-                                owner: '',
-                                shared: false,
-                                isSingleUse: true,
-                            },
-                        },
-                    ],
-                },
-            },
-        ];
-        commit(
-            'calculatedAttributeLibrariesMutator',
-            dummy as CalculatedAttributeLibrary[],
-        );
-        return dummy;
-        // await CalculatedAttributeService.getCalculatedAttributeLibraries().then(
-        //     (response: AxiosResponse<any[]>) => {
-        //         if (hasValue(response, 'data')) {
-        //             commit(
-        //                 'calculatedAttributeLibrariesMutator',
-        //                 response.data as CalculatedAttributeLibrary[],
-        //             );
-        //         }
+        // var dummy = [
+        //     {
+        //         id: getNewGuid(),
+        //         name: 'Cal1',
+        //         description: 'Cal1 description',
+        //         defaultCalculation: true,
+        //         calculatedAttribute: {
+        //             id: getNewGuid(),
+        //             attribute: 'AADTTOTAL',
+        //             name: 'AADTTOTAL',
+        //             shift: true,
+        //             timing: Timing.OnDemand,
+        //             criterionAndEquationSet: [
+        //                 {
+        //                     id: getNewGuid(),
+        //                     equation: {
+        //                         id: getNewGuid(),
+        //                         expression: '(Ceiling([SUP_SEEDED])-0.01)+1',
+        //                     },
+        //                     criterionLibrary: {
+        //                         id: getNewGuid(),
+        //                         name: 'cal dummy criteria',
+        //                         mergedCriteriaExpression: '[AGE] > "10"',
+        //                         description: 'criteria for cal',
+        //                         owner: '',
+        //                         shared: false,
+        //                         isSingleUse: true,
+        //                     },
+        //                 },
+        //             ],
+        //         },
         //     },
+        // ];
+        // commit(
+        //     'calculatedAttributeLibrariesMutator',
+        //     dummy as CalculatedAttributeLibrary[],
         // );
+        // return dummy;
+        await CalculatedAttributeService.getCalculatedAttributeLibraries().then(
+            (response: AxiosResponse<any[]>) => {
+                if (hasValue(response, 'data')) {
+                    commit(
+                        'calculatedAttributeLibrariesMutator',
+                        response.data as CalculatedAttributeLibrary[],
+                    );
+                }
+            },
+        );
     },
     async getScenarioCalculatedAttribute({ commit }: any, scenarioId: string) {
         var tempScenarioAtt = {
@@ -155,22 +153,22 @@ const actions = {
                     },
                 },
             ],
-        }
-        // await CalculatedAttributeService.getScenarioCalculatedAttribute(
-        //     scenarioId,
-        // ).then((response: AxiosResponse) => {
-        //     if (hasValue(response, 'data')) {
-        //         commit(
-        //             'scenarioCalculatedAttributeMutator',
-        //             response.data as CalculatedAttribute,
-        //         );
-        //     }
-        // });
+        };
+        await CalculatedAttributeService.getScenarioCalculatedAttribute(
+            scenarioId,
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
                 commit(
                     'scenarioCalculatedAttributeMutator',
-                    tempScenarioAtt as CalculatedAttribute,
+                    response.data as CalculatedAttribute[],
                 );
-        return tempScenarioAtt as CalculatedAttribute
+            }
+        });
+        //         commit(
+        //             'scenarioCalculatedAttributeMutator',
+        //             tempScenarioAtt as CalculatedAttribute,
+        //         );
+        // return tempScenarioAtt as CalculatedAttribute;
     },
     async upsertCalculatedAttributeLibrary(
         { dispatch, commit }: any,

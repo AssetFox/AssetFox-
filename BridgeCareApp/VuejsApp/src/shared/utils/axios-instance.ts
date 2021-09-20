@@ -45,5 +45,5 @@ export const API = {
     Announcement: '/api/Announcement',
     AnalysisDefaultData: '/api/AnalysisDefaultData',
     InvestmentDefaultData: '/api/InvestmentDefaultData',
-    CalculatedAttribute: '/api/CalculatedAttribute',
+    CalculatedAttributes: '/api/CalculatedAttributes',
 };

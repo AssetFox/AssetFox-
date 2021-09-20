@@ -55,6 +55,10 @@
                         @click="onAddCriterionEquationSet()"
                         class="ara-blue-bg white--text"
                         v-if="isAdmin"
+                        :disabled="
+                            attributeSelectItemValue == null ||
+                                attributeSelectItemValue == ''
+                        "
                     >
                         Add
                     </v-btn>
@@ -129,9 +133,7 @@
                         </v-card-title>
                         <v-data-table
                             :headers="calculatedAttributeGridHeaders"
-                            :items="
-                                calculatedAttributeGridData.criterionAndEquationSet
-                            "
+                            :items="selectedGridItem.equations"
                             :search="gridSearchTerm"
                             class="elevation-1 fixed-header v-table__overflow"
                             item-key="calculatedAttributeLibraryEquationId"
@@ -165,7 +167,7 @@
                                         readonly
                                         class="sm-txt"
                                         :value="
-                                            props.item.criterionLibrary
+                                            props.item.criteriaLibrary
                                                 .mergedCriteriaExpression
                                         "
                                         :disabled="!isAdmin"
@@ -241,7 +243,7 @@
                     Save
                 </v-btn>
                 <v-btn
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :disabled="disableCrudButton()"
                     @click="onUpsertCalculatedAttributeLibrary"
                     class="ara-blue-bg white--text"
                     v-show="!hasScenario"
@@ -347,7 +349,7 @@ import {
     CriterionLibraryEditorDialogData,
     emptyCriterionLibraryEditorDialogData,
 } from '@/shared/models/modals/criterion-library-editor-dialog-data';
-import { CriterionLibrary } from '@/shared/models/iAM/criteria';
+import { CriterionLibrary, emptyCriteria, emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -375,7 +377,7 @@ export default class CalculatedAttributeEditor extends Vue {
     stateSelectedCalculatedAttributeLibrary: CalculatedAttributeLibrary;
 
     @State(state => state.calculatedAttributeModule.scenarioCalculatedAttribute)
-    stateScenarioCalculatedAttribute: CalculatedAttribute;
+    stateScenarioCalculatedAttribute: CalculatedAttribute[];
     @State(state => state.attributeModule.numericAttributes)
     stateNumericAttributes: Attribute[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
@@ -429,9 +431,9 @@ export default class CalculatedAttributeEditor extends Vue {
     criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
         emptyCriterionLibraryEditorDialogData,
     );
-    calculatedAttributeGridData: CalculatedAttribute = clone(
-        emptyCalculatedAttribute,
-    );
+    calculatedAttributeGridData: CalculatedAttribute[] = [];
+    activeCalculatedAttributeId: string = getBlankGuid();
+    selectedGridItem: CalculatedAttribute = clone(emptyCalculatedAttribute);
 
     calculatedAttributeGridHeaders: DataTableHeader[] = [
         {
@@ -466,6 +468,9 @@ export default class CalculatedAttributeEditor extends Vue {
             vm.attributeSelectItemValue = null;
             vm.getCalculatedAttributeLibrariesAction();
 
+            vm.setAttributeSelectItems();
+            vm.setAttributeTimingSelectItems();
+
             if (
                 to.path.indexOf(ScenarioRoutePaths.CalculatedAttribute) !== -1
             ) {
@@ -484,8 +489,8 @@ export default class CalculatedAttributeEditor extends Vue {
         });
     }
     mounted() {
-        this.setAttributeSelectItems();
-        this.setAttributeTimingSelectItems();
+        // this.setAttributeSelectItems();
+        // this.setAttributeTimingSelectItems();
     }
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
@@ -503,6 +508,20 @@ export default class CalculatedAttributeEditor extends Vue {
                     value: attribute.name,
                 }),
             );
+
+            this.attributeSelectItems.forEach(_ => {
+                var tempItem: CalculatedAttribute = {
+                    id: getNewGuid(),
+                    attribute: _.text,
+                    name: _.text,
+                    timing: Timing.OnDemand,
+                    equations: [] as CriterionAndEquationSet[],
+                };
+                if(this.calculatedAttributeGridData == undefined){
+                    this.calculatedAttributeGridData = [] as CalculatedAttribute[];
+                }
+                this.calculatedAttributeGridData.push(tempItem);
+            });
         }
     }
     setAttributeTimingSelectItems() {
@@ -534,8 +553,38 @@ export default class CalculatedAttributeEditor extends Vue {
             this.attributeSelectItemValue == ''
         ) {
             this.isAttributeSelectedItemValue = false;
+            this.isTimingSelectedItemValue = false;
         } else {
             this.isAttributeSelectedItemValue = true;
+            this.isTimingSelectedItemValue = true;
+            var item = this.calculatedAttributeGridData.find(
+                _ => _.attribute == this.attributeSelectItemValue,
+            );
+            if (item != undefined) {
+                item.equations.forEach(_ => {
+                    if(isNil(_.criteriaLibrary)){
+                        _.criteriaLibrary = clone(emptyCriterionLibrary);
+                    } 
+                });
+                this.activeCalculatedAttributeId = item.id;
+                this.selectedGridItem = item;
+                // this.selectedGridItem.equations.forEach(ob => {
+                //     if(ob.criterionLibrary == null || ob.criterionLibrary == undefined){
+                //         ob.criterionLibrary = clone(emptyCriterionLibrary);
+                //     }
+                // });
+            } else {
+                var newAttributeObject: CalculatedAttribute = {
+                    id: getNewGuid(),
+                    attribute: this.attributeSelectItemValue,
+                    name: this.attributeSelectItemValue,
+                    timing: Timing.OnDemand,
+                    equations: [] as CriterionAndEquationSet[],
+                };
+                this.calculatedAttributeGridData.push(newAttributeObject);
+                this.activeCalculatedAttributeId = newAttributeObject.id;
+                this.selectedGridItem = newAttributeObject;
+            }
         }
     }
     @Watch('attributeTimingSelectItemValue')
@@ -593,37 +642,79 @@ export default class CalculatedAttributeEditor extends Vue {
             this.hasSelectedLibrary = false;
         }
 
+        if (
+            this.calculatedAttributeGridData == undefined ||
+            this.calculatedAttributeGridData.length == 0
+        ) {
+            this.attributeSelectItems.forEach(_ => {
+                var tempItem: CalculatedAttribute = {
+                    id: getNewGuid(),
+                    attribute: _.text,
+                    name: _.text,
+                    timing: Timing.OnDemand,
+                    equations: [] as CriterionAndEquationSet[],
+                };
+                this.calculatedAttributeGridData.push(tempItem);
+            });
+        }
+
         if (this.hasScenario && this.hasSelectedLibrary) {
             this.calculatedAttributeGridData = clone(
-                this.selectedCalculatedAttributeLibrary.calculatedAttribute,
+                this.selectedCalculatedAttributeLibrary.calculatedAttributes,
             );
-            this.calculatedAttributeGridData.id = getNewGuid();
-            this.calculatedAttributeGridData.criterionAndEquationSet.map(
-                (set: CriterionAndEquationSet) => ({
-                    ...set,
-                    id: getNewGuid(),
-                }),
-            );
-            this.attributeSelectItemValue = clone(
-                this.calculatedAttributeGridData.attribute,
-            );
-            this.isAttributeSelectedItemValue = true;
+            //this.calculatedAttributeGridData.id = getNewGuid();
+            // this.calculatedAttributeGridData.criterionAndEquationSet.map(
+            //     (set: CriterionAndEquationSet) => ({
+            //         ...set,
+            //         id: getNewGuid(),
+            //     }),
+            // );
+            if (
+                this.calculatedAttributeGridData != undefined &&
+                this.calculatedAttributeGridData.length > 0
+            ) {
+                this.attributeSelectItemValue = clone(
+                    this.calculatedAttributeGridData[0].attribute,
+                );
+                this.isAttributeSelectedItemValue = true;
 
-            this.setTimingsMultiSelect(this.calculatedAttributeGridData.timing);
-
+                this.setTimingsMultiSelect(
+                    this.calculatedAttributeGridData[0].timing,
+                );
+                this.activeCalculatedAttributeId = this.calculatedAttributeGridData[0].id;
+                this.selectedGridItem =
+                    this.calculatedAttributeGridData[0] != undefined
+                        ? this.calculatedAttributeGridData[0]
+                        : this.selectedGridItem;
+            } else {
+                this.isAttributeSelectedItemValue = false;
+            }
         } else if (this.hasScenario && !this.hasSelectedLibrary) {
             this.resetGridData();
-
         } else if (!this.hasScenario) {
             this.calculatedAttributeGridData = clone(
-                this.selectedCalculatedAttributeLibrary.calculatedAttribute,
+                this.selectedCalculatedAttributeLibrary.calculatedAttributes,
             );
-            this.attributeSelectItemValue = clone(
-                this.calculatedAttributeGridData.attribute,
-            );
-            this.isAttributeSelectedItemValue = true;
+            if (
+                this.calculatedAttributeGridData != undefined &&
+                this.calculatedAttributeGridData.length > 0
+            ) {
+                this.attributeSelectItemValue = clone(
+                    this.calculatedAttributeGridData[0].attribute,
+                );
+                this.isAttributeSelectedItemValue = true;
 
-            this.setTimingsMultiSelect(this.calculatedAttributeGridData.timing);
+                this.setTimingsMultiSelect(
+                    this.calculatedAttributeGridData[0].timing,
+                );
+                this.activeCalculatedAttributeId = this.calculatedAttributeGridData[0].id;
+                this.selectedGridItem =
+                    this.calculatedAttributeGridData[0] != undefined
+                        ? this.calculatedAttributeGridData[0]
+                        : this.selectedGridItem;
+            } else {
+                this.isAttributeSelectedItemValue = false;
+            }
         }
     }
     setTiming(selectedItem: number) {
@@ -639,16 +730,17 @@ export default class CalculatedAttributeEditor extends Vue {
     onUpsertCalculatedAttributeLibrary() {
         const CalculatedAttributeLibrary: CalculatedAttributeLibrary = {
             ...clone(this.selectedCalculatedAttributeLibrary),
-            calculatedAttribute: clone(this.calculatedAttributeGridData),
+            calculatedAttributes: clone(this.calculatedAttributeGridData),
         };
         this.upsertCalculatedAttributeLibraryAction(CalculatedAttributeLibrary);
     }
     onShowCreateCalculatedAttributeLibraryDialog(createAsNewLibrary: boolean) {
         this.createCalculatedAttributeLibraryDialogData = {
             showDialog: true,
-            calculatedAttribute: createAsNewLibrary
+            calculatedAttributes: createAsNewLibrary
                 ? this.calculatedAttributeGridData
-                : clone(emptyCalculatedAttribute),
+                : ([] as CalculatedAttribute[]),
+            attributeSelectItems: this.attributeSelectItems,
         };
     }
     onSubmitCreateCalculatedAttributeLibraryDialogResult(
@@ -665,7 +757,7 @@ export default class CalculatedAttributeEditor extends Vue {
         }
     }
     onSubmitCreateCalculatedAttributeDialogResult(
-        newCalculatedAttribute: CalculatedAttribute,
+        newCalculatedAttribute: CalculatedAttribute[],
     ) {
         this.showCreateCalculatedAttributeDialog = false;
 
@@ -675,12 +767,15 @@ export default class CalculatedAttributeEditor extends Vue {
     }
 
     disableCrudButton() {
-        const dataIsValid: boolean = this.calculatedAttributeGridData.criterionAndEquationSet.every(
-            (set: CriterionAndEquationSet) => {
+        if(this.calculatedAttributeGridData == undefined){
+            return false;
+        }
+        const dataIsValid = this.calculatedAttributeGridData.every(_ =>
+            _.equations.every((set: CriterionAndEquationSet) => {
                 return (
                     this.rules['generalRules'].valueIsNotEmpty(set.id) === true
                 );
-            },
+            }),
         );
 
         if (this.hasSelectedLibrary) {
@@ -714,12 +809,23 @@ export default class CalculatedAttributeEditor extends Vue {
     onAddCriterionEquationSet() {
         var newSet = clone(emptyCriterionAndEquationSet);
         newSet.id = getNewGuid();
-        newSet.criterionLibrary.id = getNewGuid();
+        newSet.criteriaLibrary.id = getNewGuid();
         newSet.equation.id = getNewGuid();
-        this.calculatedAttributeGridData.criterionAndEquationSet.push(newSet);
+
+        this.selectedGridItem;
+        // var currItem = this.calculatedAttributeGridData.find(
+        //     _ => _.id == this.activeCalculatedAttributeId,
+        // )!;
+        if (this.selectedGridItem.equations == undefined) {
+            this.selectedGridItem.equations = [];
+        }
+        this.selectedGridItem.equations.push(newSet);
     }
     onEditCalculatedAttributeCriterionLibrary(criterionEquationSetId: string) {
-        var currentCriteria = this.calculatedAttributeGridData.criterionAndEquationSet.find(
+        var currItem = this.calculatedAttributeGridData.find(
+            _ => _.id == this.activeCalculatedAttributeId,
+        )!;
+        var currentCriteria = currItem.equations.find(
             _ => _.id == criterionEquationSetId,
         );
         this.currentCriteriaEquationSetSelectedId = criterionEquationSetId;
@@ -728,7 +834,7 @@ export default class CalculatedAttributeEditor extends Vue {
 
             this.criterionLibraryEditorDialogData = {
                 showDialog: true,
-                libraryId: currentCriteria.criterionLibrary.id,
+                libraryId: currentCriteria.criteriaLibrary.id,
                 isCallFromScenario: this.hasScenario,
                 isCriterionForLibrary: !this.hasScenario,
             };
@@ -742,21 +848,25 @@ export default class CalculatedAttributeEditor extends Vue {
             emptyCriterionLibraryEditorDialogData,
         );
 
+        var currItem = this.calculatedAttributeGridData.find(
+            _ => _.id == this.activeCalculatedAttributeId,
+        )!;
         if (!isNil(criterionLibrary) && this.hasSelectedCalculatedAttribute) {
-            this.calculatedAttributeGridData.criterionAndEquationSet.map(
-                item => {
-                    item.id == this.currentCriteriaEquationSetSelectedId
-                        ? (item.criterionLibrary = criterionLibrary)
-                        : item.criterionLibrary;
-                },
-            );
+            currItem.equations.map(item => {
+                item.id == this.currentCriteriaEquationSetSelectedId
+                    ? (item.criteriaLibrary = criterionLibrary)
+                    : item.criteriaLibrary;
+            });
         }
 
         this.selectedCalculatedAttribute = clone(emptyCalculatedAttribute);
         this.hasSelectedCalculatedAttribute = false;
     }
     onShowEquationEditorDialog(criterionEquationSetId: string) {
-        var currentEquation = this.calculatedAttributeGridData.criterionAndEquationSet.find(
+        var currItem = this.calculatedAttributeGridData.find(
+            _ => _.id == this.activeCalculatedAttributeId,
+        )!;
+        var currentEquation = currItem.equations.find(
             _ => _.id == criterionEquationSetId,
         );
         this.currentCriteriaEquationSetSelectedId = criterionEquationSetId;
@@ -773,22 +883,26 @@ export default class CalculatedAttributeEditor extends Vue {
         this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation) && this.hasSelectedCalculatedAttribute) {
-            this.calculatedAttributeGridData.criterionAndEquationSet.map(
-                item => {
-                    item.id == this.currentCriteriaEquationSetSelectedId
-                        ? (item.equation = equation)
-                        : item.equation;
-                },
-            );
+            var currItem = this.calculatedAttributeGridData.find(
+                _ => _.id == this.activeCalculatedAttributeId,
+            )!;
+            currItem.equations.map(item => {
+                item.id == this.currentCriteriaEquationSetSelectedId
+                    ? (item.equation = equation)
+                    : item.equation;
+            });
         }
 
         this.selectedCalculatedAttribute = clone(emptyCalculatedAttribute);
         this.hasSelectedCalculatedAttribute = false;
     }
     onRemoveCalculatedAttribute(criterionEquationSetId: string) {
-        this.calculatedAttributeGridData.criterionAndEquationSet = reject(
+        var currItem = this.calculatedAttributeGridData.find(
+            _ => _.id == this.activeCalculatedAttributeId,
+        )!;
+        currItem.equations = reject(
             propEq('id', criterionEquationSetId),
-            this.calculatedAttributeGridData.criterionAndEquationSet,
+            currItem.equations,
         );
     }
     onDiscardChanges() {
@@ -804,18 +918,26 @@ export default class CalculatedAttributeEditor extends Vue {
         this.calculatedAttributeGridData = clone(
             this.stateScenarioCalculatedAttribute,
         );
-        this.attributeSelectItemValue = clone(
-            this.calculatedAttributeGridData.attribute,
-        );
-        this.isAttributeSelectedItemValue = true;
 
-        this.setTimingsMultiSelect(this.calculatedAttributeGridData.timing);
+        if (this.calculatedAttributeGridData != undefined) {
+            var currItem = this.calculatedAttributeGridData.find(
+                _ => _.id == this.activeCalculatedAttributeId,
+            )!;
+            this.attributeSelectItemValue = clone(currItem.attribute);
+            this.isAttributeSelectedItemValue = true;
+
+            this.setTimingsMultiSelect(currItem.timing);
+        }
     }
     setTimingsMultiSelect(selectedItem: number) {
+        if (selectedItem == undefined) {
+            selectedItem = Timing.OnDemand;
+        }
         var localTiming = this.attributeTimingSelectItems.find(
             _ => _.value == selectedItem,
         )!.text;
         this.attributeTimingSelectItemValue = localTiming;
+        this.isTimingSelectedItemValue = true;
     }
 }
 </script>

@@ -57,7 +57,9 @@ import { CreateCalculatedAttributeLibraryDialogData } from '@/shared/models/moda
 import {
     CalculatedAttribute,
     CalculatedAttributeLibrary,
+    CriterionAndEquationSet,
     emptyCalculatedAttributeLibrary,
+    Timing,
 } from '@/shared/models/iAM/calculated-attribute';
 import { getUserName } from '@/shared/utils/get-user-info';
 
@@ -75,7 +77,7 @@ export default class CreateCalculatedAttributeLibraryDialog extends Vue {
     onDialogDataChanged() {
         this.newCalculatedAttributeLibrary = {
             ...this.newCalculatedAttributeLibrary,
-            calculatedAttribute: this.dialogData.calculatedAttribute,
+            calculatedAttributes: this.dialogData.calculatedAttributes,
             // .map(
             //     (calculatedAttribute: CalculatedAttribute) => {
             //         calculatedAttribute.id = getNewGuid();
@@ -85,14 +87,13 @@ export default class CreateCalculatedAttributeLibraryDialog extends Vue {
             //         return calculatedAttribute;
             //     },
             // ),
-            owner: getUserName(),
         };
-        this.newCalculatedAttributeLibrary.calculatedAttribute.id = getNewGuid();
-        this.newCalculatedAttributeLibrary.calculatedAttribute.criterionAndEquationSet.map(_ => {
-            if(_.equation.id !== getBlankGuid()){
-                _.equation.id = getNewGuid();
-            }
-        });
+        // this.newCalculatedAttributeLibrary.calculatedAttributes.id = getNewGuid();
+        // this.newCalculatedAttributeLibrary.calculatedAttributes.criterionAndEquationSet.map(_ => {
+        //     if(_.equation.id !== getBlankGuid()){
+        //         _.equation.id = getNewGuid();
+        //     }
+        // });
     }
     onSubmit(submit: boolean) {
         if (submit) {

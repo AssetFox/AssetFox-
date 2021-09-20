@@ -79,13 +79,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void CopyDetailFrom(SectionContext other) => Detail = new SectionDetail(other.Detail);
 
-        public void FixCalculatedFieldValues()
-        {
-            foreach (var calculatedField in SimulationRunner.Simulation.Network.Explorer.CalculatedFields)
-            {
-                NumberCache_Override[calculatedField.Name] = GetNumber(calculatedField.Name);
-            }
-        }
+        public void FixCalculatedFieldValuesWithoutPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration));
+
+        public void FixCalculatedFieldValuesWithPostDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PostDeterioration));
+
+        public void FixCalculatedFieldValuesWithPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing == CalculatedFieldTiming.PreDeterioration));
 
         public double GetBenefit()
         {
@@ -234,6 +232,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void UnfixCalculatedFieldValues() => NumberCache_Override.Clear();
 
+        public void UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming()
+        {
+            foreach (var calculatedField in AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration))
+            {
+                _ = NumberCache_Override.Remove(calculatedField.Name);
+            }
+        }
+
         public bool YearIsWithinShadowForAnyTreatment(int year) => year < FirstUnshadowedYearForAnyTreatment;
 
         public bool YearIsWithinShadowForSameTreatment(int year, Treatment treatment) => FirstUnshadowedYearForSameTreatment.TryGetValue(treatment.Name, out var firstUnshadowedYear) && year < firstUnshadowedYear;
@@ -251,6 +257,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private Treatment AppliedTreatmentWithPendingMetadata;
 
         private int? FirstUnshadowedYearForAnyTreatment;
+
+        private IEnumerable<CalculatedField> AllCalculatedFields => SimulationRunner.Simulation.Network.Explorer.CalculatedFields;
 
         private void ApplyPerformanceCurves(IDictionary<string, Func<double>> calculatorPerAttribute)
         {
@@ -345,6 +353,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
             foreach (var attribute in SimulationRunner.Simulation.Network.Explorer.TextAttributes)
             {
                 detail.ValuePerTextAttribute.Add(attribute.Name, GetText(attribute.Name));
+            }
+        }
+
+        private void FixCalculatedFieldValues(IEnumerable<CalculatedField> calculatedFields)
+        {
+            foreach (var calculatedField in calculatedFields)
+            {
+                NumberCache_Override[calculatedField.Name] = GetNumber(calculatedField.Name);
             }
         }
 

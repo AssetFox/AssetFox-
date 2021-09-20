@@ -187,10 +187,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
                 ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
 
-                foreach (var context in SectionContexts)
+                InParallel(SectionContexts, context =>
                 {
                     context.ApplyTreatmentMetadataIfPending(year);
-                }
+                    context.UnfixCalculatedFieldValues();
+                });
 
                 Snapshot(year);
             }
@@ -330,9 +331,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 }
                 else
                 {
+                    context.FixCalculatedFieldValuesWithPreDeteriorationTiming();
+
                     if (Simulation.ShouldPreapplyPassiveTreatment)
                     {
-                        context.FixCalculatedFieldValues();
+                        context.FixCalculatedFieldValuesWithoutPreDeteriorationTiming();
                     }
 
                     context.ApplyPerformanceCurves();
@@ -340,8 +343,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     if (Simulation.ShouldPreapplyPassiveTreatment)
                     {
                         context.PreapplyPassiveTreatment();
-                        context.UnfixCalculatedFieldValues();
+                        context.UnfixCalculatedFieldValuesWithoutPreDeteriorationTiming();
                     }
+
+                    context.FixCalculatedFieldValuesWithPostDeteriorationTiming();
 
                     if (yearIsScheduled && scheduledEvent.IsT1(out var treatment))
                     {

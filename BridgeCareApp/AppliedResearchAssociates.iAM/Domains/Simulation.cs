@@ -33,7 +33,8 @@ namespace AppliedResearchAssociates.iAM.Domains
         public string ShortDescription => Name;
 
         /// <summary>
-        ///     Whether to always pre-apply the passive treatment just after deterioration.
+        ///     Whether to always pre-apply the passive treatment just after deterioration. This
+        ///     feature exists in order to provide v1-compatible analysis behavior.
         /// </summary>
         public bool ShouldPreapplyPassiveTreatment { get; set; } = true;
 

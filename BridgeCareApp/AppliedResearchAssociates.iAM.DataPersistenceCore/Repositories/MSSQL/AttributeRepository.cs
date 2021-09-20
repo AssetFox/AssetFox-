@@ -156,17 +156,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         var calculatedField = explorer.AddCalculatedField(entity.Name);
                         calculatedField.IsDecreasingWithDeterioration = entity.IsAscending;
-
-                        // TODO:  Remove this once the simulation object is built
-                        if (entity.AttributeEquationCriterionLibraryJoins.Any())
-                        {
-                            entity.AttributeEquationCriterionLibraryJoins.ForEach(join =>
-                            {
-                                var source = calculatedField.AddValueSource();
-                                source.Equation.Expression = join.Equation.Expression;
-                                source.Criterion.Expression = join.CriterionLibrary?.MergedCriteriaExpression ?? string.Empty;
-                            });
-                        }
+                        calculatedField.Timing = CalculatedFieldTiming.OnDemand;
                     }
                     else
                     {

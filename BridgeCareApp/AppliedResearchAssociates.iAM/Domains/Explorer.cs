@@ -8,9 +8,23 @@ namespace AppliedResearchAssociates.iAM.Domains
 {
     public sealed class Explorer : IValidator
     {
-        public Explorer() => AgeAttribute = AddNumberAttribute("AGE");
+        public const string DefaultAgeAttributeName = "AGE";
 
-        public NumberAttribute AgeAttribute { get; }
+        public Explorer(string ageAttributeName)
+        {
+            if (string.IsNullOrWhiteSpace(ageAttributeName))
+            {
+                throw new ArgumentException("Age attribute name is blank.", nameof(ageAttributeName));
+            }
+
+            _ = AddNumberAttribute(AgeAttributeName = ageAttributeName);
+        }
+
+        public Explorer() : this(DefaultAgeAttributeName)
+        {
+        }
+
+        public INumericAttribute AgeAttribute { get; private set; }
 
         public IEnumerable<Attribute> AllAttributes => CalculatedFields.Concat<Attribute>(NumberAttributes).Concat(TextAttributes);
 
@@ -22,21 +36,28 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public IEnumerable<INumericAttribute> NumericAttributes => CalculatedFields.Concat<INumericAttribute>(NumberAttributes);
 
-        public ValidatorBag Subvalidators => new ValidatorBag { AgeAttribute, CalculatedFields, Networks, NumberAttributes };
+        public string ShortDescription => nameof(Explorer);
+
+        public ValidatorBag Subvalidators => new ValidatorBag { CalculatedFields, Networks, NumberAttributes };
 
         public IReadOnlyCollection<TextAttribute> TextAttributes => _TextAttributes;
 
-        public CalculatedField AddCalculatedField(string name) => Add(name, new CalculatedField(name, this), _CalculatedFields, CalculateEvaluateParameterType.Number);
+        public CalculatedField AddCalculatedField(string name) => Add(new CalculatedField(name, this), _CalculatedFields, CalculateEvaluateParameterType.Number);
 
         public Network AddNetwork() => _Networks.GetAdd(new Network(this));
 
-        public NumberAttribute AddNumberAttribute(string name) => Add(name, new NumberAttribute(name), _NumberAttributes, CalculateEvaluateParameterType.Number);
+        public NumberAttribute AddNumberAttribute(string name) => Add(new NumberAttribute(name), _NumberAttributes, CalculateEvaluateParameterType.Number);
 
-        public TextAttribute AddTextAttribute(string name) => Add(name, new TextAttribute(name), _TextAttributes, CalculateEvaluateParameterType.Text);
+        public TextAttribute AddTextAttribute(string name) => Add(new TextAttribute(name), _TextAttributes, CalculateEvaluateParameterType.Text);
 
         public ValidationResultBag GetDirectValidationResults()
         {
             var results = new ValidationResultBag();
+
+            if (AgeAttribute.IsDecreasingWithDeterioration)
+            {
+                results.Add(ValidationStatus.Error, "Age attribute must increase with deterioration.", this, nameof(AgeAttribute));
+            }
 
             if (Networks.Select(network => network.Name).Distinct().Count() < Networks.Count)
             {
@@ -76,11 +97,36 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         private readonly List<TextAttribute> _TextAttributes = new List<TextAttribute>();
 
-        private T Add<T>(string name, T attribute, ICollection<T> attributes, CalculateEvaluateParameterType parameterType) where T : Attribute
+        private readonly string AgeAttributeName;
+
+        private T Add<T>(T attribute, ICollection<T> attributes, CalculateEvaluateParameterType parameterType) where T : Attribute
         {
-            if (AllAttributes.Any(a => string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase)))
+            var isAgeAttribute = string.Equals(attribute.Name, AgeAttributeName, StringComparison.OrdinalIgnoreCase);
+
+            if (!isAgeAttribute && AllAttributes.Any(a => string.Equals(a.Name, attribute.Name, StringComparison.OrdinalIgnoreCase)))
             {
-                throw new ArgumentException("Name is already taken by another attribute.", nameof(name));
+                throw new ArgumentException("Attribute name is already in use for another attribute.", nameof(attribute));
+            }
+
+            if (isAgeAttribute)
+            {
+                if (parameterType != CalculateEvaluateParameterType.Number)
+                {
+                    throw new ArgumentException("Cannot add a non-numeric age attribute.");
+                }
+
+                _ = Compiler.ParameterTypes.Remove(AgeAttributeName);
+
+                if (AgeAttribute is NumberAttribute na)
+                {
+                    _ = _NumberAttributes.Remove(na);
+                }
+                else if (AgeAttribute is CalculatedField cf)
+                {
+                    _ = _CalculatedFields.Remove(cf);
+                }
+
+                AgeAttribute = (INumericAttribute)attribute;
             }
 
             Compiler.ParameterTypes.Add(attribute.Name, parameterType);
@@ -100,7 +146,5 @@ namespace AppliedResearchAssociates.iAM.Domains
                 _ = attributes.Remove(attribute);
             }
         }
-
-        public string ShortDescription => nameof(Explorer);
     }
 }

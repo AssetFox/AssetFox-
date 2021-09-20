@@ -65,6 +65,7 @@ namespace BridgeCareCore.Services
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+            _unitOfWork.CalculatedAttributeRepo.PopulateScenarioCalculatedFields(simulation);
 
             var runner = new SimulationRunner(simulation);
 

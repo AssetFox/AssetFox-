@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Domains;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -356,6 +357,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private void AssignIdWhenNull(AppliedResearchAssociates.iAM.DTOs.Abstract.BaseDTO dto)
         {
             if (dto.Id == Guid.Empty) dto.Id = Guid.NewGuid();
+        }
+
+        public void PopulateScenarioCalculatedFields(Simulation simulation)
+        {
+            if (!_unitOfDataPersistanceWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+
+            var explorer = simulation.Network.Explorer;
+
+            var calculatedFieldName = explorer.CalculatedFields.Select(_ => _.Name);
+            var calculatedAttributesToPopulate = GetScenarioCalculatedAttributes(simulation.Id)
+                .ToList()
+                .Where(_ => calculatedFieldName.Contains(_.Attribute))
+                .ToList();
+            if (calculatedAttributesToPopulate.Any(_ => !Enum.IsDefined(typeof(CalculatedFieldTiming), _.CalculationTiming)))
+            {
+                var badTimingList = calculatedAttributesToPopulate
+                    .Where(_ => !Enum.IsDefined(typeof(CalculatedFieldTiming), _.CalculationTiming))
+                    .Select(_ => _.Attribute).ToList();
+                throw new RowNotInTableException($"Calculations have invalid timings ({string.Join(",", badTimingList)}");
+            }
+
+            foreach (var calcAttr in calculatedAttributesToPopulate)
+            {
+                var calculatedField = explorer.CalculatedFields.First(_ => _.Name == calcAttr.Attribute);
+                calculatedField.Timing = (CalculatedFieldTiming)calcAttr.CalculationTiming;
+                foreach (var pair in calcAttr.Equations)
+                {
+                    var source = calculatedField.AddValueSource();
+                    source.Equation.Expression = pair.Equation.Expression;
+                    source.Criterion.Expression = pair.CriteriaLibrary?.MergedCriteriaExpression ?? string.Empty;
+                }
+            }
         }
     }
 }

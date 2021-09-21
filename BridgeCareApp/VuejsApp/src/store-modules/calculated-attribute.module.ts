@@ -72,7 +72,7 @@ const mutations = {
         state: any,
         calculatedAttributes: CalculatedAttribute[],
     ) {
-        state.scenarioCalculatedAttribute = clone(calculatedAttributes);
+        state.scenarioCalculatedAttributes = clone(calculatedAttributes);
     },
     calculatedAttributesMutator(state: any, calculatedAtt: Attribute[]) {
         state.calculatedAttributes = clone(calculatedAtt);
@@ -96,44 +96,6 @@ const actions = {
         commit('selectedCalculatedAttributeLibraryMutator', libraryId);
     },
     async getCalculatedAttributeLibraries({ commit }: any) {
-        // var dummy = [
-        //     {
-        //         id: getNewGuid(),
-        //         name: 'Cal1',
-        //         description: 'Cal1 description',
-        //         defaultCalculation: true,
-        //         calculatedAttribute: {
-        //             id: getNewGuid(),
-        //             attribute: 'AADTTOTAL',
-        //             name: 'AADTTOTAL',
-        //             shift: true,
-        //             timing: Timing.OnDemand,
-        //             criterionAndEquationSet: [
-        //                 {
-        //                     id: getNewGuid(),
-        //                     equation: {
-        //                         id: getNewGuid(),
-        //                         expression: '(Ceiling([SUP_SEEDED])-0.01)+1',
-        //                     },
-        //                     criterionLibrary: {
-        //                         id: getNewGuid(),
-        //                         name: 'cal dummy criteria',
-        //                         mergedCriteriaExpression: '[AGE] > "10"',
-        //                         description: 'criteria for cal',
-        //                         owner: '',
-        //                         shared: false,
-        //                         isSingleUse: true,
-        //                     },
-        //                 },
-        //             ],
-        //         },
-        //     },
-        // ];
-        // commit(
-        //     'calculatedAttributeLibrariesMutator',
-        //     dummy as CalculatedAttributeLibrary[],
-        // );
-        // return dummy;
         await CalculatedAttributeService.getCalculatedAttributeLibraries().then(
             (response: AxiosResponse<any[]>) => {
                 if (hasValue(response, 'data')) {
@@ -146,31 +108,6 @@ const actions = {
         );
     },
     async getScenarioCalculatedAttribute({ commit }: any, scenarioId: string) {
-        var tempScenarioAtt = {
-            id: getNewGuid(),
-            attribute: 'ADTYEAR',
-            name: 'ADTYEAR',
-            shift: true,
-            timing: Timing.PostSimulation,
-            criterionAndEquationSet: [
-                {
-                    id: getNewGuid(),
-                    equation: {
-                        id: getNewGuid(),
-                        expression: '(Ceiling([SUP_SEEDED])-0.01)+1',
-                    },
-                    criterionLibrary: {
-                        id: getNewGuid(),
-                        name: 'cal dummy criteria',
-                        mergedCriteriaExpression: '[AGE] > "10"',
-                        description: 'criteria for cal',
-                        owner: '',
-                        shared: false,
-                        isSingleUse: true,
-                    },
-                },
-            ],
-        };
         await CalculatedAttributeService.getScenarioCalculatedAttribute(
             scenarioId,
         ).then((response: AxiosResponse) => {
@@ -181,11 +118,6 @@ const actions = {
                 );
             }
         });
-        //         commit(
-        //             'scenarioCalculatedAttributeMutator',
-        //             tempScenarioAtt as CalculatedAttribute,
-        //         );
-        // return tempScenarioAtt as CalculatedAttribute;
     },
     async upsertCalculatedAttributeLibrary(
         { dispatch, commit }: any,

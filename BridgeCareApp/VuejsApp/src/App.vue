@@ -117,6 +117,7 @@
                             <v-list-tile-title>Criterion</v-list-tile-title>
                         </v-list-tile>
                         <v-list-tile
+                            v-show="isAdmin"
                             @click="
                                 onNavigate(
                                     '/CalculatedAttributeEditor/Library/',

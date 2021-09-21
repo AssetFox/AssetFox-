@@ -11,12 +11,17 @@ export enum Timing {
     PostSimulation,
     OnDemand,
   }
+  export const TimingMap: Record<string,  Timing> = {
+      'Pre Simulation': Timing.PreSimulation,
+      'Post Simulation': Timing.PostSimulation,
+      'On Demand': Timing.OnDemand
+  }
 
 export interface CalculatedAttribute {
     id: string;
     attribute: string;
     name: string;
-    timing: Timing;
+    calculationTiming: Timing;
     equations: CriterionAndEquationSet[];
 }
 
@@ -35,10 +40,10 @@ export interface CriterionAndEquationSet {
 
 export const emptyCalculatedAttribute: CalculatedAttribute = {
     id: getBlankGuid(),
-    attribute: 'AADTTOTAL',
-    name: 'AADTTOTAL',
+    attribute: 'CONDITIONINDEX',
+    name: 'CONDITIONINDEX',
     equations: [],
-    timing: Timing.OnDemand
+    calculationTiming: Timing.OnDemand
 };
 
 export const emptyCriterionAndEquationSet: CriterionAndEquationSet = {

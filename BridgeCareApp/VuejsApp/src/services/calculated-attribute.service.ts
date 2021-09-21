@@ -36,7 +36,7 @@ export default class CalculatedAttributeService {
         scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.CalculatedAttributes}/UpsertScenarioAttribute/${scenarioId}`,
+            `${API.CalculatedAttributes}/UpsertScenarioAttributes/${scenarioId}`,
             data,
         );
     }

@@ -72,14 +72,12 @@
                                 label="Attribute"
                                 outline
                                 v-model="attributeSelectItemValue"
-                                :disabled="!isAdmin"
                             >
                             </v-select>
                             <v-text-field
                                 label="Attribute name"
                                 v-if="isAttributeSelectedItemValue"
                                 v-model="attributeSelectItemValue"
-                                :disabled="!isAdmin"
                             >
                                 <template slot="append">
                                     <v-btn
@@ -265,6 +263,7 @@
                 </v-btn>
                 <v-btn
                     :disabled="!hasUnsavedChanges"
+                    v-if="isAdmin"
                     @click="onDiscardChanges"
                     class="ara-orange-bg white--text"
                     v-show="hasSelectedLibrary || hasScenario"
@@ -496,12 +495,7 @@ export default class CalculatedAttributeEditor extends Vue {
             }
         });
     }
-    mounted() {
-        // this.setAttributeSelectItems();
-        // this.setAttributeTimingSelectItems();
-    }
     beforeDestroy() {
-        this.setHasUnsavedChangesAction({ value: false });
         this.calculatedAttributeGridData = [] as CalculatedAttribute[];
         this.selectedGridItem = clone(emptyCalculatedAttribute);
     }
@@ -558,6 +552,7 @@ export default class CalculatedAttributeEditor extends Vue {
     }
     @Watch('attributeSelectItemValue')
     onAttributeSelectItemValueChanged() {
+        // selection change in calculated attribute multi select
         if (
             isNil(this.attributeSelectItemValue) ||
             this.attributeSelectItemValue == ''
@@ -584,6 +579,8 @@ export default class CalculatedAttributeEditor extends Vue {
                 this.selectedGridItem = item;
                 this.setTimingsMultiSelect(item.calculationTiming);
             } else {
+                // if the selected Calculated attribute data is not present in the grid
+                // Add a new object for it. Because we cannot loop over a object, which is null
                 var newAttributeObject: CalculatedAttribute = {
                     id: getNewGuid(),
                     attribute: this.attributeSelectItemValue,
@@ -600,6 +597,7 @@ export default class CalculatedAttributeEditor extends Vue {
     }
     @Watch('attributeTimingSelectItemValue')
     onAttributeTimingSelectItemValue() {
+        // Change in timings select box
         if (
             isNil(this.attributeTimingSelectItemValue) ||
             this.attributeTimingSelectItemValue == ''
@@ -638,26 +636,29 @@ export default class CalculatedAttributeEditor extends Vue {
     }
     @Watch('calculatedAttributeGridData')
     onCalculatedAttributeGridDataChanged() {
-        const hasUnsavedChanges: boolean = this.hasScenario
-            ? hasUnsavedChangesCore(
-                  '',
-                  this.calculatedAttributeGridData,
-                  this.stateScenarioCalculatedAttributes,
-              )
-            : hasUnsavedChangesCore(
-                  '',
-                  {
-                      ...clone(this.selectedCalculatedAttributeLibrary),
-                      calculatedAttribute: clone(
-                          this.calculatedAttributeGridData,
-                      ),
-                  },
-                  this.stateSelectedCalculatedAttributeLibrary,
-              );
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+        if (this.isAdmin) {
+            const hasUnsavedChanges: boolean = this.hasScenario
+                ? hasUnsavedChangesCore(
+                      '',
+                      this.calculatedAttributeGridData,
+                      this.stateScenarioCalculatedAttributes,
+                  )
+                : hasUnsavedChangesCore(
+                      '',
+                      {
+                          ...clone(this.selectedCalculatedAttributeLibrary),
+                          calculatedAttribute: clone(
+                              this.calculatedAttributeGridData,
+                          ),
+                      },
+                      this.stateSelectedCalculatedAttributeLibrary,
+                  );
+            this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+        }
     }
     @Watch('selectedCalculatedAttributeLibrary')
     onSelectedCalculatedAttributeLibraryChanged() {
+        // change in library multiselect
         if (
             this.selectedCalculatedAttributeLibrary.id !== this.uuidNIL &&
             this.selectedCalculatedAttributeLibrary.id != getBlankGuid()
@@ -667,6 +668,8 @@ export default class CalculatedAttributeEditor extends Vue {
             this.hasSelectedLibrary = false;
         }
 
+        // If grid data is null, then add dummy objects on the fly, to show the rows to users.
+        // So that, the users can add criteria and equations
         if (
             this.calculatedAttributeGridData == undefined ||
             this.calculatedAttributeGridData.length == 0
@@ -680,6 +683,9 @@ export default class CalculatedAttributeEditor extends Vue {
                     equations: [] as CriterionAndEquationSet[],
                 };
                 this.calculatedAttributeGridData.push(tempItem);
+                this.setDefaultAttributeOnLoad(
+                    this.calculatedAttributeGridData[0],
+                );
             });
         }
 
@@ -691,40 +697,41 @@ export default class CalculatedAttributeEditor extends Vue {
                     id: getNewGuid(),
                 }),
             );
+            // If a user in scenario page, then selecting a library should generate new Ids.
+            // Because this data will be saved against the scenario
             this.calculatedAttributeGridData.forEach(att => {
                 att.equations.map((value: CriterionAndEquationSet) => ({
                     ...value,
                     id: getNewGuid(),
                 }));
                 att.equations.forEach(eq => {
-                    (eq.criteriaLibrary.id = getNewGuid()),
-                        (eq.equation.id = getNewGuid());
+                    if (isNil(eq.criteriaLibrary)) {
+                        eq.criteriaLibrary = clone(emptyCriterionLibrary);
+                        eq.criteriaLibrary.id = getNewGuid();
+                        eq.criteriaLibrary.isSingleUse = true;
+                    } else {
+                        eq.criteriaLibrary.id = getNewGuid();
+                    }
+                    eq.equation.id = getNewGuid();
                 });
             });
 
+            // Set the default values in Calculated attribute multi select, if we have data in calculatedAttributeGridData
             if (
                 this.calculatedAttributeGridData != undefined &&
                 this.calculatedAttributeGridData.length > 0
             ) {
-                this.attributeSelectItemValue = clone(
-                    this.calculatedAttributeGridData[0].attribute,
+                this.setDefaultAttributeOnLoad(
+                    this.calculatedAttributeGridData[0],
                 );
-                this.isAttributeSelectedItemValue = true;
-
-                this.setTimingsMultiSelect(
-                    this.calculatedAttributeGridData[0].calculationTiming,
-                );
-                this.activeCalculatedAttributeId = this.calculatedAttributeGridData[0].id;
-                this.selectedGridItem =
-                    this.calculatedAttributeGridData[0] != undefined
-                        ? this.calculatedAttributeGridData[0]
-                        : this.selectedGridItem;
             } else {
                 this.isAttributeSelectedItemValue = false;
             }
         } else if (this.hasScenario && !this.hasSelectedLibrary) {
+            // If a user un select a Library, then reset the grid data from the scenario calculated attribute state
             this.resetGridData();
         } else if (!this.hasScenario) {
+            // If a user is in Lirabry page
             this.calculatedAttributeGridData = clone(
                 this.selectedCalculatedAttributeLibrary.calculatedAttributes,
             );
@@ -747,6 +754,9 @@ export default class CalculatedAttributeEditor extends Vue {
                         : this.selectedGridItem;
             } else {
                 this.isAttributeSelectedItemValue = false;
+                this.attributeSelectItemValue = null;
+                this.attributeTimingSelectItemValue = null;
+                this.isTimingSelectedItemValue = false;
             }
         }
     }
@@ -768,10 +778,26 @@ export default class CalculatedAttributeEditor extends Vue {
         this.upsertCalculatedAttributeLibraryAction(CalculatedAttributeLibrary);
     }
     onShowCreateCalculatedAttributeLibraryDialog(createAsNewLibrary: boolean) {
+        var localCalculatedAttributes = [] as CalculatedAttribute[];
+        if (createAsNewLibrary) {
+            // if library is getting created from a scenario. Assign new Ids
+            localCalculatedAttributes = this.calculatedAttributeGridData;
+            localCalculatedAttributes.forEach(val => {
+                val.id = getNewGuid();
+                val.equations.forEach(eq => {
+                    eq.id = getNewGuid();
+                    if (!isNil(eq.criteriaLibrary)) {
+                        eq.criteriaLibrary.id = getNewGuid();
+                        eq.criteriaLibrary.isSingleUse = false;
+                    }
+                    eq.equation.id = getNewGuid();
+                });
+            });
+        }
         this.createCalculatedAttributeLibraryDialogData = {
             showDialog: true,
             calculatedAttributes: createAsNewLibrary
-                ? this.calculatedAttributeGridData
+                ? localCalculatedAttributes
                 : ([] as CalculatedAttribute[]),
             attributeSelectItems: this.attributeSelectItems,
         };
@@ -787,6 +813,7 @@ export default class CalculatedAttributeEditor extends Vue {
             this.upsertCalculatedAttributeLibraryAction(
                 calculatedAttributeLibrary,
             );
+            this.librarySelectItemValue = calculatedAttributeLibrary.id;
         }
     }
     onSubmitCreateCalculatedAttributeDialogResult(
@@ -846,7 +873,6 @@ export default class CalculatedAttributeEditor extends Vue {
         newSet.equation.id = getNewGuid();
         newSet.criteriaLibrary.isSingleUse = true;
 
-        this.selectedGridItem;
         if (this.selectedGridItem.equations == undefined) {
             this.selectedGridItem.equations = [];
         }
@@ -962,9 +988,16 @@ export default class CalculatedAttributeEditor extends Vue {
             propEq('id', criterionEquationSetId),
             currItem.equations,
         );
+        this.selectedGridItem.equations = reject(
+            propEq('id', criterionEquationSetId),
+            this.selectedGridItem.equations,
+        );
     }
     onDiscardChanges() {
         this.librarySelectItemValue = null;
+        this.selectedCalculatedAttributeLibrary = clone(
+            emptyCalculatedAttributeLibrary,
+        );
         setTimeout(() => {
             if (this.hasScenario) {
                 this.resetGridData();
@@ -988,6 +1021,14 @@ export default class CalculatedAttributeEditor extends Vue {
 
                 this.setTimingsMultiSelect(currItem.calculationTiming);
                 this.selectedGridItem = currItem;
+                // Setting up default values for null object, because API is sending it as null.
+                this.selectedGridItem.equations.forEach(_ => {
+                    if (isNil(_.criteriaLibrary)) {
+                        _.criteriaLibrary = clone(emptyCriterionLibrary);
+                        _.criteriaLibrary.id = getNewGuid();
+                        _.criteriaLibrary.isSingleUse = true;
+                    }
+                });
             } else if (this.calculatedAttributeGridData.length > 0) {
                 this.attributeSelectItemValue = this.calculatedAttributeGridData[0].attribute;
                 this.isAttributeSelectedItemValue = true;
@@ -1009,6 +1050,19 @@ export default class CalculatedAttributeEditor extends Vue {
         )!.text;
         this.attributeTimingSelectItemValue = localTiming;
         this.isTimingSelectedItemValue = true;
+    }
+    setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {
+        this.attributeSelectItemValue = clone(
+            localCalculatedAttribute.attribute,
+        );
+        this.isAttributeSelectedItemValue = true;
+
+        this.setTimingsMultiSelect(localCalculatedAttribute.calculationTiming);
+        this.activeCalculatedAttributeId = localCalculatedAttribute.id;
+        this.selectedGridItem =
+            localCalculatedAttribute != undefined
+                ? localCalculatedAttribute
+                : this.selectedGridItem;
     }
 }
 </script>

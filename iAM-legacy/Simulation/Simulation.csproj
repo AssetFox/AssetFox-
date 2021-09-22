@@ -497,7 +497,7 @@
     <Compile Include="Treatments.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\BridgeCareApp\AppliedResearchAssociates.iAM\AppliedResearchAssociates.iAM.Analysis.csproj">
+    <ProjectReference Include="..\..\BridgeCareApp\AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.Analysis.csproj">
       <Project>{F21F7AD7-CA1D-4DC5-BABF-57160413D659}</Project>
       <Name>AppliedResearchAssociates.iAM.Analysis</Name>
     </ProjectReference>

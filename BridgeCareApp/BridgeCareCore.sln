@@ -21,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{2EC8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.Testing", "AppliedResearchAssociates.Testing\AppliedResearchAssociates.Testing.csproj", "{7FB3B831-87E2-4408-A50C-2DB84D24064D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM", "AppliedResearchAssociates.iAM\AppliedResearchAssociates.iAM.csproj", "{F21F7AD7-CA1D-4DC5-BABF-57160413D659}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM", "AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.csproj", "{F21F7AD7-CA1D-4DC5-BABF-57160413D659}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.Analysis.Testing", "AppliedResearchAssociates.iAM.Analysis.Testing\AppliedResearchAssociates.iAM.Analysis.Testing.csproj", "{972E04F7-5006-4754-8F24-EB02CFA8401E}"
 EndProject

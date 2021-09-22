@@ -107,7 +107,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimulationConsole", "Simula
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.Analysis", "AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.Analysis.csproj", "{F21F7AD7-CA1D-4DC5-BABF-57160413D659}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.Analysis.Testing", "AppliedResearchAssociates.iAM.Analysis.Testing\AppliedResearchAssociates.iAM.Analysis.Testing.csproj", "{972E04F7-5006-4754-8F24-EB02CFA8401E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.Analysis.V1TestApp", "AppliedResearchAssociates.iAM.Analysis.V1TestApp\AppliedResearchAssociates.iAM.Analysis.V1TestApp.csproj", "{972E04F7-5006-4754-8F24-EB02CFA8401E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.Validation", "AppliedResearchAssociates.Validation\AppliedResearchAssociates.Validation.csproj", "{42171908-B5FF-4658-AF05-618F0959DD0E}"
 EndProject

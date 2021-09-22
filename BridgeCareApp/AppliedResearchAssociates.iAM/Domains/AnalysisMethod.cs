@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.Domains
 
         public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
 
-        public SpendingStrategy SpendingStrategy { get; set; }
+        public SpendingStrategy SpendingStrategy { get; set; } = SpendingStrategy.AsBudgetPermits;
 
         public ValidatorBag Subvalidators => new ValidatorBag { Benefit, BudgetPriorities, DeficientConditionGoals, Filter, RemainingLifeLimits, TargetConditionGoals };
 

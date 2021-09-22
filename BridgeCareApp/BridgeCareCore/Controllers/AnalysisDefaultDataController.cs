@@ -18,8 +18,8 @@ namespace BridgeCareCore.Controllers
     {
         public readonly IAnalysisDefaultDataService _analysisDefaultDataService;
 
-        public AnalysisDefaultDataController(IAnalysisDefaultDataService analysisDefaultDataService, IEsecSecurity esecSecurity,
-            UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) :
+        public AnalysisDefaultDataController(IEsecSecurity esecSecurity,
+            UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IAnalysisDefaultDataService analysisDefaultDataService) :
             base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _analysisDefaultDataService = analysisDefaultDataService ?? throw new ArgumentNullException(nameof(analysisDefaultDataService));
 

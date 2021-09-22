@@ -19,7 +19,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
             Context = context ?? throw new ArgumentNullException(nameof(context));
 
-            Context.Database.SetCommandTimeout(1800);
+            // This is already done in the Startup.cs
+            // Context.Database.SetCommandTimeout(1800);
         }
 
         public IConfiguration Config { get; }
@@ -49,6 +50,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IMaintainableAssetRepository _maintainableAssetRepo;
         private INetworkRepository _networkRepo;
         private IPerformanceCurveRepository _performanceCurveRepo;
+        private ICalculatedAttributesRepository _calculatedAttributesRepo;
         private IRemainingLifeLimitRepository _remainingLifeLimitRepo;
         private ISectionRepository _sectionRepo;
         private ISelectableTreatmentRepository _selectableTreatmentRepo;
@@ -110,6 +112,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public virtual INetworkRepository NetworkRepo => _networkRepo ??= new NetworkRepository(this);
 
         public IPerformanceCurveRepository PerformanceCurveRepo => _performanceCurveRepo ??= new PerformanceCurveRepository(this);
+
+        public ICalculatedAttributesRepository CalculatedAttributeRepo => _calculatedAttributesRepo ??= new CalculatedAttributeRepository(this);
 
         public IRemainingLifeLimitRepository RemainingLifeLimitRepo => _remainingLifeLimitRepo ??= new RemainingLifeLimitRepository(this);
 

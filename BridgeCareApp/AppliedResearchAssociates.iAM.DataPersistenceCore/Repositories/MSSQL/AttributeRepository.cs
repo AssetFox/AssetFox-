@@ -157,6 +157,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var calculatedField = explorer.AddCalculatedField(entity.Name);
                         calculatedField.IsDecreasingWithDeterioration = entity.IsAscending;
 
+                        // TODO:  Remove this once the simulation object is built
                         if (entity.AttributeEquationCriterionLibraryJoins.Any())
                         {
                             entity.AttributeEquationCriterionLibraryJoins.ForEach(join =>
@@ -196,11 +197,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Attribute.Any())
             {
-                throw new RowNotInTableException("Found not attributes.");
+                throw new RowNotInTableException("Found no attributes.");
             }
 
             return Task.Factory.StartNew(() =>
                 _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList());
+        }
+
+        public Task<List<AttributeDTO>> CalculatedAttributes()
+        {
+            if (!_unitOfWork.Context.Attribute.Any())
+            {
+                throw new RowNotInTableException("Found no attributes.");
+            }
+
+            return Task.Factory.StartNew(() =>
+                _unitOfWork.Context.Attribute.Where(_ => _.IsCalculated).OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList());
         }
     }
 }

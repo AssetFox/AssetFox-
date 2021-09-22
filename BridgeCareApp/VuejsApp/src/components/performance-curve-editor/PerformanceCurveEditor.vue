@@ -433,7 +433,8 @@ export default class PerformanceCurveEditor extends Vue {
     stateNumericAttributes: Attribute[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    
     @Action('getPerformanceCurveLibraries')
     getPerformanceCurveLibrariesAction: any;
     @Action('selectPerformanceCurveLibrary')

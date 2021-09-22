@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AppliedResearchAssociates.iAM\AppliedResearchAssociates.iAM.csproj" />
+      <ProjectReference Include="..\AppliedResearchAssociates.iAM\AppliedResearchAssociates.iAM.Analysis.csproj" />
     </ItemGroup>
 
 </Project>

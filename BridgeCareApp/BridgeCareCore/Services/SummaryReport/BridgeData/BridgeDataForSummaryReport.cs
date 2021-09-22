@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
@@ -184,7 +184,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                         range.Value = abbreviatedTreatmentNames[section.AppliedTreatment];
                         worksheet.Cells[row, column + 1].Value = cost;
 
-                        
+
                         if (!isInitialYear && section.TreatmentCause == TreatmentCause.CashFlowProject)
                         {
                             if (prevYearSection == null)
@@ -423,7 +423,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
 
                 worksheet.Cells[row, column + 4].Value = (int)selectedSection.ValuePerNumericAttribute["CULV_DURATION_N"];
-                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column + 4]);           
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column + 4]);
             }
             column += 4; // this will take us to "Min cond" column
 
@@ -445,7 +445,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
                 ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
             }
 
-            // Setting color of MinCond over here, to avoid Color.LightGray overriding it 
+            // Setting color of MinCond over here, to avoid Color.LightGray overriding it
             if (selectedSection.ValuePerNumericAttribute["MINCOND"] <= 3.5)
             {
                 ExcelHelper.ApplyColor(worksheet.Cells[row, minCondColumn], Color.FromArgb(112, 48, 160));

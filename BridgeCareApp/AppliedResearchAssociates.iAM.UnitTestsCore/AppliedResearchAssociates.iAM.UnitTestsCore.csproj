@@ -36,7 +36,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Reporting\AppliedResearchAssociates.iAM.Reporting.csproj" />
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM\AppliedResearchAssociates.iAM.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM\AppliedResearchAssociates.iAM.Analysis.csproj" />
     <ProjectReference Include="..\BridgeCareCore\BridgeCareCore.csproj" />
   </ItemGroup>
 

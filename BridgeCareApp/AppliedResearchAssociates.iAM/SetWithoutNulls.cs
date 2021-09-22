@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace AppliedResearchAssociates.iAM
+namespace AppliedResearchAssociates.iAM.Analysis
 {
     internal sealed class SetWithoutNulls<T> : ISet<T>, IReadOnlyCollection<T> where T : class
     {

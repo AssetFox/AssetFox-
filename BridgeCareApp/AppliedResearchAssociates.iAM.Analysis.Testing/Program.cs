@@ -5,11 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AppliedResearchAssociates.iAM.DataAccess;
+using AppliedResearchAssociates.iAM.Analysis.V1DataAccess;
 using AppliedResearchAssociates.Validation;
 using Microsoft.Data.SqlClient;
 
-namespace AppliedResearchAssociates.iAM.Analysis.Testing
+namespace AppliedResearchAssociates.iAM.Analysis.Engine.Testing
 {
     internal static class Program
     {
@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Testing
 
             void logAccessorProgress(TimeSpan elapsed, string label) => logToConsoleAndFile($"{elapsed} --- {label}");
 
-            var accessor = new DataAccessor(connection, logAccessorProgress);
+            var accessor = new V1DataAccessor(connection, logAccessorProgress);
 
             Console.WriteLine("Network/Simulation ID specification:");
             // E.g. "net1:sim1,sim2,sim3;net2" where sims 1, 2, and 3 of net1 are run, and all sims

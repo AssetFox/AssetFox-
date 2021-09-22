@@ -81,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static Domains.Attribute GetAttributesFromDomain(this AttributeEntity entity, IEnumerable<Domains.Attribute> attributes)
+        public static Analysis.Attribute GetAttributesFromDomain(this AttributeEntity entity, IEnumerable<Analysis.Attribute> attributes)
         {
             var filteredAttribute = attributes.Where(_ => _.Name == entity.Name).FirstOrDefault();
 

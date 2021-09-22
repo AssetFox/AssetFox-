@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 using BridgeCareCore.Services.SummaryReport.Models;
 using BridgeCareCore.Services.SummaryReport.Models.Worksheets;
 

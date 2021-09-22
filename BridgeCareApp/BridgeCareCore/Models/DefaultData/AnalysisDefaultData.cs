@@ -1,4 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.DataAccess;
+﻿using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Models.DefaultData
 {

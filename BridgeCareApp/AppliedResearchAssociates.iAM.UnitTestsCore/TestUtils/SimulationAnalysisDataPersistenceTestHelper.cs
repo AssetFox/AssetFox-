@@ -5,7 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Domains;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

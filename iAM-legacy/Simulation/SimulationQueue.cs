@@ -1,18 +1,15 @@
-﻿using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DataAccess;
+﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.Analysis.V1DataAccess;
 using AppliedResearchAssociates.Validation;
 using log4net;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using static Simulation.Simulation;
@@ -132,7 +129,7 @@ namespace Simulation
             using var connection = new SqlConnection(parameters.SQLConnection);
             connection.Open();
             var newSimulation =
-                new DataAccessor(connection, LogProgressToConsole)
+                new V1DataAccessor(connection, LogProgressToConsole)
                 .GetStandAloneSimulation(parameters.NetworkId, parameters.SimulationId);
 
             var errorIsPresent = false;
@@ -166,16 +163,16 @@ namespace Simulation
                 var messageBuilder = eventArgs.MessageBuilder;
                 switch (messageBuilder.Status)
                 {
-                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Error:
+                    case SimulationLogStatus.Error:
                         handleLog("Error: ", messageBuilder);
                         break;
-                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Fatal:
+                    case SimulationLogStatus.Fatal:
                         handleLog("Failed: ", messageBuilder);
                         break;
-                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Information:
+                    case SimulationLogStatus.Information:
                         handleLog("Info: ", messageBuilder);
                         break;
-                    case AppliedResearchAssociates.iAM.SimulationLogStatus.Warning:
+                    case SimulationLogStatus.Warning:
                         handleLog("Warning: ", messageBuilder);
                         break;
                 };

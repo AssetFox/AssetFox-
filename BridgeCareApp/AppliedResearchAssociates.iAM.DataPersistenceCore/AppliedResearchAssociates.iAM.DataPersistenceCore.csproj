@@ -38,7 +38,7 @@
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataAssignment\AppliedResearchAssociates.iAM.DataAssignment.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DTOs\AppliedResearchAssociates.iAM.DTOs.csproj" />
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM\AppliedResearchAssociates.iAM.Analysis.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.Analysis.csproj" />
   </ItemGroup>
 
   <ItemGroup>

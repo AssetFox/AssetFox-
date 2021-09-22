@@ -2,7 +2,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace AppliedResearchAssociates.iAM.Testing
+namespace AppliedResearchAssociates.iAM.Analysis.Testing
 {
     public class SimulationOutputTests
     {

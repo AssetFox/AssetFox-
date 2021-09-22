@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AppliedResearchAssociates.iAM.Testing.Properties {
+namespace AppliedResearchAssociates.iAM.Analysis.Testing.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.Testing.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AppliedResearchAssociates.iAM.Testing.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AppliedResearchAssociates.iAM.Analysis.Testing.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

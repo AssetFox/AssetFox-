@@ -113,7 +113,7 @@
       <Project>{db1d42ac-d45b-4256-9a3a-29156c74c2b5}</Project>
       <Name>AppliedResearchAssociates.iAM.Segmentation</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM\AppliedResearchAssociates.iAM.csproj">
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.csproj">
       <Project>{f21f7ad7-ca1d-4dc5-babf-57160413d659}</Project>
       <Name>AppliedResearchAssociates.iAM</Name>
     </ProjectReference>

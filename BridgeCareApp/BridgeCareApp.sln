@@ -137,7 +137,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_DbFirst", "Test_DbFirs
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.DataAssignment", "AppliedResearchAssociates.iAM.DataAssignment\AppliedResearchAssociates.iAM.DataAssignment.csproj", "{C7F777A5-41A3-4B3A-999B-C310FBD26127}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.Testing", "AppliedResearchAssociates.iAM.Testing\AppliedResearchAssociates.iAM.Testing.csproj", "{C5313A6D-E409-4AB4-ADB7-F340199311C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.Analysis.Testing", "AppliedResearchAssociates.iAM.Analysis.Testing\AppliedResearchAssociates.iAM.Analysis.Testing.csproj", "{C5313A6D-E409-4AB4-ADB7-F340199311C6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.UnitTestsCore", "AppliedResearchAssociates.iAM.UnitTestsCore\AppliedResearchAssociates.iAM.UnitTestsCore.csproj", "{C7198AF1-1761-4328-A7B7-4937C999D266}"
 EndProject

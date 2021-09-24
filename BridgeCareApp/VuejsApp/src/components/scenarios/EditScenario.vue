@@ -176,6 +176,13 @@ export default class EditScenario extends Vue {
             },
         },
         {
+            tabName: 'Calculated Attribute',
+            tabIcon: 'fas fa-plus-square',
+            navigation: {
+                path: '/CalculatedAttributeEditor/Scenario/',
+            },
+        },
+        {
             tabName: 'Treatment',
             tabIcon: 'fas fa-tools',
             navigation: {

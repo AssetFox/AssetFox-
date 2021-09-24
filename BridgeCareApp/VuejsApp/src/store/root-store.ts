@@ -26,6 +26,7 @@ import analysisMethodModule from '@/store-modules/analysis-method.module';
 import azureB2CModule from '@/store-modules/azureB2C.module';
 import analysisDefaultDataModule from '@/store-modules/analysisDefaultData.module';
 import investmentDefaultDataModule from '@/store-modules/investmentDefaultData.module';
+import calculatedAttributeModule from '@/store-modules/calculated-attribute.module';
 
 Vue.use(Vuex);
 
@@ -55,6 +56,7 @@ export default new Vuex.Store({
         analysisMethodModule,
         azureB2CModule,
         analysisDefaultDataModule,
-        investmentDefaultDataModule
+        investmentDefaultDataModule,
+        calculatedAttributeModule,
     }
 });

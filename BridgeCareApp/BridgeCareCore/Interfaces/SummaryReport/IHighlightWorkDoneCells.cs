@@ -1,4 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.Analysis;
+﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Interfaces.SummaryReport

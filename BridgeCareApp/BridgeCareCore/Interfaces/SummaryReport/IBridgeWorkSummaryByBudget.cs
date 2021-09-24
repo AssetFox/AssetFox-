@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Domains;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Interfaces.SummaryReport

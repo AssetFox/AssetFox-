@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
 using MoreLinq;
-using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Domains;
+using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Analysis;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {

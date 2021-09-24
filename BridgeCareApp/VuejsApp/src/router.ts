@@ -82,6 +82,10 @@ const CashFlowEditor = () =>
     import(
         /*webpackChunkName: cashFlowEditor*/ '@/components/cash-flow-editor/CashFlowEditor.vue'
     );
+const CalculatedAttributeEditor = () =>
+    import(
+        /*webpackChunkName: "CalculatedAttributeEditor" */ '@/components/calculated-attribute-editor/CalculatedAttributeEditor.vue'
+    );
 
 const onHandlingUnsavedChanges = (to: any, next: any): void => {
     // @ts-ignore
@@ -191,6 +195,11 @@ const router = new VueRouter({
                     component: PerformanceCurveEditor,
                     props: true,
                     beforeEnter: beforeEnterFunc,
+                },
+                {
+                    path: '/CalculatedAttributeEditor/Scenario/',
+                    component: CalculatedAttributeEditor,
+                    props: true,
                 },
                 {
                     path: '/TreatmentEditor/Scenario/',
@@ -331,6 +340,12 @@ const router = new VueRouter({
             path: '/UserCriteria/',
             name: 'UserCriteria',
             component: UserCriteriaEditor,
+        },
+        {
+            path: '/CalculatedAttributeEditor/Library/',
+            name: 'CalculatedAttributeEditor',
+            component: CalculatedAttributeEditor,
+            props: true,
         },
         {
             path: '*',

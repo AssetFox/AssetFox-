@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataAccess;
+using AppliedResearchAssociates.iAM.Analysis.V1DataAccess;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Domains;
+using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
@@ -111,7 +111,7 @@ namespace BridgeCareCore.Services
 
                 using var legacyConnection = _unitOfWork.GetLegacyConnection();
 
-                var dataAccessor = new DataAccessor(legacyConnection, null);
+                var dataAccessor = new V1DataAccessor(legacyConnection, null);
                 legacyConnection.Open();
 
                 var simulation = dataAccessor.GetStandAloneSimulation(LegacyNetworkId, simulationId);

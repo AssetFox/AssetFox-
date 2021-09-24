@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models.SummaryReport;
@@ -298,11 +298,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             {
                 var startColumnIndex = 3;
                 var totalSpentRow = currentCell.Row;
-                
+
                 worksheet.Cells[totalSpentRow, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(totalSpentRow, startColumnIndex, totalSpentRow, startColumnIndex + numberOfYears - 1);
                 for (var row = firstContentRow; row <= currentCell.Row - 1; row++)
                 {
-                    // Add Total(all years)                    
+                    // Add Total(all years)
                     worksheet.Cells[row, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(row, startColumnIndex, row, startColumnIndex + numberOfYears - 1);
 
                     // Percentage

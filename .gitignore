@@ -407,3 +407,4 @@ BridgeCareApp/BridgeCareCore/b2c.json
 /BridgeCareApp/BridgeCareCore/testConnections.json.json
 /BridgeCareApp/BridgeCareCore/Reports/output.txt
 /BridgeCareApp/BridgeCareCore/Reports/Adams County Test JD-8557530d-dd79-4a3c-bba0-dfb0917c0f75.json
+*.lock

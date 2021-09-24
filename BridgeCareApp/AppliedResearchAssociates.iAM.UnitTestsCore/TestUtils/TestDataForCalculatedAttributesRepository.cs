@@ -35,17 +35,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             attributeList.Add(new AttributeEntity()
             {
                 Id = new Guid("87ad4cb8-ea2e-49d9-b588-60803427de9c"),
-                Name = "Age"
+                Name = "AGE",
+                DataType = "NUMBER",
+                IsCalculated = false
             });
             attributeList.Add(new AttributeEntity()
             {
                 Id = new Guid("1a33bdf2-08e4-4456-861b-059a73139613"),
-                Name = "Condition"
+                Name = "CONDITION",
+                DataType = "NUMBER",
+                IsCalculated = true
             });
             attributeList.Add(new AttributeEntity()
             {
                 Id = new Guid("eb80878a-2cfa-49ec-b375-e34bdf38bf66"),
-                Name = "Description"
+                Name = "DESCRIPTION",
+                DataType = "STRING",
+                IsCalculated = false
             });
 
             return attributeList.AsQueryable();
@@ -92,11 +98,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return result.AsQueryable();
         }
 
-        public static IQueryable<ScenarioCalculatedAttributeEntity> GetSimulationCalculatedAttributesRepo()
+        public static IQueryable<ScenarioCalculatedAttributeEntity> GetSimulationCalculatedAttributesRepo(bool ignoreIsCalculated = true)
         {
             var result = new List<ScenarioCalculatedAttributeEntity>();
             var scenarios = GetSimulations();
             var attributes = GetAttributeRepo();
+
+            if (!ignoreIsCalculated)
+            {
+                attributes = GetAttributeRepo().Where(_ => _.IsCalculated);
+            }
 
             var selectedScenario = scenarios.First(_ => _.Name == "First");
             foreach (var attribute in attributes)
@@ -118,6 +129,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             return result.AsQueryable();
         }
+
 
         public static CalculatedAttributeEntity CreateNewCalculatedAttribute(AttributeEntity attribute, string firstEquation, int calculationTiming = 1)
         {

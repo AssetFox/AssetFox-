@@ -4,7 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CalculatedAttribute;
-using AppliedResearchAssociates.iAM.Domains;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -34,17 +34,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new List<CalculatedAttributeEquationCriteriaPairDTO>()
             };
 
-        public static CalculatedAttributeEquationCriteriaPairDTO ToDto(this CalculatedAttributeEquationCriteriaPairEntity entity)
-        {
-            var result = new CalculatedAttributeEquationCriteriaPairDTO()
-            {
+        public static CalculatedAttributeEquationCriteriaPairDTO ToDto(this CalculatedAttributeEquationCriteriaPairEntity entity) =>
+            new CalculatedAttributeEquationCriteriaPairDTO()
+            {   
                 Id = entity.Id,
-                Equation = entity.EquationCalculatedAttributeJoin.Equation.ToDto()
+                Equation = entity.EquationCalculatedAttributeJoin?.Equation.ToDto(),
+                CriteriaLibrary = entity.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary.ToDto()
             };
-            if (entity.CriterionLibraryCalculatedAttributeJoin != null)
-                result.CriteriaLibrary = entity.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary.ToDto();
-            return result;
-        }
+        
 
         public static CalculatedAttributeDTO ToDto(this ScenarioCalculatedAttributeEntity entity) =>
             new CalculatedAttributeDTO()
@@ -57,17 +54,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new List<CalculatedAttributeEquationCriteriaPairDTO>()
             };
 
-        public static CalculatedAttributeEquationCriteriaPairDTO ToDto(this ScenarioCalculatedAttributeEquationCriteriaPairEntity entity)
-        {
-            var result = new CalculatedAttributeEquationCriteriaPairDTO()
+        public static CalculatedAttributeEquationCriteriaPairDTO ToDto(this ScenarioCalculatedAttributeEquationCriteriaPairEntity entity) =>
+            new CalculatedAttributeEquationCriteriaPairDTO()
             {
                 Id = entity.Id,
-                Equation = entity.EquationCalculatedAttributeJoin.Equation.ToDto()
+                Equation = entity.EquationCalculatedAttributeJoin?.Equation.ToDto(),
+                CriteriaLibrary = entity.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary.ToDto()
             };
-            if (entity.CriterionLibraryCalculatedAttributeJoin != null)
-                result.CriteriaLibrary = entity.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary.ToDto();
-            return result;
-        }
+        
 
         public static CalculatedAttributeLibraryEntity ToLibraryEntity(this CalculatedAttributeLibraryDTO dto) =>
             new CalculatedAttributeLibraryEntity()

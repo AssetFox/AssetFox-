@@ -13,6 +13,10 @@ import { emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
 import { clone, isEmpty, keys, symmetricDifference } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { sorter } from '@/shared/utils/sorter-utils';
+import {
+    emptyCalculatedAttribute,
+    emptyCalculatedAttributeLibrary,
+} from '../models/iAM/calculated-attribute';
 
 export const hasUnsavedChangesCore = (
     objectType: string,
@@ -106,6 +110,12 @@ export const hasUnsavedChanges = (
             return (
                 !isEqual(localLibrary, emptyCriterionLibrary) &&
                 !isEqual(localLibrary, selectedLibrary)
+            );
+        case 'calculatedattribute':
+            return (
+                !isEqual(localLibrary, emptyCalculatedAttributeLibrary) &&
+                !isEqual(localLibrary, selectedLibrary) &&
+                !isEqual(localLibrary, scenarioLibrary)
             );
         default:
             return false;

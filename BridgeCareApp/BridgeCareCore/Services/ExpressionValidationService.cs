@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models.Validation;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ using MoreLinq;
 
 namespace BridgeCareCore.Services
 {
-    public class ExpressionValidationService
+    public class ExpressionValidationService : IExpressionValidationService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly ILog _log;
@@ -212,9 +213,72 @@ namespace BridgeCareCore.Services
             }
         }
 
+        public CriterionValidationResult ValidateCriterionWithoutResults(string mergedCriteriaExpression, UserCriteriaDTO currentUserCriteriaFilter)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(mergedCriteriaExpression))
+                {
+                    return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = "There is no criterion expression." };
+                }
+
+                // Appending the criteria filtering clause for non-admin users
+                if (currentUserCriteriaFilter.HasCriteria)
+                {
+                    currentUserCriteriaFilter.Criteria = "(" + currentUserCriteriaFilter.Criteria + ")";
+
+                    mergedCriteriaExpression = $"({mergedCriteriaExpression}) AND { currentUserCriteriaFilter.Criteria }";
+                }
+
+                CheckAttributes(mergedCriteriaExpression);
+
+                var modifiedExpression = mergedCriteriaExpression
+                    .Replace("[", "")
+                    .Replace("]", "")
+                    .Replace("@", "")
+                    .Replace("|", "'")
+                    .ToUpper();
+
+
+                var attributes = _unitOfWork.Context.Attribute
+                    .Where(_ => modifiedExpression.Contains(_.Name))
+                    .Select(attribute => new AttributeEntity
+                    {
+                        Name = attribute.Name,
+                        DataType = attribute.DataType
+                    }).AsNoTracking().ToList();
+
+                var compiler = new CalculateEvaluateCompiler();
+
+                attributes.ForEach(attribute =>
+                {
+                    compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                        ? CalculateEvaluateParameterType.Number
+                        : CalculateEvaluateParameterType.Text;
+                });
+
+                compiler.GetEvaluator(modifiedExpression);
+
+                return new CriterionValidationResult
+                {
+                    IsValid = true, ResultsCount = 0, ValidationMessage = "Success"
+                };
+            }
+            catch (CalculateEvaluateException e)
+            {
+                _log.Error($"{e.Message}\r\n{e.StackTrace}");
+                return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = e.Message };
+            }
+            catch (Exception e)
+            {
+                _log.Error($"{e.Message}\r\n{e.StackTrace}");
+                return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = e.Message };
+            }
+        }
+
         private void CheckAttributes(string target)
         {
-            var attributes = _unitOfWork.Context.Attribute.ToList();
+            var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
             target = target.Replace('[', '?');
             foreach (var allowedAttribute in attributes.Where(allowedAttribute => target.IndexOf("?" + allowedAttribute.Name + "]", StringComparison.Ordinal) >= 0))
             {
@@ -273,7 +337,7 @@ namespace BridgeCareCore.Services
                     {
                         Name = aggregatedResult.Attribute.Name, DataType = aggregatedResult.Attribute.DataType
                     }
-                }).AsNoTracking().AsEnumerable()
+                }).AsNoTracking().AsSplitQuery().AsEnumerable()
                 .GroupBy(_ => _.MaintainableAssetId, _ => _)
                 .ToDictionary(_ => _.Key, aggregatedResults =>
                 {

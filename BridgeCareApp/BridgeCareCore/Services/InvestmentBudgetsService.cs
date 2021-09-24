@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services.SummaryReport;
 using Microsoft.EntityFrameworkCore;
@@ -20,9 +21,15 @@ namespace BridgeCareCore.Services
     public class InvestmentBudgetsService : IInvestmentBudgetsService
     {
         private static UnitOfDataPersistenceWork _unitOfWork;
+        private static IExpressionValidationService _expressionValidationService;
 
-        public InvestmentBudgetsService(UnitOfDataPersistenceWork unitOfWork) =>
+        public InvestmentBudgetsService(UnitOfDataPersistenceWork unitOfWork,
+            IExpressionValidationService expressionValidationService)
+        {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _expressionValidationService = expressionValidationService ??
+                                           throw new ArgumentNullException(nameof(expressionValidationService));
+        }
 
         private void AddHeaderCells(ExcelWorksheet worksheet, List<string> budgetNames)
         {
@@ -67,7 +74,8 @@ namespace BridgeCareCore.Services
 
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
 
-            var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+            var budgetWorksheet = excelPackage.Workbook.Worksheets.Add("Budget");
+            var criteriaWorksheet = excelPackage.Workbook.Worksheets.Add("Criteria");
 
             var headers = new List<string>
             {
@@ -77,7 +85,11 @@ namespace BridgeCareCore.Services
                 "Sample Budget 4"
             };
 
-            AddHeaderCells(worksheet, headers);
+            AddHeaderCells(budgetWorksheet, headers);
+            AddHeaderCells(criteriaWorksheet, new List<string>
+            {
+                "BUDGET_NAME", "CRITERIA"
+            });
 
             var sampleBudgetAmountsPerYear = new Dictionary<int, List<decimal>>();
 
@@ -90,7 +102,16 @@ namespace BridgeCareCore.Services
                 currentYear++;
             }
 
-            AddDataCells(worksheet, sampleBudgetAmountsPerYear);
+            AddDataCells(budgetWorksheet, sampleBudgetAmountsPerYear);
+
+            var currentRow = 2;
+            var sampleCriteria = "[INTERSTATE]='Y'";
+            headers.ForEach(budgetName =>
+            {
+                criteriaWorksheet.Cells[currentRow, 1].Value = budgetName;
+                criteriaWorksheet.Cells[currentRow, 2].Value = sampleCriteria;
+                currentRow++;
+            });
 
             return new FileInfoDTO
             {
@@ -182,13 +203,32 @@ namespace BridgeCareCore.Services
         }
 
 
-        public List<BudgetDTO> ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage)
+        public ScenarioBudgetImportResultDTO ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter)
         {
-            var worksheet = excelPackage.Workbook.Worksheets[0];
-            var worksheetEnd = worksheet.Dimension.End;
+            var budgetWorksheet = excelPackage.Workbook.Worksheets[0];
+            var budgetWorksheetEnd = budgetWorksheet.Dimension.End;
 
-            var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheetEnd.Column]
+            var worksheetBudgetNames = budgetWorksheet.Cells[1, 2, 1, budgetWorksheetEnd.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
+
+            var criteriaPerBudgetName = new Dictionary<string, string>();
+            if (excelPackage.Workbook.Worksheets.Count > 1)
+            {
+                var criteriaWorksheet = excelPackage.Workbook.Worksheets[1];
+                var budgetCol = 1;
+                var criteriaCol = 2;
+                for (var row = 2; row <= criteriaWorksheet.Dimension.End.Row; row++)
+                {
+                    var budgetName = criteriaWorksheet.GetValue<string>(row, budgetCol);
+                    var criteria = criteriaWorksheet.GetValue<string>(row, criteriaCol);
+                    if (!criteriaPerBudgetName.ContainsKey(budgetName))
+                    {
+                        criteriaPerBudgetName.Add(budgetName, string.Empty);
+                    }
+
+                    criteriaPerBudgetName[budgetName] = criteria;
+                }
+            }
 
             var existingBudgetEntities = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId)
                 .Select(_ => _.ToScenarioEntity(simulationId)).ToList();
@@ -208,12 +248,12 @@ namespace BridgeCareCore.Services
             });
 
             var newBudgetAmountEntities = new List<ScenarioBudgetAmountEntity>();
-            for (var row = 2; row <= worksheetEnd.Row; row++)
+            for (var row = 2; row <= budgetWorksheetEnd.Row; row++)
             {
-                for (var col = 2; col <= worksheetEnd.Column; col++)
+                for (var col = 2; col <= budgetWorksheetEnd.Column; col++)
                 {
-                    var budgetName = worksheet.GetValue<string>(1, col);
-                    var year = worksheet.GetValue<int>(row, 1);
+                    var budgetName = budgetWorksheet.GetValue<string>(1, col);
+                    var year = budgetWorksheet.GetValue<int>(row, 1);
                     var budgetYearTuple = (budgetName, year);
                     if (!budgetAmountsPerBudgetYearTuple.ContainsKey(budgetYearTuple))
                     {
@@ -228,30 +268,104 @@ namespace BridgeCareCore.Services
                             Id = Guid.NewGuid(),
                             ScenarioBudgetId = budgetId,
                             Year = budgetYearTuple.year,
-                            Value = worksheet.GetValue<decimal>(row, col)
+                            Value = budgetWorksheet.GetValue<decimal>(row, col)
                         });
                     }
                     else
                     {
-                        budgetAmountsPerBudgetYearTuple[budgetYearTuple].Value = worksheet.GetValue<decimal>(row, col);
+                        budgetAmountsPerBudgetYearTuple[budgetYearTuple].Value = budgetWorksheet.GetValue<decimal>(row, col);
                     }
                 }
             }
 
-            _unitOfWork.Context.AddAll(newBudgetEntities);
-            _unitOfWork.Context.AddAll(newBudgetAmountEntities);
-            _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList());
+            _unitOfWork.Context.AddAll(newBudgetEntities, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList(), _unitOfWork.UserEntity?.Id);
 
-            return _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            var budgetsWithInvalidCriteria = new List<string>();
+            if (criteriaPerBudgetName.Values.Any())
+            {
+                var allBudgetEntities = new List<ScenarioBudgetEntity>();
+                allBudgetEntities.AddRange(existingBudgetEntities);
+                allBudgetEntities.AddRange(newBudgetEntities);
+
+                var budgetNames = criteriaPerBudgetName.Keys.ToList();
+                _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
+                    _.IsSingleUse && _.CriterionLibraryScenarioBudgetJoins.All(join =>
+                        join.ScenarioBudget.SimulationId == simulationId &&
+                        budgetNames.Contains(join.ScenarioBudget.Name)));
+
+                var criteria = new List<CriterionLibraryEntity>();
+                var criteriaJoins = new List<CriterionLibraryScenarioBudgetEntity>();
+                criteriaPerBudgetName.Where(_ => !string.IsNullOrEmpty(_.Value)).ToList().ForEach(criterionPerBudgetName =>
+                {
+                    var budgetName = criterionPerBudgetName.Key;
+                    var criterion = criterionPerBudgetName.Value;
+                    if (!string.IsNullOrEmpty(criterion))
+                    {
+                        var validationResult = _expressionValidationService.ValidateCriterionWithoutResults(criterion, currentUserCriteriaFilter);
+                        if (validationResult.IsValid)
+                        {
+                            var criterionId = Guid.NewGuid();
+                            criteria.Add(new CriterionLibraryEntity
+                            {
+                                Id = criterionId,
+                                IsSingleUse = true,
+                                Name = $"{budgetName} Criterion Library",
+                                MergedCriteriaExpression = criterion
+                            });
+                            criteriaJoins.Add(new CriterionLibraryScenarioBudgetEntity
+                            {
+                                CriterionLibraryId = criterionId,
+                                ScenarioBudgetId = allBudgetEntities.Single(_ => _.Name == budgetName).Id
+                            });
+                        }
+                        else
+                        {
+                            budgetsWithInvalidCriteria.Add(budgetName);
+                        }
+                    }
+                });
+                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.UserEntity?.Id);
+            }
+
+
+            return new ScenarioBudgetImportResultDTO
+            {
+                Budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId),
+                WarningMessage = budgetsWithInvalidCriteria.Any()
+                    ? $"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}"
+                    : null
+            };
         }
 
-        public BudgetLibraryDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage)
+        public BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter)
         {
-            var worksheet = excelPackage.Workbook.Worksheets[0];
-            var worksheetEnd = worksheet.Dimension.End;
+            var budgetWorksheet = excelPackage.Workbook.Worksheets[0];
+            var budgetWorksheetEnd = budgetWorksheet.Dimension.End;
 
-            var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheetEnd.Column]
+            var worksheetBudgetNames = budgetWorksheet.Cells[1, 2, 1, budgetWorksheetEnd.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
+
+            var criteriaPerBudgetName = new Dictionary<string, string>();
+            if (excelPackage.Workbook.Worksheets.Count > 1)
+            {
+                var criteriaWorksheet = excelPackage.Workbook.Worksheets[1];
+                var budgetCol = 1;
+                var criteriaCol = 2;
+                for (var row = 2; row <= criteriaWorksheet.Dimension.End.Row; row++)
+                {
+                    var budgetName = criteriaWorksheet.GetValue<string>(row, budgetCol);
+                    var criteria = criteriaWorksheet.GetValue<string>(row, criteriaCol);
+                    if (!criteriaPerBudgetName.ContainsKey(budgetName))
+                    {
+                        criteriaPerBudgetName.Add(budgetName, string.Empty);
+                    }
+
+                    criteriaPerBudgetName[budgetName] = criteria;
+                }
+            }
 
             var existingBudgetEntities = _unitOfWork.BudgetRepo.GetLibraryBudgets(budgetLibraryId);
 
@@ -270,12 +384,12 @@ namespace BridgeCareCore.Services
             });
 
             var newBudgetAmountEntities = new List<BudgetAmountEntity>();
-            for (var row = 2; row <= worksheetEnd.Row; row++)
+            for (var row = 2; row <= budgetWorksheetEnd.Row; row++)
             {
-                for (var col = 2; col <= worksheetEnd.Column; col++)
+                for (var col = 2; col <= budgetWorksheetEnd.Column; col++)
                 {
-                    var budgetName = worksheet.GetValue<string>(1, col);
-                    var year = worksheet.GetValue<int>(row, 1);
+                    var budgetName = budgetWorksheet.GetValue<string>(1, col);
+                    var year = budgetWorksheet.GetValue<int>(row, 1);
                     var budgetYearTuple = (budgetName, year);
                     if (!budgetAmountsPerBudgetYearTuple.ContainsKey(budgetYearTuple))
                     {
@@ -290,21 +404,76 @@ namespace BridgeCareCore.Services
                             Id = Guid.NewGuid(),
                             BudgetId = budgetId,
                             Year = budgetYearTuple.year,
-                            Value = worksheet.GetValue<decimal>(row, col)
+                            Value = budgetWorksheet.GetValue<decimal>(row, col)
                         });
                     }
                     else
                     {
-                        budgetAmountsPerBudgetYearTuple[budgetYearTuple].Value = worksheet.GetValue<decimal>(row, col);
+                        budgetAmountsPerBudgetYearTuple[budgetYearTuple].Value = budgetWorksheet.GetValue<decimal>(row, col);
                     }
                 }
             }
 
-            _unitOfWork.Context.AddAll(newBudgetEntities);
-            _unitOfWork.Context.AddAll(newBudgetAmountEntities);
-            _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList());
+            _unitOfWork.Context.AddAll(newBudgetEntities, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList(), _unitOfWork.UserEntity?.Id);
 
-            return _unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryId);
+            var budgetsWithInvalidCriteria = new List<string>();
+            if (criteriaPerBudgetName.Values.Any())
+            {
+                var allBudgetEntities = new List<BudgetEntity>();
+                allBudgetEntities.AddRange(existingBudgetEntities);
+                allBudgetEntities.AddRange(newBudgetEntities);
+
+                var budgetNames = criteriaPerBudgetName.Keys.ToList();
+                _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
+                    _.IsSingleUse && _.CriterionLibraryBudgetJoins.All(join =>
+                        join.Budget.BudgetLibraryId == budgetLibraryId &&
+                        budgetNames.Contains(join.Budget.Name)));
+
+                var criteria = new List<CriterionLibraryEntity>();
+                var criteriaJoins = new List<CriterionLibraryBudgetEntity>();
+                criteriaPerBudgetName.Where(_ => !string.IsNullOrEmpty(_.Value)).ToList().ForEach(criterionPerBudgetName =>
+                {
+                    var budgetName = criterionPerBudgetName.Key;
+                    var criterion = criterionPerBudgetName.Value;
+                    if (!string.IsNullOrEmpty(criterion))
+                    {
+                        var validationResult = _expressionValidationService.ValidateCriterionWithoutResults(criterion, currentUserCriteriaFilter);
+                        if (validationResult.IsValid)
+                        {
+                            var criterionId = Guid.NewGuid();
+                            criteria.Add(new CriterionLibraryEntity
+                            {
+                                Id = criterionId,
+                                IsSingleUse = true,
+                                Name = $"{budgetName} Criterion Library",
+                                MergedCriteriaExpression = criterion
+                            });
+                            criteriaJoins.Add(new CriterionLibraryBudgetEntity
+                            {
+                                CriterionLibraryId = criterionId,
+                                BudgetId = allBudgetEntities.Single(_ => _.Name == budgetName).Id
+                            });
+                        }
+                        else
+                        {
+                            budgetsWithInvalidCriteria.Add(budgetName);
+                        }
+                    }
+
+                });
+                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.UserEntity?.Id);
+            }
+
+            return new BudgetImportResultDTO
+            {
+                BudgetLibrary = _unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryId),
+                WarningMessage = budgetsWithInvalidCriteria.Any()
+                    ? $"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}"
+                    : null
+            };
         }
     }
 }

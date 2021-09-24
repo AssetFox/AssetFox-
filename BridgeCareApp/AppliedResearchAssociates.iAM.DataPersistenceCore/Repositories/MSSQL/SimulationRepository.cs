@@ -5,10 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.Domains;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
@@ -19,9 +20,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public SimulationRepository(UnitOfDataPersistenceWork unitOfWork) =>
+        public SimulationRepository(UnitOfDataPersistenceWork unitOfWork)
+        {
             _unitOfWork = unitOfWork ??
                           throw new ArgumentNullException(nameof(unitOfWork));
+        }
 
         public void CreateSimulation(Simulation simulation)
         {
@@ -100,15 +103,48 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
+            var defaultLibrary = _unitOfWork.Context.CalculatedAttributeLibrary.Where(_ => _.IsDefault == true)
+                .Include(_ => _.CalculatedAttributes)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.CalculatedAttributes)
+                .ThenInclude(_ => _.Equations)
+                .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.CalculatedAttributes)
+                .ThenInclude(_ => _.Equations)
+                .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+                .ThenInclude(_ => _.Equation)
+                .Select(_ => _.ToDto())
+                .ToList();
+
+            if (defaultLibrary.Count == 0)
+            {
+                throw new RowNotInTableException($"No default library for Calculated Attributes has been found. Please contact admin");
+            }
+
             var simulationEntity = dto.ToEntity(networkId);
+            // if there are multiple default libraries (This should not happen). Take the first one
+             //var libraryDto = defaultLibrary[0].ToDto();
 
             _unitOfWork.Context.AddEntity(simulationEntity, _unitOfWork.UserEntity?.Id);
-
             if (dto.Users.Any())
             {
                 _unitOfWork.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(),
                     _unitOfWork.UserEntity?.Id);
             }
+            ICalculatedAttributesRepository _calculatedAttributesRepo = _unitOfWork.CalculatedAttributeRepo;
+            // Assiging new Ids because this object will be assiged to a simulation
+            defaultLibrary[0].CalculatedAttributes.ForEach(_ => {
+                _.Id = Guid.NewGuid();
+                _.Equations.ForEach(e =>
+                {
+                    e.Id = Guid.NewGuid();
+                    e.CriteriaLibrary.Id = Guid.NewGuid();
+                    e.CriteriaLibrary.IsSingleUse = true;
+                    e.Equation.Id = Guid.NewGuid();
+                });
+            });
+            _calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(defaultLibrary[0].CalculatedAttributes, simulationEntity.Id);
         }
 
         public SimulationDTO GetSimulation(Guid simulationId)

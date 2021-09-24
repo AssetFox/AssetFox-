@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
@@ -282,7 +282,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         internal double CalculatePostedCountOrDeckAreaForBPN(List<SectionSummaryDetail> initialSectionSummaries, string bpn, bool isCount)
         {
-            var postedBridges = initialSectionSummaries.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);           
+            var postedBridges = initialSectionSummaries.FindAll(b => b.ValuePerTextAttribute["BUS_PLAN_NETWORK"] == bpn);
             var selectedBridges = postedBridges.FindAll(section => IsPosted(section));
             if (isCount)
             {

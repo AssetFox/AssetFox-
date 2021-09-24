@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
@@ -19,5 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId);      
 
         void UpsertScenarioCalculatedAttributes(ICollection<CalculatedAttributeDTO> calculatedAttributes, Guid simulationId);
+
+        void PopulateScenarioCalculatedFields(Simulation simulation);
     }
 }

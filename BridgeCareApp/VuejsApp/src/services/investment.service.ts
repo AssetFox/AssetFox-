@@ -1,6 +1,7 @@
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { AxiosPromise } from 'axios';
 import { BudgetLibrary, Investment } from '@/shared/models/iAM/investment';
+import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 
 export default class InvestmentService {
     static getInvestment(scenarioId: string): AxiosPromise {
@@ -59,13 +60,18 @@ export default class InvestmentService {
         file: File,
         overwriteBudgets: boolean,
         id: string,
-        forScenario: boolean = false,
+        forScenario: boolean,
+        currentUserCriteriaFilter: UserCriteriaFilter,
     ) {
         let formData = new FormData();
 
         formData.append('file', file);
         formData.append('overwriteBudgets', overwriteBudgets ? '1' : '0');
         formData.append(forScenario ? 'simulationId' : 'libraryId', id);
+        formData.append(
+            'currentUserCriteriaFilter',
+            JSON.stringify(currentUserCriteriaFilter),
+        );
 
         return forScenario
             ? coreAxiosInstance.post(

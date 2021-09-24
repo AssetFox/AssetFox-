@@ -22,20 +22,30 @@ namespace BridgeCareCore.Controllers
     public class CalculatedAttributesController : BridgeCareCoreBaseController
     {
         private readonly ICalculatedAttributesRepository calculatedAttributesRepo;
+        private readonly IAttributeRepository attributeRepo;
 
         public CalculatedAttributesController(IEsecSecurity esec, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esec, unitOfWork, hubService, httpContextAccessor)
         {
+            attributeRepo = unitOfWork.AttributeRepo;
             calculatedAttributesRepo = unitOfWork.CalculatedAttributeRepo;
         }
 
         [HttpGet]
+        [Route("CalculatedAttributes")]
+        [Authorize]
+        public async Task<IActionResult> GetCalculatedAttributes()
+        {
+            var result = await attributeRepo.CalculatedAttributes();
+            return Ok(result);
+        }
+            
+
+        [HttpGet]
         [Route("CalculatedAttrbiuteLibraries")]
         [Authorize]
-        public async Task<IActionResult> GetCalculatedAttributeLibraries()
-        {
-            return Ok(calculatedAttributesRepo.GetCalculatedAttributeLibraries().ToList());
-        }
+        public async Task<IActionResult> GetCalculatedAttributeLibraries() =>
+             Ok(calculatedAttributesRepo.GetCalculatedAttributeLibraries().ToList());
 
         [HttpGet]
         [Route("ScenarioAttributes/{simulationId}")]

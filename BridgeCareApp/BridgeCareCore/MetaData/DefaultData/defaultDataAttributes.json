@@ -4,7 +4,8 @@
       "Weighting": "RISK_SCORE",
       "OptimizationStrategy": "BenefitToCostRatio",
       "BenefitAttribute": "CONDITIONINDEX",
-      "BenefitLimit": 0
+      "BenefitLimit": 0,
+      "SpendingStrategy": "AsBudgetPermits"
     },
     "Investment": {
       "MinimumProjectCostLimit": 1000,

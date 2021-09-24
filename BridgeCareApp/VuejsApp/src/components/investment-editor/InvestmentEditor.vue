@@ -250,6 +250,7 @@ import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
+import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 
 @Component({
     components: {
@@ -268,6 +269,7 @@ export default class InvestmentEditor extends Vue {
     @State(state => state.investmentModule.scenarioBudgets) stateScenarioBudgets: Budget[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
     @Action('getInvestment') getInvestmentAction: any;
     @Action('getBudgetLibraries') getBudgetLibrariesAction: any;
@@ -634,11 +636,13 @@ export default class InvestmentEditor extends Vue {
                     this.importScenarioInvestmentBudgetsFileAction({
                         ...data,
                         id: this.selectedScenarioId,
+                        currentUserCriteriaFilter: this.currentUserCriteriaFilter
                     });
                 } else {
                     this.importLibraryInvestmentBudgetsFileAction({
                         ...data,
                         id: this.selectedBudgetLibrary.id,
+                        currentUserCriteriaFilter: this.currentUserCriteriaFilter
                     });
                 }
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
@@ -58,7 +58,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
 
                     var chosenTreatment = treatmentOptions.FirstOrDefault();
                     if (chosenTreatment != null)
-                    { 
+                    {
                         var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
                         if (!treatmentsPerSection.ContainsKey(facilityId))
                         {

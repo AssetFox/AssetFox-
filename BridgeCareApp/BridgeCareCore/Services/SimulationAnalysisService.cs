@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -65,6 +65,7 @@ namespace BridgeCareCore.Services
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+            _unitOfWork.CalculatedAttributeRepo.PopulateScenarioCalculatedFields(simulation);
 
             var runner = new SimulationRunner(simulation);
 

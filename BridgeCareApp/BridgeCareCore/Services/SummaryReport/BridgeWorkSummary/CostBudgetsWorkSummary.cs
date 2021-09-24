@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
+using BridgeCareCore.Interfaces.SummaryReport;
 using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;

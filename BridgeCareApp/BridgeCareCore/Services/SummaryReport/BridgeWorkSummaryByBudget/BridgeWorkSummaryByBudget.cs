@@ -31,7 +31,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
-            List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount)
+            List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount, IReadOnlyCollection<SelectableTreatment> selectableTreatments)
         {
             var startYear = simulationYears[0];
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
@@ -58,6 +58,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             }
 
             var committedTreatments = new HashSet<string>();
+            var map = WorkTypeMap.Map;
             foreach (var summaryData in workSummaryByBudgetData)
             {
                 foreach (var yearData in reportOutputData.Years)
@@ -70,14 +71,19 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                             var committedtTreatment = section.TreatmentConsiderations;
                             var budgetAmount = (double)committedtTreatment.Sum(_ =>
                             _.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget).Sum(bu => bu.CoveredCost));
-
+                            var category = TreatmentCategory.Other;
+                            if (map.ContainsKey(section.AppliedTreatment))
+                            {
+                                category = map[section.AppliedTreatment];
+                            }
                             summaryData.YearlyData.Add(new YearsData
                             {
                                 Year = yearData.Year,
                                 Treatment = section.AppliedTreatment,
                                 Amount = budgetAmount,
                                 isCommitted = true,
-                                costPerBPN = (section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], budgetAmount)
+                                costPerBPN = (section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], budgetAmount),
+                                TreatmentCategory = category
                             });
                             committedTreatments.Add(section.AppliedTreatment);
                             continue;
@@ -88,13 +94,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                             var treatmentConsideration = section.TreatmentConsiderations;
                             var budgetAmount = (double)treatmentConsideration.Sum(_ =>
                             _.BudgetUsages.Where(b => b.BudgetName == summaryData.Budget).Sum(bu => bu.CoveredCost));
-
+                            var treatmentData = selectableTreatments.FirstOrDefault(_ => _.Name == section.AppliedTreatment);
                             summaryData.YearlyData.Add(new YearsData
                             {
                                 Year = yearData.Year,
                                 Treatment = section.AppliedTreatment,
                                 Amount = budgetAmount,
-                                costPerBPN = (section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], budgetAmount)
+                                costPerBPN = (section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], budgetAmount),
+                                TreatmentCategory = treatmentData.Category,
+                                AssetType = treatmentData.Asset
                             });
                         }
                     }
@@ -113,10 +121,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 var workTypeTotal = new WorkTypeTotal();
 
                 costForCulvertBudget = summaryData.YearlyData
-                                            .FindAll(_ => _.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && !_.isCommitted);
+                                            .FindAll(_ => _.AssetType == AssetType.Culvert && !_.isCommitted);
 
                 costForBridgeBudgets = summaryData.YearlyData
-                                                .FindAll(_ => !_.Treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && !_.isCommitted);
+                                                .FindAll(_ => _.AssetType == AssetType.Bridge && !_.isCommitted);
 
                 costForCommittedBudgets = summaryData.YearlyData
                                                     .FindAll(_ => _.isCommitted && _.Treatment.ToLower() != Properties.Resources.NoTreatment);
@@ -376,64 +384,35 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
         private void InsertWorkTypeTotals(int startYear, int firstContentRow, ExcelWorksheet worksheet, WorkTypeTotal workTypeTotal)
         {
-            // Add data for BAMS work type totals "Preservation"
-            foreach (var item in workTypeTotal.MPMSpreservationCostPerYear)
+            foreach (var item in workTypeTotal.PreservationCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-            foreach (var item in workTypeTotal.BAMSPreservationCostPerYear)
-            {
-                FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
-            }
-            // End of BAMS work type totals "Preservation"
-
-            // Add data for Work type totals "Emergency repair"
             firstContentRow++;
-            foreach (var item in workTypeTotal.MPMSEmergencyRepairCostPerYear)
+            foreach (var item in workTypeTotal.CapacityAddingCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-            // End BAMS work type totals "Emergency repair"
-
             firstContentRow++;
-            // Add data for Work Type Totals "Rehab"
-            foreach (var item in workTypeTotal.BAMSRehabCostPerYear)
+            foreach (var item in workTypeTotal.RehabilitationCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-            foreach (var item in workTypeTotal.CulvertRehabCostPerYear)
-            {
-                FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
-            }
-            foreach (var item in workTypeTotal.MPMSRehabRepairCostPerYear)
-            {
-                FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
-            }
-            // End BAMS work type totals "Rehab"
-
             firstContentRow++;
-
-            // Add data for BAMS Work Type Totals "Replacement"
-            foreach (var item in workTypeTotal.MPMSReplacementCostPerYear)
+            foreach (var item in workTypeTotal.ReplacementCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-            foreach (var item in workTypeTotal.CulvertReplacementCostPerYear)
+            firstContentRow++;
+            foreach (var item in workTypeTotal.MaintenanceCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-            foreach (var item in workTypeTotal.BAMSReplacementCostPerYear)
-            {
-                FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
-            }
-            // End BAMS work type totals "Replacement"
-
-            firstContentRow++; // this row is for "Other" category
+            firstContentRow++;
             foreach (var item in workTypeTotal.OtherCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);
             }
-
             firstContentRow++;
             // Add data for BAMS Work Type Totals "Total Spent"
             worksheet.Cells[firstContentRow, 1].Value = Properties.Resources.TotalSpent;

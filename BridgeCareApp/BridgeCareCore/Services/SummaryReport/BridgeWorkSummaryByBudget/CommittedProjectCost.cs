@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
 using OfficeOpenXml;
@@ -51,7 +50,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 totalAmount += item.Amount;
                 worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
 
-                FillWorkTypeTotals(item, workTypeTotal);
+                WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
             }
 
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.BridgeTotal;
@@ -68,76 +67,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
             ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
             ExcelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
             currentCell.Row++;
-        }
-
-        private void FillWorkTypeTotals(YearsData item, WorkTypeTotal workTypeTotal)
-        {
-            MPMSTreatmentMap.Map.TryGetValue(item.Treatment, out var treatment);
-            switch (treatment)
-            {
-            case MPMSTreatmentName.Preservation:
-                if (!workTypeTotal.MPMSpreservationCostPerYear.ContainsKey(item.Year))
-                {
-                    workTypeTotal.MPMSpreservationCostPerYear.Add(item.Year, 0);
-                }
-                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
-                {
-                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
-                }
-                workTypeTotal.MPMSpreservationCostPerYear[item.Year] += item.Amount;
-                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
-                break;
-            case MPMSTreatmentName.EmergencyRepair:
-                if (!workTypeTotal.MPMSEmergencyRepairCostPerYear.ContainsKey(item.Year))
-                {
-                    workTypeTotal.MPMSEmergencyRepairCostPerYear.Add(item.Year, 0);
-                }
-                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
-                {
-                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
-                }
-                workTypeTotal.MPMSEmergencyRepairCostPerYear[item.Year] += item.Amount;
-                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
-                break;
-            case MPMSTreatmentName.Rehabilitation:
-            case MPMSTreatmentName.Repair:
-                if (!workTypeTotal.MPMSEmergencyRepairCostPerYear.ContainsKey(item.Year))
-                {
-                    workTypeTotal.MPMSEmergencyRepairCostPerYear.Add(item.Year, 0);
-                }
-                if (workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
-                {
-                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
-                }
-                workTypeTotal.MPMSEmergencyRepairCostPerYear[item.Year] += item.Amount;
-                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
-                break;
-            case MPMSTreatmentName.Removal:
-            case MPMSTreatmentName.Replacement:
-                if (!workTypeTotal.MPMSReplacementCostPerYear.ContainsKey(item.Year))
-                {
-                    workTypeTotal.MPMSReplacementCostPerYear.Add(item.Year, 0);
-                }
-                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
-                {
-                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
-                }
-                workTypeTotal.MPMSReplacementCostPerYear[item.Year] += item.Amount;
-                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
-                break;
-            default:
-                if (!workTypeTotal.OtherCostPerYear.ContainsKey(item.Year))
-                {
-                    workTypeTotal.OtherCostPerYear.Add(item.Year, 0);
-                }
-                if (!workTypeTotal.TotalCostPerYear.ContainsKey(item.Year))
-                {
-                    workTypeTotal.TotalCostPerYear.Add(item.Year, 0);
-                }
-                workTypeTotal.OtherCostPerYear[item.Year] += item.Amount;
-                workTypeTotal.TotalCostPerYear[item.Year] += item.Amount;
-                break;
-            }
         }
     }
 }

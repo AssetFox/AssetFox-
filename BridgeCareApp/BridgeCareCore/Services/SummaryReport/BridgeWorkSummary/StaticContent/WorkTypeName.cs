@@ -15,6 +15,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             TreatmentCategory.Rehabilitation => "Rehabilitation",
             TreatmentCategory.Replacement => "Replacement",
             TreatmentCategory.Maintenance => "Maintenance",
+            TreatmentCategory.Other => "Other",
             _ => name.ToString(),
         };
     }

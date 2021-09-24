@@ -52,7 +52,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 totalAmount += item.Amount;
                 worksheet.Cells[rowNum, currentCell.Column + cellToEnterCost + 2].Value = totalAmount;
 
-                FillForWorkTypeTotals(item, workTypeTotal);
+                WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
             }
 
             worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.BridgeTotal;
@@ -68,71 +68,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 
             ExcelHelper.ApplyColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
             ExcelHelper.SetTextColor(worksheet.Cells[currentCell.Row, currentCell.Column + 2, currentCell.Row, simulationYears.Count + 2], Color.White);
-        }
-
-        private void FillForWorkTypeTotals(YearsData data, WorkTypeTotal workTypeTotal)
-        {
-            BamsTreatmentMap.Map.TryGetValue(data.Treatment, out var treatment);
-            switch (treatment)
-            {
-            case BAMSTreatmentName.CountyMaintenanceDeckWork:
-            case BAMSTreatmentName.CountyMaintenanceSuperstructureWork:
-            case BAMSTreatmentName.CountyMaintenanceSubstructureWork:
-            case BAMSTreatmentName.BituminousOverlay:
-            case BAMSTreatmentName.StructuralOverlayJointsCoatings:
-            case BAMSTreatmentName.EpoxyJointGlandsCoatings:
-            case BAMSTreatmentName.PaintingJointSpotZone:
-            case BAMSTreatmentName.PaintingFull:
-                if (!workTypeTotal.BAMSPreservationCostPerYear.ContainsKey(data.Year))
-                {
-                    workTypeTotal.BAMSPreservationCostPerYear.Add(data.Year, 0);
-                }
-                if (!workTypeTotal.TotalCostPerYear.ContainsKey(data.Year))
-                {
-                    workTypeTotal.TotalCostPerYear.Add(data.Year, 0);
-                }
-                workTypeTotal.BAMSPreservationCostPerYear[data.Year] += data.Amount;
-                workTypeTotal.TotalCostPerYear[data.Year] += data.Amount;
-                break;
-            case BAMSTreatmentName.DeckReplacement:
-            case BAMSTreatmentName.SubstructureRehab:
-            case BAMSTreatmentName.SuperstructureRepRehab:
-                if (!workTypeTotal.BAMSRehabCostPerYear.ContainsKey(data.Year))
-                {
-                    workTypeTotal.BAMSRehabCostPerYear.Add(data.Year, 0);
-                }
-                if (!workTypeTotal.TotalCostPerYear.ContainsKey(data.Year))
-                {
-                    workTypeTotal.TotalCostPerYear.Add(data.Year, 0);
-                }
-                workTypeTotal.BAMSRehabCostPerYear[data.Year] += data.Amount;
-                workTypeTotal.TotalCostPerYear[data.Year] += data.Amount;
-                break;
-            case BAMSTreatmentName.BridgeReplacement:
-                if (!workTypeTotal.BAMSReplacementCostPerYear.ContainsKey(data.Year))
-                {
-                    workTypeTotal.BAMSReplacementCostPerYear.Add(data.Year, 0);
-                }
-                if (!workTypeTotal.TotalCostPerYear.ContainsKey(data.Year))
-                {
-                    workTypeTotal.TotalCostPerYear.Add(data.Year, 0);
-                }
-                workTypeTotal.BAMSReplacementCostPerYear[data.Year] += data.Amount;
-                workTypeTotal.TotalCostPerYear[data.Year] += data.Amount;
-                break;
-            default:
-                if (!workTypeTotal.OtherCostPerYear.ContainsKey(data.Year))
-                {
-                    workTypeTotal.OtherCostPerYear.Add(data.Year, 0);
-                }
-                if (!workTypeTotal.TotalCostPerYear.ContainsKey(data.Year))
-                {
-                    workTypeTotal.TotalCostPerYear.Add(data.Year, 0);
-                }
-                workTypeTotal.OtherCostPerYear[data.Year] += data.Amount;
-                workTypeTotal.TotalCostPerYear[data.Year] += data.Amount;
-                break;
-            }
         }
     }
 }

@@ -182,7 +182,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
-            _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount);
+            _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
             var districtTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
             ExcelWorksheetAdder.AddWorksheet(excelPackage.Workbook, districtTotalsModel);
 

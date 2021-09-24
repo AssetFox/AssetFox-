@@ -1,4 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.Analysis;
+﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace BridgeCareCore.Interfaces.SummaryReport
 {

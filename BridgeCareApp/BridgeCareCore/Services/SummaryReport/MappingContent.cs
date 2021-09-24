@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace BridgeCareCore.Services.SummaryReport
 {
@@ -87,11 +87,11 @@ namespace BridgeCareCore.Services.SummaryReport
             case "Epoxy Overlay":
                 return "05 - Epoxy Overlay";
             case "Bituminous":
-                return "06 - Bituminous (applies only to structures with no deck)";  
+                return "06 - Bituminous (applies only to structures with no deck)";
             case "Wood or Timber":
                 return "07 - Wood or Timber";
             case "Not applicable":
-                return "N - Not applicable";          
+                return "N - Not applicable";
             case "Gravel":
                 return "08 - Gravel";
             case "Other":

@@ -1,5 +1,5 @@
 ﻿using System;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {

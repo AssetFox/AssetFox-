@@ -63,10 +63,11 @@ namespace BridgeCareCore.Controllers
             if (analysisMethodDTO.Attribute == null && analysisMethodDTO.Benefit.Id == Guid.Empty && analysisMethodDTO.CriterionLibrary.Id == Guid.Empty)
             {
                 var analysisDefaultData = _analysisDefaultDataService.GetAnalysisDefaultData().Result;
-                analysisMethodDTO.Attribute = analysisDefaultData.weighting;
-                analysisMethodDTO.OptimizationStrategy = analysisDefaultData.optimizationStrategy;
-                analysisMethodDTO.Benefit.Attribute = analysisDefaultData.benefitAttribute;
-                analysisMethodDTO.Benefit.Limit = analysisDefaultData.benefitLimit;
+                analysisMethodDTO.Attribute = analysisDefaultData.Weighting;
+                analysisMethodDTO.OptimizationStrategy = analysisDefaultData.OptimizationStrategy;
+                analysisMethodDTO.Benefit.Attribute = analysisDefaultData.BenefitAttribute;
+                analysisMethodDTO.Benefit.Limit = analysisDefaultData.BenefitLimit;
+                analysisMethodDTO.SpendingStrategy = analysisDefaultData.SpendingStrategy;
             }
         }
 

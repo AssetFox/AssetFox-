@@ -1,4 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.DataAccess;
+﻿using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DTOs

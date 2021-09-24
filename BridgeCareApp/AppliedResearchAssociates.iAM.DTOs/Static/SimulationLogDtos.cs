@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using AppliedResearchAssociates.CalculateEvaluate;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace AppliedResearchAssociates.iAM.DTOs.Static
 {

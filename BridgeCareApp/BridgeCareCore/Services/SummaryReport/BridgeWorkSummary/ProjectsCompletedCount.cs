@@ -195,17 +195,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column = ++column;
                 double nonCulvertTotalCount = 0;
 
-                //foreach (var treatment in treatments)
-                //{
-                //    if (!treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase) && treatment != Properties.Resources.CulvertNoTreatment)
-                //    {
-                //        yearlyValues.Value.TryGetValue(treatment, out var nonCulvertCount);
-                //        worksheet.Cells[row, column].Value = nonCulvertCount;
-                //        projectRowNumberModel.TreatmentsCount.Add(treatment + "_" + yearlyValues.Key, row);
-                //        row++;
-                //        nonCulvertTotalCount += nonCulvertCount;
-                //    }
-                //}
                 foreach (var treatment in simulationTreatments)
                 {
                     if (treatment.AssetType == AssetType.Bridge || treatment.Name == Properties.Resources.NonCulvertNoTreatment)

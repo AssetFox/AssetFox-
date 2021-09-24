@@ -18,10 +18,12 @@ using BridgeCareCore.Models.DefaultData;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using Moq;
 using OfficeOpenXml;
 using Xunit;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -44,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            _service = new InvestmentBudgetsService(_testHelper.UnitOfWork);
+            _service = new InvestmentBudgetsService(_testHelper.UnitOfWork, new ExpressionValidationService(_testHelper.UnitOfWork, _testHelper.Logger));
         }
 
         private void CreateAuthorizedController()
@@ -149,6 +151,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
                 {"libraryId", new StringValues(_testBudgetLibrary.Id.ToString())},
+                {"currentUserCriteriaFilter", Newtonsoft.Json.JsonConvert.SerializeObject(new UserCriteriaDTO
+                {
+                    CriteriaId = Guid.NewGuid(),
+                    UserId = Guid.NewGuid(),
+                    UserName = "Test User",
+                    Criteria = string.Empty,
+                    HasCriteria = false,
+                    HasAccess = true,
+                })}
             };
 
             httpContext.Request.Form = new FormCollection(formData, new FormFileCollection {formFile});
@@ -176,6 +187,34 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             httpContext.Request.Form = new FormCollection(formData, new FormFileCollection {formFile});
             _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(httpContext);
+        }
+
+        private Dictionary<string, string> GetCriteriaPerBudgetName()
+        {
+            var criteriaPerBudgetName = new Dictionary<string, string>();
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
+                "TestInvestmentBudgets.xlsx");
+            using var stream = File.OpenRead(filePath);
+            var memStream = new MemoryStream();
+            stream.CopyTo(memStream);
+            var excelPackage = new ExcelPackage(memStream);
+            var criteriaWorksheet = excelPackage.Workbook.Worksheets[1];
+            var budgetCol = 1;
+            var criteriaCol = 2;
+            for (var row = 2; row <= criteriaWorksheet.Dimension.End.Row; row++)
+            {
+                var budgetName = criteriaWorksheet.GetValue<string>(row, budgetCol);
+                var criteria = criteriaWorksheet.GetValue<string>(row, criteriaCol);
+                if (!criteriaPerBudgetName.ContainsKey(budgetName))
+                {
+                    criteriaPerBudgetName.Add(budgetName, string.Empty);
+                }
+
+                criteriaPerBudgetName[budgetName] = criteria;
+            }
+
+            return criteriaPerBudgetName;
         }
 
         private void CreateRequestForExceptionTesting(FormFile file = null)
@@ -594,6 +633,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Assert.Equal(3, budgets.Count);
                     Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
                     Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
+
+                    var criteriaPerBudgetName = GetCriteriaPerBudgetName();
+                    var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+                    var criteria = _testHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
+                        .Where(_ => _.IsSingleUse &&
+                                    _.CriterionLibraryScenarioBudgetJoins.Any(join =>
+                                        budgetNames.Contains(join.ScenarioBudget.Name)))
+                        .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
+                        .ThenInclude(_ => _.ScenarioBudget)
+                        .ToList();
+                    Assert.NotEmpty(criteria);
+                    GetCriteriaPerBudgetName().Keys.ForEach(budgetName =>
+                    {
+                        var databaseCriterion = criteria.Single(_ =>
+                            _.CriterionLibraryScenarioBudgetJoins.Any(join => join.ScenarioBudget.Name == budgetName));
+                        var excelCriterion = criteriaPerBudgetName[budgetName];
+                        Assert.Equal(excelCriterion, databaseCriterion.MergedCriteriaExpression);
+                    });
                 };
             }
             finally
@@ -638,6 +695,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Assert.Equal(2, budgets.Count);
                     Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
                     Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
+
+                    var criteriaPerBudgetName = GetCriteriaPerBudgetName();
+                    var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+                    var criteria = _testHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
+                        .Where(_ => _.IsSingleUse &&
+                                    _.CriterionLibraryScenarioBudgetJoins.Any(join =>
+                                        budgetNames.Contains(join.ScenarioBudget.Name)))
+                        .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
+                        .ThenInclude(_ => _.ScenarioBudget)
+                        .ToList();
+                    Assert.NotEmpty(criteria);
+                    GetCriteriaPerBudgetName().Keys.ForEach(budgetName =>
+                    {
+                        var databaseCriterion = criteria.Single(_ =>
+                            _.CriterionLibraryScenarioBudgetJoins.Any(join => join.ScenarioBudget.Name == budgetName));
+                        var excelCriterion = criteriaPerBudgetName[budgetName];
+                        Assert.Equal(excelCriterion, databaseCriterion.MergedCriteriaExpression);
+                    });
                 };
             }
             finally
@@ -841,6 +916,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Assert.Equal(3, budgets.Count);
                     Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
                     Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
+
+                    var criteriaPerBudgetName = GetCriteriaPerBudgetName();
+                    var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+                    var criteria = _testHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
+                        .Where(_ => _.IsSingleUse &&
+                                    _.CriterionLibraryScenarioBudgetJoins.Any(join =>
+                                        budgetNames.Contains(join.ScenarioBudget.Name)))
+                        .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
+                        .ThenInclude(_ => _.ScenarioBudget)
+                        .ToList();
+                    Assert.NotEmpty(criteria);
+                    GetCriteriaPerBudgetName().Keys.ForEach(budgetName =>
+                    {
+                        var databaseCriterion = criteria.Single(_ =>
+                            _.CriterionLibraryScenarioBudgetJoins.Any(join => join.ScenarioBudget.Name == budgetName));
+                        var excelCriterion = criteriaPerBudgetName[budgetName];
+                        Assert.Equal(excelCriterion, databaseCriterion.MergedCriteriaExpression);
+                    });
                 };
             }
             finally
@@ -885,6 +978,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Assert.Equal(2, budgets.Count);
                     Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
                     Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
+
+                    var criteriaPerBudgetName = GetCriteriaPerBudgetName();
+                    var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+                    var criteria = _testHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
+                        .Where(_ => _.IsSingleUse &&
+                                    _.CriterionLibraryScenarioBudgetJoins.Any(join =>
+                                        budgetNames.Contains(join.ScenarioBudget.Name)))
+                        .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
+                        .ThenInclude(_ => _.ScenarioBudget)
+                        .ToList();
+                    Assert.NotEmpty(criteria);
+                    GetCriteriaPerBudgetName().Keys.ForEach(budgetName =>
+                    {
+                        var databaseCriterion = criteria.Single(_ =>
+                            _.CriterionLibraryScenarioBudgetJoins.Any(join => join.ScenarioBudget.Name == budgetName));
+                        var excelCriterion = criteriaPerBudgetName[budgetName];
+                        Assert.Equal(excelCriterion, databaseCriterion.MergedCriteriaExpression);
+                    });
+
                 };
             }
             finally

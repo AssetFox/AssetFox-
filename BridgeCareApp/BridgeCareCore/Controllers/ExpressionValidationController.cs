@@ -17,9 +17,9 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class ExpressionValidationController : BridgeCareCoreBaseController
     {
-        private readonly ExpressionValidationService _expressionValidationService;
+        private readonly IExpressionValidationService _expressionValidationService;
 
-        public ExpressionValidationController(ExpressionValidationService expressionValidationService,
+        public ExpressionValidationController(IExpressionValidationService expressionValidationService,
             IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _expressionValidationService = expressionValidationService ??

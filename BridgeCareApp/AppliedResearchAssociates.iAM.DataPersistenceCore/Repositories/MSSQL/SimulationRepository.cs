@@ -132,7 +132,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(),
                     _unitOfWork.UserEntity?.Id);
             }
-            ICalculatedAttributesRepository _calculatedAttributesRepo = new CalculatedAttributeRepository(_unitOfWork);
+            ICalculatedAttributesRepository _calculatedAttributesRepo = _unitOfWork.CalculatedAttributeRepo;
             // Assiging new Ids because this object will be assiged to a simulation
             defaultLibrary[0].CalculatedAttributes.ForEach(_ => {
                 _.Id = Guid.NewGuid();

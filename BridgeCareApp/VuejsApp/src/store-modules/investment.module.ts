@@ -87,8 +87,7 @@ const actions = {
         await InvestmentService.getInvestment(scenarioId).then(
             (response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    const investmentData: Investment =
-                        response.data as Investment;
+                    const investmentData: Investment = response.data as Investment;
                     commit(
                         'scenarioBudgetsMutator',
                         investmentData.scenarioBudgets,
@@ -209,6 +208,7 @@ const actions = {
             payload.overwriteBudgets,
             payload.id,
             true,
+            payload.currentUserCriteriaFilter,
         ).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
                 const budgets: Budget[] = response.data as Budget[];
@@ -227,6 +227,8 @@ const actions = {
             payload.file,
             payload.overwriteBudgets,
             payload.id,
+            false,
+            payload.currentUserCriteriaFilter,
         ).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
                 const library: BudgetLibrary = response.data as BudgetLibrary;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Interfaces
@@ -11,8 +12,8 @@ namespace BridgeCareCore.Interfaces
 
         FileInfoDTO ExportLibraryInvestmentBudgetsFile(Guid budgetLibraryId);
 
-        List<BudgetDTO> ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage);
+        ScenarioBudgetImportResultDTO ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter);
 
-        BudgetLibraryDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage);
+        BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter);
     }
 }

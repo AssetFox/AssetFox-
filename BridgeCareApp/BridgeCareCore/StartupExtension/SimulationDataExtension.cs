@@ -21,7 +21,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<ISimulationAnalysis, SimulationAnalysisService>();
             services.AddScoped<AttributeService>();
 
-            services.AddScoped<ExpressionValidationService>();
+            services.AddScoped<IExpressionValidationService, ExpressionValidationService>();
             services.AddScoped<IUserCriteriaRepository, UserCriteriaRepository>();
             services.AddScoped<IAssetData, PennDOTAssetDataRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();

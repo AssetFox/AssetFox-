@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -24,7 +25,7 @@ using OfficeOpenXml;
 namespace BridgeCareCore.Controllers
 {
     using InvestmentUpsertMethod = Action<Guid, InvestmentDTO>;
-    using InvestmentImportMethod = Func<bool, ExcelPackage, Guid, List<BudgetDTO>>;
+    using InvestmentImportMethod = Func<bool, ExcelPackage, Guid, UserCriteriaDTO , ScenarioBudgetImportResultDTO>;
 
 
     [Route("api/[controller]")]
@@ -70,19 +71,19 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, InvestmentImportMethod> CreateImportMethods()
         {
-            List<BudgetDTO> UpsertAny(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId)
+            ScenarioBudgetImportResultDTO UpsertAny(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
             {
                 if (overwriteBudgets)
                 {
                     UnitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
                 }
-                return _investmentBudgetsService.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage);
+                return _investmentBudgetsService.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter);
             }
 
-            List<BudgetDTO> UpsertPermitted(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId)
+            ScenarioBudgetImportResultDTO UpsertPermitted(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                return UpsertAny(overwriteBudgets, excelPackage, simulationId);
+                return UpsertAny(overwriteBudgets, excelPackage, simulationId, currentUserCriteriaFilter);
             }
 
             return new Dictionary<string, InvestmentImportMethod>
@@ -281,16 +282,31 @@ namespace BridgeCareCore.Controllers
                     overwriteBudgets = ContextAccessor.HttpContext.Request.Form["overwriteBudgets"].ToString() == "1";
                 }
 
+                var currentUserCriteriaFilter = new UserCriteriaDTO
+                {
+                    HasCriteria = false
+                };
+                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
+                {
+                    currentUserCriteriaFilter =
+                        Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
+                            ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
+                }
+
                 var result = await Task.Factory.StartNew(() =>
                 {
                     if (overwriteBudgets)
                     {
                         UnitOfWork.Context.DeleteAll<BudgetEntity>(_ => _.BudgetLibraryId == budgetLibraryId);
                     }
-                    return _investmentBudgetsService.ImportLibraryInvestmentBudgetsFile(budgetLibraryId, excelPackage);
+                    return _investmentBudgetsService.ImportLibraryInvestmentBudgetsFile(budgetLibraryId, excelPackage, currentUserCriteriaFilter);
                 });
 
-                return Ok(result);
+                if (result.WarningMessage != null)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                }
+                return Ok(result.BudgetLibrary);
             }
             catch (Exception e)
             {
@@ -331,10 +347,25 @@ namespace BridgeCareCore.Controllers
                     overwriteBudgets = ContextAccessor.HttpContext.Request.Form["overwriteBudgets"].ToString() == "1";
                 }
 
-                var result = await Task.Factory.StartNew(() =>
-                    _investmentImportMethods[UserInfo.Role](overwriteBudgets, excelPackage, simulationId));
+                var currentUserCriteriaFilter = new UserCriteriaDTO
+                {
+                    HasCriteria = false
+                };
+                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
+                {
+                    currentUserCriteriaFilter =
+                        Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
+                            ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
+                }
 
-                return Ok(result);
+                var result = await Task.Factory.StartNew(() =>
+                    _investmentImportMethods[UserInfo.Role](overwriteBudgets, excelPackage, simulationId, currentUserCriteriaFilter));
+
+                if (result.WarningMessage != null)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                }
+                return Ok(result.Budgets);
             }
             catch (UnauthorizedAccessException)
             {

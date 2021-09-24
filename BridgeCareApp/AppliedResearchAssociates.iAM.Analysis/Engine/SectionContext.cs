@@ -299,8 +299,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 }
             }
 
-            FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
-            FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+            if (treatment != SimulationRunner.Simulation.DesignatedPassiveTreatment)
+            {
+                FirstUnshadowedYearForAnyTreatment = year + treatment.ShadowForAnyTreatment;
+                FirstUnshadowedYearForSameTreatment[treatment.Name] = year + treatment.ShadowForSameTreatment;
+            }
 
             Detail.AppliedTreatment = treatment.Name;
             Detail.TreatmentStatus = TreatmentStatus.Applied;

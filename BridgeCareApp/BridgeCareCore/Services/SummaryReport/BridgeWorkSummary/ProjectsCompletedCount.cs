@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
-using static AppliedResearchAssociates.iAM.Domains.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using static AppliedResearchAssociates.iAM.Domains.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
 
 namespace BridgeCareCore.Models.SummaryReport
 {

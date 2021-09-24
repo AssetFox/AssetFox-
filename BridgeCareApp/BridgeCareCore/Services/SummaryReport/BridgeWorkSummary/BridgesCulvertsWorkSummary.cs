@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
-using static AppliedResearchAssociates.iAM.Domains.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {

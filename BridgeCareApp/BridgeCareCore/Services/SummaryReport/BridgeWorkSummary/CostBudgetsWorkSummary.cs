@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
-using BridgeCareCore.Interfaces.SummaryReport;
-using AppliedResearchAssociates.iAM.Domains;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
-using static AppliedResearchAssociates.iAM.Domains.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {

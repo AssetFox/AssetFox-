@@ -386,7 +386,7 @@ import { emptyUserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 @Component
 export default class EquationEditorDialog extends Vue {
   @Prop() dialogData: EquationEditorDialogData;
-  @Prop() isFromPerformanceCurveEditor: Boolean = false;
+  @Prop() isFromPerformanceCurveEditor: Boolean;
 
   @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 

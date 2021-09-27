@@ -307,6 +307,15 @@
                                         <v-icon>fas fa-paste</v-icon>
                                     </v-btn>
                                 </v-flex>
+                                <v-flex>
+                                    <v-btn @click='onShowConfirmDeleteAlert(props.item)'
+                                           class='ara-orange'
+                                           icon
+                                           title='Delete'
+                                           v-if="isAdmin">
+                                        <v-icon>fas fa-trash</v-icon>
+                                    </v-btn>
+                                </v-flex>
                             </v-layout>
                         </td>
                     </template>

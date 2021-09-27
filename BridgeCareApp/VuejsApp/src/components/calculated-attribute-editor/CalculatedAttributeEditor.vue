@@ -705,6 +705,7 @@ export default class CalculatedAttributeEditor extends Vue {
                     id: getNewGuid(),
                 }));
                 att.equations.forEach(eq => {
+                    eq.id = getNewGuid();
                     if (isNil(eq.criteriaLibrary)) {
                         eq.criteriaLibrary = clone(emptyCriterionLibrary);
                         eq.criteriaLibrary.id = getNewGuid();

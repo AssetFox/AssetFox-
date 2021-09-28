@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
-using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {

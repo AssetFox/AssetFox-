@@ -6,8 +6,6 @@ using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
-using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
-using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {

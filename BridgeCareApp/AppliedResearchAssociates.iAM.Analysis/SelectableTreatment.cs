@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.Validation;
-using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {

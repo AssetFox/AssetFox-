@@ -10,8 +10,6 @@ using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
-using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
-using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 {

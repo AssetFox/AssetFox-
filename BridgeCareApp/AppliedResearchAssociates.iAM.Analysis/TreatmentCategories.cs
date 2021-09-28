@@ -4,21 +4,13 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public class TreatmentCategories
+    public enum TreatmentCategory
     {
-        public enum TreatmentCategory
-        {
-            Preservation,
-            CapacityAdding,
-            Rehabilitation,
-            Replacement,
-            Maintenance,
-            Other
-        }
-        public enum AssetCategory
-        {
-            Bridge,
-            Culvert
-        }
+        Preservation,
+        CapacityAdding,
+        Rehabilitation,
+        Replacement,
+        Maintenance,
+        Other
     }
 }

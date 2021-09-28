@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
-using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
-using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
-using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
@@ -17,6 +16,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private Dictionary<int, decimal> TotalBridgeSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalCommittedSpent = new Dictionary<int, decimal>();
         private readonly WorkSummaryModel _workSummaryModel;
+        private int BridgeTotalRow = 0;
+        private int CulvertTotalRow = 0;
+        private int CommittedTotalRow = 0;
 
         public CostBudgetsWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon,
             WorkSummaryModel workSummaryModel)
@@ -27,106 +29,87 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, List<int> simulationYears, SortedSet<string> treatments, Dictionary<string, Budget> yearlyBudgetAmount,
-            Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear)
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount,
+            Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear,
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
-            var localTreatments = new SortedSet<string>(treatments);
-            localTreatments.Remove(Properties.Resources.CulvertNoTreatment);
-            localTreatments.Remove(Properties.Resources.NonCulvertNoTreatment);
+            var localSimulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>(simulationTreatments);
+            localSimulationTreatments.Remove((Properties.Resources.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            localSimulationTreatments.Remove((Properties.Resources.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
 
-            var committedTotalRange = FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
+            var workTypeTotalMPMS = FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
 
-            var culvertTotalRange = FillCostOfCulvertWorkSection(worksheet, currentCell,
-                simulationYears, localTreatments, costPerTreatmentPerYear);
-            var bridgeTotalRange = FillCostOfBridgeWorkSection(worksheet, currentCell,
-                simulationYears, localTreatments, costPerTreatmentPerYear);
+            var workTypeTotalCulvert = FillCostOfCulvertWorkSection(worksheet, currentCell,
+                simulationYears, costPerTreatmentPerYear, localSimulationTreatments);
+            var workTypeTotalBridge = FillCostOfBridgeWorkSection(worksheet, currentCell,
+                simulationYears, costPerTreatmentPerYear, localSimulationTreatments);
 
-            var bridgeTotalRow = bridgeTotalRange.FooterRange.End.Value;
-            var culvertTotalRow = culvertTotalRange.FooterRange.End.Value;
-            var committedTotalRow = committedTotalRange.FooterRange.End.Value;
-
-            var map = WorkTypeMap.Map;
-            var workTypeTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, map, bridgeTotalRange.ContentRange,
-                culvertTotalRange.ContentRange, committedTotalRange.ContentRange, yearlyBudgetAmount);
+            var workTypeTotalAggregated = new WorkTypeTotalAggregated
+            {
+                WorkTypeTotalCulvert = workTypeTotalCulvert,
+                WorkTypeTotalBridge = workTypeTotalBridge,
+                WorkTypeTotalMPMS = workTypeTotalMPMS
+            };
+            var workTypeTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears,
+                yearlyBudgetAmount,
+                workTypeTotalAggregated);
 
             var bpnTotalRow = FillBpnSection(worksheet, currentCell, simulationYears, bpnCostPerYear);
-            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, workTypeTotalRow, committedTotalRow);
+            FillRemainingBudgetSection(worksheet, simulationYears, currentCell, workTypeTotalRow);
         }
 
         #region Private methods
 
-        private ExcelTableRowRanges FillCostOfCommittedWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfCommittedWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
+            List<int> simulationYears,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj)
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of MPMS Work", "MPMS Work Type");
-            var committedTotalRow = AddCostsOfCommittedWork(worksheet, simulationYears, currentCell, yearlyCostCommittedProj);
-
-            var contentRange = new Range(headerRange.End.Value + 1, committedTotalRow - 1);
-            var footerRange = new Range(committedTotalRow, committedTotalRow);
-            return new ExcelTableRowRanges
-            {
-                HeaderRange = headerRange,
-                ContentRange = contentRange,
-                FooterRange = footerRange,
-            };
+            var workTypeTotalData = AddCostsOfCommittedWork(worksheet, simulationYears, currentCell, yearlyCostCommittedProj);
+            return workTypeTotalData;
         }
 
-        private ExcelTableRowRanges FillCostOfCulvertWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
-            List<int> simulationYears, SortedSet<string> treatments,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
+        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfCulvertWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
+            List<int> simulationYears,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Culvert Work", "BAMS Culvert Work Type");
-            var culvertTotalRow = AddCostsOfCulvertWork(worksheet, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
-            var contentRange = new Range(headerRange.End.Value + 1, culvertTotalRow - 1);
-            var footerRange = new Range(culvertTotalRow, culvertTotalRow);
-            return new ExcelTableRowRanges
-            {
-                HeaderRange = headerRange,
-                ContentRange = contentRange,
-                FooterRange = footerRange,
-            };
+            var workTypeTotalCulvert = AddCostsOfCulvertWork(worksheet, simulationYears, currentCell, costPerTreatmentPerYear, simulationTreatments);
+
+            return workTypeTotalCulvert;
         }
 
-        private ExcelTableRowRanges FillCostOfBridgeWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
-            List<int> simulationYears, SortedSet<string> treatments,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
+        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfBridgeWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
+            List<int> simulationYears,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Bridge Work", "BAMS Bridge Work Type");
-            var bridgeTotalRow = AddCostsOfBridgeWork(worksheet, simulationYears, currentCell, treatments, costPerTreatmentPerYear);
-            var contentRange = new Range(headerRange.End.Value + 1, bridgeTotalRow - 1);
-            var footerRange = new Range(bridgeTotalRow, bridgeTotalRow);
-            return new ExcelTableRowRanges
-            {
-                HeaderRange = headerRange,
-                ContentRange = contentRange,
-                FooterRange = footerRange,
-            };
-        }
+            var workTypeTotalBridge = AddCostsOfBridgeWork(worksheet, simulationYears, currentCell, costPerTreatmentPerYear, simulationTreatments);
 
+            return workTypeTotalBridge;
+        }
 
         private int FillWorkTypeTotalsSection(
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<string, WorkTypeName> workTypeMap,
-            Range rangeForSummands,
-            Range culvertRangeForSummands,
-            Range committedRangeForSummands,
-            Dictionary<string, Budget> yearlyBudgetAmount)
+            Dictionary<string, Budget> yearlyBudgetAmount,
+            WorkTypeTotalAggregated workTypeTotalAggregated)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "", "BAMS Work Type Totals");
             var initialRow = currentCell.Row;
             currentCell.Row++;
-            var workTypes = EnumExtensions.GetValues<WorkTypeName>();
+            var workTypes = EnumExtensions.GetValues<TreatmentCategory>();
             var numberOfYears = simulationYears.Count;
             worksheet.Cells[initialRow, 3 + numberOfYears].Value = "Total (all years)";
             var totalColumnHeaderRange = worksheet.Cells[initialRow, 3 + numberOfYears];
             ExcelHelper.ApplyBorder(totalColumnHeaderRange);
             ExcelHelper.ApplyStyle(totalColumnHeaderRange);
-
 
             var startColumnIndex = 3;
             var firstContentRow = currentCell.Row;
@@ -134,18 +117,17 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             {
                 var rowIndex = firstContentRow + (int)workType;
                 worksheet.Cells[rowIndex, 1].Value = workType.ToSpreadsheetString();
-                for (var columnIndex = startColumnIndex; columnIndex < startColumnIndex + numberOfYears; columnIndex++)
-                {
-                    var cellsToSum = new List<ExcelRange>();
-                    // for committed project data
-                    AddWorkTypeTotalData(committedRangeForSummands, cellsToSum, workType, worksheet, workTypeMap, rowIndex, columnIndex);
 
-                    // For culvert data
-                    AddWorkTypeTotalData(culvertRangeForSummands, cellsToSum, workType, worksheet, workTypeMap, rowIndex, columnIndex);
+                // For culvert data
+                AddWorkTypeTotalData(workTypeTotalAggregated.WorkTypeTotalMPMS, workType, worksheet, rowIndex);
 
-                    // For non culvert data
-                    AddWorkTypeTotalData(rangeForSummands, cellsToSum, workType, worksheet, workTypeMap, rowIndex, columnIndex);
-                }
+                // For culvert data
+                AddWorkTypeTotalData(workTypeTotalAggregated.WorkTypeTotalCulvert, workType, worksheet, rowIndex);
+
+                // For non culvert data
+                AddWorkTypeTotalData(workTypeTotalAggregated.WorkTypeTotalBridge, workType, worksheet, rowIndex);
+
+                // This line fills up data for "Total (all years)"
                 worksheet.Cells[rowIndex, startColumnIndex + numberOfYears].Formula = ExcelFormulas.Sum(rowIndex, startColumnIndex, rowIndex, startColumnIndex + numberOfYears - 1);
             }
             var lastContentRow = firstContentRow + workTypes.Count - 1;
@@ -209,30 +191,28 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             return currentCell.Row - 1;
         }
 
-        private void AddWorkTypeTotalData(Range rangeForSummands, List<ExcelRange> cellsToSum,
-            WorkTypeName workType, ExcelWorksheet worksheet, Dictionary<string, WorkTypeName> workTypeMap,
-            int rowIndex, int columnIndex)
+        private void AddWorkTypeTotalData(Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> workTypeTotal,
+            TreatmentCategory workType, ExcelWorksheet worksheet,
+            int rowIndex
+            )
         {
-            for (var summandRowIndex = rangeForSummands.Start.Value; summandRowIndex <= rangeForSummands.End.Value; summandRowIndex++)
+            workTypeTotal.TryGetValue(workType, out SortedDictionary<int, decimal> yearAndAmount);
+            var col = 3;
+            var i = 0;
+            if (yearAndAmount == null)
             {
-                var summandRowTitle = worksheet.Cells[summandRowIndex, 1].Value?.ToString();
-                if (summandRowTitle != null)
+                return;
+            }
+            foreach (var item in yearAndAmount)
+            {
+                if (worksheet.Cells[rowIndex, col + i].Value == null)
                 {
-                    var summandWorkType = workTypeMap.ContainsKey(summandRowTitle) ? workTypeMap[summandRowTitle] : WorkTypeName.Other;
-                    if (workType == summandWorkType)
-                    {
-                        var cell = worksheet.Cells[summandRowIndex, columnIndex];
-                        cellsToSum.Add(cell);
-                    }
-                }
-                if (cellsToSum.Any())
-                {
-                    worksheet.Cells[rowIndex, columnIndex].Formula = ExcelFormulas.SumOrReference(cellsToSum);
-                }
-                else
-                {
-                    worksheet.Cells[rowIndex, columnIndex].Value = 0;
-                }
+                    worksheet.Cells[rowIndex, col + i].Value = 0.0;
+                };
+                var temp = Convert.ToDouble(worksheet.Cells[rowIndex, col + i].Value);
+                temp += (double)item.Value;
+                worksheet.Cells[rowIndex, col + i].Value = temp;
+                i++;
             }
         }
 
@@ -241,7 +221,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         {
             // Add budget category headers & year columns
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Cost Per BPN", "BPN");
-            currentCell.Row ++;
+            currentCell.Row++;
             var bpnCostBudgetNames = EnumExtensions.GetValues<BPNCostBudgetName>();
 
             // Add row labels
@@ -297,7 +277,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 cost = bpnInfoPerYear[year].Where(_ => _.Key.IsBpnOther()).Sum(_ => _.Value);
             }
             else
-            { 
+            {
                 if (bpnInfoPerYear[year].ContainsKey(bpnValue.ToMatchInDictionaryString()))
                 {
                     cost = bpnInfoPerYear[year][bpnValue.ToMatchInDictionaryString()];
@@ -307,21 +287,22 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private void FillRemainingBudgetSection(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
-            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow, int committedTotalRow)
+             int budgetTotalRow)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");
             worksheet.Cells[currentCell.Row, simulationYears.Count + 3].Value = "Total Remaining Budget(all years)";
             ExcelHelper.ApplyStyle(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, simulationYears.Count + 3]);
-            AddDetailsForRemainingBudget(worksheet, simulationYears, currentCell, culvertTotalRow, bridgeTotalRow, budgetTotalRow, committedTotalRow);
+            AddDetailsForRemainingBudget(worksheet, simulationYears, currentCell, budgetTotalRow);
         }
 
-        private int AddCostsOfCommittedWork(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
+        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostsOfCommittedWork(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj)
         {
+            var workTypeTotalMPMS = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
             if (simulationYears.Count <= 0)
             {
-                return 0;
+                return workTypeTotalMPMS;
             }
             var startYear = simulationYears[0];
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out var startRow, out var startColumn, out var row, out var column);
@@ -330,6 +311,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
             var uniqueTreatments = new Dictionary<string, int>();
             var costForTreatments = new Dictionary<string, decimal>();
+            var map = WorkTypeMap.Map;
             // filling in the committed treatments in the excel TAB
             foreach (var yearlyItem in yearlyCostCommittedProj)
             {
@@ -353,8 +335,26 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                         worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = data.Value.treatmentCost;
                     }
                     committedTotalCost += data.Value.treatmentCost;
+
+                    // setting up data for Work type totals
+                    if (map.ContainsKey(data.Key))
+                    {
+                        var category = map[data.Key];
+                        if (!workTypeTotalMPMS.ContainsKey(map[data.Key]))
+                        {
+                            workTypeTotalMPMS.Add(category, new SortedDictionary<int, decimal>());
+                            foreach (var year in simulationYears)
+                            {
+                                workTypeTotalMPMS[category].Add(year, 0);
+                            }
+                            workTypeTotalMPMS[category][yearlyItem.Key] += data.Value.treatmentCost;
+                        }
+                        else
+                        {
+                            workTypeTotalMPMS[category][yearlyItem.Key] += data.Value.treatmentCost;
+                        }
+                    }
                 }
-                //worksheet.Cells[row, column].Value = committedTotalCost;
                 TotalCommittedSpent.Add(yearlyItem.Key, committedTotalCost);
             }
 
@@ -379,28 +379,30 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             ExcelHelper.SetTextColor(worksheet.Cells[committedTotalRow, fromColumn, committedTotalRow, endColumn], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, committedTotalRow + 1, endColumn);
 
-            return committedTotalRow;
+            CommittedTotalRow = committedTotalRow;
+            return workTypeTotalMPMS;
         }
 
-        private int AddCostsOfCulvertWork(ExcelWorksheet worksheet,
-            List<int> simulationYears, CurrentCell currentCell, SortedSet<string> treatments,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
+        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostsOfCulvertWork(ExcelWorksheet worksheet,
+            List<int> simulationYears, CurrentCell currentCell,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
+            var workTypeTotalCulvert = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
             if (simulationYears.Count <= 0)
             {
-                return 0;
+                return workTypeTotalCulvert;
             }
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
             int culvertTotalRow = 0;
 
             // filling in the culvert treatments in the excel TAB
-            _bridgeWorkSummaryCommon.SetCulvertSectionExcelString(worksheet, treatments, ref row, ref column);
+            _bridgeWorkSummaryCommon.SetCulvertSectionExcelString(worksheet, simulationTreatments, ref row, ref column);
 
             worksheet.Cells[row++, column].Value = Properties.Resources.CulvertTotal;
             column++;
             var fromColumn = column + 1;
-
             // Filling in the cost per treatment per year in the excel TAB
             foreach (var yearlyValues in costPerTreatmentPerYear)
             {
@@ -408,13 +410,32 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 row = startRow;
                 column = ++column;
 
-                foreach (var treatment in treatments)
+                foreach (var treatment in simulationTreatments)
                 {
-                    if (treatment.Contains("culvert", StringComparison.OrdinalIgnoreCase))
+                    decimal cost = 0;
+                    if (treatment.AssetType == AssetCategory.Culvert &&
+                        !treatment.Name.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
-                        yearlyValues.Value.TryGetValue(treatment, out var culvertCostAndCount);
+                        yearlyValues.Value.TryGetValue(treatment.Name, out var culvertCostAndCount);
                         worksheet.Cells[row++, column].Value = culvertCostAndCount.treatmentCost;
                         culvertTotalCost += culvertCostAndCount.treatmentCost;
+                        cost = culvertCostAndCount.treatmentCost;
+
+                        if (!workTypeTotalCulvert.ContainsKey(treatment.Category))
+                        {
+                            workTypeTotalCulvert.Add(treatment.Category, new SortedDictionary<int, decimal>()
+                        {
+                            { yearlyValues.Key, cost }
+                        });
+                        }
+                        else
+                        {
+                            if (!workTypeTotalCulvert[treatment.Category].ContainsKey(yearlyValues.Key))
+                            {
+                                workTypeTotalCulvert[treatment.Category].Add(yearlyValues.Key, 0);
+                            }
+                            workTypeTotalCulvert[treatment.Category][yearlyValues.Key] += cost;
+                        }
                     }
                 }
                 worksheet.Cells[row, column].Value = culvertTotalCost;
@@ -428,21 +449,25 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             ExcelHelper.ApplyColor(worksheet.Cells[culvertTotalRow, fromColumn, culvertTotalRow, column], Color.FromArgb(84, 130, 53));
             ExcelHelper.SetTextColor(worksheet.Cells[culvertTotalRow, fromColumn, culvertTotalRow, column], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
-            return culvertTotalRow;
+
+            CulvertTotalRow = culvertTotalRow;
+            return workTypeTotalCulvert;
         }
 
-        private int AddCostsOfBridgeWork(ExcelWorksheet worksheet,
-            List<int> simulationYears, CurrentCell currentCell, SortedSet<string> treatments,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear)
+        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostsOfBridgeWork(ExcelWorksheet worksheet,
+            List<int> simulationYears, CurrentCell currentCell,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
+            var workTypeTotalBridge = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
             if (simulationYears.Count <= 0)
             {
-                return 0;
+                return workTypeTotalBridge;
             }
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
             int bridgeTotalRow = 0;
-            _bridgeWorkSummaryCommon.SetNonCulvertSectionExcelString(worksheet, treatments, ref row, ref column);
+            _bridgeWorkSummaryCommon.SetNonCulvertSectionExcelString(worksheet, simulationTreatments, ref row, ref column);
 
             worksheet.Cells[row++, column].Value = Properties.Resources.BridgeTotal;
             column++;
@@ -454,14 +479,32 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 column = ++column;
                 decimal nonCulvertTotalCost = 0;
 
-                foreach (var treatment in treatments)
+                foreach (var treatment in simulationTreatments)
                 {
-                    if (!treatment.Contains(Properties.Resources.Culvert, StringComparison.OrdinalIgnoreCase) &&
-                    !treatment.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
+                    decimal cost = 0;
+                    if (treatment.AssetType == AssetCategory.Bridge &&
+                    !treatment.Name.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
-                        yearlyValues.Value.TryGetValue(treatment, out var nonCulvertCostAndCount);
+                        yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCostAndCount);
                         worksheet.Cells[row++, column].Value = nonCulvertCostAndCount.treatmentCost;
                         nonCulvertTotalCost += nonCulvertCostAndCount.treatmentCost;
+                        cost = nonCulvertCostAndCount.treatmentCost;
+
+                        if (!workTypeTotalBridge.ContainsKey(treatment.Category))
+                        {
+                            workTypeTotalBridge.Add(treatment.Category, new SortedDictionary<int, decimal>()
+                        {
+                            { yearlyValues.Key, cost }
+                        });
+                        }
+                        else
+                        {
+                            if (!workTypeTotalBridge[treatment.Category].ContainsKey(yearlyValues.Key))
+                            {
+                                workTypeTotalBridge[treatment.Category].Add(yearlyValues.Key, 0);
+                            }
+                            workTypeTotalBridge[treatment.Category][yearlyValues.Key] += cost;
+                        }
                     }
                 }
 
@@ -476,7 +519,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             ExcelHelper.ApplyColor(worksheet.Cells[bridgeTotalRow, fromColumn, bridgeTotalRow, column], Color.FromArgb(84, 130, 53));
             ExcelHelper.SetTextColor(worksheet.Cells[bridgeTotalRow, fromColumn, bridgeTotalRow, column], Color.White);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
-            return bridgeTotalRow;
+            BridgeTotalRow = bridgeTotalRow;
+            return workTypeTotalBridge;
         }
 
         private int AddDetailsForTotalBudget(ExcelWorksheet worksheet, int initialYear, CurrentCell currentCell,
@@ -513,7 +557,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private void AddDetailsForRemainingBudget(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell,
-            int culvertTotalRow, int bridgeTotalRow, int budgetTotalRow, int committedTotalRow)
+             int budgetTotalRow)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
@@ -526,16 +570,16 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             {
                 row = startRow;
                 column = ++column;
-                var totalSpent = Convert.ToDouble(worksheet.Cells[culvertTotalRow, column].Value) +
-                    Convert.ToDouble(worksheet.Cells[bridgeTotalRow, column].Value);
-                Convert.ToDouble(worksheet.Cells[committedTotalRow, column].Value);
+                var totalSpent = Convert.ToDouble(worksheet.Cells[CulvertTotalRow, column].Value) +
+                    Convert.ToDouble(worksheet.Cells[BridgeTotalRow, column].Value);
+                Convert.ToDouble(worksheet.Cells[CommittedTotalRow, column].Value);
 
                 worksheet.Cells[row, column].Value = Convert.ToDouble(worksheet.Cells[budgetTotalRow, column].Value) - totalSpent;
                 row++;
 
                 if (totalSpent != 0)
                 {
-                    worksheet.Cells[row, column].Formula = worksheet.Cells[committedTotalRow, column] + "/" + totalSpent;
+                    worksheet.Cells[row, column].Formula = worksheet.Cells[CommittedTotalRow, column] + "/" + totalSpent;
                 }
                 else
                 {

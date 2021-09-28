@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Models.SummaryReport
 {
@@ -7,6 +8,9 @@ namespace BridgeCareCore.Models.SummaryReport
         public int Year { get; set; }
 
         public string Treatment { get; set; }
+
+        public TreatmentCategory TreatmentCategory { get; set; }
+        public AssetCategory AssetType { get; set; }
 
         public double Amount { get; set; }
 

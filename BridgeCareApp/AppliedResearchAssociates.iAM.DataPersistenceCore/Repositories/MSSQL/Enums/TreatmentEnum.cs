@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             Maintenance,
             Other
         }
-        public enum AssetType
+        public enum AssetCategory
         {
             Bridge,
             Culvert

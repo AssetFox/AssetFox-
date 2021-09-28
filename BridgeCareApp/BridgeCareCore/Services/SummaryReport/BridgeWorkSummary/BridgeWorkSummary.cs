@@ -35,33 +35,42 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
-            List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount)
+            List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount,
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
             #region Initial work to set some data, which will be used throughout the Work summary TAB
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
-            var treatments = new SortedSet<string>();
+            var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
+            simulationTreatments.Add((Properties.Resources.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Add((Properties.Resources.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
+            foreach (var item in selectableTreatments)
+            {
+                if (item.Name.ToLower() == Properties.Resources.NoTreatment) continue;
+                simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
+            }
+            simulationTreatments.Sort((a, b) => a.Item1.CompareTo(b.Item1));
 
             // cache to store total cost per treatment for a given year along with count of culvert
             // and non-culvert bridges
-            var costPerBPNPerYear = new Dictionary<int,Dictionary<string, decimal>>();
+            var costPerBPNPerYear = new Dictionary<int, Dictionary<string, decimal>>();
             var costAndCountPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
             var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
             var countForCompletedProject = new Dictionary<int, Dictionary<string, int>>();
             var countForCompletedCommittedProject = new Dictionary<int, Dictionary<string, int>>();
 
             FillDataToUseInExcel(reportOutputData, costPerBPNPerYear, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
-                countForCompletedProject, countForCompletedCommittedProject, treatments);
+                countForCompletedProject, countForCompletedCommittedProject);
 
             #endregion Initial work to set some data, which will be used throughout the Work summary TAB
 
             _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj,
-                simulationYears, treatments, yearlyBudgetAmount, costPerBPNPerYear);
+                simulationYears, yearlyBudgetAmount, costPerBPNPerYear, simulationTreatments);
 
-            _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj, simulationYears, treatments);
-            _projectsCompletedCount.FillProjectCompletedCountSection(worksheet, currentCell, countForCompletedProject, countForCompletedCommittedProject, simulationYears, treatments);
+            _bridgesCulvertsWorkSummary.FillBridgesCulvertsWorkSummarySections(worksheet, currentCell, costAndCountPerTreatmentPerYear, yearlyCostCommittedProj, simulationYears, simulationTreatments);
+            _projectsCompletedCount.FillProjectCompletedCountSection(worksheet, currentCell, countForCompletedProject, countForCompletedCommittedProject, simulationYears, simulationTreatments);
 
             var chartRowsModel = _bridgeRateDeckAreaWorkSummary.FillBridgeRateDeckAreaWorkSummarySections(worksheet, currentCell,
                 simulationYears, workSummaryModel, reportOutputData);
@@ -84,13 +93,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         #region Private methods
+
         private void FillDataToUseInExcel(SimulationOutput reportOutputData, Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, Dictionary<int, Dictionary<string, int>> countForCompletedProject,
-            Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject, SortedSet<string> treatments)
+            Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject)
         {
-            treatments.Add(Properties.Resources.CulvertNoTreatment);
-            treatments.Add(Properties.Resources.NonCulvertNoTreatment);
             var isInitialYear = true;
             foreach (var yearData in reportOutputData.Years)
             {
@@ -121,7 +129,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                             var bridgeCount = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment].bridgeCount + 1;
                             var newCostAndCount = (treatmentCost, bridgeCount);
                             yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = newCostAndCount;
-
                         }
 
                         costPerBPNPerYear[yearData.Year][section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]] += commitedCost;
@@ -149,22 +156,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
                     // Fill cost per BPN per Year
                     costPerBPNPerYear[yearData.Year][section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]] += cost;
-
-                    section.TreatmentOptions.ForEach(_ =>
-                    {
-                        if (!treatments.Contains(_.TreatmentName))
-                        {
-                            treatments.Add(_.TreatmentName);
-                        }
-                    });
-
-                    section.TreatmentRejections.ForEach(_ =>
-                    {
-                        if (!treatments.Contains(_.TreatmentName))
-                        {
-                            treatments.Add(_.TreatmentName);
-                        }
-                    });
                 }
                 isInitialYear = false;
             }
@@ -201,7 +192,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                     values.treatmentCost += cost;
                     values.bridgeCount += 1;
                     costAndCountPerTreatmentPerYear[year][section.AppliedTreatment] = values;
-
                 }
             }
         }
@@ -234,14 +224,16 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 }
             }
         }
+
         private void RemoveBridgesForCashFlowedProj(Dictionary<int, Dictionary<string, int>> countForCompletedProject,
             SectionDetail section, bool isInitialYear, int year)
         {
             // to store "Projects completed"
             if (section.TreatmentCause == TreatmentCause.CashFlowProject && !isInitialYear)
             {
-                // if current year status is TreatmentCause.CashFlowProject, then the previous year is either 1st year of cashflow or
-                // somewhere in between, in both cases, we will remove the previous year project as it has not been conmleted.
+                // if current year status is TreatmentCause.CashFlowProject, then the previous year
+                // is either 1st year of cashflow or somewhere in between, in both cases, we will
+                // remove the previous year project as it has not been conmleted.
                 countForCompletedProject[year - 1][section.AppliedTreatment] -= 1;
             }
         }
@@ -275,6 +267,6 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             }
         }
 
-        #endregion
+        #endregion Private methods
     }
 }

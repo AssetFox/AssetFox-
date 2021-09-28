@@ -64,6 +64,7 @@
         </v-flex>
 
         <ConsequenceEquationEditorDialog :dialogData='consequenceEquationEditorDialogData'
+                                         :isFromPerformanceCurveEditor=false
                                          @submit='onSubmitConsequenceEquationEditorDialogResult' />
 
         <ConsequenceCriterionLibraryEditorDialog :dialogData='consequenceCriterionLibraryEditorDialogData'

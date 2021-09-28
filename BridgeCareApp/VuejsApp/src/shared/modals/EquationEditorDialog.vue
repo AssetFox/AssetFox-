@@ -20,8 +20,8 @@
             <v-flex xs12>
               <v-tabs v-model="selectedTab">
                 <v-tab :key="0" @click="isPiecewise = false">Equation</v-tab>
-                <v-tab :key="1" @click="isPiecewise = true">Piecewise</v-tab>
-                <v-tab :key="2" @click="isPiecewise = true">Time In Rating</v-tab>
+                <v-tab :key="1" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Piecewise</v-tab>
+                <v-tab :key="2" @click="isPiecewise = true" :hidden="!isFromPerformanceCurveEditor">Time In Rating</v-tab>
                 <v-tab-item>
                   <div class="equation-container-div">
                     <v-layout column>
@@ -386,6 +386,7 @@ import { emptyUserCriteriaFilter } from '../models/iAM/user-criteria-filter';
 @Component
 export default class EquationEditorDialog extends Vue {
   @Prop() dialogData: EquationEditorDialogData;
+  @Prop() isFromPerformanceCurveEditor: Boolean;
 
   @State(state => state.attributeModule.numericAttributes) stateNumericAttributes: Attribute[];
 

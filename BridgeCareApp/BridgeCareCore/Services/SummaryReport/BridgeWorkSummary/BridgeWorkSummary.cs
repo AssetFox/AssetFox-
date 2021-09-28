@@ -49,7 +49,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             foreach (var item in selectableTreatments)
             {
                 if (item.Name.ToLower() == Properties.Resources.NoTreatment) continue;
-                simulationTreatments.Add((item.Name, item.Asset, item.Category));
+                simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
             }
             simulationTreatments.Sort((a, b) => a.Item1.CompareTo(b.Item1));
 

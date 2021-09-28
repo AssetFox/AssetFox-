@@ -101,7 +101,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                                 Amount = budgetAmount,
                                 costPerBPN = (section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], budgetAmount),
                                 TreatmentCategory = treatmentData.Category,
-                                AssetType = treatmentData.Asset
+                                AssetType = treatmentData.AssetCategory
                             });
                         }
                     }

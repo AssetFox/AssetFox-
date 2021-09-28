@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public TreatmentCategory Category { get; set; }
 
-        public AssetCategory Asset { get; set; }
+        public AssetCategory AssetCategory { get; set; }
 
         public IReadOnlyCollection<Criterion> FeasibilityCriteria => _FeasibilityCriteria;
 

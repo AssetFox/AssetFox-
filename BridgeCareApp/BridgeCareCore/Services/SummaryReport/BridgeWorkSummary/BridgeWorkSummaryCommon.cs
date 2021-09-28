@@ -5,6 +5,7 @@ using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
@@ -144,11 +145,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         internal void SetNonCulvertSectionExcelString(ExcelWorksheet worksheet,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
         {
             foreach (var item in simulationTreatments)
             {
-                if (item.AssetType == AssetType.Bridge || item.Name == Properties.Resources.NonCulvertNoTreatment)
+                if (item.AssetType == AssetCategory.Bridge || item.Name == Properties.Resources.NonCulvertNoTreatment)
                 {
                     if (item.Name == Properties.Resources.NonCulvertNoTreatment)
                     {
@@ -163,11 +164,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         internal void SetCulvertSectionExcelString(ExcelWorksheet worksheet,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
         {
             foreach (var item in simulationTreatments)
             {
-                if (item.AssetType == AssetType.Culvert || item.Name == Properties.Resources.CulvertNoTreatment)
+                if (item.AssetType == AssetCategory.Culvert || item.Name == Properties.Resources.CulvertNoTreatment)
                 {
                     if (item.Name == Properties.Resources.CulvertNoTreatment)
                     {

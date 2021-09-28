@@ -11,6 +11,7 @@ using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
 using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 {
@@ -121,10 +122,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 var workTypeTotal = new WorkTypeTotal();
 
                 costForCulvertBudget = summaryData.YearlyData
-                                            .FindAll(_ => _.AssetType == AssetType.Culvert && !_.isCommitted);
+                                            .FindAll(_ => _.AssetType == AssetCategory.Culvert && !_.isCommitted);
 
                 costForBridgeBudgets = summaryData.YearlyData
-                                                .FindAll(_ => _.AssetType == AssetType.Bridge && !_.isCommitted);
+                                                .FindAll(_ => _.AssetType == AssetCategory.Bridge && !_.isCommitted);
 
                 costForCommittedBudgets = summaryData.YearlyData
                                                     .FindAll(_ => _.isCommitted && _.Treatment.ToLower() != Properties.Resources.NoTreatment);

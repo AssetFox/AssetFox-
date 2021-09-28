@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace BridgeCareCore.Models.SummaryReport
 {
@@ -10,7 +11,7 @@ namespace BridgeCareCore.Models.SummaryReport
         public string Treatment { get; set; }
 
         public TreatmentCategory TreatmentCategory { get; set; }
-        public AssetType AssetType { get; set; }
+        public AssetCategory AssetType { get; set; }
 
         public double Amount { get; set; }
 

@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums
+namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public class TreatmentEnum
+    public class TreatmentCategories
     {
-        // Order is important
         public enum TreatmentCategory
         {
             Preservation,

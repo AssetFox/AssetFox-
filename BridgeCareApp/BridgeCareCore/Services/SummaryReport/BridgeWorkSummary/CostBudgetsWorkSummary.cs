@@ -7,6 +7,7 @@ using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;
 using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
@@ -32,11 +33,11 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj, List<int> simulationYears, Dictionary<string, Budget> yearlyBudgetAmount,
             Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
-            var localSimulationTreatments = new List<(string Name, AssetType AssetType, TreatmentCategory Category)>(simulationTreatments);
-            localSimulationTreatments.Remove((Properties.Resources.CulvertNoTreatment, AssetType.Culvert, TreatmentCategory.Other));
-            localSimulationTreatments.Remove((Properties.Resources.NonCulvertNoTreatment, AssetType.Bridge, TreatmentCategory.Other));
+            var localSimulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>(simulationTreatments);
+            localSimulationTreatments.Remove((Properties.Resources.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            localSimulationTreatments.Remove((Properties.Resources.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
 
             var workTypeTotalMPMS = FillCostOfCommittedWorkSection(worksheet, currentCell, simulationYears, yearlyCostCommittedProj);
 
@@ -74,7 +75,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfCulvertWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Culvert Work", "BAMS Culvert Work Type");
@@ -86,7 +87,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfBridgeWorkSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of BAMS Bridge Work", "BAMS Bridge Work Type");
@@ -387,7 +388,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostsOfCulvertWork(ExcelWorksheet worksheet,
             List<int> simulationYears, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var workTypeTotalCulvert = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
             if (simulationYears.Count <= 0)
@@ -414,7 +415,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 foreach (var treatment in simulationTreatments)
                 {
                     decimal cost = 0;
-                    if (treatment.AssetType == AssetType.Culvert &&
+                    if (treatment.AssetType == AssetCategory.Culvert &&
                         !treatment.Name.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var culvertCostAndCount);
@@ -458,7 +459,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> AddCostsOfBridgeWork(ExcelWorksheet worksheet,
             List<int> simulationYears, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var workTypeTotalBridge = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
             if (simulationYears.Count <= 0)
@@ -483,7 +484,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 foreach (var treatment in simulationTreatments)
                 {
                     decimal cost = 0;
-                    if (treatment.AssetType == AssetType.Bridge &&
+                    if (treatment.AssetType == AssetCategory.Bridge &&
                     !treatment.Name.Contains(Properties.Resources.NoTreatment, StringComparison.OrdinalIgnoreCase))
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCostAndCount);

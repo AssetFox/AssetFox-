@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using MoreLinq;
+using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -22,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Description = dto.Description,
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
-                AssetType = (Enums.TreatmentEnum.AssetType)dto.AssetType
+                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType
             };
 
         public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this TreatmentDTO dto, Guid simulationId) =>
@@ -35,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Description = dto.Description,
                 Category = (Enums.TreatmentEnum.TreatmentCategory)dto.Category,
-                AssetType = (Enums.TreatmentEnum.AssetType)dto.AssetType
+                AssetType = (Enums.TreatmentEnum.AssetCategory)dto.AssetType
             };
 
         public static ScenarioSelectableTreatmentEntity ToScenarioEntity(this Treatment domain, Guid simulationId) =>
@@ -60,8 +61,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             selectableTreatment.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
             selectableTreatment.ShadowForSameTreatment = entity.ShadowForSameTreatment;
             selectableTreatment.Description = entity.Description;
-            selectableTreatment.Category = (SelectableTreatment.TreatmentCategory)entity.Category;
-            selectableTreatment.Asset = (SelectableTreatment.AssetType)entity.AssetType;
+            selectableTreatment.Category = (TreatmentCategory)entity.Category;
+            selectableTreatment.Asset = (AssetCategory)entity.AssetType;
 
             if (entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
             {

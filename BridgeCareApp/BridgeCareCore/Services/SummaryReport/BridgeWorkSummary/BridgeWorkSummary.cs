@@ -7,6 +7,7 @@ using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
 using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
@@ -44,9 +45,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             #region Initial work to set some data, which will be used throughout the Work summary TAB
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
-            var simulationTreatments = new List<(string Name, AssetType AssetType, TreatmentCategory Category)>();
-            simulationTreatments.Add((Properties.Resources.CulvertNoTreatment, AssetType.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Add((Properties.Resources.NonCulvertNoTreatment, AssetType.Bridge, TreatmentCategory.Other));
+            var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
+            simulationTreatments.Add((Properties.Resources.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Add((Properties.Resources.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
             foreach (var item in selectableTreatments)
             {
                 if (item.Name.ToLower() == Properties.Resources.NoTreatment) continue;

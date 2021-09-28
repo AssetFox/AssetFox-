@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.Validation;
+using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
@@ -18,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public TreatmentCategory Category { get; set; }
 
-        public AssetType Asset { get; set; }
+        public AssetCategory Asset { get; set; }
 
         public IReadOnlyCollection<Criterion> FeasibilityCriteria => _FeasibilityCriteria;
 
@@ -186,20 +187,5 @@ namespace AppliedResearchAssociates.iAM.Analysis
         private readonly Simulation Simulation;
 
         private ILookup<Attribute, ConditionalTreatmentConsequence> ConsequencesPerAttribute;
-
-        public enum TreatmentCategory
-        {
-            Preservation,
-            CapacityAdding,
-            Rehabilitation,
-            Replacement,
-            Maintenance,
-            Other
-        }
-        public enum AssetType
-        {
-            Bridge,
-            Culvert
-        }
     }
 }

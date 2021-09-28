@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BridgeCareCore.Models.SummaryReport;
 using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
 {

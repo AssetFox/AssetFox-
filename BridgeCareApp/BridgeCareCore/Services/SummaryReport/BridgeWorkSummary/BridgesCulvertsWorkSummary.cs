@@ -4,6 +4,7 @@ using System.Drawing;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
 using static AppliedResearchAssociates.iAM.Analysis.SelectableTreatment;
+using static AppliedResearchAssociates.iAM.Analysis.TreatmentCategories;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
@@ -22,7 +23,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> workedOnCommitedProjCount,
             List<int> simulationYears,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             var projectRowNumberModel = new ProjectRowNumberModel();
             FillMPMSWorkedOnCount(worksheet, currentCell, workedOnCommitedProjCount, simulationYears, projectRowNumberModel);
@@ -43,7 +44,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private void FillNumberOfCulvertsWorkedOnSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Culverts Worked on", "Culvert Work Type");
             AddCountsOfCulvertsWorkedOn(worksheet, currentCell, countPerTreatmentPerYear, projectRowNumberModel, simulationTreatments);
@@ -52,7 +53,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private void FillNumberOfBridgesWorkedOnSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Bridges Worked on", "Bridge Work Type");
             AddCountsOfBridgesWorkedOn(worksheet, currentCell, countPerTreatmentPerYear, projectRowNumberModel, simulationTreatments);
@@ -60,7 +61,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         private void FillNumberOfBridgesCulvertsWorkedOnSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Number of Bridges and Culverts Worked on", "Bridge and Culvert Work Types");
             AddDetailsForNumberOfBridgesCulvertsWorkedOn(worksheet, currentCell, simulationYears, projectRowNumberModel, simulationTreatments);
@@ -127,7 +128,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private void AddCountsOfCulvertsWorkedOn(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
@@ -144,7 +145,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
                 foreach (var treatment in simulationTreatments)
                 {
-                    if (treatment.AssetType == AssetType.Culvert || treatment.Name == Properties.Resources.CulvertNoTreatment)
+                    if (treatment.AssetType == AssetCategory.Culvert || treatment.Name == Properties.Resources.CulvertNoTreatment)
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var culvertCostAndCount);
                         worksheet.Cells[row, column].Value = culvertCostAndCount.bridgeCount;
@@ -163,7 +164,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         private void AddCountsOfBridgesWorkedOn(ExcelWorksheet worksheet, CurrentCell currentCell,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> countPerTreatmentPerYear,
             ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
@@ -180,7 +181,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
                 foreach (var treatment in simulationTreatments)
                 {
-                    if (treatment.AssetType == AssetType.Bridge && treatment.Name != Properties.Resources.CulvertNoTreatment)
+                    if (treatment.AssetType == AssetCategory.Bridge && treatment.Name != Properties.Resources.CulvertNoTreatment)
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCostAndCount);
                         worksheet.Cells[row, column].Value = nonCulvertCostAndCount.bridgeCount;
@@ -198,15 +199,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 
         private void AddDetailsForNumberOfBridgesCulvertsWorkedOn(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears, ProjectRowNumberModel projectRowNumberModel,
-            List<(string Name, AssetType AssetType, TreatmentCategory Category)> simulationTreatments)
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments)
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
             worksheet.Cells[row++, column].Value = Properties.Resources.NoTreatmentForWorkSummary;
 
-            simulationTreatments.Remove((Properties.Resources.CulvertNoTreatment, AssetType.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Remove((Properties.Resources.NonCulvertNoTreatment, AssetType.Bridge, TreatmentCategory.Other));
+            simulationTreatments.Remove((Properties.Resources.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Remove((Properties.Resources.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
 
             foreach (var item in simulationTreatments)
             {
@@ -256,8 +257,8 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
             ExcelHelper.ApplyColor(worksheet.Cells[row + 2, startColumn, row + 2, column], Color.DimGray);
 
             // Adding back the two types of No treatments.
-            simulationTreatments.Add((Properties.Resources.CulvertNoTreatment, AssetType.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Add((Properties.Resources.NonCulvertNoTreatment, AssetType.Bridge, TreatmentCategory.Other));
+            simulationTreatments.Add((Properties.Resources.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Add((Properties.Resources.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
         }
 
         #endregion Private methods

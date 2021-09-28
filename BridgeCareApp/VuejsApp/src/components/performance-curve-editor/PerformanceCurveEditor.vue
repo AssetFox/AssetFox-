@@ -346,6 +346,7 @@
 
         <EquationEditorDialog
             :dialogData="equationEditorDialogData"
+            :isFromPerformanceCurveEditor=true
             @submit="onSubmitEquationEditorDialogResult"
         />
 

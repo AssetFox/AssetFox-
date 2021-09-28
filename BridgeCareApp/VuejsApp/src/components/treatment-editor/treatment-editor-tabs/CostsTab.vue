@@ -84,6 +84,7 @@
 
         <CostEquationEditorDialog
             :dialogData="costEquationEditorDialogData"
+            :isFromPerformanceCurveEditor=false
             @submit="onSubmitCostEquationEditorDialogResult"
         />
 

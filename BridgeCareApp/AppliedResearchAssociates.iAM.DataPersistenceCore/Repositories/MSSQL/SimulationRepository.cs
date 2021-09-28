@@ -139,8 +139,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.Equations.ForEach(e =>
                 {
                     e.Id = Guid.NewGuid();
-                    e.CriteriaLibrary.Id = Guid.NewGuid();
-                    e.CriteriaLibrary.IsSingleUse = true;
+                    if (e.CriteriaLibrary != null)
+                    {
+                        e.CriteriaLibrary.Id = Guid.NewGuid();
+                        e.CriteriaLibrary.IsSingleUse = true;
+                    }
                     e.Equation.Id = Guid.NewGuid();
                 });
             });

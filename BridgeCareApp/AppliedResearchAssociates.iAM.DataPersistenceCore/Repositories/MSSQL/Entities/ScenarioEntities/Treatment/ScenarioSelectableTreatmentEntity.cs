@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public TreatmentCategory Category { get; set; }
 
-        public AssetType AssetType { get; set; }
+        public AssetCategory AssetType { get; set; }
 
         public virtual SimulationEntity Simulation { get; set; }
 

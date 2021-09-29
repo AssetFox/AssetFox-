@@ -4,8 +4,6 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -184,7 +182,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var budgetsPreventingCloning = new List<string>();
             var numberOfCommittedProjectsAffected = 0;
-
+            
             var simulationToClone = _unitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
                 // analysis method
                 .Include(_ => _.AnalysisMethod)
@@ -225,6 +223,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.PerformanceCurves)
                 .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                // Calculated Attributes
+                .Include(_ => _.CalculatedAttributes)
+                .ThenInclude(_ => _.Equations)
+                .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.CalculatedAttributes)
+                .ThenInclude(_ => _.Equations)
+                .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.CalculatedAttributes)
+                .ThenInclude(_ => _.Attribute)
                 // remaining life limits
                 .Include(_ => _.RemainingLifeLimits)
                 .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
@@ -508,6 +517,56 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             _unitOfWork.UserEntity?.Id);
                         _unitOfWork.Context.ReInitializeAllEntityBaseProperties(
                             performanceCurve.CriterionLibraryScenarioPerformanceCurveJoin, _unitOfWork.UserEntity?.Id);
+                    }
+                });
+            }
+
+            if (simulationToClone.CalculatedAttributes.Any())
+            {
+                simulationToClone.CalculatedAttributes.ForEach(calculatedAttribute =>
+                {
+                    calculatedAttribute.Id = Guid.NewGuid();
+                    calculatedAttribute.SimulationId = simulationToClone.Id;
+                    calculatedAttribute.Simulation = null;
+                    _unitOfWork.Context.ReInitializeAllEntityBaseProperties(calculatedAttribute,
+                        _unitOfWork.UserEntity?.Id);
+                    if (calculatedAttribute.Equations.Any())
+                    {
+                        calculatedAttribute.Equations.ForEach(equationPair =>
+                        {
+                            equationPair.Id = Guid.NewGuid();
+                            equationPair.ScenarioCalculatedAttributeId = calculatedAttribute.Id;
+                            _unitOfWork.Context.ReInitializeAllEntityBaseProperties(equationPair,
+                        _unitOfWork.UserEntity?.Id);
+
+                            if(equationPair.EquationCalculatedAttributeJoin != null)
+                            {
+                                var equationId = Guid.NewGuid();
+                                equationPair.EquationCalculatedAttributeJoin.Equation.Id = equationId;
+                                equationPair.EquationCalculatedAttributeJoin.EquationId = equationId;
+                                equationPair.EquationCalculatedAttributeJoin.ScenarioCalculatedAttributePairId = equationPair.Id;
+                                _unitOfWork.Context.ReInitializeAllEntityBaseProperties(
+                            equationPair.EquationCalculatedAttributeJoin.Equation, _unitOfWork.UserEntity?.Id);
+                                _unitOfWork.Context.ReInitializeAllEntityBaseProperties(
+                            equationPair.EquationCalculatedAttributeJoin, _unitOfWork.UserEntity?.Id);
+                            }
+
+                            if (equationPair.CriterionLibraryCalculatedAttributeJoin != null)
+                            {
+                                var criterionId = Guid.NewGuid();
+                                equationPair.CriterionLibraryCalculatedAttributeJoin.CriterionLibrary.Id = criterionId;
+                                equationPair.CriterionLibraryCalculatedAttributeJoin.CriterionLibrary.IsSingleUse =
+                                    true;
+                                equationPair.CriterionLibraryCalculatedAttributeJoin.CriterionLibraryId = criterionId;
+                                equationPair.CriterionLibraryCalculatedAttributeJoin.ScenarioCalculatedAttributePairId =
+                                    equationPair.Id;
+                                _unitOfWork.Context.ReInitializeAllEntityBaseProperties(
+                                    equationPair.CriterionLibraryCalculatedAttributeJoin.CriterionLibrary,
+                                    _unitOfWork.UserEntity?.Id);
+                                _unitOfWork.Context.ReInitializeAllEntityBaseProperties(
+                                    equationPair.CriterionLibraryCalculatedAttributeJoin, _unitOfWork.UserEntity?.Id);
+                            }
+                        });
                     }
                 });
             }
@@ -920,6 +979,55 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     _unitOfWork.Context.AddAll(performanceCurveCriteriaJoins);
                     _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                }
+            }
+
+            // add calculated attributes
+            if (simulationToClone.CalculatedAttributes.Any())
+            {
+                _unitOfWork.Context.AddAll(simulationToClone.CalculatedAttributes.ToList());
+                _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+
+                if (simulationToClone.CalculatedAttributes.Any(_ => _.Equations.Any()))
+                {
+                    _unitOfWork.Context.AddAll(simulationToClone.CalculatedAttributes
+                        .Where(_ => _.Equations.Any())
+                        .SelectMany(_ => _.Equations
+                            .Select(pair => pair))
+                        .ToList());
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                }
+
+                if (simulationToClone.CalculatedAttributes.Any(_ =>
+                _.Equations.Any()))
+                {
+                    simulationToClone.CalculatedAttributes.ForEach(calculatedAttribute =>
+                    {
+                        // add calculated attribute equations
+                        if (calculatedAttribute.Equations.Any(_ => _.EquationCalculatedAttributeJoin?.Equation != null))
+                        {
+                            var calculatedAttributeEquationJoins = calculatedAttribute.Equations
+                           .Where(_ => _.EquationCalculatedAttributeJoin?.Equation != null)
+                           .Select(_ => _.EquationCalculatedAttributeJoin).ToList();
+                            _unitOfWork.Context.AddAll(calculatedAttributeEquationJoins.Select(_ => _.Equation).ToList());
+                            _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                            _unitOfWork.Context.AddAll(calculatedAttributeEquationJoins);
+                            _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                        }
+
+                        // add calculated attribute criteria
+                        if (calculatedAttribute.Equations.Any(_ => _.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary != null))
+                        {
+                            var calculatedAttributeCriteriaJoins = calculatedAttribute.Equations
+                                .Where(_ => _.CriterionLibraryCalculatedAttributeJoin?.CriterionLibrary != null)
+                                .Select(_ => _.CriterionLibraryCalculatedAttributeJoin)
+                                    .ToList();
+                            _unitOfWork.Context.AddAll(calculatedAttributeCriteriaJoins.Select(_ => _.CriterionLibrary).ToList());
+                            _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                            _unitOfWork.Context.AddAll(calculatedAttributeCriteriaJoins);
+                            _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                        }
+                    });
                 }
             }
 

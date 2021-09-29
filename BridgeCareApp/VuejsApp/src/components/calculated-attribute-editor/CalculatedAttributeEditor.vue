@@ -530,8 +530,8 @@ export default class CalculatedAttributeEditor extends Vue {
     }
     setAttributeTimingSelectItems() {
         this.attributeTimingSelectItems = [
-            { text: 'Pre Simulation', value: Timing.PreSimulation },
-            { text: 'Post Simulation', value: Timing.PostSimulation },
+            { text: 'Pre Deterioration', value: Timing.PreDeterioration },
+            { text: 'Post Deterioration', value: Timing.PostDeterioration },
             { text: 'On Demand', value: Timing.OnDemand },
         ];
     }

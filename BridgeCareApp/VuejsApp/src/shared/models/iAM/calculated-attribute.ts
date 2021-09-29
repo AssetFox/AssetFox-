@@ -7,15 +7,16 @@ import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { clone } from 'ramda';
 
 export enum Timing {
-    PreSimulation = 0,
-    PostSimulation,
+    NotSpecified,
     OnDemand,
-  }
-  export const TimingMap: Record<string,  Timing> = {
-      'Pre Simulation': Timing.PreSimulation,
-      'Post Simulation': Timing.PostSimulation,
-      'On Demand': Timing.OnDemand
-  }
+    PreDeterioration,
+    PostDeterioration,
+}
+export const TimingMap: Record<string, Timing> = {
+    'Pre Simulation': Timing.PreDeterioration,
+    'Post Simulation': Timing.PostDeterioration,
+    'On Demand': Timing.OnDemand,
+};
 
 export interface CalculatedAttribute {
     id: string;
@@ -43,7 +44,7 @@ export const emptyCalculatedAttribute: CalculatedAttribute = {
     attribute: 'CONDITIONINDEX',
     name: 'CONDITIONINDEX',
     equations: [],
-    calculationTiming: Timing.OnDemand
+    calculationTiming: Timing.OnDemand,
 };
 
 export const emptyCriterionAndEquationSet: CriterionAndEquationSet = {

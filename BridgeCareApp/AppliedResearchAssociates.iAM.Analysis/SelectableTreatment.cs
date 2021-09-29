@@ -16,6 +16,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public string Description { get; set; }
 
+        public TreatmentCategory Category { get; set; }
+
+        public AssetCategory AssetCategory { get; set; }
+
         public IReadOnlyCollection<Criterion> FeasibilityCriteria => _FeasibilityCriteria;
 
         public ICollection<TreatmentScheduling> Schedulings { get; } = new SetWithoutNulls<TreatmentScheduling>();

@@ -2,26 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {
-    public enum WorkTypeName
-    {
-        Preservation,
-        EmergencyRepair,
-        Rehab,
-        Replacement,
-        Other,
-    }
-
     public static class WorkTypeNamesExtensions
     {
-        public static string ToSpreadsheetString(this WorkTypeName name) => name switch
+        public static string ToSpreadsheetString(this TreatmentCategory name) => name switch
         {
-            WorkTypeName.Preservation => "Preservation",
-            WorkTypeName.EmergencyRepair => "Emergency Repair",
-            WorkTypeName.Rehab => "Rehab",
-            WorkTypeName.Replacement => "Replacement",
+            TreatmentCategory.Preservation => "Preservation",
+            TreatmentCategory.CapacityAdding => "Capacity Adding",
+            TreatmentCategory.Rehabilitation => "Rehabilitation",
+            TreatmentCategory.Replacement => "Replacement",
+            TreatmentCategory.Maintenance => "Maintenance",
+            TreatmentCategory.Other => "Other",
             _ => name.ToString(),
         };
     }

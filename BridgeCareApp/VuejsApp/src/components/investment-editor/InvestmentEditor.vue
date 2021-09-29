@@ -219,6 +219,7 @@ import {
     emptyBudgetLibrary,
     emptyInvestmentPlan, InvestmentBudgetFileImport,
     InvestmentPlan,
+    emptyBudgetAmount
 } from '@/shared/models/iAM/investment';
 import { any, append, clone, find, findIndex, groupBy, isNil, keys, propEq, update } from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -606,6 +607,20 @@ export default class InvestmentEditor extends Vue {
 
     onSubmitEditBudgetsDialogResult(budgets: Budget[]) {
         this.editBudgetsDialogData = clone(emptyEditBudgetsDialogData);
+        
+        var budgetWithBudgetAmounts = budgets.find(b => b.budgetAmounts.length != 0);
+        budgets.forEach((budget: Budget) => {
+           if(budget.budgetAmounts.length == 0)
+            {                
+               var budgetAmounts = budgetWithBudgetAmounts != undefined ? budgetWithBudgetAmounts.budgetAmounts : [];               
+               budgetAmounts.forEach(budgetAmount => {
+                   const emptyBudgetAmt = clone(emptyBudgetAmount);                   
+                   emptyBudgetAmt.year = clone(budgetAmount.year);
+                   emptyBudgetAmt.budgetName = budget.name;
+                   emptyBudgetAmt.id = getNewGuid();
+                   budget.budgetAmounts.push(emptyBudgetAmt);
+               });                              
+            }});
 
         if (!isNil(budgets)) {
             this.budgets = clone(budgets);

@@ -13,8 +13,8 @@ export enum Timing {
     PostDeterioration,
 }
 export const TimingMap: Record<string, Timing> = {
-    'Pre Simulation': Timing.PreDeterioration,
-    'Post Simulation': Timing.PostDeterioration,
+    'Pre Deterioration': Timing.PreDeterioration,
+    'Post Deterioration': Timing.PostDeterioration,
     'On Demand': Timing.OnDemand,
 };
 

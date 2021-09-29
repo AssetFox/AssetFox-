@@ -326,22 +326,29 @@ export default class EditScenario extends Vue {
                         );
                     }
                 });
-            } else if (hasValue(result.file)) {
-                CommittedProjectsService.importCommittedProjects(
-                    result.file,
-                    result.applyNoTreatment,
-                    this.selectedScenarioId,
-                ).then((response: AxiosResponse) => {
-                    if (
-                        hasValue(response, 'status') &&
-                        http2XX.test(response.status.toString())
-                    ) {
-                        this.setSuccessMessageAction({
-                            message:
-                                'Successfully uploaded committed projects.',
-                        });
-                    }
-                });
+            } else {
+                if (hasValue(result.file)) {
+                    CommittedProjectsService.importCommittedProjects(
+                        result.file,
+                        result.applyNoTreatment,
+                        this.selectedScenarioId,
+                    ).then((response: AxiosResponse) => {
+                        if (
+                            hasValue(response, 'status') &&
+                            http2XX.test(response.status.toString())
+                        ) {
+                            this.setSuccessMessageAction({
+                                message:
+                                    'Successfully uploaded committed projects.',
+                            });
+                        }
+                    });
+                } else {
+                    this.setErrorMessageAction({
+                                message:
+                                    'No file selected to upload the committed projects.'
+                                    });
+                }
             }
         }
     }

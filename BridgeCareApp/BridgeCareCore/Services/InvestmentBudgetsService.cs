@@ -31,14 +31,14 @@ namespace BridgeCareCore.Services
                                            throw new ArgumentNullException(nameof(expressionValidationService));
         }
 
-        private void AddHeaderCells(ExcelWorksheet worksheet, List<string> budgetNames)
+        private void AddHeaderCells(ExcelWorksheet worksheet, List<string> headers)
         {
             var startRow = worksheet.Cells.Start.Row;
             var startCol = worksheet.Cells.Start.Column;
 
             worksheet.Cells[startRow, startCol].Value = "Year";
 
-            budgetNames.ForEach(budgetName =>
+            headers.ForEach(budgetName =>
             {
                 worksheet.Cells[startRow, ++startCol].Value = budgetName;
             });
@@ -77,7 +77,7 @@ namespace BridgeCareCore.Services
             var budgetWorksheet = excelPackage.Workbook.Worksheets.Add("Budget");
             var criteriaWorksheet = excelPackage.Workbook.Worksheets.Add("Criteria");
 
-            var headers = new List<string>
+            var budgetNames = new List<string>
             {
                 "Sample Budget 1",
                 "Sample Budget 2",
@@ -85,11 +85,7 @@ namespace BridgeCareCore.Services
                 "Sample Budget 4"
             };
 
-            AddHeaderCells(budgetWorksheet, headers);
-            AddHeaderCells(criteriaWorksheet, new List<string>
-            {
-                "BUDGET_NAME", "CRITERIA"
-            });
+            AddHeaderCells(budgetWorksheet, budgetNames);
 
             var sampleBudgetAmountsPerYear = new Dictionary<int, List<decimal>>();
 
@@ -104,9 +100,11 @@ namespace BridgeCareCore.Services
 
             AddDataCells(budgetWorksheet, sampleBudgetAmountsPerYear);
 
+            criteriaWorksheet.Cells[1, 1].Value = "BUDGET_NAME";
+            criteriaWorksheet.Cells[1, 2].Value = "CRITERIA";
             var currentRow = 2;
             var sampleCriteria = "[INTERSTATE]='Y'";
-            headers.ForEach(budgetName =>
+            budgetNames.ForEach(budgetName =>
             {
                 criteriaWorksheet.Cells[currentRow, 1].Value = budgetName;
                 criteriaWorksheet.Cells[currentRow, 2].Value = sampleCriteria;
@@ -124,6 +122,12 @@ namespace BridgeCareCore.Services
         public FileInfoDTO ExportScenarioInvestmentBudgetsFile(Guid simulationId)
         {
             var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(simulationId);
+            var criteriaPerBudgetName = _unitOfWork.Context.ScenarioBudget.AsNoTracking().AsSplitQuery()
+                .Include(_ => _.CriterionLibraryScenarioBudgetJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Where(_ => _.SimulationId == simulationId)
+                .ToDictionary(_ => _.Name,
+                    _ => _.CriterionLibraryScenarioBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? "");
 
             if (budgetAmounts.Any())
             {
@@ -134,12 +138,12 @@ namespace BridgeCareCore.Services
 
                 using var excelPackage = new ExcelPackage(new FileInfo(fileName));
 
-                var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+                var budgetWorksheet = excelPackage.Workbook.Worksheets.Add("Budget");
 
                 var budgetNames = budgetAmounts.Select(_ => _.ScenarioBudget.Name).Distinct().OrderBy(budgetName => budgetName)
                     .ToList();
 
-                AddHeaderCells(worksheet, budgetNames);
+                AddHeaderCells(budgetWorksheet, budgetNames);
 
                 var budgetAmountsPerYear = budgetAmounts
                     .OrderBy(budgetAmount => budgetAmount.Year)
@@ -148,7 +152,23 @@ namespace BridgeCareCore.Services
                         .OrderBy(budgetAmount => budgetAmount.ScenarioBudget.Name)
                         .Select(budgetAmount => budgetAmount.Value).ToList());
 
-                AddDataCells(worksheet, budgetAmountsPerYear);
+                AddDataCells(budgetWorksheet, budgetAmountsPerYear);
+
+                if (criteriaPerBudgetName.Any())
+                {
+                    var criteriaWorksheet = excelPackage.Workbook.Worksheets.Add("Criteria");
+
+                    criteriaWorksheet.Cells[1, 1].Value = "BUDGET_NAME";
+                    criteriaWorksheet.Cells[1, 2].Value = "CRITERIA";
+
+                    var currentRow = 2;
+                    criteriaPerBudgetName.ForEach(criteriaPerBudgetName =>
+                    {
+                        criteriaWorksheet.Cells[currentRow, 1].Value = criteriaPerBudgetName.Key;
+                        criteriaWorksheet.Cells[currentRow, 2].Value = criteriaPerBudgetName.Value;
+                        currentRow++;
+                    });
+                }
 
                 return new FileInfoDTO
                 {
@@ -164,6 +184,12 @@ namespace BridgeCareCore.Services
         public FileInfoDTO ExportLibraryInvestmentBudgetsFile(Guid budgetLibraryId)
         {
             var budgetAmounts = _unitOfWork.BudgetAmountRepo.GetLibraryBudgetAmounts(budgetLibraryId);
+            var criteriaPerBudgetName = _unitOfWork.Context.Budget.AsNoTracking().AsSplitQuery()
+                .Include(_ => _.CriterionLibraryBudgetJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Where(_ => _.BudgetLibraryId == budgetLibraryId)
+                .ToDictionary(_ => _.Name,
+                    _ => _.CriterionLibraryBudgetJoin?.CriterionLibrary.MergedCriteriaExpression ?? "");
 
             if (budgetAmounts.Any())
             {
@@ -175,12 +201,12 @@ namespace BridgeCareCore.Services
 
                 using var excelPackage = new ExcelPackage(new FileInfo(fileName));
 
-                var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+                var budgetWorksheet = excelPackage.Workbook.Worksheets.Add("Budget");
 
                 var budgetNames = budgetAmounts.Select(_ => _.Budget.Name).Distinct().OrderBy(budgetName => budgetName)
                     .ToList();
 
-                AddHeaderCells(worksheet, budgetNames);
+                AddHeaderCells(budgetWorksheet, budgetNames);
 
                 var budgetAmountsPerYear = budgetAmounts
                     .OrderBy(budgetAmount => budgetAmount.Year)
@@ -189,7 +215,23 @@ namespace BridgeCareCore.Services
                         .OrderBy(budgetAmount => budgetAmount.Budget.Name)
                         .Select(budgetAmount => budgetAmount.Value).ToList());
 
-                AddDataCells(worksheet, budgetAmountsPerYear);
+                AddDataCells(budgetWorksheet, budgetAmountsPerYear);
+
+                if (criteriaPerBudgetName.Any())
+                {
+                    var criteriaWorksheet = excelPackage.Workbook.Worksheets.Add("Criteria");
+
+                    criteriaWorksheet.Cells[1, 1].Value = "BUDGET_NAME";
+                    criteriaWorksheet.Cells[1, 2].Value = "CRITERIA";
+
+                    var currentRow = 2;
+                    criteriaPerBudgetName.ForEach(criteriaPerBudgetName =>
+                    {
+                        criteriaWorksheet.Cells[currentRow, 1].Value = criteriaPerBudgetName.Key;
+                        criteriaWorksheet.Cells[currentRow, 2].Value = criteriaPerBudgetName.Value;
+                        currentRow++;
+                    });
+                }
 
                 return new FileInfoDTO
                 {

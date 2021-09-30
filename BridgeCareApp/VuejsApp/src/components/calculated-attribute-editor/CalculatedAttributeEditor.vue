@@ -643,16 +643,18 @@ export default class CalculatedAttributeEditor extends Vue {
                       this.calculatedAttributeGridData,
                       this.stateScenarioCalculatedAttributes,
                   )
-                : hasUnsavedChangesCore(
+                : this.stateSelectedCalculatedAttributeLibrary.id != getBlankGuid()
+                    ?  hasUnsavedChangesCore(
                       '',
                       {
                           ...clone(this.selectedCalculatedAttributeLibrary),
-                          calculatedAttribute: clone(
+                          calculatedAttributes: clone(
                               this.calculatedAttributeGridData,
                           ),
                       },
                       this.stateSelectedCalculatedAttributeLibrary,
-                  );
+                  )
+                  : false;
             this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
         }
     }

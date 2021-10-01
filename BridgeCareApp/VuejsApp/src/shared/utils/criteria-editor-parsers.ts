@@ -120,6 +120,16 @@ function createCriteriaExpression(criteriaRule: CriteriaRule): string {
     }
 }
 
+function getCharIndex(
+    expression: string,
+    currentCharIndex: number,
+    numberToAddToCurrentCharIndex: number = 0,
+): number {
+    return currentCharIndex + numberToAddToCurrentCharIndex < expression.length
+        ? currentCharIndex + numberToAddToCurrentCharIndex
+        : expression.length - 1;
+}
+
 /**
  * Creates a CriteriaRule object from a given criteria expression
  */
@@ -179,8 +189,14 @@ function createCriteriaObject(
     let currentCharIndex: number = 0;
     let currentOpenParentheses: string[] = [];
     let currentCloseParentheses: string[] = [];
+    let loopPasses: number = 0;
 
     while (currentCharIndex < expression.length) {
+        loopPasses++;
+        if (loopPasses >= expression.length) {
+            break;
+        }
+
         if (expression[currentCharIndex] === '(') {
             if (hasValue(currentClause)) {
                 criteria.children!.push(
@@ -204,7 +220,9 @@ function createCriteriaObject(
 
                 subCharIndex++;
             } while (
-                currentOpenParentheses.length !== currentCloseParentheses.length
+                currentOpenParentheses.length !==
+                    currentCloseParentheses.length &&
+                subCharIndex < expression.length
             );
 
             criteria.children!.push(
@@ -219,7 +237,6 @@ function createCriteriaObject(
                     ),
                 ),
             );
-            //}
 
             currentOpenParentheses = [];
             currentCloseParentheses = [];
@@ -227,10 +244,14 @@ function createCriteriaObject(
             currentCharIndex = subCharIndex;
         } else if (expression[currentCharIndex] === ' ') {
             if (
-                expression.substring(currentCharIndex, currentCharIndex + 5) ===
-                    ' AND ' ||
-                expression.substring(currentCharIndex, currentCharIndex + 4) ===
-                    ' OR '
+                expression.substring(
+                    currentCharIndex,
+                    getCharIndex(expression, currentCharIndex, 5),
+                ) === ' AND ' ||
+                expression.substring(
+                    currentCharIndex,
+                    getCharIndex(expression, currentCharIndex, 4),
+                ) === ' OR '
             ) {
                 if (hasValue(currentClause)) {
                     criteria.children!.push(
@@ -245,18 +266,26 @@ function createCriteriaObject(
                 if (
                     expression.substring(
                         currentCharIndex,
-                        currentCharIndex + 5,
+                        getCharIndex(expression, currentCharIndex, 5),
                     ) === ' AND '
                 ) {
                     if (!hasValue(criteria.logicalOperator)) {
                         criteria.logicalOperator = 'AND';
                     }
-                    currentCharIndex = currentCharIndex + 5;
+                    currentCharIndex = getCharIndex(
+                        expression,
+                        currentCharIndex,
+                        5,
+                    );
                 } else {
                     if (!hasValue(criteria.logicalOperator)) {
                         criteria.logicalOperator = 'OR';
                     }
-                    currentCharIndex = currentCharIndex + 4;
+                    currentCharIndex = getCharIndex(
+                        expression,
+                        currentCharIndex,
+                        4,
+                    );
                 }
             }
         } else {

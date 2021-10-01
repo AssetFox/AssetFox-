@@ -1,14 +1,28 @@
-import {isEmpty, isNil} from 'ramda';
-import {Criteria, CriteriaRule, CriteriaType, emptyCriteria} from '@/shared/models/iAM/criteria';
-import {hasValue} from '@/shared/utils/has-value-util';
+import { clone, isEmpty, isNil } from 'ramda';
+import {
+    Criteria,
+    CriteriaRule,
+    CriteriaType,
+    emptyCriteria,
+} from '@/shared/models/iAM/criteria';
+import { hasValue } from '@/shared/utils/has-value-util';
 
 const operators: string[] = ['<=', '>=', '<>', '=', '<', '>'];
 
+const invalidCharRegex: RegExp = /\s|\(|\)/g;
+
+const queryBuilderTypes: any = {
+    QueryBuilderRule: 'query-builder-rule',
+    QueryBuilderGroup: 'query-builder-group',
+};
+
 /**
- * Creates a clause string from a given criteria object
- * @param criteria The criteria object used to create the clause string
+ * Creates a criteria expression from a given Criteria object
  */
-export const parseCriteriaJson = (criteria: Criteria) => {
+export const convertCriteriaObjectToCriteriaExpression = (
+    criteria: Criteria,
+    recursiveCallNumber: number = 0,
+): string[] | null => {
     // create an empty string list to build the where clause
     const clause: string[] = [];
     try {
@@ -18,9 +32,11 @@ export const parseCriteriaJson = (criteria: Criteria) => {
             // @ts-ignore
             // loop over the criteria children and append all rules
             criteria.children.forEach((child: CriteriaType) => {
-                if (child.type === 'query-builder-rule') {
+                if (child.type === queryBuilderTypes.QueryBuilderRule) {
                     // create a clause rule from the query builder child.query
-                    const rule = parseQueryBuilderRule(child.query as CriteriaRule);
+                    const rule = createCriteriaExpression(
+                        child.query as CriteriaRule,
+                    );
                     if (hasValue(rule)) {
                         // append the logical operator if the string list is not empty
                         if (hasValue(clause)) {
@@ -30,16 +46,24 @@ export const parseCriteriaJson = (criteria: Criteria) => {
                         clause.push(rule);
                     }
                 } else {
-                    const clauseGroup = parseCriteriaJson(child.query as Criteria);
+                    const clauseGroup = convertCriteriaObjectToCriteriaExpression(
+                        child.query as Criteria,
+                        recursiveCallNumber++,
+                    );
                     if (clauseGroup && hasValue(clauseGroup.join(''))) {
                         // append the logical operator if the string list is not empty
                         if (hasValue(clause)) {
                             clause.push(logicalOperator);
                         }
+
                         // create a rule group
-                        clause.push('(');
-                        clause.push(...clauseGroup);
-                        clause.push(')');
+                        if (recursiveCallNumber === 0) {
+                            clause.push(...clauseGroup);
+                        } else {
+                            clause.push('(');
+                            clause.push(...clauseGroup);
+                            clause.push(')');
+                        }
                     }
                 }
             });
@@ -50,16 +74,25 @@ export const parseCriteriaJson = (criteria: Criteria) => {
     return clause;
 };
 
-export const parseCriteriaTypeJson = (criteriaType: CriteriaType) => {
+/**
+ * Creates a criteria expression string from a given CriteriaType object
+ */
+export const convertCriteriaTypeObjectToCriteriaExpression = (
+    criteriaType: CriteriaType,
+): string => {
     let clause: string = '';
     if (!isNil(criteriaType)) {
-        if (criteriaType.type === 'query-builder-rule') {
-            const rule = parseQueryBuilderRule(criteriaType.query as CriteriaRule);
+        if (criteriaType.type === queryBuilderTypes.QueryBuilderRule) {
+            const rule = createCriteriaExpression(
+                criteriaType.query as CriteriaRule,
+            );
             if (hasValue(rule)) {
                 clause = rule;
             }
         } else {
-            const ruleGroup = parseCriteriaJson(criteriaType.query as Criteria);
+            const ruleGroup = convertCriteriaObjectToCriteriaExpression(
+                criteriaType.query as Criteria,
+            );
             if (ruleGroup && hasValue(ruleGroup.join(''))) {
                 clause = ruleGroup.join('');
             }
@@ -69,13 +102,14 @@ export const parseCriteriaTypeJson = (criteriaType: CriteriaType) => {
 };
 
 /**
- * Creates a clause rule substring from a given criteria rule object
- * @param criteriaRule The criteria rule object used to create the clause rule substring
+ * Creates a criteria expression from a given CriteriaRule object
  */
-function parseQueryBuilderRule(criteriaRule: CriteriaRule) {
-
+function createCriteriaExpression(criteriaRule: CriteriaRule): string {
     // return the concatenated rule string
-    if (typeof criteriaRule.value != 'undefined' && hasValue(criteriaRule.value)) {
+    if (
+        typeof criteriaRule.value != 'undefined' &&
+        hasValue(criteriaRule.value)
+    ) {
         if (criteriaRule.value[0] != '[') {
             return `[${criteriaRule.selectedOperand}]${criteriaRule.selectedOperator}'${criteriaRule.value}'`;
         } else {
@@ -86,296 +120,249 @@ function parseQueryBuilderRule(criteriaRule: CriteriaRule) {
     }
 }
 
-
-/**
- * Parses a clause string into a criteria object
- * @param clause The clause string to parse
- */
-export const parseCriteriaString = (clause: string) => {
-    try {
-        if (hasValue(clause)) {
-            var trimmedClause: string = clause.trim();
-            // Whenever any of the following operands (or space) are followed by an extra space, trim away that space
-            trimmedClause = trimmedClause.replace(/ *([ <>=]) */g, (_, group1) => group1);
-            // create a new criteria object
-            const newCriteria: Criteria = {
-                logicalOperator: '',
-                children: []
-            };
-            // if no open parentheses are present, assume clause string was created in legacy app
-            if ((trimmedClause.match(/\(/g) || []).length === 0) {
-                // ensure there are no close parentheses in the string before parsing
-                trimmedClause = trimmedClause.replace(/\)/g, '');
-                // parse the clause string and return
-                return parseLegacyAppClause(trimmedClause, newCriteria);
-            } else {
-                // parse the clause as a query builder string and return
-                return parseQueryBuilderClause(trimmedClause, newCriteria);
-            }
-        }
-    } catch (e) {
-        return null;
-    }
-    return {...emptyCriteria};
-};
-
-/**
- * Parses legacy app formatted clause string data into a criteria object
- * @param clause The clause string to parse
- * @param criteria The criteria object to parse the data into
- */
-function parseLegacyAppClause(clause: string, criteria: Criteria) {
-    var splitVals: any = [];
-    let startingIndex = 0;
-    let indexForSpacedString = 0;
-    let spacedString = 0;
-    while (startingIndex < clause.length) {
-        let index = clause.indexOf(' ', startingIndex);
-        if (index == -1) {
-            if (spacedString == 0) {
-                splitVals.push(clause.substring(startingIndex, clause.length));
-            } else {
-                splitVals.push(clause.substring(indexForSpacedString, clause.length));
-                spacedString = 0;
-            }
-            break;
-        }
-        if (clause[index + 1] == '(' || clause[index + 1] == '[' || clause.substring(index + 1, index + 4) == 'AND'
-            || clause.substring(index + 1, index + 3) == 'OR') {
-            if (spacedString == 0) {
-                splitVals.push(clause.substring(startingIndex, index));
-            } else {
-                splitVals.push(clause.substring(indexForSpacedString, index));
-                spacedString = 0;
-            }
-            startingIndex = index + 1;
-        } else if (clause.substring(index - 2, index) == 'OR' || clause.substring(index - 3, index) == 'AND') {
-            if (spacedString == 0) {
-                splitVals.push(clause.substring(startingIndex, index));
-            } else {
-                splitVals.push(clause.substring(indexForSpacedString, index));
-                spacedString = 0;
-            }
-            startingIndex = index + 1;
-        } else {
-            if (spacedString == 0) {
-                indexForSpacedString = startingIndex;
-                spacedString++;
-            }
-            startingIndex = index + 1;
-
-        }
-    }
-    //const splitVals = clause.split(' ');
-    while (splitVals.indexOf('') !== -1) {
-        splitVals.splice(splitVals.indexOf(''), 1);
-    }
-    let i = 0;
-    while (i < splitVals.length) {
-        const splitVal = splitVals[i];
-        if (splitVal === 'AND' || splitVal === 'OR') {
-            if (!hasValue(criteria.logicalOperator)) {
-                // set criteria logical operator if it doesn't currently have one
-                criteria.logicalOperator = splitVal;
-            } else if (criteria.logicalOperator !== splitVal) {
-                // create a new clause string starting at the current iteration to the end of the splitVals array
-                const groupClause = splitVals.slice(i).join(' ');
-                // create a new criteria object
-                const newCriteria: Criteria = {
-                    logicalOperator: '',
-                    children: []
-                };
-                // create a new criteria type object, and recursively call the parseLegacyAppClause function with the
-                // new clause and new criteria to create a query builder group of rules
-                const criteriaType: CriteriaType = {
-                    type: 'query-builder-group',
-                    query: parseLegacyAppClause(groupClause, newCriteria)
-                };
-                // @ts-ignore
-                // add the new criteria type to the current criteria
-                criteria.children.push(criteriaType);
-                // set current iteration value to the length of the current splitVals array and continue
-                i = splitVals.length;
-                continue;
-            }
-        } else {
-            // create a new criteria rule by parsing the current substring
-            const criteriaRule: CriteriaRule = parseCriteriaRule(splitVal);
-            // create a new criteria type and add the new criteria rule to it
-            const criteriaType: CriteriaType = {
-                type: 'query-builder-rule',
-                query: criteriaRule
-            };
-            // @ts-ignore
-            // add the new criteria type to the current criteria
-            criteria.children.push(criteriaType);
-        }
-        i++;
-    }
-    return criteria;
+function getCharIndex(
+    expression: string,
+    currentCharIndex: number,
+    numberToAddToCurrentCharIndex: number = 0,
+): number {
+    return currentCharIndex + numberToAddToCurrentCharIndex < expression.length
+        ? currentCharIndex + numberToAddToCurrentCharIndex
+        : expression.length - 1;
 }
 
 /**
- * Parses query builder formatted clause string into a criteria object
- * @param clause The clause string to parse
- * @param criteria The criteria object to parse the data into
+ * Creates a CriteriaRule object from a given criteria expression
  */
-function parseQueryBuilderClause(clause: string, criteria: Criteria) {
-    var splitVals: any = [];
-    let startingIndex = 0;
-    let indexForSpacedString = 0;
-    let spacedString = 0;
-    while (startingIndex < clause.length) {
-        let index = clause.indexOf(' ', startingIndex);
-        if (index == -1) {
-            if (spacedString == 0) {
-                splitVals.push(clause.substring(startingIndex, clause.length));
-            } else {
-                splitVals.push(clause.substring(indexForSpacedString, clause.length));
-                spacedString = 0;
-            }
-            break;
-        }
-        if (clause[index + 1] == '(' || clause[index + 1] == '[' || clause.substring(index + 1, index + 4) == 'AND'
-            || clause.substring(index + 1, index + 3) == 'OR') {
-            if (spacedString == 0) {
-                splitVals.push(clause.substring(startingIndex, index));
-            } else {
-                splitVals.push(clause.substring(indexForSpacedString, index));
-                spacedString = 0;
-            }
-            startingIndex = index + 1;
-        } else if (clause.substring(index - 2, index) == 'OR' || clause.substring(index - 3, index) == 'AND') {
-            if (spacedString == 0) {
-                splitVals.push(clause.substring(startingIndex, index));
-            } else {
-                splitVals.push(clause.substring(indexForSpacedString, index));
-                spacedString = 0;
-            }
-            startingIndex = index + 1;
-        } else {
-            if (spacedString == 0) {
-                indexForSpacedString = startingIndex;
-                spacedString++;
-            }
-            startingIndex = index + 1;
-
-        }
-    }
-    //const splitVals = clause.split(' ');
-    while (splitVals.indexOf('') !== -1) {
-        splitVals.splice(splitVals.indexOf(''), 1);
-    }
-    let i = 0;
-    while (i < splitVals.length) {
-        const splitVal = splitVals[i];
-        if (splitVal.charAt(0) === '(') {
-            // set groupEnd as the number of ( chars - the number of ) chars, 0 means the clause subgroup has been found
-            let groupEnd = (splitVal.match(/\(/g) || []).length - (splitVal.match(/\)/g) || []).length;
-            // set placeholder for clause substring
-            let groupClause = '';
-            if (groupEnd === 0) {
-                // group contains only 1 operand/operator and no logical operators, so slice of the '(' & ')' chars at
-                // start and end of the current iteration value
-                groupClause = splitVal.slice(1, splitVal.length - 1);
-                i++;
-            } else {
-                // start j at the next index of the substring list
-                let j = i + 1;
-                // loop over the substring list until groupEnd = 0
-                while (groupEnd !== 0) {
-                    // get current substring at substring list index j
-                    const clauseSubstring = splitVals[j];
-                    // add current groupEnd value to current substring number of '(' chars - the substring number of ')' chars
-                    groupEnd = groupEnd + (clauseSubstring.match(/\(/g) || []).length
-                        - (clauseSubstring.match(/\)/g) || []).length;
-                    // if groupEnd != 0 then add 1 to j to continue to next substring in list
-                    if (groupEnd !== 0) {
-                        j++;
-                    }
-                }
-                // slice the array at the current iteration to j + 1 index, then join with whitespace
-                const joinedVals = splitVals.slice(i, j + 1).join(' ');
-                // create a new clause string and slice off the '(' & ')' chars at the start and end
-                groupClause = joinedVals.slice(1, joinedVals.length - 1);
-                // set current iteration to j + 1 to begin iteration after the query group
-                i = j + 1;
-            }
-            // create a new criteria object
-            const newCriteria: Criteria = {
-                logicalOperator: 'AND',
-                children: []
-            };
-            // create a new criteria type object, and recursively call the parseCriteriaString function with the new clause
-            // and new criteria to create a query builder group of rules
-            const criteriaType: CriteriaType = {
-                type: 'query-builder-group',
-                query: parseQueryBuilderClause(groupClause, newCriteria)
-            };
-            // @ts-ignore
-            // add the new criteria type to the current criteria
-            criteria.children.push(criteriaType);
-            // continue to next iteration
-            continue;
-        } else if (splitVal === 'AND' || splitVal === 'OR') {
-            //if (!hasValue(criteria.logicalOperator)) {
-            // set logical operator for current criteria
-            criteria.logicalOperator = splitVal;
-            //}
-        } else {
-            // create a new criteria rule by parsing the current substring
-            const criteriaRule: CriteriaRule = parseCriteriaRule(splitVal);
-            // create a new criteria type and add the new criteria rule to it
-            const criteriaType: CriteriaType = {
-                type: 'query-builder-rule',
-                query: criteriaRule
-            };
-            // @ts-ignore
-            // add the new criteria type to the current criteria
-            criteria.children.push(criteriaType);
-        }
-        i++;
-    }
-    return criteria;
-}
-
-/**
- * Parses a clause substring into a criteria rule object
- * @param criteriaRuleString The clause substring to parse
- */
-function parseCriteriaRule(criteriaRuleString: string): CriteriaRule {
-
+function createCriteriaRuleObject(clause: string): CriteriaRule {
     let operator: string = '';
-    let operandAndValue: string[] = [];
-    let tempSplitfromOperator: string[] = [];
-    let index = -2;
 
-    for (let operatorIndex = 0; operatorIndex < operators.length; operatorIndex++) {
-        if (criteriaRuleString.indexOf(operators[operatorIndex]) !== -1) {
+    for (
+        let operatorIndex = 0;
+        operatorIndex < operators.length;
+        operatorIndex++
+    ) {
+        if (clause.indexOf(operators[operatorIndex]) !== -1) {
             operator = operators[operatorIndex];
-            index = criteriaRuleString.indexOf(operators[operatorIndex]);
-            tempSplitfromOperator = criteriaRuleString.split(operator);
             break;
         }
     }
 
-    if (typeof tempSplitfromOperator[1] != 'undefined') {
-        if (!tempSplitfromOperator[1].startsWith('[', 0)) {
-            criteriaRuleString = criteriaRuleString.replace(/\[/g, '').replace(/]/g, '');
-        } else {
-            tempSplitfromOperator[0] = tempSplitfromOperator[0].replace(/\[/g, '').replace(/]/g, '');
-            criteriaRuleString = criteriaRuleString.slice(index);
-            criteriaRuleString = [tempSplitfromOperator[0], criteriaRuleString].join('');
-        }
-        operandAndValue = criteriaRuleString.split(operator);
-    } else {
-        criteriaRuleString = criteriaRuleString.replace(/\[/g, '').replace(/]/g, '');
+    if (!hasValue(operator)) {
+        throw new Error('The criteria expression is invalid.');
     }
+
+    const operandAndValue: string[] = clause.split(operator);
+    operandAndValue[0] = operandAndValue[0]
+        .replace(/\[/g, '')
+        .replace(/]/g, '');
+    operandAndValue[1] = operandAndValue[1]
+        .replace(/'/g, '')
+        .replace(/\|/g, '');
 
     return {
         rule: operandAndValue[0],
         selectedOperator: operator,
         selectedOperand: operandAndValue[0],
-        value: operandAndValue[1].replace(/'/g, '').replace(/\|/g, '')
-    };
+        value: operandAndValue[1],
+    } as CriteriaRule;
 }
+
+/**
+ * Converts a string into a Criteria object
+ * @param expression The string to convert
+ * @param criteria The Criteria object to use for property setting
+ */
+function createCriteriaObject(
+    expression: string,
+    criteria: Criteria,
+): Criteria {
+    if (
+        (expression.match(/\(/g) || []).length !==
+        (expression.match(/\)/g) || []).length
+    ) {
+        throw new Error(
+            'The criteria expression has mismatching numbers of open/close parentheses.',
+        );
+    }
+
+    let currentClause: string = '';
+    let currentCharIndex: number = 0;
+    let currentOpenParentheses: string[] = [];
+    let currentCloseParentheses: string[] = [];
+    let loopPasses: number = 0;
+
+    while (currentCharIndex < expression.length) {
+        loopPasses++;
+        if (loopPasses >= expression.length) {
+            throw new Error('The criteria expression is invalid.');
+        }
+
+        if (expression[currentCharIndex] === '(') {
+            if (hasValue(currentClause)) {
+                criteria.children!.push(
+                    createCriteriaTypeObject(
+                        queryBuilderTypes.QueryBuilderRule,
+                        createCriteriaRuleObject(currentClause),
+                    ),
+                );
+                currentClause = '';
+            }
+
+            let subCharIndex: number = currentCharIndex;
+            do {
+                if (expression[subCharIndex] === '(') {
+                    currentOpenParentheses.push('(');
+                }
+
+                if (expression[subCharIndex] === ')') {
+                    currentCloseParentheses.push(')');
+                }
+
+                subCharIndex++;
+            } while (
+                currentOpenParentheses.length !==
+                    currentCloseParentheses.length &&
+                subCharIndex < expression.length
+            );
+
+            criteria.children!.push(
+                createCriteriaTypeObject(
+                    queryBuilderTypes.QueryBuilderGroup,
+                    createCriteriaObject(
+                        expression.substring(
+                            currentCharIndex + 1,
+                            subCharIndex - 1,
+                        ),
+                        clone(emptyCriteria),
+                    ),
+                ),
+            );
+
+            currentOpenParentheses = [];
+            currentCloseParentheses = [];
+
+            currentCharIndex = subCharIndex;
+        } else if (expression[currentCharIndex] === ' ') {
+            if (
+                expression.substring(
+                    currentCharIndex,
+                    getCharIndex(expression, currentCharIndex, 5),
+                ) === ' AND ' ||
+                expression.substring(
+                    currentCharIndex,
+                    getCharIndex(expression, currentCharIndex, 4),
+                ) === ' OR '
+            ) {
+                if (hasValue(currentClause)) {
+                    criteria.children!.push(
+                        createCriteriaTypeObject(
+                            queryBuilderTypes.QueryBuilderRule,
+                            createCriteriaRuleObject(currentClause),
+                        ),
+                    );
+                    currentClause = '';
+                }
+
+                if (
+                    expression.substring(
+                        currentCharIndex,
+                        getCharIndex(expression, currentCharIndex, 5),
+                    ) === ' AND '
+                ) {
+                    if (!hasValue(criteria.logicalOperator)) {
+                        criteria.logicalOperator = 'AND';
+                    }
+                    currentCharIndex = getCharIndex(
+                        expression,
+                        currentCharIndex,
+                        5,
+                    );
+                } else {
+                    if (!hasValue(criteria.logicalOperator)) {
+                        criteria.logicalOperator = 'OR';
+                    }
+                    currentCharIndex = getCharIndex(
+                        expression,
+                        currentCharIndex,
+                        4,
+                    );
+                }
+            }
+        } else {
+            if (!invalidCharRegex.test(expression[currentCharIndex])) {
+                currentClause = `${currentClause}${expression[currentCharIndex]}`;
+            }
+
+            currentCharIndex++;
+
+            if (
+                hasValue(currentClause) &&
+                currentCharIndex === expression.length
+            ) {
+                criteria.children!.push(
+                    createCriteriaTypeObject(
+                        queryBuilderTypes.QueryBuilderRule,
+                        createCriteriaRuleObject(currentClause),
+                    ),
+                );
+                currentClause = '';
+            }
+        }
+    }
+
+    if (
+        !hasValue(criteria.logicalOperator) &&
+        criteria.children!.length === 1 &&
+        criteria.children![0].type === queryBuilderTypes.QueryBuilderGroup
+    ) {
+        do {
+            criteria = criteria.children![0].query as Criteria;
+        } while (
+            !hasValue(criteria.logicalOperator) &&
+            criteria.children!.length === 1 &&
+            criteria.children![0].type === queryBuilderTypes.QueryBuilderGroup
+        );
+    } else if (
+        !hasValue(criteria.logicalOperator) &&
+        criteria.children!.length > 1
+    ) {
+        throw new Error('The criteria expression is malformed.');
+    }
+
+    return criteria;
+}
+
+/**
+ * Creates a CriteriaType object of the specified type for the given CriteriaRule object or Criteria object
+ */
+function createCriteriaTypeObject(
+    type: string,
+    query: CriteriaRule | Criteria,
+): CriteriaType {
+    return {
+        type: type,
+        query: query,
+    } as CriteriaType;
+}
+
+/**
+ * Converts a criteria expression into its Criteria object equivalent
+ */
+export const convertCriteriaExpressionToCriteriaObject = (
+    expression: string,
+    setErrorMessageActionCallback: any,
+) => {
+    try {
+        if (hasValue(expression)) {
+            return createCriteriaObject(
+                expression.trim(),
+                clone(emptyCriteria),
+            );
+        }
+    } catch (e) {
+        setErrorMessageActionCallback({ message: e.message });
+        return null;
+    }
+
+    return { ...emptyCriteria };
+};

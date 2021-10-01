@@ -1,4 +1,4 @@
-import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import { getBlankGuid } from '@/shared/utils/uuid-utils';
 
 export interface CriteriaEditorAttribute {
     name: string;
@@ -49,8 +49,8 @@ export interface CriteriaEditorResult {
 }
 
 export const emptyCriteria: Criteria = {
-    logicalOperator: 'AND',
-    children: []
+    logicalOperator: '',
+    children: [],
 };
 
 export const emptyCriterionLibrary: CriterionLibrary = {
@@ -58,10 +58,10 @@ export const emptyCriterionLibrary: CriterionLibrary = {
     name: '',
     description: '',
     mergedCriteriaExpression: '',
-    isSingleUse: false
+    isSingleUse: false,
 };
 
 export const emptyCriteriaEditorData: CriteriaEditorData = {
     mergedCriteriaExpression: '',
-    isLibraryContext: false
+    isLibraryContext: false,
 };

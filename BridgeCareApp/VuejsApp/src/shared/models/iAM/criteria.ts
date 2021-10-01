@@ -58,7 +58,7 @@ export const emptyCriterionLibrary: CriterionLibrary = {
     name: '',
     description: '',
     mergedCriteriaExpression: '',
-    isSingleUse: false,
+    isSingleUse: true,
 };
 
 export const emptyCriteriaEditorData: CriteriaEditorData = {

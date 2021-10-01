@@ -321,16 +321,17 @@ function createCriteriaTypeObject(
  */
 export const convertCriteriaExpressionToCriteriaObject = (
     expression: string,
+    setErrorMessageActionCallback: any,
 ) => {
     try {
         if (hasValue(expression)) {
-            const trimmedExpression: string = expression.trim();
             return createCriteriaObject(
-                trimmedExpression,
+                expression.trim(),
                 clone(emptyCriteria),
             );
         }
     } catch (e) {
+        setErrorMessageActionCallback({ message: e.message });
         return null;
     }
 

@@ -282,6 +282,7 @@ export default class CriteriaEditor extends Vue {
 
     @Action('getAttributes') getAttributesAction: any;
     @Action('getAttributeSelectValues') getAttributeSelectValuesAction: any;
+    @Action('setErrorMessage') setErrorMessageAction: any;
 
     queryBuilderRules: any[] = [];
     queryBuilderLabels: object = {
@@ -329,7 +330,7 @@ export default class CriteriaEditor extends Vue {
         const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
             this.criteriaEditorData.mergedCriteriaExpression != null
                 ? this.criteriaEditorData.mergedCriteriaExpression
-                : '',
+                : '', this.setErrorMessageAction
         ) as Criteria;
 
         const parsedSubCriteria: string[] | null = convertCriteriaObjectToCriteriaExpression(
@@ -501,7 +502,7 @@ export default class CriteriaEditor extends Vue {
             // TODO
             //this.selectedSubCriteriaClause = parseCriteriaString(subCriteriaClause);
             this.selectedSubCriteriaClause = convertCriteriaExpressionToCriteriaObject(
-                subCriteriaClause,
+                subCriteriaClause, this.setErrorMessageAction
             );
             if (this.selectedSubCriteriaClause) {
                 if (!hasValue(this.selectedSubCriteriaClause.logicalOperator)) {
@@ -569,7 +570,7 @@ export default class CriteriaEditor extends Vue {
         //TODO
         //const parsedRawSubCriteria = parseCriteriaString(this.selectedRawSubCriteriaClause);
         const parsedRawSubCriteria = convertCriteriaExpressionToCriteriaObject(
-            this.selectedRawSubCriteriaClause,
+            this.selectedRawSubCriteriaClause, this.setErrorMessageAction
         );
         if (parsedRawSubCriteria) {
             this.selectedSubCriteriaClause = parsedRawSubCriteria;
@@ -775,7 +776,7 @@ export default class CriteriaEditor extends Vue {
         //const parsedSelectedRawSubCriteriaClause = convertCriteriaObjectToCriteriaExpression(parseCriteriaString(this.selectedRawSubCriteriaClause) as Criteria);
         const parsedSelectedRawSubCriteriaClause = convertCriteriaObjectToCriteriaExpression(
             convertCriteriaExpressionToCriteriaObject(
-                this.selectedRawSubCriteriaClause,
+                this.selectedRawSubCriteriaClause, this.setErrorMessageAction
             ) as Criteria,
         );
 
@@ -812,7 +813,7 @@ export default class CriteriaEditor extends Vue {
                         //TODO
                         //const parsedSubCriteriaClause: Criteria = parseCriteriaString(subCriteriaClause) as Criteria;
                         const parsedSubCriteriaClause: Criteria = convertCriteriaExpressionToCriteriaObject(
-                            subCriteriaClause,
+                            subCriteriaClause, this.setErrorMessageAction
                         ) as Criteria;
                         if (parsedSubCriteriaClause.children!.length === 1) {
                             return parsedSubCriteriaClause.children![0];

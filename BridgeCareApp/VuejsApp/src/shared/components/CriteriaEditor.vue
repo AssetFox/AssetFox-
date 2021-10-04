@@ -815,7 +815,7 @@ export default class CriteriaEditor extends Vue {
                         const parsedSubCriteriaClause: Criteria = convertCriteriaExpressionToCriteriaObject(
                             subCriteriaClause, this.setErrorMessageAction
                         ) as Criteria;
-                        if (parsedSubCriteriaClause.children!.length === 1) {
+                        if (hasValue(parsedSubCriteriaClause) && parsedSubCriteriaClause.children!.length === 1) {
                             return parsedSubCriteriaClause.children![0];
                         }
                         return {

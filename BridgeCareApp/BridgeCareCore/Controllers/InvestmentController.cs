@@ -292,11 +292,7 @@ namespace BridgeCareCore.Controllers
 
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    if (overwriteBudgets)
-                    {
-                        UnitOfWork.Context.DeleteAll<BudgetEntity>(_ => _.BudgetLibraryId == budgetLibraryId);
-                    }
-                    return _investmentBudgetsService.ImportLibraryInvestmentBudgetsFile(budgetLibraryId, excelPackage, currentUserCriteriaFilter);
+                    return _investmentBudgetsService.ImportLibraryInvestmentBudgetsFile(budgetLibraryId, excelPackage, currentUserCriteriaFilter, overwriteBudgets);
                 });
 
                 if (result.WarningMessage != null)

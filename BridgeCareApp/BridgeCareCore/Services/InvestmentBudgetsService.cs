@@ -398,7 +398,8 @@ namespace BridgeCareCore.Services
             };
         }
 
-        public BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter)
+        public BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter,
+            bool overwriteBudgets)
         {
             var budgetWorksheet = excelPackage.Workbook.Worksheets[0];
             var budgetWorksheetEnd = budgetWorksheet.Dimension.End;
@@ -423,6 +424,21 @@ namespace BridgeCareCore.Services
 
                     criteriaPerBudgetName[budgetName] = criteria;
                 }
+            }
+
+            if (overwriteBudgets)
+            {
+                if (criteriaPerBudgetName.Values.Any())
+                {
+                    var budgetNames = criteriaPerBudgetName.Keys.ToList();
+
+                    _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
+                    _.IsSingleUse && _.CriterionLibraryBudgetJoins.Any(join =>
+                        join.Budget.BudgetLibraryId == budgetLibraryId &&
+                        budgetNames.Contains(join.Budget.Name)));
+                }
+
+                _unitOfWork.Context.DeleteAll<BudgetEntity>(_ => _.BudgetLibraryId == budgetLibraryId);
             }
 
             var existingBudgetEntities = _unitOfWork.BudgetRepo.GetLibraryBudgets(budgetLibraryId);
@@ -487,7 +503,7 @@ namespace BridgeCareCore.Services
 
                 var budgetNames = criteriaPerBudgetName.Keys.ToList();
                 _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
-                    _.IsSingleUse && _.CriterionLibraryBudgetJoins.All(join =>
+                    _.IsSingleUse && _.CriterionLibraryBudgetJoins.Any(join =>
                         join.Budget.BudgetLibraryId == budgetLibraryId &&
                         budgetNames.Contains(join.Budget.Name)));
 

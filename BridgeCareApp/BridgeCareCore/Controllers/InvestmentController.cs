@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -73,11 +74,7 @@ namespace BridgeCareCore.Controllers
         {
             ScenarioBudgetImportResultDTO UpsertAny(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
             {
-                if (overwriteBudgets)
-                {
-                    UnitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
-                }
-                return _investmentBudgetsService.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter);
+                return _investmentBudgetsService.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter, overwriteBudgets);
             }
 
             ScenarioBudgetImportResultDTO UpsertPermitted(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)

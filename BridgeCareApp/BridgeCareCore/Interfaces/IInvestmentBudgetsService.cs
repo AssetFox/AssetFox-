@@ -12,7 +12,8 @@ namespace BridgeCareCore.Interfaces
 
         FileInfoDTO ExportLibraryInvestmentBudgetsFile(Guid budgetLibraryId);
 
-        ScenarioBudgetImportResultDTO ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter);
+        ScenarioBudgetImportResultDTO ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter,
+            bool overwriteBudgets);
 
         BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter);
     }

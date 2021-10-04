@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MoreLinq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
@@ -14,6 +13,7 @@ using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services.SummaryReport;
 using Microsoft.EntityFrameworkCore;
+using MoreLinq;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services
@@ -132,7 +132,7 @@ namespace BridgeCareCore.Services
             if (budgetAmounts.Any())
             {
                 var simulationName = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
-                    .Select(_ => new SimulationEntity {Name = _.Name}).AsNoTracking().Single().Name;
+                    .Select(_ => new SimulationEntity { Name = _.Name }).AsNoTracking().Single().Name;
 
                 var fileName = $"{simulationName.Trim().Replace(" ", "_")}_investment_budgets.xlsx";
 
@@ -194,7 +194,7 @@ namespace BridgeCareCore.Services
             if (budgetAmounts.Any())
             {
                 var budgetLibraryName = _unitOfWork.Context.BudgetLibrary.Where(_ => _.Id == budgetLibraryId)
-                    .Select(budgetLibrary => new BudgetLibraryEntity {Name = budgetLibrary.Name}).AsNoTracking().Single()
+                    .Select(budgetLibrary => new BudgetLibraryEntity { Name = budgetLibrary.Name }).AsNoTracking().Single()
                     .Name;
 
                 var fileName = $"{budgetLibraryName.Trim().Replace(" ", "_")}_investment_budgets.xlsx";
@@ -244,8 +244,8 @@ namespace BridgeCareCore.Services
             return CreateInvestmentBudgetsSampleFile();
         }
 
-
-        public ScenarioBudgetImportResultDTO ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter)
+        public ScenarioBudgetImportResultDTO ImportScenarioInvestmentBudgetsFile(Guid simulationId, ExcelPackage excelPackage,
+            UserCriteriaDTO currentUserCriteriaFilter, bool overwriteBudgets)
         {
             var budgetWorksheet = excelPackage.Workbook.Worksheets[0];
             var budgetWorksheetEnd = budgetWorksheet.Dimension.End;
@@ -272,6 +272,20 @@ namespace BridgeCareCore.Services
                 }
             }
 
+            if (overwriteBudgets)
+            {
+                if (criteriaPerBudgetName.Values.Any())
+                {
+                    var budgetNames = criteriaPerBudgetName.Keys.ToList();
+                    _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
+                        _.IsSingleUse && _.CriterionLibraryScenarioBudgetJoins.Any(join =>
+                            join.ScenarioBudget.SimulationId == simulationId &&
+                            budgetNames.Contains(join.ScenarioBudget.Name)));
+                }
+
+                _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
+            }
+
             var existingBudgetEntities = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId)
                 .Select(_ => _.ToScenarioEntity(simulationId)).ToList();
 
@@ -279,7 +293,9 @@ namespace BridgeCareCore.Services
             var newBudgetEntities = worksheetBudgetNames.Where(budgetName => !existingBudgetNames.Contains(budgetName))
                 .Select(budgetName => new ScenarioBudgetEntity
                 {
-                    Id = Guid.NewGuid(), SimulationId = simulationId, Name = budgetName
+                    Id = Guid.NewGuid(),
+                    SimulationId = simulationId,
+                    Name = budgetName
                 }).ToList();
 
             var budgetAmountsPerBudgetYearTuple = new Dictionary<(string, int), ScenarioBudgetAmountEntity>();
@@ -332,8 +348,9 @@ namespace BridgeCareCore.Services
                 allBudgetEntities.AddRange(newBudgetEntities);
 
                 var budgetNames = criteriaPerBudgetName.Keys.ToList();
+
                 _unitOfWork.Context.DeleteAll<CriterionLibraryEntity>(_ =>
-                    _.IsSingleUse && _.CriterionLibraryScenarioBudgetJoins.All(join =>
+                    _.IsSingleUse && _.CriterionLibraryScenarioBudgetJoins.Any(join =>
                         join.ScenarioBudget.SimulationId == simulationId &&
                         budgetNames.Contains(join.ScenarioBudget.Name)));
 
@@ -371,7 +388,6 @@ namespace BridgeCareCore.Services
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.UserEntity?.Id);
             }
-
 
             return new ScenarioBudgetImportResultDTO
             {
@@ -415,7 +431,9 @@ namespace BridgeCareCore.Services
             var newBudgetEntities = worksheetBudgetNames.Where(budgetName => !existingBudgetNames.Contains(budgetName))
                 .Select(budgetName => new BudgetEntity
                 {
-                    Id = Guid.NewGuid(), BudgetLibraryId = budgetLibraryId, Name = budgetName
+                    Id = Guid.NewGuid(),
+                    BudgetLibraryId = budgetLibraryId,
+                    Name = budgetName
                 }).ToList();
 
             var budgetAmountsPerBudgetYearTuple = new Dictionary<(string, int), BudgetAmountEntity>();
@@ -503,7 +521,6 @@ namespace BridgeCareCore.Services
                             budgetsWithInvalidCriteria.Add(budgetName);
                         }
                     }
-
                 });
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.UserEntity?.Id);

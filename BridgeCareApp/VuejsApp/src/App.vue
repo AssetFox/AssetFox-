@@ -249,7 +249,7 @@
                 <v-flex xs2>
                     <div class="dev-and-ver-div">
                         <div class="font-weight-light">iAM</div>
-                        <div>BridgeCare &copy; 2019</div>
+                        <div>BridgeCare &copy; 2021</div>
                         <div>{{ packageVersion }}</div>
                     </div>
                 </v-flex>

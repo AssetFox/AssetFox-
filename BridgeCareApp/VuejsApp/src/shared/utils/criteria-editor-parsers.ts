@@ -193,7 +193,7 @@ function createCriteriaObject(
 
     while (currentCharIndex < expression.length) {
         loopPasses++;
-        if (loopPasses >= expression.length) {
+        if (loopPasses > expression.length) {
             throw new Error('The criteria expression is invalid.');
         }
 

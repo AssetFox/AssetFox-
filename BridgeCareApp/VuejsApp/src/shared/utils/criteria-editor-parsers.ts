@@ -1,4 +1,4 @@
-import { clone, isEmpty, isNil } from 'ramda';
+import { clone, forEach, isEmpty, isNil } from 'ramda';
 import {
     Criteria,
     CriteriaRule,
@@ -194,7 +194,8 @@ function createCriteriaObject(
     while (currentCharIndex < expression.length) {
         loopPasses++;
         if (loopPasses > expression.length) {
-            throw new Error('The criteria expression is invalid.');
+            break;
+            //throw new Error('The criteria expression is invalid.');
         }
 
         if (expression[currentCharIndex] === '(') {
@@ -299,12 +300,14 @@ function createCriteriaObject(
                 hasValue(currentClause) &&
                 currentCharIndex === expression.length
             ) {
-                criteria.children!.push(
-                    createCriteriaTypeObject(
-                        queryBuilderTypes.QueryBuilderRule,
-                        createCriteriaRuleObject(currentClause),
-                    ),
-                );
+                if(hasAttributeToTest(currentClause, currentCharIndex)){
+                    criteria.children!.push(
+                        createCriteriaTypeObject(
+                            queryBuilderTypes.QueryBuilderRule,
+                            createCriteriaRuleObject(currentClause),
+                        ),
+                    );
+                }
                 currentClause = '';
             }
         }
@@ -345,6 +348,26 @@ function createCriteriaTypeObject(
     } as CriteriaType;
 }
 
+
+function hasAttributeToTest(clause: string, currentCharIndex: number): boolean{
+    
+    if(clause.startsWith('[') && clause.indexOf(']') == -1){
+        return false;
+    }
+    else {
+        var hasOp = false;
+        operators.forEach(op => {
+            if(clause.includes(op)){
+                hasOp = true;
+            }
+        });
+        if(!hasOp && !clause.endsWith(' ')){
+            return false;
+        }
+    }
+
+    return true;
+}
 /**
  * Converts a criteria expression into its Criteria object equivalent
  */

@@ -156,8 +156,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
-                throw;
+                return BadRequest($"Committed Project error::{e.Message}");
             }
         }
 

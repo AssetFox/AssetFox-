@@ -82,6 +82,10 @@ export const getErrorMessage = (error: AxiosError) => {
                 error,
             ) as AxiosResponse;
 
+            if (hasValue(prop('status', response)) && prop('status', response) == 400 && hasValue(prop('data', response))) {                              
+                    return prop('data', response) as string;                
+            }
+
             if (hasValue(prop('statusText', response))) {
                 return prop('statusText', response) as string;
             }

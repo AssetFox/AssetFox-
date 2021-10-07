@@ -608,19 +608,23 @@ export default class InvestmentEditor extends Vue {
     onSubmitEditBudgetsDialogResult(budgets: Budget[]) {
         this.editBudgetsDialogData = clone(emptyEditBudgetsDialogData);
         
-        var budgetWithBudgetAmounts = budgets.find(b => b.budgetAmounts.length != 0);
+        const budgetWithBudgetAmounts = budgets.find(b => b.budgetAmounts.length !== 0);
         budgets.forEach((budget: Budget) => {
            if(budget.budgetAmounts.length == 0)
             {                
-               var budgetAmounts = budgetWithBudgetAmounts != undefined ? budgetWithBudgetAmounts.budgetAmounts : [];               
+               const budgetAmounts = hasValue(budgetWithBudgetAmounts) ? budgetWithBudgetAmounts!.budgetAmounts : [];
                budgetAmounts.forEach(budgetAmount => {
-                   const emptyBudgetAmt = clone(emptyBudgetAmount);                   
-                   emptyBudgetAmt.year = clone(budgetAmount.year);
-                   emptyBudgetAmt.budgetName = budget.name;
-                   emptyBudgetAmt.id = getNewGuid();
-                   budget.budgetAmounts.push(emptyBudgetAmt);
+                   budget.budgetAmounts.push({
+                       ...emptyBudgetAmount,
+                       id: getNewGuid(),
+                       budgetName: budget.name,
+                       year: budgetAmount.year
+                   });
                });                              
-            }});
+            } else {
+               budget.budgetAmounts.forEach((budgetAmount: BudgetAmount) => budgetAmount.budgetName = budget.name);
+           }
+        });
 
         if (!isNil(budgets)) {
             this.budgets = clone(budgets);

@@ -298,7 +298,7 @@ function createCriteriaObject(
                     currentClause = `${currentClause}${expression[currentCharIndex]}`;
                 }
             }
-            else if(!quotesClosed)
+            else
             {
                 currentClause = `${currentClause}${expression[currentCharIndex]}`;
             }

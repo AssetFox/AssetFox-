@@ -293,8 +293,10 @@ function createCriteriaObject(
                 }
             }
         } else {
-            if (quotesClosed && !invalidCharRegex.test(expression[currentCharIndex])) {
-                currentClause = `${currentClause}${expression[currentCharIndex]}`;
+            if(quotesClosed){
+                if(!invalidCharRegex.test(expression[currentCharIndex])){
+                    currentClause = `${currentClause}${expression[currentCharIndex]}`;
+                }
             }
             else if(!quotesClosed)
             {

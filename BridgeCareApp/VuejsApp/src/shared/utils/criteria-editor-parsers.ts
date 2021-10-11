@@ -190,6 +190,7 @@ function createCriteriaObject(
     let currentOpenParentheses: string[] = [];
     let currentCloseParentheses: string[] = [];
     let loopPasses: number = 0;
+    let quotesClosed: boolean = true; // This check is to allow values with spaces in it to pass through the while loop
 
     while (currentCharIndex < expression.length) {
         loopPasses++;
@@ -197,7 +198,9 @@ function createCriteriaObject(
             break;
             //throw new Error('The criteria expression is invalid.');
         }
-
+        if(expression[currentCharIndex] == "'"){
+            quotesClosed = !quotesClosed;
+        }
         if (expression[currentCharIndex] === '(') {
             if (hasValue(currentClause)) {
                 criteria.children!.push(
@@ -243,7 +246,7 @@ function createCriteriaObject(
             currentCloseParentheses = [];
 
             currentCharIndex = subCharIndex;
-        } else if (expression[currentCharIndex] === ' ') {
+        } else if (expression[currentCharIndex] === ' ' && quotesClosed) {
             if (
                 expression.substring(
                     currentCharIndex,
@@ -290,7 +293,13 @@ function createCriteriaObject(
                 }
             }
         } else {
-            if (!invalidCharRegex.test(expression[currentCharIndex])) {
+            if(quotesClosed){
+                if(!invalidCharRegex.test(expression[currentCharIndex])){
+                    currentClause = `${currentClause}${expression[currentCharIndex]}`;
+                }
+            }
+            else
+            {
                 currentClause = `${currentClause}${expression[currentCharIndex]}`;
             }
 

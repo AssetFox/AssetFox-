@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -15,6 +15,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static ScenarioBudgetEntity ToScenarioEntity(this BudgetDTO dto, Guid simulationId) =>
             new ScenarioBudgetEntity { Id = dto.Id, SimulationId = simulationId, Name = dto.Name };
+
+        public static ScenarioBudgetEntity ToScenarioEntityWithBudgetAmount(this BudgetDTO dto, Guid simulationId) =>
+            new ScenarioBudgetEntity
+            {
+                Id = dto.Id,
+                SimulationId = simulationId,
+                Name = dto.Name,
+                ScenarioBudgetAmounts = dto.BudgetAmounts.Select(_ => _.ToScenarioEntity(dto.Id)).ToList()
+            };
 
         public static BudgetEntity ToLibraryEntity(this BudgetDTO dto, Guid libraryId) =>
             new BudgetEntity { Id = dto.Id, BudgetLibraryId = libraryId, Name = dto.Name };

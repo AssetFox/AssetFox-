@@ -287,7 +287,7 @@ namespace BridgeCareCore.Services
             }
 
             var existingBudgetEntities = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId)
-                .Select(_ => _.ToScenarioEntity(simulationId)).ToList();
+                .Select(_ => _.ToScenarioEntityWithBudgetAmount(simulationId)).ToList();
 
             var existingBudgetNames = existingBudgetEntities.Select(existingBudget => existingBudget.Name).ToList();
             var newBudgetEntities = worksheetBudgetNames.Where(budgetName => !existingBudgetNames.Contains(budgetName))
@@ -302,7 +302,14 @@ namespace BridgeCareCore.Services
             existingBudgetEntities.ForEach(budget =>
             {
                 budget.ScenarioBudgetAmounts.ForEach(budgetAmount =>
-                    budgetAmountsPerBudgetYearTuple.Add((budget.Name, budgetAmount.Year), budgetAmount));
+                {
+                    // The if condition is to avoid any duplicate records coming from the DB.
+                    // Ideally the database must have only 1 record per Budget name per year.
+                    if (!budgetAmountsPerBudgetYearTuple.ContainsKey((budget.Name, budgetAmount.Year)))
+                    {
+                        budgetAmountsPerBudgetYearTuple.Add((budget.Name, budgetAmount.Year), budgetAmount);
+                    }
+                });
             });
 
             var newBudgetAmountEntities = new List<ScenarioBudgetAmountEntity>();

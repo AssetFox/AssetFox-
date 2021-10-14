@@ -25,6 +25,7 @@ using Newtonsoft.Json;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using static AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums.TreatmentEnum;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -1677,13 +1678,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<SimulationOutputEntity>(entity =>
             {
-                entity.HasKey(e => e.SimulationId);
+                entity.HasKey(e => e.Id);
 
-                entity.HasIndex(e => e.SimulationId).IsUnique();
+                entity.HasIndex(e => e.Id).IsUnique();
+                entity.HasIndex(e => e.SimulationId);
 
-                entity.HasOne(d => d.Simulation)
-                    .WithOne(p => p.SimulationOutput)
-                    .HasForeignKey<SimulationOutputEntity>(d => d.SimulationId)
+                entity.Property(e => e.OutputType)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => string.IsNullOrWhiteSpace(v) || string.IsNullOrEmpty(v)
+                        ? SimulationOutputEnum.InitialConditionNetwork
+                        : (SimulationOutputEnum)Enum.Parse(typeof(SimulationOutputEnum), v));
+
+                entity.HasOne(e => e.Simulation)
+                    .WithMany(p => p.SimulationOutputs)
+                    .HasForeignKey(d => d.SimulationId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 

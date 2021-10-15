@@ -42,7 +42,7 @@
       <v-card-actions>
           <v-chip
                  @click="onDownloadReports()"
-                 class="ara-blue-bg white--text">
+                 class="green darken-2 white--text">
             Download summary report
           </v-chip>
       </v-card-actions>

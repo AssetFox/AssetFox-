@@ -53,7 +53,7 @@ namespace BridgeCareCore.Services.SummaryReport
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public byte[] GenerateReport(Guid networkId, Guid simulationId)
+        public void GenerateReport(Guid networkId, Guid simulationId)
         {
             var requiredSections = new HashSet<string>()
             {
@@ -196,14 +196,40 @@ namespace BridgeCareCore.Services.SummaryReport
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
             _summaryReportGlossary.Fill(shortNameWorksheet);
 
-            var folderPathForSimulation = $"DownloadedNewReports\\{simulationId}";
+            var folderPathForSimulation = $"Reports\\{simulationId}";
             var relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
             Directory.CreateDirectory(relativeFolderPath);
-            var filePath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation, "SummaryReportTestData.xlsx");
+            var filePath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation, "SummaryReport.xlsx");
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);
 
-            return bin;
+            reportDetailDto.Status = $"Report generation completed";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto, true);
+        }
+
+        public byte[] FetchFromFileLocation(Guid networkId, Guid simulationId)
+        {
+            var folderPathForSimulation = $"Reports\\{simulationId}";
+            var relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
+            var filePath = Path.Combine(relativeFolderPath, "SummaryReport.xlsx");
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
+
+            if (File.Exists(filePath))
+            {
+                reportDetailDto.Status = $"Gathering summary report data";
+                UpdateSimulationAnalysisDetail(reportDetailDto);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+
+                byte[] summaryReportData = File.ReadAllBytes(filePath);
+                return summaryReportData;
+            }
+
+            reportDetailDto.Status = $"Summary report is not available in the path {filePath}";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+
+            throw new FileNotFoundException($"Summary report is not available in the path {filePath}", "SummaryReport.xlsx");
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) =>

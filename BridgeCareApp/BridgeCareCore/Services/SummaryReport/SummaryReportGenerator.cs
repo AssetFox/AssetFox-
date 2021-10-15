@@ -196,7 +196,7 @@ namespace BridgeCareCore.Services.SummaryReport
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
             _summaryReportGlossary.Fill(shortNameWorksheet);
 
-            var folderPathForSimulation = $"DownloadedReports\\{simulationId}";
+            var folderPathForSimulation = $"Reports\\{simulationId}";
             var relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
             Directory.CreateDirectory(relativeFolderPath);
             var filePath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation, "SummaryReport.xlsx");
@@ -210,7 +210,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
         public byte[] FetchFromFileLocation(Guid networkId, Guid simulationId)
         {
-            var folderPathForSimulation = $"DownloadedReports\\{simulationId}";
+            var folderPathForSimulation = $"Reports\\{simulationId}";
             var relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
             var filePath = Path.Combine(relativeFolderPath, "SummaryReport.xlsx");
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };

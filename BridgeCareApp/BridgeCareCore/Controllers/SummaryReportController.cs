@@ -50,7 +50,7 @@ namespace BridgeCareCore.Controllers
                 UpdateSimulationAnalysisDetail(reportDetailDto);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report error::{e.Message}");
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -92,7 +92,7 @@ namespace BridgeCareCore.Controllers
                 UpdateSimulationAnalysisDetail(reportDetailDto);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report error::{e.Message}");
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
-                throw;
+                throw new Exception(e.Message);
             }
         }
 

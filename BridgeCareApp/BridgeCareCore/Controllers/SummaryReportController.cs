@@ -28,18 +28,48 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("GenerateSummaryReport/{networkId}/{simulationId}")]
         [Authorize]
-        public async Task<FileResult> GenerateSummaryReport(Guid networkId, Guid simulationId)
+        public IActionResult GenerateSummaryReport(Guid networkId, Guid simulationId)
         {
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "Generating" };
 
-            var reportDetailDto = new SimulationReportDetailDTO {SimulationId = simulationId, Status = "Generating"};
+            try
+            {
+                UpdateSimulationAnalysisDetail(reportDetailDto);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+                _summaryReportGenerator.GenerateReport(networkId, simulationId);
+
+                const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                HttpContext.Response.ContentType = contentType;
+                HttpContext.Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                reportDetailDto.Status = $"Failed to generate";
+                UpdateSimulationAnalysisDetail(reportDetailDto);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("DownloadSummaryReport/{networkId}/{simulationId}")]
+        [Authorize]
+        public async Task<FileResult> DownloadSummaryReport(Guid networkId, Guid simulationId)
+        {
+            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "Downloading from the server" };
 
             try
             {
                 UpdateSimulationAnalysisDetail(reportDetailDto);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
-                var response = await Task.Factory.StartNew(() =>
-                    _summaryReportGenerator.GenerateReport(networkId, simulationId));
+                var response = await
+                    Task.Factory.StartNew(() =>
+                    _summaryReportGenerator.FetchFromFileLocation(networkId, simulationId)
+                    );
 
                 const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 HttpContext.Response.ContentType = contentType;
@@ -47,7 +77,7 @@ namespace BridgeCareCore.Controllers
 
                 var fileContentResult = new FileContentResult(response, contentType)
                 {
-                    FileDownloadName = "SummaryReportTestData.xlsx"
+                    FileDownloadName = "SummaryReport.xlsx"
                 };
 
                 reportDetailDto.Status = "Completed";
@@ -58,7 +88,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                reportDetailDto.Status = $"Failed to generate";
+                reportDetailDto.Status = $"Failed to download";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report error::{e.Message}");
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);

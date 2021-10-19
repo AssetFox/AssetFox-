@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
@@ -10,7 +11,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Services.SummaryReport;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
@@ -22,13 +25,15 @@ namespace BridgeCareCore.Services
     {
         private static UnitOfDataPersistenceWork _unitOfWork;
         private static IExpressionValidationService _expressionValidationService;
+        protected readonly IHubService HubService;
 
         public InvestmentBudgetsService(UnitOfDataPersistenceWork unitOfWork,
-            IExpressionValidationService expressionValidationService)
+            IExpressionValidationService expressionValidationService, IHubService hubService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _expressionValidationService = expressionValidationService ??
                                            throw new ArgumentNullException(nameof(expressionValidationService));
+            HubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
         }
 
         private void AddHeaderCells(ExcelWorksheet worksheet, List<string> headers)
@@ -348,6 +353,7 @@ namespace BridgeCareCore.Services
             _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList(), _unitOfWork.UserEntity?.Id);
 
             var budgetsWithInvalidCriteria = new List<string>();
+            var criteriaBudgetNamesNotPresentInBudgetTab = new List<string>();
             if (criteriaPerBudgetName.Values.Any())
             {
                 var allBudgetEntities = new List<ScenarioBudgetEntity>();
@@ -363,6 +369,8 @@ namespace BridgeCareCore.Services
 
                 var criteria = new List<CriterionLibraryEntity>();
                 var criteriaJoins = new List<CriterionLibraryScenarioBudgetEntity>();
+                var invalidOperationEx = false;
+                var exceptionMessage = "";
                 criteriaPerBudgetName.Where(_ => !string.IsNullOrEmpty(_.Value)).ToList().ForEach(criterionPerBudgetName =>
                 {
                     var budgetName = criterionPerBudgetName.Key;
@@ -380,11 +388,24 @@ namespace BridgeCareCore.Services
                                 Name = $"{budgetName} Criterion Library",
                                 MergedCriteriaExpression = criterion
                             });
-                            criteriaJoins.Add(new CriterionLibraryScenarioBudgetEntity
+                            try
                             {
-                                CriterionLibraryId = criterionId,
-                                ScenarioBudgetId = allBudgetEntities.Single(_ => _.Name == budgetName).Id
-                            });
+                                criteriaJoins.Add(new CriterionLibraryScenarioBudgetEntity
+                                {
+                                    CriterionLibraryId = criterionId,
+                                    ScenarioBudgetId = allBudgetEntities.Single(_ => _.Name.ToUpperInvariant() == budgetName.ToUpperInvariant()).Id
+                                });
+                            }
+                            catch (ArgumentNullException ex)
+                            {
+                                throw new ArgumentNullException(ex.Message);
+                            }
+                            catch (InvalidOperationException ex)
+                            {
+                                invalidOperationEx = true;
+                                exceptionMessage = ex.Message;
+                                criteriaBudgetNamesNotPresentInBudgetTab.Add(budgetName);
+                            }
                         }
                         else
                         {
@@ -392,15 +413,30 @@ namespace BridgeCareCore.Services
                         }
                     }
                 });
+                if (invalidOperationEx)
+                {
+                    var sb = new StringBuilder();
+                    if (criteriaBudgetNamesNotPresentInBudgetTab.Count > 0)
+                    {
+                        sb.Append($" The following budget names are in criteria TAB but not in Budget TAB: {string.Join(",", criteriaBudgetNamesNotPresentInBudgetTab)}");
+                    }
+                    HubService.SendRealTimeMessage("", HubConstant.BroadcastError, sb.ToString());
+                    throw new InvalidOperationException(exceptionMessage);
+                }
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.UserEntity?.Id);
             }
 
+            var warningSb = new StringBuilder();
+            if (budgetsWithInvalidCriteria.Any())
+            {
+                warningSb.Append($"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}. ");
+            }
             return new ScenarioBudgetImportResultDTO
             {
                 Budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId),
-                WarningMessage = budgetsWithInvalidCriteria.Any()
-                    ? $"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}"
+                WarningMessage = !string.IsNullOrEmpty(warningSb.ToString())
+                    ? warningSb.ToString()
                     : null
             };
         }
@@ -502,6 +538,7 @@ namespace BridgeCareCore.Services
             _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList(), _unitOfWork.UserEntity?.Id);
 
             var budgetsWithInvalidCriteria = new List<string>();
+            var criteriaBudgetNamesNotPresentInBudgetTab = new List<string>();
             if (criteriaPerBudgetName.Values.Any())
             {
                 var allBudgetEntities = new List<BudgetEntity>();
@@ -516,6 +553,8 @@ namespace BridgeCareCore.Services
 
                 var criteria = new List<CriterionLibraryEntity>();
                 var criteriaJoins = new List<CriterionLibraryBudgetEntity>();
+                var invalidOperationEx = false;
+                var exceptionMessage = "";
                 criteriaPerBudgetName.Where(_ => !string.IsNullOrEmpty(_.Value)).ToList().ForEach(criterionPerBudgetName =>
                 {
                     var budgetName = criterionPerBudgetName.Key;
@@ -533,11 +572,25 @@ namespace BridgeCareCore.Services
                                 Name = $"{budgetName} Criterion Library",
                                 MergedCriteriaExpression = criterion
                             });
-                            criteriaJoins.Add(new CriterionLibraryBudgetEntity
+                            
+                            try
                             {
-                                CriterionLibraryId = criterionId,
-                                BudgetId = allBudgetEntities.Single(_ => _.Name == budgetName).Id
-                            });
+                                criteriaJoins.Add(new CriterionLibraryBudgetEntity
+                                {
+                                    CriterionLibraryId = criterionId,
+                                    BudgetId = allBudgetEntities.Single(_ => _.Name == budgetName).Id
+                                });
+                            }
+                            catch (ArgumentNullException ex)
+                            {
+                                throw new ArgumentNullException(ex.Message);
+                            }
+                            catch (InvalidOperationException ex)
+                            {
+                                invalidOperationEx = true;
+                                exceptionMessage = ex.Message;
+                                criteriaBudgetNamesNotPresentInBudgetTab.Add(budgetName);
+                            }
                         }
                         else
                         {
@@ -545,15 +598,30 @@ namespace BridgeCareCore.Services
                         }
                     }
                 });
+                if (invalidOperationEx)
+                {
+                    var sb = new StringBuilder();
+                    if (criteriaBudgetNamesNotPresentInBudgetTab.Count > 0)
+                    {
+                        sb.Append($" The following budget names are in criteria TAB but not in Budget TAB: {string.Join(",", criteriaBudgetNamesNotPresentInBudgetTab)}");
+                    }
+                    HubService.SendRealTimeMessage("", HubConstant.BroadcastError, sb.ToString());
+                    throw new InvalidOperationException(exceptionMessage);
+                }
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.UserEntity?.Id);
             }
 
+            var warningSb = new StringBuilder();
+            if (budgetsWithInvalidCriteria.Any())
+            {
+                warningSb.Append($"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}");
+            }
             return new BudgetImportResultDTO
             {
                 BudgetLibrary = _unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryId),
-                WarningMessage = budgetsWithInvalidCriteria.Any()
-                    ? $"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}"
+                WarningMessage = !string.IsNullOrEmpty(warningSb.ToString())
+                    ? warningSb.ToString()
                     : null
             };
         }

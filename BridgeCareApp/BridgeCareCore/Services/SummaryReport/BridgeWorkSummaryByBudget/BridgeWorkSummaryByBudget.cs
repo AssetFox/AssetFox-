@@ -310,10 +310,10 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                     // Text
                     worksheet.Cells[row, startColumnIndex + numberOfYears + 2].Value = $"Percentage Spent on " + worksheet.Cells[row, 1].Value.ToString().ToUpper();
                 }
-                var excelRange = worksheet.Cells[firstContentRow, numberOfYears + 3, firstContentRow + 5, numberOfYears + 3];
+                var excelRange = worksheet.Cells[firstContentRow, numberOfYears + 3, firstContentRow + 6, numberOfYears + 3];
                 ExcelHelper.ApplyColor(excelRange, Color.FromArgb(217, 217, 217));
                 ExcelHelper.ApplyBorder(excelRange);
-                ExcelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, numberOfYears + 4, firstContentRow + 5, numberOfYears + 4], ExcelHelperCellFormat.Percentage);
+                ExcelHelper.SetCustomFormat(worksheet.Cells[firstContentRow, numberOfYears + 4, firstContentRow + 6, numberOfYears + 4], ExcelHelperCellFormat.Percentage);
             }
         }
 

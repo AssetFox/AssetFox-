@@ -201,9 +201,9 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummaryByBudget
                 InsertWorkTypeTotals(startYear, firstContentRow, worksheet, workTypeTotal);
                 insertTotalAndPercentagePerCategory(worksheet, currentCell, numberOfYears, firstContentRow);
 
-                ExcelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 3], ExcelHelperCellFormat.NegativeCurrency);
-                ExcelHelper.ApplyColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
-                ExcelHelper.SetTextColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 5, simulationYears.Count + 2], Color.White);
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 6, simulationYears.Count + 3], ExcelHelperCellFormat.NegativeCurrency);
+                ExcelHelper.ApplyColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 6, simulationYears.Count + 2], Color.FromArgb(84, 130, 53));
+                ExcelHelper.SetTextColor(worksheet.Cells[rowTrackerForColoring, 3, rowTrackerForColoring + 6, simulationYears.Count + 2], Color.White);
 
                 currentCell.Row += 2;
                 currentCell.Column = 1;

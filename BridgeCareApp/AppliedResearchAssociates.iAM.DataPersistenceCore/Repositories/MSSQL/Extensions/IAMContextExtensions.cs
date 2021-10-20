@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions
@@ -292,8 +293,37 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             {
                 entities.Remove(entityToDelete);
             }
-
             context.SaveChanges();
+        }
+        public static void DeleteEntity<T>(this IAMContext context, Expression<Func<T, bool>> predicate, int possibleConcurrency) where T : class
+        {
+            var entities = context.Set<T>();
+
+            var entityToDelete = entities.SingleOrDefault(predicate);
+            if (entityToDelete != null)
+            {
+                entities.Remove(entityToDelete);
+            }
+
+            bool saveFailed;
+            do
+            {
+                saveFailed = false;
+
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    saveFailed = true;
+
+                    // Update the values of the entity that failed to save from the store
+                    ex.Entries.Single().Reload();
+                    possibleConcurrency--;
+                }
+
+            } while (saveFailed && possibleConcurrency >= 0);
         }
 
         public static void DeleteAll<T>(this IAMContext context, Expression<Func<T, bool>> predicate) where T : class

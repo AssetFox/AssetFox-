@@ -536,7 +536,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
                 row = startRow;
                 column = ++column;
                 var totalSpent = Convert.ToDouble(worksheet.Cells[CulvertTotalRow, column].Value) +
-                    Convert.ToDouble(worksheet.Cells[BridgeTotalRow, column].Value);
+                    Convert.ToDouble(worksheet.Cells[BridgeTotalRow, column].Value) +
                 Convert.ToDouble(worksheet.Cells[CommittedTotalRow, column].Value);
 
                 worksheet.Cells[row, column].Value = Convert.ToDouble(worksheet.Cells[budgetTotalRow, column].Value) - totalSpent;

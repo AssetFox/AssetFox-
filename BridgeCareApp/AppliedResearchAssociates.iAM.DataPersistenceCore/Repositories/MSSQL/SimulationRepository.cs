@@ -1289,10 +1289,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var count = _unitOfWork.Context.CommittedProject.Where(_ =>
                 _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).Count();
 
+            var committedEntities = _unitOfWork.Context.CommittedProject.Where(_ =>
+                _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId).ToList();
+
             _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
                 _.SimulationId == simulationId || _.ScenarioBudget.SimulationId == simulationId);
 
-            _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId, count);
+            var index = 0;
+            while(index < committedEntities.Count)
+            {
+                _unitOfWork.Context.Entry(committedEntities[index]).Reload();
+                index++;
+            }
+
+            _unitOfWork.Context.DeleteEntity<SimulationEntity>(_ => _.Id == simulationId);
         }
 
         // the method is used only by other repositories.

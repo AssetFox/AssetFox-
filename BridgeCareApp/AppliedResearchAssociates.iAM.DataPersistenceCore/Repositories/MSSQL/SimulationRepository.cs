@@ -1227,6 +1227,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
                     }
                 }
+
+                // add treatment available budgets
+                if (simulationToClone.SelectableTreatments.Any(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins.Any()))
+                {
+                    var budgetJoins = simulationToClone.SelectableTreatments
+                        .Where(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins.Any())
+                        .SelectMany(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                        .ToList();
+                    _unitOfWork.Context.AddAll(budgetJoins);
+                    _unitOfWork.Context.Database.ExecuteSqlRaw("CHECKPOINT");
+                }
             }
 
             // add simulation user

@@ -518,7 +518,7 @@ export default class CriteriaEditor extends Vue {
             );
             if (this.selectedSubCriteriaClause) {
                 if (!hasValue(this.selectedSubCriteriaClause.logicalOperator)) {
-                    this.selectedSubCriteriaClause.logicalOperator = 'OR';
+                    this.selectedSubCriteriaClause.logicalOperator = 'AND';
                 }
             } else {
                 this.invalidSubCriteriaMessage =

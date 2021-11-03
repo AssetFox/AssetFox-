@@ -35,7 +35,7 @@ namespace BridgeCareCore
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials()
-                .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com", "https://iam-demo.net/", "https://test.iam-deploy.com");
+                .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com", "https://iam-demo.net/", "https://test.iam-deploy.com", "https://iam-bridgecare.dev.penndot.gov");
             }));
 
             services.AddSecurityConfig(Configuration);

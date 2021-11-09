@@ -72,9 +72,9 @@
         }
 
         onRedirect() {
-            let href: string = `${oidcConfig.authorizationEndpoint}?response_type=code&scope=openid&scope=BAMS`;
-            href += `&client_id=${oidcConfig.clientId}`;
-            href += `&redirect_uri=${oidcConfig.redirectUri}`;
+            let href: string = `${this.$config.authorizationEndpoint}?response_type=code&scope=openid&scope=BAMS`;
+            href += `&client_id=${this.$config.clientId}`;
+            href += `&redirect_uri=${this.$config.redirectUri}`;
 
             // The 'state' query parameter that is sent to ESEC will be sent back to
             // the /Authentication page of the iam-deploy app.

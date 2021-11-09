@@ -44,9 +44,9 @@ namespace BridgeCareCore.Controllers
                 var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(response);
                 return Ok(userInfo);
             }
-            catch 
+            catch (Exception e)
             {
-                throw;
+                return BadRequest(e.StackTrace);
             }
         }
 
@@ -123,7 +123,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                throw;
+                return BadRequest(e.StackTrace);
             }
         }
 
@@ -168,7 +168,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                throw;
+                return BadRequest(e.StackTrace);
             }
 
         }
@@ -219,7 +219,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                throw;
+                return BadRequest(e.StackTrace);
             }
         }
 
@@ -241,7 +241,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                throw;
+                return BadRequest(e.StackTrace);
             }
         }
 

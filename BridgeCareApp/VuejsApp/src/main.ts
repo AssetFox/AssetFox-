@@ -64,8 +64,13 @@ Vue.config.productionTip = false;
 
 Vue.use(VuejsDialog);
 
-new Vue({
-    store,
-    router,
-    render: h => h(App),
-}).$mount('#app');
+fetch(process.env.BASE_URL + "config.json")
+.then((response) => response.json())
+.then((config) => {
+    Vue.prototype.$config = config;
+    new Vue({
+        store,
+        router,
+        render: h => h(App),
+    }).$mount('#app');
+});

@@ -40,10 +40,11 @@ namespace BridgeCareCore
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
                 builder
+                .AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials()
-                .WithOrigins(urls.ToArray());
+                //.WithOrigins(urls.ToArray());
             }));
 
             services.AddSecurityConfig(Configuration);

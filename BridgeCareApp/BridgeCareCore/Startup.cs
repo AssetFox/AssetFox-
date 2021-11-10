@@ -43,7 +43,7 @@ namespace BridgeCareCore
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader()
-                .AllowCredentials()
+                .AllowCredentials();
                 //.WithOrigins(urls.ToArray());
             }));
 

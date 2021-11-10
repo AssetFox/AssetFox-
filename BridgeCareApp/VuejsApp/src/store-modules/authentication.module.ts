@@ -51,13 +51,17 @@ const mutations = {
 
 const actions = {
     async getUserTokens({ commit }: any, code: string) {
+        console.log('calling getUserTokens backend API');
         await AuthenticationService.getUserTokens(code).then(
             (response: AxiosResponse) => {
                 const expirationInMilliseconds = moment().add(30, 'minutes');
+                console.log(`got a response in authentication.module.ts : ${response}`);
                 if (
                     hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
+                    console.log(`entered in the if block of user token api - response is ${response}, response.status = ${response.status}, response.data = ${response.data}, 
+                    response.config = ${response.config}, response.header = ${response.headers} `)
                     const userTokens: UserTokens = response.data as UserTokens;
                     localStorage.setItem(
                         'UserTokens',
@@ -69,8 +73,13 @@ const actions = {
                     );
                     commit('authenticatedMutator', true);
                 }
+                else{
+                    console.log(`entered in the else block -  response is ${response}, response.status = ${response.status}, response.data = ${response.data}, 
+                    response.config = ${response.config}, response.header = ${response.headers}`)
+                }
             },
-        );
+        )
+        .catch(error => console.log(error));
     },
 
     async checkBrowserTokens({ dispatch }: any) {

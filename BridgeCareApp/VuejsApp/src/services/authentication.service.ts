@@ -3,7 +3,9 @@ import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 
 export default class AuthenticationService {
     static getUserTokens(code: string): AxiosPromise {
-        return coreAxiosInstance.get(`${API.Authentication}/UserTokens/${code}`);
+        var result = coreAxiosInstance.get(`${API.Authentication}/UserTokens/${code}`);
+        console.log(`got result back in authentication.service.ts from backend API : ${result}`);
+        return result;
     }
 
     static refreshTokens(refreshToken: string): AxiosPromise {

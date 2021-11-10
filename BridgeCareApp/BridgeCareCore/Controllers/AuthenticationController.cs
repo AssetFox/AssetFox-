@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Logging;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -23,10 +24,14 @@ namespace BridgeCareCore.Controllers
     public class AuthenticationController : BridgeCareCoreBaseController
     {
         private static IConfigurationSection _esecConfig;
+        private readonly ILog _log;
 
         public AuthenticationController(IConfiguration config, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
+            IHubService hubService, IHttpContextAccessor httpContextAccessor, ILog log) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
             _esecConfig = config?.GetSection("EsecConfig") ?? throw new ArgumentNullException(nameof(config));
+            _log = log ?? throw new ArgumentNullException(nameof(log));
+        }
 
         /// <summary>
         ///     API endpoint for fetching user info from ESEC using the OpenID Connect protocol
@@ -46,6 +51,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
+                _log.Error(e.Message);
                 return BadRequest(e.StackTrace);
             }
         }
@@ -90,6 +96,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
+                _log.Information($"Entered in UserTokens/{code}");
                 // These two lines should be removed as soon as the ESEC site's certificates start working
                 var handler = new HttpClientHandler
                 {
@@ -108,21 +115,38 @@ namespace BridgeCareCore.Controllers
                     new KeyValuePair<string, string>("client_id", _esecConfig["EsecClientId"]),
                     new KeyValuePair<string, string>("client_secret", _esecConfig["EsecClientSecret"])
                 };
+                _log.Information($"Created the form data using code");
                 HttpContent content = new FormUrlEncodedContent(formData);
+
+                _log.Information($"Formed HttpClient using the formData");
+
+                _log.Information($"Now going back to OIDC end point with the HttpClient. The Call is:  var responseTask = client.PostAsync(token, content); ");
 
                 var responseTask = client.PostAsync("token", content);
                 responseTask.Wait();
 
+                _log.Information($"got response back from OIDC");
+
                 var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+
+                _log.Information($"result from the response {response}");
 
                 ValidateResponse(response);
 
+                _log.Information($"response got validated");
+
                 var userTokens = JsonConvert.DeserializeObject<UserTokensDTO>(response);
+
+                _log.Information($"response got deserialized");
+
+                _log.Information($"user token info: accessToken : {userTokens.access_token}, expiresIn : {userTokens.expires_in}, id token : {userTokens.id_token}" +
+                    $", refreshToken : {userTokens.refresh_token}, tokenType : {userTokens.token_type}");
 
                 return Ok(userTokens);
             }
             catch (Exception e)
             {
+                _log.Error(e.Message);
                 return BadRequest(e.StackTrace);
             }
         }
@@ -168,6 +192,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
+                _log.Error(e.Message);
                 return BadRequest(e.StackTrace);
             }
 
@@ -219,6 +244,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
+                _log.Error(e.Message);
                 return BadRequest(e.StackTrace);
             }
         }
@@ -241,6 +267,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
+                _log.Error(e.Message);
                 return BadRequest(e.StackTrace);
             }
         }

@@ -99,7 +99,6 @@ namespace BridgeCareCore.Controllers
                 using var client = new HttpClient(handler) { BaseAddress = new Uri(_esecConfig["EsecBaseAddress"]) };
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("Access-Control-Allow-Origin", "*");
 
                 var formData = new List<KeyValuePair<string, string>>
                 {

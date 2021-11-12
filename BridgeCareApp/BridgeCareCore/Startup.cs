@@ -41,10 +41,10 @@ namespace BridgeCareCore
             {
                 builder
                 //.AllowAnyOrigin()
+                .WithOrigins(urls.ToArray())
                 .AllowAnyMethod()
                 .AllowAnyHeader()
-                .AllowCredentials()
-                .WithOrigins(urls.ToArray());
+                .AllowCredentials();
             }));
 
             services.AddSecurityConfig(Configuration);

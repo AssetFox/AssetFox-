@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +19,7 @@ namespace BridgeCareCore.Security
         private readonly RsaSecurityKey _esecPublicKey;
         private readonly string _securityType;
         private readonly IConfiguration _config;
+        private readonly ILog _log;
 
         /// <summary>
         ///     Each key is a token that has been revoked. Its value is the unix timestamp of the
@@ -25,12 +27,13 @@ namespace BridgeCareCore.Security
         /// </summary>
         private ConcurrentDictionary<string, long> _revokedTokens;
 
-        public EsecSecurity(IConfiguration config)
+        public EsecSecurity(IConfiguration config, ILog log)
         {
             _revokedTokens = new ConcurrentDictionary<string, long>();
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _securityType = _config.GetSection("SecurityType").Value;
             _esecPublicKey = SecurityFunctions.GetPublicKey(_config.GetSection("EsecConfig"));
+            _log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
         /// <summary>
@@ -64,8 +67,10 @@ namespace BridgeCareCore.Security
         /// <returns></returns>
         public UserInfo GetUserInformation(HttpRequest request)
         {
+            _log.Information("entering in the function called GetUserInformation");
             var idToken = request.Headers["Authorization"].ToString().Split(" ")[1];
 
+            _log.Information($"idToken : {idToken}");
             if (string.IsNullOrEmpty(idToken))
             {
                 throw new UnauthorizedAccessException("No authorization bearer present on request.");
@@ -81,6 +86,7 @@ namespace BridgeCareCore.Security
             if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
                 var roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
+                _log.Information($"roleStrings : {roleStrings}");
                 if (roleStrings.Count == 0)
                 {
                     throw new UnauthorizedAccessException("User has no security roles assigned.");

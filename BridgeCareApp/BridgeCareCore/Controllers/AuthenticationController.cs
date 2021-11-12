@@ -142,7 +142,8 @@ namespace BridgeCareCore.Controllers
                 _log.Information($"user token info: accessToken : {userTokens.access_token}, expiresIn : {userTokens.expires_in}, id token : {userTokens.id_token}" +
                     $", refreshToken : {userTokens.refresh_token}, tokenType : {userTokens.token_type}");
 
-                return Ok("can I send anything?");
+                _log.Information($"sending response instead of user token");
+                return Ok(userTokens);
             }
             catch (Exception e)
             {

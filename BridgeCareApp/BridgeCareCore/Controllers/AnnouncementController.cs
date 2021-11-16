@@ -15,24 +15,16 @@ namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AnnouncementController : ControllerBase
+    public class AnnouncementController : BridgeCareCoreBaseController
     {
-        protected readonly UnitOfDataPersistenceWork UnitOfWork;
-
-        protected readonly IHubService HubService;
-
-        protected readonly IHttpContextAccessor ContextAccessor;
-        public AnnouncementController(UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor contextAccessor)
+        public AnnouncementController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            HubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
-            ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
         }
 
         [HttpGet]
         [Route("GetAnnouncements")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> Announcements()
         {
             try
@@ -42,14 +34,14 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                //HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
                 throw new Exception(e.Message);
             }
         }
 
         [HttpPost]
         [Route("UpsertAnnouncement")]
-        //[Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> UpsertAnnouncement(AnnouncementDTO dto)
         {
             try
@@ -67,14 +59,14 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                //HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
                 throw new Exception(e.Message);
             }
         }
 
         [HttpDelete]
         [Route("DeleteAnnouncement/{announcementId}")]
-        //[Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> DeleteAnnouncement(Guid announcementId)
         {
             try
@@ -91,7 +83,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                //HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
                 throw new Exception(e.Message);
             }
         }

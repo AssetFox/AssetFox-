@@ -13,9 +13,6 @@ module.exports = {
                 }
             })
         ],
-        devServer: {
-            proxy: 'https://iam-bridgecare-apis.dev.penndot.gov/',
-        },
         optimization: {
             runtimeChunk: 'single',
             splitChunks: {

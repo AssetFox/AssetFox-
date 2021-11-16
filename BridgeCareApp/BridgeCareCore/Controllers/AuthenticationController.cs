@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
@@ -92,11 +93,10 @@ namespace BridgeCareCore.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("UserTokens/{code}")]
-        public IActionResult GetUserTokens(string code)
+        public async Task<IActionResult> GetUserTokens(string code)
         {
             try
             {
-                _log.Information($"Entered in UserTokens/{code}");
                 // These two lines should be removed as soon as the ESEC site's certificates start working
                 var handler = new HttpClientHandler
                 {
@@ -115,40 +115,23 @@ namespace BridgeCareCore.Controllers
                     new KeyValuePair<string, string>("client_id", _esecConfig["EsecClientId"]),
                     new KeyValuePair<string, string>("client_secret", _esecConfig["EsecClientSecret"])
                 };
-                _log.Information($"Created the form data using code");
                 HttpContent content = new FormUrlEncodedContent(formData);
 
-                _log.Information($"Formed HttpClient using the formData");
+                var responseTask = await client.PostAsync("token", content);
+                 //responseTask.Wait();
 
-                _log.Information($"Now going back to OIDC end point with the HttpClient. The Call is:  var responseTask = client.PostAsync(token, content); ");
-
-                var responseTask = client.PostAsync("token", content);
-                responseTask.Wait();
-
-                _log.Information($"got response back from OIDC");
-
-                var response = responseTask.Result.Content.ReadAsStringAsync().Result;
-
-                _log.Information($"result from the response {response}");
+                var response = responseTask.Content.ReadAsStringAsync().Result;
 
                 ValidateResponse(response);
 
-                _log.Information($"response got validated");
-
                 var userTokens = JsonConvert.DeserializeObject<UserTokensDTO>(response);
 
-                _log.Information($"response got deserialized");
-
-                _log.Information($"user token info: accessToken : {userTokens.access_token}, expiresIn : {userTokens.expires_in}, id token : {userTokens.id_token}" +
-                    $", refreshToken : {userTokens.refresh_token}, tokenType : {userTokens.token_type}");
-
-                _log.Information($"sending response instead of user token");
                 return Ok(userTokens);
             }
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                return BadRequest(e.StackTrace);
+                return StatusCode(500, e.Message);
             }
         }
 
@@ -194,7 +177,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                return BadRequest(e.StackTrace);
+                return StatusCode(500, e.Message);
             }
 
         }
@@ -246,7 +229,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                return BadRequest(e.StackTrace);
+                return StatusCode(500, e.Message);
             }
         }
 
@@ -269,7 +252,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                return BadRequest(e.StackTrace);
+                return StatusCode(500, e.Message);
             }
         }
 
@@ -284,7 +267,6 @@ namespace BridgeCareCore.Controllers
             {
                 return;
             }
-
             throw new AuthenticationException(responseJson["error_description"]);
         }
     }

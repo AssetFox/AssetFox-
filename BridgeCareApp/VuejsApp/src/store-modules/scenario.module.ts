@@ -125,7 +125,7 @@ const actions = {
         return await ScenarioService.updateScenario(payload.scenario)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    commit('updatedScenarioMutator', payload.scenario);
+                    commit('updatedScenarioMutator', response.data);
                     dispatch('setSuccessMessage', {message: 'Updated scenario'});
                 }
             });

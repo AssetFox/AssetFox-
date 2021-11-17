@@ -53,7 +53,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 _log.Error(e.Message);
-                return BadRequest(e.StackTrace);
+                return StatusCode(500, e.Message);
             }
         }
 

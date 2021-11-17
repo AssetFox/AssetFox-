@@ -28,7 +28,6 @@
     import Vue from 'vue';
     import {Component} from 'vue-property-decorator';
     import {State, Action} from 'vuex-class';
-    import oidcConfig from '@/oidc-config';
     import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
     import { SecurityTypes } from '@/shared/utils/security-types';
     import { hasValue } from '@/shared/utils/has-value-util';

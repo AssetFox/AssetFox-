@@ -70,7 +70,8 @@ const actions = {
                     commit('authenticatedMutator', true);
                 }
             },
-        );
+        )
+        .catch(error => console.log(error));
     },
 
     async checkBrowserTokens({ dispatch }: any) {

@@ -56,15 +56,39 @@ namespace BridgeCareCore.Services
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+
+            simulationAnalysisDetail.Status = "Getting simulation analysis network";
+            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+
+            simulationAnalysisDetail.Status = "Getting investment plan";
+            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
             var simulation = network.Simulations.Single(_ => _.Id == simulationId);
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+
+            simulationAnalysisDetail.Status = "Getting performance curve";
+            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+
+            simulationAnalysisDetail.Status = "Getting selectable treatments";
+            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+
+            simulationAnalysisDetail.Status = "Populating calculated fields";
+            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
             _unitOfWork.CalculatedAttributeRepo.PopulateScenarioCalculatedFields(simulation);
 
             var runner = new SimulationRunner(simulation);

@@ -4,11 +4,13 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Logging;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -23,10 +25,14 @@ namespace BridgeCareCore.Controllers
     public class AuthenticationController : BridgeCareCoreBaseController
     {
         private static IConfigurationSection _esecConfig;
+        private readonly ILog _log;
 
         public AuthenticationController(IConfiguration config, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
+            IHubService hubService, IHttpContextAccessor httpContextAccessor, ILog log) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
             _esecConfig = config?.GetSection("EsecConfig") ?? throw new ArgumentNullException(nameof(config));
+            _log = log ?? throw new ArgumentNullException(nameof(log));
+        }
 
         /// <summary>
         ///     API endpoint for fetching user info from ESEC using the OpenID Connect protocol
@@ -44,9 +50,10 @@ namespace BridgeCareCore.Controllers
                 var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(response);
                 return Ok(userInfo);
             }
-            catch 
+            catch (Exception e)
             {
-                throw;
+                _log.Error(e.Message);
+                return StatusCode(500, e.Message);
             }
         }
 
@@ -86,7 +93,7 @@ namespace BridgeCareCore.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("UserTokens/{code}")]
-        public IActionResult GetUserTokens(string code)
+        public async Task<IActionResult> GetUserTokens(string code)
         {
             try
             {
@@ -110,10 +117,10 @@ namespace BridgeCareCore.Controllers
                 };
                 HttpContent content = new FormUrlEncodedContent(formData);
 
-                var responseTask = client.PostAsync("token", content);
-                responseTask.Wait();
+                var responseTask = await client.PostAsync("token", content);
+                 //responseTask.Wait();
 
-                var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+                var response = responseTask.Content.ReadAsStringAsync().Result;
 
                 ValidateResponse(response);
 
@@ -123,7 +130,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                throw;
+                _log.Error(e.Message);
+                return StatusCode(500, e.Message);
             }
         }
 
@@ -168,7 +176,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                throw;
+                _log.Error(e.Message);
+                return StatusCode(500, e.Message);
             }
 
         }
@@ -219,7 +228,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                throw;
+                _log.Error(e.Message);
+                return StatusCode(500, e.Message);
             }
         }
 
@@ -241,7 +251,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                throw;
+                _log.Error(e.Message);
+                return StatusCode(500, e.Message);
             }
         }
 
@@ -256,7 +267,6 @@ namespace BridgeCareCore.Controllers
             {
                 return;
             }
-
             throw new AuthenticationException(responseJson["error_description"]);
         }
     }

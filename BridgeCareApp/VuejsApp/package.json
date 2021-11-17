@@ -1,6 +1,6 @@
 {
     "name": "bridge-care",
-    "version": "v2.2.0",
+    "version": "v2.2.1",
     "private": true,
     "description": "BridgeCare",
     "security": "ESEC",

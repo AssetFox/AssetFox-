@@ -18,8 +18,9 @@ namespace BridgeCareCore.Controllers
     public class AnnouncementController : BridgeCareCoreBaseController
     {
         public AnnouncementController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor contextAccessor) : base(esecSecurity, unitOfWork, hubService,
-            contextAccessor) { }
+            IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
+        }
 
         [HttpGet]
         [Route("GetAnnouncements")]
@@ -34,7 +35,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -59,7 +60,7 @@ namespace BridgeCareCore.Controllers
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -83,7 +84,7 @@ namespace BridgeCareCore.Controllers
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
-                throw;
+                throw new Exception(e.Message);
             }
         }
     }

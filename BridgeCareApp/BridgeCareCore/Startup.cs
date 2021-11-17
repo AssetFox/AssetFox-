@@ -10,6 +10,7 @@ using BridgeCareCore.StartupExtension;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,13 +30,26 @@ namespace BridgeCareCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //services.Configure<ForwardedHeadersOptions>(options =>
+            //{
+            //    options.ForwardedHeaders =
+            //        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            //});
+            var urlsKeyValue = Configuration.GetSection("AllowedOrigins:urls").GetChildren();
+            var urls = new List<string>();
+
+            foreach (var item in urlsKeyValue)
+            {
+                urls.Add(item.Value);
+            }
+
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
                 builder
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials()
-                .WithOrigins("http://localhost:8080", "https://v2.iam-deploy.com", "https://iam-demo.net/", "https://test.iam-deploy.com");
+                .WithOrigins(urls.ToArray());
             }));
 
             services.AddSecurityConfig(Configuration);
@@ -78,9 +92,11 @@ namespace BridgeCareCore
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                //app.UseForwardedHeaders();
             }
 
             app.ConfigureExceptionHandler(logger);
+            //app.UseForwardedHeaders();
 
             app.UseCors("CorsPolicy");
 

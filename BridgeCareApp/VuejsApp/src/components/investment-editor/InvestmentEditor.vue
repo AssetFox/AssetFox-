@@ -282,6 +282,7 @@ export default class InvestmentEditor extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('importScenarioInvestmentBudgetsFile') importScenarioInvestmentBudgetsFileAction: any;
     @Action('importLibraryInvestmentBudgetsFile') importLibraryInvestmentBudgetsFileAction: any;
+    @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
 
     selectedBudgetLibrary: BudgetLibrary = clone(emptyBudgetLibrary);
     investmentPlan: InvestmentPlan = clone(emptyInvestmentPlan);
@@ -656,13 +657,19 @@ export default class InvestmentEditor extends Vue {
                         ...data,
                         id: this.selectedScenarioId,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                    })
+                    .then(() => {
+                            this.getCriterionLibrariesAction();
                     });
                 } else {
                     this.importLibraryInvestmentBudgetsFileAction({
                         ...data,
                         id: this.selectedBudgetLibrary.id,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
-                    });
+                    })
+                    .then(() => {
+                            this.getCriterionLibrariesAction();
+                    });;
                 }
 
             }

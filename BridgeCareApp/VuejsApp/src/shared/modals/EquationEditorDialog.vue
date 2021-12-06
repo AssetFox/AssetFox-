@@ -255,7 +255,7 @@
             <v-flex xs12>
               <div>
                 <v-layout justify-space-between row>
-                  <v-btn :disabled="cannotCheck" @click="onCheckEquation" class="ara-blue-bg white--text">Check</v-btn>
+                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" class="ara-blue-bg white--text">Check</v-btn>
                   <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
                          class="ara-blue-bg white--text">Save
                   </v-btn>
@@ -401,7 +401,6 @@ export default class EquationEditorDialog extends Vue {
   textareaInput: HTMLTextAreaElement = {} as HTMLTextAreaElement;
   cursorPosition: number = 0;
   cannotSubmit: boolean = true;
-  cannotCheck: boolean = true;
   invalidExpressionMessage: string = '';
   validExpressionMessage: string = '';
   piecewiseGridHeaders: DataTableHeader[] = [
@@ -511,7 +510,6 @@ export default class EquationEditorDialog extends Vue {
     this.invalidExpressionMessage = '';
     this.validExpressionMessage = '';
     this.cannotSubmit = !(this.expression === '' && !this.isPiecewise);
-    this.cannotCheck = this.expression === ''  && !this.isPiecewise;
   }
 
   /**
@@ -810,15 +808,17 @@ export default class EquationEditorDialog extends Vue {
     this.syncDataGridLists(dataPoints);
   }
 
+    disableEquationCheck() {
+        return this.isPiecewise ? !hasValue(this.onParseTimeAttributeDataPoints()) : !hasValue(this.expression);
+    }
+
   /**
    * onCheckEquation => This function is used to trigger a service function to make an HTTP request to the backend API
    * equation validation service in order to validate the current expression.
    */
   onCheckEquation() {
-    //TODO : replace with actual Equation DTO when .net core API is setup
     const equationValidationParameters: EquationValidationParameters = {
       expression: this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression,
-      /*isFunction: !this.isPiecewise,*/
       isPiecewise: this.isPiecewise,
       currentUserCriteriaFilter: {...emptyUserCriteriaFilter}
     };
@@ -857,11 +857,6 @@ export default class EquationEditorDialog extends Vue {
     this.resetComponentCalculatedProperties();
 
     if (submit) {
-      /*const result: EquationEditorDialogResult = {
-        equation: this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression,
-        isPiecewise: this.isPiecewise,
-        isFunction: false
-      };*/
       this.equation.expression = this.isPiecewise ? this.onParseTimeAttributeDataPoints() : this.expression;
       this.$emit('submit', this.equation);
     } else {

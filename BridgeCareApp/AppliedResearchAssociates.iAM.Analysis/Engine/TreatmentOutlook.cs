@@ -21,7 +21,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             RemainingLifeCalculators = remainingLifeCalculatorFactories.Select(factory => factory.Create(AccumulationContext)).ToArray();
 
             AccumulationContext = new SectionContext(TemplateContext);
-            MostRecentBenefit = AccumulationContext.GetBenefit();
 
             Run();
         }
@@ -109,7 +108,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             ApplyTreatment(InitialTreatment, InitialYear);
 
-            AccumulateBenefit();
+            MostRecentBenefit = AccumulationContext.GetBenefit();
             updateRemainingLife?.Invoke();
 
             foreach (var year in Enumerable.Range(InitialYear + 1, AccumulationContext.SimulationRunner.Simulation.NumberOfYearsOfTreatmentOutlook))

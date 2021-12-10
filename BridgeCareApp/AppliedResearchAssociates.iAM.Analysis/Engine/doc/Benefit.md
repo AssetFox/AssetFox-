@@ -1,13 +1,4 @@
----
-title: "iAM Benefit Calculation"
-author: "Applied Research Associates"
-date: "12/9/2021"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+# iAM Benefit Calculation
 
 ## Essential Symbols & Terms
 
@@ -34,12 +25,14 @@ $$
 Each $C$ is calculated independently over the outlook period $N$, a fixed whole number of years starting from the current year.
 To understand the calculation, it's helpful to visualize with a line plot of yearly benefit-instant values over time.
 
-```{r}
+<div style="text-align: center">
+    <img src="benefit_curves_example.png" width="80%" />
+</div>
 
-```
-
-
-Cumulative benefit is the area under these curves. Each point on the plot is a $(y, b)$ pair.
+Cumulative benefit is the area under each of these curves.
+Benefit is the area between the two curves.
+(Negative benefit is possible.)
+Each point on the plot is a $(y, b)$ pair.
 Given the series $b = (b_0, b_1, \dots, b_N)$ of benefit-instant values over outlook period $N$, the cumulative benefit is
 
 $$

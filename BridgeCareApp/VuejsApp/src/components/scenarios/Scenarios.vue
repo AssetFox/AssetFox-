@@ -1,57 +1,108 @@
 <template>
     <v-layout column>
         <v-flex xs12>
-            <v-card elevation='5'>
+            <v-card elevation="5">
                 <v-flex xs10>
                     <v-layout>
-                        <div class='network-min-width'>
-                            <v-data-table :headers='networkGridHeaders'
-                                          :items='networks'
-                                          :items-per-page='5'
-                                          class='elevation-1'
-                                          hide-actions>
-                                <template slot='items' slot-scope='props'>
+                        <div class="network-min-width">
+                            <v-data-table
+                                :headers="networkGridHeaders"
+                                :items="networks"
+                                :items-per-page="5"
+                                class="elevation-1"
+                                hide-actions
+                            >
+                                <template slot="items" slot-scope="props">
                                     <td>{{ props.item.name }}</td>
                                     <td>{{ props.item.createdDate }}</td>
-                                    <td class='text-xs-center'>
-                                        <v-menu left min-height='500px' min-width='500px'>
-                                            <template slot='activator'>
-                                                <v-btn class='ara-blue' icon>
+                                    <td class="text-xs-center">
+                                        <v-menu
+                                            left
+                                            min-height="500px"
+                                            min-width="500px"
+                                        >
+                                            <template slot="activator">
+                                                <v-btn class="ara-blue" icon>
                                                     <v-icon>fas fa-eye</v-icon>
                                                 </v-btn>
                                             </template>
                                             <v-card>
                                                 <v-card-text>
-                                                    <v-textarea class='sm-txt'
-                                                                :value='props.item.benefitQuantifier.equation.expression'
-                                                                full-width no-resize outline readonly rows='5' />
+                                                    <v-textarea
+                                                        class="sm-txt"
+                                                        :value="
+                                                            props.item
+                                                                .benefitQuantifier
+                                                                .equation
+                                                                .expression
+                                                        "
+                                                        full-width
+                                                        no-resize
+                                                        outline
+                                                        readonly
+                                                        rows="5"
+                                                    />
                                                 </v-card-text>
                                             </v-card>
                                         </v-menu>
                                         <v-btn
-                                            @click='onShowEquationEditorDialog(props.item.benefitQuantifier.equation)'
-                                            class='edit-icon'
-                                            icon>
+                                            @click="
+                                                onShowEquationEditorDialog(
+                                                    props.item.benefitQuantifier
+                                                        .equation,
+                                                )
+                                            "
+                                            class="edit-icon"
+                                            icon
+                                        >
                                             <v-icon>fas fa-edit</v-icon>
                                         </v-btn>
                                     </td>
-                                    <td class='status-min-width'>
+                                    <td class="status-min-width">
                                         {{ props.item.status }}
-                                        <v-progress-linear v-model='networkDataAssignmentPercentage'
-                                                           color='light-green darken-1'
-                                                           height='25'
-                                                           striped>
-                                            <strong>{{ Math.ceil(networkDataAssignmentPercentage) }}%</strong>
+                                        <v-progress-linear
+                                            v-model="
+                                                networkDataAssignmentPercentage
+                                            "
+                                            color="light-green darken-1"
+                                            height="25"
+                                            striped
+                                        >
+                                            <strong
+                                                >{{
+                                                    Math.ceil(
+                                                        networkDataAssignmentPercentage,
+                                                    )
+                                                }}%</strong
+                                            >
                                         </v-progress-linear>
                                     </td>
                                     <td>
                                         <v-layout row wrap>
                                             <v-flex>
-                                                <v-btn @click='onShowConfirmDataAggregationAlert(props.item.id)'
-                                                       class='green--text darken-1'
-                                                       :disabled="props.item.benefitQuantifier.equation.expression === ''"
-                                                       :title="props.item.benefitQuantifier.equation.expression === '' ? 'Add Benefit Quantifier to Aggregate' : 'Aggregate'"
-                                                       icon>
+                                                <v-btn
+                                                    @click="
+                                                        onShowConfirmDataAggregationAlert(
+                                                            props.item.id,
+                                                        )
+                                                    "
+                                                    class="green--text darken-1"
+                                                    :disabled="
+                                                        props.item
+                                                            .benefitQuantifier
+                                                            .equation
+                                                            .expression === ''
+                                                    "
+                                                    :title="
+                                                        props.item
+                                                            .benefitQuantifier
+                                                            .equation
+                                                            .expression === ''
+                                                            ? 'Add Benefit Quantifier to Aggregate'
+                                                            : 'Aggregate'
+                                                    "
+                                                    icon
+                                                >
                                                     <v-icon>fas fa-play</v-icon>
                                                 </v-btn>
                                             </v-flex>
@@ -79,253 +130,440 @@
             </v-card>
         </v-flex>
         <v-flex x12>
-            <v-card elevation='5' color='blue lighten-5'>
-                <v-card-title>
-                    <v-flex xs2>
-                        <v-chip color='ara-blue-bg' text-color='white'>
-                            My Scenarios
-                            <v-icon right>star</v-icon>
-                        </v-chip>
-                    </v-flex>
-                    <v-flex xs6>
-                        <v-text-field append-icon='fas fa-search'
-                                      hide-details
-                                      lablel='Search'
-                                      single-line
-                                      v-model='searchMine'>
-                        </v-text-field>
-                    </v-flex>
-                    <v-flex xs4 v-if='isAdmin'>
-                        <v-btn @click='showMigrateLegacySimulationDialog = true'
-                               class='ara-light-gray-bg'
-                               round>
-                            Migrate Legacy Simulation
-                        </v-btn>
-                    </v-flex>
-                </v-card-title>
-                <v-data-table :headers='scenarioGridHeaders'
-                              :items='userScenarios'
-                              :search='searchMine'>
-                    <template slot='items' slot-scope='props'>
-                        <td>
-                            <v-edit-dialog large
-                                           lazy
-                                           persistent
-                                           :return-value.sync='props.item.name'
-                                           @save='onEditScenarioName(props.item, nameUpdate)'
-                                           @open='prepareForNameEdit(props.item.name)'>
-                                {{ props.item.name }}
-                                <template slot='input'>
-                                    <v-text-field label='Edit'
-                                                  single-line
-                                                  v-model='nameUpdate'
-                                                  :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                </template>
-                            </v-edit-dialog>
-                        </td>
-                        <td>
-                            {{ props.item.creator ? props.item.creator : '[ Unknown ]' }}
-                        </td>
-                        <td>
-                            {{ props.item.owner ? props.item.owner : '[ No Owner ]' }}
-                        </td>
-                        <td>{{ formatDate(props.item.createdDate) }}</td>
-                        <td>{{ formatDate(props.item.lastModifiedDate) }}</td>
-                        <td>{{ formatDate(props.item.lastRun) }}</td>
-                        <td>{{ props.item.status }}</td>
-                        <td>{{ props.item.runTime }}</td>
-                        <td>{{ props.item.reportStatus }}</td>
-                        <td>
-                            <v-layout nowrap row>
-                                <v-flex>
-                                    <v-btn @click='onShowConfirmAnalysisRunAlert(props.item)'
-                                           class='ara-blue'
-                                           icon
-                                           title='Run Analysis'>
-                                        <v-icon>fas fa-play</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                                <v-flex>
-                                    <v-btn @click='onShowReportsDownloaderDialog(props.item)'
-                                           class='ara-blue'
-                                           icon
-                                           title='Reports'>
-                                        <v-icon>fas fa-chart-line</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                                <v-flex>
-                                    <v-btn @click='onNavigateToEditScenarioView(props.item.id, props.item.name)'
-                                           class='edit-icon'
-                                           icon
-                                           title='Settings'>
-                                        <v-icon>fas fa-edit</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                                <v-flex>
-                                    <v-btn @click='onShowShareScenarioDialog(props.item)'
-                                           class='ara-blue'
-                                           icon
-                                           title='Share'>
-                                        <v-icon>fas fa-users</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                                <v-flex>
-                                    <v-btn @click='onShowConfirmCloneScenarioAlert(props.item)'
-                                           class='ara-blue'
-                                           icon
-                                           title='Clone'>
-                                        <v-icon>fas fa-paste</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                                <v-flex>
-                                    <v-btn @click='onShowConfirmDeleteAlert(props.item)'
-                                           class='ara-orange'
-                                           icon
-                                           title='Delete'>
-                                        <v-icon>fas fa-trash</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                            </v-layout>
-                        </td>
-                    </template>
-                    <v-alert :value='true'
-                             class='ara-orange-bg'
-                             icon='fas fa-exclamation'
-                             slot='no-results'>
-                        Your search for "{{ searchMine }}" found no results.
-                    </v-alert>
-                </v-data-table>
-                <v-card-actions color='white'>
-                    <div style='width:2em' />
-                    <v-btn @click='showCreateScenarioDialog = true'
-                           color='green darken-2 white--text'>
-                        Create new scenario
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-flex>
+            <v-card elevation="5" color="blue lighten-5">
+                <v-tabs center-active v-model="tab">
+                    <v-tabs-slider color="blue"></v-tabs-slider>
+                    <v-tab v-for="item in tabItems" :key="item.name" class="tab-theme">
+                        <v-icon left>{{ item.icon }}</v-icon>
+                        {{ item.name }}</v-tab
+                    >
+                </v-tabs>
 
-        <v-flex xs12>
-            <v-card elevation='5' color='blue lighten-3'>
-                <v-card-title>
-                    <v-flex xs4>
-                        <v-chip class='ara-blue-bg white--text'>
-                            Shared with Me
-                            <v-icon right>share</v-icon>
-                        </v-chip>
-                    </v-flex>
-                    <v-spacer />
-                    <v-flex xs6>
-                        <v-text-field append-icon='fas fa-search'
-                                      hide-details
-                                      lablel='Search'
-                                      single-line
-                                      v-model='searchShared'>
-                        </v-text-field>
-                    </v-flex>
-                </v-card-title>
-                <v-data-table :headers='scenarioGridHeaders'
-                              :items='sharedScenarios'
-                              :search='searchShared'>
-                    <template slot='items' slot-scope='props'>
-                        <td>
-                            <v-edit-dialog large
-                                           lazy
-                                           persistent
-                                           :return-value.sync='props.item.name'
-                                           @save='onEditScenarioName(props.item, nameUpdate)'
-                                           @open='prepareForNameEdit(props.item.name)'>
-                                {{ props.item.name }}
-                                <template slot='input'>
-                                    <v-text-field label='Edit'
-                                                  single-line
-                                                  v-model='nameUpdate'
-                                                  :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                </template>
-                            </v-edit-dialog>
-                        </td>
-                        <td>{{ props.item.creator ? props.item.creator : '[ Unknown ]' }}
-                        </td>
-                        <td>{{ props.item.owner ? props.item.owner : '[ No Owner ]' }}
-                        </td>
-                        <td>{{ formatDate(props.item.createdDate) }}</td>
-                        <td>{{ formatDate(props.item.lastModifiedDate) }}</td>
-                        <td>{{ formatDate(props.item.lastRun) }}</td>
-                        <td>{{ props.item.status }}</td>
-                        <td>{{ props.item.runTime }}</td>
-                        <td>{{ props.item.reportStatus }}</td>
-                        <td>
+                <v-tabs-items v-model="tab" @click="onSelectTab">
+                    <v-tab-item>
+                        <v-flex x12>
+                            <v-card elevation="5" color="blue lighten-3">
+                                <v-card-title>
+                                    <v-flex xs6>
+                                        <v-text-field
+                                            append-icon="fas fa-search"
+                                            hide-details
+                                            lablel="Search"
+                                            single-line
+                                            v-model="searchMine"
+                                        >
+                                        </v-text-field>
+                                    </v-flex>
+                                    <v-flex xs4></v-flex>
+                                    <v-flex class="justify-end xs2">
+                                        <v-btn
+                                            @click="
+                                                showCreateScenarioDialog = true
+                                            "
+                                            color="blue darken-2 white--text"
+                                            round
+                                        >
+                                            Create new scenario
+                                        </v-btn>
+                                    </v-flex>
+                                </v-card-title>
+                                <v-data-table
+                                    :headers="scenarioGridHeaders"
+                                    :items="userScenarios"
+                                    :search="searchMine"
+                                >
+                                    <template slot="items" slot-scope="props">
+                                        <td>
+                                            <v-edit-dialog
+                                                large
+                                                lazy
+                                                persistent
+                                                :return-value.sync="
+                                                    props.item.name
+                                                "
+                                                @save="
+                                                    onEditScenarioName(
+                                                        props.item,
+                                                        nameUpdate,
+                                                    )
+                                                "
+                                                @open="
+                                                    prepareForNameEdit(
+                                                        props.item.name,
+                                                    )
+                                                "
+                                            >
+                                                {{ props.item.name }}
+                                                <template slot="input">
+                                                    <v-text-field
+                                                        label="Edit"
+                                                        single-line
+                                                        v-model="nameUpdate"
+                                                        :rules="[
+                                                            rules[
+                                                                'generalRules'
+                                                            ].valueIsNotEmpty,
+                                                        ]"
+                                                    />
+                                                </template>
+                                            </v-edit-dialog>
+                                        </td>
+                                        <td>
+                                            {{
+                                                props.item.creator
+                                                    ? props.item.creator
+                                                    : '[ Unknown ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                props.item.owner
+                                                    ? props.item.owner
+                                                    : '[ No Owner ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                formatDate(
+                                                    props.item.createdDate,
+                                                )
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                formatDate(
+                                                    props.item.lastModifiedDate,
+                                                )
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{ formatDate(props.item.lastRun) }}
+                                        </td>
+                                        <td>{{ props.item.status }}</td>
+                                        <td>{{ props.item.runTime }}</td>
+                                        <td>{{ props.item.reportStatus }}</td>
+                                        <td>
+                                            <v-menu offset-x left>
+                                                <template
+                                                    v-slot:activator="{
+                                                        on,
+                                                        attrs,
+                                                    }"
+                                                >
+                                                    <v-btn
+                                                        color="green--text darken-1"
+                                                        icon
+                                                        v-bind="attrs"
+                                                        v-on="on"
+                                                    >
+                                                        <i
+                                                            class="fas fa-align-justify"
+                                                        ></i>
+                                                    </v-btn>
+                                                </template>
+
+                                                <v-list>
+                                                    <v-list-tile
+                                                        v-for="(item,
+                                                        i) in actionItems"
+                                                        :key="i"
+                                                        @click="
+                                                            OnActionTaken(
+                                                                item.action,
+                                                                props.item
+                                                                    .users,
+                                                                props.item,
+                                                                true,
+                                                            )
+                                                        "
+                                                        class="menu-style"
+                                                    >
+                                                        <v-list-tile-title icon>
+                                                            <v-icon>{{
+                                                                item.icon
+                                                            }}</v-icon>
+                                                            {{
+                                                                item.title
+                                                            }}</v-list-tile-title
+                                                        >
+                                                    </v-list-tile>
+                                                </v-list>
+                                            </v-menu>
+                                        </td>
+                                    </template>
+                                    <v-alert
+                                        :value="true"
+                                        class="ara-orange-bg"
+                                        icon="fas fa-exclamation"
+                                        slot="no-results"
+                                    >
+                                        Your search for "{{ searchMine }}" found
+                                        no results.
+                                    </v-alert>
+                                </v-data-table>
+                            </v-card>
+                        </v-flex>
+                    </v-tab-item>
+                    <v-tab-item>
+                        <v-flex xs12>
+                            <v-card elevation="5" color="blue lighten-3">
+                                <v-card-title>
+                                    <v-flex xs6>
+                                        <v-text-field
+                                            append-icon="fas fa-search"
+                                            hide-details
+                                            lablel="Search"
+                                            single-line
+                                            v-model="searchShared"
+                                        >
+                                        </v-text-field>
+                                    </v-flex>
+                                </v-card-title>
+                                <v-data-table
+                                    :headers="scenarioGridHeaders"
+                                    :items="sharedScenarios"
+                                    :search="searchShared"
+                                >
+                                    <template slot="items" slot-scope="props">
+                                        <td>
+                                            <v-edit-dialog
+                                                large
+                                                lazy
+                                                persistent
+                                                :return-value.sync="
+                                                    props.item.name
+                                                "
+                                                @save="
+                                                    onEditScenarioName(
+                                                        props.item,
+                                                        nameUpdate,
+                                                    )
+                                                "
+                                                @open="
+                                                    prepareForNameEdit(
+                                                        props.item.name,
+                                                    )
+                                                "
+                                            >
+                                                {{ props.item.name }}
+                                                <template slot="input">
+                                                    <v-text-field
+                                                        label="Edit"
+                                                        single-line
+                                                        v-model="nameUpdate"
+                                                        :rules="[
+                                                            rules[
+                                                                'generalRules'
+                                                            ].valueIsNotEmpty,
+                                                        ]"
+                                                    />
+                                                </template>
+                                            </v-edit-dialog>
+                                        </td>
+                                        <td>
+                                            {{
+                                                props.item.creator
+                                                    ? props.item.creator
+                                                    : '[ Unknown ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                props.item.owner
+                                                    ? props.item.owner
+                                                    : '[ No Owner ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                formatDate(
+                                                    props.item.createdDate,
+                                                )
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                formatDate(
+                                                    props.item.lastModifiedDate,
+                                                )
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{ formatDate(props.item.lastRun) }}
+                                        </td>
+                                        <td>{{ props.item.status }}</td>
+                                        <td>{{ props.item.runTime }}</td>
+                                        <td>{{ props.item.reportStatus }}</td>
+                                        <td>
+                                            <v-menu offset-x left>
+                                                <template
+                                                    v-slot:activator="{
+                                                        on,
+                                                        attrs,
+                                                    }"
+                                                >
+                                                    <v-btn
+                                                        color="green--text darken-1"
+                                                        icon
+                                                        v-bind="attrs"
+                                                        v-on="on"
+                                                    >
+                                                        <i
+                                                            class="fas fa-align-justify"
+                                                        ></i>
+                                                    </v-btn>
+                                                </template>
+
+                                                <v-list>
+                                                    <v-list-tile
+                                                        v-for="(item,
+                                                        i) in actionItemsForSharedScenario"
+                                                        :key="i"
+                                                        @click="
+                                                            OnActionTaken(
+                                                                item.action,
+                                                                props.item
+                                                                    .users,
+                                                                props.item,
+                                                                false,
+                                                            )
+                                                        "
+                                                        class="menu-style"
+                                                    >
+                                                        <v-list-tile-title icon>
+                                                            <v-icon>{{
+                                                                item.icon
+                                                            }}</v-icon>
+                                                            {{
+                                                                item.title
+                                                            }}</v-list-tile-title
+                                                        >
+                                                    </v-list-tile>
+                                                </v-list>
+                                            </v-menu>
+                                        </td>
+                                        <!-- <td>
                             <v-layout nowrap row>
                                 <v-flex>
-                                    <v-btn v-if='canModifySharedScenario(props.item.users)'
-                                           @click='onShowConfirmAnalysisRunAlert(props.item)'
-                                           class='ara-blue'
-                                           flat
-                                           icon
-                                           title='Run Analysis'>
+                                    <v-btn
+                                        v-if="
+                                            canModifySharedScenario(
+                                                props.item.users,
+                                            )
+                                        "
+                                        @click="
+                                            onShowConfirmAnalysisRunAlert(
+                                                props.item,
+                                            )
+                                        "
+                                        class="ara-blue"
+                                        flat
+                                        icon
+                                        title="Run Analysis"
+                                    >
                                         <v-icon>fas fa-play</v-icon>
                                     </v-btn>
-                                    <v-btn v-else :disabled='true'
-                                           class='ara-light-gray'
-                                           flat
-                                           icon
-                                           title='Not authorized to run analysis'>
+                                    <v-btn
+                                        v-else
+                                        :disabled="true"
+                                        class="ara-light-gray"
+                                        flat
+                                        icon
+                                        title="Not authorized to run analysis"
+                                    >
                                         <v-icon>fas fa-play</v-icon>
                                     </v-btn>
                                 </v-flex>
                                 <v-flex>
-                                    <v-btn @click='onShowReportsDownloaderDialog(props.item)'
-                                           class='ara-blue'
-                                           flat
-                                           icon
-                                           title='Reports'>
+                                    <v-btn
+                                        @click="
+                                            onShowReportsDownloaderDialog(
+                                                props.item,
+                                            )
+                                        "
+                                        class="ara-blue"
+                                        flat
+                                        icon
+                                        title="Reports"
+                                    >
                                         <v-icon>fas fa-chart-line</v-icon>
                                     </v-btn>
                                 </v-flex>
                                 <v-flex>
-                                    <v-btn v-if='canModifySharedScenario(props.item.users)'
-                                           @click='onNavigateToEditScenarioView(props.item.id, props.item.name)'
-                                           class='edit-icon'
-                                           flat
-                                           icon
-                                           title='Settings'>
+                                    <v-btn
+                                        v-if="
+                                            canModifySharedScenario(
+                                                props.item.users,
+                                            )
+                                        "
+                                        @click="
+                                            onNavigateToEditScenarioView(
+                                                props.item.id,
+                                                props.item.name,
+                                            )
+                                        "
+                                        class="edit-icon"
+                                        flat
+                                        icon
+                                        title="Settings"
+                                    >
                                         <v-icon>fas fa-edit</v-icon>
                                     </v-btn>
-                                    <v-btn v-else :disabled='true'
-                                           class='ara-light-gray'
-                                           flat
-                                           icon
-                                           title='Not authorized to edit'>
+                                    <v-btn
+                                        v-else
+                                        :disabled="true"
+                                        class="ara-light-gray"
+                                        flat
+                                        icon
+                                        title="Not authorized to edit"
+                                    >
                                         <v-icon>fas fa-edit</v-icon>
                                     </v-btn>
                                 </v-flex>
                                 <v-flex>
-                                    <v-btn @click='onShowConfirmCloneScenarioAlert(props.item)'
-                                           class='ara-blue'
-                                           icon
-                                           title='Clone'>
+                                    <v-btn
+                                        @click="
+                                            onShowConfirmCloneScenarioAlert(
+                                                props.item,
+                                            )
+                                        "
+                                        class="ara-blue"
+                                        icon
+                                        title="Clone"
+                                    >
                                         <v-icon>fas fa-paste</v-icon>
                                     </v-btn>
                                 </v-flex>
                                 <v-flex>
-                                    <v-btn @click='onShowConfirmDeleteAlert(props.item)'
-                                           class='ara-orange'
-                                           icon
-                                           title='Delete'
-                                           v-if="isAdmin">
+                                    <v-btn
+                                        @click="
+                                            onShowConfirmDeleteAlert(props.item)
+                                        "
+                                        class="ara-orange"
+                                        icon
+                                        title="Delete"
+                                        v-if="isAdmin"
+                                    >
                                         <v-icon>fas fa-trash</v-icon>
                                     </v-btn>
                                 </v-flex>
                             </v-layout>
-                        </td>
-                    </template>
-                    <v-alert :value='true'
-                             class='ara-orange-bg'
-                             icon='fas fa-exclamation'
-                             slot='no-results'>
-                        Your search for "{{ searchShared }}" found no results.
-                    </v-alert>
-                </v-data-table>
+                        </td> -->
+                                    </template>
+                                    <v-alert
+                                        :value="true"
+                                        class="ara-orange-bg"
+                                        icon="fas fa-exclamation"
+                                        slot="no-results"
+                                    >
+                                        Your search for "{{ searchShared }}"
+                                        found no results.
+                                    </v-alert>
+                                </v-data-table>
+                            </v-card>
+                        </v-flex>
+                    </v-tab-item>
+                </v-tabs-items>
             </v-card>
         </v-flex>
 
@@ -333,35 +571,62 @@
 
         <!--    <ConfirmRollupAlert :dialogData="confirmRollupAlertData" @submit="onConfirmRollupAlertSubmit"/>-->
 
-        <ConfirmDataAssignmentAlert :dialogData='confirmDataAggregationAlertData'
-                                    @submit='onConfirmDataAggregationAlertSubmit' />
+        <ConfirmDataAssignmentAlert
+            :dialogData="confirmDataAggregationAlertData"
+            @submit="onConfirmDataAggregationAlertSubmit"
+        />
 
-        <ConfirmAnalysisRunAlert :dialogData='confirmAnalysisRunAlertData' @submit='onConfirmAnalysisRunAlertSubmit' />
+        <ConfirmAnalysisRunAlert
+            :dialogData="confirmAnalysisRunAlertData"
+            @submit="onConfirmAnalysisRunAlertSubmit"
+        />
 
-        <ReportsDownloaderDialog :dialogData='reportsDownloaderDialogData' />
+        <ReportsDownloaderDialog :dialogData="reportsDownloaderDialogData" />
 
-        <ShareScenarioDialog :dialogData='shareScenarioDialogData' @submit='onShareScenarioDialogSubmit' />
+        <ShareScenarioDialog
+            :dialogData="shareScenarioDialogData"
+            @submit="onShareScenarioDialogSubmit"
+        />
 
-        <ConfirmCloneScenarioAlert :dialogData='confirmCloneScenarioAlertData'
-                                   @submit='onConfirmCloneScenarioAlertSubmit' />
+        <ConfirmCloneScenarioAlert
+            :dialogData="confirmCloneScenarioAlertData"
+            @submit="onConfirmCloneScenarioAlertSubmit"
+        />
 
-        <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onConfirmDeleteAlertSubmit' />
+        <ConfirmDeleteAlert
+            :dialogData="confirmDeleteAlertData"
+            @submit="onConfirmDeleteAlertSubmit"
+        />
 
-        <CreateScenarioDialog :showDialog='showCreateScenarioDialog' @submit='onCreateScenarioDialogSubmit' />
+        <CreateScenarioDialog
+            :showDialog="showCreateScenarioDialog"
+            @submit="onCreateScenarioDialogSubmit"
+        />
 
-        <MigrateLegacySimulationDialog :showDialog='showMigrateLegacySimulationDialog'
-                                       @submit='onMigrateLegacySimulationSubmit' />
+        <MigrateLegacySimulationDialog
+            :showDialog="showMigrateLegacySimulationDialog"
+            @submit="onMigrateLegacySimulationSubmit"
+        />
 
-        <EquationEditorDialog :dialogData='equationEditorDialogData' @submit='onSubmitEquationEditorDialogSubmit' />
+        <EquationEditorDialog
+            :dialogData="equationEditorDialogData"
+            @submit="onSubmitEquationEditorDialogSubmit"
+        />
     </v-layout>
 </template>
 
-<script lang='ts'>
+<script lang="ts">
 import Vue from 'vue';
 import { Component, Watch } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
 import moment from 'moment';
-import { emptyScenario, Scenario, ScenarioUser } from '@/shared/models/iAM/scenario';
+import {
+    emptyScenario,
+    Scenario,
+    ScenarioActions,
+    TabItems,
+    ScenarioUser,
+} from '@/shared/models/iAM/scenario';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
@@ -375,7 +640,10 @@ import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareS
 import { Network } from '@/shared/models/iAM/network';
 import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
 import { getUserName } from '@/shared/utils/get-user-info';
-import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import {
+    InputValidationRules,
+    rules,
+} from '@/shared/utils/input-validation-rules';
 import CreateNetworkDialog from '@/components/scenarios/scenarios-dialogs/CreateNetworkDialog.vue';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import {
@@ -391,7 +659,7 @@ import {
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
 import { Hub } from '@/connectionHub';
-import {NetworkRollupDetail} from '../../shared/models/iAM/network-rollup-detail';
+import { NetworkRollupDetail } from '../../shared/models/iAM/network-rollup-detail';
 
 @Component({
     components: {
@@ -415,7 +683,8 @@ export default class Scenarios extends Vue {
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
 
     //@State(state => state.rollup.rollups) rollups: Rollup[];
-    @State(state => state.authenticationModule.authenticated) authenticated: boolean;
+    @State(state => state.authenticationModule.authenticated)
+    authenticated: boolean;
     @State(state => state.authenticationModule.userId) userId: string;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.authenticationModule.isCWOPA) isCWOPA: boolean;
@@ -426,9 +695,12 @@ export default class Scenarios extends Vue {
     @Action('updateScenario') updateScenarioAction: any;
     @Action('deleteScenario') deleteScenarioAction: any;
     @Action('runSimulation') runSimulationAction: any;
-    @Action('migrateLegacySimulationData') migrateLegacySimulationDataAction: any;
-    @Action('updateSimulationAnalysisDetail') updateSimulationAnalysisDetailAction: any;
-    @Action('updateSimulationReportDetail') updateSimulationReportDetailAction: any;
+    @Action('migrateLegacySimulationData')
+    migrateLegacySimulationDataAction: any;
+    @Action('updateSimulationAnalysisDetail')
+    updateSimulationAnalysisDetailAction: any;
+    @Action('updateSimulationReportDetail')
+    updateSimulationReportDetailAction: any;
     @Action('updateNetworkRollupDetail') updateNetworkRollupDetailAction: any;
     @Action('selectScenario') selectScenarioAction: any;
 
@@ -443,25 +715,144 @@ export default class Scenarios extends Vue {
     @Action('setInfoMessage') setInfoMessageAction: any;
 
     networkGridHeaders: DataTableHeader[] = [
-        { text: 'Network', value: 'name', align: 'left', sortable: false, class: '', width: '' },
-        { text: 'Date Created', value: 'createdDate', align: 'left', sortable: false, class: '', width: '' },
-        { text: 'Benefit Quantifier', value: '', align: 'left', sortable: false, class: '', width: '' },
-        { text: 'Status', value: 'status', align: 'left', sortable: false, class: '', width: '' },
-        { text: 'Aggregate Data', value: '', align: 'left', sortable: false, class: '', width: '' },
+        {
+            text: 'Network',
+            value: 'name',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Date Created',
+            value: 'createdDate',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Benefit Quantifier',
+            value: '',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Status',
+            value: 'status',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Aggregate Data',
+            value: '',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
     ];
     networks: Network[] = [];
     scenarioGridHeaders: DataTableHeader[] = [
-        { text: 'Scenario', value: 'name', align: 'left', sortable: true, class: '', width: '' },
-        { text: 'Creator', value: 'creator', align: 'left', sortable: false, class: '', width: '' },
-        { text: 'Owner', value: 'owner', align: 'left', sortable: false, class: '', width: '' },
-        { text: 'Date Created', value: 'createdDate', align: 'left', sortable: true, class: '', width: '' },
-        { text: 'Date Last Modified', value: 'lastModifiedDate', align: 'left', sortable: true, class: '', width: '' },
-        { text: 'Date Last Run', value: 'lastRun', align: 'left', sortable: true, class: '', width: '' },
-        { text: 'Status', value: 'status', align: 'left', sortable: false, class: '', width: '' },
-        { text: 'Run Time', value: 'runTime', align: 'left', sortable: false, class: '', width: '' },
-        { text: 'Report Status', value: 'reportStatus', align: 'left', sortable: false, class: '', width: '' },
-        { text: '', value: '', align: 'left', sortable: false, class: '', width: '' },
+        {
+            text: 'Scenario',
+            value: 'name',
+            align: 'left',
+            sortable: true,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Creator',
+            value: 'creator',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Owner',
+            value: 'owner',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Date Created',
+            value: 'createdDate',
+            align: 'left',
+            sortable: true,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Date Last Modified',
+            value: 'lastModifiedDate',
+            align: 'left',
+            sortable: true,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Date Last Run',
+            value: 'lastRun',
+            align: 'left',
+            sortable: true,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Status',
+            value: 'status',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Run Time',
+            value: 'runTime',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Report Status',
+            value: 'reportStatus',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: 'Action',
+            value: 'actions',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
+        {
+            text: '',
+            value: '',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        },
     ];
+
+    actionItems: ScenarioActions[] = [];
+    actionItemsForSharedScenario: ScenarioActions[] = [];
+    tabItems: TabItems[] = [];
+    tab: string = '';
+    availableActions: any;
     nameUpdate: string = '';
     scenarios: Scenario[] = [];
     userScenarios: Scenario[] = [];
@@ -469,12 +860,18 @@ export default class Scenarios extends Vue {
     searchMine = '';
     searchShared = '';
     //confirmRollupAlertData: AlertData = clone(emptyAlertData);
-    equationEditorDialogData: EquationEditorDialogData = clone(emptyEquationEditorDialogData);
+    equationEditorDialogData: EquationEditorDialogData = clone(
+        emptyEquationEditorDialogData,
+    );
     confirmDataAggregationAlertData: AlertData = clone(emptyAlertData);
     //showCreateNetworkDialog: boolean = false;
-    reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(emptyReportsDownloadDialogData);
+    reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(
+        emptyReportsDownloadDialogData,
+    );
     confirmAnalysisRunAlertData: AlertData = clone(emptyAlertData);
-    shareScenarioDialogData: ShareScenarioDialogData = clone(emptyShareScenarioDialogData);
+    shareScenarioDialogData: ShareScenarioDialogData = clone(
+        emptyShareScenarioDialogData,
+    );
     confirmCloneScenarioAlertData: AlertData = clone(emptyAlertData);
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     showCreateScenarioDialog: boolean = false;
@@ -484,13 +881,13 @@ export default class Scenarios extends Vue {
     rules: InputValidationRules = rules;
     showMigrateLegacySimulationDialog: boolean = false;
 
-  @Watch('stateNetworks')
-  onStateNetworksChanged() {
-    this.networks = clone(this.stateNetworks);
-      if (hasValue(this.networks)) {
-          this.getScenariosAction({ networkId: this.networks[0].id });
-      }
-  }
+    @Watch('stateNetworks')
+    onStateNetworksChanged() {
+        this.networks = clone(this.stateNetworks);
+        if (hasValue(this.networks)) {
+            this.getScenariosAction({ networkId: this.networks[0].id });
+        }
+    }
 
     @Watch('stateScenarios')
     onStateScenariosChanged() {
@@ -501,44 +898,127 @@ export default class Scenarios extends Vue {
     onScenariosChanged() {
         const username: string = getUserName();
         // filter scenarios that are the user's
-        this.userScenarios = this.scenarios.filter((scenario: Scenario) => scenario.owner === username);
+        this.userScenarios = this.scenarios.filter(
+            (scenario: Scenario) => scenario.owner === username,
+        );
         // filter scenarios that are shared with the user
-        const scenarioUserCanModify = (user: ScenarioUser) => user.username === username;
+        const scenarioUserCanModify = (user: ScenarioUser) =>
+            user.username === username;
         const sharedScenarioFilter = (scenario: Scenario) =>
-            scenario.owner !== username && (this.isAdmin || this.isCWOPA || any(scenarioUserCanModify, scenario.users));
+            scenario.owner !== username &&
+            (this.isAdmin ||
+                this.isCWOPA ||
+                any(scenarioUserCanModify, scenario.users));
         this.sharedScenarios = this.scenarios.filter(sharedScenarioFilter);
     }
 
     mounted() {
         this.networks = clone(this.stateNetworks);
         if (hasValue(this.networks) && !hasValue(this.stateScenarios)) {
-            this.getScenariosAction({networkId: this.networks[0].id});
+            this.getScenariosAction({ networkId: this.networks[0].id });
         } else {
             this.scenarios = clone(this.stateScenarios);
         }
 
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+            this.getDataAggregationStatus,
+        );
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastDataMigrationEvent,
+            this.getDataMigrationStatus,
+        );
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent,
+            this.getScenarioAnalysisDetailUpdate,
+        );
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent,
+            this.getSummaryReportStatus,
+        );
 
-        this.$statusHub.$on(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, this.getDataAggregationStatus);
-        this.$statusHub.$on(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);
-        this.$statusHub.$on(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, this.getScenarioAnalysisDetailUpdate);
-        this.$statusHub.$on(Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent, this.getSummaryReportStatus);
+        this.availableActions = {
+            runAnalysis: 'runAnalysis',
+            reports: 'reports',
+            settings: 'settings',
+            share: 'share',
+            clone: 'clone',
+            delete: 'delete',
+        };
+        this.actionItemsForSharedScenario = [
+            {
+                title: 'Run Analysis',
+                action: this.availableActions.runAnalysis,
+                icon: 'fas fa-play',
+            },
+            {
+                title: 'Reports',
+                action: this.availableActions.reports,
+                icon: 'fas fa-chart-line',
+            },
+            {
+                title: 'Settings',
+                action: this.availableActions.settings,
+                icon: 'fas fa-edit',
+            },
+            {
+                title: 'Clone',
+                action: this.availableActions.clone,
+                icon: 'fas fa-paste',
+            },
+            {
+                title: 'Delete',
+                action: this.availableActions.delete,
+                icon: 'fas fa-trash',
+            },
+        ];
+        this.actionItems = this.actionItemsForSharedScenario.slice();
+        this.actionItems.splice(3, 0, {
+            title: 'Share',
+            action: this.availableActions.share,
+            icon: 'fas fa-users',
+        });
+        this.tabItems.push(
+            { name: 'My scenario', icon: 'star' },
+            { name: 'Shared with me', icon: 'share' },
+        );
+        this.tab = 'My scenario';
     }
 
     beforeDestroy() {
-        this.$statusHub.$off(Hub.BroadcastEventType.BroadcastAssignDataStatusEvent, this.getDataAggregationStatus);
-        this.$statusHub.$off(Hub.BroadcastEventType.BroadcastDataMigrationEvent, this.getDataMigrationStatus);
-        this.$statusHub.$off(Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent, this.getScenarioAnalysisDetailUpdate);
-        this.$statusHub.$off(Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent, this.getSummaryReportStatus);
+        this.$statusHub.$off(
+            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+            this.getDataAggregationStatus,
+        );
+        this.$statusHub.$off(
+            Hub.BroadcastEventType.BroadcastDataMigrationEvent,
+            this.getDataMigrationStatus,
+        );
+        this.$statusHub.$off(
+            Hub.BroadcastEventType.BroadcastSimulationAnalysisDetailEvent,
+            this.getScenarioAnalysisDetailUpdate,
+        );
+        this.$statusHub.$off(
+            Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent,
+            this.getSummaryReportStatus,
+        );
     }
 
     formatDate(dateToFormat: Date) {
-        return hasValue(dateToFormat) ? moment(dateToFormat).format('M/D/YYYY') : null;
+        return hasValue(dateToFormat)
+            ? moment(dateToFormat).format('M/D/YYYY')
+            : null;
     }
 
     canModifySharedScenario(scenarioUsers: ScenarioUser[]) {
         const currentUser: string = getUserName();
-        const scenarioUserCanModify = (user: ScenarioUser) => user.username === currentUser && user.canModify;
-        return this.isAdmin || this.isCWOPA || any(scenarioUserCanModify, scenarioUsers);
+        const scenarioUserCanModify = (user: ScenarioUser) =>
+            user.username === currentUser && user.canModify;
+        return (
+            this.isAdmin ||
+            this.isCWOPA ||
+            any(scenarioUserCanModify, scenarioUsers)
+        );
     }
 
     /*onShowConfirmRollupAlert() {
@@ -612,7 +1092,9 @@ export default class Scenarios extends Vue {
     // TODO: update to send no payload when API is modified to migrate ALL simulations
     onStartDataMigration() {
         // the legacy scenario id is hardcoded to our test scenario "JML Run District 8"
-        this.migrateLegacySimulationDataAction({ simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY });
+        this.migrateLegacySimulationDataAction({
+            simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
+        });
     }
 
     onEditScenarioName(scenario: Scenario, name: string) {
@@ -649,7 +1131,7 @@ export default class Scenarios extends Vue {
             this.runSimulationAction({
                 networkId: this.networks[0].id,
                 scenarioId: this.selectedScenario.id,
-            }).then(() => this.selectedScenario = clone(emptyScenario));
+            }).then(() => (this.selectedScenario = clone(emptyScenario)));
         }
     }
 
@@ -658,7 +1140,7 @@ export default class Scenarios extends Vue {
             showModal: true,
             scenarioId: scenario.id,
             networkId: this.networks[0].id,
-            name: scenario.name
+            name: scenario.name,
         };
     }
 
@@ -679,7 +1161,6 @@ export default class Scenarios extends Vue {
         this.shareScenarioDialogData = {
             showDialog: true,
             scenario: clone(scenario),
-
         };
     }
 
@@ -713,8 +1194,9 @@ export default class Scenarios extends Vue {
         this.confirmCloneScenarioAlertData = clone(emptyAlertData);
 
         if (submit && this.selectedScenario.id !== getBlankGuid()) {
-            this.cloneScenarioAction({ scenarioId: this.selectedScenario.id })
-                .then(() => this.selectedScenario = clone(emptyScenario));
+            this.cloneScenarioAction({
+                scenarioId: this.selectedScenario.id,
+            }).then(() => (this.selectedScenario = clone(emptyScenario)));
         }
     }
 
@@ -735,20 +1217,23 @@ export default class Scenarios extends Vue {
         if (submit && this.selectedScenario.id !== getBlankGuid()) {
             this.deleteScenarioAction({
                 scenarioId: this.selectedScenario.id,
-            }).then(() => this.selectedScenario = clone(emptyScenario));
+            }).then(() => (this.selectedScenario = clone(emptyScenario)));
         }
     }
 
     getDataAggregationStatus(data: any) {
         const networkRollupDetail: NetworkRollupDetail = data.networkRollupDetail as NetworkRollupDetail;
         if (any(propEq('id', networkRollupDetail.networkId), this.networks)) {
-            const updatedNetwork: Network = find(propEq('id', networkRollupDetail.networkId), this.networks) as Network;
+            const updatedNetwork: Network = find(
+                propEq('id', networkRollupDetail.networkId),
+                this.networks,
+            ) as Network;
             updatedNetwork.status = networkRollupDetail.status;
 
             this.networks = update(
                 findIndex(propEq('id', updatedNetwork.id), this.networks),
                 updatedNetwork,
-                this.networks
+                this.networks,
             );
         }
 
@@ -765,11 +1250,15 @@ export default class Scenarios extends Vue {
     }
 
     getScenarioAnalysisDetailUpdate(data: any) {
-        this.updateSimulationAnalysisDetailAction({ simulationAnalysisDetail: data.simulationAnalysisDetail });
+        this.updateSimulationAnalysisDetailAction({
+            simulationAnalysisDetail: data.simulationAnalysisDetail,
+        });
     }
 
     getSummaryReportStatus(data: any) {
-        this.updateSimulationReportDetailAction({ simulationReportDetail: data.simulationReportDetail });
+        this.updateSimulationReportDetailAction({
+            simulationReportDetail: data.simulationReportDetail,
+        });
     }
 
     onCreateScenarioDialogSubmit(scenario: Scenario) {
@@ -793,6 +1282,46 @@ export default class Scenarios extends Vue {
             });
         }
     }
+
+    OnActionTaken(
+        action: string,
+        scenarioUsers: ScenarioUser[],
+        scenario: Scenario,
+        isOwner: boolean,
+    ) {
+        switch (action) {
+            case this.availableActions.runAnalysis:
+                if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
+                    this.onShowConfirmAnalysisRunAlert(scenario);
+                } else {
+                }
+                break;
+            case this.availableActions.reports:
+                this.onShowReportsDownloaderDialog(scenario);
+                break;
+            case this.availableActions.settings:
+                if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
+                    this.onNavigateToEditScenarioView(
+                        scenario.id,
+                        scenario.name,
+                    );
+                }
+                break;
+            case this.availableActions.share:
+                this.onShowShareScenarioDialog(scenario);
+                break;
+            case this.availableActions.clone:
+                this.onShowConfirmCloneScenarioAlert(scenario);
+                break;
+            case this.availableActions.delete:
+                this.onShowConfirmDeleteAlert(scenario);
+                break;
+        }
+    }
+
+    onSelectTab() {
+        //this.tab = 'Shared with me';
+    }
 }
 </script>
 
@@ -807,5 +1336,16 @@ export default class Scenarios extends Vue {
 
 .status-min-width {
     min-width: 300px;
+}
+
+.menu-style{
+    border-bottom:inset; 
+    padding:2px; 
+    padding-right:15px
+}
+
+.tab-theme{
+    border:ridge; 
+    border-width:1px;
 }
 </style>

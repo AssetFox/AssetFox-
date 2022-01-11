@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
-                .AddJsonFile("testEsec.json")
+                .AddJsonFile("esec.json")
                 .Build();
             var builder = new WebHostBuilder()
                 .UseEnvironment("MsSqlDebug")

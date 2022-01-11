@@ -1,154 +1,39 @@
 <template>
     <v-layout column>
-        <v-flex xs12>
-            <v-card elevation="5">
-                <v-flex xs10>
-                    <v-layout>
-                        <div class="network-min-width">
-                            <v-data-table
-                                :headers="networkGridHeaders"
-                                :items="networks"
-                                :items-per-page="5"
-                                class="elevation-1"
-                                hide-actions
-                            >
-                                <template slot="items" slot-scope="props">
-                                    <td>{{ props.item.name }}</td>
-                                    <td>{{ props.item.createdDate }}</td>
-                                    <td class="text-xs-center">
-                                        <v-menu
-                                            left
-                                            min-height="500px"
-                                            min-width="500px"
-                                        >
-                                            <template slot="activator">
-                                                <v-btn class="ara-blue" icon>
-                                                    <v-icon>fas fa-eye</v-icon>
-                                                </v-btn>
-                                            </template>
-                                            <v-card>
-                                                <v-card-text>
-                                                    <v-textarea
-                                                        class="sm-txt"
-                                                        :value="
-                                                            props.item
-                                                                .benefitQuantifier
-                                                                .equation
-                                                                .expression
-                                                        "
-                                                        full-width
-                                                        no-resize
-                                                        outline
-                                                        readonly
-                                                        rows="5"
-                                                    />
-                                                </v-card-text>
-                                            </v-card>
-                                        </v-menu>
-                                        <v-btn
-                                            @click="
-                                                onShowEquationEditorDialog(
-                                                    props.item.benefitQuantifier
-                                                        .equation,
-                                                )
-                                            "
-                                            class="edit-icon"
-                                            icon
-                                        >
-                                            <v-icon>fas fa-edit</v-icon>
-                                        </v-btn>
-                                    </td>
-                                    <td class="status-min-width">
-                                        {{ props.item.status }}
-                                        <v-progress-linear
-                                            v-model="
-                                                networkDataAssignmentPercentage
-                                            "
-                                            color="light-green darken-1"
-                                            height="25"
-                                            striped
-                                        >
-                                            <strong
-                                                >{{
-                                                    Math.ceil(
-                                                        networkDataAssignmentPercentage,
-                                                    )
-                                                }}%</strong
-                                            >
-                                        </v-progress-linear>
-                                    </td>
-                                    <td>
-                                        <v-layout row wrap>
-                                            <v-flex>
-                                                <v-btn
-                                                    @click="
-                                                        onShowConfirmDataAggregationAlert(
-                                                            props.item.id,
-                                                        )
-                                                    "
-                                                    class="green--text darken-1"
-                                                    :disabled="
-                                                        props.item
-                                                            .benefitQuantifier
-                                                            .equation
-                                                            .expression === ''
-                                                    "
-                                                    :title="
-                                                        props.item
-                                                            .benefitQuantifier
-                                                            .equation
-                                                            .expression === ''
-                                                            ? 'Add Benefit Quantifier to Aggregate'
-                                                            : 'Aggregate'
-                                                    "
-                                                    icon
-                                                >
-                                                    <v-icon>fas fa-play</v-icon>
-                                                </v-btn>
-                                            </v-flex>
-                                        </v-layout>
-                                    </td>
-                                    <!--                   <td>
-                                                          <v-layout row wrap>
-                                                              <v-flex>
-                                                                  <v-btn @click="onShowConfirmRollupAlert" class="green&#45;&#45;text darken-2"
-                                                                         icon>
-                                                                      <v-icon>fas fa-play</v-icon>
-                                                                  </v-btn>
-                                                              </v-flex>
-                                                          </v-layout>
-                                                      </td>-->
-                                </template>
-                            </v-data-table>
-                        </div>
-                        <!-- <div class="pad-button" v-if="isAdmin">
-                            <v-btn @click="showCreateNetworkDialog = true" color="green darken-2 white--text" round>Create network
-                            </v-btn>
-                        </div> -->
-                    </v-layout>
-                </v-flex>
-            </v-card>
-        </v-flex>
         <v-flex x12>
             <v-card elevation="5" color="blue lighten-5">
                 <v-tabs center-active v-model="tab">
                     <v-tabs-slider color="blue"></v-tabs-slider>
-                    <v-tab v-for="item in tabItems" :key="item.name" class="tab-theme">
+                    <v-tab
+                        v-for="item in tabItems"
+                        :key="item.name"
+                        class="tab-theme"
+                    >
                         <v-icon left>{{ item.icon }}</v-icon>
                         {{ item.name }}</v-tab
                     >
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        round
+                        class="green darken-2 white--text"
+                        @click="onShowAggregatePopup"
+                    >
+                        Aggregate Data
+                    </v-btn>
+                    <v-flex xs1></v-flex>
                 </v-tabs>
-
-                <v-tabs-items v-model="tab" @click="onSelectTab">
+                <v-tabs-items v-model="tab">
                     <v-tab-item>
                         <v-flex x12>
-                            <v-card elevation="5" color="blue lighten-3">
+                            <v-card elevation="5" >
                                 <v-card-title>
                                     <v-flex xs6>
                                         <v-text-field
+                                            label="Search"
+                                            placeholder="Search in scenarios"
+                                            outlined
                                             append-icon="fas fa-search"
                                             hide-details
-                                            lablel="Search"
                                             single-line
                                             v-model="searchMine"
                                         >
@@ -279,7 +164,7 @@
                                                         class="menu-style"
                                                     >
                                                         <v-list-tile-title icon>
-                                                            <v-icon>{{
+                                                            <v-icon class="action-icon-padding">{{
                                                                 item.icon
                                                             }}</v-icon>
                                                             {{
@@ -310,9 +195,11 @@
                                 <v-card-title>
                                     <v-flex xs6>
                                         <v-text-field
+                                            label="Search"
+                                            placeholder="Search in scenarios"
+                                            outlined
                                             append-icon="fas fa-search"
                                             hide-details
-                                            lablel="Search"
                                             single-line
                                             v-model="searchShared"
                                         >
@@ -442,113 +329,6 @@
                                                 </v-list>
                                             </v-menu>
                                         </td>
-                                        <!-- <td>
-                            <v-layout nowrap row>
-                                <v-flex>
-                                    <v-btn
-                                        v-if="
-                                            canModifySharedScenario(
-                                                props.item.users,
-                                            )
-                                        "
-                                        @click="
-                                            onShowConfirmAnalysisRunAlert(
-                                                props.item,
-                                            )
-                                        "
-                                        class="ara-blue"
-                                        flat
-                                        icon
-                                        title="Run Analysis"
-                                    >
-                                        <v-icon>fas fa-play</v-icon>
-                                    </v-btn>
-                                    <v-btn
-                                        v-else
-                                        :disabled="true"
-                                        class="ara-light-gray"
-                                        flat
-                                        icon
-                                        title="Not authorized to run analysis"
-                                    >
-                                        <v-icon>fas fa-play</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                                <v-flex>
-                                    <v-btn
-                                        @click="
-                                            onShowReportsDownloaderDialog(
-                                                props.item,
-                                            )
-                                        "
-                                        class="ara-blue"
-                                        flat
-                                        icon
-                                        title="Reports"
-                                    >
-                                        <v-icon>fas fa-chart-line</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                                <v-flex>
-                                    <v-btn
-                                        v-if="
-                                            canModifySharedScenario(
-                                                props.item.users,
-                                            )
-                                        "
-                                        @click="
-                                            onNavigateToEditScenarioView(
-                                                props.item.id,
-                                                props.item.name,
-                                            )
-                                        "
-                                        class="edit-icon"
-                                        flat
-                                        icon
-                                        title="Settings"
-                                    >
-                                        <v-icon>fas fa-edit</v-icon>
-                                    </v-btn>
-                                    <v-btn
-                                        v-else
-                                        :disabled="true"
-                                        class="ara-light-gray"
-                                        flat
-                                        icon
-                                        title="Not authorized to edit"
-                                    >
-                                        <v-icon>fas fa-edit</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                                <v-flex>
-                                    <v-btn
-                                        @click="
-                                            onShowConfirmCloneScenarioAlert(
-                                                props.item,
-                                            )
-                                        "
-                                        class="ara-blue"
-                                        icon
-                                        title="Clone"
-                                    >
-                                        <v-icon>fas fa-paste</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                                <v-flex>
-                                    <v-btn
-                                        @click="
-                                            onShowConfirmDeleteAlert(props.item)
-                                        "
-                                        class="ara-orange"
-                                        icon
-                                        title="Delete"
-                                        v-if="isAdmin"
-                                    >
-                                        <v-icon>fas fa-trash</v-icon>
-                                    </v-btn>
-                                </v-flex>
-                            </v-layout>
-                        </td> -->
                                     </template>
                                     <v-alert
                                         :value="true"
@@ -570,11 +350,6 @@
         <!--    <CreateNetworkDialog :showDialog="showCreateNetworkDialog" @submit="onCreateNetworkDialogSubmit"/>-->
 
         <!--    <ConfirmRollupAlert :dialogData="confirmRollupAlertData" @submit="onConfirmRollupAlertSubmit"/>-->
-
-        <ConfirmDataAssignmentAlert
-            :dialogData="confirmDataAggregationAlertData"
-            @submit="onConfirmDataAggregationAlertSubmit"
-        />
 
         <ConfirmAnalysisRunAlert
             :dialogData="confirmAnalysisRunAlertData"
@@ -607,11 +382,7 @@
             :showDialog="showMigrateLegacySimulationDialog"
             @submit="onMigrateLegacySimulationSubmit"
         />
-
-        <EquationEditorDialog
-            :dialogData="equationEditorDialogData"
-            @submit="onSubmitEquationEditorDialogSubmit"
-        />
+        <ShowAggregationDialog :dialogData="aggragateDialogData" />
     </v-layout>
 </template>
 
@@ -631,6 +402,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import ReportsDownloaderDialog from '@/components/scenarios/scenarios-dialogs/ReportsDownloaderDialog.vue';
+import ShowAggregationDialog from '@/components/scenarios/scenarios-dialogs/ShowAggregationDialog.vue';
 import {
     emptyReportsDownloadDialogData,
     ReportsDownloaderDialogData,
@@ -652,14 +424,7 @@ import {
 } from '@/shared/models/modals/share-scenario-dialog-data';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import MigrateLegacySimulationDialog from '@/components/scenarios/scenarios-dialogs/MigrateLegacySimulationDialog.vue';
-import { Equation } from '@/shared/models/iAM/equation';
-import EquationEditorDialog from '@/shared/modals/EquationEditorDialog.vue';
-import {
-    emptyEquationEditorDialogData,
-    EquationEditorDialogData,
-} from '@/shared/models/modals/equation-editor-dialog-data';
 import { Hub } from '@/connectionHub';
-import { NetworkRollupDetail } from '../../shared/models/iAM/network-rollup-detail';
 
 @Component({
     components: {
@@ -667,13 +432,12 @@ import { NetworkRollupDetail } from '../../shared/models/iAM/network-rollup-deta
         ConfirmCloneScenarioAlert: Alert,
         ConfirmDeleteAlert: Alert,
         ConfirmRollupAlert: Alert,
-        ConfirmDataAssignmentAlert: Alert,
         ConfirmAnalysisRunAlert: Alert,
         ReportsDownloaderDialog,
         CreateScenarioDialog,
         CreateNetworkDialog,
         ShareScenarioDialog,
-        EquationEditorDialog,
+        ShowAggregationDialog,
     },
 })
 export default class Scenarios extends Vue {
@@ -682,7 +446,6 @@ export default class Scenarios extends Vue {
 
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
 
-    //@State(state => state.rollup.rollups) rollups: Rollup[];
     @State(state => state.authenticationModule.authenticated)
     authenticated: boolean;
     @State(state => state.authenticationModule.userId) userId: string;
@@ -714,48 +477,6 @@ export default class Scenarios extends Vue {
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('setInfoMessage') setInfoMessageAction: any;
 
-    networkGridHeaders: DataTableHeader[] = [
-        {
-            text: 'Network',
-            value: 'name',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '',
-        },
-        {
-            text: 'Date Created',
-            value: 'createdDate',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '',
-        },
-        {
-            text: 'Benefit Quantifier',
-            value: '',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '',
-        },
-        {
-            text: 'Status',
-            value: 'status',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '',
-        },
-        {
-            text: 'Aggregate Data',
-            value: '',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '',
-        },
-    ];
     networks: Network[] = [];
     scenarioGridHeaders: DataTableHeader[] = [
         {
@@ -860,10 +581,6 @@ export default class Scenarios extends Vue {
     searchMine = '';
     searchShared = '';
     //confirmRollupAlertData: AlertData = clone(emptyAlertData);
-    equationEditorDialogData: EquationEditorDialogData = clone(
-        emptyEquationEditorDialogData,
-    );
-    confirmDataAggregationAlertData: AlertData = clone(emptyAlertData);
     //showCreateNetworkDialog: boolean = false;
     reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(
         emptyReportsDownloadDialogData,
@@ -877,9 +594,10 @@ export default class Scenarios extends Vue {
     showCreateScenarioDialog: boolean = false;
     selectedScenario: Scenario = clone(emptyScenario);
     networkDataAssignmentStatus: string = '';
-    networkDataAssignmentPercentage = 0;
     rules: InputValidationRules = rules;
     showMigrateLegacySimulationDialog: boolean = false;
+
+    aggragateDialogData: any = { showDialog: false };
 
     @Watch('stateNetworks')
     onStateNetworksChanged() {
@@ -979,10 +697,10 @@ export default class Scenarios extends Vue {
             icon: 'fas fa-users',
         });
         this.tabItems.push(
-            { name: 'My scenario', icon: 'star' },
+            { name: 'My scenarios', icon: 'star' },
             { name: 'Shared with me', icon: 'share' },
         );
-        this.tab = 'My scenario';
+        this.tab = 'My scenarios';
     }
 
     beforeDestroy() {
@@ -1047,47 +765,6 @@ export default class Scenarios extends Vue {
         this.createNetworkAction({network: network});
       }
     }*/
-
-    onShowEquationEditorDialog(equation: Equation) {
-        this.equationEditorDialogData = {
-            showDialog: true,
-            equation: equation,
-        };
-    }
-
-    onSubmitEquationEditorDialogSubmit(equation: Equation) {
-        this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
-
-        if (!isNil(equation) && hasValue(this.networks)) {
-            this.upsertBenefitQuantifierAction({
-                benefitQuantifier: {
-                    ...this.networks[0].benefitQuantifier,
-                    equation: equation,
-                },
-            });
-        }
-    }
-
-    onShowConfirmDataAggregationAlert() {
-        this.confirmDataAggregationAlertData = {
-            showDialog: true,
-            heading: 'Warning',
-            choice: true,
-            message:
-                'The data aggregation operation can take around 1 hour to finish. ' +
-                'Are you sure that you want to continue?',
-        };
-    }
-
-    onConfirmDataAggregationAlertSubmit(response: boolean) {
-        this.confirmDataAggregationAlertData = clone(emptyAlertData);
-
-        if (response) {
-            this.aggregateNetworkDataAction({
-                networkId: this.networks[0].id,
-            });
-        }
-    }
 
     // TODO: update to send no payload when API is modified to migrate ALL simulations
     onStartDataMigration() {
@@ -1221,25 +898,6 @@ export default class Scenarios extends Vue {
         }
     }
 
-    getDataAggregationStatus(data: any) {
-        const networkRollupDetail: NetworkRollupDetail = data.networkRollupDetail as NetworkRollupDetail;
-        if (any(propEq('id', networkRollupDetail.networkId), this.networks)) {
-            const updatedNetwork: Network = find(
-                propEq('id', networkRollupDetail.networkId),
-                this.networks,
-            ) as Network;
-            updatedNetwork.status = networkRollupDetail.status;
-
-            this.networks = update(
-                findIndex(propEq('id', updatedNetwork.id), this.networks),
-                updatedNetwork,
-                this.networks,
-            );
-        }
-
-        this.networkDataAssignmentPercentage = data.percentage;
-    }
-
     getDataMigrationStatus(data: any) {
         const status: any = data.status;
         if (status.indexOf('Error') !== -1) {
@@ -1318,9 +976,10 @@ export default class Scenarios extends Vue {
                 break;
         }
     }
-
-    onSelectTab() {
-        //this.tab = 'Shared with me';
+    onShowAggregatePopup() {
+        this.aggragateDialogData = {
+            showDialog: true,
+        };
     }
 }
 </script>
@@ -1338,14 +997,17 @@ export default class Scenarios extends Vue {
     min-width: 300px;
 }
 
-.menu-style{
-    border-bottom:inset; 
-    padding:2px; 
-    padding-right:15px
+.menu-style {
+    border-bottom: inset;
+    padding: 2px;
+    padding-right: 15px;
 }
 
-.tab-theme{
-    border:ridge; 
-    border-width:1px;
+.tab-theme {
+    border: ridge;
+    border-width: 1px;
+}
+.action-icon-padding{
+    padding-right:14px;
 }
 </style>

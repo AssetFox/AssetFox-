@@ -120,23 +120,23 @@ namespace BridgeCareCore.Services
                 }
             }
 
-            var previous = ageValues.First();
-            foreach (var ageValue in ageValues)
-            {
-                if (ageValue.Value > previous.Value)
-                {
-                    _log.Error($"Values for CONDITION must descend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})");
-                    return new ValidationResult
-                    {
-                        IsValid = false,
-                        ValidationMessage = $"Values for CONDITION must descend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})"
-                    };
-                }
-                previous = ageValue;
-            }
-
             if (ageValues.Count >= 1)
             {
+                var previous = ageValues.First();
+                foreach (var ageValue in ageValues)
+                {
+                    if (ageValue.Value > previous.Value)
+                    {
+                        _log.Error($"Values for CONDITION must descend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})");
+                        return new ValidationResult
+                        {
+                            IsValid = false,
+                            ValidationMessage = $"Values for CONDITION must descend. Check pairs ({previous.Key},{previous.Value}) and ({ageValue.Key},{ageValue.Value})"
+                        };
+                    }
+                    previous = ageValue;
+                }
+
                 return new ValidationResult { IsValid = true, ValidationMessage = "Success" };
             }
 

@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     .UpsertCriterionLibrary(_testHelper.TestCriterionLibrary.ToDto());
 
                 // Assert
-                Assert.IsType<OkResult>(result);
+                Assert.IsType<OkObjectResult>(result);
             }
             finally
             {
@@ -142,8 +142,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 var addResult = await _controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
 
                 // Assert
-                Assert.IsType<OkResult>(updateResult);
-                Assert.IsType<OkResult>(addResult);
+                Assert.IsType<OkObjectResult>(updateResult);
+                Assert.IsType<OkObjectResult>(addResult);
 
                 var updatedCriterionLibraryEntity = _testHelper.UnitOfWork.Context.CriterionLibrary
                     .Single(_ => _.Id == _testHelper.TestCriterionLibrary.Id);

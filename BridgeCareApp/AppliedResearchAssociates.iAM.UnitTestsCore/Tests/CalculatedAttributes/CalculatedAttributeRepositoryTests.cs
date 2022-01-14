@@ -289,7 +289,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             var attributes = TestDataForCalculatedAttributesRepository.GetAttributeRepo();
 
             var changingLibraryDTO = _testRepo.Context.CalculatedAttributeLibrary.First(_ => _.Name == "Second").ToDto();
-            var revisedCalculation = changingLibraryDTO.CalculatedAttributes.First(_ => _.Attribute == "Description");
+            var revisedCalculation = changingLibraryDTO.CalculatedAttributes.FirstOrDefault(_ => _.Attribute == "DESCRIPTION");
             revisedCalculation.CalculationTiming = 2;
 
             // Act & Assert
@@ -337,7 +337,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
 
             // Assert
             Assert.Equal(3, result.Count());
-            Assert.NotNull(result.FirstOrDefault(_ => _.Attribute == "Age"));
+            Assert.NotNull(result.FirstOrDefault(_ => _.Attribute == "AGE"));
         }
 
         [Fact]
@@ -404,7 +404,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
         {
             // Arrange
             var repo = new CalculatedAttributeRepository(_testRepo);
-            var attributeToModify = _testRepo.Context.ScenarioCalculatedAttribute.First(_ => _.Attribute.Name == "Condition").ToDto();
+            var attributeToModify = _testRepo.Context.ScenarioCalculatedAttribute.First(_ => _.Attribute.Name == "CONDITION").ToDto();
             attributeToModify.CalculationTiming = 2;
 
             // Act & Assert

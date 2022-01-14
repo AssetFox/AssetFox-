@@ -70,10 +70,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var testSegment = repo.GetAssetAttributes("BRKEY", "2");
 
             // Assert
-            Assert.Equal(1, testSegment.Where(_ => _.Name == "BRKEY").Count());
-            Assert.Equal(2, testSegment.First(_ => _.Name == "BRKEY").NumericValue);
+            Assert.Equal(1, testSegment.Where(_ => _.Name == "BRKEY").Count());            
             Assert.Equal("2", testSegment.First(_ => _.Name == "BRKEY").Value);
-            Assert.Equal(15.4, testSegment.First(_ => _.Name == "Length").NumericValue);
+            Assert.Equal("15.4", testSegment.First(_ => _.Name == "Length").TextValue);
             Assert.Equal("First B", testSegment.First(_ => _.Name == "Name").TextValue);
         }
 
@@ -87,10 +86,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var testSegment = repo.GetAssetAttributes("BMSID", "13401256");
 
             // Assert
-            Assert.Equal(1, testSegment.Where(_ => _.Name == "BRKEY").Count());
-            Assert.Equal(2, testSegment.First(_ => _.Name == "BRKEY").NumericValue);
+            Assert.Equal(1, testSegment.Where(_ => _.Name == "BRKEY").Count());            
             Assert.Equal("2", testSegment.First(_ => _.Name == "BRKEY").Value);
-            Assert.Equal(15.4, testSegment.First(_ => _.Name == "Length").NumericValue);
+            Assert.Equal("15.4", testSegment.First(_ => _.Name == "Length").TextValue);
             Assert.Equal("First B", testSegment.First(_ => _.Name == "Name").TextValue);
         }
 

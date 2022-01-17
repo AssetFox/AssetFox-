@@ -45,8 +45,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 SimulationId = simulationId,
                 Name = domain.Name,
                 ShadowForAnyTreatment = domain.ShadowForAnyTreatment,
-                ShadowForSameTreatment = domain.ShadowForSameTreatment,
-                Description = domain.ShortDescription
+                ShadowForSameTreatment = domain.ShadowForSameTreatment
             };
 
         public static TreatmentLibraryEntity ToEntity(this TreatmentLibraryDTO dto) =>

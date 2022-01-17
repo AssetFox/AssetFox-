@@ -33,6 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(simulation => new SimulationEntity
                 {
                     Id = simulation.Id,
+                    Name = simulation.Name,
                     Network = new NetworkEntity
                     {
                         MaintainableAssets = simulation.Network.MaintainableAssets.Select(asset => new MaintainableAssetEntity
@@ -43,11 +44,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             //Area = asset.Area
                         }).ToList()
                     },
+                    // Network = simulation.Network, Q on above: Why does it create new NetworkEntity instead of assigning network from simulation??
+                    // NetworkId = simulation.NetworkId, 
                     Budgets = simulation.Budgets
                         .Select(budget => new ScenarioBudgetEntity { Id = budget.Id, Name = budget.Name })
                         .ToList()
                 }).Single();
-
+           
             // Update last modified date
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
 

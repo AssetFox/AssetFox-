@@ -29,28 +29,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation
-                .Where(_ => _.Id == simulationId)
-                .Select(simulation => new SimulationEntity
-                {
-                    Id = simulation.Id,
-                    Name = simulation.Name,
-                    Network = new NetworkEntity
-                    {
-                        MaintainableAssets = simulation.Network.MaintainableAssets.Select(asset => new MaintainableAssetEntity
-                        {
-                            Id = asset.Id,
-                            SectionName = asset.SectionName,
-                            SpatialWeighting = asset.SpatialWeighting
-                            //Area = asset.Area
-                        }).ToList()
-                    },
-                    // Network = simulation.Network, Q on above: Why does it create new NetworkEntity instead of assigning network from simulation??
-                    // NetworkId = simulation.NetworkId, 
-                    Budgets = simulation.Budgets
-                        .Select(budget => new ScenarioBudgetEntity { Id = budget.Id, Name = budget.Name })
-                        .ToList()
-                }).Single();
-           
+                    .Include(s => s.Network)
+                    .Include(n => n.Network.MaintainableAssets)                    
+                    .Include(s => s.Budgets)
+                .Where(_ => _.Id == simulationId).Single();
+
             // Update last modified date
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
 

@@ -40,8 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {            
             var explorer = UnitOfWorkForAnalysis.AttributeRepo.GetExplorer();
             var network = UnitOfWorkForAnalysis.NetworkRepo.GetSimulationAnalysisNetwork(new Guid(DataPersistenceConstants.PennDotNetworkId), explorer, true);                     
-            UnitOfWorkForAnalysis.SimulationRepo.GetSimulationInNetwork(new Guid("d4903c9f-ec76-4e36-b9e6-a3a07dd27403"), network);
-
+            UnitOfWorkForAnalysis.SimulationRepo.GetSimulationInNetwork(new Guid("F70E0EAD-EC60-4D3B-B05D-D1FC1933EB60"), network);
             StandAloneSimulation = network.Simulations.First();
             UnitOfWorkForAnalysis.InvestmentPlanRepo.GetSimulationInvestmentPlan(StandAloneSimulation);
             UnitOfWorkForAnalysis.AnalysisMethodRepo.GetSimulationAnalysisMethod(StandAloneSimulation);

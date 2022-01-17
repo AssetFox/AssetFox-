@@ -410,7 +410,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
 
-        // TODO: CHECK: runner.Run(); SectionContexts gets 0 from SimulationRunner, investigate why!
+        // TODO: Check on better simulation data(current ex. has context.GetSpatialWeight() giving ExpressionIsBlank as true.
         [Fact]
         public void TestCreateSimulationEntityOutput()
         {
@@ -554,8 +554,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 });
             });
         }
-
-        // TODO: CHECK: Commented as MaintainableAssets is compulsory and the simulation in test is not having that data. Need more investigation here...
+                
         [Fact]
         public void TestCreateCommittedProjectEntity()
         {
@@ -749,7 +748,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
 
-        // TODO: CHECK: runner.Run(); SectionContexts gets 0 from SimulationRunner, investigate why!
+        // TODO: Check on better simulation data(current ex. has MaintainableAssetLocation as null.
         [Fact]
         public void TestLegacySimulationSynchronizerWithSimulationHavingCommittedProjects()
         {
@@ -823,6 +822,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
         }
 
+        // TODO: Check on better simulation data(current ex. has context.GetSpatialWeight() giving ExpressionIsBlank as true.
         [Fact]
         public void TestLegacySimulationSynchronizerWithSimulationHavingNoCommittedProjects()
         {

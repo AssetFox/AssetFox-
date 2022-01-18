@@ -133,3 +133,8 @@ html {
 table.v-table tbody td {
   font-size: 15px !important;
 }
+
+.dialog-header{
+    display: block; 
+    color:rgb(59, 57, 65);
+  }

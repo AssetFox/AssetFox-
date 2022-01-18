@@ -122,9 +122,3 @@ export default class CreateScenarioDialog extends Vue {
     }
 }
 </script>
-<style scoped>
-.dialog-header{
-  display: block; 
-  color:rgb(59, 57, 65);
-}
-</style>

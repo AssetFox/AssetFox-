@@ -314,8 +314,4 @@ export default class ShowAggregationDialog extends Vue {
     padding-left: 35%;
 }
 .agg-pop-height {min-height: 300px}
-.dialog-header{
-  display: block; 
-  color:rgb(59, 57, 65);
-}
 </style>

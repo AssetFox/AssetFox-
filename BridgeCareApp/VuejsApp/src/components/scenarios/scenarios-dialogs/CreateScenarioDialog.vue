@@ -2,7 +2,7 @@
     <v-dialog max-width="450px" persistent v-model="showDialog">
         <v-card elevation="5" outlined class="modal-pop-up-padding">
             <v-card-title>
-                <h3 style="display: block; color:rgb(59, 57, 65)">
+                <h3 class="dialog-header">
                     Create new scenario
                 </h3>
                 <v-spacer></v-spacer>
@@ -122,3 +122,9 @@ export default class CreateScenarioDialog extends Vue {
     }
 }
 </script>
+<style scoped>
+.dialog-header{
+  display: block; 
+  color:rgb(59, 57, 65);
+}
+</style>

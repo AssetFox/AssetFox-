@@ -20,6 +20,15 @@ export interface Scenario {
     runTime?: string;
 }
 
+export interface ScenarioActions {
+    title: string;
+    action: string;
+    icon: string;
+}
+export interface TabItems {
+    name: string;
+    icon: string;
+}
 export const emptyScenario: Scenario = {
     id: getBlankGuid(),
     name: '',

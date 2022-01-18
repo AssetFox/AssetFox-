@@ -66,7 +66,7 @@ export default class FileSelector extends Vue {
     chooseFiles(){
         if(document != null)
         {
-            document.getElementById("file-select")!.click();
+            document.getElementById('file-select')!.click();
         }
     }
 
@@ -74,7 +74,7 @@ export default class FileSelector extends Vue {
     onFileChanged() {        
         this.files = hasValue(this.file) ? [this.file as File] : [];                                   
         this.$emit('submit', this.file);
-        (<HTMLInputElement>document.getElementById("file-select")!).value = '';
+        (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     }
 
     @Watch('closed')
@@ -83,7 +83,7 @@ export default class FileSelector extends Vue {
             this.files = [];
             this.file = null;
             this.fileSelect.value = '';
-            (<HTMLInputElement>document.getElementById("file-select")!).value = '';
+            (<HTMLInputElement>document.getElementById('file-select')!).value = '';
         }
     }
 

@@ -208,16 +208,14 @@
                     <v-btn
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogin"
-                        class="ara-blue-bg white--text"
-                        round
+                        class="ara-blue-bg white--text button-radius"
                     >
                         Log In
                     </v-btn>
                     <v-btn
                         v-if="securityType === esecSecurityType"
                         @click="onNavigate('/AuthenticationStart/')"
-                        class="ara-blue-bg white--text"
-                        round
+                        class="ara-blue-bg white--text button-radius"
                     >
                         Log In
                     </v-btn>
@@ -226,16 +224,14 @@
                     <v-btn
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogout"
-                        class="ara-blue-bg white--text"
-                        round
+                        class="ara-blue-bg white--text button-radius"
                     >
                         Log Out
                     </v-btn>
                     <v-btn
                         v-if="securityType === esecSecurityType"
                         @click="onLogout"
-                        class="ara-blue-bg white--text"
-                        round
+                        class="ara-blue-bg white--text button-radius"
                     >
                         Log Out
                     </v-btn>

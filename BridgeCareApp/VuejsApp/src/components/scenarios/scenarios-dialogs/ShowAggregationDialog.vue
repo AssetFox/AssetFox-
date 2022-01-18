@@ -3,10 +3,10 @@
         scrollable
         persistent
         v-model="dialogData.showDialog"
-        max-width="1000"
+        max-width="60%"
         transition="dialog-bottom-transition"
     >
-        <v-card elevation="5" outlined class="agg-pop-height">
+        <v-card elevation="5" outlined >
             <v-card-title>
                 <h3 style="display: block; color:rgb(59, 57, 65)">
                     Aggregate Data
@@ -17,7 +17,7 @@
                     
                     icon
                 >
-                    <i class="far fa-window-close fa-2x"></i>
+                    <i class="fas fa-times fa-2x"></i>
                 </v-btn>
             </v-card-title>
             <v-flex xs10>
@@ -307,11 +307,11 @@ export default class ShowAggregationDialog extends Vue {
 
 <style scoped>
 .network-min-width {
-    min-width: 1000px;
+    min-width: 1140px;
 }
 
 .play-button-center {
     padding-left: 35%;
 }
-.agg-pop-height {height: 290px}
+.agg-pop-height {min-height: 300px}
 </style>

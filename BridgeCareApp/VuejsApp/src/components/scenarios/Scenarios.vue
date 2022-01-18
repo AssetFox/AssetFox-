@@ -24,7 +24,7 @@
                 <v-tabs-items v-model="tab">
                     <v-tab-item>
                         <v-flex x12>
-                            <v-card elevation="5" class="green lighten-3">
+                            <v-card elevation="5" color="blue lighten-3">
                                 <v-card-title>
                                     <v-flex xs6>
                                         <v-text-field type="text"
@@ -187,7 +187,7 @@
                     </v-tab-item>
                     <v-tab-item>
                         <v-flex xs12>
-                            <v-card elevation="5" color="blue lighten-3">
+                            <v-card elevation="5" color="blue lighten-4">
                                 <v-card-title>
                                     <v-flex xs6>
                                         <v-text-field

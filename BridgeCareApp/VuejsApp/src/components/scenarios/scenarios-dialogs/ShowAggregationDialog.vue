@@ -14,10 +14,10 @@
                 <v-spacer></v-spacer>
                 <v-btn
                     @click="dialogData.showDialog = false"
-                    color="error"
+                    
                     icon
                 >
-                    <i class="fas fa-times-circle"></i>
+                    <i class="far fa-window-close fa-2x"></i>
                 </v-btn>
             </v-card-title>
             <v-flex xs10>

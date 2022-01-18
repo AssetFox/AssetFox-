@@ -6,8 +6,8 @@
                     Create new scenario
                 </h3>
                 <v-spacer></v-spacer>
-                <v-btn @click="onSubmit(false)" color="error" icon>
-                    <i class="fas fa-times-circle"></i>
+                <v-btn @click="onSubmit(false)" icon>
+                    <i class="fas fa-times fa-2x"></i>
                 </v-btn>
             </v-card-title>
 

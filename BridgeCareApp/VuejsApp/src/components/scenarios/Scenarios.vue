@@ -14,8 +14,7 @@
                     >
                     <v-spacer></v-spacer>
                     <v-btn
-                        round
-                        class="green darken-2 white--text"
+                        class="green darken-2 white--text button-radius"
                         @click="onShowAggregatePopup"
                     >
                         Aggregate Data
@@ -25,17 +24,16 @@
                 <v-tabs-items v-model="tab">
                     <v-tab-item>
                         <v-flex x12>
-                            <v-card elevation="5" >
+                            <v-card elevation="5" class="green lighten-3">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-text-field
-                                            label="Search"
+                                        <v-text-field type="text"
                                             placeholder="Search in scenarios"
-                                            outlined
                                             append-icon="fas fa-search"
                                             hide-details
                                             single-line
                                             v-model="searchMine"
+                                            outline
                                         >
                                         </v-text-field>
                                     </v-flex>
@@ -46,7 +44,7 @@
                                                 showCreateScenarioDialog = true
                                             "
                                             color="blue darken-2 white--text"
-                                            round
+                                            class="button-radius"
                                         >
                                             Create new scenario
                                         </v-btn>
@@ -141,9 +139,7 @@
                                                         v-bind="attrs"
                                                         v-on="on"
                                                     >
-                                                        <i
-                                                            class="fas fa-align-justify"
-                                                        ></i>
+                                                    <i class="fas fa-ellipsis-v"></i>
                                                     </v-btn>
                                                 </template>
 
@@ -197,7 +193,7 @@
                                         <v-text-field
                                             label="Search"
                                             placeholder="Search in scenarios"
-                                            outlined
+                                            outline
                                             append-icon="fas fa-search"
                                             hide-details
                                             single-line
@@ -295,9 +291,7 @@
                                                         v-bind="attrs"
                                                         v-on="on"
                                                     >
-                                                        <i
-                                                            class="fas fa-align-justify"
-                                                        ></i>
+                                                        <i class="fas fa-ellipsis-v"></i>
                                                     </v-btn>
                                                 </template>
 
@@ -318,7 +312,7 @@
                                                         class="menu-style"
                                                     >
                                                         <v-list-tile-title icon>
-                                                            <v-icon>{{
+                                                            <v-icon class="action-icon-padding">{{
                                                                 item.icon
                                                             }}</v-icon>
                                                             {{
@@ -680,7 +674,7 @@ export default class Scenarios extends Vue {
                 icon: 'fas fa-edit',
             },
             {
-                title: 'Clone',
+                title: 'Copy',
                 action: this.availableActions.clone,
                 icon: 'fas fa-paste',
             },

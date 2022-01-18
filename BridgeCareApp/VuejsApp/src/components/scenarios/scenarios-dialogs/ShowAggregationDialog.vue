@@ -6,11 +6,11 @@
         max-width="1000"
         transition="dialog-bottom-transition"
     >
-        <v-card elevation="5" outlined>
+        <v-card elevation="5" outlined class="agg-pop-height">
             <v-card-title>
-                <h5 style="display: block; color:rgb(59, 57, 65)">
+                <h3 style="display: block; color:rgb(59, 57, 65)">
                     Aggregate Data
-                </h5>
+                </h3>
                 <v-spacer></v-spacer>
                 <v-btn
                     @click="dialogData.showDialog = false"
@@ -313,4 +313,5 @@ export default class ShowAggregationDialog extends Vue {
 .play-button-center {
     padding-left: 35%;
 }
+.agg-pop-height {height: 290px}
 </style>

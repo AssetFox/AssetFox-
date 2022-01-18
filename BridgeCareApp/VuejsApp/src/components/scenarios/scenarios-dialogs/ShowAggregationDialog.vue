@@ -8,7 +8,7 @@
     >
         <v-card elevation="5" outlined >
             <v-card-title>
-                <h3 style="display: block; color:rgb(59, 57, 65)">
+                <h3 class="dialog-header">
                     Aggregate Data
                 </h3>
                 <v-spacer></v-spacer>
@@ -314,4 +314,8 @@ export default class ShowAggregationDialog extends Vue {
     padding-left: 35%;
 }
 .agg-pop-height {min-height: 300px}
+.dialog-header{
+  display: block; 
+  color:rgb(59, 57, 65);
+}
 </style>

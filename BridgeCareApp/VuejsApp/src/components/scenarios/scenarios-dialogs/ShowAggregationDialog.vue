@@ -97,14 +97,14 @@
                                 </td>
                                 <td>
                                     <v-layout row wrap>
-                                        <v-flex>
+                                        <v-flex class="play-button-center">
                                             <v-btn
                                                 @click="
                                                     onShowConfirmDataAggregationAlert(
                                                         props.item.id,
                                                     )
                                                 "
-                                                class="green--text darken-1 play-button-center"
+                                                class="green--text darken-1"
                                                 :disabled="
                                                     props.item.benefitQuantifier
                                                         .equation.expression ===
@@ -333,7 +333,7 @@ export default class ShowAggregationDialog extends Vue {
 }
 
 .play-button-center {
-    padding-left: 35%;
+    text-align: -webkit-center;
 }
 .agg-pop-height {min-height: 300px}
 </style>

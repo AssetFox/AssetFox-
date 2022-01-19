@@ -14,7 +14,7 @@
                     >
                     <v-spacer></v-spacer>
                     <v-btn
-                        class="green darken-2 white--text button-radius"
+                        class="green darken-2 white--text"
                         @click="onShowAggregatePopup"
                     >
                         Aggregate Data
@@ -44,7 +44,6 @@
                                                 showCreateScenarioDialog = true
                                             "
                                             color="blue darken-2 white--text"
-                                            class="button-radius"
                                         >
                                             Create new scenario
                                         </v-btn>

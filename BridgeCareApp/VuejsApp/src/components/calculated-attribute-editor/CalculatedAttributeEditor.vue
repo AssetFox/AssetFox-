@@ -51,7 +51,7 @@
                 <v-flex xs8>
                     <v-btn
                         @click="onAddCriterionEquationSet()"
-                        class="ara-blue-bg white--text button-radius"
+                        class="ara-blue-bg white--text"
                         v-if="isAdmin"
                         :disabled="
                             attributeSelectItemValue == null ||
@@ -232,7 +232,7 @@
             >
                 <v-btn
                     @click="onUpsertScenarioCalculatedAttribute"
-                    class="ara-blue-bg white--text button-radius"
+                    class="ara-blue-bg white--text"
                     v-show="hasScenario && isAdmin"
                 >
                     Save
@@ -240,7 +240,7 @@
                 <v-btn
                     :disabled="disableCrudButton()"
                     @click="onUpsertCalculatedAttributeLibrary"
-                    class="ara-blue-bg white--text button-radius"
+                    class="ara-blue-bg white--text"
                     v-show="!hasScenario"
                 >
                     Update Library
@@ -249,13 +249,13 @@
                     :disabled="disableCrudButton()"
                     v-if="isAdmin"
                     @click="onShowCreateCalculatedAttributeLibraryDialog(true)"
-                    class="ara-blue-bg white--text button-radius"
+                    class="ara-blue-bg white--text"
                 >
                     Create as New Library
                 </v-btn>
                 <v-btn
                     @click="onShowConfirmDeleteAlert"
-                    class="ara-orange-bg white--text button-radius"
+                    class="ara-orange-bg white--text"
                     v-show="!hasScenario"
                     :disabled="!hasSelectedLibrary"
                 >
@@ -265,7 +265,7 @@
                     :disabled="!hasUnsavedChanges"
                     v-if="isAdmin"
                     @click="onDiscardChanges"
-                    class="ara-orange-bg white--text button-radius"
+                    class="ara-orange-bg white--text"
                     v-show="hasSelectedLibrary || hasScenario"
                 >
                     Discard Changes

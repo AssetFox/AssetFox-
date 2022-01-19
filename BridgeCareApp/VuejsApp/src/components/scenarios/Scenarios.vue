@@ -632,10 +632,10 @@ export default class Scenarios extends Vue {
             this.scenarios = clone(this.stateScenarios);
         }
 
-        this.$statusHub.$on(
-            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
-        );
+        // this.$statusHub.$on(
+        //     Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+        //     this.getDataAggregationStatus,
+        // );
         this.$statusHub.$on(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             this.getDataMigrationStatus,
@@ -698,10 +698,10 @@ export default class Scenarios extends Vue {
     }
 
     beforeDestroy() {
-        this.$statusHub.$off(
-            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
-        );
+        // this.$statusHub.$off(
+        //     Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+        //     this.getDataAggregationStatus,
+        // );
         this.$statusHub.$off(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             this.getDataMigrationStatus,

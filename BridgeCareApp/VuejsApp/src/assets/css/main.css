@@ -138,3 +138,6 @@ table.v-table tbody td {
     display: block; 
     color:rgb(59, 57, 65);
   }
+  .v-btn{
+    border-radius: 6px !important;
+  }

@@ -67,6 +67,7 @@
                                             onShowEquationEditorDialog(
                                                 props.item.benefitQuantifier
                                                     .equation,
+                                                    props.item.id
                                             )
                                         "
                                         class="edit-icon"
@@ -79,7 +80,7 @@
                                     {{ props.item.status }}
                                     <v-progress-linear
                                         v-model="
-                                            networkDataAssignmentPercentage
+                                            props.item.networkDataAssignmentPercentage
                                         "
                                         color="light-green darken-1"
                                         height="25"
@@ -88,7 +89,7 @@
                                         <strong
                                             >{{
                                                 Math.ceil(
-                                                    networkDataAssignmentPercentage,
+                                                    props.item.networkDataAssignmentPercentage,
                                                 )
                                             }}%</strong
                                         >
@@ -96,14 +97,14 @@
                                 </td>
                                 <td>
                                     <v-layout row wrap>
-                                        <v-flex>
+                                        <v-flex class="play-button-center">
                                             <v-btn
                                                 @click="
                                                     onShowConfirmDataAggregationAlert(
                                                         props.item.id,
                                                     )
                                                 "
-                                                class="green--text darken-1 play-button-center"
+                                                class="green--text darken-1"
                                                 :disabled="
                                                     props.item.benefitQuantifier
                                                         .equation.expression ===
@@ -158,7 +159,7 @@
 import Alert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '@/shared/modals/EquationEditorDialog.vue';
 import { Equation } from '@/shared/models/iAM/equation';
-import { Network } from '@/shared/models/iAM/network';
+import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import {
@@ -171,6 +172,7 @@ import { any, clone, find, findIndex, isNil, propEq, update } from 'ramda';
 import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
+import { Hub } from '@/connectionHub';
 
 @Component({
     components: {
@@ -235,6 +237,7 @@ export default class ShowAggregationDialog extends Vue {
         },
     ];
     networks: Network[] = [];
+    selectedNetworkId: string = '';
 
     @Watch('stateNetworks')
     onStateNetworksChanged() {
@@ -242,9 +245,15 @@ export default class ShowAggregationDialog extends Vue {
     }
     mounted() {
         this.networks = clone(this.stateNetworks);
+
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+            this.getDataAggregationStatus,
+        );
     }
 
-    onShowEquationEditorDialog(equation: Equation) {
+    onShowEquationEditorDialog(equation: Equation, networkId: string) {
+        this.selectedNetworkId = networkId;
         this.equationEditorDialogData = {
             showDialog: true,
             equation: equation,
@@ -254,16 +263,22 @@ export default class ShowAggregationDialog extends Vue {
         this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation) && hasValue(this.networks)) {
+            var localNetworkObj = this.networks.find(_ => _.id == this.selectedNetworkId);
+
+            if(isNil(localNetworkObj)){
+                return `no network found with networkId ${this.selectedNetworkId}`;
+            }
             this.upsertBenefitQuantifierAction({
                 benefitQuantifier: {
-                    ...this.networks[0].benefitQuantifier,
+                    ...localNetworkObj.benefitQuantifier,
                     equation: equation,
                 },
             });
         }
     }
 
-    onShowConfirmDataAggregationAlert() {
+    onShowConfirmDataAggregationAlert(networkId: string) {
+        this.selectedNetworkId = networkId;
         this.confirmDataAggregationAlertData = {
             showDialog: true,
             heading: 'Warning',
@@ -279,7 +294,7 @@ export default class ShowAggregationDialog extends Vue {
 
         if (response) {
             this.aggregateNetworkDataAction({
-                networkId: this.networks[0].id,
+                networkId: this.selectedNetworkId,
             });
         }
     }
@@ -292,6 +307,7 @@ export default class ShowAggregationDialog extends Vue {
                 this.networks,
             ) as Network;
             updatedNetwork.status = networkRollupDetail.status;
+            updatedNetwork.networkDataAssignmentPercentage = data.percentage as number;
 
             this.networks = update(
                 findIndex(propEq('id', updatedNetwork.id), this.networks),
@@ -300,7 +316,13 @@ export default class ShowAggregationDialog extends Vue {
             );
         }
 
-        this.networkDataAssignmentPercentage = data.percentage;
+        //this.networkDataAssignmentPercentage = data.percentage;
+    }
+    beforeDestroy() {
+        this.$statusHub.$off(
+            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+            this.getDataAggregationStatus,
+        );
     }
 }
 </script>
@@ -311,7 +333,7 @@ export default class ShowAggregationDialog extends Vue {
 }
 
 .play-button-center {
-    padding-left: 35%;
+    text-align: -webkit-center;
 }
 .agg-pop-height {min-height: 300px}
 </style>

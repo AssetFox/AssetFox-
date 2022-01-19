@@ -122,8 +122,6 @@ html {
     overflow-y: scroll;
   }
 
-  .button-radius {border-radius: 6px;}
-
   .modal-pop-up-padding {padding: 15px;}
 
   table.v-table thead th {
@@ -137,4 +135,7 @@ table.v-table tbody td {
 .dialog-header{
     display: block; 
     color:rgb(59, 57, 65);
+  }
+  .v-btn{
+    border-radius: 6px !important;
   }

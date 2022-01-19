@@ -14,7 +14,7 @@
                     >
                     <v-spacer></v-spacer>
                     <v-btn
-                        class="green darken-2 white--text button-radius"
+                        class="green darken-2 white--text"
                         @click="onShowAggregatePopup"
                     >
                         Aggregate Data
@@ -44,7 +44,6 @@
                                                 showCreateScenarioDialog = true
                                             "
                                             color="blue darken-2 white--text"
-                                            class="button-radius"
                                         >
                                             Create new scenario
                                         </v-btn>
@@ -632,10 +631,10 @@ export default class Scenarios extends Vue {
             this.scenarios = clone(this.stateScenarios);
         }
 
-        this.$statusHub.$on(
-            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
-        );
+        // this.$statusHub.$on(
+        //     Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+        //     this.getDataAggregationStatus,
+        // );
         this.$statusHub.$on(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             this.getDataMigrationStatus,
@@ -698,10 +697,10 @@ export default class Scenarios extends Vue {
     }
 
     beforeDestroy() {
-        this.$statusHub.$off(
-            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-            this.getDataAggregationStatus,
-        );
+        // this.$statusHub.$off(
+        //     Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+        //     this.getDataAggregationStatus,
+        // );
         this.$statusHub.$off(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             this.getDataMigrationStatus,

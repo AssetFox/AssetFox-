@@ -43,6 +43,8 @@ namespace BridgeCareCore.Controllers
             try
             {
                 _networkId = networkId;
+                var isError = false;
+                var errorMessage = "";
 
                 await Task.Factory.StartNew(() =>
                 {
@@ -100,7 +102,9 @@ namespace BridgeCareCore.Controllers
                         {
                             _log.Error($"While getting data for the attributes (attributes coming from metaData.json file) -  {e.Message}");
                             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error: Fetching data for the attributes ::{e.Message}");
-                            throw;
+                            isError = true;
+                            errorMessage = e.Message;
+                            throw new Exception(e.StackTrace);
                         }
 
                         // get the attribute ids for assigned data that can be deleted (attribute is present
@@ -176,7 +180,9 @@ namespace BridgeCareCore.Controllers
                         {
                             _log.Error($"Error while filling Assigned Data -  {e.Message}");
                             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error: while filling Assigned Data ::{e.Message}");
-                            throw;
+                            isError = true;
+                            errorMessage = e.Message;
+                            throw new Exception(e.StackTrace);
                         }
                         try
                         {
@@ -186,7 +192,9 @@ namespace BridgeCareCore.Controllers
                         {
                             _log.Error($"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}");
                             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error: while updating MaintainableAssets SpatialWeighting ::{e.Message}");
-                            throw;
+                            isError = true;
+                            errorMessage = e.Message;
+                            throw new Exception(e.StackTrace);
                         }
 
                         try
@@ -197,21 +205,37 @@ namespace BridgeCareCore.Controllers
                         {
                             _log.Error($"Error while adding Aggregated results -  {e.Message}");
                             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error: while adding Aggregated results ::{e.Message}");
-                            throw;
+                            isError = true;
+                            errorMessage = e.Message;
+                            throw new Exception(e.StackTrace);
                         }
                     });
 
 
                     CheckCurrentLongRunningTask(crudResult);
 
-                    _status = "Aggregated all network data";
-                    UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
-                    UnitOfWork.Commit();
+                    if (!isError)
+                    {
+                        _status = "Aggregated all network data";
+                        UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                        UnitOfWork.Commit();
 
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
-                        new NetworkRollupDetailDTO {NetworkId = _networkId, Status = _status}, _percentage);
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
+                        new NetworkRollupDetailDTO { NetworkId = _networkId, Status = _status }, _percentage);
+                    }
+                    else
+                    {
+                        _status = $"Error in data aggregation {errorMessage}";
+                        UnitOfWork.Rollback();
+                        _percentage = 0;
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
+                        new NetworkRollupDetailDTO { NetworkId = _networkId, Status = _status }, _percentage);
+                    }
                 });
-
+                if (isError)
+                {
+                    return StatusCode(500, errorMessage);
+                }
                 return Ok();
             }
             catch (Exception e)

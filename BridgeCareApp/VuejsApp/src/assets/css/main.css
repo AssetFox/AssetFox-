@@ -121,3 +121,21 @@
 html {
     overflow-y: scroll;
   }
+
+  .modal-pop-up-padding {padding: 15px;}
+
+  table.v-table thead th {
+    font-size: 20px !important;
+
+}
+table.v-table tbody td {
+  font-size: 15px !important;
+}
+
+.dialog-header{
+    display: block; 
+    color:rgb(59, 57, 65);
+  }
+  .v-btn{
+    border-radius: 6px !important;
+  }

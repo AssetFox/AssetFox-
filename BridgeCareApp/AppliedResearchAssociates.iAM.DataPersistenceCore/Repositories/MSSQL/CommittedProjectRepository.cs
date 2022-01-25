@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var simulationEntity = _unitOfWork.Context.Simulation
                     .Include(s => s.Network)
-                    .Include(n => n.Network.MaintainableAssets)                    
+                    .ThenInclude(n => n.MaintainableAssets)                    
                     .Include(s => s.Budgets)
                 .Where(_ => _.Id == simulationId).Single();
 

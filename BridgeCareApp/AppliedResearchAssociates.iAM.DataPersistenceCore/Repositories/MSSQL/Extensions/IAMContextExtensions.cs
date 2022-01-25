@@ -303,7 +303,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             var entitiesToDelete = entities.Where(predicate).ToList();
             if (entitiesToDelete.Any())
             {
-                entities.RemoveRange(entitiesToDelete);
+                context.BulkDelete(entitiesToDelete);                
             }
 
             context.SaveChanges();

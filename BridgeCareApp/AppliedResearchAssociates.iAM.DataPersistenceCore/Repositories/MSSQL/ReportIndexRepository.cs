@@ -44,8 +44,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var scenarioReports = _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == simulationId);
             if (scenarioReports.Count() > 0)
-            {
-                //_unitOfDataPersistenceWork.Context.ReportIndex.RemoveRange(scenarioReports);
+            {                
                 _unitOfDataPersistenceWork.Context.DeleteAll<ReportIndexEntity>(_ => _.SimulationID == simulationId);
                 return true;
             }

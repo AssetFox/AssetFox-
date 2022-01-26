@@ -213,6 +213,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Act
+                CreateAuthorizedController();
                 var result = await _controller.DeleteBudgetPriorityLibrary(Guid.Empty);
 
                 // Assert

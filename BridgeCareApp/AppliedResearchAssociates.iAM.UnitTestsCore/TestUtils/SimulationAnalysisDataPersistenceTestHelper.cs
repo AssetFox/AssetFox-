@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -10,6 +9,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MoreLinq;
+using System.IO;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -37,11 +37,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         }
 
         public void SetStandAloneSimulation(int simulationId)
-        {
+        {            
             var explorer = UnitOfWorkForAnalysis.AttributeRepo.GetExplorer();
-            var network = UnitOfWorkForAnalysis.NetworkRepo.GetSimulationAnalysisNetwork(new Guid(DataPersistenceConstants.PennDotNetworkId), explorer, true);
-            UnitOfWorkForAnalysis.SimulationRepo.GetSimulationInNetwork(new Guid("75942BFA-D205-4456-80FA-C51493CB2E0E"), network);
-
+            var network = UnitOfWorkForAnalysis.NetworkRepo.GetSimulationAnalysisNetwork(new Guid(DataPersistenceConstants.PennDotNetworkId), explorer, true);                     
+            UnitOfWorkForAnalysis.SimulationRepo.GetSimulationInNetwork(new Guid("F70E0EAD-EC60-4D3B-B05D-D1FC1933EB60"), network);
             StandAloneSimulation = network.Simulations.First();
             UnitOfWorkForAnalysis.InvestmentPlanRepo.GetSimulationInvestmentPlan(StandAloneSimulation);
             UnitOfWorkForAnalysis.AnalysisMethodRepo.GetSimulationAnalysisMethod(StandAloneSimulation);

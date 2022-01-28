@@ -814,15 +814,16 @@ export default class Scenarios extends Vue {
         };
     }
 
-    onNavigateToEditScenarioView(id: string, name: string) {
-        this.selectScenarioAction({ scenarioId: id });
+    onNavigateToEditScenarioView(localScenario: Scenario) {
+        this.selectScenarioAction({ scenarioId: localScenario.id });
 
         this.$router.push({
             path: '/EditScenario/',
             query: {
-                scenarioId: id,
-                networkId: this.networks[0].id,
-                scenarioName: name,
+                scenarioId: localScenario.id,
+                networkId: localScenario.networkId,
+                scenarioName: localScenario.name,
+                networkName: localScenario.networkName
             },
         });
     }
@@ -918,7 +919,7 @@ export default class Scenarios extends Vue {
         if (!isNil(scenario)) {
             this.createScenarioAction({
                 scenario: scenario,
-                networkId: this.networks[0].id,
+                networkId: scenario.networkId,
             });
         }
     }
@@ -953,8 +954,7 @@ export default class Scenarios extends Vue {
             case this.availableActions.settings:
                 if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
                     this.onNavigateToEditScenarioView(
-                        scenario.id,
-                        scenario.name,
+                        scenario
                     );
                 }
                 break;

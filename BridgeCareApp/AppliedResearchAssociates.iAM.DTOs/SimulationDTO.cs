@@ -9,6 +9,10 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public string Name { get; set; }
 
+        public Guid NetworkId { get; set;}
+
+        public string NetworkName { get; set; }
+
         public string Owner { get; set; }
 
         public string Creator { get; set; }

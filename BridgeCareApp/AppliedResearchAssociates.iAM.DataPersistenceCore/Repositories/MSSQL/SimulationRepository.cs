@@ -54,7 +54,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
-
             if (!_unitOfWork.Context.Simulation.Any())
             {
                 return new List<SimulationDTO>();
@@ -67,7 +66,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.SimulationReportDetail)
                 .Include(_ => _.SimulationUserJoins)
                 .ThenInclude(_ => _.User)
-                .Where(_ => _.NetworkId == networkId)
+                .Include(_ => _.Network)
+                //.Where(_ => _.NetworkId == networkId)
                 .ToList();
 
             return simulationEntities.Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
@@ -161,6 +161,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.SimulationAnalysisDetail)
                 .Include(_ => _.SimulationUserJoins)
                 .ThenInclude(_ => _.User)
+                .Include(_ => _.Network)
                 .Single(_ => _.Id == simulationId);
 
             return simulationEntity.ToDto(users.FirstOrDefault(_ => _.Id == simulationEntity.CreatedBy));

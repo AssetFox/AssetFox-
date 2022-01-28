@@ -42,6 +42,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = entity.Id,
                 Name = entity.Name,
+                NetworkId = entity.NetworkId,
+                NetworkName = entity.Network.Name,
                 Creator = creator?.Username,
                 Owner = entity.SimulationUserJoins?.FirstOrDefault(_ => _.IsOwner)?.User?.Username,
                 CreatedDate = entity.CreatedDate,

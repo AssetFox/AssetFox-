@@ -12,14 +12,23 @@
             </v-card-title>
 
             <v-card-text>
-                  <!-- <v-row class="mx-0"> -->
-                    <v-text-field
-                        label="Name"
-                        outline
-                        v-model="newScenario.name"
-                    ></v-text-field>
-                    <v-checkbox v-model="shared" label="Share with all?" />
-                <!-- </v-layout> -->
+              <v-select
+                    :items="stateNetworks"
+                    label="Select a network"
+                    item-text="name"
+                    v-model="networkMetaData"
+                    return-object
+                    v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
+                    dense
+                    outline
+                ></v-select>
+                <v-text-field
+                    :disabled='!isNetworkSelected'
+                    label="Scenario name"
+                    outline
+                    v-model="newScenario.name"
+                ></v-text-field>
+                <v-checkbox v-model="shared" label="Share with all?" />
             </v-card-text>
             <v-card-actions>
                 <v-layout justify-space-between row>
@@ -52,18 +61,24 @@ import {
     Scenario,
     ScenarioUser,
 } from '@/shared/models/iAM/scenario';
-import { getNewGuid } from '@/shared/utils/uuid-utils';
+import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { find, propEq } from 'ramda';
+import { find, isNil, propEq } from 'ramda';
+import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 
 @Component
 export default class CreateScenarioDialog extends Vue {
     @Prop() showDialog: boolean;
 
     @State(state => state.userModule.users) stateUsers: User[];
+    @State(state => state.networkModule.networks) stateNetworks: Network[];
 
     newScenario: Scenario = { ...emptyScenario, id: getNewGuid() };
     shared: boolean = false;
+    selectedNetworkId: string = getBlankGuid();
+    isNetworkSelected: boolean = false;
+    networkMetaData: Network = {...emptyNetwork}
+    selectedNetworkName: string;
 
     @Watch('showDialog')
     onShowDialogChanged() {
@@ -73,6 +88,17 @@ export default class CreateScenarioDialog extends Vue {
     @Watch('shared')
     onSetPublic() {
         this.onModifyScenarioUserAccess();
+    }
+
+    selectedNetwork(networkName: string, networkId: string){
+      this.selectedNetworkId = networkId;
+      this.selectedNetworkName = networkName;
+      if(networkId != '' && !isNil(networkId) && networkId != getBlankGuid()){
+        this.isNetworkSelected = true;
+      }
+      else{
+        this.isNetworkSelected = false;
+      }
     }
 
     onModifyScenarioUserAccess() {
@@ -90,6 +116,7 @@ export default class CreateScenarioDialog extends Vue {
 
             this.newScenario = {
                 ...this.newScenario,
+                networkId: this.selectedNetworkId,
                 users: this.shared
                     ? [
                           owner,
@@ -105,13 +132,15 @@ export default class CreateScenarioDialog extends Vue {
                                   isOwner: false,
                               })),
                       ]
-                    : [owner],
+                    : [owner]
             };
         }
     }
 
     onSubmit(submit: boolean) {
         if (submit) {
+            this.newScenario.networkId = this.selectedNetworkId;
+            this.newScenario.networkName = this.selectedNetworkName;
             this.$emit('submit', this.newScenario);
         } else {
             this.$emit('submit', null);

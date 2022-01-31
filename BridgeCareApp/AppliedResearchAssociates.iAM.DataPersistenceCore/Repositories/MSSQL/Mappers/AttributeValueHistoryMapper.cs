@@ -150,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
                 var attributeValueHistories = entitiesPerAttributeName[attributeName].ToList();
 
-                if (attributeValueHistories.Count > 1)
+                if (attributeValueHistories.Any())
                 {
                     attributeValueHistories.ForEach(_ => history.Add(_.Year, _.NumericValue ?? 0));
                     history.MostRecentValue = attributeValueHistories.Last().NumericValue ?? 0;

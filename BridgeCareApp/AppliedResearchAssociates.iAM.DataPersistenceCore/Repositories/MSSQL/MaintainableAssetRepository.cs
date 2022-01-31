@@ -51,6 +51,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         NumericValue = datum.NumericValue,
                         TextValue = datum.TextValue,
                         Discriminator = datum.Discriminator,
+                        TimeStamp = datum.TimeStamp,
                         AttributeDatumLocation = new AttributeDatumLocationEntity(datum.AttributeDatumLocation.Id,
                             datum.AttributeDatumLocation.Discriminator,
                             datum.AttributeDatumLocation.LocationIdentifier),

@@ -40,8 +40,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Id = asset.Id,
                     NetworkId = networkId,
                     SpatialWeighting = asset.SpatialWeighting,
-                    //Area = asset.Area,
-                    //AreaUnit = asset.AreaUnit,
                     MaintainableAssetLocation = new MaintainableAssetLocationEntity(
                         asset.MaintainableAssetLocation.Id, asset.MaintainableAssetLocation.Discriminator,
                         asset.MaintainableAssetLocation.LocationIdentifier),
@@ -51,6 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         NumericValue = datum.NumericValue,
                         TextValue = datum.TextValue,
                         Discriminator = datum.Discriminator,
+                        TimeStamp = datum.TimeStamp,
                         AttributeDatumLocation = new AttributeDatumLocationEntity(datum.AttributeDatumLocation.Id,
                             datum.AttributeDatumLocation.Discriminator,
                             datum.AttributeDatumLocation.LocationIdentifier),

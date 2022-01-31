@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private AttributeEntity TextAttribute { get; set; }
 
         private MaintainableAssetEntity TestMaintainableAsset { get; } =
-            new MaintainableAssetEntity {Id = MaintainableAssetId};
+            new MaintainableAssetEntity { Id = MaintainableAssetId };
 
         private AggregatedResultEntity TestNumericAggregatedResult { get; } = new AggregatedResultEntity
         {
@@ -172,7 +172,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 // Arrange
                 var model = new EquationValidationParameters
                 {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(), Expression = "(10,1)", IsPiecewise = true
+                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                    Expression = "(10,1)",
+                    IsPiecewise = true
                 };
 
                 // Act
@@ -197,7 +199,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 AddTestData();
                 var model = new ValidationParameter
                 {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(), Expression = $"[{NumericAttribute.Name}]='1'"
+                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                    Expression = $"[{NumericAttribute.Name}]='1'"
                 };
 
                 // Act
@@ -221,7 +224,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 // Arrange
                 var model = new EquationValidationParameters
                 {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(), Expression = "(10,1)", IsPiecewise = true
+                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                    Expression = "(10,1)",
+                    IsPiecewise = true
                 };
 
                 // Act
@@ -307,19 +312,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Act + Assert
-                GetInvalidPiecewiseEquationValidationData().ToList().ForEach(async testDataSet =>
+                var invalidPiecewiseEquationValidationData = GetInvalidPiecewiseEquationValidationData().ToList();
+
+                foreach (var testDataSet in invalidPiecewiseEquationValidationData)
                 {
-                    var result =
-                        await _controller.GetEquationValidationResult(testDataSet[0] as EquationValidationParameters);
-
-                    var actualValidationResult =
-                        (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value, typeof(ValidationResult));
-
+                    var result = _controller.GetEquationValidationResult(testDataSet[0] as EquationValidationParameters);
+                    var objectResult = (OkObjectResult)result.Result;
+                    var actualValidationResult = (ValidationResult)objectResult.Value;
                     var expectedValidationResult = testDataSet[1] as ValidationResult;
 
                     Assert.Equal(expectedValidationResult.IsValid, actualValidationResult.IsValid);
                     Assert.Equal(expectedValidationResult.ValidationMessage, actualValidationResult.ValidationMessage);
-                });
+                };
             }
             finally
             {
@@ -387,7 +391,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             try
             {
-                var timer = new Timer {Interval = 5000};
+                var timer = new Timer { Interval = 5000 };
                 // Act + Assert
                 GetInvalidCriterionValidationData().ToList().ForEach(async testDataSet =>
                 {

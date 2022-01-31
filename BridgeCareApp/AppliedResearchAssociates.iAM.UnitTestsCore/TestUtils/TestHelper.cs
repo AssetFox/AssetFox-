@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
@@ -137,6 +138,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == SimulationId))
             {
                 UnitOfWork.Context.AddEntity(TestSimulation);
+            }
+        }
+
+        public virtual void CreateCalculatedAttributeLibrary()
+        {
+            if (!UnitOfWork.Context.CalculatedAttributeLibrary.Any(_ => _.IsDefault))
+            {
+                _ = UnitOfWork.Context.CalculatedAttributeLibrary.Add(new CalculatedAttributeLibraryEntity
+                {
+                    IsDefault = true,
+                    Id = Guid.NewGuid(),
+                    Name = "Default Test Calculated Attribute Library",
+                    CalculatedAttributes = { },
+                    CreatedDate = DateTime.Now
+                });
             }
         }
 

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -15,8 +14,6 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 using Xunit;
 
@@ -476,7 +473,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoMimeTypeForImport()
+        public async void ShouldThrowConstraintWhenNoMimeTypeWithBadRequestForImport()
         {
             try
             {
@@ -489,9 +486,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     _testHelper.MockHttpContextAccessor.Object);
 
                 // Act + Asset
-                var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                    await _controller.ImportCommittedProjects());
-                Assert.Equal("Request MIME type is invalid.", exception.Message);
+                var result = await _controller.ImportCommittedProjects();                
+                Assert.IsType<BadRequestObjectResult>(result);
+                Assert.Equal(((BadRequestObjectResult)result).Value, "Committed Project error::Request MIME type is invalid.");
             }
             finally
             {
@@ -501,7 +498,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoFilesForImport()
+        public async void ShouldThrowConstraintWhenNoFilesWithBadRequestForImport()
         {
             try
             {
@@ -514,9 +511,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 CreateRequestForExceptionTesting();
 
                 // Act + Asset
-                var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                    await _controller.ImportCommittedProjects());
-                Assert.Equal("Committed project file not found.", exception.Message);
+                var result = await _controller.ImportCommittedProjects();
+                Assert.IsType<BadRequestObjectResult>(result);
+                Assert.Equal(((BadRequestObjectResult)result).Value, "Committed Project error::Committed project file not found.");
             }
             finally
             {
@@ -526,7 +523,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoSimulationIdForImport()
+        public async void ShouldThrowConstraintWhenNoSimulationIdWithBadRequestForImport()
         {
             try
             {
@@ -541,9 +538,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 CreateRequestForExceptionTesting(file);
 
                 // Act + Asset
-                var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                    await _controller.ImportCommittedProjects());
-                Assert.Equal("Request contained no simulation id.", exception.Message);
+                var result = await _controller.ImportCommittedProjects();
+                Assert.IsType<BadRequestObjectResult>(result);
+                Assert.Equal(((BadRequestObjectResult)result).Value, "Committed Project error::Request contained no simulation id.");
             }
             finally
             {

@@ -78,6 +78,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
             SendRealTimeMessage("Inserting simulation data...");
 
             _unitOfWork.SimulationRepo.CreateSimulation(simulation);
+            simulation.Network.Id = new Guid(DataPersistenceConstants.PennDotNetworkId);
 
             if (simulation.InvestmentPlan != null)
             {

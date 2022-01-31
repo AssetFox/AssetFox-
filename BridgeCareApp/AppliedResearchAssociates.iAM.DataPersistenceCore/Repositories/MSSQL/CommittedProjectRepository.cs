@@ -29,24 +29,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation
-                .Where(_ => _.Id == simulationId)
-                .Select(simulation => new SimulationEntity
-                {
-                    Id = simulation.Id,
-                    Network = new NetworkEntity
-                    {
-                        MaintainableAssets = simulation.Network.MaintainableAssets.Select(asset => new MaintainableAssetEntity
-                        {
-                            Id = asset.Id,
-                            SectionName = asset.SectionName,
-                            SpatialWeighting = asset.SpatialWeighting
-                            //Area = asset.Area
-                        }).ToList()
-                    },
-                    Budgets = simulation.Budgets
-                        .Select(budget => new ScenarioBudgetEntity { Id = budget.Id, Name = budget.Name })
-                        .ToList()
-                }).Single();
+                    .Include(s => s.Network)
+                    .ThenInclude(n => n.MaintainableAssets)                    
+                    .Include(s => s.Budgets)
+                .Where(_ => _.Id == simulationId).Single();
 
             // Update last modified date
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);

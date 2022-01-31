@@ -40,8 +40,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Id = asset.Id,
                     NetworkId = networkId,
                     SpatialWeighting = asset.SpatialWeighting,
-                    //Area = asset.Area,
-                    //AreaUnit = asset.AreaUnit,
                     MaintainableAssetLocation = new MaintainableAssetLocationEntity(
                         asset.MaintainableAssetLocation.Id, asset.MaintainableAssetLocation.Discriminator,
                         asset.MaintainableAssetLocation.LocationIdentifier),

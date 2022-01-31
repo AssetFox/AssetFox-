@@ -23,7 +23,6 @@
                     outline
                 ></v-select>
                 <v-text-field
-                    :disabled='!isNetworkSelected'
                     label="Scenario name"
                     outline
                     v-model="newScenario.name"
@@ -33,7 +32,7 @@
             <v-card-actions>
                 <v-layout justify-space-between row>
                     <v-btn
-                        :disabled="newScenario.name === ''"
+                        :disabled="newScenario.name === '' || !isNetworkSelected"
                         @click="onSubmit(true)"
                         class="ara-blue-bg white--text"
                     >

@@ -99,13 +99,13 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("GetScenarios/{networkId}")]
+        [Route("GetScenarios/")]
         [Authorize]
-        public async Task<IActionResult> GetSimulations(Guid networkId)
+        public async Task<IActionResult> GetSimulations()
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetAllInNetwork(networkId));
+                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetAllInNetwork());
                 return Ok(result);
             }
             catch (Exception e)

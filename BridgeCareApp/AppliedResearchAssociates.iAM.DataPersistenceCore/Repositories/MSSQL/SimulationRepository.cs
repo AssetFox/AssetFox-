@@ -48,12 +48,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             entities.ForEach(_ => _.CreateSimulation(network, DateTime.Now, DateTime.Now));
         }
 
-        public List<SimulationDTO> GetAllInNetwork(Guid networkId)
+        public List<SimulationDTO> GetAllInNetwork()
         {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
-            {
-                throw new RowNotInTableException($"No network found having id {networkId}");
-            }
             if (!_unitOfWork.Context.Simulation.Any())
             {
                 return new List<SimulationDTO>();
@@ -67,7 +63,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.SimulationUserJoins)
                 .ThenInclude(_ => _.User)
                 .Include(_ => _.Network)
-                //.Where(_ => _.NetworkId == networkId)
                 .ToList();
 
             return simulationEntities.Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))

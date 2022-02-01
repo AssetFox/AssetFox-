@@ -117,7 +117,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var simulationEntity = dto.ToEntity(networkId);
             // if there are multiple default libraries (This should not happen). Take the first one
-             //var libraryDto = defaultLibrary[0].ToDto();
 
             _unitOfWork.Context.AddEntity(simulationEntity, _unitOfWork.UserEntity?.Id);
             if (dto.Users.Any())

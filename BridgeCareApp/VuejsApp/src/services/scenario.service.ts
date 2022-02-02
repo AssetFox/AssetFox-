@@ -4,7 +4,7 @@ import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 
 export default class ScenarioService {
     static getScenarios(networkId: string): AxiosPromise {
-        return coreAxiosInstance.get(`${API.Scenario}/GetScenarios/${networkId}`);
+        return coreAxiosInstance.get(`${API.Scenario}/GetScenarios/`);
     }
 
     static createScenario(data: Scenario, networkId: string): AxiosPromise {

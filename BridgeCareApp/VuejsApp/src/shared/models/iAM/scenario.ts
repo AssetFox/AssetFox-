@@ -9,6 +9,8 @@ export interface ScenarioUser {
 export interface Scenario {
     id: string;
     name: string;
+    networkId: string;
+    networkName: string;
     users: ScenarioUser[];
     owner?: string;
     creator?: string;
@@ -32,6 +34,8 @@ export interface TabItems {
 export const emptyScenario: Scenario = {
     id: getBlankGuid(),
     name: '',
+    networkId: getBlankGuid(),
+    networkName: '',
     users: [],
     createdDate: new Date(),
     lastModifiedDate: new Date(),

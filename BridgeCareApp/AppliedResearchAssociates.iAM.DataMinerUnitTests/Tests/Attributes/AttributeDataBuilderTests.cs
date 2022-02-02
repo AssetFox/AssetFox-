@@ -11,7 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
     {
         private Mock<Attribute> mockAttribute;
         Mock<AttributeConnection> mockAttributeConnection;
-        private Guid guid = Guid.Empty;              
 
         [Fact]
         public void GetDataForStringTypeTest()
@@ -43,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 
         private void Init(string type)
         {
-            mockAttribute = new Mock<Attribute>(guid, "Test", type, "TestRuleType", "TestCommand", DataMiner.ConnectionType.MSSQL, "TestString", false, false);
+            mockAttribute = new Mock<Attribute>(Guid.Empty, "Test", type, "TestRuleType", "TestCommand", DataMiner.ConnectionType.MSSQL, "TestString", false, false);
             mockAttributeConnection = new Mock<AttributeConnection>(mockAttribute.Object);
             mockAttributeConnection.Setup(m => m.GetData<It.IsAnyType>()).Returns(new List<IAttributeDatum>());
         }

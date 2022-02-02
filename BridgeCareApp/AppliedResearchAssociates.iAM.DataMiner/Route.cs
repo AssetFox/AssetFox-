@@ -7,6 +7,6 @@
         public Route(string uniqueIdentifier) => LocationIdentifier = uniqueIdentifier;
 
         // Determines if two routes match in a comparison.
-        internal abstract bool MatchOn(Route route);
+        public abstract bool MatchOn(Route route);
     }
 }

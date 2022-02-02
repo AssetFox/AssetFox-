@@ -6,7 +6,7 @@
         {
         }
 
-        internal override bool MatchOn(Route route)
+        public override bool MatchOn(Route route)
         {
             throw new System.NotImplementedException();
         }

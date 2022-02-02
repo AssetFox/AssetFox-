@@ -7,9 +7,9 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 {
     public class AttributeTests
     {
-        private Mock<Attribute> mockAttribute;
-        private Mock<Attribute> mockAttributeToCompare;
-        private Guid guid = Guid.Empty;
+        private readonly Mock<Attribute> mockAttribute;
+        private readonly Mock<Attribute> mockAttributeToCompare;
+        private readonly Guid guid = Guid.Empty;
 
         public AttributeTests()
         {            

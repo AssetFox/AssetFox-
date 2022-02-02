@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
 {
     public class DirectionalRouteTests
     {
-        private readonly Route directionalRoute;
+        private readonly DirectionalRoute directionalRoute;
         private Mock<DirectionalRoute> mockDirectionalRoute;
         private const string locationIdentifier = "TestUniqueId";
 

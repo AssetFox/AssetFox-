@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -174,14 +175,31 @@ namespace BridgeCareCore.Services
                     .Replace("|", "'")
                     .ToUpper();
 
+                var pattern = "\\[[^\\]]*\\]";
+                var rg = new Regex(pattern);
+                var match = rg.Matches(mergedCriteriaExpression);
+                var hashMatch = new HashSet<string>();
+                foreach (Match m in match)
+                {
+                    hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
+                }
 
                 var attributes = _unitOfWork.Context.Attribute
-                    .Where(_ => modifiedExpression.Contains(_.Name))
+                    .Where(_ => hashMatch.Contains(_.Name))
                     .Select(attribute => new AttributeEntity
                     {
                         Name = attribute.Name,
                         DataType = attribute.DataType
                     }).AsNoTracking().ToList();
+
+
+                //var attributes = _unitOfWork.Context.Attribute
+                //    .Where(_ => modifiedExpression.Contains(_.Name))
+                //    .Select(attribute => new AttributeEntity
+                //    {
+                //        Name = attribute.Name,
+                //        DataType = attribute.DataType
+                //    }).AsNoTracking().ToList();
 
                 var compiler = new CalculateEvaluateCompiler();
 
@@ -239,14 +257,30 @@ namespace BridgeCareCore.Services
                     .Replace("|", "'")
                     .ToUpper();
 
+                var pattern = "\\[[^\\]]*\\]";
+                var rg = new Regex(pattern);
+                var match = rg.Matches(mergedCriteriaExpression);
+                var hashMatch = new HashSet<string>();
+                foreach (Match m in match)
+                {
+                    hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
+                }
 
                 var attributes = _unitOfWork.Context.Attribute
-                    .Where(_ => modifiedExpression.Contains(_.Name))
+                    .Where(_ => hashMatch.Contains(_.Name))
                     .Select(attribute => new AttributeEntity
                     {
                         Name = attribute.Name,
                         DataType = attribute.DataType
                     }).AsNoTracking().ToList();
+
+                //var attributes = _unitOfWork.Context.Attribute
+                //    .Where(_ => modifiedExpression.Contains(_.Name))
+                //    .Select(attribute => new AttributeEntity
+                //    {
+                //        Name = attribute.Name,
+                //        DataType = attribute.DataType
+                //    }).AsNoTracking().ToList();
 
                 var compiler = new CalculateEvaluateCompiler();
 

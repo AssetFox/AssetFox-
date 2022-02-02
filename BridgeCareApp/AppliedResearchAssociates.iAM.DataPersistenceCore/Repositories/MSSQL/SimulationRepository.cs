@@ -48,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             entities.ForEach(_ => _.CreateSimulation(network, DateTime.Now, DateTime.Now));
         }
 
-        public List<SimulationDTO> GetAllInNetwork()
+        public List<SimulationDTO> GetAllScenario()
         {
             if (!_unitOfWork.Context.Simulation.Any())
             {

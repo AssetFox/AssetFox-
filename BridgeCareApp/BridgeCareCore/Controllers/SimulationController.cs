@@ -105,7 +105,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetAllInNetwork());
+                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetAllScenario());
                 return Ok(result);
             }
             catch (Exception e)

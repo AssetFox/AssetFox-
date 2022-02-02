@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void GetSimulationInNetwork(Guid simulationId, Network network);
 
-        List<SimulationDTO> GetAllInNetwork(Guid networkId);
+        List<SimulationDTO> GetAllScenario();
 
         void CreateSimulation(Guid networkId, SimulationDTO dto);
 

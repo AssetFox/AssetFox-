@@ -152,6 +152,7 @@ export default class EditScenario extends Vue {
     selectedScenarioId: string = getBlankGuid();
     showImportExportCommittedProjectsDialog: boolean = false;
     networkId: string = getBlankGuid();
+    networkName: string = '';
     selectedScenario: Scenario = clone(emptyScenario);
     navigationTabs: NavigationTab[] = [
         {
@@ -234,6 +235,7 @@ export default class EditScenario extends Vue {
             vm.selectedScenarioId = to.query.scenarioId;
             vm.networkId = to.query.networkId;
             vm.simulationName = to.query.scenarioName;
+            vm.networkName = to.query.networkName;
 
             // check that selectedScenarioId is set
             if (vm.selectedScenarioId === getBlankGuid()) {
@@ -252,7 +254,8 @@ export default class EditScenario extends Vue {
                                 query: {
                                     scenarioName: vm.simulationName,
                                     scenarioId: vm.selectedScenarioId,
-                                    networkId: vm.networkId
+                                    networkId: vm.networkId,
+                                    networkName: vm.networkName
                                 },
                             },
                         };

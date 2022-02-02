@@ -48,13 +48,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             entities.ForEach(_ => _.CreateSimulation(network, DateTime.Now, DateTime.Now));
         }
 
-        public List<SimulationDTO> GetAllInNetwork(Guid networkId)
+        public List<SimulationDTO> GetAllScenario()
         {
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
-            {
-                throw new RowNotInTableException($"No network found having id {networkId}");
-            }
-
             if (!_unitOfWork.Context.Simulation.Any())
             {
                 return new List<SimulationDTO>();
@@ -67,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.SimulationReportDetail)
                 .Include(_ => _.SimulationUserJoins)
                 .ThenInclude(_ => _.User)
-                .Where(_ => _.NetworkId == networkId)
+                .Include(_ => _.Network)
                 .ToList();
 
             return simulationEntities.Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
@@ -122,7 +117,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var simulationEntity = dto.ToEntity(networkId);
             // if there are multiple default libraries (This should not happen). Take the first one
-             //var libraryDto = defaultLibrary[0].ToDto();
 
             _unitOfWork.Context.AddEntity(simulationEntity, _unitOfWork.UserEntity?.Id);
             if (dto.Users.Any())
@@ -161,6 +155,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.SimulationAnalysisDetail)
                 .Include(_ => _.SimulationUserJoins)
                 .ThenInclude(_ => _.User)
+                .Include(_ => _.Network)
                 .Single(_ => _.Id == simulationId);
 
             return simulationEntity.ToDto(users.FirstOrDefault(_ => _.Id == simulationEntity.CreatedBy));

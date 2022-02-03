@@ -4,6 +4,7 @@ using System;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 {
@@ -15,9 +16,13 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         [Fact]
         public void GetDataForStringTypeTest()
         {
-            Init("STRING");
+            // Arrange
+            Init(AttributeTypeNames.StringType);
 
+            // Act
             var result = AttributeDataBuilder.GetData(mockAttributeConnection.Object);
+
+            // Assert
             Assert.NotNull(result);
             Assert.IsType<List<IAttributeDatum>>(result);
         }
@@ -25,7 +30,8 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         [Fact]
         public void GetDataForNumberTypeTest()
         {
-            Init("NUMBER");
+            // Arrange
+            Init(AttributeTypeNames.NumberType);
 
             var result = AttributeDataBuilder.GetData(mockAttributeConnection.Object);
             Assert.NotNull(result);
@@ -35,14 +41,15 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         [Fact]
         public void GetDataForNoTypeTest()
         {
-            Init("");
+            // Arrange
+            Init(string.Empty);
 
             Assert.Throws<InvalidOperationException>(() => AttributeDataBuilder.GetData(mockAttributeConnection.Object));            
         }
 
         private void Init(string type)
         {
-            mockAttribute = new Mock<Attribute>(Guid.Empty, "Test", type, "TestRuleType", "TestCommand", DataMiner.ConnectionType.MSSQL, "TestString", false, false);
+            mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, type, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, DataMiner.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, false, false);
             mockAttributeConnection = new Mock<AttributeConnection>(mockAttribute.Object);
             mockAttributeConnection.Setup(m => m.GetData<It.IsAnyType>()).Returns(new List<IAttributeDatum>());
         }

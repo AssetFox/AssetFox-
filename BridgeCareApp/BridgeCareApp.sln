@@ -145,7 +145,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.i
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{C4BF5576-53A4-4911-A2CF-5204A0914F5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppliedResearchAssociates.iAM.DataMinerUnitTests", "AppliedResearchAssociates.iAM.DataMinerUnitTests\AppliedResearchAssociates.iAM.DataMinerUnitTests.csproj", "{AEE11399-05D6-4DDC-9C1F-43FE67C17B52}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.DataMinerUnitTests", "AppliedResearchAssociates.iAM.DataMinerUnitTests\AppliedResearchAssociates.iAM.DataMinerUnitTests.csproj", "{AEE11399-05D6-4DDC-9C1F-43FE67C17B52}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,6 +1,7 @@
 ﻿using Xunit;
 using System;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 {
@@ -11,19 +12,41 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         [Fact]
         public void CreateForStringTypeTest()
         {
-            Init("STRING", string.Empty);
+            // Arrange
+            Init(AttributeTypeNames.StringType, string.Empty);
 
+            // Act
             var result = AttributeFactory.Create(attributeMetaDatum);
+
+            // Assert
             Assert.NotNull(result);
             Assert.IsType<TextAttribute>(result);
         }
 
         [Fact]
-        public void CreateForNumberTypeTest()
+        public void CreateForNumberDoubleTypeTest()
         {
-            Init("NUMBER", "0");
+            // Arrange
+            Init(AttributeTypeNames.NumberType, CommonTestParameterValues.DoubleNumber);
 
+            // Act
             var result = AttributeFactory.Create(attributeMetaDatum);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.IsType<NumericAttribute>(result);
+        }
+
+        [Fact]
+        public void CreateForNumberIntTypeTest()
+        {
+            // Arrange
+            Init(AttributeTypeNames.NumberType, CommonTestParameterValues.IntNumber);
+
+            // Act
+            var result = AttributeFactory.Create(attributeMetaDatum);
+
+            // Assert
             Assert.NotNull(result);
             Assert.IsType<NumericAttribute>(result);
         }
@@ -32,14 +55,20 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         [Fact]
         public void CreateForNumberInvalidValueTest()
         {
-            Init("NUMBER", string.Empty);
+            // Arrange
+            Init(AttributeTypeNames.NumberType, string.Empty);
+
+            // Act, Assert
             Assert.Throws<InvalidCastException>(() => AttributeFactory.Create(attributeMetaDatum));
         }
 
         [Fact]
         public void CreateForNoTypeTest()
         {
-            Init("", string.Empty);
+            // Arrange
+            Init(string.Empty, string.Empty);
+
+            // Act, Assert
             Assert.Throws<InvalidOperationException>(() => AttributeFactory.Create(attributeMetaDatum));
         }
 

@@ -22,27 +22,39 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
         [Fact]
         public void MatchOnTrueTest()
         {
+            // Arrange
             var sectionLocation = new SectionLocation(guId, locationIdentifier);
 
+            // Act
             var result = sectionLocation.MatchOn(mockSectionLocation.Object);
+
+            // Assert
             Assert.True(result);
         }
 
         [Fact]
         public void MatchOnFalseTest()
         {
+            // Arrange
             var sectionLocation = new SectionLocation(guId, locationIdentifier2);
 
+            // Act
             var result = sectionLocation.MatchOn(mockSectionLocation.Object);
+
+            // Assert
             Assert.False(result);
         }
 
         [Fact]
         public void MatchOnNonSectionLocationParameterTest()
         {
+            // Arrange
             var sectionLocation = new SectionLocation(guId, locationIdentifier);
 
+            // Act
             var result = sectionLocation.MatchOn(mockLocation.Object);
+
+            // Assert
             Assert.False(result);
         }        
     }

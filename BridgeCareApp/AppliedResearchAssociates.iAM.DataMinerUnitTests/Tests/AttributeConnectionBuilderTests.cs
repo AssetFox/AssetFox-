@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 using Moq;
 using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
 {
@@ -14,23 +15,29 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
         [Fact]
         public void BuildWithMsSqlTest()
         {
-            Init(ConnectionType.MSSQL);            
+            // Arrange
+            Init(ConnectionType.MSSQL);
+
+            // Act
             var result = AttributeConnectionBuilder.Build(mockAttribute.Object);           
-           
+
+            // Assert
             Assert.IsType<SqlAttributeConnection>(result);
         }
 
         [Fact]
         public void BuildWithMongoDbTest()
         {
+            // Arrange
             Init(ConnectionType.MONGO_DB);
-            
+
+            // Act, Assert
             Assert.Throws<NotImplementedException>(() => AttributeConnectionBuilder.Build(mockAttribute.Object));
         }
 
         private void Init(ConnectionType connectionType)
         {
-            mockAttribute = new Mock<Attribute>(Guid.Empty, "Test", "STRING", "TestRuleType", "TestCommand", connectionType, "TestConnection", false, false);
+            mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, AttributeTypeNames.StringType, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, connectionType, CommonTestParameterValues.ConnectionString, false, false);
         }
     }
 }

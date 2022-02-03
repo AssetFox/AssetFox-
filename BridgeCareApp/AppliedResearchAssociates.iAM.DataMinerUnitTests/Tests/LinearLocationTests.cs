@@ -25,19 +25,27 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
         [Fact]
         public void MatchOnTrueTest()
         {
+            // Arrange
             mockDirectionalRoute.Setup(m => m.MatchOn(It.IsAny<Route>())).Returns(true);
             var linearLocation = new LinearLocation(guId, mockDirectionalRoute.Object, locationIdentifier, start, end);
 
+            // Act
             var result = linearLocation.MatchOn(mockLinearLocation.Object);
+
+            // Assert
             Assert.True(result);
         }
 
         [Fact]
         public void MatchOnFalseTest()
         {
+            // Arrange
             var linearLocation = new LinearLocation(guId, mockDirectionalRoute.Object, locationIdentifier, start, end);
 
+            // Act
             var result = linearLocation.MatchOn(mockLocation.Object);
+
+            // Assert
             Assert.False(result);
         }
     }

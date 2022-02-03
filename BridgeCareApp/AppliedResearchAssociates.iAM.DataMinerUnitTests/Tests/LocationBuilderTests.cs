@@ -16,8 +16,10 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
         [Fact]
         public void CreateLocationLinearWithSimpleRoute()
         {
+            // Act
             var locationResult = LocationBuilder.CreateLocation(locationIdentifier, start, end);
 
+            // Assert
             Assert.NotNull(locationResult);
             Assert.IsType<LinearLocation>(locationResult);
             Assert.IsType<SimpleRoute>(((LinearLocation)locationResult).Route);
@@ -26,8 +28,10 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
         [Fact]
         public void CreateLocationLinearWithDirectionalRoute()
         {
+            // Act
             var locationResult = LocationBuilder.CreateLocation(locationIdentifier, start, end, direction);
 
+            // Assert
             Assert.NotNull(locationResult);
             Assert.IsType<LinearLocation>(locationResult);
             Assert.IsType<DirectionalRoute>(((LinearLocation)locationResult).Route);
@@ -36,8 +40,10 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
         [Fact]
         public void CreateLocationGis()
         {
+            // Act
             var locationResult = LocationBuilder.CreateLocation(locationIdentifier, wellKnownText: wellKnownText);
 
+            // Assert
             Assert.NotNull(locationResult);
             Assert.IsType<GisLocation>(locationResult);
         }
@@ -45,8 +51,10 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
         [Fact]
         public void CreateLocationSection()
         {
+            // Act
             var locationResult = LocationBuilder.CreateLocation(locationIdentifier);
 
+            // Assert
             Assert.NotNull(locationResult);
             Assert.IsType<SectionLocation>(locationResult);
         }
@@ -54,6 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
         [Fact]
         public void CreateLocationInvalidOperationException()
         {
+            // Act, Assert
             Assert.Throws<InvalidOperationException>(() => LocationBuilder.CreateLocation(null));
         }
     }

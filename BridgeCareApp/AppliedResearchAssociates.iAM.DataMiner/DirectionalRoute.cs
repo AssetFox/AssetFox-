@@ -9,7 +9,7 @@
             Direction = direction;
         }
 
-        internal override bool MatchOn(Route route)
+        public override bool MatchOn(Route route)
         {
             var directionalRoute = (DirectionalRoute)route;
             return ((LocationIdentifier == directionalRoute.LocationIdentifier &&

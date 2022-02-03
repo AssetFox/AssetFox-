@@ -40,15 +40,5 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             // Assert
             Assert.True(result);
         }
-
-        [Fact]
-        public void GetHashCodeTest()
-        {
-            // Act
-            var result = mockAttribute.Object.GetHashCode();
-
-            // Assert
-            Assert.IsType<int>(result);
-        }
     }
 }

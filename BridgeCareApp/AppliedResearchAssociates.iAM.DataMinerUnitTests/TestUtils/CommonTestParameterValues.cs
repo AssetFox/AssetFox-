@@ -15,5 +15,7 @@
         public static string DoubleNumber = "11.01";
 
         public static string IntNumber = "100";
+
+        public static string StringValue = "Test";
     }
 }

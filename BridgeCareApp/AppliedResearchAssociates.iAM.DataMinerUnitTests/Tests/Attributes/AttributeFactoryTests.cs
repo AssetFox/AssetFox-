@@ -24,6 +24,20 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         }
 
         [Fact]
+        public void CreateForStringTypeWithValueTest()
+        {
+            // Arrange
+            Init(AttributeTypeNames.StringType, CommonTestParameterValues.StringValue);
+
+            // Act
+            var result = AttributeFactory.Create(attributeMetaDatum);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.IsType<TextAttribute>(result);
+        }
+
+        [Fact]
         public void CreateForNumberDoubleTypeTest()
         {
             // Arrange

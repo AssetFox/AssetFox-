@@ -204,6 +204,34 @@
                     <span class="font-weight-light">Hello, </span>
                     <span>{{ username }}</span>
                 </v-toolbar-title>
+                <v-toolbar-title class="white--text">
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                            <notification-bell
+                                :size="30"
+                                :count="2"
+                                :upperLimit="50"
+                                counterLocation="upperRight"
+                                counterStyle="roundRectangle"
+                                counterBackgroundColor="#FF0000"
+                                counterTextColor="#FFFFFF"
+                                iconColor="#000000"
+                                v-bind="attrs"
+                                v-on="on"
+                            />
+                        </template>
+                        <v-list>
+                            <v-list-item
+                                v-for="(item, index) in items"
+                                :key="index"
+                            >
+                                <v-list-item-title>{{
+                                    item.title
+                                }}</v-list-item-title>
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
+                </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
                     <v-btn
                         v-if="securityType === b2cSecurityType"
@@ -260,6 +288,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import NotificationBell from 'vue-notification-bell';
 import { Watch } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
 import Spinner from './shared/modals/Spinner.vue';
@@ -296,7 +325,7 @@ import {
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 
 @Component({
-    components: { Alert, Spinner },
+    components: { Alert, Spinner, NotificationBell },
 })
 export default class AppComponent extends Vue {
     @State(state => state.authenticationModule.authenticated)
@@ -332,6 +361,15 @@ export default class AppComponent extends Vue {
     @Action('azureB2CLogin') azureB2CLoginAction: any;
     @Action('azureB2CLogout') azureB2CLogoutAction: any;
 
+    data: () => {
+        showMenu: false;
+        items: [
+            { title: 'Click Me' },
+            { title: 'Click Me' },
+            { title: 'Click Me' },
+            { title: 'Click Me 2' },
+        ];
+    };
     drawer: boolean = false;
     alertDialogData: AlertData = clone(emptyAlertData);
     pushRouteUpdate: boolean = false;
@@ -557,7 +595,10 @@ export default class AppComponent extends Vue {
             Hub.BroadcastEventType.BroadcastErrorEvent,
             this.onSetErrorMessage,
         );
-        this.$statusHub.$on(Hub.BroadcastEventType.BroadcastWarningEvent, this.onSetWarningMessage);
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastWarningEvent,
+            this.onSetWarningMessage,
+        );
     }
 
     beforeDestroy() {

@@ -192,15 +192,6 @@ namespace BridgeCareCore.Services
                         DataType = attribute.DataType
                     }).AsNoTracking().ToList();
 
-
-                //var attributes = _unitOfWork.Context.Attribute
-                //    .Where(_ => modifiedExpression.Contains(_.Name))
-                //    .Select(attribute => new AttributeEntity
-                //    {
-                //        Name = attribute.Name,
-                //        DataType = attribute.DataType
-                //    }).AsNoTracking().ToList();
-
                 var compiler = new CalculateEvaluateCompiler();
 
                 attributes.ForEach(attribute =>
@@ -279,14 +270,6 @@ namespace BridgeCareCore.Services
                         Name = attribute.Name,
                         DataType = attribute.DataType
                     }).AsNoTracking().ToList();
-
-                //var attributes = _unitOfWork.Context.Attribute
-                //    .Where(_ => modifiedExpression.Contains(_.Name))
-                //    .Select(attribute => new AttributeEntity
-                //    {
-                //        Name = attribute.Name,
-                //        DataType = attribute.DataType
-                //    }).AsNoTracking().ToList();
 
                 var compiler = new CalculateEvaluateCompiler();
 

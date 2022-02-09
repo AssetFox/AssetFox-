@@ -596,7 +596,7 @@ export default class Scenarios extends Vue {
     onStateNetworksChanged() {
         this.networks = clone(this.stateNetworks);
         if (hasValue(this.networks)) {
-            this.getScenariosAction({ networkId: this.networks[0].id });
+            this.getScenariosAction();
         }
     }
 
@@ -626,7 +626,7 @@ export default class Scenarios extends Vue {
     mounted() {
         this.networks = clone(this.stateNetworks);
         if (hasValue(this.networks) && !hasValue(this.stateScenarios)) {
-            this.getScenariosAction({ networkId: this.networks[0].id });
+            this.getScenariosAction();
         } else {
             this.scenarios = clone(this.stateScenarios);
         }
@@ -799,17 +799,18 @@ export default class Scenarios extends Vue {
 
         if (submit && this.selectedScenario.id !== getBlankGuid()) {
             this.runSimulationAction({
-                networkId: this.networks[0].id,
+                networkId: this.selectedScenario.networkId,
                 scenarioId: this.selectedScenario.id,
             }).then(() => (this.selectedScenario = clone(emptyScenario)));
         }
     }
 
     onShowReportsDownloaderDialog(scenario: Scenario) {
+        console.log(scenario.networkId);
         this.reportsDownloaderDialogData = {
             showModal: true,
             scenarioId: scenario.id,
-            networkId: this.networks[0].id,
+            networkId: scenario.networkId,
             name: scenario.name,
         };
     }

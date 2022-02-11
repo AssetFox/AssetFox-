@@ -2,15 +2,15 @@ using Xunit;
 using Moq;
 using System;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils;
 
-namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests
+namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregation
 {
     public class AggregationRuleFactoryTests
     {
         private Mock<Attribute> mockAttribute;
-        private readonly Guid guid = Guid.Empty;
+        private readonly Guid guId = Guid.Empty;
 
         [Fact]
         public void CreateNumericRuleTest()
@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests
 
         public void Init(string aggregationRuleType)
         {
-            mockAttribute = new Mock<Attribute>(guid, null, null, aggregationRuleType, null, DataMiner.ConnectionType.MSSQL, null, false, false);
+            mockAttribute = new Mock<Attribute>(guId, null, null, aggregationRuleType, null, DataMiner.ConnectionType.MSSQL, null, false, false);
         }
     }
 }

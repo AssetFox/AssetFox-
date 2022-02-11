@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils
+﻿namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils
 {
     public static class AggregationRuleTypeNames
     {

@@ -26,4 +26,8 @@
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Tests\Networking\" />
+  </ItemGroup>
+
 </Project>

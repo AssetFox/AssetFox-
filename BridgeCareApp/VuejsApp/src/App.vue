@@ -205,32 +205,43 @@
                     <span>{{ username }}</span>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text">
-                    <v-menu offset-y>
-                        <template v-slot:activator="{ on, attrs }">
-                            <notification-bell
-                                :size="30"
-                                :count="2"
-                                :upperLimit="50"
-                                counterLocation="upperRight"
-                                counterStyle="roundRectangle"
-                                counterBackgroundColor="#FF0000"
-                                counterTextColor="#FFFFFF"
-                                iconColor="#000000"
-                                v-bind="attrs"
-                                v-on="on"
-                            />
-                        </template>
-                        <v-list>
-                            <v-list-item
-                                v-for="(item, index) in items"
-                                :key="index"
-                            >
-                                <v-list-item-title>{{
-                                    item.title
-                                }}</v-list-item-title>
-                            </v-list-item>
-                        </v-list>
-                    </v-menu>
+                <v-menu offset-y min-width="300" max-width="300">
+        <template v-slot:activator="{ on, attrs }">
+            <button v-on="on" v-bind="attrs">
+                <notification-bell
+                :size="30"
+                :count="4"
+                :upperLimit="50"
+                counterLocation="right"
+                fontSize="10px"
+                counterStyle="roundRectangle"
+                counterBackgroundColor="#FF0000"
+                counterTextColor="#FFFFFF"
+                iconColor="#FFFFFF"
+                />
+            </button>
+        </template>
+        <v-list>
+            <v-list-group
+            v-for="notification in testNotifications"
+            :key="notification.icon"
+            v-model="notification.active"
+            :prepend-icon="notification.icon"
+            no-action
+            >
+                <template v-slot:activator>
+                    <v-list-item-content>
+                        <v-list-item-title v-text="notification.shortMessage"></v-list-item-title>
+                    </v-list-item-content>
+                </template>
+                <v-list-item>
+                    <v-list-item-content>
+                        <v-list-item-title v-text="notification.longMessage"></v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+            </v-list-group>
+        </v-list>
+    </v-menu>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
                     <v-btn
@@ -307,12 +318,15 @@ import {
 } from '@/shared/utils/http-utils';
 //import ReportsService from './services/reports.service';
 import Alert from '@/shared/modals/Alert.vue';
+import NotificationMenu from '@/shared/components/NotificationMenu.vue'
+import { TestNotifications } from '@/shared/utils/notification-types'
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { clone } from 'ramda';
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { Hub } from '@/connectionHub';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import { Notification } from '@/shared/models/iAM/notifications';
 import { SecurityTypes } from '@/shared/utils/security-types';
 import {
     clearRefreshIntervalID,
@@ -325,7 +339,7 @@ import {
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 
 @Component({
-    components: { Alert, Spinner, NotificationBell },
+    components: { Alert, Spinner, NotificationMenu, NotificationBell },
 })
 export default class AppComponent extends Vue {
     @State(state => state.authenticationModule.authenticated)
@@ -335,6 +349,7 @@ export default class AppComponent extends Vue {
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.authenticationModule.refreshing) refreshing: boolean;
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
+    @State(state => state.notificationModule.notifications) notifications: Notification[];
     @State(state => state.toastrModule.successMessage) successMessage: string;
     @State(state => state.toastrModule.warningMessage) warningMessage: string;
     @State(state => state.toastrModule.errorMessage) errorMessage: string;
@@ -361,15 +376,6 @@ export default class AppComponent extends Vue {
     @Action('azureB2CLogin') azureB2CLoginAction: any;
     @Action('azureB2CLogout') azureB2CLogoutAction: any;
 
-    data: () => {
-        showMenu: false;
-        items: [
-            { title: 'Click Me' },
-            { title: 'Click Me' },
-            { title: 'Click Me' },
-            { title: 'Click Me 2' },
-        ];
-    };
     drawer: boolean = false;
     alertDialogData: AlertData = clone(emptyAlertData);
     pushRouteUpdate: boolean = false;
@@ -386,6 +392,33 @@ export default class AppComponent extends Vue {
     ];
     esecSecurityType: string = SecurityTypes.esec;
     b2cSecurityType: string = SecurityTypes.b2c;
+
+    testNotifications: any[] = [
+        {
+            icon: 'fas fa-exclamation',
+            active: false,
+            shortMessage: 'Lorem ipsum dolor sit amet',
+            longMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        },
+        {
+            icon: 'fas fa-exclamation',
+            active: false,
+            shortMessage: 'Lorem ipsum dolor sit amet',
+            longMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        },
+        {
+            icon: 'fas fa-exclamation',
+            active: false,
+            shortMessage: 'Lorem ipsum dolor sit amet',
+            longMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        },
+        {
+            icon: 'fas fa-exclamation',
+            active: false,
+            shortMessage: 'Lorem ipsum dolor sit amet',
+            longMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        }
+    ]
 
     get container() {
         const container: any = {};

@@ -27,6 +27,7 @@ import azureB2CModule from '@/store-modules/azureB2C.module';
 import analysisDefaultDataModule from '@/store-modules/analysisDefaultData.module';
 import investmentDefaultDataModule from '@/store-modules/investmentDefaultData.module';
 import calculatedAttributeModule from '@/store-modules/calculated-attribute.module';
+import notificationModule from '@/store-modules/notification.module';
 
 Vue.use(Vuex);
 
@@ -58,5 +59,6 @@ export default new Vuex.Store({
         analysisDefaultDataModule,
         investmentDefaultDataModule,
         calculatedAttributeModule,
+        notificationModule,
     }
 });

@@ -13,7 +13,7 @@
                         {{ item.name }}</v-tab
                     >
                     <v-spacer></v-spacer>
-                    <v-btn
+                    <v-btn v-if="isAdmin"
                         class="green darken-2 white--text"
                         @click="onShowAggregatePopup"
                     >
@@ -24,7 +24,7 @@
                 <v-tabs-items v-model="tab">
                     <v-tab-item>
                         <v-flex x12>
-                            <v-card elevation="5" color="blue lighten-3">
+                            <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
                                         <v-text-field type="text"
@@ -186,7 +186,7 @@
                     </v-tab-item>
                     <v-tab-item>
                         <v-flex xs12>
-                            <v-card elevation="5" color="blue lighten-4">
+                            <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
                                         <v-text-field
@@ -477,7 +477,7 @@ export default class Scenarios extends Vue {
             value: 'name',
             align: 'left',
             sortable: true,
-            class: '',
+            class: 'header-border',
             width: '',
         },
         {
@@ -485,7 +485,7 @@ export default class Scenarios extends Vue {
             value: 'creator',
             align: 'left',
             sortable: false,
-            class: '',
+            class: 'header-border',
             width: '',
         },
         {
@@ -493,7 +493,7 @@ export default class Scenarios extends Vue {
             value: 'owner',
             align: 'left',
             sortable: false,
-            class: '',
+            class: 'header-border',
             width: '',
         },
         {
@@ -501,7 +501,7 @@ export default class Scenarios extends Vue {
             value: 'createdDate',
             align: 'left',
             sortable: true,
-            class: '',
+            class: 'header-border',
             width: '',
         },
         {
@@ -509,7 +509,7 @@ export default class Scenarios extends Vue {
             value: 'lastModifiedDate',
             align: 'left',
             sortable: true,
-            class: '',
+            class: 'header-border',
             width: '',
         },
         {
@@ -517,7 +517,7 @@ export default class Scenarios extends Vue {
             value: 'lastRun',
             align: 'left',
             sortable: true,
-            class: '',
+            class: 'header-border',
             width: '',
         },
         {
@@ -525,7 +525,7 @@ export default class Scenarios extends Vue {
             value: 'status',
             align: 'left',
             sortable: false,
-            class: '',
+            class: 'header-border',
             width: '',
         },
         {
@@ -533,7 +533,7 @@ export default class Scenarios extends Vue {
             value: 'runTime',
             align: 'left',
             sortable: false,
-            class: '',
+            class: 'header-border',
             width: '',
         },
         {
@@ -541,7 +541,7 @@ export default class Scenarios extends Vue {
             value: 'reportStatus',
             align: 'left',
             sortable: false,
-            class: '',
+            class: 'header-border',
             width: '',
         },
         {
@@ -549,7 +549,7 @@ export default class Scenarios extends Vue {
             value: 'actions',
             align: 'left',
             sortable: false,
-            class: '',
+            class: 'header-border',
             width: '',
         },
         {
@@ -557,7 +557,7 @@ export default class Scenarios extends Vue {
             value: '',
             align: 'left',
             sortable: false,
-            class: '',
+            class: 'header-border',
             width: '',
         },
     ];
@@ -596,7 +596,7 @@ export default class Scenarios extends Vue {
     onStateNetworksChanged() {
         this.networks = clone(this.stateNetworks);
         if (hasValue(this.networks)) {
-            this.getScenariosAction({ networkId: this.networks[0].id });
+            this.getScenariosAction();
         }
     }
 
@@ -626,7 +626,7 @@ export default class Scenarios extends Vue {
     mounted() {
         this.networks = clone(this.stateNetworks);
         if (hasValue(this.networks) && !hasValue(this.stateScenarios)) {
-            this.getScenariosAction({ networkId: this.networks[0].id });
+            this.getScenariosAction();
         } else {
             this.scenarios = clone(this.stateScenarios);
         }
@@ -697,10 +697,6 @@ export default class Scenarios extends Vue {
     }
 
     beforeDestroy() {
-        // this.$statusHub.$off(
-        //     Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
-        //     this.getDataAggregationStatus,
-        // );
         this.$statusHub.$off(
             Hub.BroadcastEventType.BroadcastDataMigrationEvent,
             this.getDataMigrationStatus,
@@ -799,17 +795,18 @@ export default class Scenarios extends Vue {
 
         if (submit && this.selectedScenario.id !== getBlankGuid()) {
             this.runSimulationAction({
-                networkId: this.networks[0].id,
+                networkId: this.selectedScenario.networkId,
                 scenarioId: this.selectedScenario.id,
             }).then(() => (this.selectedScenario = clone(emptyScenario)));
         }
     }
 
     onShowReportsDownloaderDialog(scenario: Scenario) {
+        console.log(scenario.networkId);
         this.reportsDownloaderDialogData = {
             showModal: true,
             scenarioId: scenario.id,
-            networkId: this.networks[0].id,
+            networkId: scenario.networkId,
             name: scenario.name,
         };
     }
@@ -998,9 +995,12 @@ export default class Scenarios extends Vue {
 
 .tab-theme {
     border: ridge;
-    border-width: 1px;
+    border-width: 2px;
 }
 .action-icon-padding{
     padding-right:14px;
+}
+.header-border {
+  border-bottom: 2px solid black;
 }
 </style>

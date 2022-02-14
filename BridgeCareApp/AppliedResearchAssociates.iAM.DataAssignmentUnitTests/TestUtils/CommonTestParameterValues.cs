@@ -12,11 +12,9 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils
 
         public static string ConnectionString = "TestConnectionString";
 
-        public static string NameColumn = "Name";       
-
-        public static string IntNumber = "100";
-
         public static string StringValue = "Test";
+
+        public static string StringValue2 = "Test2";
 
         public static double DoubleValue = 10.10;
 
@@ -27,5 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils
         public static string LocationIdentifier2 = "TestUniqueId2";
 
         public static DateTime TimeStamp = DateTime.Today;
+
+        public static string DefaultEquation = "[DECK_AREA]";
     }
 }

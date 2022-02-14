@@ -13,7 +13,7 @@
                         {{ item.name }}</v-tab
                     >
                     <v-spacer></v-spacer>
-                    <v-btn
+                    <v-btn v-if="isAdmin"
                         class="green darken-2 white--text"
                         @click="onShowAggregatePopup"
                     >

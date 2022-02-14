@@ -13,6 +13,7 @@ using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
+using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -37,7 +38,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
             try

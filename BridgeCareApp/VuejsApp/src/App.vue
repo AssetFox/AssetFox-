@@ -305,23 +305,24 @@
                                         </v-list-item>
                                     </v-list-group>
                                 </template>
-
-                                <v-list-tile>
-                                    <v-list-tile-title
-                                        v-text="notification.shortMessage"
-                                    ></v-list-tile-title>
-                                    <v-btn icon small right absolute>
-                                        <v-icon
-                                            small
-                                            @click="
-                                                onRemoveNotification(
-                                                    notification.id,
-                                                )
-                                            "
-                                            >fas fa-times-circle</v-icon
-                                        >
-                                    </v-btn>
-                                </v-list-tile>
+                                <template v-else>
+                                    <v-list-tile>
+                                        <v-list-tile-title
+                                            v-text="notification.shortMessage"
+                                        ></v-list-tile-title>
+                                        <v-btn icon small right absolute>
+                                            <v-icon
+                                                small
+                                                @click="
+                                                    onRemoveNotification(
+                                                        notification.id,
+                                                    )
+                                                "
+                                                >fas fa-times-circle</v-icon
+                                            >
+                                        </v-btn>
+                                    </v-list-tile>
+                                </template>
                             </v-list>
                         </v-card>
                     </v-menu>

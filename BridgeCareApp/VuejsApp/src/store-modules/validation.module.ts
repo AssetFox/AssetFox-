@@ -1,6 +1,6 @@
 const state = {
     validationErrors: [] as string[]
-};
+}; 
 
 const mutations = {
     validationErrorsMutator(state: any, payload: string[]) {

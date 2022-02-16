@@ -50,48 +50,51 @@
     flex-wrap: nowrap;
 }
 
-.fixed-header .v-datatable.v-table .v-datatable__actions .v-datatable__actions__pagination {
+.fixed-header
+    .v-datatable.v-table
+    .v-datatable__actions
+    .v-datatable__actions__pagination {
     white-space: nowrap;
 }
 
 .paper-white-bg {
-    background-color: #FFFFFF !important;
+    background-color: #ffffff !important;
 }
 
 .ara-blue-pantone-281-bg {
-    background-color: #002E6C !important;
+    background-color: #002e6c !important;
 }
 
 .ara-blue-pantone-289-bg {
-    background-color: #00204B !important;
+    background-color: #00204b !important;
 }
 
 .ara-blue-bg {
-    background-color: #008FCA !important;
+    background-color: #008fca !important;
 }
 
 .ara-orange-bg {
-    background-color: #F05632 !important;
+    background-color: #f05632 !important;
 }
 
 .ara-light-gray-bg {
-    background-color: #B0BFC8 !important;
+    background-color: #b0bfc8 !important;
 }
 
 .ara-light-gray {
-    color: #B0BFC8 !important;
+    color: #b0bfc8 !important;
 }
 
 .ara-blue {
-    color: #008FCA !important;
+    color: #008fca !important;
 }
 
 .ara-orange {
-    color: #F05632 !important;
+    color: #f05632 !important;
 }
 
 .ara-yellow {
-    color: #D1DD30 !important;
+    color: #d1dd30 !important;
 }
 
 .ara-dark-gray {
@@ -99,14 +102,15 @@
 }
 
 .ara-blue-pantone-281 {
-    color: #002E6C !important;
+    color: #002e6c !important;
 }
 
 .ara-black {
     color: #000000 !important;
 }
 
-.edit-icon, .plus-icon {
+.edit-icon,
+.plus-icon {
     color: forestgreen !important;
 }
 
@@ -120,22 +124,38 @@
 
 html {
     overflow-y: scroll;
-  }
+}
 
-  .modal-pop-up-padding {padding: 15px;}
+.modal-pop-up-padding {
+    padding: 15px;
+}
 
-  table.v-table thead th {
+table.v-table thead th {
     font-size: 20px !important;
-
 }
 table.v-table tbody td {
-  font-size: 15px !important;
+    font-size: 15px !important;
 }
 
-.dialog-header{
-    display: block; 
-    color:rgb(59, 57, 65);
-  }
-  .v-btn{
+.dialog-header {
+    display: block;
+    color: rgb(59, 57, 65);
+}
+.v-btn {
     border-radius: 6px !important;
-  }
+}
+
+.notification-long-message {
+    display: inline-block;
+    min-inline-size: 75%;
+    padding: 10pt;
+    margin: 10pt 10pt 10pt 10pt;
+    border-radius: 4pt;
+    box-shadow: 0 3pt 5pt rgba(0, 0, 0, 0.25);
+    justify-content: center;
+}
+
+.notification-message {
+    padding: 5pt;
+    justify-content: center;
+}

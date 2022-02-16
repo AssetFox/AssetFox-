@@ -201,47 +201,130 @@
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-toolbar-title class="white--text" v-if="authenticated">
+                    <v-btn
+                        @click="testNotification"
+                        class="ara-blue-bg white--text"
+                    >
+                        Test Notif
+                    </v-btn>
+                </v-toolbar-title>
+                <v-toolbar-title class="white--text" v-if="authenticated">
                     <span class="font-weight-light">Hello, </span>
                     <span>{{ username }}</span>
                 </v-toolbar-title>
-                <v-toolbar-title class="white--text">
-                <v-menu offset-y min-width="300" max-width="300">
-        <template v-slot:activator="{ on, attrs }">
-            <button v-on="on" v-bind="attrs">
-                <notification-bell
-                :size="30"
-                :count="4"
-                :upperLimit="50"
-                counterLocation="right"
-                fontSize="10px"
-                counterStyle="roundRectangle"
-                counterBackgroundColor="#FF0000"
-                counterTextColor="#FFFFFF"
-                iconColor="#FFFFFF"
-                />
-            </button>
-        </template>
-        <v-list>
-            <v-list-group
-            v-for="notification in testNotifications"
-            :key="notification.icon"
-            v-model="notification.active"
-            :prepend-icon="notification.icon"
-            no-action
-            >
-                <template v-slot:activator>
-                    <v-list-item-content>
-                        <v-list-item-title v-text="notification.shortMessage"></v-list-item-title>
-                    </v-list-item-content>
-                </template>
-                <v-list-item>
-                    <v-list-item-content>
-                        <v-list-item-title v-text="notification.longMessage"></v-list-item-title>
-                    </v-list-item-content>
-                </v-list-item>
-            </v-list-group>
-        </v-list>
-    </v-menu>
+                <v-toolbar-title class="white--text" v-if="authenticated">
+                    <v-menu
+                        offset-y
+                        min-width="350"
+                        max-width="350"
+                        close-on-content-click="false"
+                    >
+                        <template v-slot:activator="{ on, attrs }">
+                            <button
+                                v-on="on"
+                                v-bind="attrs"
+                                @click="onNotificationMenuSelect"
+                            >
+                                <notification-bell
+                                    :size="30"
+                                    :count="notificationCounter"
+                                    :upperLimit="50"
+                                    counterLocation="right"
+                                    fontSize="10px"
+                                    counterStyle="roundRectangle"
+                                    counterBackgroundColor="#FF0000"
+                                    counterTextColor="#FFFFFF"
+                                    iconColor="#FFFFFF"
+                                />
+                            </button>
+                        </template>
+                        <v-card class="mx-auto" max-width="350">
+                            <v-toolbar color="primary" dark>
+                                <v-app-bar-nav-icon></v-app-bar-nav-icon>
+
+                                <v-toolbar-title>Notifications</v-toolbar-title>
+
+                                <v-spacer></v-spacer>
+                            </v-toolbar>
+                            <v-list
+                                v-for="notification in notifications"
+                                :key="notification.id"
+                                class="notification-message"
+                            >
+                                <template
+                                    v-if="
+                                        !notification.longMessage
+                                            .isNullOrUndefined
+                                    "
+                                >
+                                    <v-list-group
+                                        append-icon=""
+                                        class="notification-message"
+                                        v-model="notification.active"
+                                    >
+                                        <v-icon
+                                            slot="prependIcon"
+                                            :color="notification.iconColor"
+                                            >{{ notification.icon }}</v-icon
+                                        >
+                                        <template v-slot:activator>
+                                            <v-list-tile>
+                                                <v-list-tile-title
+                                                    v-text="
+                                                        notification.shortMessage
+                                                    "
+                                                ></v-list-tile-title>
+                                                <v-btn
+                                                    icon
+                                                    small
+                                                    right
+                                                    absolute
+                                                >
+                                                    <v-icon
+                                                        small
+                                                        @click="
+                                                            onRemoveNotification(
+                                                                notification.id,
+                                                            )
+                                                        "
+                                                        >fas
+                                                        fa-times-circle</v-icon
+                                                    >
+                                                </v-btn>
+                                            </v-list-tile>
+                                        </template>
+                                        <v-list-item>
+                                            <v-list-item-content>
+                                                <v-list-item-title
+                                                    class="notification-long-message"
+                                                    v-text="
+                                                        notification.longMessage
+                                                    "
+                                                ></v-list-item-title>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </v-list-group>
+                                </template>
+
+                                <v-list-tile>
+                                    <v-list-tile-title
+                                        v-text="notification.shortMessage"
+                                    ></v-list-tile-title>
+                                    <v-btn icon small right absolute>
+                                        <v-icon
+                                            small
+                                            @click="
+                                                onRemoveNotification(
+                                                    notification.id,
+                                                )
+                                            "
+                                            >fas fa-times-circle</v-icon
+                                        >
+                                    </v-btn>
+                                </v-list-tile>
+                            </v-list>
+                        </v-card>
+                    </v-menu>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
                     <v-btn
@@ -318,8 +401,8 @@ import {
 } from '@/shared/utils/http-utils';
 //import ReportsService from './services/reports.service';
 import Alert from '@/shared/modals/Alert.vue';
-import NotificationMenu from '@/shared/components/NotificationMenu.vue'
-import { TestNotifications } from '@/shared/utils/notification-types'
+import NotificationMenu from '@/shared/components/NotificationMenu.vue';
+import { TestNotifications } from '@/shared/utils/notification-types';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { clone } from 'ramda';
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
@@ -337,6 +420,7 @@ import {
     onHandleLogout,
 } from '@/shared/utils/authentication-utils';
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
+import { isNullOrUndefined } from 'util';
 
 @Component({
     components: { Alert, Spinner, NotificationMenu, NotificationBell },
@@ -349,7 +433,10 @@ export default class AppComponent extends Vue {
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.authenticationModule.refreshing) refreshing: boolean;
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
-    @State(state => state.notificationModule.notifications) notifications: Notification[];
+    @State(state => state.notificationModule.notifications)
+    notifications: Notification[];
+    @State(state => state.notificationModule.counter)
+    notificationCounter: number;
     @State(state => state.toastrModule.successMessage) successMessage: string;
     @State(state => state.toastrModule.warningMessage) warningMessage: string;
     @State(state => state.toastrModule.errorMessage) errorMessage: string;
@@ -369,6 +456,12 @@ export default class AppComponent extends Vue {
     @Action('setWarningMessage') setWarningMessageAction: any;
     @Action('setErrorMessage') setErrorMessageAction: any;
     @Action('setInfoMessage') setInfoMessageAction: any;
+    @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('addWarningNotification') addWarningNotificationAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
+    @Action('addInfoNotification') addInfoNotificationAction: any;
+    @Action('removeNotification') removeNotificationAction: any;
+    @Action('clearNotificationCounter') clearNotificationCounterAction: any;
     @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
     @Action('getAllUsers') getAllUsersAction: any;
     @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
@@ -395,30 +488,38 @@ export default class AppComponent extends Vue {
 
     testNotifications: any[] = [
         {
-            icon: 'fas fa-exclamation',
+            icon: 'fas fa-exclamation-circle',
+            iconColor: 'yellow',
             active: false,
             shortMessage: 'Lorem ipsum dolor sit amet',
-            longMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+            longMessage:
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
         },
         {
-            icon: 'fas fa-exclamation',
+            icon: 'fas fa-exclamation-circle',
+            iconColor: 'red',
             active: false,
             shortMessage: 'Lorem ipsum dolor sit amet',
-            longMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+            longMessage:
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
         },
         {
-            icon: 'fas fa-exclamation',
+            icon: 'fas fa-check-circle',
+            iconColor: 'green',
             active: false,
             shortMessage: 'Lorem ipsum dolor sit amet',
-            longMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+            longMessage:
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
         },
         {
-            icon: 'fas fa-exclamation',
+            icon: 'fas fa-info-circle',
+            iconColor: 'primary',
             active: false,
             shortMessage: 'Lorem ipsum dolor sit amet',
-            longMessage: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-        }
-    ]
+            longMessage:
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+        },
+    ];
 
     get container() {
         const container: any = {};
@@ -714,6 +815,21 @@ export default class AppComponent extends Vue {
             this.$router.push(route);
         }
     }
+
+    onNotificationMenuSelect() {
+        this.clearNotificationCounterAction();
+    }
+
+    onRemoveNotification(id: number) {
+        this.removeNotificationAction(id);
+    }
+
+    testNotification() {
+        this.addSuccessNotificationAction(
+            "Modified scenario's performance curves",
+            'Long Test Message',
+        );
+    }
 }
 </script>
 
@@ -725,7 +841,7 @@ html {
 }
 
 .v-list__group__header__prepend-icon .v-icon {
-    color: #798899 !important;
+    color: #798899;
 }
 
 .v-list__group__header__prepend-icon .primary--text .v-icon {

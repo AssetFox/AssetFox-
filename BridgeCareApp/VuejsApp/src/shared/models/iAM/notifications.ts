@@ -1,12 +1,8 @@
-export enum NotificationType {
-    Success,
-    Warning,
-    Error,
-    Info,
-}
-
 export interface Notification {
-    type: NotificationType;
+    id: number;
+    icon: string;
+    iconColor: string;
+    active: boolean;
     shortMessage: string;
-    longMessage: string;
+    longMessage?: string;
 }

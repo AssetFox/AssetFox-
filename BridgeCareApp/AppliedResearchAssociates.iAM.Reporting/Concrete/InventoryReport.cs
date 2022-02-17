@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Report definition created.";
             Results = String.Empty;
             IsComplete = false;
-            _networkId = _unitofwork.NetworkRepo.GetPennDotNetwork().Id;
+            _networkId = _unitofwork.NetworkRepo.GetMainNetwork().Id;
         }
 
         public async Task Run(string parameters)

@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             _mockedContext.Setup(_ => _.MaintainableAsset).Returns(_mockedMaintainableAssetEntitySet.Object);
             _mockedContext.Setup(_ => _.AggregatedResult).Returns(_mockedAggregatedResultsEntitySet.Object);
             var mockedRepo = new Mock<UnitOfDataPersistenceWork>((new Mock<IConfiguration>()).Object, _mockedContext.Object);
-            mockedRepo.Setup(_ => _.NetworkRepo.GetPennDotNetwork()).Returns(_testData.TestNetwork);
+            mockedRepo.Setup(_ => _.NetworkRepo.GetMainNetwork()).Returns(_testData.TestNetwork);
             _testRepo = mockedRepo.Object;
         }
 

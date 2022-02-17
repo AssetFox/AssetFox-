@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public PennDOTAssetDataRepository(UnitOfDataPersistenceWork uow)
         {
             _unitofwork = uow;
-            var network = _unitofwork.NetworkRepo.GetPennDotNetwork();
+            var network = _unitofwork.NetworkRepo.GetMainNetwork();
             var facilities = _unitofwork.Context.Facility.Where(_ => _.NetworkId == network.Id).Include(_ => _.Sections);
 
 

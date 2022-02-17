@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -174,9 +175,17 @@ namespace BridgeCareCore.Services
                     .Replace("|", "'")
                     .ToUpper();
 
+                var pattern = "\\[[^\\]]*\\]";
+                var rg = new Regex(pattern);
+                var match = rg.Matches(mergedCriteriaExpression);
+                var hashMatch = new HashSet<string>();
+                foreach (Match m in match)
+                {
+                    hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
+                }
 
                 var attributes = _unitOfWork.Context.Attribute
-                    .Where(_ => modifiedExpression.Contains(_.Name))
+                    .Where(_ => hashMatch.Contains(_.Name))
                     .Select(attribute => new AttributeEntity
                     {
                         Name = attribute.Name,
@@ -194,7 +203,13 @@ namespace BridgeCareCore.Services
 
                 compiler.GetEvaluator(modifiedExpression);
 
-                var resultsCount = GetResultsCount(modifiedExpression, attributes.Select(_ => _.Name).ToList());
+                var customAttribute = new List<(string name, string datatype)>();
+                foreach (var attribute in attributes)
+                {
+                    customAttribute.Add((attribute.Name, attribute.DataType));
+                }
+
+                var resultsCount = GetResultsCount(modifiedExpression, customAttribute);
 
                 return new CriterionValidationResult
                 {
@@ -239,9 +254,17 @@ namespace BridgeCareCore.Services
                     .Replace("|", "'")
                     .ToUpper();
 
+                var pattern = "\\[[^\\]]*\\]";
+                var rg = new Regex(pattern);
+                var match = rg.Matches(mergedCriteriaExpression);
+                var hashMatch = new HashSet<string>();
+                foreach (Match m in match)
+                {
+                    hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
+                }
 
                 var attributes = _unitOfWork.Context.Attribute
-                    .Where(_ => modifiedExpression.Contains(_.Name))
+                    .Where(_ => hashMatch.Contains(_.Name))
                     .Select(attribute => new AttributeEntity
                     {
                         Name = attribute.Name,
@@ -299,32 +322,58 @@ namespace BridgeCareCore.Services
             throw new InvalidOperationException("Unsupported Attribute " + target.Substring(start + 1, end - 1));
         }
 
-        private DataTable CreateFlattenedDataTable(List<string> attributeNames)
+        private DataTable CreateFlattenedDataTable(List<(string name, string dataType)> attributeNames)
         {
             var flattenedDataTable = new DataTable("FlattenedDataTable");
             flattenedDataTable.Columns.Add("MaintainableAssetId", typeof(Guid));
             attributeNames.ForEach(attributeName =>
             {
-                flattenedDataTable.Columns.Add(attributeName, typeof(string));
+                if(attributeName.dataType.Equals("NUMBER", StringComparison.OrdinalIgnoreCase))
+                {
+                    flattenedDataTable.Columns.Add(attributeName.name, typeof(double));
+                }
+                else
+                {
+                    flattenedDataTable.Columns.Add(attributeName.name, typeof(string));
+                }
             });
             return flattenedDataTable;
         }
 
-        private void AddToFlattenedDataTable(DataTable flattenedDataTable, Dictionary<Guid, Dictionary<string, string>> valuePerAttributeNamePerMaintainableAssetId) =>
+        private void AddToFlattenedDataTable(DataTable flattenedDataTable,
+            Dictionary<Guid, Dictionary<string, (string data, string type)>> valuePerAttributeNamePerMaintainableAssetId) =>
             valuePerAttributeNamePerMaintainableAssetId.Keys.ForEach(maintainableAssetId =>
             {
                 var row = flattenedDataTable.NewRow();
                 row["MaintainableAssetId"] = maintainableAssetId;
                 valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId].Keys.ForEach(attributeName =>
                 {
-                    row[attributeName] = valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId][attributeName];
+                    var currData = valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId][attributeName];
+
+                    if (currData.type.Equals("NUMBER", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (double.TryParse(valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId][attributeName].data, out var res))
+                        {
+                            row[attributeName] = res;
+                        }
+                    }
+                    else
+                    {
+                        row[attributeName] = valuePerAttributeNamePerMaintainableAssetId[maintainableAssetId][attributeName].data;
+                    }
                 });
                 flattenedDataTable.Rows.Add(row);
             });
 
-        private int GetResultsCount(string expression, List<string> attributeNames)
+        private int GetResultsCount(string expression, List<(string name, string dataType)> attributes)
         {
-            var flattenedDataTable = CreateFlattenedDataTable(attributeNames);
+            var flattenedDataTable = CreateFlattenedDataTable(attributes);
+
+            var attributeNames = new List<string>();
+            foreach (var attribute in attributes)
+            {
+                attributeNames.Add(attribute.name);
+            }
 
             var valuePerAttributeNamePerMaintainableAssetId = _unitOfWork.Context.AggregatedResult
                 .Where(_ => attributeNames.Contains(_.Attribute.Name))
@@ -341,10 +390,16 @@ namespace BridgeCareCore.Services
                 .GroupBy(_ => _.MaintainableAssetId, _ => _)
                 .ToDictionary(_ => _.Key, aggregatedResults =>
                 {
-                    return aggregatedResults.ToDictionary(_ => _.Attribute.Name, _ =>
-                        _.Attribute.DataType == DataPersistenceConstants.AttributeNumericDataType
+                    var value = aggregatedResults.ToDictionary(_ => _.Attribute.Name, _ =>
+                    {
+                        var data = _.Attribute.DataType == DataPersistenceConstants.AttributeNumericDataType
                             ? _.NumericValue?.ToString()
-                            : _.TextValue);
+                            : _.TextValue;
+
+                        var type = _.Attribute.DataType;
+                        return (data, type);
+                    });
+                    return value;
                 });
 
             AddToFlattenedDataTable(flattenedDataTable, valuePerAttributeNamePerMaintainableAssetId);

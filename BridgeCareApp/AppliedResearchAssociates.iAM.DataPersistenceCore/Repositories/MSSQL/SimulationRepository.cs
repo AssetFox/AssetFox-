@@ -179,6 +179,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var numberOfCommittedProjectsAffected = 0;
             
             var simulationToClone = _unitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
+                .Include(_ => _.Network)
                 // analysis method
                 .Include(_ => _.AnalysisMethod)
                 .ThenInclude(_ => _.Benefit)

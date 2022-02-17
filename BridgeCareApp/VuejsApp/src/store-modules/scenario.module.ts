@@ -116,9 +116,9 @@ const actions = {
     updateSimulationReportDetail({ commit }: any, payload: any) {
         commit('simulationReportDetailMutator', payload.simulationReportDetail);
     },
-    async getScenarios({ commit }: any, payload: any) {
-        await ScenarioService.getScenarios(payload.networkId).then(
-            (response: AxiosResponse) => {
+    async getScenarios({commit}: any, payload: any) {
+        await ScenarioService.getScenarios()
+            .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('scenariosMutator', response.data as Scenario[]);
                 }

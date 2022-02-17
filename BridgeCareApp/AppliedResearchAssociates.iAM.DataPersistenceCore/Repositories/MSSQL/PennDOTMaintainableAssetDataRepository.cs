@@ -15,36 +15,48 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             _unitOfWork = uow;
             var network = _unitOfWork.NetworkRepo.GetMainNetwork();
-            var assets = _unitOfWork.Context.MaintainableAsset.Where(_ => _.NetworkId == network.Id);
-            var brKeyValues = _unitOfWork.Context.AggregatedResult
-                .Include(_ => _.Attribute)
-                .Where(_ => _.Attribute.Name == "BRKEY_");
-            var bridgeIdValues = _unitOfWork.Context.AggregatedResult
-                .Include(_ => _.Attribute)
-                .Where(_ => _.Attribute.Name == "BRIDGE_ID");
+            //var assets = _unitOfWork.Context.MaintainableAsset.Where(_ => _.NetworkId == network.Id);
+            //var brKeyValues = _unitOfWork.Context.AggregatedResult
+            //    .Include(_ => _.Attribute)
+            //    .Where(_ => _.Attribute.Name == "BRKEY_");
+            //var bridgeIdValues = _unitOfWork.Context.AggregatedResult
+            //    .Include(_ => _.Attribute)
+            //    .Where(_ => _.Attribute.Name == "BRIDGE_ID");
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
-            var brkeyDatum = new List<KeySegmentDatum>();
-            var bmsidDatum = new List<KeySegmentDatum>();
+            var brkeyDatum = _unitOfWork.Context.AggregatedResult
+                .Include(_ => _.MaintainableAsset)
+                .Include(_ => _.Attribute)
+                .Where(_ => _.MaintainableAsset.NetworkId == network.Id && _.Attribute.Name == "BRKEY_" && _.NumericValue != null)
+                .Select(_ => new KeySegmentDatum { SegmentId = _.MaintainableAssetId, KeyValue = new SegmentAttributeDatum("BRKEY", _.NumericValue.ToString()) })
+                .ToList();
+            var bmsidDatum = _unitOfWork.Context.AggregatedResult
+                .Include(_ => _.MaintainableAsset)
+                .Include(_ => _.Attribute)
+                .Where(_ => _.MaintainableAsset.NetworkId == network.Id && _.Attribute.Name == "BRIDGE_ID")
+                .Select(_ => new KeySegmentDatum { SegmentId = _.MaintainableAssetId, KeyValue = new SegmentAttributeDatum("BMSID", _.TextValue) })
+                .ToList();
+            //var brkeyDatum = new List<KeySegmentDatum>();
+            //var bmsidDatum = new List<KeySegmentDatum>();
 
-            foreach (var asset in assets)
-            {
-                if (brKeyValues.Any(_ => _.MaintainableAssetId == asset.Id && _.NumericValue != null))
-                {
-                    brkeyDatum.Add(new KeySegmentDatum
-                    {
-                        SegmentId = asset.Id,
-                        KeyValue = new SegmentAttributeDatum("BRKEY", brKeyValues.First(_ => _.MaintainableAssetId == asset.Id).NumericValue?.ToString() ?? "NoValue")
-                    });
-                }
-                if (bridgeIdValues.Any(_ => _.MaintainableAssetId == asset.Id))
-                {
-                    bmsidDatum.Add(new KeySegmentDatum
-                    {
-                        SegmentId = asset.Id,
-                        KeyValue = new SegmentAttributeDatum("BMSID", bridgeIdValues.First(_ => _.MaintainableAssetId == asset.Id).TextValue)
-                    });
-                }
-            }
+            //foreach (var asset in assets)
+            //{
+            //    if (brKeyValues.Any(_ => _.MaintainableAssetId == asset.Id && _.NumericValue != null))
+            //    {
+            //        brkeyDatum.Add(new KeySegmentDatum
+            //        {
+            //            SegmentId = asset.Id,
+            //            KeyValue = new SegmentAttributeDatum("BRKEY", brKeyValues.First(_ => _.MaintainableAssetId == asset.Id).NumericValue?.ToString() ?? "NoValue")
+            //        });
+            //    }
+            //    if (bridgeIdValues.Any(_ => _.MaintainableAssetId == asset.Id))
+            //    {
+            //        bmsidDatum.Add(new KeySegmentDatum
+            //        {
+            //            SegmentId = asset.Id,
+            //            KeyValue = new SegmentAttributeDatum("BMSID", bridgeIdValues.First(_ => _.MaintainableAssetId == asset.Id).TextValue)
+            //        });
+            //    }
+            //}
 
             KeyProperties.Add("BRKEY", brkeyDatum);
             KeyProperties.Add("BMSID", bmsidDatum);

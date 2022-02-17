@@ -426,7 +426,12 @@
                         outline
                         rows="4"
                         v-model="selectedCashFlowRuleLibrary.description"
-                        @input='selectedCashFlowRuleLibrary = {...selectedCashFlowRuleLibrary, description: $event}'
+                        @input="
+                            selectedCashFlowRuleLibrary = {
+                                ...selectedCashFlowRuleLibrary,
+                                description: $event,
+                            }
+                        "
                     >
                     </v-textarea>
                 </v-flex>
@@ -564,12 +569,12 @@ export default class CashFlowEditor extends Vue {
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-    
+
     @Action('getCashFlowRuleLibraries') getCashFlowRuleLibrariesAction: any;
     @Action('selectCashFlowRuleLibrary') selectCashFlowRuleLibraryAction: any;
     @Action('upsertCashFlowRuleLibrary') upsertCashFlowRuleLibraryAction: any;
     @Action('deleteCashFlowRuleLibrary') deleteCashFlowRuleLibraryAction: any;
-    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('getScenarioCashFlowRules') getScenarioCashFlowRulesAction: any;
     @Action('upsertScenarioCashFlowRules')
@@ -677,7 +682,7 @@ export default class CashFlowEditor extends Vue {
                 vm.selectedScenarioId = to.query.scenarioId;
 
                 if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.setErrorMessageAction({
+                    vm.addErrorNotificationAction({
                         message: 'Unable to identify selected scenario.',
                     });
                     vm.$router.push('/Scenarios/');

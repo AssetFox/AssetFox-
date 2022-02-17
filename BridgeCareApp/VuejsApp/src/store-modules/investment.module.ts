@@ -119,7 +119,7 @@ const actions = {
                     payload.investment.investmentPlan,
                 );
 
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Modified investment',
                 });
             }
@@ -157,7 +157,7 @@ const actions = {
                     commit('budgetLibraryMutator', budgetLibrary);
                     commit('selectedBudgetLibraryMutator', budgetLibrary.id);
 
-                    dispatch('setSuccessMessage', {
+                    dispatch('addSuccessNotification', {
                         message: message,
                     });
                 }
@@ -180,7 +180,7 @@ const actions = {
                     ) as BudgetLibrary[];
                     commit('budgetLibrariesMutator', budgetLibraries);
 
-                    dispatch('setSuccessMessage', {
+                    dispatch('addSuccessNotification', {
                         message: 'Deleted budget library',
                     });
                 }
@@ -213,7 +213,7 @@ const actions = {
             if (hasValue(response, 'data')) {
                 const budgets: Budget[] = response.data as Budget[];
                 commit('scenarioBudgetsMutator', budgets);
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Investment budgets file imported',
                 });
             }
@@ -234,7 +234,7 @@ const actions = {
                 const library: BudgetLibrary = response.data as BudgetLibrary;
                 commit('budgetLibraryMutator', library);
                 commit('selectedBudgetLibraryMutator', library.id);
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Investment budgets file imported',
                 });
             }

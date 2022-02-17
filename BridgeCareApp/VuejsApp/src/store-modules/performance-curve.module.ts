@@ -108,7 +108,7 @@ const actions = {
                 commit('performanceCurveLibraryMutator', library);
                 commit('selectedPerformanceCurveLibraryMutator', library.id);
 
-                dispatch('setSuccessMessage', { message: message });
+                dispatch('addSuccessNotification', { message: message });
             }
         });
     },
@@ -140,7 +140,7 @@ const actions = {
                     'scenarioPerformanceCurvesMutator',
                     payload.scenarioPerformanceCurves,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: "Modified scenario's performance curves",
                 });
             }
@@ -167,7 +167,7 @@ const actions = {
                     performanceCurveLibraries,
                 );
 
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Deleted performance curve library',
                 });
             }

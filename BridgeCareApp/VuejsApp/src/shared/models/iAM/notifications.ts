@@ -4,5 +4,5 @@ export interface Notification {
     iconColor: string;
     active: boolean;
     shortMessage: string;
-    longMessage?: string;
+    longMessage: string;
 }

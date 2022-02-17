@@ -2,13 +2,13 @@ import { Notification } from '@/shared/models/iAM/notifications';
 
 const state = {
     notifications: [] as Notification[],
-    counter: 5,
+    counter: 0,
     totalNotifications: 0,
 };
 
 const mutations = {
     addNotificationMutator(state: any, notification: Notification) {
-        state.notifications.push(notification);
+        state.notifications.unshift(notification);
         state.counter += 1;
         state.totalNotifications += 1;
     },
@@ -25,67 +25,55 @@ const mutations = {
 };
 
 const actions = {
-    addSuccessNotification(
-        { commit }: any,
-        shortMessage: string,
-        longMessage?: string,
-    ) {
+    addSuccessNotification({ commit }: any, payload: any) {
         let notification: Notification = {
             id: state.totalNotifications + 1,
             icon: 'fas fa-check-circle',
             iconColor: 'green',
             active: false,
-            shortMessage: shortMessage,
-            longMessage: longMessage,
+            shortMessage: payload.message,
+            longMessage:
+                payload.longMessage || 'No further information provided.',
         };
         commit('addNotificationMutator', notification);
     },
-    addWarningNotification(
-        { commit }: any,
-        shortMessage: string,
-        longMessage?: string,
-    ) {
+    addWarningNotification({ commit }: any, payload: any) {
         let notification: Notification = {
             id: state.totalNotifications + 1,
             icon: 'fas fa-exclamation-circle',
             iconColor: 'yellow',
             active: false,
-            shortMessage: shortMessage,
-            longMessage: longMessage || shortMessage,
+            shortMessage: payload.message,
+            longMessage:
+                payload.longMessage || 'No further information provided.',
         };
         commit('addNotificationMutator', notification);
     },
-    addErrorNotification(
-        { commit }: any,
-        shortMessage: string,
-        longMessage?: string,
-    ) {
+    addErrorNotification({ commit }: any, payload: any) {
         let notification: Notification = {
             id: state.totalNotifications + 1,
             icon: 'fas fa-exclamation-circle',
             iconColor: 'red',
             active: false,
-            shortMessage: shortMessage,
-            longMessage: longMessage || shortMessage,
+            shortMessage: payload.message,
+            longMessage:
+                payload.longMessage || 'No further information provided.',
         };
         commit('addNotificationMutator', notification);
     },
-    addInfoNotification(
-        { commit }: any,
-        shortMessage: string,
-        longMessage?: string,
-    ) {
+    addInfoNotification({ commit }: any, payload: any) {
         let notification: Notification = {
             id: state.totalNotifications + 1,
             icon: 'fas fa-info-circle',
             iconColor: 'primary',
             active: false,
-            shortMessage: shortMessage,
-            longMessage: longMessage || shortMessage,
+            shortMessage: payload.message,
+            longMessage:
+                payload.longMessage || 'No further information provided.',
         };
         commit('addNotificationMutator', notification);
     },
-    removeNofitication({ commit }: any, id: number) {
+    removeNotification({ commit }: any, id: number) {
         commit('removeNotificationMutator', id);
     },
     clearNotificationCounter({ commit }: any) {

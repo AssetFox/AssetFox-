@@ -106,7 +106,7 @@ const actions = {
                         'selectedTreatmentLibraryMutator',
                         payload.library.id,
                     );
-                    dispatch('setSuccessMessage', { message: message });
+                    dispatch('addSuccessNotification', { message: message });
                 }
             },
         );
@@ -139,7 +139,7 @@ const actions = {
                     'scenarioSelectableTreatmentsMutator',
                     payload.scenarioSelectableTreatments,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Modified scenario treatments',
                 });
             }
@@ -156,7 +156,7 @@ const actions = {
                     http2XX.test(response.status.toString())
                 ) {
                     commit('deletedTreatmentLibraryMutator', payload.libraryId);
-                    dispatch('setSuccessMessage', {
+                    dispatch('addSuccessNotification', {
                         message: 'Deleted treatment library',
                     });
                 }

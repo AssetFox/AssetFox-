@@ -19,8 +19,9 @@ export const setRefreshIntervalID = () => {
 const checkBrowserTokens = () => {
     store.dispatch('checkBrowserTokens').catch((err: any) => {
         store
-            .dispatch('setErrorMessage', {
-                message: err.errorMessage,
+            .dispatch('addErrorNotification', {
+                message: 'Browser token error',
+                longMessage: err.errorMessage,
             })
             .then(() => onHandleLogout());
     });

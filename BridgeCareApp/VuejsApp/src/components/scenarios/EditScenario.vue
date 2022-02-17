@@ -143,8 +143,8 @@ export default class EditScenario extends Vue {
     @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
     @State(state => state.authenticationModule.userId) userId: string;
 
-    @Action('setErrorMessage') setErrorMessageAction: any;
-    @Action('setSuccessMessage') setSuccessMessageAction: any;
+    @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('selectScenario') selectScenarioAction: any;
     @Action('runSimulation') runSimulationAction: any;
     @Action('runNewSimulation') runNewSimulationAction: any;
@@ -240,7 +240,7 @@ export default class EditScenario extends Vue {
             // check that selectedScenarioId is set
             if (vm.selectedScenarioId === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
-                vm.setErrorMessageAction({
+                vm.addErrorNotificationAction({
                     message: 'Found no selected scenario for edit',
                 });
                 vm.$router.push('/Scenarios/');
@@ -255,7 +255,7 @@ export default class EditScenario extends Vue {
                                     scenarioName: vm.simulationName,
                                     scenarioId: vm.selectedScenarioId,
                                     networkId: vm.networkId,
-                                    networkName: vm.networkName
+                                    networkName: vm.networkName,
                                 },
                             },
                         };
@@ -340,17 +340,19 @@ export default class EditScenario extends Vue {
                             hasValue(response, 'status') &&
                             http2XX.test(response.status.toString())
                         ) {
-                            this.setSuccessMessageAction({
-                                message:
+                            this.addSuccessNotificationAction({
+                                message: 'Successful upload.',
+                                longMessage:
                                     'Successfully uploaded committed projects.',
                             });
                         }
                     });
                 } else {
-                    this.setErrorMessageAction({
-                                message:
-                                    'No file selected to upload the committed projects.'
-                                    });
+                    this.addErrorNotificationAction({
+                        message: 'No file selected.',
+                        longMessage:
+                            'No file selected to upload the committed projects.',
+                    });
                 }
             }
         }
@@ -377,7 +379,7 @@ export default class EditScenario extends Vue {
                     hasValue(response) &&
                     http2XX.test(response.status.toString())
                 ) {
-                    this.setSuccessMessageAction({
+                    this.addSuccessNotificationAction({
                         message: 'Committed projects have been deleted.',
                     });
                 }

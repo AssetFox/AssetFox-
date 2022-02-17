@@ -1,16 +1,25 @@
-import {emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
+import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import ScenarioService from '@/services/scenario.service';
-import {AxiosResponse} from 'axios';
-import {any, clone, find, findIndex, prepend, propEq, reject, update} from 'ramda';
-import {hasValue} from '@/shared/utils/has-value-util';
-import {http2XX} from '@/shared/utils/http-utils';
+import { AxiosResponse } from 'axios';
+import {
+    any,
+    clone,
+    find,
+    findIndex,
+    prepend,
+    propEq,
+    reject,
+    update,
+} from 'ramda';
+import { hasValue } from '@/shared/utils/has-value-util';
+import { http2XX } from '@/shared/utils/http-utils';
 import ReportsService from '@/services/reports.service';
-import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
-import {SimulationReportDetail} from '@/shared/models/iAM/simulation-report-detail';
+import { SimulationAnalysisDetail } from '@/shared/models/iAM/simulation-analysis-detail';
+import { SimulationReportDetail } from '@/shared/models/iAM/simulation-report-detail';
 
 const state = {
     scenarios: [] as Scenario[],
-    selectedScenario: clone(emptyScenario) as Scenario
+    selectedScenario: clone(emptyScenario) as Scenario,
 };
 
 const mutations = {
@@ -25,7 +34,7 @@ const mutations = {
             state.scenarios = update(
                 findIndex(propEq('id', updatedScenario.id), state.scenarios),
                 updatedScenario,
-                state.scenarios
+                state.scenarios,
             );
         }
     },
@@ -36,14 +45,28 @@ const mutations = {
     },
     selectedScenarioMutator(state: any, id: string) {
         if (any(propEq('id', id), state.scenarios)) {
-            state.selectedScenario = find(propEq('id', id), state.scenarios) as Scenario;
+            state.selectedScenario = find(
+                propEq('id', id),
+                state.scenarios,
+            ) as Scenario;
         } else {
             state.selectedScenario = clone(emptyScenario);
         }
     },
-    simulationAnalysisDetailMutator(state: any, simulationAnalysisDetail: SimulationAnalysisDetail) {
-        if (any(propEq('id', simulationAnalysisDetail.simulationId), state.scenarios)) {
-            const updatedScenario: Scenario = find(propEq('id', simulationAnalysisDetail.simulationId), state.scenarios) as Scenario;
+    simulationAnalysisDetailMutator(
+        state: any,
+        simulationAnalysisDetail: SimulationAnalysisDetail,
+    ) {
+        if (
+            any(
+                propEq('id', simulationAnalysisDetail.simulationId),
+                state.scenarios,
+            )
+        ) {
+            const updatedScenario: Scenario = find(
+                propEq('id', simulationAnalysisDetail.simulationId),
+                state.scenarios,
+            ) as Scenario;
             updatedScenario.lastRun = simulationAnalysisDetail.lastRun;
             updatedScenario.status = simulationAnalysisDetail.status;
             updatedScenario.runTime = simulationAnalysisDetail.runTime;
@@ -51,94 +74,136 @@ const mutations = {
             state.scenarios = update(
                 findIndex(propEq('id', updatedScenario.id), state.scenarios),
                 updatedScenario,
-                state.scenarios
+                state.scenarios,
             );
         }
     },
-    simulationReportDetailMutator(state: any, simulationReportDetail: SimulationReportDetail) {
-        if (any(propEq('id', simulationReportDetail.simulationId), state.scenarios)) {
-            const updatedScenario: Scenario = find(propEq('id', simulationReportDetail.simulationId), state.scenarios) as Scenario;
+    simulationReportDetailMutator(
+        state: any,
+        simulationReportDetail: SimulationReportDetail,
+    ) {
+        if (
+            any(
+                propEq('id', simulationReportDetail.simulationId),
+                state.scenarios,
+            )
+        ) {
+            const updatedScenario: Scenario = find(
+                propEq('id', simulationReportDetail.simulationId),
+                state.scenarios,
+            ) as Scenario;
             updatedScenario.reportStatus = simulationReportDetail.status;
 
             state.scenarios = update(
                 findIndex(propEq('id', updatedScenario.id), state.scenarios),
                 updatedScenario,
-                state.scenarios
+                state.scenarios,
             );
         }
-    }
+    },
 };
 
 const actions = {
-    selectScenario({commit}: any, payload: any) {
+    selectScenario({ commit }: any, payload: any) {
         commit('selectedScenarioMutator', payload.scenarioId);
     },
-    updateSimulationAnalysisDetail({commit}: any, payload: any) {
-        commit('simulationAnalysisDetailMutator', payload.simulationAnalysisDetail);
+    updateSimulationAnalysisDetail({ commit }: any, payload: any) {
+        commit(
+            'simulationAnalysisDetailMutator',
+            payload.simulationAnalysisDetail,
+        );
     },
-    updateSimulationReportDetail({commit}: any, payload: any) {
+    updateSimulationReportDetail({ commit }: any, payload: any) {
         commit('simulationReportDetailMutator', payload.simulationReportDetail);
     },
-    async getScenarios({commit}: any, payload: any) {
-        await ScenarioService.getScenarios(payload.networkId)
-            .then((response: AxiosResponse) => {
+    async getScenarios({ commit }: any, payload: any) {
+        await ScenarioService.getScenarios(payload.networkId).then(
+            (response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('scenariosMutator', response.data as Scenario[]);
                 }
-            });
+            },
+        );
     },
-    async runSimulation({dispatch, commit}: any, payload: any) {
-        await ScenarioService.runSimulation(payload.networkId, payload.scenarioId)
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    dispatch('setSuccessMessage', {message: 'Simulation analysis complete'});
-                }
-            });
+    async runSimulation({ dispatch, commit }: any, payload: any) {
+        await ScenarioService.runSimulation(
+            payload.networkId,
+            payload.scenarioId,
+        ).then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                dispatch('addSuccessNotification', {
+                    message: 'Simulation analysis complete',
+                });
+            }
+        });
     },
-    async migrateLegacySimulationData({dispatch, commit}: any, payload: any) {
-        await ScenarioService.migrateLegacySimulationData(payload.simulationId)
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    dispatch('getScenarios', {networkId: payload.networkId});
-                }
-            });
+    async migrateLegacySimulationData({ dispatch, commit }: any, payload: any) {
+        await ScenarioService.migrateLegacySimulationData(
+            payload.simulationId,
+        ).then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                dispatch('getScenarios', { networkId: payload.networkId });
+            }
+        });
     },
-    async createScenario({dispatch, commit}: any, payload: any) {
-        return await ScenarioService.createScenario(payload.scenario, payload.networkId)
-            .then((response: AxiosResponse) => {
+    async createScenario({ dispatch, commit }: any, payload: any) {
+        return await ScenarioService.createScenario(
+            payload.scenario,
+            payload.networkId,
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                commit('createdScenarioMutator', response.data as Scenario);
+                dispatch('addSuccessNotification', {
+                    message: 'Created scenario',
+                });
+            }
+        });
+    },
+    async cloneScenario({ dispatch, commit }: any, payload: any) {
+        return await ScenarioService.cloneScenario(payload.scenarioId).then(
+            (response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('createdScenarioMutator', response.data as Scenario);
-                    dispatch('setSuccessMessage', {message: 'Created scenario'});
+                    dispatch('addSuccessNotification', {
+                        message: 'Cloned scenario',
+                    });
                 }
-            });
+            },
+        );
     },
-    async cloneScenario({dispatch, commit}: any, payload: any) {
-        return await ScenarioService.cloneScenario(payload.scenarioId)
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    commit('createdScenarioMutator', response.data as Scenario);
-                    dispatch('setSuccessMessage', {message: 'Cloned scenario'});
-                }
-            });
-    },
-    async updateScenario({dispatch, commit}: any, payload: any) {
-        return await ScenarioService.updateScenario(payload.scenario)
-            .then((response: AxiosResponse) => {
+    async updateScenario({ dispatch, commit }: any, payload: any) {
+        return await ScenarioService.updateScenario(payload.scenario).then(
+            (response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('updatedScenarioMutator', response.data);
-                    dispatch('setSuccessMessage', {message: 'Updated scenario'});
+                    dispatch('addSuccessNotification', {
+                        message: 'Updated scenario',
+                    });
                 }
-            });
+            },
+        );
     },
-    async deleteScenario({dispatch, state, commit}: any, payload: any) {
-        return await ScenarioService.deleteScenario(payload.scenarioId)
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+    async deleteScenario({ dispatch, state, commit }: any, payload: any) {
+        return await ScenarioService.deleteScenario(payload.scenarioId).then(
+            (response: AxiosResponse) => {
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
                     commit('deletedScenarioMutator', payload.scenarioId);
-                    dispatch('setSuccessMessage', {message: 'Deleted scenario'});
+                    dispatch('addSuccessNotification', {
+                        message: 'Deleted scenario',
+                    });
                 }
-            });
-    }
+            },
+        );
+    },
 };
 
 const getters = {};
@@ -147,5 +212,5 @@ export default {
     state,
     getters,
     actions,
-    mutations
+    mutations,
 };

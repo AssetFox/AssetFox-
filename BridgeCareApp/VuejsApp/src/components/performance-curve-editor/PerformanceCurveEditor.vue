@@ -284,23 +284,36 @@
                         outline
                         rows="4"
                         v-model="selectedPerformanceCurveLibrary.description"
-                        @input='selectedPerformanceCurveLibrary = {...selectedPerformanceCurveLibrary, description: $event}'
+                        @input="
+                            selectedPerformanceCurveLibrary = {
+                                ...selectedPerformanceCurveLibrary,
+                                description: $event,
+                            }
+                        "
                     />
                 </v-flex>
             </v-layout>
         </v-flex>
         <v-flex xs12>
-            <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
-                       @click='onUpsertScenarioPerformanceCurves'
-                       class='ara-blue-bg white--text'
-                       v-show='hasScenario'>
+            <v-layout
+                justify-end
+                row
+                v-show="hasSelectedLibrary || hasScenario"
+            >
+                <v-btn
+                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    @click="onUpsertScenarioPerformanceCurves"
+                    class="ara-blue-bg white--text"
+                    v-show="hasScenario"
+                >
                     Save
                 </v-btn>
-                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
-                       @click='onUpsertPerformanceCurveLibrary'
-                       class='ara-blue-bg white--text'
-                       v-show='!hasScenario'>
+                <v-btn
+                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    @click="onUpsertPerformanceCurveLibrary"
+                    class="ara-blue-bg white--text"
+                    v-show="!hasScenario"
+                >
                     Update Library
                 </v-btn>
                 <v-btn
@@ -346,7 +359,7 @@
 
         <EquationEditorDialog
             :dialogData="equationEditorDialogData"
-            :isFromPerformanceCurveEditor=true
+            :isFromPerformanceCurveEditor="true"
             @submit="onSubmitEquationEditorDialogResult"
         />
 
@@ -435,7 +448,7 @@ export default class PerformanceCurveEditor extends Vue {
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-    
+
     @Action('getPerformanceCurveLibraries')
     getPerformanceCurveLibrariesAction: any;
     @Action('selectPerformanceCurveLibrary')
@@ -531,7 +544,7 @@ export default class PerformanceCurveEditor extends Vue {
                 vm.selectedScenarioId = to.query.scenarioId;
 
                 if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.setErrorMessageAction({
+                    vm.addErrorNotificationAction({
                         message: 'Unable to identify selected scenario.',
                     });
                     vm.$router.push('/Scenarios/');
@@ -579,13 +592,16 @@ export default class PerformanceCurveEditor extends Vue {
             this.selectedPerformanceCurveLibrary.id !== this.uuidNIL;
 
         if (this.hasScenario) {
-            this.performanceCurveGridData = this.selectedPerformanceCurveLibrary.performanceCurves
-                .map((performanceCurve: PerformanceCurve) => ({
+            this.performanceCurveGridData = this.selectedPerformanceCurveLibrary.performanceCurves.map(
+                (performanceCurve: PerformanceCurve) => ({
                     ...performanceCurve,
                     id: getNewGuid(),
-                }));
+                }),
+            );
         } else {
-            this.performanceCurveGridData = clone(this.selectedPerformanceCurveLibrary.performanceCurves);
+            this.performanceCurveGridData = clone(
+                this.selectedPerformanceCurveLibrary.performanceCurves,
+            );
         }
     }
 
@@ -596,9 +612,7 @@ export default class PerformanceCurveEditor extends Vue {
 
     @Watch('stateScenarioPerformanceCurves')
     onStateScenarioPerformanceCurvesChanged() {
-        if (
-            this.hasScenario
-        ) {
+        if (this.hasScenario) {
             this.performanceCurveGridData = clone(
                 this.stateScenarioPerformanceCurves,
             );
@@ -608,10 +622,19 @@ export default class PerformanceCurveEditor extends Vue {
     @Watch('performanceCurveGridData')
     onPerformanceCurveGridDataChanged() {
         const hasUnsavedChanges: boolean = this.hasScenario
-            ? hasUnsavedChangesCore('', this.performanceCurveGridData, this.stateScenarioPerformanceCurves)
-            : hasUnsavedChangesCore('',
-                {...clone(this.selectedPerformanceCurveLibrary), performanceCurves: clone(this.performanceCurveGridData)},
-                this.stateSelectedPerformanceCurveLibrary);
+            ? hasUnsavedChangesCore(
+                  '',
+                  this.performanceCurveGridData,
+                  this.stateScenarioPerformanceCurves,
+              )
+            : hasUnsavedChangesCore(
+                  '',
+                  {
+                      ...clone(this.selectedPerformanceCurveLibrary),
+                      performanceCurves: clone(this.performanceCurveGridData),
+                  },
+                  this.stateSelectedPerformanceCurveLibrary,
+              );
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -729,7 +752,7 @@ export default class PerformanceCurveEditor extends Vue {
                 showDialog: true,
                 libraryId: this.selectedPerformanceCurve.criterionLibrary.id,
                 isCallFromScenario: this.hasScenario,
-                isCriterionForLibrary: !this.hasScenario
+                isCriterionForLibrary: !this.hasScenario,
             };
         }
     }
@@ -785,7 +808,9 @@ export default class PerformanceCurveEditor extends Vue {
         this.librarySelectItemValue = null;
         setTimeout(() => {
             if (this.hasScenario) {
-                this.performanceCurveGridData = clone(this.stateScenarioPerformanceCurves);
+                this.performanceCurveGridData = clone(
+                    this.stateScenarioPerformanceCurves,
+                );
             }
         });
     }
@@ -828,8 +853,8 @@ export default class PerformanceCurveEditor extends Vue {
             return !(
                 this.rules['generalRules'].valueIsNotEmpty(
                     this.selectedPerformanceCurveLibrary.name,
-                ) === true &&
-                dataIsValid);
+                ) === true && dataIsValid
+            );
         }
 
         return !dataIsValid;

@@ -10,7 +10,6 @@ import investmentModule from '@/store-modules/investment.module';
 import performanceCurveModule from '@/store-modules/performance-curve.module';
 import treatmentModule from '@/store-modules/treatment.module';
 import attributeModule from '@/store-modules/attribute.module';
-import toastrModule from '@/store-modules/toastr.module';
 import deficientConditionGoalModule from '@/store-modules/deficient-condition-goal.module';
 import budgetPriorityModule from '@/store-modules/budget-priority.module';
 import targetConditionGoalModule from '@/store-modules/target-condition-goal.module';
@@ -28,6 +27,7 @@ import analysisDefaultDataModule from '@/store-modules/analysisDefaultData.modul
 import investmentDefaultDataModule from '@/store-modules/investmentDefaultData.module';
 import calculatedAttributeModule from '@/store-modules/calculated-attribute.module';
 import notificationModule from '@/store-modules/notification.module';
+import testNotificationModule from '@/store-modules/testNotification.module';
 
 Vue.use(Vuex);
 
@@ -42,7 +42,6 @@ export default new Vuex.Store({
         performanceCurveModule,
         attributeModule,
         treatmentModule,
-        toastrModule,
         deficientConditionGoalModule,
         budgetPriorityModule,
         targetConditionGoalModule,
@@ -60,5 +59,6 @@ export default new Vuex.Store({
         investmentDefaultDataModule,
         calculatedAttributeModule,
         notificationModule,
-    }
+        testNotificationModule,
+    },
 });

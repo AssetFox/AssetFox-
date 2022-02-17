@@ -147,15 +147,14 @@ table.v-table tbody td {
 
 .notification-long-message {
     display: inline-block;
-    min-inline-size: 75%;
+    min-inline-size: 90%;
     padding: 10pt;
     margin: 10pt 10pt 10pt 10pt;
     border-radius: 4pt;
     box-shadow: 0 3pt 5pt rgba(0, 0, 0, 0.25);
-    justify-content: center;
+    font-size: 100%;
 }
 
 .notification-message {
-    padding: 5pt;
-    justify-content: center;
+    text-align: left;
 }

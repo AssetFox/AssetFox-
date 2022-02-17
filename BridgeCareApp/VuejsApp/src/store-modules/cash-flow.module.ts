@@ -96,7 +96,7 @@ const actions = {
                     commit('cashFlowRuleLibraryMutator', library);
                     commit('selectedCashFlowRuleLibraryMutator', library.id);
 
-                    dispatch('setSuccessMessage', { message: message });
+                    dispatch('addSuccessNotification', { message: message });
                 }
             },
         );
@@ -121,7 +121,7 @@ const actions = {
                         cashFlowRuleLibraries,
                     );
 
-                    dispatch('setSuccessMessage', {
+                    dispatch('addSuccessNotification', {
                         message: 'Deleted cash flow rule library',
                     });
                 }
@@ -153,7 +153,7 @@ const actions = {
                     'scenarioCashFlowRulesMutator',
                     payload.scenarioCashFlowRules,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Modified scenario cash flow rules',
                 });
             }

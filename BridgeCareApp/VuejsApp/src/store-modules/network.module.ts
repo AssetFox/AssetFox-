@@ -8,7 +8,7 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 
 const state = {
-    networks: [] as Network[]
+    networks: [] as Network[],
 };
 
 const mutations = {
@@ -20,45 +20,58 @@ const mutations = {
     },
     benefitQuantifierMutator(state: any, benefitQuantifier: BenefitQuantifier) {
         if (any(propEq('id', benefitQuantifier.networkId), state.networks)) {
-            const network: Network = find(propEq('id', benefitQuantifier.networkId), state.networks) as Network;
+            const network: Network = find(
+                propEq('id', benefitQuantifier.networkId),
+                state.networks,
+            ) as Network;
 
             state.networks = update(
-              findIndex(propEq('id', network.id), state.networks),
-              {...network, benefitQuantifier: benefitQuantifier},
-              state.networks
+                findIndex(propEq('id', network.id), state.networks),
+                { ...network, benefitQuantifier: benefitQuantifier },
+                state.networks,
             );
         }
-    }
+    },
 };
 
 const actions = {
-    async getNetworks({commit}: any) {
-        await NetworkService.getNetworks()
-            .then((response: AxiosResponse<any[]>) => {
+    async getNetworks({ commit }: any) {
+        await NetworkService.getNetworks().then(
+            (response: AxiosResponse<any[]>) => {
                 if (hasValue(response, 'data')) {
                     commit('networksMutator', response.data as Network[]);
                 }
-            });
+            },
+        );
     },
-    async createNetwork({dispatch, commit}: any, payload: any) {
-        return await NetworkService.createNetwork(payload.name)
-            .then((response: AxiosResponse) => {
+    async createNetwork({ dispatch, commit }: any, payload: any) {
+        return await NetworkService.createNetwork(payload.name).then(
+            (response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const network: Network = response.data;
                     commit('createdNetworkMutator', network);
-                    dispatch('setSuccessMessage', {message: 'Network created'});
+                    dispatch('addSuccessNotification', {
+                        message: 'Network created',
+                    });
                 }
-            });
+            },
+        );
     },
-    async upsertBenefitQuantifier({dispatch, commit}: any, payload: any) {
-        return await NetworkService.upsertBenefitQuantifier(payload.benefitQuantifier)
-          .then((response: AxiosResponse) => {
-              if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                  commit('benefitQuantifierMutator', payload.benefitQuantifier);
-                  dispatch('setSuccessMessage', {message: 'Benefit quantifier upsertted'});
-              }
-          });
-    }
+    async upsertBenefitQuantifier({ dispatch, commit }: any, payload: any) {
+        return await NetworkService.upsertBenefitQuantifier(
+            payload.benefitQuantifier,
+        ).then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                commit('benefitQuantifierMutator', payload.benefitQuantifier);
+                dispatch('addSuccessNotification', {
+                    message: 'Benefit quantifier upsertted',
+                });
+            }
+        });
+    },
 };
 
 const getters = {};
@@ -67,5 +80,5 @@ export default {
     state,
     getters,
     actions,
-    mutations
+    mutations,
 };

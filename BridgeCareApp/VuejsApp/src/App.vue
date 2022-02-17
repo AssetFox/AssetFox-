@@ -212,7 +212,7 @@
                     <span class="font-weight-light">Hello, </span>
                     <span>{{ username }}</span>
                 </v-toolbar-title>
-                <v-toolbar-title class="white--text" v-if="authenticated">
+                <v-toolbar-title class="white--text">
                     <v-menu
                         offset-y
                         min-width="20%"

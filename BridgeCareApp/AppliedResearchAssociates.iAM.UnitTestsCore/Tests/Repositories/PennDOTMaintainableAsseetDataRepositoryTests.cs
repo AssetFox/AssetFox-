@@ -56,8 +56,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             // Assert
             Assert.Equal(2, repo.KeyProperties.Count());
             Assert.Equal(5, repo.KeyProperties["BRKEY"].Count());
-            Assert.NotNull(repo.KeyProperties["BRKEY"].FirstOrDefault(_ => _.KeyValue.Value == "2").SegmentId == checkGuid);
-            Assert.NotNull(repo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256").SegmentId == checkGuid);
+            Assert.NotNull(repo.KeyProperties["BRKEY"].FirstOrDefault(_ => _.KeyValue.Value == "2").AssetId == checkGuid);
+            Assert.NotNull(repo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256").AssetId == checkGuid);
         }
 
         [Fact]

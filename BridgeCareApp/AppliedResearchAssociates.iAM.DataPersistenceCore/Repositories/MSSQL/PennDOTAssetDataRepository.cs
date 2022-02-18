@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         keyValues.Add(new KeySegmentDatum
                         {
-                            SegmentId = section.Id,
+                            AssetId = section.Id,
                             KeyValue = new SegmentAttributeDatum(key, section.Name)
                         });
                     }
@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                             keyValues.Add(new KeySegmentDatum
                             {
-                                SegmentId = group.Key,
+                                AssetId = group.Key,
                                 KeyValue = new SegmentAttributeDatum(key, lastValue)
                             });
                         }
@@ -90,7 +90,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                             keyValues.Add(new KeySegmentDatum
                             {
-                                SegmentId = group.Key,
+                                AssetId = group.Key,
                                 KeyValue = new SegmentAttributeDatum(key, lastValue.ToString())
                             });
                         }
@@ -115,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var lookupSource = KeyProperties[keyName];
             var targetSegment = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
             if (targetSegment == null) return new List<SegmentAttributeDatum>();
-            var segment = _unitofwork.Context.Section.Where(_ => _.Id == targetSegment.SegmentId)
+            var segment = _unitofwork.Context.Section.Where(_ => _.Id == targetSegment.AssetId)
                 .Include(_ => _.NumericAttributeValueHistories).ThenInclude(_ => _.Attribute)
                 .Include(_ => _.TextAttributeValueHistories).ThenInclude(_ => _.Attribute)
                 .FirstOrDefault();
@@ -150,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var lookupSource = KeyProperties[keyName];
             var targetSegment = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
             if (targetSegment == null) return new Dictionary<int, SegmentAttributeDatum>();
-            var segment = _unitofwork.Context.Section.Where(_ => _.Id == targetSegment.SegmentId)
+            var segment = _unitofwork.Context.Section.Where(_ => _.Id == targetSegment.AssetId)
                 .Include(_ => _.NumericAttributeValueHistories).ThenInclude(_ => _.Attribute)
                 .Include(_ => _.TextAttributeValueHistories).ThenInclude(_ => _.Attribute)
                 .FirstOrDefault();

@@ -15,7 +15,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateMaintainableAssets(List<Section> sections, Guid networkId);
 
         void UpdateMaintainableAssetsSpatialWeighting(List<MaintainableAsset> maintainableAssets);
-
-        List<BMSIDAndBRKeyDTO> GetBMSIDAndBRKey();
     }
 }

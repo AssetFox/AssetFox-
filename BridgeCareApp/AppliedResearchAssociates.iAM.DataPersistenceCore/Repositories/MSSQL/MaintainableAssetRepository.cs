@@ -178,17 +178,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.AddAll(maintainableAssetLocationEntities, _unitOfWork.UserEntity?.Id);
         }
-
-        public List<BMSIDAndBRKeyDTO> GetBMSIDAndBRKey()
-        {
-            var valuesFromDb = _unitOfWork.Context.MaintainableAsset.Select(_ => new { bmsId = _.SectionName, brKey = _.FacilityName });
-
-            var result = new List<BMSIDAndBRKeyDTO>();
-            foreach (var item in valuesFromDb)
-            {
-                result.Add(new BMSIDAndBRKeyDTO { BmsId = item.bmsId, BrKey = Convert.ToInt32(item.brKey) });
-            }
-            return result;
-        }
     }
 }

@@ -34,6 +34,7 @@
         "ramda": "0.26.1",
         "socket.io-client": "^2.2.0",
         "uuid": "^8.3.2",
+        "vue": "2.6.12",
         "vue-class-component": "6.0.0",
         "vue-currency-input": "1.18.3",
         "vue-notification-bell": "^0.9.12",

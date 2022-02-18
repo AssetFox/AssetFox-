@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
     public class SequentialTaskQueueTests
     {
         [Fact]
-        public void tasks_execute_in_order_they_were_added()
+        public void tasks_execute_in_the_order_they_were_added()
         {
             SequentialTaskQueue queue = new();
             List<int> taskEffects = new();

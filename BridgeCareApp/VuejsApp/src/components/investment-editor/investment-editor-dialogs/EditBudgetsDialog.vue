@@ -4,7 +4,7 @@
             <v-card>
                 <v-card-title>
                     <v-layout justify-center>
-                        <h3>Edit Budgets</h3>
+                        <h3>Edit Budget Criteria</h3>
                     </v-layout>
                 </v-card-title>
                 <v-toolbar>

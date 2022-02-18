@@ -19,11 +19,13 @@ namespace BridgeCareCore.Services
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IHubService _hubService;
+        private readonly SequentialTaskQueue _sequentialTaskQueue;
 
-        public SimulationAnalysisService(UnitOfDataPersistenceWork unitOfWork, IHubService hubService)
+        public SimulationAnalysisService(UnitOfDataPersistenceWork unitOfWork, IHubService hubService, SequentialTaskQueue sequentialTaskQueue)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
+            _sequentialTaskQueue = sequentialTaskQueue ?? throw new ArgumentNullException(nameof(sequentialTaskQueue));
         }
 
         private readonly HashSet<string> LoggedMessages = new HashSet<string>();
@@ -46,112 +48,117 @@ namespace BridgeCareCore.Services
 
         public Task CreateAndRun(Guid networkId, Guid simulationId)
         {
-            var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
+            Task analysisTask = new(_createAndRun, TaskCreationOptions.LongRunning);
+            _sequentialTaskQueue.Add(analysisTask);
+            return analysisTask;
+
+            void _createAndRun()
             {
-                SimulationId = simulationId,
-                LastRun = DateTime.Now,
-                Status = "Creating input..."
-            };
-            _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
-            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-
-            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
-
-            simulationAnalysisDetail.Status = "Getting simulation analysis network";
-            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-
-            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
-            _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
-
-            simulationAnalysisDetail.Status = "Getting investment plan";
-            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-
-            var simulation = network.Simulations.Single(_ => _.Id == simulationId);
-            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
-
-            simulationAnalysisDetail.Status = "Getting performance curve";
-            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
-
-            simulationAnalysisDetail.Status = "Getting selectable treatments";
-            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
-            _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
-
-            simulationAnalysisDetail.Status = "Populating calculated fields";
-            UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-
-            _unitOfWork.CalculatedAttributeRepo.PopulateScenarioCalculatedFields(simulation);
-
-            var runner = new SimulationRunner(simulation);
-
-            runner.Progress += (sender, eventArgs) =>
-            {
-                switch (eventArgs.ProgressStatus)
+                var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
                 {
-                case ProgressStatus.Started:
-                    simulationAnalysisDetail.Status = "Simulation initializing ...";
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-
-                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
-                    break;
-                case ProgressStatus.Running:
-                    simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete)}%";
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
-
-                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
-                    break;
-                case ProgressStatus.Completed:
-                    simulationAnalysisDetail.Status = $"Simulation complete. {100}%";
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
-
-                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
-                    break;
-                }
+                    SimulationId = simulationId,
+                    LastRun = DateTime.Now,
+                    Status = "Creating input..."
+                };
+                _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
                 _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-            };
 
-            runner.SimulationLog += (sender, eventArgs) =>
-            {
-                var message = eventArgs.MessageBuilder;
-                if (LoggedMessages.Add(message.Message))
+                var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+
+                simulationAnalysisDetail.Status = "Getting simulation analysis network";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
+                var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
+                _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
+
+                simulationAnalysisDetail.Status = "Getting investment plan";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
+                var simulation = network.Simulations.Single(_ => _.Id == simulationId);
+                _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+                _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+
+                simulationAnalysisDetail.Status = "Getting performance curve";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
+                _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+
+                simulationAnalysisDetail.Status = "Getting selectable treatments";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
+                _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+                _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+
+                simulationAnalysisDetail.Status = "Populating calculated fields";
+                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
+                _unitOfWork.CalculatedAttributeRepo.PopulateScenarioCalculatedFields(simulation);
+
+                var runner = new SimulationRunner(simulation);
+
+                runner.Progress += (sender, eventArgs) =>
                 {
-                    var dto = SimulationLogMapper.ToDTO(message);
-                    _unitOfWork.SimulationLogRepo.CreateLog(dto);
-                }
-                switch (message.Status)
-                {
-                case SimulationLogStatus.Warning:
-                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
-                    break;
-                case SimulationLogStatus.Error:
-                case SimulationLogStatus.Fatal:
-                    simulationAnalysisDetail.Status = message.Message;
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
+                    switch (eventArgs.ProgressStatus)
+                    {
+                    case ProgressStatus.Started:
+                        simulationAnalysisDetail.Status = "Simulation initializing ...";
+                        UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
+                        _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
+                        break;
+                    case ProgressStatus.Running:
+                        simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete)}%";
+                        UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+
+                        _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                        break;
+                    case ProgressStatus.Completed:
+                        simulationAnalysisDetail.Status = $"Simulation complete. {100}%";
+                        UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
+                        _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
+
+                        _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                        break;
+                    }
                     _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-                    break;
-                }
-            };
+                };
 
-            // resetting the report generation status.
-            var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
-            _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+                runner.SimulationLog += (sender, eventArgs) =>
+                {
+                    var message = eventArgs.MessageBuilder;
+                    if (LoggedMessages.Add(message.Message))
+                    {
+                        var dto = SimulationLogMapper.ToDTO(message);
+                        _unitOfWork.SimulationLogRepo.CreateLog(dto);
+                    }
+                    switch (message.Status)
+                    {
+                    case SimulationLogStatus.Warning:
+                        _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
+                        break;
+                    case SimulationLogStatus.Error:
+                    case SimulationLogStatus.Fatal:
+                        simulationAnalysisDetail.Status = message.Message;
+                        UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
+                        _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
+                        _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                        break;
+                    }
+                };
 
-            RunValidation(runner);
-            runner.Run(false);
+                // resetting the report generation status.
+                var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
+                _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
+                _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
-            return Task.CompletedTask;
+                RunValidation(runner);
+                runner.Run(false);
+            }
         }
 
         private void RunValidation(SimulationRunner runner)

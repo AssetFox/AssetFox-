@@ -18,14 +18,12 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class InventoryController : BridgeCareCoreBaseController
     {
-        private readonly IMaintainableAssetRepository _maintainableAssetRepository;
         private readonly IAssetData _assetData;
 
-        public InventoryController(IMaintainableAssetRepository maintainableAssetRepository, IEsecSecurity esecSecurity,
+        public InventoryController(IEsecSecurity esecSecurity,
             UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) :
             base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _maintainableAssetRepository = maintainableAssetRepository;
             _assetData = unitOfWork.AssetDataRepository;
         }
 
@@ -35,6 +33,8 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetInventory()
         {
             var data = new List<BMSIDAndBRKeyDTO>();
+
+            // TODO:  Need to figure out a way to make this more generic.  Another setting in appSettings.json?
 
             if (_assetData.KeyProperties.ContainsKey("BRKEY") && _assetData.KeyProperties.ContainsKey("BMSID"))
             {

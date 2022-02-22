@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateCalculatedAttributeLibrary();
             _testHelper.SetupDefaultHttpContext();
             _simulationAnalysisService =
-                new SimulationAnalysisService(_testHelper.UnitOfWork, _testHelper.MockHubService.Object, new());
+                new SimulationAnalysisService(_testHelper.UnitOfWork, new());
             /*_controller = new SimulationController(_simulationAnalysisSerivce,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,

@@ -431,6 +431,19 @@ export default class RemainingLifeLimitEditor extends Vue {
             this.selectedRemainingLifeLimitLibrary.id !== this.uuidNIL;
 
         if (this.hasScenario) {
+            this.remainingLifeLimits = this.selectedRemainingLifeLimitLibrary.remainingLifeLimits.map((remainingLifeLimit: RemainingLifeLimit) => ({
+                ...remainingLifeLimit, id: getNewGuid()
+            }));
+        } else {
+            this.remainingLifeLimits = clone(
+                this.selectedRemainingLifeLimitLibrary.remainingLifeLimits,
+            );
+        }
+    }
+
+    @Watch('stateScenarioRemainingLifeLimits')
+    onStateScenarioRemainingLifeLimitsChanged() {
+        if (this.hasScenario) {
             this.remainingLifeLimits = clone(this.stateScenarioRemainingLifeLimits);
         }
     }

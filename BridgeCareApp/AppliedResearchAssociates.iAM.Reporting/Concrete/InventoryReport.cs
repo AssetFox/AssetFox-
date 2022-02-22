@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             Status = "Report definition created.";
             Results = String.Empty;
             IsComplete = false;
-            _networkId = _unitofwork.NetworkRepo.GetPennDotNetwork().Id;
+            _networkId = _unitofwork.NetworkRepo.GetMainNetwork().Id;
         }
 
         public async Task Run(string parameters)
@@ -145,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     Errors.Add($"Unable to find BMSID {parameters.BMSID}.  Will not use {parameters.BRKey}");
                     return false;
                 }
-                if (BRKeyGuid.SegmentId != BMSIDGuid.SegmentId)
+                if (BRKeyGuid.AssetId != BMSIDGuid.AssetId)
                 {
                     // Keys were provided for two different assets
                     Errors.Add($"The BRKey {parameters.BRKey} and BMSID {parameters.BMSID}.  No report will be provided");

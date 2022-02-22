@@ -57,17 +57,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList());
         }
 
-        public NetworkEntity GetPennDotNetwork()
+        public NetworkEntity GetMainNetwork()
         {
-            var penndotNetworkId = new Guid(DataPersistenceConstants.PennDotNetworkId);
+            var mainNetworkId = new Guid(_unitOfWork.Config.GetSection("PrimaryNetwork").Value);
 
-            if (!_unitOfWork.Context.Network.Any(_ => _.Id == penndotNetworkId))
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == mainNetworkId))
             {
                 return null;
             }
 
             return _unitOfWork.Context.Network
-                .Single(_ => _.Id == penndotNetworkId);
+                .Single(_ => _.Id == mainNetworkId);
         }
 
         public bool CheckPennDotNetworkHasData()

@@ -4,7 +4,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generic
 {
     public class KeySegmentDatum
     {
-        public Guid SegmentId { get; set; }
+        public Guid AssetId { get; set; }
         public SegmentAttributeDatum KeyValue { get; set; }
     }
 }

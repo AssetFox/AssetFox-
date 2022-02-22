@@ -201,14 +201,6 @@
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-toolbar-title class="white--text" v-if="authenticated">
-                    <v-btn
-                        @click="testNotification"
-                        class="ara-blue-bg white--text"
-                    >
-                        Test Notif
-                    </v-btn>
-                </v-toolbar-title>
-                <v-toolbar-title class="white--text" v-if="authenticated">
                     <span class="font-weight-light">Hello, </span>
                     <span>{{ username }}</span>
                 </v-toolbar-title>
@@ -700,10 +692,6 @@ export default class AppComponent extends Vue {
 
     onRemoveNotification(id: number) {
         this.removeNotificationAction(id);
-    }
-
-    testNotification() {
-        this.loadNotificationsActions();
     }
 }
 </script>

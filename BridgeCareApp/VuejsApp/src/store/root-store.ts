@@ -27,7 +27,6 @@ import analysisDefaultDataModule from '@/store-modules/analysisDefaultData.modul
 import investmentDefaultDataModule from '@/store-modules/investmentDefaultData.module';
 import calculatedAttributeModule from '@/store-modules/calculated-attribute.module';
 import notificationModule from '@/store-modules/notification.module';
-import testNotificationModule from '@/store-modules/testNotification.module';
 
 Vue.use(Vuex);
 
@@ -59,6 +58,5 @@ export default new Vuex.Store({
         investmentDefaultDataModule,
         calculatedAttributeModule,
         notificationModule,
-        testNotificationModule,
     },
 });

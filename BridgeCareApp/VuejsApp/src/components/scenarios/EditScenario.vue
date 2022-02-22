@@ -208,7 +208,10 @@ export default class EditScenario extends Vue {
                             },
                         };
 
-                        if (navigationTab.tabName === 'Remaining Life Limit') {
+                        if (navigationTab.tabName === 'Remaining Life Limit' 
+                            || navigationTab.tabName === 'Target Conditional Goals' 
+                            || navigationTab.tabName === 'Deficient Conditional Goal' 
+                            || navigationTab.tabName === 'Calculated Attribute') {
                             navigationTab['visible'] = vm.isAdmin;
                         }
 

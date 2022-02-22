@@ -456,6 +456,10 @@ export default class Scenarios extends Vue {
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.authenticationModule.isCWOPA) isCWOPA: boolean;
 
+    @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('addWarningNotification') addWarningNotificationAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
+    @Action('addInfoNotification') addInfoNotificationAction: any;
     @Action('getScenarios') getScenariosAction: any;
     @Action('createScenario') createScenarioAction: any;
     @Action('cloneScenario') cloneScenarioAction: any;

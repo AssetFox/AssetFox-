@@ -1,52 +1,30 @@
 <template>
     <v-layout column>
-        <v-layout column>
-            <div
-                id="app"
-                class="ara-light-gray-bg"
-                v-cloak
-                @drop.prevent="onSelect($event.dataTransfer.files)"
-                @dragover.prevent
-            >
+        <v-layout column>           
+            <div id="app" class="ara-light-gray-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
                 <v-layout align-center fill-height justify-center>
                     <div class="drag-drop-area">Drag & Drop File Here</div>
-                </v-layout>
+                </v-layout>                
             </div>
             <v-flex xs12>
-                <v-layout justify-start>
-                    <v-btn
-                        @click="chooseFiles()"
-                        class="ara-blue-bg white--text"
-                    >
+                <v-layout justify-start>                  
+                    <v-btn @click="chooseFiles()" class="ara-blue-bg white--text">
                         Select File
                     </v-btn>
                 </v-layout>
             </v-flex>
             <div v-show="true">
-                <input
-                    @change="onSelect($event.target.files)"
-                    id="file-select"
-                    type="file"
-                    hidden
-                />
+                <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden/>
             </div>
-        </v-layout>
+        </v-layout>        
         <div class="files-table">
-            <v-data-table
-                :headers="tableHeaders"
-                :items="files"
-                class="elevation-1 fixed-header v-table__overflow"
-                hide-actions
-            >
+            <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow"
+                          hide-actions>
                 <template slot="items" slot-scope="props">
                     <td>
                         <v-layout column>
-                            <span>{{ props.item.name }}</span>
-                            <div>
-                                <strong>{{
-                                    formatBytesSize(props.item.size)
-                                }}</strong>
-                            </div>
+                            <span>{{props.item.name}}</span>
+                            <div><strong>{{ formatBytesSize(props.item.size) }}</strong></div>
                         </v-layout>
                     </td>
                     <td>
@@ -62,12 +40,12 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { Component, Watch, Prop } from 'vue-property-decorator';
-import { Action } from 'vuex-class';
-import { hasValue } from '@/shared/utils/has-value-util';
-import { getPropertyValues } from '@/shared/utils/getter-utils';
-import { clone, prop } from 'ramda';
-import { DataTableHeader } from '@/shared/models/vue/data-table-header';
+import {Component, Watch, Prop} from 'vue-property-decorator';
+import {Action} from 'vuex-class';
+import {hasValue} from '@/shared/utils/has-value-util';
+import {getPropertyValues} from '@/shared/utils/getter-utils';
+import {clone, prop} from 'ramda';
+import {DataTableHeader} from '@/shared/models/vue/data-table-header';
 import { formatBytes } from '@/shared/utils/math-utils';
 
 @Component
@@ -79,35 +57,22 @@ export default class FileSelector extends Vue {
 
     fileSelect: HTMLInputElement = {} as HTMLInputElement;
     tableHeaders: DataTableHeader[] = [
-        {
-            text: 'Selected File',
-            value: 'name',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '150px',
-        },
-        {
-            text: '',
-            value: '',
-            align: 'center',
-            sortable: false,
-            class: '',
-            width: '25px',
-        },
+        {text: 'Selected File', value: 'name', align: 'left', sortable: false, class: '', width: '150px'},
+        {text: '', value: '', align: 'center', sortable: false, class: '', width: '25px'}
     ];
     files: File[] = [];
-    file: File | null = null;
+    file: File | null = null;   
 
-    chooseFiles() {
-        if (document != null) {
+    chooseFiles(){
+        if(document != null)
+        {
             document.getElementById('file-select')!.click();
         }
     }
 
     @Watch('file')
-    onFileChanged() {
-        this.files = hasValue(this.file) ? [this.file as File] : [];
+    onFileChanged() {        
+        this.files = hasValue(this.file) ? [this.file as File] : [];                                   
         this.$emit('submit', this.file);
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     }
@@ -118,17 +83,14 @@ export default class FileSelector extends Vue {
             this.files = [];
             this.file = null;
             this.fileSelect.value = '';
-            (<HTMLInputElement>document.getElementById('file-select')!).value =
-                '';
+            (<HTMLInputElement>document.getElementById('file-select')!).value = '';
         }
     }
 
     mounted() {
         // couple fileSelect object with #file-select input element
-        this.fileSelect = document.getElementById(
-            'file-select',
-        ) as HTMLInputElement;
-    }
+        this.fileSelect = document.getElementById('file-select') as HTMLInputElement;        
+    }    
 
     /**
      * File input change event handler

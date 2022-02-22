@@ -1,29 +1,25 @@
 ﻿<template>
-    <v-dialog max-width="500px" scrollable v-model="dialogData.showModal">
-        <v-card>
-            <v-card-title primary-title>
-                <v-layout column>
-                    <v-flex>
-                        <v-layout justify-center>
-                            <h3 class="grey--text">Available Reports</h3>
-                        </v-layout>
-                    </v-flex>
-                    <v-progress-linear
-                        :indeterminate="true"
-                        v-if="isDownloading"
-                    ></v-progress-linear>
-                    <v-flex>
-                        <span class="grey--text" v-if="isDownloading"
-                            >Downloading... You can close this window, it will
-                            not stop the report generation</span
-                        >
-                    </v-flex>
-                </v-layout>
-            </v-card-title>
-            <v-divider></v-divider>
-            <v-card-text>
-                <v-layout align-start row>
-                    <v-chip
+  <v-dialog max-width="500px"
+            scrollable
+            v-model="dialogData.showModal">
+    <v-card>
+      <v-card-title primary-title>
+        <v-layout column>
+          <v-flex>
+            <v-layout justify-center>
+              <h3 class="grey--text">Available Reports</h3>
+            </v-layout>
+          </v-flex>
+          <v-progress-linear :indeterminate="true" v-if="isDownloading"></v-progress-linear>
+          <v-flex>
+            <span class="grey--text" v-if="isDownloading">Downloading... You can close this window, it will not stop the report generation</span>
+          </v-flex>
+        </v-layout>
+      </v-card-title>
+      <v-divider></v-divider>
+      <v-card-text>
+          <v-layout align-start row>
+            <v-chip
                         color="ara-blue-bg"
                         text-color="white"
                         @click="onGenerateSummaryReport(true)"
@@ -31,45 +27,38 @@
                         Generate Summary Report
                     </v-chip>
                     <v-divider vertical></v-divider>
-                    <v-chip
-                        color="ara-blue-bg"
-                        text-color="white"
-                        @click="onDownloadSimulationLog(true)"
-                    >
-                        Simulation Log
-                    </v-chip>
-                </v-layout>
-                <v-alert
-                    :value="errorMessage !== ''"
-                    color="error"
-                    icon="warning"
-                    outline
-                >
-                    {{ errorMessage }}
-                </v-alert>
-            </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions>
-                <v-chip
-                    @click="onDownloadReports()"
-                    class="green darken-2 white--text"
-                >
-                    Download summary report
-                </v-chip>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+            <v-chip color='ara-blue-bg' text-color='white' @click="onDownloadSimulationLog(true)">
+                            Simulation Log
+                        </v-chip>
+          </v-layout>
+        <v-alert :value="errorMessage !== ''"
+                 color="error"
+                 icon="warning"
+                 outline>
+          {{ errorMessage }}
+        </v-alert>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions>
+          <v-chip
+                 @click="onDownloadReports()"
+                 class="green darken-2 white--text">
+            Download summary report
+          </v-chip>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { Component, Prop } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
-import { ReportsDownloaderDialogData } from '@/shared/models/modals/reports-downloader-dialog-data';
+import {Component, Prop} from 'vue-property-decorator';
+import {Action, State} from 'vuex-class';
+import {ReportsDownloaderDialogData} from '@/shared/models/modals/reports-downloader-dialog-data';
 import FileDownload from 'js-file-download';
 import ReportsService from '@/services/reports.service';
-import { AxiosResponse } from 'axios';
-import { hasValue } from '@/shared/utils/has-value-util';
+import {AxiosResponse} from 'axios';
+import {hasValue} from '@/shared/utils/has-value-util';
 
 @Component({})
 export default class ReportsDownloaderDialog extends Vue {
@@ -80,10 +69,7 @@ export default class ReportsDownloaderDialog extends Vue {
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
 
-    reports: string[] = [
-        /*'Detailed Report', */ 'Summary Report',
-        'Simulation Log',
-    ];
+    reports: string[] = [/*'Detailed Report', */'Summary Report', 'Simulation Log'];
     errorMessage: string = '';
     isDownloading: boolean = false;
 

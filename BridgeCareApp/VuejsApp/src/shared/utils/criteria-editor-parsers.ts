@@ -198,7 +198,7 @@ function createCriteriaObject(
             break;
             //throw new Error('The criteria expression is invalid.');
         }
-        if (expression[currentCharIndex] == "'") {
+        if(expression[currentCharIndex] == "'"){
             quotesClosed = !quotesClosed;
         }
         if (expression[currentCharIndex] === '(') {
@@ -293,11 +293,13 @@ function createCriteriaObject(
                 }
             }
         } else {
-            if (quotesClosed) {
-                if (!invalidCharRegex.test(expression[currentCharIndex])) {
+            if(quotesClosed){
+                if(!invalidCharRegex.test(expression[currentCharIndex])){
                     currentClause = `${currentClause}${expression[currentCharIndex]}`;
                 }
-            } else {
+            }
+            else
+            {
                 currentClause = `${currentClause}${expression[currentCharIndex]}`;
             }
 
@@ -307,7 +309,7 @@ function createCriteriaObject(
                 hasValue(currentClause) &&
                 currentCharIndex === expression.length
             ) {
-                if (hasAttributeToTest(currentClause, currentCharIndex)) {
+                if(hasAttributeToTest(currentClause, currentCharIndex)){
                     criteria.children!.push(
                         createCriteriaTypeObject(
                             queryBuilderTypes.QueryBuilderRule,
@@ -355,17 +357,20 @@ function createCriteriaTypeObject(
     } as CriteriaType;
 }
 
-function hasAttributeToTest(clause: string, currentCharIndex: number): boolean {
-    if (clause.startsWith('[') && clause.indexOf(']') == -1) {
+
+function hasAttributeToTest(clause: string, currentCharIndex: number): boolean{
+    
+    if(clause.startsWith('[') && clause.indexOf(']') == -1){
         return false;
-    } else {
+    }
+    else {
         var hasOp = false;
         operators.forEach(op => {
-            if (clause.includes(op)) {
+            if(clause.includes(op)){
                 hasOp = true;
             }
         });
-        if (!hasOp && !clause.endsWith(' ')) {
+        if(!hasOp && !clause.endsWith(' ')){
             return false;
         }
     }

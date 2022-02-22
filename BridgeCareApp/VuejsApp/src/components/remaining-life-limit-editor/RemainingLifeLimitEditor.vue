@@ -13,14 +13,18 @@
                         New Library
                     </v-btn>
                     <v-select
-                        v-if="!hasSelectedLibrary || hasScenario"
+                        v-if="
+                            !hasSelectedLibrary || hasScenario
+                        "
                         :items="selectListItems"
                         label="Select a Remaining Life Limit Library"
                         outline
                         v-model="selectItemValue"
                     />
                     <v-text-field
-                        v-if="hasSelectedLibrary && !hasScenario"
+                        v-if="
+                            hasSelectedLibrary && !hasScenario
+                        "
                         label="Library Name"
                         v-model="selectedRemainingLifeLimitLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
@@ -37,7 +41,10 @@
                     </v-text-field>
                 </v-flex>
             </v-layout>
-            <v-flex xs3 v-show="hasSelectedLibrary || hasScenario">
+            <v-flex
+                xs3
+                v-show="hasSelectedLibrary || hasScenario"
+            >
                 <v-btn
                     @click="onShowCreateRemainingLifeLimitDialog"
                     class="ara-blue-bg white--text"
@@ -45,7 +52,10 @@
                 >
             </v-flex>
         </v-flex>
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+        <v-flex
+            xs12
+            v-show="hasSelectedLibrary || hasScenario"
+        >
             <div class="remaining-life-limit-data-table">
                 <v-data-table
                     :headers="gridHeaders"
@@ -162,12 +172,7 @@
                         outline
                         rows="4"
                         v-model="selectedRemainingLifeLimitLibrary.description"
-                        @input="
-                            selectedRemainingLifeLimitLibrary = {
-                                ...selectedRemainingLifeLimitLibrary,
-                                description: $event,
-                            }
-                        "
+                        @input='selectedRemainingLifeLimitLibrary = {...selectedRemainingLifeLimitLibrary, description: $event}'
                     >
                     </v-textarea>
                 </v-flex>
@@ -206,8 +211,7 @@
                 >
                     Delete Library
                 </v-btn>
-                <v-btn
-                    :disabled="!hasUnsavedChanges"
+                <v-btn :disabled='!hasUnsavedChanges'
                     @click="onDiscardChanges"
                     class="ara-orange-bg white--text"
                     v-show="hasSelectedLibrary || hasScenario"
@@ -427,43 +431,16 @@ export default class RemainingLifeLimitEditor extends Vue {
             this.selectedRemainingLifeLimitLibrary.id !== this.uuidNIL;
 
         if (this.hasScenario) {
-            this.remainingLifeLimits = this.selectedRemainingLifeLimitLibrary.remainingLifeLimits.map(
-                (remainingLifeLimit: RemainingLifeLimit) => ({
-                    ...remainingLifeLimit,
-                    id: getNewGuid(),
-                }),
-            );
-        } else {
-            this.remainingLifeLimits = clone(
-                this.selectedRemainingLifeLimitLibrary.remainingLifeLimits,
-            );
-        }
-    }
-
-    @Watch('stateScenarioRemainingLifeLimits')
-    onStateScenarioRemainingLifeLimitsChanged() {
-        if (this.hasScenario) {
-            this.remainingLifeLimits = clone(
-                this.stateScenarioRemainingLifeLimits,
-            );
+            this.remainingLifeLimits = clone(this.stateScenarioRemainingLifeLimits);
         }
     }
     @Watch('remainingLifeLimits')
     onGridDataChanged() {
         const hasUnsavedChanges: boolean = this.hasScenario
-            ? hasUnsavedChangesCore(
-                  '',
-                  this.remainingLifeLimits,
-                  this.stateScenarioRemainingLifeLimits,
-              )
-            : hasUnsavedChangesCore(
-                  '',
-                  {
-                      ...clone(this.selectedRemainingLifeLimitLibrary),
-                      remainingLifeLimits: clone(this.remainingLifeLimits),
-                  },
-                  this.stateSelectedRemainingLifeLimitLibrary,
-              );
+            ? hasUnsavedChangesCore('', this.remainingLifeLimits, this.stateScenarioRemainingLifeLimits)
+            : hasUnsavedChangesCore('',
+                { ...clone(this.selectedRemainingLifeLimitLibrary), remainingLifeLimits: clone(this.remainingLifeLimits) },
+                this.stateSelectedRemainingLifeLimitLibrary);
 
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
@@ -497,15 +474,11 @@ export default class RemainingLifeLimitEditor extends Vue {
         };
     }
 
-    onSubmitCreateRemainingLifeLimitLibraryDialogResult(
-        library: RemainingLifeLimitLibrary,
-    ) {
-        this.createRemainingLifeLimitLibraryDialogData = clone(
-            emptyCreateRemainingLifeLimitLibraryDialogData,
-        );
+    onSubmitCreateRemainingLifeLimitLibraryDialogResult(library: RemainingLifeLimitLibrary) {
+        this.createRemainingLifeLimitLibraryDialogData = clone(emptyCreateRemainingLifeLimitLibraryDialogData);
 
         if (!isNil(library)) {
-            this.upsertRemainingLifeLimitLibraryAction({ library: library });
+            this.upsertRemainingLifeLimitLibraryAction({library: library});
         }
     }
 
@@ -517,28 +490,16 @@ export default class RemainingLifeLimitEditor extends Vue {
     }
 
     onAddRemainingLifeLimit(newRemainingLifeLimit: RemainingLifeLimit) {
-        this.createRemainingLifeLimitDialogData = clone(
-            emptyCreateRemainingLifeLimitDialogData,
-        );
+        this.createRemainingLifeLimitDialogData = clone(emptyCreateRemainingLifeLimitDialogData);
 
         if (!isNil(newRemainingLifeLimit)) {
-            this.remainingLifeLimits = prepend(
-                newRemainingLifeLimit,
-                this.remainingLifeLimits,
-            );
+            this.remainingLifeLimits = prepend(newRemainingLifeLimit, this.remainingLifeLimits);
         }
     }
 
-    onEditRemainingLifeLimitProperty(
-        remainingLifeLimit: RemainingLifeLimit,
-        property: string,
-        value: any,
-    ) {
+    onEditRemainingLifeLimitProperty(remainingLifeLimit: RemainingLifeLimit, property: string, value: any) {
         this.remainingLifeLimits = update(
-            findIndex(
-                propEq('id', remainingLifeLimit.id),
-                this.remainingLifeLimits,
-            ),
+            findIndex(propEq('id', remainingLifeLimit.id), this.remainingLifeLimits),
             setItemPropertyValue(property, value, remainingLifeLimit),
             this.remainingLifeLimits,
         );
@@ -558,14 +519,9 @@ export default class RemainingLifeLimitEditor extends Vue {
     onEditRemainingLifeLimitCriterionLibrary(
         criterionLibrary: CriterionLibrary,
     ) {
-        this.criterionLibraryEditorDialogData = clone(
-            emptyCriterionLibraryEditorDialogData,
-        );
+        this.criterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
 
-        if (
-            !isNil(criterionLibrary) &&
-            this.selectedRemainingLifeLimit.id !== this.uuidNIL
-        ) {
+        if (!isNil(criterionLibrary) && this.selectedRemainingLifeLimit.id !== this.uuidNIL) {
             this.remainingLifeLimits = update(
                 findIndex(
                     propEq('id', this.selectedRemainingLifeLimit.id),
@@ -585,9 +541,9 @@ export default class RemainingLifeLimitEditor extends Vue {
     onUpsertRemainingLifeLimitLibrary() {
         const library: RemainingLifeLimitLibrary = {
             ...clone(this.selectedRemainingLifeLimitLibrary),
-            remainingLifeLimits: clone(this.remainingLifeLimits),
+            remainingLifeLimits: clone(this.remainingLifeLimits)
         };
-        this.upsertRemainingLifeLimitLibraryAction({ library: library });
+        this.upsertRemainingLifeLimitLibraryAction({ library: library, });
     }
 
     onUpsertScenarioRemainingLifeLimits() {
@@ -601,9 +557,7 @@ export default class RemainingLifeLimitEditor extends Vue {
         this.selectItemValue = null;
         setTimeout(() => {
             if (this.hasScenario) {
-                this.remainingLifeLimits = clone(
-                    this.stateScenarioRemainingLifeLimits,
-                );
+                this.remainingLifeLimits = clone(this.stateScenarioRemainingLifeLimits);
             }
         });
     }
@@ -646,8 +600,8 @@ export default class RemainingLifeLimitEditor extends Vue {
             return !(
                 this.rules['generalRules'].valueIsNotEmpty(
                     this.selectedRemainingLifeLimitLibrary.name,
-                ) === true && dataIsValid
-            );
+                ) === true &&
+                dataIsValid);
         }
 
         return !dataIsValid;

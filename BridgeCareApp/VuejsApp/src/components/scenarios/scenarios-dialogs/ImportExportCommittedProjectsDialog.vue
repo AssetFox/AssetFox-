@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="500px" persistent v-model="showDialog">
+    <v-dialog max-width='500px' persistent v-model='showDialog'>
         <v-card>
             <v-card-title>
                 <v-layout justify-center>
@@ -8,56 +8,30 @@
             </v-card-title>
             <v-card-text>
                 <v-layout column>
-                    <CommittedProjectsFileSelector
-                        :closed="closed"
-                        @submit="onSubmitFileSelectorFile"
-                    />
+                    <CommittedProjectsFileSelector :closed='closed' @submit='onSubmitFileSelectorFile' />
                     <v-flex xs12>
                         <v-layout justify-start>
-                            <v-checkbox
-                                label="No Treatment"
-                                v-model="applyNoTreatment"
-                            ></v-checkbox>
+                            <v-checkbox label='No Treatment' v-model='applyNoTreatment'></v-checkbox>
                         </v-layout>
                     </v-flex>
                     <span>
                         <p>
-                            Warning: Uploading new committed projects will
-                            override ALL previous commitments. Committed
-                            projects may take a few minutes to process. You will
-                            receive an email when this process is complete.
+                            Warning: Uploading new committed projects will override ALL previous commitments.
+                            Committed projects may take a few minutes to process. You will receive an email when this process is complete.
                         </p>
                     </span>
                 </v-layout>
             </v-card-text>
             <v-card-actions>
                 <v-layout justify-space-between row>
-                    <v-btn
-                        @click="onSubmit(true)"
-                        class="ara-blue-bg white--text"
-                        >Upload</v-btn
-                    >
-                    <v-btn
-                        @click="onSubmit(true, true)"
-                        class="ara-blue-bg white--text"
-                        >Export</v-btn
-                    >
-                    <v-btn
-                        @click="onSubmit(false)"
-                        class="ara-orange-bg white--text"
-                        >Cancel</v-btn
-                    >
+                    <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'>Upload</v-btn>
+                    <v-btn @click='onSubmit(true, true)' class='ara-blue-bg white--text'>Export</v-btn>
+                    <v-btn @click='onSubmit(false)' class='ara-orange-bg white--text'>Cancel</v-btn>
                     <v-tooltip top>
-                        <template slot="activator">
-                            <v-btn
-                                @click="onDelete"
-                                class="ara-orange-bg white--text"
-                                >Delete</v-btn
-                            >
+                        <template slot='activator'>
+                            <v-btn @click='onDelete' class='ara-orange-bg white--text'>Delete</v-btn>
                         </template>
-                        <span
-                            >Delete scenario's current committed projects</span
-                        >
+                        <span>Delete scenario's current committed projects</span>
                     </v-tooltip>
                 </v-layout>
             </v-card-actions>
@@ -65,7 +39,7 @@
     </v-dialog>
 </template>
 
-<script lang="ts">
+<script lang='ts'>
 import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
 import { Action } from 'vuex-class';

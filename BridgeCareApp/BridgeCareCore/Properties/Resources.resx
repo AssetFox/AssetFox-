@@ -170,10 +170,10 @@
     <comment>Label for Summary TABs</comment>
   </data>
   <data name="ClosedBridgeCountByBPN" xml:space="preserve">
-    <value>Closed Bridge Count By BPN</value>
+    <value>Close BPN Count</value>
   </data>
   <data name="ClosedBridgeDeckAreaByBPN" xml:space="preserve">
-    <value>Closed Bridge Deck Area By BPN</value>
+    <value>Closed BPN DA</value>
   </data>
   <data name="CombinedPostedAndClosed" xml:space="preserve">
     <value>Combined Posted and Closed</value>
@@ -339,7 +339,7 @@ Condition By Deck Area TAB</comment>
     <value>Posted Bridge Count By BPN</value>
   </data>
   <data name="PostedBridgeDeckAreaByBPN" xml:space="preserve">
-    <value>Posted Bridge Deck Area By BPN</value>
+    <value>Posted BPN DA</value>
   </data>
   <data name="RemainingBudget" xml:space="preserve">
     <value>Remaining Budget</value>

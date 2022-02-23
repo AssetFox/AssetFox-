@@ -377,7 +377,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
             var minCActionCallDecider = MinCValue.minOfCulvDeckSubSuper;
-            var familyId = int.Parse(selectedSection.ValuePerTextAttribute["FAMILY_ID"]);
+            int.TryParse(selectedSection.ValuePerTextAttribute["FAMILY_ID"], out var familyId);
             var familyIdLessThanEleven = familyId < 11;
             if (familyId > 10)
             {

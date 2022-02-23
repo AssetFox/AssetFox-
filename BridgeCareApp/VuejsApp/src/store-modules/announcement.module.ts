@@ -1,5 +1,5 @@
 import { Announcement } from '@/shared/models/iAM/announcement';
-import { any, append, clone, findIndex, propEq, reject, update } from 'ramda';
+import { any, append, clone, findIndex, prepend, propEq, reject, update } from 'ramda';
 import AnnouncementService from '@/services/announcement.service';
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -20,7 +20,7 @@ const mutations = {
     state.announcements = any(propEq('id', announcement.id), state.announcements)
       ? update(findIndex(propEq('id', announcement.id), state.announcements),
         announcement, state.announcements)
-      : append(announcement, state.announcements);
+      : prepend(announcement, state.announcements);
   },
   deletedAnnouncementMutator(state: any, deletedAnnouncementId: string) {
     if (any(propEq('id', deletedAnnouncementId), state.announcements)) {
@@ -37,7 +37,6 @@ const actions = {
     await AnnouncementService.getAnnouncements().then((response: AxiosResponse<any[]>) => {
       if (hasValue(response, 'data')) {
         commit('announcementsMutator', response.data as Announcement[]);
-        commit('sortAnnouncementsMutator');
       }
     });
   },
@@ -48,7 +47,6 @@ const actions = {
           const message: string = any(propEq('id', payload.announcement.id), state.announcements)
             ? 'Updated announcement' : 'Added announcement';
           commit('addedOrUpdatedAnnouncementMutator', payload.announcement);
-          commit('sortAnnouncementsMutator');
           dispatch('setSuccessMessage', { message: message });
         }
       });

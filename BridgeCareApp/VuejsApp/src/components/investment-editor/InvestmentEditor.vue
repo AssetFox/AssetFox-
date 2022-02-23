@@ -76,7 +76,7 @@
                 <v-flex xs6>
                     <v-layout justify-space-between>
                         <v-btn @click='onShowEditBudgetsDialog' class='ara-blue-bg white--text'>
-                            Edit Budgets
+                            Edit Budget Criteria
                         </v-btn>
                         <v-btn :disabled='budgets.length === 0'
                                @click='onAddBudgetYear'

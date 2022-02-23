@@ -448,7 +448,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 CreateAuthorizedController();
 
                 // Act
-                var result = await _controller.GetSimulations(_testHelper.TestNetwork.Id);
+                var result = await _controller.GetSimulations();
 
                 // Assert
                 Assert.IsType<OkObjectResult>(result);
@@ -534,7 +534,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 CreateAuthorizedController();
 
                 // Act
-                var result = await _controller.GetSimulations(_testHelper.TestNetwork.Id);
+                var result = await _controller.GetSimulations();
 
                 // Assert
                 var okObjResult = result as OkObjectResult;
@@ -612,7 +612,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 CreateAuthorizedController();
                 _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
 
-                var getResult = await _controller.GetSimulations(_testHelper.TestNetwork.Id);
+                var getResult = await _controller.GetSimulations();
                 var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<SimulationDTO>));
 
@@ -661,7 +661,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 CreateAuthorizedController();
                 _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
 
-                var getResult = await _controller.GetSimulations(_testHelper.TestNetwork.Id);
+                var getResult = await _controller.GetSimulations();
                 var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                     typeof(List<SimulationDTO>));
 

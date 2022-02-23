@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             _mockedContext.Setup(_ => _.MaintainableAsset).Returns(_mockedMaintainableAssetEntitySet.Object);
             _mockedContext.Setup(_ => _.AggregatedResult).Returns(_mockedAggregatedResultsEntitySet.Object);
             var mockedRepo = new Mock<UnitOfDataPersistenceWork>((new Mock<IConfiguration>()).Object, _mockedContext.Object);
-            mockedRepo.Setup(_ => _.NetworkRepo.GetPennDotNetwork()).Returns(_testData.TestNetwork);
+            mockedRepo.Setup(_ => _.NetworkRepo.GetMainNetwork()).Returns(_testData.TestNetwork);
             _testRepo = mockedRepo.Object;
         }
 
@@ -56,8 +56,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             // Assert
             Assert.Equal(2, repo.KeyProperties.Count());
             Assert.Equal(5, repo.KeyProperties["BRKEY"].Count());
-            Assert.NotNull(repo.KeyProperties["BRKEY"].FirstOrDefault(_ => _.KeyValue.Value == "2").SegmentId == checkGuid);
-            Assert.NotNull(repo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256").SegmentId == checkGuid);
+            Assert.NotNull(repo.KeyProperties["BRKEY"].FirstOrDefault(_ => _.KeyValue.Value == "2").AssetId == checkGuid);
+            Assert.NotNull(repo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256").AssetId == checkGuid);
         }
 
         [Fact]

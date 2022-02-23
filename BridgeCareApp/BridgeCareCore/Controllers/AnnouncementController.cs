@@ -24,7 +24,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetAnnouncements")]
-        [Authorize]
         public async Task<IActionResult> Announcements()
         {
             try

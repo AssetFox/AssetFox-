@@ -104,7 +104,7 @@ const actions = {
                     commit('budgetPriorityLibraryMutator', library);
                     commit('selectedBudgetPriorityLibraryMutator', library.id);
 
-                    dispatch('setSuccessMessage', { message: message });
+                    dispatch('addSuccessNotification', { message: message });
                 }
             },
         );
@@ -129,7 +129,7 @@ const actions = {
                         budgetPriorityLibraries,
                     );
 
-                    dispatch('setSuccessMessage', {
+                    dispatch('addSuccessNotification', {
                         message: 'Deleted budget priority library',
                     });
                 }
@@ -164,7 +164,7 @@ const actions = {
                     'scenarioBudgetPrioritiesMutator',
                     payload.scenarioBudgetPriorities,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Modified scenario budget priorities',
                 });
             }

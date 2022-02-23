@@ -99,7 +99,7 @@ import { CriterionLibrary, emptyCriterionLibrary } from '@/shared/models/iAM/cri
 export default class EditBudgetsDialog extends Vue {
     @Prop() dialogData: EditBudgetsDialogData;
 
-    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
 
     editBudgetsDialogGridHeaders: DataTableHeader[] = [
         { text: 'Budget', value: 'name', sortable: false, align: 'center', class: '', width: '' },

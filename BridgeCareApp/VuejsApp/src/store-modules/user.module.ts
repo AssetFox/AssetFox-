@@ -113,7 +113,7 @@ const actions = {
     //         .then((response: AxiosResponse) => {
     //             if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
     //                 commit('updatedUserMutator', payload.user);
-    //                 dispatch('setSuccessMessage', {message: 'Updated user'});
+    //                 dispatch('addSuccessNotification', {message: 'Updated user'});
     //             }
     //         });
     // },
@@ -125,7 +125,9 @@ const actions = {
                     http2XX.test(response.status.toString())
                 ) {
                     commit('deletedUserMutator', payload.userId);
-                    dispatch('setSuccessMessage', { message: 'Deleted user' });
+                    dispatch('addSuccessNotification', {
+                        message: 'Deleted user',
+                    });
                 }
             },
         );
@@ -151,7 +153,10 @@ const actions = {
                             // @ts-ignore
                             !store.state.authenticationModule.isAdmin
                         ) {
-                            dispatch('setInfoMessage', { message });
+                            dispatch('addInfoNotification', {
+                                message: 'Access Denied.',
+                                longMessage: message,
+                            });
                         }
                     }
                 },
@@ -183,7 +188,7 @@ const actions = {
                     'updatedUserCriteriaFilterMutator',
                     payload.userCriteriaFilter,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Updated user criteria filter',
                 });
             }
@@ -201,7 +206,7 @@ const actions = {
                     'revokeUsersCriteriaFilterMutator',
                     payload.userCriteriaId,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Deleted user criteria filter',
                 });
             }

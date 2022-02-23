@@ -135,7 +135,7 @@ const actions = {
                     'selectedRemainingLifeLimitLibraryMutator',
                     payload.library.id,
                 );
-                dispatch('setSuccessMessage', { message: message });
+                dispatch('addSuccessNotification', { message: message });
             }
         });
     },
@@ -167,7 +167,7 @@ const actions = {
                     'scenarioRemainingLifeLimitMutator',
                     payload.scenarioRemainingLifeLimits,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Modified remaining life minits',
                 });
             }
@@ -188,7 +188,7 @@ const actions = {
                     'deletedRemainingLifeLimitLibraryMutator',
                     payload.libraryId,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Deleted remaining life limit library',
                 });
             }

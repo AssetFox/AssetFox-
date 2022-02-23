@@ -62,18 +62,18 @@ import {hasValue} from '@/shared/utils/has-value-util';
 
 @Component({})
 export default class ReportsDownloaderDialog extends Vue {
-  @Prop() dialogData: ReportsDownloaderDialogData;
+    @Prop() dialogData: ReportsDownloaderDialogData;
 
-  @State(state => state.busyModule.isBusy) isBusy: boolean;
+    @State(state => state.busyModule.isBusy) isBusy: boolean;
 
-  @Action('setSuccessMessage') setSuccessMessageAction: any;
-  @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
 
-  reports: string[] = [/*'Detailed Report', */'Summary Report', 'Simulation Log'];
-  errorMessage: string = '';
-  isDownloading: boolean = false;
+    reports: string[] = [/*'Detailed Report', */'Summary Report', 'Simulation Log'];
+    errorMessage: string = '';
+    isDownloading: boolean = false;
 
-  async onGenerateSummaryReport(download: boolean) {
+    async onGenerateSummaryReport(download: boolean) {
         if (download) {
             this.errorMessage = '';
             this.isDownloading = true;
@@ -84,12 +84,13 @@ export default class ReportsDownloaderDialog extends Vue {
             ).then((response: AxiosResponse<any>) => {
                 this.isDownloading = false;
                 if (response.status == 200) {
-                    this.setSuccessMessageAction({
-                        message: 'Summary report is getting generated',
+                    this.addSuccessNotificationAction({
+                        message: 'Summary report is being generated',
                     });
                 } else {
-                    this.setErrorMessageAction({
-                        message:
+                    this.addErrorNotificationAction({
+                        message: 'Failed to generate report.',
+                        longMessage:
                             'Failed to generate the summary report. Make sure the scenario has been run',
                     });
                 }
@@ -109,49 +110,60 @@ export default class ReportsDownloaderDialog extends Vue {
         ).then((response: AxiosResponse<any>) => {
             this.isDownloading = false;
             if (hasValue(response, 'data')) {
-                this.setSuccessMessageAction({ message: 'Report downloaded' });
+                this.addSuccessNotificationAction({
+                    message: 'Report downloaded',
+                });
                 FileDownload(
                     response.data,
                     `Summary Report ${this.dialogData.name}.xlsx`,
                 );
             } else {
-                this.setErrorMessageAction({
-                    message:
+                this.addErrorNotificationAction({
+                    message: 'Failed to generate report.',
+                    longMessage:
                         'Failed to generate the summary report. Make sure the scenario has been run',
                 });
             }
         });
     }
 
-  async onDownloadSimulationLog(download: boolean) {
-    if (download) {
-      this.errorMessage = '';
-      this.isDownloading = true;
-      this.dialogData.showModal = false;
-      await ReportsService.downloadSimulationLog(this.dialogData.networkId, this.dialogData.scenarioId)
-         .then((response: AxiosResponse<any>) => {
-         this.isDownloading = false;
-         if (hasValue(response, 'data')) {
-           this.setSuccessMessageAction({message: 'Report downloaded'});
-           FileDownload(response.data, `Simulation Log ${this.dialogData.name}.txt`);
-         } else {
-           this.setErrorMessageAction({
-             message: 'Failed to download simulation log. Please try generating and downloading the log again.'
-           });
-         }
-        });
-      }
-    else {
-      this.dialogData.showModal = false;
+    async onDownloadSimulationLog(download: boolean) {
+        if (download) {
+            this.errorMessage = '';
+            this.isDownloading = true;
+            this.dialogData.showModal = false;
+            await ReportsService.downloadSimulationLog(
+                this.dialogData.networkId,
+                this.dialogData.scenarioId,
+            ).then((response: AxiosResponse<any>) => {
+                this.isDownloading = false;
+                if (hasValue(response, 'data')) {
+                    this.addSuccessNotificationAction({
+                        message: 'Report downloaded',
+                    });
+                    FileDownload(
+                        response.data,
+                        `Simulation Log ${this.dialogData.name}.txt`,
+                    );
+                } else {
+                    this.addErrorNotificationAction({
+                        message: 'Failed to download simulation log.',
+                        longMessage:
+                            'Failed to download simulation log. Please try generating and downloading the log again.',
+                    });
+                }
+            });
+        } else {
+            this.dialogData.showModal = false;
+        }
     }
-  }
 }
 </script>
 
 <style>
 .missing-attributes-card-text {
-  max-height: 300px;
-  max-width: 300px;
-  overflow-y: auto;
+    max-height: 300px;
+    max-width: 300px;
+    overflow-y: auto;
 }
 </style>

@@ -27,7 +27,8 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-text-field type="text"
+                                        <v-text-field
+                                            type="text"
                                             placeholder="Search in scenarios"
                                             append-icon="fas fa-search"
                                             hide-details
@@ -138,7 +139,9 @@
                                                         v-bind="attrs"
                                                         v-on="on"
                                                     >
-                                                    <i class="fas fa-ellipsis-v"></i>
+                                                        <i
+                                                            class="fas fa-ellipsis-v"
+                                                        ></i>
                                                     </v-btn>
                                                 </template>
 
@@ -159,9 +162,12 @@
                                                         class="menu-style"
                                                     >
                                                         <v-list-tile-title icon>
-                                                            <v-icon class="action-icon-padding">{{
-                                                                item.icon
-                                                            }}</v-icon>
+                                                            <v-icon
+                                                                class="action-icon-padding"
+                                                                >{{
+                                                                    item.icon
+                                                                }}</v-icon
+                                                            >
                                                             {{
                                                                 item.title
                                                             }}</v-list-tile-title
@@ -290,7 +296,9 @@
                                                         v-bind="attrs"
                                                         v-on="on"
                                                     >
-                                                        <i class="fas fa-ellipsis-v"></i>
+                                                        <i
+                                                            class="fas fa-ellipsis-v"
+                                                        ></i>
                                                     </v-btn>
                                                 </template>
 
@@ -311,9 +319,12 @@
                                                         class="menu-style"
                                                     >
                                                         <v-list-tile-title icon>
-                                                            <v-icon class="action-icon-padding">{{
-                                                                item.icon
-                                                            }}</v-icon>
+                                                            <v-icon
+                                                                class="action-icon-padding"
+                                                                >{{
+                                                                    item.icon
+                                                                }}</v-icon
+                                                            >
                                                             {{
                                                                 item.title
                                                             }}</v-list-tile-title
@@ -445,6 +456,10 @@ export default class Scenarios extends Vue {
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.authenticationModule.isCWOPA) isCWOPA: boolean;
 
+    @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('addWarningNotification') addWarningNotificationAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
+    @Action('addInfoNotification') addInfoNotificationAction: any;
     @Action('getScenarios') getScenariosAction: any;
     @Action('createScenario') createScenarioAction: any;
     @Action('cloneScenario') cloneScenarioAction: any;
@@ -464,11 +479,6 @@ export default class Scenarios extends Vue {
     @Action('createNetwork') createNetworkAction: any;*/
     @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
     @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
-
-    @Action('setSuccessMessage') setSuccessMessageAction: any;
-    @Action('setWarningMessage') setWarningMessageAction: any;
-    @Action('setErrorMessage') setErrorMessageAction: any;
-    @Action('setInfoMessage') setInfoMessageAction: any;
 
     networks: Network[] = [];
     scenarioGridHeaders: DataTableHeader[] = [
@@ -820,7 +830,7 @@ export default class Scenarios extends Vue {
                 scenarioId: localScenario.id,
                 networkId: localScenario.networkId,
                 scenarioName: localScenario.name,
-                networkName: localScenario.networkName
+                networkName: localScenario.networkName,
             },
         });
     }
@@ -892,9 +902,15 @@ export default class Scenarios extends Vue {
     getDataMigrationStatus(data: any) {
         const status: any = data.status;
         if (status.indexOf('Error') !== -1) {
-            this.setErrorMessageAction({ message: data.status });
+            this.addErrorNotificationAction({
+                message: 'Data migration error.',
+                longMessage: data.status,
+            });
         } else {
-            this.setInfoMessageAction({ message: data.status });
+            this.addInfoNotificationAction({
+                message: 'Data migration info.',
+                longMessage: data.status,
+            });
         }
     }
 
@@ -950,9 +966,7 @@ export default class Scenarios extends Vue {
                 break;
             case this.availableActions.settings:
                 if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
-                    this.onNavigateToEditScenarioView(
-                        scenario
-                    );
+                    this.onNavigateToEditScenarioView(scenario);
                 }
                 break;
             case this.availableActions.share:
@@ -997,8 +1011,8 @@ export default class Scenarios extends Vue {
     border: ridge;
     border-width: 2px;
 }
-.action-icon-padding{
-    padding-right:14px;
+.action-icon-padding {
+    padding-right: 14px;
 }
 .header-border {
   border-bottom: 2px solid black;

@@ -42,7 +42,7 @@ import InvestmentBudgetsFileSelector from '@/shared/components/FileSelector.vue'
 export default class ImportExportInvestmentBudgetsDialog extends Vue {
     @Prop() showDialog: boolean;
 
-    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
 
     investmentBudgetsFile: File | null = null;
@@ -61,7 +61,8 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
 
     /**
      * FileSelector submit event handler
-     */     
+     */
+
     onFileSelectorChange(file: File) {
         this.investmentBudgetsFile = hasValue(file) ? clone(file) : null;
     }

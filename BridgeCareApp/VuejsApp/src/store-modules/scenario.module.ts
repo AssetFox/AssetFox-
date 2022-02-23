@@ -91,9 +91,11 @@ const actions = {
         await ScenarioService.runSimulation(payload.networkId, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    dispatch('setSuccessMessage', {message: 'Simulation analysis complete'});
-                }
-            });
+                dispatch('addSuccessNotification', {
+                    message: 'Simulation analysis complete',
+                });
+            }
+        });
     },
     async migrateLegacySimulationData({dispatch, commit}: any, payload: any) {
         await ScenarioService.migrateLegacySimulationData(payload.simulationId)
@@ -108,7 +110,9 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('createdScenarioMutator', response.data as Scenario);
-                    dispatch('setSuccessMessage', {message: 'Created scenario'});
+                    dispatch('addSuccessNotification', {
+                    message: 'Created scenario',
+                    });
                 }
             });
     },
@@ -117,28 +121,37 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('createdScenarioMutator', response.data as Scenario);
-                    dispatch('setSuccessMessage', {message: 'Cloned scenario'});
+                    dispatch('addSuccessNotification', {
+                        message: 'Cloned scenario',
+                    });
                 }
-            });
+            },
+        );
     },
     async updateScenario({dispatch, commit}: any, payload: any) {
         return await ScenarioService.updateScenario(payload.scenario)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('updatedScenarioMutator', response.data);
-                    dispatch('setSuccessMessage', {message: 'Updated scenario'});
+                    dispatch('addSuccessNotification', {
+                        message: 'Updated scenario',
+                    });
                 }
-            });
+            },
+        );
     },
     async deleteScenario({dispatch, state, commit}: any, payload: any) {
         return await ScenarioService.deleteScenario(payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     commit('deletedScenarioMutator', payload.scenarioId);
-                    dispatch('setSuccessMessage', {message: 'Deleted scenario'});
+                    dispatch('addSuccessNotification', {
+                        message: 'Deleted scenario',
+                    });
                 }
-            });
-    }
+            },
+        );
+    },
 };
 
 const getters = {};
@@ -147,5 +160,5 @@ export default {
     state,
     getters,
     actions,
-    mutations
+    mutations,
 };

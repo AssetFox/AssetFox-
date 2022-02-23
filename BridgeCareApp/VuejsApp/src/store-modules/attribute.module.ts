@@ -58,22 +58,28 @@ const actions = {
                     commit('attributesSelectValuesMutator', attributesSelectValues);
 
                     if (hasValue(warningMessages)) {
-                        dispatch('setWarningMessage', {message: warningMessages.length === 1 ? warningMessages[0] : warningMessages.join('<br>')});
-                    }
+                    dispatch('addWarningNotification', {
+                        message: 'Attributes selected warning.',
+                        longMessage:
+                            warningMessages.length === 1
+                                ? warningMessages[0]
+                                : warningMessages.join('<br>'),
+                    });
                 }
-            });
-    }
+            }
+        });
+    },
 };
 
 const getters = {
     getNumericAttributes: (state: any) => {
         return state.numericAttributes;
-    }
+    },
 };
 
 export default {
     state,
     getters,
     actions,
-    mutations
+    mutations,
 };

@@ -435,7 +435,7 @@ export default class PerformanceCurveEditor extends Vue {
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-    
+
     @Action('getPerformanceCurveLibraries')
     getPerformanceCurveLibrariesAction: any;
     @Action('selectPerformanceCurveLibrary')
@@ -531,7 +531,7 @@ export default class PerformanceCurveEditor extends Vue {
                 vm.selectedScenarioId = to.query.scenarioId;
 
                 if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.setErrorMessageAction({
+                    vm.addErrorNotificationAction({
                         message: 'Unable to identify selected scenario.',
                     });
                     vm.$router.push('/Scenarios/');

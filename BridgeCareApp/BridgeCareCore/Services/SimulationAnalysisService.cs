@@ -36,8 +36,9 @@ namespace BridgeCareCore.Services
 
         public Task CreateAndRun(Guid networkId, Guid simulationId)
         {
-            _sequentialWorkQueue.Add(new AnalysisWorkItem(networkId, simulationId));
-            return Task.CompletedTask;
+            AnalysisWorkItem workItem = new(networkId, simulationId);
+            _sequentialWorkQueue.Enqueue(workItem, out var workHandle).Wait();
+            return workHandle.WorkCompletion;
         }
     }
 }

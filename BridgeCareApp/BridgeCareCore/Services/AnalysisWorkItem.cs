@@ -15,11 +15,13 @@ namespace BridgeCareCore.Services
 {
     public record AnalysisWorkItem(Guid networkId, Guid simulationId) : IWorkItem
     {
+        public string WorkId => simulationId.ToString();
+
         public void DoWork(IServiceProvider serviceProvider)
         {
-            using var scope = serviceProvider.CreateScope();
-
             HashSet<string> LoggedMessages = new();
+
+            using var scope = serviceProvider.CreateScope();
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfDataPersistenceWork>();
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
@@ -81,12 +83,14 @@ namespace BridgeCareCore.Services
 
                     _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
                     break;
+
                 case ProgressStatus.Running:
                     simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete)}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                     _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
                     break;
+
                 case ProgressStatus.Completed:
                     simulationAnalysisDetail.Status = $"Simulation complete. {100}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
@@ -111,6 +115,7 @@ namespace BridgeCareCore.Services
                 case SimulationLogStatus.Warning:
                     _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
                     break;
+
                 case SimulationLogStatus.Error:
                 case SimulationLogStatus.Fatal:
                     simulationAnalysisDetail.Status = message.Message;

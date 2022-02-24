@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BridgeCareCore.Controllers
 {
     using SimulationDeleteMethod = Action<Guid>;
-    using SimulationRunMethod = Action<Guid, Guid>;
+    using SimulationRunMethod = Func<Guid, Guid, Task>;
     using SimulationUpdateMethod = Action<SimulationDTO>;
 
     [Route("api/[controller]")]
@@ -80,13 +80,13 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, SimulationRunMethod> CreateRunMethods()
         {
-            void RunAnySimulation(Guid networkId, Guid simulationId) =>
+            Task RunAnySimulation(Guid networkId, Guid simulationId) =>
                 _simulationAnalysis.CreateAndRun(networkId, simulationId);
 
-            void RunPermittedSimulation(Guid networkId, Guid simulationId)
+            Task RunPermittedSimulation(Guid networkId, Guid simulationId)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                RunAnySimulation(networkId, simulationId);
+                return RunAnySimulation(networkId, simulationId);
             }
 
             return new Dictionary<string, SimulationRunMethod>
@@ -235,8 +235,10 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                await Task.Factory.StartNew(() =>
-                    _simulationRunMethods[UserInfo.Role](networkId, simulationId));
+                SimulationAnalysisDetailDTO analysisDetail = new() { SimulationId = simulationId, Status = "Queueing...", };
+                HubService.SendRealTimeMessage(UnitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, analysisDetail);
+
+                await _simulationRunMethods[UserInfo.Role](networkId, simulationId);
 
                 return Ok();
             }

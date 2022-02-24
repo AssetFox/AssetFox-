@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -18,32 +19,10 @@ namespace BridgeCareCore.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if (stoppingToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested)
             {
-                return;
-            }
-
-            // Go asynchronous ASAP to avoid blocking the caller (and the whole app).
-            await Task.Yield();
-
-            if (stoppingToken.IsCancellationRequested)
-            {
-                return;
-            }
-
-            foreach (var workItem in _sequentialWorkQueue)
-            {
-                if (stoppingToken.IsCancellationRequested)
-                {
-                    break;
-                }
-
-                workItem.DoWork(_serviceProvider);
-
-                if (stoppingToken.IsCancellationRequested)
-                {
-                    break;
-                }
+                var workItem = await _sequentialWorkQueue.Dequeue(stoppingToken);
+                workItem?.DoWork(_serviceProvider);
             }
         }
     }

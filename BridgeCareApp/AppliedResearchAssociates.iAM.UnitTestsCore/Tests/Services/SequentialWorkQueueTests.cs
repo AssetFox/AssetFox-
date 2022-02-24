@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using BridgeCareCore.Services;
 using Xunit;
@@ -15,16 +16,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             SequentialWorkQueue queue = new();
             List<int> taskEffects = new();
 
-            queue.Add(new TestWorkItem(1, 0, taskEffects));
-            queue.Add(new TestWorkItem(2, 1000, taskEffects));
-            queue.Add(new TestWorkItem(3, 0, taskEffects));
-            queue.Add(new TestWorkItem(4, 1000, taskEffects));
-            queue.Add(new TestWorkItem(5, 0, taskEffects));
+            queue.Enqueue(new TestWorkItem(1, 0, taskEffects), out _).Wait();
+            queue.Enqueue(new TestWorkItem(2, 1000, taskEffects), out _).Wait();
+            queue.Enqueue(new TestWorkItem(3, 0, taskEffects), out _).Wait();
+            queue.Enqueue(new TestWorkItem(4, 1000, taskEffects), out _).Wait();
+            queue.Enqueue(new TestWorkItem(5, 0, taskEffects), out _).Wait();
 
-            queue.CompleteAdding();
-            foreach (var workItem in queue.GetConsumingEnumerable())
+            CancellationTokenSource cts = new();
+            cts.CancelAfter(TimeSpan.FromSeconds(3));
+
+            try
             {
-                workItem.DoWork(null);
+                while (!cts.IsCancellationRequested)
+                {
+                    var workItem = queue.Dequeue(cts.Token).Result;
+                    workItem.DoWork(null);
+                }
+            }
+            catch (AggregateException e) when (e.InnerException is OperationCanceledException)
+            {
             }
 
             Assert.Equal(Enumerable.Range(1, 5), taskEffects);
@@ -32,6 +42,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
         private record TestWorkItem(int Id, int MsDelay, List<int> WorkTarget) : IWorkItem
         {
+            public string WorkId { get; } = Id.ToString();
+
             public void DoWork(IServiceProvider serviceProvider)
             {
                 WorkTarget.Add(Id);

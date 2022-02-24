@@ -28,14 +28,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static void CreateFacility(this MaintainableAssetEntity entity, Network network)
         {
-            var facilitySectionNameSplit =
-                entity.MaintainableAssetLocation.LocationIdentifier.Split("-");
+            //var facilitySectionNameSplit =
+            //    entity.MaintainableAssetLocation.LocationIdentifier.Split("-");
 
             var facility = network.AddFacility();
             facility.Id = Guid.NewGuid();
-            facility.Name = facilitySectionNameSplit[0];
+            facility.Name = entity.MaintainableAssetLocation.LocationIdentifier;
 
-            entity.CreateSection(facility, facilitySectionNameSplit[1]);
+            entity.CreateSection(facility, entity.MaintainableAssetLocation.LocationIdentifier);
         }
     }
 }

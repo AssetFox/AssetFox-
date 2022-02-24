@@ -1,96 +1,44 @@
 ﻿<template>
     <v-layout column>
-        <v-flex xs12>
-            <v-layout fixed justify-space-between>
-                <div>
-                    <v-tabs>
-                        <v-tab
-                            :key="navigationTab.tabName"
-                            :to="navigationTab.navigation"
-                            v-for="navigationTab in visibleNavigationTabs()"
-                        >
-                            {{ navigationTab.tabName }}
-                            <v-icon right>{{ navigationTab.tabIcon }}</v-icon>
-                        </v-tab>
-                    </v-tabs>
+        <v-layout row>
+            <v-card
+                class="mx-auto"
+                height="100%"
+                style="border-top-left-radius: 10px; border-bottom-left-radius: 10px;"
+            >
+                <v-list>
+                    <v-list-item-group
+                        class="settings-list"
+                        :key="navigationTab.tabName"
+                        v-for="navigationTab in visibleNavigationTabs()"
+                    >
+                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid grey;">
+                            <v-list-tile-action>
+                                <v-list-tile-icon>
+                                    <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon>
+                                </v-list-tile-icon>
+                            </v-list-tile-action>
+                            <v-list-tile-content>
+                                <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
+                            </v-list-tile-content>
+                        </v-list-tile>
+                    </v-list-item-group>
+                </v-list>
+                <div style="margin: auto; width: 75%;">
+                    <v-btn @click="onShowRunSimulationAlert" depressed block>
+                        Run Scenario
+                    </v-btn>
+                    <v-btn @click="showImportExportCommittedProjectsDialog = true" depressed block>
+                        Committed Projects
+                    </v-btn>
                 </div>
-                <div>
-                    <v-layout>
-                        <div v-if="$screen.xxl && !$screen.freeRealEstate">
-                            <v-menu>
-                                <template slot="activator">
-                                    <v-btn icon>
-                                        <v-icon>fas fa-bars</v-icon>
-                                    </v-btn>
-                                </template>
-                                <v-list>
-                                    <v-list-tile
-                                        @click="onShowRunSimulationAlert"
-                                    >
-                                        <v-list-tile-action>
-                                            <v-icon>fas fa-play</v-icon>
-                                        </v-list-tile-action>
-                                        <v-list-tile-title
-                                            >Run Scenario</v-list-tile-title
-                                        >
-                                    </v-list-tile>
-                                    <v-list-tile
-                                        @click="
-                                            showImportExportCommittedProjectsDialog = true
-                                        "
-                                    >
-                                        <v-list-tile-action>
-                                            <v-icon
-                                                >fas fa-cloud-upload-alt</v-icon
-                                            >
-                                        </v-list-tile-action>
-                                        <v-list-tile-title
-                                            >Committed
-                                            Projects</v-list-tile-title
-                                        >
-                                    </v-list-tile>
-                                </v-list>
-                            </v-menu>
-                        </div>
-                        <div
-                            class="edit-scenario-btns-div"
-                            v-if="$screen.freeRealEstate"
-                        >
-                            <div>
-                                <v-btn
-                                    @click="onShowRunSimulationAlert"
-                                    class="ara-blue-bg white--text"
-                                    >Run Scenario
-                                    <v-icon class="white--text" right
-                                        >fas fa-play</v-icon
-                                    >
-                                </v-btn>
-                            </div>
-                            <div>
-                                <v-btn
-                                    @click="
-                                        showImportExportCommittedProjectsDialog = true
-                                    "
-                                    class="ara-blue-bg white--text"
-                                >
-                                    Committed Projects
-                                    <v-icon class="white--text" right
-                                        >fas fa-cloud-upload-alt</v-icon
-                                    >
-                                </v-btn>
-                            </div>
-                        </div>
-                    </v-layout>
-                </div>
-            </v-layout>
-        </v-flex>
-
-        <v-flex xs12>
-            <v-container fluid grid-list-xs>
-                <router-view></router-view>
-            </v-container>
-        </v-flex>
-
+            </v-card>
+            <v-flex xs12>
+                <v-container fluid grid-list-xs>
+                    <router-view></router-view>
+                </v-container>
+            </v-flex>
+        </v-layout>
         <Alert :dialogData="alertData" @submit="onSubmitAlertResult" />
 
         <Alert
@@ -432,4 +380,8 @@ export default class EditScenario extends Vue {
 .edit-scenario-btns-div {
     display: flex;
 }
+.settings-list a:hover {
+    text-decoration: none;
+}
+
 </style>

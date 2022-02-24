@@ -137,7 +137,7 @@ const actions = {
                     'selectedDeficientConditionGoalLibraryMutator',
                     payload.library.id,
                 );
-                dispatch('setSuccessMessage', { message: message });
+                dispatch('addSuccessNotification', { message: message });
             }
         });
     },
@@ -172,7 +172,7 @@ const actions = {
                     'scenarioDeficientConditionGoalsMutator',
                     payload.scenarioDeficientConditionGoals,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Modified deficient condition goals',
                 });
             }
@@ -193,7 +193,7 @@ const actions = {
                     'deletedDeficientConditionGoalLibraryMutator',
                     payload.libraryId,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Deleted target condition goal library',
                 });
             }

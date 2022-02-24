@@ -212,7 +212,7 @@ export default class EditAnalysisMethod extends Vue {
 
     @Action('getAnalysisMethod') getAnalysisMethodAction: any;
     @Action('upsertAnalysisMethod') upsertAnalysisMethodAction: any;
-    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
     selectedScenarioId: string = getBlankGuid();
@@ -266,7 +266,7 @@ export default class EditAnalysisMethod extends Vue {
             vm.networkName = to.query.networkName;
             if (vm.selectedScenarioId === getBlankGuid()) {
                 // set 'no selected scenario' error message, then redirect user to Scenarios UI
-                vm.setErrorMessageAction({
+                vm.addErrorNotificationAction({
                     message: 'Found no selected scenario for edit',
                 });
                 vm.$router.push('/Scenarios/');

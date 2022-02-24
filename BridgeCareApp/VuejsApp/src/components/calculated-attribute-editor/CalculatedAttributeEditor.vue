@@ -401,7 +401,7 @@ export default class CalculatedAttributeEditor extends Vue {
     selectCalculatedAttributeLibraryAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('getCalculatedAttributes') getCalculatedAttributesAction: any;
-    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
 
     hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
@@ -484,7 +484,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 vm.selectedScenarioId = to.query.scenarioId;
 
                 if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.setErrorMessageAction({
+                    vm.addErrorNotificationAction({
                         message: 'Unable to identify selected scenario.',
                     });
                     vm.$router.push('/Scenarios/');
@@ -643,8 +643,9 @@ export default class CalculatedAttributeEditor extends Vue {
                       this.calculatedAttributeGridData,
                       this.stateScenarioCalculatedAttributes,
                   )
-                : this.stateSelectedCalculatedAttributeLibrary.id != getBlankGuid()
-                    ?  hasUnsavedChangesCore(
+                : this.stateSelectedCalculatedAttributeLibrary.id !=
+                  getBlankGuid()
+                ? hasUnsavedChangesCore(
                       '',
                       {
                           ...clone(this.selectedCalculatedAttributeLibrary),
@@ -654,7 +655,7 @@ export default class CalculatedAttributeEditor extends Vue {
                       },
                       this.stateSelectedCalculatedAttributeLibrary,
                   )
-                  : false;
+                : false;
             this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
         }
     }

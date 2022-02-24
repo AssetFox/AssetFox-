@@ -140,7 +140,7 @@ const actions = {
                 commit('calculatedAttributeLibraryMutator', library);
                 commit('selectedCalculatedAttributeLibraryMutator', library.id);
 
-                dispatch('setSuccessMessage', { message: message });
+                dispatch('addSuccessNotification', { message: message });
             }
         });
     },
@@ -160,7 +160,7 @@ const actions = {
                     'scenarioCalculatedAttributeMutator',
                     payload.scenarioCalculatedAttribute,
                 );
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: "Modified scenario's calculated attribute",
                 });
             }
@@ -187,7 +187,7 @@ const actions = {
                     calculatedAttributeLibraries,
                 );
 
-                dispatch('setSuccessMessage', {
+                dispatch('addSuccessNotification', {
                     message: 'Deleted calculated attribute library',
                 });
             }

@@ -9,8 +9,6 @@ import App from './App.vue';
 import router from './router';
 import store from './store/root-store';
 import './assets/css/main.css';
-import 'izitoast/dist/css/iziToast.min.css';
-import 'izitoast/dist/js/iziToast.min';
 import VueScreen from 'vue-screen';
 // @ts-ignore
 import VueWorker from 'vue-worker';
@@ -64,13 +62,13 @@ Vue.config.productionTip = false;
 
 Vue.use(VuejsDialog);
 
-fetch(process.env.BASE_URL + "config.json")
-.then((response) => response.json())
-.then((config) => {
-    Vue.prototype.$config = config;
-    new Vue({
-        store,
-        router,
-        render: h => h(App),
-    }).$mount('#app');
-});
+fetch(process.env.BASE_URL + 'config.json')
+    .then(response => response.json())
+    .then(config => {
+        Vue.prototype.$config = config;
+        new Vue({
+            store,
+            router,
+            render: h => h(App),
+        }).$mount('#app');
+    });

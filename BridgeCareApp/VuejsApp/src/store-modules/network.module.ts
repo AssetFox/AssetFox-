@@ -46,19 +46,24 @@ const actions = {
                 if (hasValue(response, 'data')) {
                     const network: Network = response.data;
                     commit('createdNetworkMutator', network);
-                    dispatch('setSuccessMessage', {message: 'Network created'});
+                    dispatch('addSuccessNotification', {
+                        message: 'Network created',
+                    });
                 }
-            });
+            },
+        );
     },
     async upsertBenefitQuantifier({dispatch, commit}: any, payload: any) {
         return await NetworkService.upsertBenefitQuantifier(payload.benefitQuantifier)
           .then((response: AxiosResponse) => {
               if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                  commit('benefitQuantifierMutator', payload.benefitQuantifier);
-                  dispatch('setSuccessMessage', {message: 'Benefit quantifier upsertted'});
-              }
-          });
-    }
+                commit('benefitQuantifierMutator', payload.benefitQuantifier);
+                dispatch('addSuccessNotification', {
+                    message: 'Benefit quantifier upsertted',
+                });
+            }
+        });
+    },
 };
 
 const getters = {};
@@ -67,5 +72,5 @@ export default {
     state,
     getters,
     actions,
-    mutations
+    mutations,
 };

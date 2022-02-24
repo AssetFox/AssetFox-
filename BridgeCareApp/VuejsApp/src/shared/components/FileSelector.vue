@@ -52,9 +52,9 @@ import { formatBytes } from '@/shared/utils/math-utils';
 export default class FileSelector extends Vue {
     @Prop() closed: boolean = false;
 
-    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
-    
+
     fileSelect: HTMLInputElement = {} as HTMLInputElement;
     tableHeaders: DataTableHeader[] = [
         {text: 'Selected File', value: 'name', align: 'left', sortable: false, class: '', width: '150px'},
@@ -100,10 +100,12 @@ export default class FileSelector extends Vue {
             const fileName: string = prop('name', fileList[0]) as string;
 
             if (fileName.indexOf('xlsx') === -1) {
-                this.setErrorMessageAction({message: 'Only .xlsx file types are allowed'});
+                this.addErrorNotificationAction({
+                    message: 'Only .xlsx file types are allowed',
+                });
             }
 
-            this.file = clone(fileList[0]);          
+            this.file = clone(fileList[0]);
         }
 
         this.fileSelect.value = '';
@@ -124,7 +126,7 @@ export default class FileSelector extends Vue {
     overflow-y: auto;
 }
 
-.drag-drop-area{
+.drag-drop-area {
     height: 100px;
     border-radius: 4px;
     padding-top: 40px;

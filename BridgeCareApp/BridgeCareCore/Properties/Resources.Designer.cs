@@ -19,7 +19,7 @@ namespace BridgeCareCore.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -187,7 +187,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Closed Bridge Count By BPN.
+        ///   Looks up a localized string similar to Close BPN Count.
         /// </summary>
         internal static string ClosedBridgeCountByBPN {
             get {
@@ -196,7 +196,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Closed Bridge Deck Area By BPN.
+        ///   Looks up a localized string similar to Closed BPN DA.
         /// </summary>
         internal static string ClosedBridgeDeckAreaByBPN {
             get {
@@ -550,20 +550,20 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Overall.
-        /// </summary>
-        internal static string Overall {
-            get {
-                return ResourceManager.GetString("Overall", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No Treatment.
         /// </summary>
         internal static string NoTreatmentForWorkSummary {
             get {
                 return ResourceManager.GetString("NoTreatmentForWorkSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overall.
+        /// </summary>
+        internal static string Overall {
+            get {
+                return ResourceManager.GetString("Overall", resourceCulture);
             }
         }
         
@@ -640,7 +640,7 @@ namespace BridgeCareCore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Posted Bridge Deck Area By BPN.
+        ///   Looks up a localized string similar to Posted BPN DA.
         /// </summary>
         internal static string PostedBridgeDeckAreaByBPN {
             get {

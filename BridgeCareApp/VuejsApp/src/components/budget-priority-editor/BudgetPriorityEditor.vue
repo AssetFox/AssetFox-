@@ -222,8 +222,7 @@ export default class BudgetPriorityEditor extends Vue {
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
 
-    @Action('setErrorMessage') setErrorMessageAction: any;
-    @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getBudgetPriorityLibraries') getBudgetPriorityLibrariesAction: any;
     @Action('selectBudgetPriorityLibrary') selectBudgetPriorityLibraryAction: any;
     @Action('upsertBudgetPriorityLibrary') upsertBudgetPriorityLibraryAction: any;
@@ -264,7 +263,9 @@ export default class BudgetPriorityEditor extends Vue {
                 vm.selectedScenarioId = to.query.scenarioId;
 
                 if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.setErrorMessageAction({ message: 'Found no selected scenario for edit' });
+                    vm.addErrorNotificationAction({
+                        message: 'Found no selected scenario for edit',
+                    });
                     vm.$router.push('/Scenarios/');
                 }
 

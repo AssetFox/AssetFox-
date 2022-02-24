@@ -382,7 +382,7 @@ function hasAttributeToTest(clause: string, currentCharIndex: number): boolean{
  */
 export const convertCriteriaExpressionToCriteriaObject = (
     expression: string,
-    setErrorMessageActionCallback: any,
+    addErrorNotificationActionCallback: any,
 ) => {
     try {
         if (hasValue(expression)) {
@@ -392,7 +392,7 @@ export const convertCriteriaExpressionToCriteriaObject = (
             );
         }
     } catch (e) {
-        setErrorMessageActionCallback({ message: e.message });
+        addErrorNotificationActionCallback({ message: e.message });
         return null;
     }
 

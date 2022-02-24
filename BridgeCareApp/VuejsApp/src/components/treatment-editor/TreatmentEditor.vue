@@ -304,7 +304,11 @@ export default class TreatmentEditor extends Vue {
     hasUnsavedChanges: boolean;
     @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-    
+
+    @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('addWarningNotification') addWarningNotificationAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
+    @Action('addInfoNotification') addInfoNotificationAction: any;
     @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
     @Action('selectTreatmentLibrary') selectTreatmentLibraryAction: any;
     @Action('upsertTreatmentLibrary') upsertTreatmentLibraryAction: any;
@@ -349,7 +353,7 @@ export default class TreatmentEditor extends Vue {
             if (to.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
                 if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.setErrorMessageAction({
+                    vm.addErrorNotificationAction({
                         message: 'Found no selected scenario for edit',
                     });
                     vm.$router.push('/Scenarios/');

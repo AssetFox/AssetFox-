@@ -41,34 +41,37 @@ const actions = {
       }
     });
   },
-  async upsertAnnouncement({ dispatch, commit }: any, payload: any) {
-    await AnnouncementService.upsertAnnouncement(payload.announcement)
-      .then((response: AxiosResponse) => {
-        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-          const message: string = any(propEq('id', payload.announcement.id), state.announcements)
-            ? 'Updated announcement' : 'Added announcement';
-          commit('addedOrUpdatedAnnouncementMutator', payload.announcement);
-          commit('sortAnnouncementsMutator');
-          dispatch('setSuccessMessage', { message: message });
-        }
-      });
-  },
-  async deleteAnnouncement({ dispatch, commit }: any, payload: any) {
-    await AnnouncementService.deleteAnnouncement(payload.deletedAnnouncementId)
-      .then((response: AxiosResponse) => {
-        if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-          commit('deletedAnnouncementMutator', payload.deletedAnnouncementId);
-          dispatch('setSuccessMessage', { message: 'Deleted announcement' });
-        }
-      });
-  }
-};
-
-const getters = {};
-
-export default {
-  state,
-  getters,
-  actions,
-  mutations,
-};
+    async upsertAnnouncement({ dispatch, commit }: any, payload: any) {
+        await AnnouncementService.upsertAnnouncement(payload.announcement)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    const message: string = any(propEq('id', payload.announcement.id), state.announcements)
+                    ? 'Updated announcement' : 'Added announcement';
+                    commit('addedOrUpdatedAnnouncementMutator', payload.announcement);
+                    commit('sortAnnouncementsMutator');
+                    dispatch('addSuccessNotification', { message: message });
+                }
+            });
+    },
+    async deleteAnnouncement({ dispatch, commit }: any, payload: any) {
+        await AnnouncementService.deleteAnnouncement(payload.deletedAnnouncementId)
+          .then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+              commit('deletedAnnouncementMutator', payload.deletedAnnouncementId);
+              dispatch('addSuccessNotification', {
+                message: 'Deleted announcement',
+              });
+            }
+          });
+      }
+    };
+    
+    const getters = {};
+    
+    export default {
+      state,
+      getters,
+      actions,
+      mutations,
+    };
+    

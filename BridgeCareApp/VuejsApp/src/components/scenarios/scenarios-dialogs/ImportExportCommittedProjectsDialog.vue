@@ -54,7 +54,7 @@ import { clone } from 'ramda';
 export default class ImportExportCommittedProjectsDialog extends Vue {
     @Prop() showDialog: boolean;
 
-    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
 
     committedProjectsFile: File | null = null;

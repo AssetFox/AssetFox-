@@ -76,7 +76,7 @@
                 <v-flex xs6>
                     <v-layout justify-space-between>
                         <v-btn @click='onShowEditBudgetsDialog' class='ara-blue-bg white--text'>
-                            Edit Budgets
+                            Edit Budget Criteria
                         </v-btn>
                         <v-btn :disabled='budgets.length === 0'
                                @click='onAddBudgetYear'
@@ -278,7 +278,7 @@ export default class InvestmentEditor extends Vue {
     @Action('upsertInvestment') upsertInvestmentAction: any;
     @Action('upsertBudgetLibrary') upsertBudgetLibraryAction: any;
     @Action('deleteBudgetLibrary') deleteBudgetLibraryAction: any;
-    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('importScenarioInvestmentBudgetsFile') importScenarioInvestmentBudgetsFileAction: any;
     @Action('importLibraryInvestmentBudgetsFile') importLibraryInvestmentBudgetsFileAction: any;
@@ -305,7 +305,7 @@ export default class InvestmentEditor extends Vue {
     showImportExportInvestmentBudgetsDialog: boolean = false;
     hasScenario: boolean = false;
     budgets: Budget[] = [];
-    
+
     get addYearLabel() {
         return 'Add Year (' + this.getNextYear() + ')';
     }
@@ -321,14 +321,16 @@ export default class InvestmentEditor extends Vue {
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
-            vm.librarySelectItemValue = null;            
+            vm.librarySelectItemValue = null;
             vm.getBudgetLibrariesAction();
 
             if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
 
                 if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.setErrorMessageAction({ message: 'Found no selected scenario for edit' });
+                    vm.addErrorNotificationAction({
+                        message: 'Found no selected scenario for edit',
+                    });
                     vm.$router.push('/Scenarios/');
                 }
 

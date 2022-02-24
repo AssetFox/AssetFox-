@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<Network> GetAllNetworks();
 
-        NetworkEntity GetPennDotNetwork();
+        NetworkEntity GetMainNetwork();
 
         bool CheckPennDotNetworkHasData();
 

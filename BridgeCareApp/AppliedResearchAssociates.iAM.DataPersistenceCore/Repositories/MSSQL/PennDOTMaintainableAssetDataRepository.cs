@@ -13,25 +13,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public PennDOTMaintainableAssetDataRepository(UnitOfDataPersistenceWork uow)
         {
+            // TODO:  Switch this to be non-PennDOT specific.  It should take in an array
+            // of strings that name the key values and build KeyProperties
+
             _unitOfWork = uow;
-            var network = _unitOfWork.NetworkRepo.GetPennDotNetwork();
-            var assets = _unitOfWork.Context.MaintainableAsset.Where(_ => _.NetworkId == network.Id);
+            var network = _unitOfWork.NetworkRepo.GetMainNetwork();
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
             var brkeyDatum = new List<KeySegmentDatum>();
             var bmsidDatum = new List<KeySegmentDatum>();
 
-            foreach (var asset in assets)
+            var locations = _unitOfWork.Context.MaintainableAssetLocation
+                .Include(_ => _.MaintainableAsset)
+                .Where(_ => _.MaintainableAsset.NetworkId == network.Id);
+
+            foreach (var location in locations)
             {
-                brkeyDatum.Add(new KeySegmentDatum
+                var ids = location.LocationIdentifier.Split('-');
+                if (ids.Length == 2)
                 {
-                    SegmentId = asset.Id,
-                    KeyValue = new SegmentAttributeDatum("BRKEY", asset.FacilityName)
-                });
-                bmsidDatum.Add(new KeySegmentDatum
-                {
-                    SegmentId = asset.Id,
-                    KeyValue = new SegmentAttributeDatum("BMSID", asset.SectionName)
-                });
+                    // This is a valid PennDOT location identifier for us
+                    brkeyDatum.Add(new KeySegmentDatum { AssetId = location.MaintainableAssetId, KeyValue = new SegmentAttributeDatum("BRKEY", ids[0]) });
+                    bmsidDatum.Add(new KeySegmentDatum { AssetId = location.MaintainableAssetId, KeyValue = new SegmentAttributeDatum("BMSID", ids[1]) });
+                }
             }
 
             KeyProperties.Add("BRKEY", brkeyDatum);
@@ -50,15 +53,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // Get the target segment info
             var lookupSource = KeyProperties[keyName];
-            var targetSegment = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
-            if (targetSegment == null) return new List<SegmentAttributeDatum>();
-            var segment = _unitOfWork.Context.MaintainableAsset
-                .Where(_ => _.Id == targetSegment.SegmentId)
+            var targetAsset = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
+            if (targetAsset == null) return new List<SegmentAttributeDatum>();
+            var asset = _unitOfWork.Context.MaintainableAsset
+                .Where(_ => _.Id == targetAsset.AssetId)
                 .Include(_ => _.AggregatedResults)
                 .ThenInclude(_ => _.Attribute)
                 .FirstOrDefault();
-            if (segment == null) return new List<SegmentAttributeDatum>();
-            var attributeIdList = segment.AggregatedResults.Select(_ => _.AttributeId).Distinct();
+            if (asset == null) return new List<SegmentAttributeDatum>();
+            var attributeIdList = asset.AggregatedResults.Select(_ => _.AttributeId).Distinct();
 
             // Populate the return value list
             var returnValueList = new List<SegmentAttributeDatum>();
@@ -66,15 +69,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             foreach (var attributeId in attributeIdList)
             {
                 // Get the entry with the most recent value
-                var maxEntry = segment.AggregatedResults
+                var maxEntry = asset.AggregatedResults
                     .Where(_ => _.AttributeId == attributeId)
                     .OrderByDescending(_ => _.Year)
                     .First();
                 string attributeValue = (maxEntry.Discriminator[0] == 'N') ? maxEntry.NumericValue.ToString() : maxEntry.TextValue;
                 returnValueList.Add(new SegmentAttributeDatum(maxEntry.Attribute.Name, attributeValue));
             }
-            returnValueList.Add(new SegmentAttributeDatum("BRKEY", segment.FacilityName));
-            returnValueList.Add(new SegmentAttributeDatum("BMSID", segment.SectionName));
+            //returnValueList.Add(new SegmentAttributeDatum("BRKEY", asset.FacilityName));
+            //returnValueList.Add(new SegmentAttributeDatum("BMSID", asset.SectionName));
+
+            // Add in each key property if it does not exist
+            foreach (var keyProperty in KeyProperties)
+            {
+                if (!returnValueList.Any(_ => _.Name == keyProperty.Key))
+                {
+                    // This does not exist in the set yet
+                    var specificKeyValue = KeyProperties[keyProperty.Key].FirstOrDefault(_ => _.AssetId == asset.Id);
+                    if (specificKeyValue != null) returnValueList.Add(new SegmentAttributeDatum(keyProperty.Key, specificKeyValue.KeyValue.TextValue));
+                }
+            }
 
             return returnValueList;
         }
@@ -83,37 +97,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Check for the existence of the given key
             if (!KeyProperties.ContainsKey(keyName))
             {
-                throw new ArgumentException($"{keyName} not a key attribute in PennDOT network");
+                throw new ArgumentException($"{keyName} not a key attribute in network");
             }
-            var targetSegment = KeyProperties[keyName].FirstOrDefault(_ => _.KeyValue.Value == keyValue);
-            if (targetSegment == null) return new Dictionary<int, SegmentAttributeDatum>();
+            var targetAsset = KeyProperties[keyName].FirstOrDefault(_ => _.KeyValue.Value == keyValue);
+            if (targetAsset == null) return new Dictionary<int, SegmentAttributeDatum>();
 
             // Get the sought attribute id
             var attributeInfo = _unitOfWork.Context.Attribute.FirstOrDefault(_ => _.Name == attribute);
             if (attributeInfo == null)
             {
+                if (KeyProperties.ContainsKey(attribute)) throw new ArgumentException($"{attribute} is a key and has no history");
                 throw new ArgumentException($"{attribute} was not found");
             }
 
             var result = new Dictionary<int, SegmentAttributeDatum>();
-            if (attribute == "BRKEY")
-            {
-                result.Add(0, new SegmentAttributeDatum("BRKEY", _unitOfWork.Context.MaintainableAsset.First(_ => _.Id == targetSegment.SegmentId).FacilityName));
-            }
-            else if (attribute == "BMSID")
-            {
-                result.Add(0, new SegmentAttributeDatum("BMSID", _unitOfWork.Context.MaintainableAsset.First(_ => _.Id == targetSegment.SegmentId).SectionName));
-            }
-            else
-            {
-                var attributeValues = _unitOfWork.Context.AggregatedResult
-                    .Where(_ => _.MaintainableAssetId == targetSegment.SegmentId && _.AttributeId == attributeInfo.Id);
 
-                foreach (var value in attributeValues)
-                {
-                    string yearValue = (value.Discriminator[0] == 'N') ? value.NumericValue.ToString() : value.TextValue;
-                    result.Add(value.Year, new SegmentAttributeDatum(attributeInfo.Name, yearValue));
-                }
+            var attributeValues = _unitOfWork.Context.AggregatedResult
+                .Where(_ => _.MaintainableAssetId == targetAsset.AssetId && _.AttributeId == attributeInfo.Id);
+
+            foreach (var value in attributeValues)
+            {
+                string yearValue = (value.Discriminator[0] == 'N') ? value.NumericValue.ToString() : value.TextValue;
+                result.Add(value.Year, new SegmentAttributeDatum(attributeInfo.Name, yearValue));
             }
 
             return result;

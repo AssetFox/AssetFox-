@@ -60,16 +60,16 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs.BPN
                 switch (graphDataTab.type)
                 {
                 case ChartType.AreaChart:
-                    _bpnAreaChart.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount);
+                    _bpnAreaChart.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount, graphDataTab.Title);
                     break;
                     case ChartType.CountChart:
-                    _bpnCountChart.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount);
+                    _bpnCountChart.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount, graphDataTab.Title);
                     break;
                 case ChartType.CombinedChart:
-                    _combinedPostedAndClosed.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount);
+                    _combinedPostedAndClosed.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount, graphDataTab.Title);
                     break;
                 case ChartType.CashChart:
-                    _cashNeededByBPN.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount);
+                    _cashNeededByBPN.Fill(graphDataTab.Worksheet, bridgeWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount, graphDataTab.Title);
                     break;
 
                 }

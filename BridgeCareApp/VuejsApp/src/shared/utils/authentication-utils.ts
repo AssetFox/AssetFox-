@@ -20,9 +20,14 @@ const isAuthenticatedEsecUser = () => {
             ),
         )
         .catch((error: any) => {
-            store.dispatch('setErrorMessage', { message: error }).then(() => {
-                return false;
-            });
+            store
+                .dispatch('addErrorNotification', {
+                    message: 'Authentication Error.',
+                    longMessage: error,
+                })
+                .then(() => {
+                    return false;
+                });
         });
 };
 
@@ -40,9 +45,14 @@ const isAuthenticatedAzureUser = () => {
             }),
         )
         .catch((error: any) => {
-            store.dispatch('setErrorMessage', { message: error }).then(() => {
-                return false;
-            });
+            store
+                .dispatch('addErrorNotification', {
+                    message: 'Authenticaton Error.',
+                    longMessage: error,
+                })
+                .then(() => {
+                    return false;
+                });
         });
 };
 

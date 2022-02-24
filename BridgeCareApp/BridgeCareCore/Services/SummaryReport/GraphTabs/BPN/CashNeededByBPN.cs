@@ -15,10 +15,10 @@ namespace BridgeCareCore.Services.SummaryReport.GraphTabs.BPN
         {
             _stackedColumnChartCommon = stackedColumnChartCommon;
         }
-        public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalCashNeededByBPNYearsRow, int simulationYearsCount)
+        public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalCashNeededByBPNYearsRow, int simulationYearsCount, string title)
         {
             _stackedColumnChartCommon.SetWorksheetProperties(worksheet);
-            var title = Properties.Resources.CashNeededByBPN;
+            //var title = Properties.Resources.CashNeededByBPN;
             var chart = worksheet.Drawings.AddChart(title, eChartType.ColumnStacked);
             _stackedColumnChartCommon.SetChartProperties(chart, title, 950, 700, 6, 7);
 

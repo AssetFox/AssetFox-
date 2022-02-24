@@ -78,10 +78,10 @@ namespace BridgeCareCore.Services
                 switch (eventArgs.ProgressStatus)
                 {
                 case ProgressStatus.Started:
-                    simulationAnalysisDetail.Status = "Simulation initializing ...";
+                    simulationAnalysisDetail.Status = "Simulation initializing...";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
-                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing ...", simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing...", simulationId);
                     break;
 
                 case ProgressStatus.Running:

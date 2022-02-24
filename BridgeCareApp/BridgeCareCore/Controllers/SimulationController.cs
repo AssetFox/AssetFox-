@@ -235,11 +235,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                SimulationAnalysisDetailDTO analysisDetail = new() { SimulationId = simulationId, Status = "Queueing...", };
-                HubService.SendRealTimeMessage(UnitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, analysisDetail);
-
                 await _simulationRunMethods[UserInfo.Role](networkId, simulationId);
-
                 return Ok();
             }
             catch (Exception e)

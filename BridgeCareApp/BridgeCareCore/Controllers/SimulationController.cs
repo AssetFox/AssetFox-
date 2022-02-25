@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BridgeCareCore.Controllers
 {
     using SimulationDeleteMethod = Action<Guid>;
-    using SimulationRunMethod = Action<Guid, Guid>;
+    using SimulationRunMethod = Func<Guid, Guid, Task>;
     using SimulationUpdateMethod = Action<SimulationDTO>;
 
     [Route("api/[controller]")]
@@ -80,13 +80,13 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, SimulationRunMethod> CreateRunMethods()
         {
-            void RunAnySimulation(Guid networkId, Guid simulationId) =>
+            Task RunAnySimulation(Guid networkId, Guid simulationId) =>
                 _simulationAnalysis.CreateAndRun(networkId, simulationId);
 
-            void RunPermittedSimulation(Guid networkId, Guid simulationId)
+            Task RunPermittedSimulation(Guid networkId, Guid simulationId)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                RunAnySimulation(networkId, simulationId);
+                return RunAnySimulation(networkId, simulationId);
             }
 
             return new Dictionary<string, SimulationRunMethod>
@@ -235,15 +235,21 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                await Task.Factory.StartNew(() =>
-                    _simulationRunMethods[UserInfo.Role](networkId, simulationId));
+                var runTask = _simulationRunMethods[UserInfo.Role](networkId, simulationId);
 
+                await Task.Delay(500); // Allow a brief moment for an empty queue to start running the submission.
+                if (runTask.Status is TaskStatus.Created)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastScenarioStatusUpdate, "Queued to run.", simulationId);
+                }
+
+                await runTask;
                 return Ok();
             }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario error::{e.Message}");
-                if (!(e is SimulationException))
+                if (e is not SimulationException)
                 {
                     var logDto = SimulationLogDtos.GenericException(simulationId, e);
                     UnitOfWork.SimulationLogRepo.CreateLog(logDto);

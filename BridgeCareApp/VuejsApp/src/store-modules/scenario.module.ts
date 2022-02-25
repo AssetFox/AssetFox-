@@ -88,16 +88,6 @@ const actions = {
             });
     },
     async runSimulation({dispatch, commit}: any, payload: any) {
-
-        var analysisData : SimulationAnalysisDetail = {
-            simulationId: payload.scenarioId,
-            status: 'Queueing...',
-            lastRun: new Date(),
-            runTime: '',
-        };
-
-        commit('simulationAnalysisDetailMutator', analysisData);
-
         await ScenarioService.runSimulation(payload.networkId, payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {

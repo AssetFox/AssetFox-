@@ -235,13 +235,21 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                await _simulationRunMethods[UserInfo.Role](networkId, simulationId);
+                var runTask = _simulationRunMethods[UserInfo.Role](networkId, simulationId);
+
+                await Task.Delay(500); // Allow a brief moment for an empty queue to start running the submission.
+                if (runTask.Status is TaskStatus.Created)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastScenarioStatusUpdate, "Queued to run.", simulationId);
+                }
+
+                await runTask;
                 return Ok();
             }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario error::{e.Message}");
-                if (!(e is SimulationException))
+                if (e is not SimulationException)
                 {
                     var logDto = SimulationLogDtos.GenericException(simulationId, e);
                     UnitOfWork.SimulationLogRepo.CreateLog(logDto);

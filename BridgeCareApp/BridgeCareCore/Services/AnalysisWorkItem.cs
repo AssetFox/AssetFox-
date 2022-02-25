@@ -81,7 +81,7 @@ namespace BridgeCareCore.Services
                     simulationAnalysisDetail.Status = "Simulation initializing...";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
-                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, "Simulation initializing...", simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
                     break;
 
                 case ProgressStatus.Running:
@@ -92,7 +92,7 @@ namespace BridgeCareCore.Services
                     break;
 
                 case ProgressStatus.Completed:
-                    simulationAnalysisDetail.Status = $"Simulation complete. {100}%";
+                    simulationAnalysisDetail.Status = $"Simulation complete. 100%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
 

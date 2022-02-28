@@ -238,10 +238,16 @@ namespace BridgeCareCore.Controllers
             {
                 var analysisHandle = _simulationRunMethods[UserInfo.Role](networkId, simulationId);
 
-                await Task.Delay(500); // Allow a brief moment for an empty queue to start running the submission.
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
                 if (!analysisHandle.WorkHasStarted)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastScenarioStatusUpdate, "Queued to run.", simulationId);
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                    {
+                        SimulationId = simulationId,
+                        Status = "Queued to run."
+                    });
                 }
 
                 await analysisHandle.WorkCompletion;

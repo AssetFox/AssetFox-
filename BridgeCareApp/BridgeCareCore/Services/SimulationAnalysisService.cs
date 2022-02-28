@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Interfaces;
 
@@ -18,7 +17,7 @@ namespace BridgeCareCore.Services
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
         }
 
-        public Task CreateAndRunPermitted(Guid networkId, Guid simulationId)
+        public IQueuedWorkHandle CreateAndRunPermitted(Guid networkId, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
@@ -34,11 +33,11 @@ namespace BridgeCareCore.Services
             return CreateAndRun(networkId, simulationId);
         }
 
-        public Task CreateAndRun(Guid networkId, Guid simulationId)
+        public IQueuedWorkHandle CreateAndRun(Guid networkId, Guid simulationId)
         {
             AnalysisWorkItem workItem = new(networkId, simulationId);
             _sequentialWorkQueue.Enqueue(workItem, out var workHandle).Wait();
-            return workHandle.WorkCompletion;
+            return workHandle;
         }
     }
 }

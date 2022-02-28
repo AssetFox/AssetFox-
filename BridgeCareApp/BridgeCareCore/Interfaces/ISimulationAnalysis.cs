@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Threading.Tasks;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Interfaces
 {
     public interface ISimulationAnalysis
     {
-        Task CreateAndRunPermitted(Guid networkId, Guid simulationId);
+        IQueuedWorkHandle CreateAndRunPermitted(Guid networkId, Guid simulationId);
 
-        Task CreateAndRun(Guid networkId, Guid simulationId);
+        IQueuedWorkHandle CreateAndRun(Guid networkId, Guid simulationId);
     }
 }

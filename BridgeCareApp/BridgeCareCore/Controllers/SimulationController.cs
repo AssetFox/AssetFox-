@@ -11,6 +11,7 @@ using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BridgeCareCore.Controllers
 {
     using SimulationDeleteMethod = Action<Guid>;
-    using SimulationRunMethod = Func<Guid, Guid, Task>;
+    using SimulationRunMethod = Func<Guid, Guid, IQueuedWorkHandle>;
     using SimulationUpdateMethod = Action<SimulationDTO>;
 
     [Route("api/[controller]")]
@@ -80,10 +81,10 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, SimulationRunMethod> CreateRunMethods()
         {
-            Task RunAnySimulation(Guid networkId, Guid simulationId) =>
+            IQueuedWorkHandle RunAnySimulation(Guid networkId, Guid simulationId) =>
                 _simulationAnalysis.CreateAndRun(networkId, simulationId);
 
-            Task RunPermittedSimulation(Guid networkId, Guid simulationId)
+            IQueuedWorkHandle RunPermittedSimulation(Guid networkId, Guid simulationId)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
                 return RunAnySimulation(networkId, simulationId);
@@ -235,15 +236,21 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var runTask = _simulationRunMethods[UserInfo.Role](networkId, simulationId);
+                var analysisHandle = _simulationRunMethods[UserInfo.Role](networkId, simulationId);
 
-                await Task.Delay(500); // Allow a brief moment for an empty queue to start running the submission.
-                if (runTask.Status is TaskStatus.Created)
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastScenarioStatusUpdate, "Queued to run.", simulationId);
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                    {
+                        SimulationId = simulationId,
+                        Status = "Queued to run."
+                    });
                 }
 
-                await runTask;
+                await analysisHandle.WorkCompletion;
                 return Ok();
             }
             catch (Exception e)

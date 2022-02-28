@@ -11,6 +11,8 @@ namespace BridgeCareCore.Services
 
         public Task WorkCompletion { get; }
 
+        public bool WorkHasStarted { get; }
+
         public string WorkId { get; }
 
         public void RemoveFromQueue();

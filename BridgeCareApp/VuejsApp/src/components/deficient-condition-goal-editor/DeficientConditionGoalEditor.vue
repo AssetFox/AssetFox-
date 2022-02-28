@@ -426,7 +426,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
 
-    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getDeficientConditionGoalLibraries')
     getDeficientConditionGoalLibrariesAction: any;
     @Action('selectDeficientConditionGoalLibrary')
@@ -522,7 +522,7 @@ export default class DeficientConditionGoalEditor extends Vue {
                 vm.selectedScenarioId = to.query.scenarioId;
 
                 if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.setErrorMessageAction({
+                    vm.addErrorNotificationAction({
                         message: 'Found no selected scenario for edit',
                     });
                     vm.$router.push('/Scenarios/');

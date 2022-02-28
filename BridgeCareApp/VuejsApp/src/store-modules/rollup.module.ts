@@ -65,9 +65,12 @@ const actions = {
         await RollupService.aggregateNetworkData(payload.networkId)
         .then((response: AxiosResponse<any>) => {
             if(http2XX.test(response.status.toString())){
-                dispatch('setSuccessMessage', {message: 'Data assignment started'});
-            }
-        });
+                    dispatch('addSuccessNotification', {
+                        message: 'Data assignment started',
+                    });
+                }
+            },
+        );
     },
     async socket_rollupStatus({dispatch, state, commit}: any, payload: any) {
         if (payload.operationType == 'update' || payload.operationType == 'replace') {
@@ -79,10 +82,14 @@ const actions = {
             const createdNetwork: Rollup = convertFromMongoToVue(payload.fullDocument);
             if (!any(propEq('id', createdNetwork.id), state.rollups)) {
                 commit('createdNetworkMutator', createdNetwork);
-                dispatch('setInfoMessage', {message: 'New network has been inserted from another source'});
+                dispatch('addInfoNotification', {
+                    message: 'New network.',
+                    longMessage:
+                        'New network has been inserted from another source',
+                });
             }
         }
-    }
+    },
 };
 
 const getters = {};
@@ -91,5 +98,5 @@ export default {
     state,
     getters,
     actions,
-    mutations
+    mutations,
 };

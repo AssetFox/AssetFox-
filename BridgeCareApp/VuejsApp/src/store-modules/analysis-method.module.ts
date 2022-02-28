@@ -29,7 +29,9 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     commit('analysisMethodMutator', payload.analysisMethod);
-                    dispatch('setSuccessMessage', {message: 'Upsertted analysis method'});
+                    dispatch('addSuccessNotification', {
+                        message: 'Upsertted analysis method',
+                });
                 }
             });
     }

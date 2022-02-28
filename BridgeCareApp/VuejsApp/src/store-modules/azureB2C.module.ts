@@ -52,8 +52,9 @@ const actions = {
                     await state.appPasswordReset
                         .loginPopup(azureB2CConfig.forgotPasswordAuthority)
                         .then(() => {
-                            dispatch('setSuccessMessage', {
-                                message:
+                            dispatch('addSuccessNotification', {
+                                message: 'Password Reset.',
+                                longMessage:
                                     'Password has been reset successfully. Please sign-in with your new password.',
                             });
                         });

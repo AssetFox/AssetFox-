@@ -1,15 +1,7 @@
-﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Analysis.V1DataAccess;
-using AppliedResearchAssociates.Validation;
-using log4net;
+﻿using log4net;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static Simulation.Simulation;
@@ -116,83 +108,84 @@ namespace Simulation
             simulation.CompileSimulation(parameters.IsApiCall);
         }
 
+        [Obsolete("Since the v2 projects were retargeted from netstandard2.0 to netstandard2.1, this method won't work.")]
         private static void SimulationForNewAnalysis(object state)
         {
-            var parameters = (SimulationParameters)state;
+            //var parameters = (SimulationParameters)state;
 
-            MongoConnection = parameters.ConnectionString;
-            var mongoClient = new MongoClient(MongoConnection);
-            var mongoDB = mongoClient.GetDatabase("BridgeCare");
-            Simulations = mongoDB.GetCollection<SimulationModel>("scenarios");
-            SimulationId = parameters.SimulationId;
+            //MongoConnection = parameters.ConnectionString;
+            //var mongoClient = new MongoClient(MongoConnection);
+            //var mongoDB = mongoClient.GetDatabase("BridgeCare");
+            //Simulations = mongoDB.GetCollection<SimulationModel>("scenarios");
+            //SimulationId = parameters.SimulationId;
 
-            using var connection = new SqlConnection(parameters.SQLConnection);
-            connection.Open();
-            var newSimulation =
-                new V1DataAccessor(connection, LogProgressToConsole)
-                .GetStandAloneSimulation(parameters.NetworkId, parameters.SimulationId);
+            //using var connection = new SqlConnection(parameters.SQLConnection);
+            //connection.Open();
+            //var newSimulation =
+            //    new V1DataAccessor(connection, LogProgressToConsole)
+            //    .GetStandAloneSimulation(parameters.NetworkId, parameters.SimulationId);
 
-            var errorIsPresent = false;
-            foreach (var result in newSimulation.Network.Explorer.GetAllValidationResults(Enumerable.Empty<string>()))
-            {
-                errorIsPresent |= result.Status == ValidationStatus.Error;
-                Console.WriteLine($"[{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");
+            //var errorIsPresent = false;
+            //foreach (var result in newSimulation.Network.Explorer.GetAllValidationResults(Enumerable.Empty<string>()))
+            //{
+            //    errorIsPresent |= result.Status == ValidationStatus.Error;
+            //    Console.WriteLine($"[{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");
 
-                log.Info($"NewAnalysis: [{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");
-                var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"[{result.Status}] {result.Message} - {result.Target.Key}");
-                Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
-            }
+            //    log.Info($"NewAnalysis: [{result.Status}] {result.Message} --- {result.Target.Object}::{result.Target.Key}");
+            //    var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, $"[{result.Status}] {result.Message} - {result.Target.Key}");
+            //    Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+            //}
 
-            if (errorIsPresent)
-            {
-                Console.WriteLine("Analysis should not run when validation errors are present. Terminating execution...");
-                log.Error("NewAnalysis: Analysis should not run when validation errors are present. Terminating execution...");
-            }
+            //if (errorIsPresent)
+            //{
+            //    Console.WriteLine("Analysis should not run when validation errors are present. Terminating execution...");
+            //    log.Error("NewAnalysis: Analysis should not run when validation errors are present. Terminating execution...");
+            //}
 
-            var runner = new SimulationRunner(newSimulation);
-            runner.SimulationLog += (sender, eventArgs) =>
-            {
-                static void handleLog(string prefix, SimulationLogMessageBuilder messageBuilder)
-                {
-                    var message = $"{prefix}{messageBuilder.Message}";
-                    log.Info(message);
-                    var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, message);
-                    Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
-                }
+            //var runner = new SimulationRunner(newSimulation);
+            //runner.SimulationLog += (sender, eventArgs) =>
+            //{
+            //    static void handleLog(string prefix, SimulationLogMessageBuilder messageBuilder)
+            //    {
+            //        var message = $"{prefix}{messageBuilder.Message}";
+            //        log.Info(message);
+            //        var updateStatus = Builders<SimulationModel>.Update.Set(s => s.status, message);
+            //        Simulations.UpdateOne(s => s.simulationId == SimulationId, updateStatus);
+            //    }
 
-                var messageBuilder = eventArgs.MessageBuilder;
-                switch (messageBuilder.Status)
-                {
-                    case SimulationLogStatus.Error:
-                        handleLog("Error: ", messageBuilder);
-                        break;
-                    case SimulationLogStatus.Fatal:
-                        handleLog("Failed: ", messageBuilder);
-                        break;
-                    case SimulationLogStatus.Information:
-                        handleLog("Info: ", messageBuilder);
-                        break;
-                    case SimulationLogStatus.Warning:
-                        handleLog("Warning: ", messageBuilder);
-                        break;
-                };
-            };
+            //    var messageBuilder = eventArgs.MessageBuilder;
+            //    switch (messageBuilder.Status)
+            //    {
+            //        case SimulationLogStatus.Error:
+            //            handleLog("Error: ", messageBuilder);
+            //            break;
+            //        case SimulationLogStatus.Fatal:
+            //            handleLog("Failed: ", messageBuilder);
+            //            break;
+            //        case SimulationLogStatus.Information:
+            //            handleLog("Info: ", messageBuilder);
+            //            break;
+            //        case SimulationLogStatus.Warning:
+            //            handleLog("Warning: ", messageBuilder);
+            //            break;
+            //    };
+            //};
 
-            var timer = Stopwatch.StartNew();
+            //var timer = Stopwatch.StartNew();
 
-            runner.Run();
-            LogProgressToConsole(timer.Elapsed, "simulation run");
+            //runner.Run();
+            //LogProgressToConsole(timer.Elapsed, "simulation run");
 
-            var folderPathForNewAnalysis = $"DownloadedReports\\{SimulationId}_NewAnalysis";
-            var relativeFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis);
-            Directory.CreateDirectory(relativeFolderPath);
+            //var folderPathForNewAnalysis = $"DownloadedReports\\{SimulationId}_NewAnalysis";
+            //var relativeFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis);
+            //Directory.CreateDirectory(relativeFolderPath);
 
-            var outputFile = $"Network {parameters.NetworkId} - Simulation {parameters.SimulationId}.json";
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis, outputFile);
-            var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
+            //var outputFile = $"Network {parameters.NetworkId} - Simulation {parameters.SimulationId}.json";
+            //var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderPathForNewAnalysis, outputFile);
+            //var settings = new Newtonsoft.Json.Converters.StringEnumConverter();
             
-            var resultObject = JsonConvert.SerializeObject(newSimulation.Results, settings);
-            File.WriteAllText(filePath, resultObject);
+            //var resultObject = JsonConvert.SerializeObject(newSimulation.Results, settings);
+            //File.WriteAllText(filePath, resultObject);
         }
 
         private void Consume(object state)

@@ -318,7 +318,7 @@ export default class RemainingLifeLimitEditor extends Vue {
     deleteRemainingLifeLimitLibraryAction: any;
     @Action('selectRemainingLifeLimitLibrary')
     selectRemainingLifeLimitLibraryAction: any;
-    @Action('setErrorMessage') setErrorMessageAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('getScenarioRemainingLifeLimits')
     getScenarioRemainingLifeLimitsAction: any;
@@ -386,7 +386,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             if (to.path.indexOf(ScenarioRoutePaths.RemainingLifeLimit) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
                 if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.setErrorMessageAction({
+                    vm.addErrorNotificationAction({
                         message: 'Found no selected scenario for edit',
                     });
                     vm.$router.push('/Scenarios/');

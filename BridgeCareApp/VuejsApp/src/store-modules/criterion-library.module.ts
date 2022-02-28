@@ -87,33 +87,33 @@ const actions = {
                             commit('scenarioRelatedCriterionMutator', library.id);
                         }
                     }
-                    dispatch('setSuccessMessage', {message: message});
-                    returningId = response.data;
-                }
-                return returningId;
-            });
+                dispatch('addSuccessNotification', { message: message });
+                returningId = response.data;
+            }
             return returningId;
-    },
-    async deleteCriterionLibrary({commit, dispatch}: any, payload: any) {
-        await CriterionLibraryService.deleteCriterionLibrary(payload.libraryId)
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    commit('deletedCriterionLibraryMutator', payload.libraryId);
-                    dispatch('setSuccessMessage', {message: 'Deleted criterion library'});
-                    commit('selectedCriterionIsValidMutator', false);
-                }
-            });
-    },
-    upsertSelectedScenarioRelatedCriterion({commit, dispatch}: any, payload: any){
-        commit('upsertScenarioRelatedCriteriaMutator', payload.library);
-    }
+        });
+        return returningId;
+},
+async deleteCriterionLibrary({commit, dispatch}: any, payload: any) {
+    await CriterionLibraryService.deleteCriterionLibrary(payload.libraryId)
+        .then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                commit('deletedCriterionLibraryMutator', payload.libraryId);
+                dispatch('setSuccessMessage', {message: 'Deleted criterion library'});
+                commit('selectedCriterionIsValidMutator', false);
+            }
+        });
+},
+upsertSelectedScenarioRelatedCriterion({commit, dispatch}: any, payload: any){
+    commit('upsertScenarioRelatedCriteriaMutator', payload.library);
+}
 };
 
 const getters = {};
 
 export default {
-    state,
-    getters,
-    actions,
-    mutations
+state,
+getters,
+actions,
+mutations
 };

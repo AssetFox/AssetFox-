@@ -66,27 +66,27 @@
                 });
             }
 
-            if (this.securityType === SecurityTypes.b2c) {
-                this.getAzureAccountDetailsAction();
-                if (!this.authenticated) {
-                    this.onAuthenticationFailure();
-                } else {
-                    this.onAuthenticationSuccess();
-                }
+        if (this.securityType === SecurityTypes.b2c) {
+            this.getAzureAccountDetailsAction();
+            if (!this.authenticated) {
+                this.onAuthenticationFailure();
+            } else {
+                this.onAuthenticationSuccess();
             }
         }
-
-        onAuthenticationSuccess() {
-            this.$router.push('/Home/');
-        }
-
-        onAuthenticationFailure() {
-            this.setErrorMessageAction({message: 'Authentication failed.'});
-            this.$router.push('/AuthenticationFailure/');
-        }
-
-        onRoleFailure() {
-            this.$router.push('/NoRole/');
-        }
     }
+
+    onAuthenticationSuccess() {
+        this.$router.push('/Home/');
+    }
+
+    onAuthenticationFailure() {
+        this.addErrorNotificationAction({ message: 'Authentication failed.' });
+        this.$router.push('/AuthenticationFailure/');
+    }
+
+    onRoleFailure() {
+        this.$router.push('/NoRole/');
+    }
+}
 </script>

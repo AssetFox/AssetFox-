@@ -204,6 +204,92 @@
                     <span class="font-weight-light">Hello, </span>
                     <span>{{ username }}</span>
                 </v-toolbar-title>
+                <v-toolbar-title class="white--text">
+                    <v-menu
+                        offset-y
+                        min-width="20%"
+                        max-width="20%"
+                        max-height="75%"
+                        :close-on-content-click="false"
+                    >
+                        <template v-slot:activator="{ on, attrs }">
+                            <button
+                                v-on="on"
+                                v-bind="attrs"
+                                @click="onNotificationMenuSelect"
+                            >
+                                <notification-bell
+                                    :size="30"
+                                    :count="notificationCounter"
+                                    :upperLimit="50"
+                                    counterLocation="right"
+                                    fontSize="10px"
+                                    counterStyle="roundRectangle"
+                                    counterBackgroundColor="#FF0000"
+                                    counterTextColor="#FFFFFF"
+                                    iconColor="#FFFFFF"
+                                />
+                            </button>
+                        </template>
+                        <v-card class="mx-auto" max-width="100%">
+                            <v-toolbar color="primary" dark>
+                                <v-app-bar-nav-icon></v-app-bar-nav-icon>
+
+                                <v-toolbar-title>Notifications</v-toolbar-title>
+
+                                <v-spacer></v-spacer>
+                            </v-toolbar>
+                            <v-list>
+                                <v-list-group
+                                    v-for="notification in notifications"
+                                    :key="notification.id"
+                                    v-model="notification.active"
+                                    append-icon=""
+                                    class="notification-message"
+                                    style="border-bottom: 1px solid;"
+                                >
+                                    <v-icon
+                                        slot="prependIcon"
+                                        :color="notification.iconColor"
+                                        >{{ notification.icon }}</v-icon
+                                    >
+                                    <template v-slot:activator>
+                                        <v-list-tile>
+                                            <v-list-tile-content
+                                                style="font-size: 85%"
+                                                v-text="
+                                                    notification.shortMessage
+                                                "
+                                            ></v-list-tile-content>
+                                            <v-btn icon small right absolute>
+                                                <v-icon
+                                                    small
+                                                    @click="
+                                                        onRemoveNotification(
+                                                            notification.id,
+                                                        )
+                                                    "
+                                                    >fas fa-times-circle</v-icon
+                                                >
+                                            </v-btn>
+                                        </v-list-tile>
+                                    </template>
+                                    <v-list-item>
+                                        <v-list-item-content>
+                                            <v-list-item-title
+                                                class="notification-long-message"
+                                                v-text="
+                                                    notification.longMessage
+                                                "
+                                            ></v-list-item-title>
+                                        </v-list-item-content>
+                                    </v-list-item>
+                                    <v-spacer></v-spacer>
+                                </v-list-group>
+                            </v-list>
+                        </v-card>
+                    </v-menu>
+                </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
                     <v-btn
                         v-if="securityType === b2cSecurityType"
@@ -260,10 +346,10 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import NotificationBell from 'vue-notification-bell';
 import { Watch } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
 import Spinner from './shared/modals/Spinner.vue';
-import iziToast from 'izitoast';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import {
@@ -284,6 +370,7 @@ import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { Hub } from '@/connectionHub';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import { Notification } from '@/shared/models/iAM/notifications';
 import { SecurityTypes } from '@/shared/utils/security-types';
 import {
     clearRefreshIntervalID,
@@ -296,7 +383,7 @@ import {
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 
 @Component({
-    components: { Alert, Spinner },
+    components: { Alert, Spinner, NotificationBell },
 })
 export default class AppComponent extends Vue {
     @State(state => state.authenticationModule.authenticated)
@@ -306,10 +393,10 @@ export default class AppComponent extends Vue {
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.authenticationModule.refreshing) refreshing: boolean;
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
-    @State(state => state.toastrModule.successMessage) successMessage: string;
-    @State(state => state.toastrModule.warningMessage) warningMessage: string;
-    @State(state => state.toastrModule.errorMessage) errorMessage: string;
-    @State(state => state.toastrModule.infoMessage) infoMessage: string;
+    @State(state => state.notificationModule.notifications)
+    notifications: Notification[];
+    @State(state => state.notificationModule.counter)
+    notificationCounter: number;
     @State(state => state.scenarioModule.selectedScenario)
     stateSelectedScenario: Scenario;
     @State(state => state.announcementModule.packageVersion)
@@ -321,14 +408,16 @@ export default class AppComponent extends Vue {
     @Action('setIsBusy') setIsBusyAction: any;
     @Action('getNetworks') getNetworksAction: any;
     @Action('getAttributes') getAttributesAction: any;
-    @Action('setSuccessMessage') setSuccessMessageAction: any;
-    @Action('setWarningMessage') setWarningMessageAction: any;
-    @Action('setErrorMessage') setErrorMessageAction: any;
-    @Action('setInfoMessage') setInfoMessageAction: any;
+    @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('addWarningNotification') addWarningNotificationAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
+    @Action('addInfoNotification') addInfoNotificationAction: any;
+    @Action('removeNotification') removeNotificationAction: any;
+    @Action('clearNotificationCounter') clearNotificationCounterAction: any;
     @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
     @Action('getAllUsers') getAllUsersAction: any;
     @Action('getUserCriteriaFilter') getUserCriteriaFilterAction: any;
-
+    @Action('loadNotifications') loadNotificationsActions: any;
     @Action('azureB2CLogin') azureB2CLoginAction: any;
     @Action('azureB2CLogout') azureB2CLogoutAction: any;
 
@@ -377,62 +466,6 @@ export default class AppComponent extends Vue {
 
     get authenticatedWithRole() {
         return this.authenticated && this.hasRole;
-    }
-
-    @Watch('successMessage')
-    onSuccessMessageChanged() {
-        if (hasValue(this.successMessage)) {
-            iziToast.success({
-                title: 'Success',
-                message: this.successMessage,
-                position: 'topRight',
-                closeOnClick: true,
-                timeout: 3000,
-            });
-            this.setSuccessMessageAction({ message: '' });
-        }
-    }
-
-    @Watch('warningMessage')
-    onWarningMessageChanged() {
-        if (hasValue(this.warningMessage)) {
-            iziToast.warning({
-                title: 'Warning',
-                message: this.warningMessage,
-                position: 'topRight',
-                closeOnClick: true,
-                timeout: 5000,
-            });
-            this.setWarningMessageAction({ message: '' });
-        }
-    }
-
-    @Watch('errorMessage')
-    onErrorMessageChanged() {
-        if (hasValue(this.errorMessage)) {
-            iziToast.error({
-                title: 'Error',
-                message: this.errorMessage,
-                position: 'topRight',
-                closeOnClick: true,
-                timeout: false,
-            });
-            this.setErrorMessageAction({ message: '' });
-        }
-    }
-
-    @Watch('infoMessage')
-    onInfoMessageChanged() {
-        if (hasValue(this.infoMessage)) {
-            iziToast.info({
-                title: 'Info',
-                message: this.infoMessage,
-                position: 'topRight',
-                closeOnClick: true,
-                timeout: 5000,
-            });
-            this.setInfoMessageAction({ message: '' });
-        }
     }
 
     @Watch('stateSelectedScenario')
@@ -509,7 +542,10 @@ export default class AppComponent extends Vue {
                 );
             }
             this.setIsBusyAction({ isBusy: false });
-            this.setErrorMessageAction({ message: getErrorMessage(error) });
+            this.addErrorNotificationAction({
+                message: 'HTTP Error',
+                longMessage: getErrorMessage(error),
+            });
             if (
                 hasValue(error, 'response') &&
                 error.response!.status.toString() === '401'
@@ -555,24 +591,33 @@ export default class AppComponent extends Vue {
     mounted() {
         this.$statusHub.$on(
             Hub.BroadcastEventType.BroadcastErrorEvent,
-            this.onSetErrorMessage,
+            this.onAddErrorNotification,
         );
-        this.$statusHub.$on(Hub.BroadcastEventType.BroadcastWarningEvent, this.onSetWarningMessage);
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastWarningEvent,
+            this.onAddWarningNotification,
+        );
     }
 
     beforeDestroy() {
         this.$statusHub.$off(
             Hub.BroadcastEventType.BroadcastErrorEvent,
-            this.onSetErrorMessage,
+            this.onAddErrorNotification,
         );
     }
 
-    onSetErrorMessage(data: any) {
-        this.setErrorMessageAction({ message: data.error });
+    onAddErrorNotification(data: any) {
+        this.addErrorNotificationAction({
+            message: 'Server Error.',
+            longMessage: data.error,
+        });
     }
 
-    onSetWarningMessage(data: any) {
-        this.setWarningMessageAction({ message: data.warning });
+    onAddWarningNotification(data: any) {
+        this.addWarningNotificationAction({
+            message: 'Server Warning.',
+            longMessage: data.warning,
+        });
     }
 
     onAlertResult(submit: boolean) {
@@ -640,6 +685,14 @@ export default class AppComponent extends Vue {
             this.$router.push(route);
         }
     }
+
+    onNotificationMenuSelect() {
+        this.clearNotificationCounterAction();
+    }
+
+    onRemoveNotification(id: number) {
+        this.removeNotificationAction(id);
+    }
 }
 </script>
 
@@ -651,7 +704,7 @@ html {
 }
 
 .v-list__group__header__prepend-icon .v-icon {
-    color: #798899 !important;
+    color: #798899;
 }
 
 .v-list__group__header__prepend-icon .primary--text .v-icon {

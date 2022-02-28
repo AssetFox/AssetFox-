@@ -383,8 +383,8 @@ export default class TargetConditionGoalEditor extends Vue {
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-    
-    @Action('setErrorMessage') setErrorMessageAction: any;
+
+    @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getTargetConditionGoalLibraries') getTargetConditionGoalLibrariesAction: any;
     @Action('selectTargetConditionGoalLibrary') selectTargetConditionGoalLibraryAction: any;
     @Action('upsertTargetConditionGoalLibrary') upsertTargetConditionGoalLibraryAction: any;
@@ -474,7 +474,7 @@ export default class TargetConditionGoalEditor extends Vue {
                 vm.selectedScenarioId = to.query.scenarioId;
 
                 if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.setErrorMessageAction({
+                    vm.addErrorNotificationAction({
                         message: 'Found no selected scenario for edit',
                     });
                     vm.$router.push('/Scenarios/');

@@ -37,6 +37,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetEntity _testBudget;
         private InvestmentPlanEntity _testInvestmentPlan;
         private ScenarioBudgetEntity _testScenarioBudget;
+
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
 
         public InvestmentTests()

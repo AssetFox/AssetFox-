@@ -11,6 +11,7 @@ using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BridgeCareCore.Controllers
 {
     using SimulationDeleteMethod = Action<Guid>;
-    using SimulationRunMethod = Action<Guid, Guid>;
+    using SimulationRunMethod = Func<Guid, Guid, IQueuedWorkHandle>;
     using SimulationUpdateMethod = Action<SimulationDTO>;
 
     [Route("api/[controller]")]
@@ -80,13 +81,13 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, SimulationRunMethod> CreateRunMethods()
         {
-            void RunAnySimulation(Guid networkId, Guid simulationId) =>
+            IQueuedWorkHandle RunAnySimulation(Guid networkId, Guid simulationId) =>
                 _simulationAnalysis.CreateAndRun(networkId, simulationId);
 
-            void RunPermittedSimulation(Guid networkId, Guid simulationId)
+            IQueuedWorkHandle RunPermittedSimulation(Guid networkId, Guid simulationId)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                RunAnySimulation(networkId, simulationId);
+                return RunAnySimulation(networkId, simulationId);
             }
 
             return new Dictionary<string, SimulationRunMethod>
@@ -235,15 +236,27 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                await Task.Factory.StartNew(() =>
-                    _simulationRunMethods[UserInfo.Role](networkId, simulationId));
+                var analysisHandle = _simulationRunMethods[UserInfo.Role](networkId, simulationId);
 
+                // Before sending a "queued" message that may overwrite early messages from the run,
+                // allow a brief moment for an empty queue to start running the submission.
+                await Task.Delay(500);
+                if (!analysisHandle.WorkHasStarted)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                    {
+                        SimulationId = simulationId,
+                        Status = "Queued to run."
+                    });
+                }
+
+                await analysisHandle.WorkCompletion;
                 return Ok();
             }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario error::{e.Message}");
-                if (!(e is SimulationException))
+                if (e is not SimulationException)
                 {
                     var logDto = SimulationLogDtos.GenericException(simulationId, e);
                     UnitOfWork.SimulationLogRepo.CreateLog(logDto);

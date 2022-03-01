@@ -23,7 +23,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return new List<AnnouncementDTO>();
             }
 
-            return _unitOfWork.Context.Announcement.Select(_ => _.ToDto()).ToList();
+            var collection = _unitOfWork.Context.Announcement.Select(_ => _.ToDto()).ToList();
+            collection.Sort((a, b) => b.CreatedDate.CompareTo(a.CreatedDate));
+            return collection;
         }
 
         public void UpsertAnnouncement(AnnouncementDTO dto)

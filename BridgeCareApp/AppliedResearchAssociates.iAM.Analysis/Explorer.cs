@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class Explorer : IValidator
     {
-        public const string DefaultAgeAttributeName = "AGE";
+        public static string DefaultAgeAttributeName => "AGE";
 
         public Explorer(string ageAttributeName)
         {
@@ -101,11 +101,19 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private T Add<T>(T attribute, ICollection<T> attributes, CalculateEvaluateParameterType parameterType) where T : Attribute
         {
-            var isAgeAttribute = string.Equals(attribute.Name, AgeAttributeName, StringComparison.OrdinalIgnoreCase);
+            var isAgeAttribute = StringComparer.OrdinalIgnoreCase.Equals(attribute.Name, AgeAttributeName);
 
-            if (!isAgeAttribute && AllAttributes.Any(a => string.Equals(a.Name, attribute.Name, StringComparison.OrdinalIgnoreCase)))
+            if (!isAgeAttribute)
             {
-                throw new ArgumentException("Attribute name is already in use for another attribute.", nameof(attribute));
+                if (parameterType is CalculateEvaluateParameterType.Number && StringComparer.OrdinalIgnoreCase.Equals(attribute.Name, Network.SpatialWeightIdentifier))
+                {
+                    throw new ArgumentException($"Cannot use the reserved spatial weight identifier \"{Network.SpatialWeightIdentifier}\" as a numeric attribute name.");
+                }
+
+                if (AllAttributes.Any(a => StringComparer.OrdinalIgnoreCase.Equals(a.Name, attribute.Name)))
+                {
+                    throw new ArgumentException("Attribute name is already in use for another attribute.", nameof(attribute));
+                }
             }
 
             if (isAgeAttribute)

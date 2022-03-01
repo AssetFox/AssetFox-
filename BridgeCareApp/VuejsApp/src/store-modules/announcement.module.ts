@@ -28,7 +28,7 @@ const mutations = {
     }
   },
   sortAnnouncementsMutator(state: any) {
-    state.announcements = sortByProperty('createdDate', state.announcements);
+    state.announcements = sortByProperty('createdDate', state.announcements).reverse();
   },
 };
 

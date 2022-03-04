@@ -10,14 +10,13 @@
         /// <summary>
         ///     Indicates a budget that paid some of the remaining cost of the treatment. Only
         ///     possible when <see cref="AnalysisMethod.ShouldUseExtraFundsAcrossBudgets"/> is true.
-        ///     Mutually exclusive with <see cref="CostNotCovered"/>.
         /// </summary>
         CostCoveredInPart,
 
         /// <summary>
         ///     Indicates a budget that was insufficient to pay the remaining cost of the treatment.
-        ///     Only possible when <see cref="AnalysisMethod.ShouldUseExtraFundsAcrossBudgets"/> is
-        ///     false. Mutually exclusive with <see cref="CostCoveredInPart"/>.
+        ///     When <see cref="AnalysisMethod.ShouldUseExtraFundsAcrossBudgets"/> is true, this
+        ///     status further indicates that the budget had zero available funds.
         /// </summary>
         CostNotCovered,
 

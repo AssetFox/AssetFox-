@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public SimulationTests()
         {
-            _testHelper = new TestHelper();
+            _testHelper = TestHelper.Instance;
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();

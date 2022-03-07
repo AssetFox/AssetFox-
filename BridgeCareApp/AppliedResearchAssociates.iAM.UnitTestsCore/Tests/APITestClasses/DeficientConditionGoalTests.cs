@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -23,11 +22,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public DeficientConditionGoalTests()
         {
-            _testHelper = new TestHelper();
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
-            _testHelper.SetupDefaultHttpContext();
+            _testHelper = TestHelper.Instance;
+            if (!_testHelper.DbContext.Attribute.Any())
+            {
+                _testHelper.CreateAttributes();
+                _testHelper.CreateNetwork();
+                _testHelper.CreateSimulation();
+                _testHelper.SetupDefaultHttpContext();
+            }
             _controller = new DeficientConditionGoalController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
@@ -49,18 +51,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void SetupForGet()
         {
-            _testHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Add(TestDeficientConditionGoalLibrary);
-            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
-            TestDeficientConditionGoal.AttributeId = attribute.Id;
-            _testHelper.UnitOfWork.Context.DeficientConditionGoal.Add(TestDeficientConditionGoal);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            if (!_testHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any())
+            {
+                _testHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Add(TestDeficientConditionGoalLibrary);
+            }
+            if (!_testHelper.UnitOfWork.Context.DeficientConditionGoal.Any())
+            {
+                var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+                TestDeficientConditionGoal.AttributeId = attribute.Id;
+                _testHelper.UnitOfWork.Context.DeficientConditionGoal.Add(TestDeficientConditionGoal);
+                _testHelper.UnitOfWork.Context.SaveChanges();
+            }
         }
 
         private void SetupForUpsertOrDelete()
         {
             SetupForGet();
-            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            if (!_testHelper.UnitOfWork.Context.CriterionLibrary.Any())
+            {
+                _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+                _testHelper.UnitOfWork.Context.SaveChanges();
+            }
         }
 
         [Fact]
@@ -136,10 +147,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                     typeof(List<DeficientConditionGoalLibraryDTO>));
                 Assert.Single(dtos);
-
                 Assert.Equal(DeficientConditionGoalLibraryId, dtos[0].Id);
                 Assert.Single(dtos[0].DeficientConditionGoals);
-
                 Assert.Equal(DeficientConditionGoalId, dtos[0].DeficientConditionGoals[0].Id);
             }
             finally

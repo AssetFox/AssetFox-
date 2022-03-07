@@ -19,7 +19,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public UnitOfDataPersistenceWork UnitOfWorkForAnalysis { get; }
         public readonly IAMContext DbContextForAnalysis;
         public IConfiguration ConfigForAnalysis { get; }
-
         public Simulation StandAloneSimulation { get; set; }
 
         public SimulationAnalysisDataPersistenceTestHelper()
@@ -37,9 +36,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         }
 
         public void SetStandAloneSimulation(int simulationId)
-        {            
+        {
             var explorer = UnitOfWorkForAnalysis.AttributeRepo.GetExplorer();
-            var network = UnitOfWorkForAnalysis.NetworkRepo.GetSimulationAnalysisNetwork(new Guid(DataPersistenceConstants.PennDotNetworkId), explorer, true);                     
+            var network = UnitOfWorkForAnalysis.NetworkRepo.GetSimulationAnalysisNetwork(new Guid(DataPersistenceConstants.PennDotNetworkId), explorer, true);
             UnitOfWorkForAnalysis.SimulationRepo.GetSimulationInNetwork(new Guid("F70E0EAD-EC60-4D3B-B05D-D1FC1933EB60"), network);
             StandAloneSimulation = network.Simulations.First();
             UnitOfWorkForAnalysis.InvestmentPlanRepo.GetSimulationInvestmentPlan(StandAloneSimulation);
@@ -214,8 +213,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public override void CleanUp()
         {
-            UnitOfWork.Context.Database.EnsureDeleted();
-            UnitOfWork.Dispose();
+            //UnitOfWork.Context.Database.EnsureDeleted();
+            //UnitOfWork.Dispose();
         }
     }
 }

@@ -41,13 +41,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public CommittedProjectTests()
         {
-            _testHelper = new TestHelper();
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
+            _testHelper = TestHelper.Instance;
+            if (!_testHelper.DbContext.Attribute.Any())
+            {
+                _testHelper.CreateAttributes();
+                _testHelper.CreateNetwork();
+                _testHelper.CreateSimulation();                
+            }
             _service = new CommittedProjectService(_testHelper.UnitOfWork);
-
-            CreateCommittedProjectTestData();
+            if (!_testHelper.DbContext.InvestmentPlan.Any())
+            {
+                CreateCommittedProjectTestData();
+            }
         }
 
         private void CreateCommittedProjectTestData()

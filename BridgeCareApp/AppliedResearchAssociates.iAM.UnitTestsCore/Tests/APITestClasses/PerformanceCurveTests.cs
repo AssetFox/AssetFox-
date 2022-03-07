@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public PerformanceCurveTests()
         {
-            _testHelper = new TestHelper();
+            _testHelper = TestHelper.Instance;
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.CreateSimulation();

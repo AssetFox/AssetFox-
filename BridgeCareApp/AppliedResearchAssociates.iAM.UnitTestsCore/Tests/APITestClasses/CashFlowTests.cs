@@ -28,11 +28,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public CashFlowRuleTests()
         {
-            _testHelper = new TestHelper();
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
-            _testHelper.SetupDefaultHttpContext();
+            _testHelper = TestHelper.Instance;
+            if (!_testHelper.DbContext.Attribute.Any())
+            {
+                _testHelper.CreateAttributes();
+                _testHelper.CreateNetwork();
+                _testHelper.CreateSimulation();
+                _testHelper.SetupDefaultHttpContext();
+            }
         }
 
         private void CreateAuthorizedController() =>

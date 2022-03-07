@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Timers;
+using System.Threading;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -13,7 +13,6 @@ using BridgeCareCore.Logging;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Mvc;
-using NUnit.Framework.Internal;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
@@ -28,14 +27,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public ExpressionValidationTests()
         {
-            _testHelper = new TestHelper();
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
-            _testHelper.SetupDefaultHttpContext();
-            _service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());
+            Thread.Sleep(2000);
+            _testHelper = TestHelper.Instance;
+            if (!_testHelper.DbContext.Attribute.Any())
+            {
+                _testHelper.CreateAttributes();
+                _testHelper.CreateNetwork();
+                _testHelper.CreateSimulation();
+                _testHelper.SetupDefaultHttpContext();
+                SetData();
+                AddTestData();
+            }
+            _service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());            
             _controller = new ExpressionValidationController(_service, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+
         }
 
         private AttributeEntity NumericAttribute { get; set; }
@@ -60,15 +66,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             TextValue = "test"
         };
 
-        private void AddTestData()
+        private void SetData()
         {
-            TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
-            _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
-
             NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
                 .First(_ => _.DataType == DataPersistenceConstants.AttributeNumericDataType);
             TextAttribute = _testHelper.UnitOfWork.Context.Attribute
                 .First(_ => _.DataType == DataPersistenceConstants.AttributeTextDataType);
+        }
+
+        private void AddTestData()
+        {
+            TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
+            _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
 
             TestNumericAggregatedResult.AttributeId = NumericAttribute.Id;
             TestTextAggregatedResult.AttributeId = TextAttribute.Id;
@@ -188,33 +197,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 // Cleanup
                 _testHelper.CleanUp();
             }
-        }
-
-        [Fact]
-        public async void ShouldReturnOkResultOnCriterionPost()
-        {
-            try
-            {
-                // Arrange
-                AddTestData();
-                var model = new ValidationParameter
-                {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                    Expression = $"[{NumericAttribute.Name}]='1'"
-                };
-
-                // Act
-                var result = await _controller.GetCriterionValidationResult(model);
-
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
-        }
+        }        
 
         [Fact]
         public async void ShouldValidateEquation()
@@ -282,7 +265,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             try
             {
                 // Arrange
-                AddTestData();
+                SetData();
                 var model = new ValidationParameter
                 {
                     CurrentUserCriteriaFilter = new UserCriteriaDTO(),
@@ -391,7 +374,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             try
             {
-                var timer = new Timer { Interval = 5000 };
+                var timer = new System.Timers.Timer { Interval = 5000 };
                 // Act + Assert
                 GetInvalidCriterionValidationData().ToList().ForEach(async testDataSet =>
                 {
@@ -410,6 +393,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         Assert.Equal(expectedValidationResult.ValidationMessage, actualValidationResult.ValidationMessage);
                     };
                 });
+            }
+            finally
+            {
+                // Cleanup
+                _testHelper.CleanUp();
+            }
+        }
+
+        [Fact]
+        public async void ShouldReturnOkResultOnCriterionPost()
+        {
+            try
+            {
+                // Arrange                
+                SetData();
+                var model = new ValidationParameter
+                {
+                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                    Expression = $"[{NumericAttribute.Name}]='1'"
+                };
+
+                // Act
+                var result = await _controller.GetCriterionValidationResult(model);
+
+                // Assert
+                Assert.IsType<OkObjectResult>(result);
             }
             finally
             {

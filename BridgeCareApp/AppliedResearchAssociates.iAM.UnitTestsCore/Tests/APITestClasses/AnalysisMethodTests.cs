@@ -25,11 +25,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public AnalysisMethodTests()
         {
-            _testHelper = new TestHelper();
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
-            _testHelper.SetupDefaultHttpContext();
+            _testHelper = TestHelper.Instance;
+            if (!_testHelper.DbContext.Attribute.Any())
+            {
+                _testHelper.CreateAttributes();
+                _testHelper.CreateNetwork();
+                _testHelper.CreateSimulation();
+                _testHelper.SetupDefaultHttpContext();
+            }
             _mockAnalysisDefaultDataService.Setup(m => m.GetAnalysisDefaultData()).ReturnsAsync(new AnalysisDefaultData());
             _controller = new AnalysisMethodController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockAnalysisDefaultDataService.Object);
@@ -55,8 +58,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private void SetupForGet()
         {
             TestAnalysis.SimulationId = _testHelper.TestSimulation.Id;
-            _testHelper.UnitOfWork.Context.AnalysisMethod.Add(TestAnalysis);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            if (!_testHelper.UnitOfWork.Context.AnalysisMethod.Any(m => m.SimulationId == TestAnalysis.SimulationId))
+            {
+                _testHelper.UnitOfWork.Context.AnalysisMethod.Add(TestAnalysis);
+                _testHelper.UnitOfWork.Context.SaveChanges();
+            }
         }
 
         private void SetupForUpsert()

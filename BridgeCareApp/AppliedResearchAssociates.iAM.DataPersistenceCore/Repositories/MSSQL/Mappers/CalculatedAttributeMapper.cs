@@ -17,6 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Name = entity.Name,
                 Description = entity.Description,
+                Owner = entity.CreatedBy,
                 IsDefault = entity.IsDefault,
                 IsShared = entity.IsShared,
                 CalculatedAttributes = entity.CalculatedAttributes.Any()

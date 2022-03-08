@@ -38,13 +38,8 @@
                             </v-btn>
                         </template>
                     </v-text-field>
-                    <div v-if="hasSelectedLibrary && !hasScenario">
-                        Owner:
-                        {{
-                            selectedDeficientConditionGoalLibrary.owner
-                                ? selectedDeficientConditionGoalLibrary.owner
-                                : '[ No Owner ]'
-                        }}
+                    <div v-if='hasSelectedLibrary && !hasScenario'>
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox
                         class="sharing"
@@ -394,6 +389,7 @@ import {
 } from '@/shared/utils/library-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -443,6 +439,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     upsertScenarioDeficientConditionGoalsAction: any;
 
     @Getter('getNumericAttributes') getNumericAttributesGetter: any;
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     selectedScenarioId: string = getBlankGuid();
     librarySelectItems: SelectItem[] = [];
@@ -649,6 +646,7 @@ export default class DeficientConditionGoalEditor extends Vue {
 
         if (!isNil(library)) {
             this.upsertDeficientConditionGoalLibraryAction({ library: library});
+            this.hasCreatedLibrary = true;
         }
     }
 

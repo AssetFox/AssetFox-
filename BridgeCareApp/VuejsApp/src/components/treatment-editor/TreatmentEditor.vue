@@ -36,12 +36,7 @@
                         </template>
                     </v-text-field>
                     <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner:
-                        {{
-                            selectedTreatmentLibrary.owner
-                                ? selectedTreatmentLibrary.owner
-                                : '[ No Owner ]'
-                        }}
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox
                         class='sharing'
@@ -235,7 +230,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import CreateTreatmentLibraryDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentLibraryDialog.vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
@@ -281,6 +276,7 @@ import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { hasUnsavedChangesCore, isEqual } from '@/shared/utils/has-unsaved-changes-helper';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -320,6 +316,8 @@ export default class TreatmentEditor extends Vue {
     getScenarioSelectableTreatmentsAction: any;
     @Action('upsertScenarioSelectableTreatments')
     upsertScenarioSelectableTreatmentsAction: any;
+
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     selectedTreatmentLibrary: TreatmentLibrary = clone(emptyTreatmentLibrary);
     treatments: Treatment[] = [];
@@ -539,6 +537,7 @@ export default class TreatmentEditor extends Vue {
 
         if (!isNil(library)) {
             this.upsertTreatmentLibraryAction({ library: library });
+            this.hasCreatedLibrary = true;
         }
     }
 

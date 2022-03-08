@@ -21,9 +21,8 @@
                             </v-btn>
                         </template>
                     </v-text-field>
-                    <div v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
-                        Owner:
-                        {{ selectedBudgetPriorityLibrary.owner ? selectedBudgetPriorityLibrary.owner : '[ No Owner ]' }}
+                    <div v-if='hasSelectedLibrary && !hasScenario'>
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox class='sharing' label='Shared'
                                 v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
@@ -169,7 +168,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import {
     BudgetPercentagePair,
     BudgetPriority,
@@ -206,6 +205,7 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { getAppliedLibraryId, hasAppliedLibrary } from '@/shared/utils/library-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 const ObjectID = require('bson-objectid');
 
@@ -230,6 +230,8 @@ export default class BudgetPriorityEditor extends Vue {
     @Action('getScenarioBudgetPriorities') getScenarioBudgetPrioritiesAction: any;
     @Action('upsertScenarioBudgetPriorities') upsertScenarioBudgetPrioritiesAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
@@ -256,6 +258,7 @@ export default class BudgetPriorityEditor extends Vue {
     disableCrudButtonsResult: boolean = false;
     checkBoxChanged: boolean = false;
     hasLibraryEditPermission: boolean = false;
+    hasCreatedLibrary: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -488,6 +491,7 @@ export default class BudgetPriorityEditor extends Vue {
 
         if (!isNil(budgetPriorityLibrary)) {
             this.upsertBudgetPriorityLibraryAction(budgetPriorityLibrary);
+            this.hasCreatedLibrary = true;
         }
     }
 

@@ -36,15 +36,8 @@
                             </v-btn>
                         </template>
                     </v-text-field>
-                    <div
-                        v-if="hasSelectedLibrary && selectedScenarioId === '0'"
-                    >
-                        Owner:
-                        {{
-                            selectedPerformanceCurveLibrary.owner
-                                ? selectedPerformanceCurveLibrary.owner
-                                : '[ No Owner ]'
-                        }}
+                    <div v-if='hasSelectedLibrary && !hasScenario'>
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox
                         class="sharing"
@@ -361,7 +354,7 @@
 import Vue from 'vue';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import CreatePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
 import CreatePerformanceCurveDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
@@ -411,6 +404,7 @@ import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -451,6 +445,8 @@ export default class PerformanceCurveEditor extends Vue {
     getScenarioPerformanceCurvesAction: any;
     @Action('upsertScenarioPerformanceCurves')
     upsertScenarioPerformanceCurvesAction: any;
+
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     gridSearchTerm = '';
     selectedPerformanceCurveLibrary: PerformanceCurveLibrary = clone(
@@ -642,6 +638,13 @@ export default class PerformanceCurveEditor extends Vue {
         return this.getUserNameByIdGetter(this.selectedPerformanceCurveLibrary.owner) == getUserName();
     }
 
+    getOwnerUserName(): string {
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedPerformanceCurveLibrary.owner);
+        }
+        return getUserName();
+    }
+
     onShowCreatePerformanceCurveLibraryDialog(createAsNewLibrary: boolean) {
         this.createPerformanceCurveLibraryDialogData = {
             showDialog: true,
@@ -660,6 +663,7 @@ export default class PerformanceCurveEditor extends Vue {
 
         if (!isNil(performanceCurveLibrary)) {
             this.upsertPerformanceCurveLibraryAction(performanceCurveLibrary);
+            this.hasCreatedLibrary = true;
         }
     }
 

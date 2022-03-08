@@ -32,7 +32,9 @@ export interface CalculatedAttributeLibrary {
     description: string;
     calculatedAttributes: CalculatedAttribute[];
     isDefault: boolean;
+    owner?: string;
 }
+
 export interface CriterionAndEquationSet {
     id: string;
     criteriaLibrary: CriterionLibrary;

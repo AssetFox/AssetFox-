@@ -62,6 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = entity.Id,
                 Name = entity.Name,
+                Owner = entity.CreatedBy,
                 Description = entity.Description,
                 IsShared = entity.IsShared,
                 PerformanceCurves = entity.PerformanceCurves.Any()

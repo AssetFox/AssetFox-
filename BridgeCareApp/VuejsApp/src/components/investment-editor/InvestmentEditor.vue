@@ -62,7 +62,7 @@
                         </template>
                     </v-text-field>
                     <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner: {{ selectedBudgetLibrary.owner ? selectedBudgetLibrary.owner : '[ No Owner ]' }}
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox class='sharing' label='Shared'
                                 v-if='hasSelectedLibrary && !hasScenario'
@@ -207,7 +207,7 @@
 import Vue from 'vue';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import SetRangeForAddingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForAddingBudgetYearsDialog.vue';
 import SetRangeForDeletingBudgetYearsDialog from './investment-editor-dialogs/SetRangeForDeletingBudgetYearsDialog.vue';
 import EditBudgetsDialog from './investment-editor-dialogs/EditBudgetsDialog.vue';
@@ -252,6 +252,7 @@ import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -284,6 +285,8 @@ export default class InvestmentEditor extends Vue {
     @Action('importLibraryInvestmentBudgetsFile') importLibraryInvestmentBudgetsFileAction: any;
     @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
 
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
+
     selectedBudgetLibrary: BudgetLibrary = clone(emptyBudgetLibrary);
     investmentPlan: InvestmentPlan = clone(emptyInvestmentPlan);
     selectedScenarioId: string = getBlankGuid();
@@ -304,6 +307,8 @@ export default class InvestmentEditor extends Vue {
     rules: InputValidationRules = clone(rules);
     showImportExportInvestmentBudgetsDialog: boolean = false;
     hasScenario: boolean = false;
+    hasInvestmentPlanForScenario: boolean = false;
+    hasCreatedLibrary: boolean = false;
     budgets: Budget[] = [];
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
@@ -518,6 +523,7 @@ export default class InvestmentEditor extends Vue {
 
         if (!isNil(budgetLibrary)) {
             this.upsertBudgetLibraryAction(budgetLibrary);
+            this.hasCreatedLibrary = true;
         }
     }
 

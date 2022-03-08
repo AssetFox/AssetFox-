@@ -33,12 +33,7 @@
                         </template>
                     </v-text-field>
                     <div v-if="hasSelectedCriterionLibrary">
-                        Owner:
-                        {{
-                            selectedCriterionLibrary.owner
-                                ? selectedCriterionLibrary.owner
-                                : '[ No Owner ]'
-                        }}
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox
                         v-if="hasSelectedCriterionLibrary"
@@ -119,7 +114,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import { Prop, Watch } from 'vue-property-decorator';
 import CriteriaEditor from '@/shared/components/CriteriaEditor.vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -145,6 +140,7 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -177,6 +173,8 @@ export default class CriterionLibraryEditor extends Vue {
     selectScenarioRelatedCriterionAction: any;
     @Action('upsertSelectedScenarioRelatedCriterion')
     upsertSelectedScenarioRelatedCriterionAction: any;
+
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     hasSelectedCriterionLibrary: boolean = false;
     criterionLibrarySelectItems: SelectItem[] = [];
@@ -344,6 +342,16 @@ export default class CriterionLibraryEditor extends Vue {
 
     checkUserIsLibraryOwner() {
         return this.getUserNameByIdGetter(this.selectedCriterionLibrary.owner) == getUserName();
+        }
+    }
+
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedCriterionLibrary.owner);
+        }
+        
+        return getUserName();
     }
 
     onShowCreateCriterionLibraryDialog(createAsNew: boolean) {
@@ -392,6 +400,8 @@ export default class CriterionLibraryEditor extends Vue {
             this.upsertCriterionLibraryAction({
                 library: criterionLibrary,
             }).then(() => (this.librarySelectItemValue = criterionLibrary.id));
+
+            this.hasCreatedLibrary = true;
         }
     }
 

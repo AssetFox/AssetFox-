@@ -42,7 +42,11 @@ $$
 For a given outlook year $t$ and benefit weight attribute value $w_t$, the benefit-instant value is
 
 $$
-b_t = \max(0, b_t') \times w_t
+b_t =
+\begin{cases}
+b_t' \times w_t &\text{if $w$ is defined} \\
+b_t'            &\text{if $w$ is not defined}
+\end{cases}
 $$
 
 where, given the benefit limit value $L$ and benefit attribute value $b_t^A$, the LRU benefit-instant value is
@@ -50,8 +54,8 @@ where, given the benefit limit value $L$ and benefit attribute value $b_t^A$, th
 $$
 b_t' =
 \begin{cases}
-b_t^A - L &\text{if $A$ decreases with deterioration} \\
-L - b_t^A &\text{if $A$ increases with deterioration.}
+\max(0, b_t^A - L) &\text{if $A$ decreases with deterioration} \\
+\max(0, L - b_t^A) &\text{if $A$ increases with deterioration.}
 \end{cases}
 $$
 
